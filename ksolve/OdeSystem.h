@@ -10,8 +10,6 @@
 #ifndef _ODE_SYSTEM_H
 #define _ODE_SYSTEM_H
 
-class BoostSys;
-
 class OdeSystem {
 	public:
 		OdeSystem()
@@ -26,9 +24,6 @@ class OdeSystem {
 #ifdef USE_GSL
 		gsl_odeiv2_system gslSys;
 		const gsl_odeiv2_step_type* gslStep;
-
-#elif defined(USE_BOOST)
-                BoostSys* boostSys;
 #endif
 		double initStepSize;
 

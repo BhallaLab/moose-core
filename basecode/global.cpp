@@ -3,8 +3,7 @@
  *
  *       Filename:  global.cpp
  *
- *    Description:  It contains global variables to track no of test run and
- *    running performance of moose basecode.
+ *    Description:  Some global declarations.
  *
  *        Version:  1.0
  *        Created:  Tuesday 29 April 2014 10:18:35  IST
@@ -18,8 +17,9 @@
  */
 
 #include "global.h"
-#include "../external/debug/simple_logger.hpp"
 #include <numeric>
+#include <random>
+
 
 /*-----------------------------------------------------------------------------
  *  This variable keep track of how many tests have been performed.
@@ -29,6 +29,10 @@
 unsigned int totalTests = 0;
 
 stringstream errorSS;
+std::random_device rd;
+
+
+bool isRNGInitialized = false;
 
 clock_t simClock = clock();
 
@@ -37,48 +41,113 @@ extern string joinPath( string pathA, string pathB);
 extern string fixPath( string path);
 extern string dumpStats( int  );
 
-/* Logger */
-SimpleLogger logger;
+
 
 namespace moose {
-    /* Check if path is OK */
-    int checkPath( const string& path  )
-    {
-        if( path.size() < 1)
-            return EMPTY_PATH;
+    namespace global {
 
-        if( path.find_first_of( " \\!") != std::string::npos )
-            return BAD_CHARACTER_IN_PATH;
+        int __rng_seed__ = rd();
 
-        if ( path[path.size() - 1 ] != ']')
+        rng_type_ rng( __rng_seed__ );
+        distribution_type_ dist;
+
+        /* Check if path is OK */
+        int checkPath( const string& path  )
         {
-            return MISSING_BRACKET_AT_END;
+            if( path.size() < 1)
+                return EMPTY_PATH;
+
+            if( path.find_first_of( " \\!") != std::string::npos )
+                return BAD_CHARACTER_IN_PATH;
+
+            if ( path[path.size() - 1 ] != ']')
+            {
+                return MISSING_BRACKET_AT_END;
+            }
+            return 0;
         }
-        return 0;
-    }
 
-    /* Join paths */
-    string joinPath( string pathA, string pathB )
-    {
-        errorSS.str("");
-        errorSS << "Calling a hacky function to fix paths. Ticket #134"
-            << endl;
-        dump(errorSS.str(), "BUG");
-        pathA = moose::fixPath( pathA );
-        string newPath = pathA + "/" + pathB;
-        return moose::fixPath( newPath );
-    }
+        /* Join paths */
+        string joinPath( string pathA, string pathB )
+        {
+            pathA = moose::global::fixPath( pathA );
+            string newPath = pathA + "/" + pathB;
+            return moose::global::fixPath( newPath );
+        }
 
-    /* Fix given path */
-    string fixPath(string path)
-    {
-        int pathOk = moose::checkPath( path );
-        if( pathOk == 0)
+        /* Fix given path */
+        string fixPath(string path)
+        {
+            int pathOk = moose::global::checkPath( path );
+            if( pathOk == 0)
+                return path;
+            else if( pathOk == MISSING_BRACKET_AT_END)
+                return path + "[0]";
             return path;
-        else if( pathOk == MISSING_BRACKET_AT_END)
-            return path + "[0]";
-        dump("I don't know how to fix this path: " + path, "FIXME");
-        return path;
-    }
+        }
 
+        /**
+         * @brief Set the global seed or all rngs.
+         *
+         * @param x 
+         */
+        void mtseed( unsigned int x )
+        {
+            moose::global::rng.seed( x );
+            moose::global::__rng_seed__ = x;
+            isRNGInitialized = true;
+        }
+
+        /*  Generate a random number */
+        double mtrand( void )
+        {
+            return moose::global::dist( rng );
+        }
+
+        // Fix the given path.
+        string createPosixPath( string s )
+        {
+            string undesired = ":?\"<>|[]";
+            for (auto it = s.begin() ; it < s.end() ; ++it)
+            {
+                bool found = undesired.find(*it) != string::npos;
+                if(found){
+                    *it = '_';
+                }
+            }
+            return s;
+        }
+
+        /**
+         * @brief Create directories recursively
+         *
+         * @param path
+         */
+        void createDirs( const string& path )
+        {
+#ifdef  USE_BOOST
+            if( path.size() == 0 )
+                    return;
+            try 
+            {
+                boost::filesystem::p( path );
+                boost::filesystem::create_directories( p );
+            } 
+            catch(const boost::filesystem::filesystem_error& e)
+            {
+                std::cout << "create_directories(" << p << ") failed with "
+                    << e.code().message() << '\n';
+            }
+
+            LOG( info, "Created directory " << path );
+
+#else      /* -----  not USE_BOOST  ----- */
+            LOG( moose::warning, "createDir is only works when USE_BOOST is used");
+
+#endif     /* -----  not USE_BOOST  ----- */
+
+        }
+
+
+    }
 }

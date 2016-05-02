@@ -18,10 +18,8 @@
  * proxy pools that participate in cross-node reactions, but are really 
  * located on other compartments.
  */
-
-class Stoich;
 class RateTerm;
-
+class Stoich;
 class VoxelPoolsBase
 {
 	public: 
@@ -200,8 +198,6 @@ class VoxelPoolsBase
 
 		/// Debugging utility
 		void print() const;
-
-
 
 	protected:
 		const Stoich* stoichPtr_;

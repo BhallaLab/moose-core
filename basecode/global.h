@@ -9,14 +9,26 @@
 **********************************************************************/
 
 
-#ifndef  GLOBAL_INC
-#define  GLOBAL_INC
+#ifndef  __MOOSE_GLOBAL_INC_
+#define  __MOOSE_GLOBAL_INC_
 
-#include "header.h"
-#include "../external/debug/simple_test.hpp"
 #include <ctime>
 #include <map>
+#include <sstream>
 
+
+using namespace std;
+
+#ifdef  USE_BOOST
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_01.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/filesystem.hpp>
+#else      /* -----  not USE_BOOST  ----- */
+
+#endif     /* -----  not USE_BOOST  ----- */
+
+#include "../external/debug/print_function.hpp"
 
 /**
  * @brief Global stringstream for message printing.
@@ -28,6 +40,7 @@ extern stringstream errorSS;
  */
 extern unsigned int totalTests;
 
+
 /** @brief This macro prints the output of a test function onto console.  It
  * also keep track of index of the current test. The index of test is
  * automatically computed by increamenting the counter.
@@ -36,12 +49,6 @@ extern unsigned int totalTests;
 #define TEST_BEGIN cout << endl << "Test(" << totalTests << "): " << SIMPLE_CURRENT_FUNCTION;
 #define TEST_END totalTests++; \
     cout << std::right <<  setw(20) << "test of " << SIMPLE_CURRENT_FUNCTION << " finished."; 
-
-
-/*-----------------------------------------------------------------------------
- *  Global clock in moose.
- *-----------------------------------------------------------------------------*/
-
 
 /*-----------------------------------------------------------------------------
  *  Global functions in namespace moose
@@ -56,38 +63,108 @@ extern unsigned int totalTests;
 
 namespace moose
 {
+    namespace global {
 
-    /**
-     * @brief Fix a path. For testing purpose.
-     *
-     * @param path Path as string.
-     *
-     * @return  A fixed path.
-     */
-     string fixPath(string path);
+#ifdef  USE_BOOST
+        typedef boost::random::mt19937 rng_type_;
+        typedef boost::random::uniform_01<double> distribution_type_;
+#else      /* -----  not USE_BOOST  ----- */
+        typedef std::mt19937 rng_type_;
+        typedef std::uniform_real_distribution<double> distribution_type_;
+#endif     /* -----  not USE_BOOST  ----- */
 
-    /**
-     * @brief Checks if given path is correct. 
-     * If not, return false and error-code as well.
-     *
-     * @param path Path name.
-     *
-     * @return 0 if path is all-right. Negative number if path is not OK.
-     */
-     int checkPath( const string& path );
+        extern rng_type_ rng;
+        extern distribution_type_ dist;
 
-    /** @brief Append pathB to pathA and return the result. 
-     *
-     * If pathA does not have [indexs] at the end, append "[0]" to pathA and
-     * then add pathB to it.  This version does not care if the result has '[0]'
-     * at its end.
-     *
-     * @param pathA First path.  
-     * @param pathB Second path.
-     *
-     * @return A string representing moose-path.
-     */
-     string joinPath(string pathA, string pathB);
+        /**
+         * @brief A global seed for all RNGs in moose. When moose.seed( x ) is called,
+         * this variable is set. Other's RNGs (except muparser) uses this seed to
+         * initialize them. By default it is initialized by random_device (see
+         * global.cpp).
+         */
+        extern int __rng_seed__;
+
+        /**
+         * @brief Fix a path. For testing purpose.
+         *
+         * @param path Path as string.
+         *
+         * @return  A fixed path.
+         */
+        string fixPath(string path);
+
+        /**
+         * @brief Checks if given path is correct. 
+         * If not, return false and error-code as well.
+         *
+         * @param path Path name.
+         *
+         * @return 0 if path is all-right. Negative number if path is not OK.
+         */
+        int checkPath( const string& path );
+
+        /** @brief Append pathB to pathA and return the result. 
+         *
+         * If pathA does not have [indexs] at the end, append "[0]" to pathA and
+         * then add pathB to it.  This version does not care if the result has '[0]'
+         * at its end.
+         *
+         * @param pathA First path.  
+         * @param pathB Second path.
+         *
+         * @return A string representing moose-path.
+         */
+        string joinPath(string pathA, string pathB);
+
+        /**
+         * @brief Seed seed for RNG.
+         *
+         * @param seed
+         */
+        void mtseed( unsigned int seed );
+
+        /**
+         * @brief Generate a random double between 0 and 1
+         *
+         * @return  A random number between 0 and 1.
+         */
+        double mtrand( void );
+
+        /**
+         * @brief Create a POSIX compatible path from a given string.
+         * Remove/replace bad characters.
+         *
+         * @param path
+         */
+        string createPosixPath( string path );
+
+        /**
+         * @brief Convert a given value to string.
+         *
+         * @tparam T
+         * @param x
+         *
+         * @return  String representation
+         */
+        template<typename T>
+        string toString( T x )
+        {
+#ifdef  USE_BOOST
+            return boost::lexical_cast<string>( x );
+#else      /* -----  not USE_BOOST  ----- */
+            char buffer[20];
+            sprintf( buffer, "%lf", x );
+            return string( buffer );
+#endif     /* -----  not USE_BOOST  ----- */
+        }
+
+        /**
+         * @brief Create directory, recursively.
+         *
+         * @param path
+         */
+        void createDirs( const string& path );
+    }
 }
 
-#endif   /* ----- #ifndef GLOBAL_INC  ----- */
+#endif   /* ----- #ifndef __MOOSE_GLOBAL_INC_  ----- */
