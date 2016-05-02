@@ -1069,16 +1069,19 @@ void Shell::wildcard( const string& path, vector< ObjId >& list )
 // Static func
 void Shell::cleanSimulation()
 {
-	Eref sheller = Id().eref();
-	Shell* s = reinterpret_cast< Shell* >( sheller.data() );
-	vector< Id > kids;
-	Neutral::children( sheller, kids );
-	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
-	{
-		if ( i->value() > 4 ) {
-			cout << "Shell::cleanSimulation: deleted cruft at " << 
-				i->value() << ": " << i->path() << endl;
-			s->doDelete( *i );
-		}
-	}
+    Eref sheller = Id().eref();
+    Shell* s = reinterpret_cast< Shell* >( sheller.data() );
+    vector< Id > kids;
+    Neutral::children( sheller, kids );
+    for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
+    {
+        if ( i->value() > 4 )
+        {
+            LOG( moose::debug
+                    , "Shell::cleanSimulation: deleted cruft at " <<
+                 i->value() << ": " << i->path());
+            s->doDelete( *i );
+        }
+    }
+    LOG( moose::info, "Cleaned up!");
 }

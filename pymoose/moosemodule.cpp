@@ -174,59 +174,58 @@ vector<ObjId> all_elements(Id id)
  */
 void handle_keyboard_interrupts( int signum )
 {
-    cout << "Interrupt signal (" << signum << ") received.\n";
-    cout << "Terminating simulation !";
-    // TODO: leanup and close up stuff here  
-    // TODO: Perhaps I should throw exception. Might require c++11 support by
-    // default.
+    LOG( moose::info, "Interrupt signal (" << signum << ") received.");
+
+    // Get the shell and cleanup.
+    Shell* shell = reinterpret_cast<Shell*>(getShell(0, nullptr).eref().data());
+    shell->cleanSimulation();
     exit( signum );
 }
 
-// C-wrapper to be used by Python
-extern "C" {
+// IdType and ObjIdType are defined in vec.cpp and
+// melement.cpp respectively.
+extern PyTypeObject IdType;
+extern PyTypeObject ObjIdType;
+extern PyTypeObject moose_DestField;
+extern PyTypeObject moose_LookupField;
+extern PyTypeObject moose_ElementField;
 
-    // IdType and ObjIdType are defined in vec.cpp and
-    // melement.cpp respectively.
-    extern PyTypeObject IdType;
-    extern PyTypeObject ObjIdType;
-    extern PyTypeObject moose_DestField;
-    extern PyTypeObject moose_LookupField;
-    extern PyTypeObject moose_ElementField;
-    
-    /////////////////////////////////////////////////////////////////
-    // Module globals 
-    /////////////////////////////////////////////////////////////////
-    int verbosity = 1;
-    // static int isSingleThreaded = 0;
-    static int isInfinite = 0;
-    static unsigned int numNodes = 1;
-    static unsigned int numCores = 1;
-    static unsigned int myNode = 0;
-    // static unsigned int numProcessThreads = 0;
-    static int doUnitTests = 0;
-    static int doRegressionTests = 0;
-    static int quitFlag = 0;
+/////////////////////////////////////////////////////////////////
+// Module globals
+/////////////////////////////////////////////////////////////////
+int verbosity = 1;
+// static int isSingleThreaded = 0;
+static int isInfinite = 0;
+static unsigned int numNodes = 1;
+static unsigned int numCores = 1;
+static unsigned int myNode = 0;
+// static unsigned int numProcessThreads = 0;
+static int doUnitTests = 0;
+static int doRegressionTests = 0;
+static int quitFlag = 0;
 
-    /**
-       Utility function to convert an Python integer or a sequence
-       object into a vector of dimensions
-    */
-    vector<int> pysequence_to_dimvec(PyObject * dims)
+/**
+   Utility function to convert an Python integer or a sequence
+   object into a vector of dimensions
+*/
+vector<int> pysequence_to_dimvec(PyObject * dims)
+{
+    vector <int> vec_dims;
+    Py_ssize_t num_dims = 1;
+    long dim_value = 1;
+    if (dims)
     {
-        vector <int> vec_dims;
-        Py_ssize_t num_dims = 1;
-        long dim_value = 1;
-        if (dims){
-            // First try to use it as a tuple of dimensions
-            if (PyTuple_Check(dims)){
-                num_dims = PyTuple_Size(dims);
-                for (Py_ssize_t ii = 0; ii < num_dims; ++ ii){
-                    PyObject* dim = PyTuple_GetItem(dims, ii);
-                    dim_value = PyInt_AsLong(dim);
-                    if ((dim_value == -1) && PyErr_Occurred()){
-                        return vec_dims;
-                    }
-                    vec_dims.push_back((unsigned int)dim_value);
+        // First try to use it as a tuple of dimensions
+        if (PyTuple_Check(dims))
+        {
+            num_dims = PyTuple_Size(dims);
+            for (Py_ssize_t ii = 0; ii < num_dims; ++ ii)
+            {
+                PyObject* dim = PyTuple_GetItem(dims, ii);
+                dim_value = PyInt_AsLong(dim);
+                if ((dim_value == -1) && PyErr_Occurred())
+                {
+                    return vec_dims;
                 }
             } else if (PyInt_Check(dims)){ // 1D array
                 dim_value = PyInt_AsLong(dims);
