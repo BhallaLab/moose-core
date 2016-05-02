@@ -133,7 +133,7 @@ Id Shell::doLoadModel( const string& fileName, const string& modelPath, const st
     ifstream fin( fileName.c_str() );
     if ( !fin )
     {
-        LOG( failed, "Shell::doLoadModel: could not open file " << fileName );
+        LOG( moose::failed, "Shell::doLoadModel: could not open file " << fileName );
         return Id();
     }
 
@@ -154,7 +154,7 @@ Id Shell::doLoadModel( const string& fileName, const string& modelPath, const st
     }
     case SWC:
     {
-        LOG( info, "In doLoadModel for SWC" );
+        LOG( moose::info, "In doLoadModel for SWC" );
         ReadSwc rs( fileName );
         Id model = parentId;
         if ( !parentId.element()->cinfo()->isA( "Neuron" ) )

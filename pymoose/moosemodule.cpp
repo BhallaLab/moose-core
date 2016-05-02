@@ -3298,14 +3298,14 @@ PyMODINIT_FUNC MODINIT(_moose)
 
     clock_t defclasses_end = clock();
 
-    LOG( info, "`Time to define moose classes:" 
+    LOG( moose::info, "`Time to define moose classes:" 
             << (defclasses_end - defclasses_start) * 1.0 /CLOCKS_PER_SEC
        );
 
     PyGILState_Release(gstate);
     clock_t modinit_end = clock();
 
-    LOG( info, "`Time to initialize module:" 
+    LOG( moose::info, "`Time to initialize module:" 
             << (modinit_end - modinit_start) * 1.0 /CLOCKS_PER_SEC 
        );
 

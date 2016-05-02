@@ -48,7 +48,7 @@ public:
 
     virtual const char* what() const throw()
     {
-        __dump__( msg_, failed );
+        moose::__dump__( msg_, moose::failed );
         return msg_.c_str();
     }
 
