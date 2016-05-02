@@ -166,6 +166,8 @@ int VoxelPools::evalRatesUsingGSL( double t, const double* y, double *dydt, void
 #endif
 }
 
+
+#ifdef USE_BOOST
 void VoxelPools::evalRatesUsingBoost( const state_type_& y,  state_type_& dydt
         , const double t, void* params)
 {
@@ -174,6 +176,7 @@ void VoxelPools::evalRatesUsingBoost( const state_type_& y,  state_type_& dydt
     vp->stoichPtr_->updateFuncs( &q, t );
     vp->updateRates( &y[0], &dydt[0] );
 }
+#endif
 
 ///////////////////////////////////////////////////////////////////////
 // Here are the internal reaction rate calculation functions

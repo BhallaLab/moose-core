@@ -16,6 +16,9 @@
  * =====================================================================================
  */
 
+
+#ifdef  USE_BOOST
+
 #include "BoostSys.h"
 #include <iostream>
 
@@ -30,3 +33,5 @@ BoostSys::~BoostSys()
 
 }
 
+
+#endif     /* -----  not USE_BOOST  ----- */

@@ -87,8 +87,7 @@ option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_CURSES "Enable ncurses support (deprecated)" OFF)
 
-option(USE_BOOST "Use boost library (experimental, development)" ON)
-option(USE_GSL   "Use gsl library instead of boost" OFF)
+option(USE_GSL   "Use gsl library instead of boost" ON)
 
 # If SBML is available, it will automaticall enable the support. If ON, then
 # libSBML must be present.
@@ -275,12 +274,7 @@ if(GSL_STATIC_HOME)
     SET(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
     message(STATUS "STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
     set(GSL_FOUND TRUE)
-ELSEIF(USE_BOOST)
-    find_package( Boost REQUIRED  )
-    add_definitions( -DUSE_BOOST )
-    add_definitions( -UUSE_GSL )
-    include_directories( ${Boost_INCLUDE_DIRS} )
-ELSE()        # Fixme: If boost works, this should go away.
+ELSE()      
     find_package(GSL 1.16)
     if(NOT GSL_FOUND)
         message(FATAL_ERROR 
