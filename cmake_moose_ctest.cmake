@@ -84,3 +84,12 @@ ADD_TEST( NAME pymoose-test-streamer
 set_tests_properties(pymoose-test-streamer
     PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
     )
+
+# Test streaming supports in tables.
+ADD_TEST( NAME pymoose-test-streaming_in_tables 
+    COMMAND ${TEST_COMMAND} 
+    ${PROJECT_SOURCE_DIR}/tests/python/test_table_streaming_support.py
+    )
+set_tests_properties(pymoose-test-streaming_in_tables
+    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+    )

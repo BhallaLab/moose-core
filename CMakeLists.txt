@@ -72,9 +72,9 @@ endif()
 option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
 
 ## Unit testing and debug mode.
-option(DEBUG "Build with debug support" ON)
+option(DEBUG "Build with debug support" OFF)
 option(GPROF "Build for profiling using gprof" OFF)
-option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" ON)
+option(ENABLE_UNIT_TESTS "Enable unit tests" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_CURSES "Enable ncurses support (deprecated)" OFF)
