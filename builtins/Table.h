@@ -10,7 +10,10 @@
 #ifndef _TABLE_H
 #define _TABLE_H
 
+
+#if  USE_BOOST
 #include <boost/filesystem.hpp>
+#endif     /* -----  USE_BOOST  ----- */
 
 /**
  * Receives and records inputs. Handles plot and spiking data in batch mode.
@@ -39,7 +42,14 @@ public:
     void setOutfile( string outfilepath );
     string getOutfile( void ) const;
 
-    void writeToOutfile( );
+    // Access the dt_ of table.
+    double getDt( void ) const;
+
+    void zipWithTime( 
+            const vector<double>& yvec
+            , vector<double>& tvec
+            , const double& lasttime 
+            );
 
     //////////////////////////////////////////////////////////////////
     // Dest funcs
@@ -63,6 +73,16 @@ private:
     double input_;
 
     /**
+     * @brief Keep the data, each entry is preceeded by time value. 
+     * t0, v0, t1, v1, t2, v2 etc.
+     */
+    vector<double> data_;
+    vector<string> columns_;                    /* Store the name of tables */
+
+    string tablePath_ = "";
+    string tableName_ = "";
+
+    /**
      * @brief If stream is set to true, then stream to outfile_. Default value
      * of outfile_ is table path starting from `pwd`/_tables_ . On table, set
      * streamToFile to true.
@@ -72,18 +92,20 @@ private:
     /**
      * @brief Table directory into which dump the stream data.
      */
-    boost::filesystem::path rootdir_;
+    string rootdir_;
 
     // On Table, set outfile to change this variable. By default it sets to,
     // `pwd1/_tables_/table.path().
-    boost::filesystem::path outfile_;
+    string outfile_;
+
     bool outfileIsSet = false;
 
     /**
      * @brief format of data. Currently fixed to csv.
      */
-    string format_ = "csv";
-    string delimiter_ = ",";
+    string format_ = ".csv";
+    const char delimiter_ = ' ';
+    const char newline_ = '\n';
 
     /**
      * @brief text_ to write.
@@ -99,7 +121,8 @@ private:
     /**
      * @brief Output stream.
      */
-    ofstream of_;
+    std::ofstream of_;
+    ios_base::openmode mode_;
 
 };
 

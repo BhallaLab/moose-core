@@ -1,4 +1,5 @@
 include_directories(../basecode ../synapse ../utility ../)
+include_directories( ${CMAKE_SOURCE_DIR}/external/debug )
 include_directories(../external/muparser/include ${GSL_INCLUDE_DIRS})
 
 set( SRCS

@@ -25,8 +25,8 @@
 #include <fstream>
 #include <sstream>
 
-#include "TableBase.h"
 #include "StreamerBase.h"
+#include "Table.h"
 
 using namespace std;
 
@@ -45,23 +45,17 @@ public:
     string getFormat( void ) const;
     void setFormat( string format );
 
-    void initOutfile( const Eref& e );
-    void writeTablesToOutfile( void );
-
     size_t getNumTables( void ) const;
 
-    void write( string& text );
-
-    /*-----------------------------------------------------------------------------
-     *  Following function adds or remove a table from vector of table tables_
-     *-----------------------------------------------------------------------------*/
     void addTable( Id table );
     void addTables( vector<Id> tables);
 
     void removeTable( Id table );
     void removeTables( vector<Id> table );
 
-    /* Dest functions.
+    void zipWithTime( vector<double>& data, double currTime);
+
+    /** Dest functions.
      * The process function called by scheduler on every tick
      */
     void process(const Eref& e, ProcPtr p);
@@ -75,13 +69,12 @@ public:
 
 private:
 
-    ofstream of_;
-    string outfilePath_ = "";
-    string text_ = "";
-    string delimiter_= ",";
+    string outfilePath_;
     string format_ = "csv";
+    bool isOutfilePathSet_ = false;
 
     // dt_ of its clock
+    vector<double> tableDt_;
     double dt_;
 
     // No of lines written.
@@ -90,8 +83,10 @@ private:
     // Total tables handled by this class.
     unsigned int numTables_ = 0;
 
-    // These Tables are handled by StreamerBase 
-    map< Id, TableBase* > tables_;
+    // Used for adding or removing tables
+    vector<Id> tableIds_;
+    vector<Table*> tables_;
+    vector<string> columns_ = { "time" };            /* Keep tabe names. */
 };
 
 #endif   /* ----- #ifndef Streamer_INC  ----- */

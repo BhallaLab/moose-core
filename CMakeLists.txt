@@ -139,27 +139,18 @@ endif()
 
 ############################ BUILD CONFIGURATION #################################
 
-# VERBOSITY OF OUTPUT
-if(VERBOSITY)
-    message(STATUS "Verbosity of output is ${VERBOSITY}. This is not implemented
-    yet!")
-    add_definitions(-DVERBOSITY=${VERBOSITY})
-else()
-    message(STATUS "Moose will be quiet")
-    add_definitions(-DQUIET_MODE)
-endif()
-
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-if(ENABLE_UNIT_TESTS AND DEBUG)
+if(ENABLE_UNIT_TESTS)
     message(STATUS "Building for Debug/Unit testing")
-    add_definitions(-DDO_UNIT_TESTS)
+    add_definitions(-DDO_UNIT_TESTS -DVERBOSITY=1)
     set(CMAKE_BUILD_TYPE Debug)
     add_definitions(-g)
-elseif(DEBUG AND ENABLE_UNIT_TESTS)
+elseif(DEBUG)
     MESSAGE(STATUS "Enabled Unit tests")
-    add_definitions(-DDO_UNIT_TESTS -g)
+    set(CMAKE_BUILD_TYPE Debug)
+    add_definitions(-DDO_UNIT_TESTS -DVERBOSITY=1)
 else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
@@ -263,9 +254,14 @@ set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
 
 set(Boost_USE_STATIC_LIBS OFF)
-find_package( Boost REQUIRED COMPONENTS system filesystem  )
+find_package( Boost REQUIRED COMPONENTS system filesystem log REQUIRED )
 find_package( LAPACK REQUIRED )
 add_definitions( -DUSE_BOOST )
+
+# When not using boost-static libraries, enable boost-log dynamic link macro.
+if( NOT Boost_USE_STATIC_LIBS )
+    add_definitions( -DBOOST_LOG_DYN_LINK )
+endif()
 
 include_directories( 
     ${Boost_INCLUDE_DIRS}
@@ -295,7 +291,6 @@ ELSE(HDF5_STATIC_HOME)
      endif()
 endif(HDF5_STATIC_HOME)
 
-#message(STATUS "Debug: HDF5_FOUND? = ${HDF5_FOUND}")
 if(NOT HDF5_FOUND)
     message(
         "==================================================================\n"
@@ -310,9 +305,7 @@ if(NOT HDF5_FOUND)
         " variable HDF5_ROOT to the location. Rerun cmake \n"
         "================================================================ \n"
         )
-ELSE(NOT HDF5_FOUND)
-    add_definitions(-DUSE_HDF5)
-    message(STATUS "DBG -- HDF5: ${HDF5_LIBRARIES} ## ${HDF5_CXX_LIBRARIES} ## ${HDF5_HL_LIBRARIES}")
+ELSEIF(HDF5_FOUND AND (NOT HDF5_STATIC_HOME))
     if(HDF5_HL_LIBRARIES)
         set(HDF5_LIBRARIES ${HDF5_HL_LIBRARIES})
     else()
@@ -320,6 +313,11 @@ ELSE(NOT HDF5_FOUND)
     endif()
     include_directories(${HDF5_INCLUDE_DIRS})
 endif(NOT HDF5_FOUND)
+
+if(HDF5_FOUND)
+    add_definitions( -DUSE_HDF5 )
+    include_directories( ${HDF5_INCLUDE_DIRS} )
+endif( HDF5_FOUND )
 
 # This is a fix for new HDF5 package on Debian/Ubuntu which installs hdf5
 # headers in non-standard path. issue #80.
@@ -371,7 +369,7 @@ add_subdirectory(benchmarks)
 add_subdirectory(kinetics)
 add_subdirectory(synapse)
 add_subdirectory(intfire)
-add_subdirectory(examples)
+add_subdirectory(external/muparser)
 
 if(LIBSBML_FOUND)
     add_subdirectory(sbml)
@@ -407,8 +405,7 @@ endif()
 # state.
 if(USE_BOOST)
     list( APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES} )
-    list( APPEND SYSTEM_SHARED_LIBS ${Boost_SYSTEM_LIBRARY}
-        ${Boost_FILESYSTEM_LIBRARY} )
+    list( APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES} )
 endif(USE_BOOST)
 
 if(READLINE_FOUND AND TERMCAP_FOUND)
@@ -421,15 +418,6 @@ if(WITH_MPI)
     endif()
 endif(WITH_MPI)
 
-pkg_check_modules(MUPARSER muparser)
-if(MUPARSER_FOUND)
-    message(STATUS "Using system muparser ${MUPARSER_VERSION}")
-    list(APPEND SYSTEM_SHARED_LIBS ${MUPARSER_LIBRARIES})
-else()
-    message(STATUS "Using private muparser")
-    add_subdirectory(external/muparser)
-    list(APPEND MOOSE_LIBRARIES muparser)
-endif()
 
 #pkg_check_modules(TINYXML tinyxml)
 #if(TINYXML_FOUND)
@@ -461,6 +449,7 @@ list(APPEND MOOSE_LIBRARIES
     ksolve
     device
     basecode
+    muparser
     )
 
 

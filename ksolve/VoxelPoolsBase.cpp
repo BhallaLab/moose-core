@@ -48,7 +48,7 @@ void VoxelPoolsBase::resizeArrays( unsigned int totNumPools )
 void VoxelPoolsBase::reinit()
 {
     S_ = Sinit_;
-    rng.seed( moose::global::__rng_seed__ );
+    rng.seed( moose::__rng_seed__ );
 }
 
 //////////////////////////////////////////////////////////////

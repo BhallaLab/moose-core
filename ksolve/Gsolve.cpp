@@ -229,7 +229,7 @@ Gsolve::Gsolve()
     dsolvePtr_( 0 ),
     useClockedUpdate_( false )
 {
-    rng.seed( moose::global::__rng_seed__ );
+    rng.seed( moose::__rng_seed__ );
 }
 
 Gsolve::~Gsolve()
@@ -454,7 +454,7 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 
 void Gsolve::reinit( const Eref& e, ProcPtr p )
 {
-    rng.seed( moose::global::__rng_seed__ );
+    rng.seed( moose::__rng_seed__ );
 
     if ( !stoichPtr_ )
         return;

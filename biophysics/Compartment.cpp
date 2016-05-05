@@ -90,7 +90,7 @@ Compartment::Compartment()
     B_ = 0.0;
 
     // seed the rng.
-    rng.seed( moose::global::__rng_seed__ );
+    rng.seed( moose::__rng_seed__ );
 }
 
 Compartment::~Compartment()
@@ -218,7 +218,7 @@ void Compartment::vReinit(  const Eref& e, ProcPtr p )
     dt_ = p->dt;
 
     // Seed the RNG.
-    rng.seed( moose::global::__rng_seed__ );
+    rng.seed( moose::__rng_seed__ );
 
     // Send out the resting Vm to channels, SpikeGens, etc.
     VmOut()->send( e, Vm_ );

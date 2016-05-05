@@ -14,6 +14,11 @@
 #include "TableBase.h"
 #include "Table.h"
 #include "Clock.h"
+#include "StreamerBase.h"
+
+
+// Write to numpy arrays.
+#include "../utility/cnpy.hpp"
 
 
 static SrcFinfo1< vector< double >* > *requestOut()
@@ -189,15 +194,19 @@ static const Cinfo* tableCinfo = Table::initCinfo();
 Table::Table() : threshold_( 0.0 ) , lastTime_( 0.0 ) , input_( 0.0 ) 
 {
     // Initialize the directory to which each table should stream.
-    rootdir_ /= "_tables";
-
-    // If this directory does not exists, craete it. Following takes care of it.
-    boost::filesystem::create_directories( rootdir_ );
+    rootdir_ = "_tables";
 }
 
 Table::~Table( )
 {
-    of_.close();
+    // Make sure to write to rest of the entries to file before closing down.
+    if( useStreamer_ )
+    {
+        zipWithTime( vec(), data_, lastTime_ );
+        StreamerBase::writeToOutFile( outfile_, format_, "a", data_, columns_ );
+        clearVec();
+        data_.clear();
+    }
 }
 
 Table& Table::operator=( const Table& tab )
@@ -205,17 +214,6 @@ Table& Table::operator=( const Table& tab )
     return *this;
 }
 
-void Table::writeToOutfile( )
-{
-    for( auto v : vec() ) 
-    {
-        text_ += moose::global::toString( dt_ * numLines ) + delimiter_
-             + moose::global::toString( v ) + '\n';
-        numLines += 1;
-    }
-    of_ << text_; text_ = "";
-    if( getVecSize() > 0) clearVec();
-}
 
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions
@@ -232,13 +230,29 @@ void Table::process( const Eref& e, ProcPtr p )
 
     /*  If we are streaming to a file, let's write to a file. And clean the
      *  vector.  
+     *  Write at every 5 seconds or whenever size of vector is more than 10k.
      */
-    writeToOutfile( );
-    clearVec();
+    if( useStreamer_ )
+    {
+        if( fmod(lastTime_, 5.0) == 0.0 or getVecSize() >= 10000 )
+        {
+            zipWithTime( vec(), data_, lastTime_ );
+            StreamerBase::writeToOutFile( outfile_, format_ , "a", data_, columns_ );
+            data_.clear();
+            clearVec();
+        }
+    }
 }
 
+/**
+ * @brief Reinitialize
+ *
+ * @param e
+ * @param p
+ */
 void Table::reinit( const Eref& e, ProcPtr p )
 {
+    tablePath_ = e.id().path();
     unsigned int numTick = e.element()->getTick();
     Clock* clk = reinterpret_cast<Clock*>(Id(1).eref().data());
     dt_ = clk->getTickDt( numTick );
@@ -246,22 +260,17 @@ void Table::reinit( const Eref& e, ProcPtr p )
     /** Create the default filepath for this table.  */
     if( useStreamer_ )
     {
-        // If useStreamer is set then we need to construct the table path, if
-        // not set by user.
+        // The first column is variable time.
+        columns_.push_back( "time" );
+        // And the second column name is the name of the table.
+        columns_.push_back( moose::moosePathToUserPath( tablePath_ ) );
+
+        // If user has not set the filepath, then use the table path prefixed
+        // with rootdit as path.
         if( ! outfileIsSet )
-            setOutfile( 
-                    moose::global::createPosixPath( 
-                        rootdir_.string() + e.id().path() + "." + format_ 
-                        )
+            setOutfile( rootdir_ +
+                    moose::moosePathToUserPath(tablePath_) + '.' + format_ 
                     );
-
-        // Create its root directory.
-        moose::global::createDirs( outfile_.parent_path() );
-
-        // Open the stream to write to file.
-        of_.open( outfile_.string(), ios::out );
-        of_ << "time,value\n";
-
     }
 
     input_ = 0.0;
@@ -272,8 +281,15 @@ void Table::reinit( const Eref& e, ProcPtr p )
     requestOut()->send( e, &ret );
     vec().insert( vec().end(), ret.begin(), ret.end() );
 
+
     if( useStreamer_ )
-        writeToOutfile( );
+    {
+        zipWithTime( vec(), data_, lastTime_ );
+        StreamerBase::writeToOutFile( outfile_, format_, "w", data_, columns_);
+        clearVec();
+        data_.clear();
+        clearVec();
+    }
 }
 
 //////////////////////////////////////////////////////////////
@@ -331,15 +347,42 @@ bool Table::getUseStreamer( void ) const
 /*  set/get outfile_ */
 void Table::setOutfile( string outpath )
 {
-    outfile_ /= moose::global::createPosixPath( outpath );
-    outfile_.make_preferred();
+    outfile_ = moose::createPosixPath( outpath );
+    outfile_ = moose::createParentDirs( outfile_ );
+
     outfileIsSet = true;
     setUseStreamer( true );
+
+    // If possible get the format of file as well.
+    format_ = moose::getExtension( outfile_, true );
+    if( format_.size() == 0 )
+        format_ = "csv";
 }
 
 string Table::getOutfile( void ) const
 {
-    return outfile_.string();
+    return outfile_;
 }
 
+// Get the dt_ of this table
+double Table::getDt( void ) const
+{
+    return dt_;
+}
 
+/**
+ * @brief Take the vector from table and timestamp it. It must only be called
+ * when packing the data for writing.
+ */
+void Table::zipWithTime( const vector<double>& v
+        , vector<double>& tvec
+        , const double& currTime 
+        )
+{
+    size_t N = v.size();
+    for (size_t i = 0; i < N; i++) 
+    {
+        tvec.emplace_back( currTime - (N - i - 1 ) * dt_ );
+        tvec.emplace_back( v[i] );
+    }
+}

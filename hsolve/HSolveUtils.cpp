@@ -98,11 +98,11 @@ int HSolveUtils::gates(
 
             if ( power > 0.0 ) {
                 // string gatePath = moose::joinPath(channel.path(), gateName[i]);
-                string gatePath = moose::global::fixPath( channel.path() ) + 
+                string gatePath = moose::fixPath( channel.path() ) + 
 						"/" +  gateName[i];
                 Id gate( gatePath );
 
-                string gPath = moose::global::fixPath(gate.path());
+                string gPath = moose::fixPath(gate.path());
                 errorSS.str("");
                 errorSS << "Got " << gatePath << " expected " << gPath;
                 SIMPLE_ASSERT_MSG(gPath == gatePath, errorSS.str().c_str());

@@ -12,6 +12,7 @@
 #include "../shell/Shell.h"
 #include "CompartmentBase.h"
 #include "Compartment.h"
+#include "testing_macros.hpp"
 
 /*
 #include "HHGate.h"
@@ -111,10 +112,10 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
     // Here we have an interesting problem. The mtRand might be called
     // by multiple threads if the above Set call is not complete.
 
-    moose::global::mtseed( 5489U );
+    moose::mtseed( 5489U );
     vector< double > origVm( size, 0.0 );
     for ( unsigned int i = 0; i < size; ++i )
-        origVm[i] = moose::global::mtrand() * Vmax;
+        origVm[i] = moose::mtrand() * Vmax;
 
     double origVm100 = origVm[100];
     double origVm900 = origVm[900];
@@ -143,8 +144,8 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
         weight[i].resize( numSynVec[i], 0.0 );
         vector< double > delay( numSynVec[i], 0.0 );
         for ( unsigned int j = 0; j < numSynVec[i]; ++j ) {
-            weight[i][ j ] = moose::global::mtrand() * weightMax;
-            delay[ j ] = delayMin + moose::global::mtrand() * ( delayMax - delayMin );
+            weight[i][ j ] = moose::mtrand() * weightMax;
+            delay[ j ] = delayMin + moose::mtrand() * ( delayMax - delayMin );
         }
         ret = Field< double >::
             setVec( ObjId( synId, i ), "weight", weight[i] );
@@ -224,13 +225,13 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
         cout << retVm902<< endl;
 #endif
 
-        assert( doubleEq( retVm100, 0.158155894544  ) );
-        assert( doubleEq( retVm101, 0.0787406321424 ) );
-        assert( doubleEq( retVm102, 0.112282091194  ) );
-        assert( doubleEq( retVm99,  0.0614945481554 ) );
-        assert( doubleEq( retVm900, 0.259239075066  ) );
-        assert( doubleEq( retVm901, 0.19530866066   ) );
-        assert( doubleEq( retVm902, 0.236583352978  ) );
+        ASSERT_EQ( retVm100,  0.189304207678  , "" );
+        ASSERT_EQ( retVm101,  0.352776164289  , "" );
+        ASSERT_EQ( retVm102,  0.367242141036  , "" );
+        ASSERT_EQ( retVm99,   0.123552428475  , "" );
+        ASSERT_EQ( retVm900,  0.0714865703958 , "" );
+        ASSERT_EQ( retVm901,  0.35823689362   , "" );
+        ASSERT_EQ( retVm902,  0.0307787676562 , "" );
 
     }
 
