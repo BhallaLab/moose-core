@@ -127,67 +127,30 @@ void write_header( FILE* fp
 
     if( version == '2' )
         __pre__[6] = (char) 0x02;
-
     fwrite( __pre__.data(), sizeof( char ), __pre__.size(), fp );
-    uint32_t s = dict.size();
-    fwrite( (char*)&s, sizeof( unsigned int), 1, fp);
+
+    // Now write the size of dict. It is 2bytes long in version 1 and 4 bytes
+    // long in version 2.
+    if( version == '2' )
+    {
+        uint32_t s = dict.size();
+        fwrite( (char*)&s, sizeof( uint32_t ), 1, fp);
+    }
+    else
+    {
+        int16_t s = dict.size();
+        fwrite( (char*)&s, sizeof( uint16_t ), 1, fp);
+    }
     fwrite( dict.c_str(), sizeof(char), dict.size(), fp );
 }
-
-// Write to version 2.
-template<typename T>
-void save_numpy2( 
-        const string& outfile 
-        , const vector<double>& vec
-        , vector<string> colnames
-        , const string openmode 
-        )
-{
-    FILE* fp;
-
-    // In our application, we need to write a vector as matrix. We do not
-    // support the stacking of matrices.
-    vector<unsigned int> shape;
-    shape.push_back( vec.size()/ colnames.size());
-
-    /* In mode "w", open the file and write a header as well. When file is open
-     * in mode "a", we assume that file is alreay a valid numpy file.
-     */
-    if( openmode == "w" )
-    {
-        fp = fopen( outfile.c_str(), "wb" );
-        write_header<T>( fp, colnames, shape, '2' );
-    }
-    else                                        /* Append mode. */
-    {
-        // Do a sanity check if file is really a numpy file.
-        if(! is_valid_numpy_file( outfile ) )
-        {
-            cout << "Err : File " << outfile << " is not a valid numpy file"
-                << " I am not goind to write to it" 
-                << endl;
-            return;
-        }
-
-        // Unfortunetely we need to rewrite the header of the file.
-        change_shape_in_header( outfile, vec.size(), colnames.size() );
-
-        //  now open the data in append mode 
-        fp = fopen( outfile.c_str(), "ab" );
-    }
-
-    // Go to the very end of the file and write the data.
-    fwrite( &vec[0], sizeof(T), vec.size(), fp );
-    fclose( fp );
-}
-
-// write to version 1.
+// write to version 1 or version 2.
 template<typename T>
 void save_numpy( 
         const string& outfile 
         , const vector<double>& vec
         , vector<string> colnames
         , const string openmode 
+        , const char version = '1'
         )
 {
     FILE* fp;
@@ -203,7 +166,7 @@ void save_numpy(
     if( openmode == "w" )
     {
         fp = fopen( outfile.c_str(), "wb" );
-        write_header<T>( fp, colnames, shape, '1' );
+        write_header<T>( fp, colnames, shape, version );
     }
     else                                        /* Append mode. */
     {
