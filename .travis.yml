@@ -32,6 +32,7 @@ before_install:
     - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
     - wget "$sbmlurl" -O libsbml.deb && sudo dpkg -i libsbml.deb 
     - sudo apt-get install -f
+    - /usr/bin/python; /usr/loca/bin/python
     - which python
     - python -c 'import numpy'
 
