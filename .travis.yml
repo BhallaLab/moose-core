@@ -25,14 +25,13 @@ before_script:
     - sudo apt-get install -qq libxml2-dev libbz2-dev
     - sudo apt-get install -qq libhdf5-serial-dev
     - sudo apt-get install -qq make cmake
-    - sudo apt-get install -qq python-pip python-numpy python-matplotlib
+    - sudo apt-get install -qq  python-numpy python-matplotlib
     - sudo apt-get install -qq libboost-all-dev
 
 before_install:
     - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
     - wget "$sbmlurl" -O libsbml.deb && sudo dpkg -i libsbml.deb 
     - sudo apt-get install -f
-    - sudo pip install numpy --upgrade
 
 install:
     - echo "nothing to do here"
