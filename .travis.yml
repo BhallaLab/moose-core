@@ -1,3 +1,5 @@
+sudo: required
+dist: trusty
 language: cpp
 compiler:
     - gcc
@@ -8,6 +10,7 @@ notifications:
     email:
         recipients:
             - dilawar.s.rajput@gmail.com
+            - bhalla@ncbs.res.in
         on_success: change
         on_failure: always
 
@@ -19,14 +22,12 @@ matrix:
     allow_failures:
 
 before_script:
-    - sudo add-apt-repository ppa:takluyver/python3 -y
-    - sudo apt-get update -qq
-    - sudo apt-get install libxml2-dev libbz2-dev
-    - sudo apt-get install libhdf5-serial-dev
-    - sudo apt-get install make cmake
-    - sudo apt-get install python-numpy python-matplotlib
-    - sudo apt-get install python3-numpy  python3-matplotlib
-    - sudo apt-get install libboost-all-dev
+    - sudo apt-get install -qq libxml2-dev libbz2-dev
+    - sudo apt-get install -qq libhdf5-serial-dev
+    - sudo apt-get install -qq make cmake
+    - sudo apt-get install -qq python-numpy python-matplotlib
+    - sudo apt-get install -qq python3-numpy  python3-matplotlib
+    - sudo apt-get install -qq libboost-all-dev
 
 before_install:
     - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
@@ -38,6 +39,10 @@ install:
 
 script:
     - sudo ldconfig /usr/lib64
-    - mkdir -p _BUILD && cd _BUILD && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 ..
+    - mkdir -p _BUILD && cd _BUILD && cmake -DDEBUG=ON ..
+    - make 
+    - ctest --output-on-failure
+    - rm -rf *
+    - cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 ..
     - make 
     - ctest --output-on-failure 
