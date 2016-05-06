@@ -162,7 +162,7 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
 
     if( ! isOutfilePathSet_ )
     {
-        string defaultPath = "_tables/" + e.id().path();
+        string defaultPath = "_tables/" + moose::moosePathToUserPath( e.id().path() );
         setOutFilepath( defaultPath );
     }
 
@@ -212,7 +212,10 @@ void Streamer::addTable( Id table )
 
     tableIds_.push_back( table );
     tables_.push_back( t );
-    columns_.push_back( moose::pathToName( table.path() ) );
+
+    // We don't want name of table here as column names since they may not be
+    // unique. However, paths of tables are guarenteed to be unique.
+    columns_.push_back( moose::moosePathToUserPath( table.path() ) );
 }
 
 /**
@@ -282,6 +285,8 @@ void Streamer::setOutFilepath( string filepath )
     string format = moose::getExtension( outfilePath_, true );
     if( format.size() > 0)
         setFormat( format );
+    else
+        setFormat( "csv" );
 }
 
 /* Set the format of all Tables */

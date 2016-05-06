@@ -153,9 +153,14 @@ namespace moose {
     /*  return extension of a filename */
     string getExtension(const string& path, bool without_dot )
     {
+        auto dotPos = path.find_last_of( '.' );
+        if( dotPos == std::string::npos )
+            return "";
+
         if( without_dot )
-            return path.substr( path.find_last_of( '.' ) + 1 );
-        return path.substr( path.find_last_of( '.' ) );
+            return path.substr( dotPos + 1 );
+
+        return path.substr( dotPos );
     }
 
     /*  returns `basename path`  */
