@@ -51,3 +51,6 @@ script:
     - mkdir -p _BUILD && cd _BUILD && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 ..
     - make 
     - ctest --output-on-failure 
+
+after_success:
+    - coveralls
