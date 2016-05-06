@@ -73,7 +73,7 @@ void StreamerBase::writeToOutFile( const string& filepath
     else
     {
         LOG( moose::warning, "Unsupported format " << outputFormat 
-                << "Use npy, or csv. Falling back to default csv"
+                << ". Use npy or csv. Falling back to default csv"
            );
         writeToCSVFile( filepath, openmode, data, columns );
     }
