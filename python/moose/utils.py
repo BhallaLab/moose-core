@@ -769,6 +769,8 @@ def printCellTree(cell):
     Apart from compartment properties and messages,
     it displays the same for subelements of compartments only one level below the compartments.
     Thus NMDA synapses' mgblock-s will be left out.
+
+    FIXME: no lenght cound on compartment.
     """
     for compartmentid in cell.children: # compartments
         comp = _moose.Compartment(compartmentid)
