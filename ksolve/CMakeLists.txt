@@ -3,6 +3,7 @@ include_directories(../builtins ../basecode ../utility ../kinetics)
 include_directories(../)
 include_directories(../mesh)
 include_directories(../external/muparser/include )
+include_directories(../external/odeint-v2/include )
 
 if(USE_GSL)
     include_directories( ${GSL_INCLUDE_DIRS} )
