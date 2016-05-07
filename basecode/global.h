@@ -59,8 +59,8 @@ extern unsigned int totalTests;
 namespace moose
 {
 
-    typedef boost::random::mt19937 rng_type_;
-    typedef boost::random::uniform_01<double> distribution_type_;
+    using rng_type_ = boost::random::mt19937;
+    using distribution_type_ = boost::random::uniform_01<double>;
 
     extern rng_type_ rng;
     extern distribution_type_ dist;
