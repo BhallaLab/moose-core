@@ -61,7 +61,6 @@ void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
 
 void VoxelPools::advance( const ProcInfo* p )
 {
-
     /*-----------------------------------------------------------------------------
     NOTICE: 04/21/2016 11:31:42 AM
 
@@ -91,95 +90,58 @@ void VoxelPools::advance( const ProcInfo* p )
 
     string method = sys_->getMethod();
     if( method == "rk2" )
-    {
-        rk_midpoint_stepper_type_ stepper;
-        stepper.do_step( system , Svec(),  p->currTime, p->dt);
-    }
+        rk_midpoint_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
     else if( method == "rk4" )
-    {
-        // Fixed step size stepper.
-        rk_karp_stepper_type_ stepper;
-        stepper.do_step( system , Svec(),  p->currTime, p->dt);
-    }
+        rk_karp_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
     else if( method == "rk5")
-    {
-        // Adaptive step size stepper.
-        rk_karp_stepper_type_ stepper;
-        stepper.do_step( system , Svec(),  p->currTime, p->dt);
-    }
+        rk_karp_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
     else if( method == "rk5a")
-    {
-        // Adaptive step size stepper.
-        auto stepper = odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol);
-        odeint::integrate_adaptive( stepper, system, Svec()
+        odeint::integrate_adaptive( 
+                odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol)
+                , system, Svec()
                 , p->currTime - p->dt 
                 , p->currTime
                 , p->dt 
                 );
-    }
     else if ("rk54" == method )
-    {
-        rk_karp_stepper_type_ stepper;
-        stepper.do_step( system , Svec(),  p->currTime, p->dt);
-    }
+        rk_karp_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
     else if ("rk54a" == method )
-    {
-        auto stepper = odeint::make_controlled<rk_karp_stepper_type_>(
-                absTol, relTol 
-                );
-
-        odeint::integrate_adaptive( stepper, system, Svec()
+        odeint::integrate_adaptive( 
+                odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol )
+                , system, Svec()
                 , p->currTime - p->dt 
                 , p->currTime
                 , p->dt 
                 );
-    }
     else if ("rk5" == method )
-    {
-        rk_dopri_stepper_type_ stepper;
-        stepper.do_step( system , Svec(),  p->currTime, p->dt);
-    }
+        rk_dopri_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
     else if ("rk5a" == method )
-    {
-        auto stepper = odeint::make_controlled<rk_dopri_stepper_type_>( 
-                absTol, relTol 
-                );
-
-        odeint::integrate_adaptive( stepper, system, Svec()
+        odeint::integrate_adaptive( 
+                odeint::make_controlled<rk_dopri_stepper_type_>( absTol, relTol )
+                , system, Svec()
                 , p->currTime - p->dt 
                 , p->currTime
                 , p->dt 
                 );
-    }
     else if( method == "rk8" ) 
-    {
-        rk_felhberg_stepper_type_ stepper;
-        stepper.do_step( system , Svec(),  p->currTime, p->dt);
-    }
+        rk_felhberg_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
     else if( method == "rk8a" ) 
-    {
-        auto stepper = odeint::make_controlled<rk_felhberg_stepper_type_>( 
-                absTol, relTol 
-                );
-        odeint::integrate_adaptive( stepper, system, Svec()
+        odeint::integrate_adaptive(
+                odeint::make_controlled<rk_felhberg_stepper_type_>( absTol, relTol )
+                , system, Svec()
                 , p->currTime - p->dt 
                 , p->currTime
                 , p->dt 
                 );
-    }
 
     else
-    {
-        auto stepper = odeint::make_controlled<rk_karp_stepper_type_>( 
-                absTol, relTol 
-                );
-
-        odeint::integrate_adaptive( stepper, system, Svec()
+        odeint::integrate_adaptive( 
+                odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol )
+                , system, Svec()
                 , p->currTime - p->dt 
                 , p->currTime
                 , p->dt 
                 );
-    }
 }
 
 
