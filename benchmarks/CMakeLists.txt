@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
 include_directories(../msg)
 include_directories(../basecode)
 add_library(benchmarks 
@@ -11,10 +9,8 @@ if(ENABLE_BENCHMARKS)
     # This target run benchmarks. Not a part of moose distribution
     add_executable( 
         randnum_benchmark 
-        ${CMAKE_CURRENT_SOURCE_DIR}/benchmark_rngs.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/genrand_nishimura_masumoto.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/benchmark_random_numbers.cpp
         )
-
     target_link_libraries(randnum_benchmark randnum  )
 
     if(GSL_FOUND)

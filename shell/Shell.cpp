@@ -7,10 +7,6 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include <string>
-using namespace std;
-
-
 #include "header.h"
 #include "global.h"
 #include "SingleMsg.h"
@@ -364,10 +360,21 @@ void Shell::doQuit()
     SetGet0::set( ObjId(), "quit" );
 }
 
-void Shell::doStart( double runtime, bool notify )
+void Shell::doStart( double runtime )
 {
-    Id clockId( 1 );
-    SetGet2< double, bool >::set( clockId, "start", runtime, notify );
+#ifdef ENABLE_LOGGER
+        clock_t t = clock();
+        stringstream ss;
+        ss << "Running moose for " << runtime << " seconds";
+        logger.log("INFO", ss.str());
+#endif
+	Id clockId( 1 );
+	SetGet1< double >::set( clockId, "start", runtime );
+
+#ifdef ENABLE_LOGGER
+        float time = (float(clock() - t) / CLOCKS_PER_SEC);
+        logger.simulationTime.push_back(time);
+#endif
 }
 
 bool isDoingReinit()

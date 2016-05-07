@@ -8,7 +8,6 @@
 **********************************************************************/
 
 #include "header.h"
-#include "global.h"
 
 #include <stdio.h>
 #include <iomanip>
@@ -24,27 +23,11 @@
 #include "SparseMsg.h"
 #include "SingleMsg.h"
 #include "OneToOneMsg.h"
+#include "../randnum/randnum.h"
 #include "../scheduling/Clock.h"
 
 #include "../shell/Shell.h"
 #include "../mpi/PostMaster.h"
-
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
-
-int _seed_ = 0;
-
-void _mtseed_( unsigned int seed )
-{
-    _seed_ = seed;
-}
-
-double _mtrand_( )
-{
-    static boost::random::mt19937 rng( _seed_ );
-    static boost::random::uniform_01<double> dist;
-    return dist( rng );
-}
 
 void showFields()
 {
@@ -794,6 +777,7 @@ void printGrid( Element* e, const string& field, double min, double max )
 	cout << endl;
 }
 
+
 void testSparseMsg()
 {
 	// static const unsigned int NUMSYN = 104576;
@@ -817,7 +801,7 @@ void testSparseMsg()
 
 	string arg;
 
-	_mtseed_( 5489UL ); // The default value, but better to be explicit.
+	mtseed( 5489UL ); // The default value, but better to be explicit.
 
 	Id sshid = Id::nextId();
 	Element* t2 = new GlobalDataElement( sshid, sshc, "test2", size );
@@ -837,7 +821,7 @@ void testSparseMsg()
 
 	vector< double > temp( size, 0.0 );
 	for ( unsigned int i = 0; i < size; ++i )
-		temp[i] = _mtrand_() * Vmax;
+		temp[i] = mtrand() * Vmax;
 
 	bool ret = Field< double >::setVec( cells, "Vm", temp );
 	assert( ret );
@@ -859,8 +843,8 @@ void testSparseMsg()
 				Field< unsigned int >::get( id, "numSynapse" );
 		unsigned int k = i * fieldSize;
 		for ( unsigned int j = 0; j < numSyn; ++j ) {
-			weight[ k + j ] = _mtrand_() * weightMax;
-			delay[ k + j ] = _mtrand_() * delayMax;
+			weight[ k + j ] = mtrand() * weightMax;
+			delay[ k + j ] = mtrand() * delayMax;
 		}
 	}
 	ret = Field< double >::setVec( syns, "weight", weight );

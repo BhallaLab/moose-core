@@ -11,11 +11,6 @@
 #ifndef _COMPARTMENT_H
 #define _COMPARTMENT_H
 
-#include "global.h"
-
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
-
 /**
  * The Compartment class sets up an asymmetric compartment for
  * branched nerve calculations. Handles electronic structure and

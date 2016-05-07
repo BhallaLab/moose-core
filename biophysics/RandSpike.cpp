@@ -8,98 +8,98 @@
 **********************************************************************/
 
 #include "header.h"
+#include "../randnum/randnum.h"
 #include "RandSpike.h"
 
-///////////////////////////////////////////////////////
-// MsgSrc definitions
-///////////////////////////////////////////////////////
-static SrcFinfo1< double > *spikeOut()
-{
-    static SrcFinfo1< double > spikeOut( "spikeOut",
-                                         "Sends out a trigger for an event.");
-    return &spikeOut;
+	///////////////////////////////////////////////////////
+	// MsgSrc definitions
+	///////////////////////////////////////////////////////
+static SrcFinfo1< double > *spikeOut() {
+	static SrcFinfo1< double > spikeOut( "spikeOut", 
+			"Sends out a trigger for an event.");
+	return &spikeOut;
 }
 
 const Cinfo* RandSpike::initCinfo()
 {
-    ///////////////////////////////////////////////////////
-    // Shared message definitions
-    ///////////////////////////////////////////////////////
-    static DestFinfo process( "process",
-                              "Handles process call",
-                              new ProcOpFunc< RandSpike >( &RandSpike::process ) );
-    static DestFinfo reinit( "reinit",
-                             "Handles reinit call",
-                             new ProcOpFunc< RandSpike >( &RandSpike::reinit ) );
+	///////////////////////////////////////////////////////
+	// Shared message definitions
+	///////////////////////////////////////////////////////
+	static DestFinfo process( "process", 
+		"Handles process call",
+		new ProcOpFunc< RandSpike >( &RandSpike::process ) );
+	static DestFinfo reinit( "reinit", 
+		"Handles reinit call",
+		new ProcOpFunc< RandSpike >( &RandSpike::reinit ) );
 
-    static Finfo* processShared[] =
-    {
-        &process, &reinit
-    };
+	static Finfo* processShared[] =
+	{
+		&process, &reinit
+	};
 
-    static SharedFinfo proc( "proc",
-                             "Shared message to receive Process message from scheduler",
-                             processShared, sizeof( processShared ) / sizeof( Finfo* ) );
+	static SharedFinfo proc( "proc", 
+		"Shared message to receive Process message from scheduler",
+		processShared, sizeof( processShared ) / sizeof( Finfo* ) );
+		
+	//////////////////////////////////////////////////////////////////
+	// Dest Finfos.
+	//////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////////
-    // Dest Finfos.
-    //////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////
+	// Value Finfos.
+	//////////////////////////////////////////////////////////////////
+	
+	static ValueFinfo< RandSpike, double > rate( "rate",
+		"Specifies rate for random spike train. Note that this is"
+		"probabilistic, so the instantaneous rate may differ. "
+		"If the rate is assigned be message and it varies slowly then "
+		"the average firing rate will approach the specified rate",
+		&RandSpike::setRate,
+		&RandSpike::getRate
+	);
+	static ValueFinfo< RandSpike, double > refractT( "refractT",
+		"Refractory Time.",
+		&RandSpike::setRefractT,
+		&RandSpike::getRefractT
+	);
+	static ValueFinfo< RandSpike, double > absRefract( "abs_refract",
+		"Absolute refractory time. Synonym for refractT.",
+		&RandSpike::setRefractT,
+		&RandSpike::getRefractT
+	);
+	static ReadOnlyValueFinfo< RandSpike, bool > hasFired( "hasFired",
+		"True if RandSpike has just fired",
+		&RandSpike::getFired
+	);
 
-    //////////////////////////////////////////////////////////////////
-    // Value Finfos.
-    //////////////////////////////////////////////////////////////////
+	static Finfo* spikeGenFinfos[] = 
+	{
+		spikeOut(),	// SrcFinfo
+		&proc,		// Shared
+		&rate,		// Value
+		&refractT,	// Value
+		&absRefract,	// Value
+		&hasFired,	// ReadOnlyValue
+	};
 
-    static ValueFinfo< RandSpike, double > rate( "rate",
-            "Specifies rate for random spike train. Note that this is"
-            "probabilistic, so the instantaneous rate may differ. "
-            "If the rate is assigned be message and it varies slowly then "
-            "the average firing rate will approach the specified rate",
-            &RandSpike::setRate,
-            &RandSpike::getRate
-                                               );
-    static ValueFinfo< RandSpike, double > refractT( "refractT",
-            "Refractory Time.",
-            &RandSpike::setRefractT,
-            &RandSpike::getRefractT
-                                                   );
-    static ValueFinfo< RandSpike, double > absRefract( "abs_refract",
-            "Absolute refractory time. Synonym for refractT.",
-            &RandSpike::setRefractT,
-            &RandSpike::getRefractT
-                                                     );
-    static ReadOnlyValueFinfo< RandSpike, bool > hasFired( "hasFired",
-            "True if RandSpike has just fired",
-            &RandSpike::getFired
-                                                         );
+	static string doc[] =
+	{
+		"Name", "RandSpike",
+		"Author", "Upi Bhalla",
+		"Description", "RandSpike object, generates random spikes at."
+		"specified mean rate. Based closely on GENESIS randspike. "
+	};
+	static Dinfo< RandSpike > dinfo;
+	static Cinfo spikeGenCinfo(
+		"RandSpike",
+		Neutral::initCinfo(),
+		spikeGenFinfos, sizeof( spikeGenFinfos ) / sizeof( Finfo* ),
+		&dinfo,
+                doc,
+                sizeof(doc)/sizeof(string)                
+	);
 
-    static Finfo* spikeGenFinfos[] =
-    {
-        spikeOut(),	// SrcFinfo
-        &proc,		// Shared
-        &rate,		// Value
-        &refractT,	// Value
-        &absRefract,	// Value
-        &hasFired,	// ReadOnlyValue
-    };
-
-    static string doc[] =
-    {
-        "Name", "RandSpike",
-        "Author", "Upi Bhalla",
-        "Description", "RandSpike object, generates random spikes at."
-        "specified mean rate. Based closely on GENESIS randspike. "
-    };
-    static Dinfo< RandSpike > dinfo;
-    static Cinfo spikeGenCinfo(
-        "RandSpike",
-        Neutral::initCinfo(),
-        spikeGenFinfos, sizeof( spikeGenFinfos ) / sizeof( Finfo* ),
-        &dinfo,
-        doc,
-        sizeof(doc)/sizeof(string)
-    );
-
-    return &spikeGenCinfo;
+	return &spikeGenCinfo;
 }
 
 static const Cinfo* spikeGenCinfo = RandSpike::initCinfo();
@@ -123,41 +123,34 @@ RandSpike::RandSpike()
 // Value Field access function definitions.
 void RandSpike::setRate( double rate )
 {
-    rate_ = rate;
-    double prob = 1.0 - rate * refractT_;
-    if ( prob <= 0.0 )
-    {
-        cout << "Warning: RandSpike::setRate: Rate is too high compared to refractory time\n";
-        realRate_ = rate_;
-    }
-    else
-    {
-        realRate_ = rate_ / prob;
-    }
+	rate_ = rate;
+	double prob = 1.0 - rate * refractT_;
+	if ( prob <= 0.0 ) {
+		cout << "Warning: RandSpike::setRate: Rate is too high compared to refractory time\n";
+		realRate_ = rate_;
+	} else {
+		realRate_ = rate_ / prob;
+	}
 }
 double RandSpike::getRate() const
 {
-    return rate_;
+	return rate_;
 }
 
 void RandSpike::setRefractT( double val )
 {
-    refractT_ = val;
+	refractT_ = val;
 }
 double RandSpike::getRefractT() const
 {
-    return refractT_;
+	return refractT_;
 }
 
 bool RandSpike::getFired() const
 {
-    return fired_;
+	return fired_;
 }
 
-double RandSpike::mtrand( )
-{
-    return dist( rng );
-}
 
 //////////////////////////////////////////////////////////////////
 // RandSpike::Dest function definitions.
@@ -165,20 +158,17 @@ double RandSpike::mtrand( )
 
 void RandSpike::process( const Eref& e, ProcPtr p )
 {
-    if ( refractT_ > p->currTime - lastEvent_ )
-        return;
-    double prob = realRate_ * p->dt;
-
-    if ( prob >= 1.0 || prob >= mtrand() )
-    {
-        lastEvent_ = p->currTime;
-        spikeOut()->send( e, p->currTime );
-        fired_ = true;
-    }
-    else
-    {
+	if ( refractT_ > p->currTime - lastEvent_ )
+		return;
+	double prob = realRate_ * p->dt;
+	if ( prob >= 1.0 || prob >= mtrand() ) 
+	{
+		lastEvent_ = p->currTime;
+		spikeOut()->send( e, p->currTime );
+		fired_ = true;                    
+	} else {
         fired_ = false;
-    }
+	}
 }
 
 // Set it so that first spike is allowed.

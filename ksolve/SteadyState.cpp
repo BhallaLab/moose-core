@@ -9,14 +9,12 @@
 
 /**
  * This program works out a steady-state value for a reaction system.
- * It uses boost-ublas and lapack heavily.
- *
+ * It uses GSL heavily, and isn't even compiled if the flag isn't set.
  * It finds the ss value closest to the initial conditions.
  *
  * If you want to find multiple stable states, it is best to do this
  * in Python as it gives a lot of flexibility in working out how to
  * find steady states.
- *
  * Likewise, if you want to carry out a dose-response calculation.
  */
 
@@ -30,32 +28,30 @@
 #include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
+#include "../randnum/randnum.h"
 
-/* Root finding algorithm is implemented here */
-#include "NonLinearSystem.h"                    
-
-/*
- * Bindings to lapack. These headers are not part of standard boost
- * distribution. They are available with moose distribution. See 'external'
- * folder.
- */
-#include "boost/numeric/bindings/lapack/lapack.hpp"
-#include "boost/numeric/bindings/lapack/geev.hpp"
-
-// Random number generator
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
+#ifdef USE_GSL
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_multiroots.h>
+#include <gsl/gsl_sort.h>
+#include <gsl/gsl_sort_vector.h>
+#include <gsl/gsl_eigen.h>
+#include <gsl/gsl_odeiv2.h>
+#endif
 
 #include "VoxelPoolsBase.h"
 #include "OdeSystem.h"
 #include "VoxelPools.h"
 #include "SteadyState.h"
 
-using namespace boost::numeric::bindings;
-using namespace boost::numeric;
-
-void ss_func( const vector_type& x, void* params, vector_type& f );
-unsigned int rankUsingBoost( ublas::matrix<value_type_>& U );
+int ss_func( const gsl_vector* x, void* params, gsl_vector* f );
+#ifdef USE_GSL
+int myGaussianDecomp( gsl_matrix* U );
+#endif
 
 // Limit below which small numbers are treated as zero.
 const double SteadyState::EPSILON = 1e-9;
@@ -68,19 +64,20 @@ const double SteadyState::DELTA = 1e-6;
  */
 struct reac_info
 {
+	int rank;
+	int num_reacs;
+	size_t num_mols;
+	int nIter;
+	double convergenceCriterion;
 
-    int rank;
-    int num_reacs;
-    size_t num_mols;
-    int nIter;
-    double convergenceCriterion;
+	double* T;
+	VoxelPools* pool;
+	vector< double > nVec;
 
-    double* T;
-    VoxelPools* pool;
-    vector< double > nVec;
-
-    ublas::matrix< value_type_ >* Nr;
-    ublas::matrix< value_type_ >* gamma;
+#ifdef USE_GSL
+	gsl_matrix* Nr;
+	gsl_matrix* gamma;
+#endif
 };
 
 const Cinfo* SteadyState::initCinfo()
@@ -320,167 +317,161 @@ static const Cinfo* steadyStateCinfo = SteadyState::initCinfo();
 ///////////////////////////////////////////////////
 
 SteadyState::SteadyState()
-    :
-    nIter_( 0 ),
-    maxIter_( 100 ),
-    badStoichiometry_( 0 ),
-    status_( "OK" ),
-    isInitialized_( 0 ),
-    isSetup_( 0 ),
-    convergenceCriterion_( 1e-7 ),
-    stoich_(),
-    numVarPools_( 0 ),
-    nReacs_( 0 ),
-    rank_( 0 ),
-    reassignTotal_( 0 ),
-    nNegEigenvalues_( 0 ),
-    nPosEigenvalues_( 0 ),
-    stateType_( 0 ),
-    solutionStatus_( 0 ),
-    numFailed_( 0 )
+	:
+		nIter_( 0 ), 
+		maxIter_( 100 ), 
+		badStoichiometry_( 0 ),
+		status_( "OK" ),
+		isInitialized_( 0 ),
+		isSetup_( 0 ),
+		convergenceCriterion_( 1e-7 ),
+#ifdef USE_GSL
+		LU_( 0 ),
+		Nr_( 0 ),
+		gamma_( 0 ),
+#endif
+		stoich_(),
+		numVarPools_( 0 ),
+		nReacs_( 0 ),
+		rank_( 0 ),
+		reassignTotal_( 0 ),
+		nNegEigenvalues_( 0 ),
+		nPosEigenvalues_( 0 ),
+		stateType_( 0 ),
+		solutionStatus_( 0 ),
+		numFailed_( 0 )
 {
     rng.seed( moose::__rng_seed__ );
 }
 
 SteadyState::~SteadyState()
 {
-
+#ifdef USE_GSL
+	if ( LU_ != 0 )
+		gsl_matrix_free( LU_ );
+	if ( Nr_ != 0 )
+		gsl_matrix_free( Nr_ );
+	if ( gamma_ != 0 )
+		gsl_matrix_free( gamma_ );
+#endif
 }
-
+		
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
 
-Id SteadyState::getStoich() const
-{
-    return stoich_;
+Id SteadyState::getStoich() const {
+	return stoich_;
 }
 
-void SteadyState::setStoich( Id value )
-{
-    if ( !value.element()->cinfo()->isA( "Stoich" ) )
-    {
-        cout << "Error: SteadyState::setStoich: Must be of Stoich class\n";
-        return;
-    }
+void SteadyState::setStoich( Id value ) {
+	if ( !value.element()->cinfo()->isA( "Stoich" ) ) {
+		cout << "Error: SteadyState::setStoich: Must be of Stoich class\n";
+		return;
+	}
 
-    stoich_ = value;
-    Stoich* stoichPtr = reinterpret_cast< Stoich* >( value.eref().data());
-    numVarPools_ = Field< unsigned int >::get( stoich_, "numVarPools" );
-    nReacs_ = Field< unsigned int >::get( stoich_, "numRates" );
-    setupSSmatrix();
-    double vol = LookupField< unsigned int, double >::get(
-                     stoichPtr->getCompartment(), "oneVoxelVolume", 0 );
-    pool_.setVolume( vol );
-    pool_.setStoich( stoichPtr, 0 );
-    pool_.updateAllRateTerms( stoichPtr->getRateTerms(),
-                              stoichPtr->getNumCoreRates() );
-    isInitialized_ = 1;
+	stoich_ = value;
+	Stoich* stoichPtr = reinterpret_cast< Stoich* >( value.eref().data());
+	numVarPools_ = Field< unsigned int >::get( stoich_, "numVarPools" );
+	nReacs_ = Field< unsigned int >::get( stoich_, "numRates" );
+	setupSSmatrix();
+	double vol = LookupField< unsigned int, double >::get( 
+				stoichPtr->getCompartment(), "oneVoxelVolume", 0 );
+	pool_.setVolume( vol );
+	pool_.setStoich( stoichPtr, 0 );
+	pool_.updateAllRateTerms( stoichPtr->getRateTerms(),
+				   stoichPtr->getNumCoreRates() );
+	isInitialized_ = 1;
 }
 
-bool SteadyState::badStoichiometry() const
-{
-    return badStoichiometry_;
+bool SteadyState::badStoichiometry() const {
+	return badStoichiometry_;
 }
 
-bool SteadyState::isInitialized() const
-{
-    return isInitialized_;
+bool SteadyState::isInitialized() const {
+	return isInitialized_;
 }
 
-unsigned int SteadyState::getNiter() const
-{
-    return nIter_;
+unsigned int SteadyState::getNiter() const {
+	return nIter_;
 }
 
-string SteadyState::getStatus() const
-{
-    return status_;
+string SteadyState::getStatus() const {
+	return status_;
 }
 
-unsigned int SteadyState::getMaxIter() const
-{
-    return maxIter_;
+unsigned int SteadyState::getMaxIter() const {
+	return maxIter_;
 }
 
-void SteadyState::setMaxIter( unsigned int value )
-{
-    maxIter_ = value;
+void SteadyState::setMaxIter( unsigned int value ) {
+	maxIter_ = value;
 }
 
-unsigned int SteadyState::getRank() const
-{
-    return rank_;
+unsigned int SteadyState::getRank() const {
+	return rank_;
 }
 
-unsigned int SteadyState::getNumVarPools() const
-{
-    return numVarPools_;
+unsigned int SteadyState::getNumVarPools() const {
+	return numVarPools_;
 }
 
-unsigned int SteadyState::getStateType() const
-{
-    return stateType_;
+unsigned int SteadyState::getStateType() const {
+	return stateType_;
 }
 
-unsigned int SteadyState::getNnegEigenvalues() const
-{
-    return nNegEigenvalues_;
+unsigned int SteadyState::getNnegEigenvalues() const {
+	return nNegEigenvalues_;
 }
 
-unsigned int SteadyState::getNposEigenvalues() const
-{
-    return nPosEigenvalues_;
+unsigned int SteadyState::getNposEigenvalues() const {
+	return nPosEigenvalues_;
 }
 
-unsigned int SteadyState::getSolutionStatus() const
-{
-    return solutionStatus_;
+unsigned int SteadyState::getSolutionStatus() const {
+	return solutionStatus_;
 }
 
-void SteadyState::setConvergenceCriterion( double value )
-{
-    if ( value > 1e-10 )
-        convergenceCriterion_ = value;
-    else
-        cout << "Warning: Convergence criterion " << value <<
-             " too small. Old value " <<
-             convergenceCriterion_ << " retained\n";
+void SteadyState::setConvergenceCriterion( double value ) {
+	if ( value > 1e-10 )
+		convergenceCriterion_ = value;
+	else
+		cout << "Warning: Convergence criterion " << value << 
+		" too small. Old value " << 
+		convergenceCriterion_ << " retained\n";
 }
 
-double SteadyState::getConvergenceCriterion() const
-{
-    return convergenceCriterion_;
+double SteadyState::getConvergenceCriterion() const {
+	return convergenceCriterion_;
 }
 
 double SteadyState::getTotal( const unsigned int i ) const
 {
-    if ( i < total_.size() )
-        return total_[i];
-    cout << "Warning: SteadyState::getTotal: index " << i <<
-         " out of range " << total_.size() << endl;
-    return 0.0;
+	if ( i < total_.size() )
+		return total_[i];
+	cout << "Warning: SteadyState::getTotal: index " << i <<
+			" out of range " << total_.size() << endl;
+	return 0.0;
 }
 
 void SteadyState::setTotal( const unsigned int i, double val )
 {
-    if ( i < total_.size() )
-    {
-        total_[i] = val;
-        reassignTotal_ = 1;
-        return;
-    }
-    cout << "Warning: SteadyState::setTotal: index " << i <<
-         " out of range " << total_.size() << endl;
+	if ( i < total_.size() ) {
+		total_[i] = val;
+		reassignTotal_ = 1;
+		return;
+	}
+	cout << "Warning: SteadyState::setTotal: index " << i <<
+		" out of range " << total_.size() << endl;
 }
 
 double SteadyState::getEigenvalue( const unsigned int i ) const
 {
-    if ( i < eigenvalues_.size() )
-        return eigenvalues_[i];
-    cout << "Warning: SteadyState::getEigenvalue: index " << i <<
-         " out of range " << eigenvalues_.size() << endl;
-    return 0.0;
+	if ( i < eigenvalues_.size() )
+		return eigenvalues_[i];
+	cout << "Warning: SteadyState::getEigenvalue: index " << i <<
+			" out of range " << eigenvalues_.size() << endl;
+	return 0.0;
 }
 
 ///////////////////////////////////////////////////
@@ -490,16 +481,16 @@ double SteadyState::getEigenvalue( const unsigned int i ) const
 // Static func
 void SteadyState::setupMatrix()
 {
-    setupSSmatrix();
+	setupSSmatrix();
 }
 void SteadyState::settleFunc()
 {
-    settle( 0 );
+	settle( 0 );
 }
 
 void SteadyState::resettleFunc()
 {
-    settle( 1 );
+	settle( 1 );
 }
 
 // Dummy function
@@ -507,225 +498,297 @@ void SteadyState::assignY( double* S )
 {
 }
 
+///////////////////////////////////////////////////
+// GSL interface stuff
+///////////////////////////////////////////////////
+
+#ifdef USE_GSL
+void print_gsl_mat( gsl_matrix* m, const char* name )
+{
+    size_t i, j;
+    printf( "%s[%lu, %lu] = \n", name, m->size1, m->size2 );
+    for (i = 0; i < m->size1; i++) {
+        for (j = 0; j < m->size2; j++) {
+            double x = gsl_matrix_get (m, i, j );
+            if ( fabs( x ) < 1e-9 ) x = 0;
+            printf( "%6g", x );
+        }
+    
+        printf( "\n");
+    }   
+}
+#endif
+
 void SteadyState::showMatrices()
 {
-    if ( !isInitialized_ ) {
-        cout << "SteadyState::showMatrices: Sorry, the system is not yet initialized.\n";
-        return;
-    }
-    int numConsv = numVarPools_ - rank_;
-    cout << "Totals:	";
-    for ( int i = 0; i < numConsv; ++i )
-        cout << total_[i] << "	";
-    cout << endl;
-    cout << "gamma " << gamma_ << endl;
-    cout << "Nr " << Nr_ << endl;
-    cout << "LU " << LU_ << endl;
+	if ( !isInitialized_ ) {
+		cout << "SteadyState::showMatrices: Sorry, the system is not yet initialized.\n";
+		return;
+	}
+	int numConsv = numVarPools_ - rank_;
+	cout << "Totals:	";
+	for ( int i = 0; i < numConsv; ++i )
+		cout << total_[i] << "	";
+	cout << endl;
+#ifdef USE_GSL
+	print_gsl_mat( gamma_, "gamma" );
+	print_gsl_mat( Nr_, "Nr" );
+	print_gsl_mat( LU_, "LU" );
+#endif
 }
 
 void SteadyState::setupSSmatrix()
 {
+#ifdef USE_GSL
+	if ( numVarPools_ == 0 || nReacs_ == 0 )
+		return;
+	
+	int nTot = numVarPools_ + nReacs_;
+	gsl_matrix* N = gsl_matrix_calloc (numVarPools_, nReacs_);
+	if ( LU_ ) { // Clear out old one.
+		gsl_matrix_free( LU_ );
+	}
+	LU_ = gsl_matrix_calloc (numVarPools_, nTot);
+	vector< int > entry = Field< vector< int > >::get( 
+					stoich_, "matrixEntry" );
+	vector< unsigned int > colIndex = Field< vector< unsigned int > >::get(
+					stoich_, "columnIndex" );
+	vector< unsigned int > rowStart = Field< vector< unsigned int > >::get(
+					stoich_, "rowStart" );
 
-    if ( numVarPools_ == 0 || nReacs_ == 0 )
-        return;
+	// cout << endl << endl;
+	for ( unsigned int i = 0; i < numVarPools_; ++i ) {
+		gsl_matrix_set (LU_, i, i + nReacs_, 1 );
+		unsigned int k = rowStart[i];
+		// cout << endl << i << ":	";
+		for ( unsigned int j = 0; j < nReacs_; ++j ) {
+			double x = 0;
+			if ( j == colIndex[k] && k < rowStart[i+1] ) {
+				x = entry[k++];
+			}
+			// cout << "	" << x;
+			gsl_matrix_set (N, i, j, x);
+			gsl_matrix_set (LU_, i, j, x );
+		}
+	}
+	cout << endl << endl;
 
-    int nTot = numVarPools_ + nReacs_;
+	rank_ = myGaussianDecomp( LU_ );
 
-    ublas::matrix<double> N(numVarPools_, nReacs_, 0.0);
+	unsigned int nConsv = numVarPools_ - rank_;
+	if ( nConsv == 0 ) {
+		cout << "SteadyState::setupSSmatrix(): Number of conserved species == 0. Aborting\n";
+		return;
+	}
+	
+	if ( Nr_ ) { // Clear out old one.
+		gsl_matrix_free( Nr_ );
+	}
+	Nr_ = gsl_matrix_calloc ( rank_, nReacs_ );
+	// Fill up Nr.
+	for ( unsigned int i = 0; i < rank_; i++)
+		for ( unsigned int j = i; j < nReacs_; j++)
+			gsl_matrix_set (Nr_, i, j, gsl_matrix_get( LU_, i, j ) );
 
-    LU_ = ublas::matrix< value_type_ >( numVarPools_, nTot, 0.0);
+	if ( gamma_ ) { // Clear out old one.
+		gsl_matrix_free( gamma_ );
+	}
+	gamma_ = gsl_matrix_calloc (nConsv, numVarPools_ );
+	
+	// Fill up gamma
+	for ( unsigned int i = rank_; i < numVarPools_; ++i )
+		for ( unsigned int j = 0; j < numVarPools_; ++j )
+			gsl_matrix_set( gamma_, i - rank_, j, 
+				gsl_matrix_get( LU_, i, j + nReacs_ ) );
 
-    vector< int > entry = Field< vector< int > >::get(
-                              stoich_, "matrixEntry" );
-    vector< unsigned int > colIndex = Field< vector< unsigned int > >::get(
-                                          stoich_, "columnIndex" );
-    vector< unsigned int > rowStart = Field< vector< unsigned int > >::get(
-                                          stoich_, "rowStart" );
+	// Fill up boundary condition values
+	total_.resize( nConsv );
+	total_.assign( nConsv, 0.0 );
 
-    for ( unsigned int i = 0; i < numVarPools_; ++i )
-    {
-        LU_(i, i + nReacs_) = 1;
-        unsigned int k = rowStart[i];
-        for ( unsigned int j = 0; j < nReacs_; ++j )
-        {
-            double x = 0;
-            if ( j == colIndex[k] && k < rowStart[i+1] )
-            {
-                x = entry[k++];
-            }
-            N(i,j) = x;
-            LU_(i,j) = x;
-        }
-    }
+	/*
+	cout << "S = (";
+	for ( unsigned int j = 0; j < numVarPools_; ++j )
+		cout << s_->S()[ j ] << ", ";
+	cout << "), Sinit = ( ";
+	for ( unsigned int j = 0; j < numVarPools_; ++j )
+		cout << s_->Sinit()[ j ] << ", ";
+	cout << ")\n";
+	*/
+	Id ksolve = Field< Id >::get( stoich_, "ksolve" );
+	vector< double > nVec = 
+			LookupField< unsigned int, vector< double > >::get(
+			ksolve,"nVec", 0 );
 
-    // This function reorgranize LU_.
-    rank_ = rankUsingBoost( LU_ );
-    Nr_ = ublas::matrix< value_type_ >( rank_, nReacs_ );
-    Nr_.assign( ublas::zero_matrix< value_type_ >( rank_, nReacs_ ) );
+	if ( nVec.size() >= numVarPools_ ) {
+		for ( unsigned int i = 0; i < nConsv; ++i )
+			for ( unsigned int j = 0; j < numVarPools_; ++j )
+				total_[i] += gsl_matrix_get( gamma_, i, j ) * nVec[ j ];
+		isSetup_ = 1;
+	} else {
+		cout << "Error: SteadyState::setupSSmatrix(): unable to get"
+				"pool numbers from ksolve.\n";
+		isSetup_ = 0;
+	}
 
-    unsigned int nConsv = numVarPools_ - rank_;
-    if ( nConsv == 0 )
-    {
-        cout << "SteadyState::setupSSmatrix(): Number of conserved species == 0. Aborting\n";
-        return;
-    }
-
-    // Fill up Nr.
-    for ( unsigned int i = 0; i < rank_; i++)
-        for ( unsigned int j = i; j < nReacs_; j++)
-            Nr_(i,j) = LU_(i, j);
-
-    gamma_ = ublas::matrix< value_type_ >( nConsv, numVarPools_, 0.0 );
-
-    // Fill up gamma
-    for ( unsigned int i = rank_; i < numVarPools_; ++i )
-        for ( unsigned int j = 0; j < numVarPools_; ++j )
-            gamma_(i-rank_, j) = LU_(i, j+nReacs_);
-
-    // Fill up boundary condition values
-    total_.resize( nConsv );
-    total_.assign( nConsv, 0.0 );
-
-    Id ksolve = Field< Id >::get( stoich_, "ksolve" );
-    vector< double > nVec =
-        LookupField< unsigned int, vector< double > >::get(
-            ksolve,"nVec", 0 );
-
-    if ( nVec.size() >= numVarPools_ )
-    {
-        for ( unsigned int i = 0; i < nConsv; ++i )
-            for ( unsigned int j = 0; j < numVarPools_; ++j )
-                total_[i] += gamma_(i,j) * nVec[ j ];
-        isSetup_ = 1;
-    }
-    else
-    {
-        cout << "Error: SteadyState::setupSSmatrix(): unable to get"
-             "pool numbers from ksolve.\n";
-        isSetup_ = 0;
-    }
-
+	gsl_matrix_free( N );
+#endif
 }
+
+static double op( double x )
+{
+	return x * x;
+}
+
+static double invop( double x )
+{
+	if ( x > 0.0 )
+		return sqrt( x );
+	return 0.0;
+}
+
+
+/**
+ * This does the iteration, using the specified method.
+ * First try gsl_multiroot_fsolver_hybrids
+ * If that doesn't work try gsl_multiroot_fsolver_dnewton
+ * Returns the gsl status.
+ */
+#ifdef USE_GSL
+int iterate( const gsl_multiroot_fsolver_type* st, struct reac_info *ri,
+	int maxIter )
+{
+	int status = 0;
+	gsl_vector* x = gsl_vector_calloc( ri->num_mols );
+	gsl_multiroot_fsolver *solver = 
+		gsl_multiroot_fsolver_alloc( st, ri->num_mols );
+	gsl_multiroot_function func = {&ss_func, ri->num_mols, ri};
+
+	// This gives the starting point for finding the solution
+	for ( unsigned int i = 0; i < ri->num_mols; ++i )
+		gsl_vector_set( x, i, invop( ri->nVec[i] ) );
+
+	gsl_multiroot_fsolver_set( solver, &func, x );
+
+	ri->nIter = 0;
+	do {
+		ri->nIter++;
+		status = gsl_multiroot_fsolver_iterate( solver );
+		if (status ) break;
+		status = gsl_multiroot_test_residual( 
+			solver->f, ri->convergenceCriterion);
+	} while (status == GSL_CONTINUE && ri->nIter < maxIter );
+
+	gsl_multiroot_fsolver_free( solver );
+	gsl_vector_free( x );
+	return status;
+}
+#endif
 
 void SteadyState::classifyState( const double* T )
 {
-    /* column_major trait is needed for fortran */
-    ublas::matrix<value_type_, ublas::column_major> J(numVarPools_, numVarPools_);
+#ifdef USE_GSL
+	// unsigned int nConsv = numVarPools_ - rank_;
+	gsl_matrix* J = gsl_matrix_calloc ( numVarPools_, numVarPools_ );
+	// double* yprime = new double[ numVarPools_ ];
+	// vector< double > yprime( numVarPools_, 0.0 );
+	// Generate an approximation to the Jacobean by generating small
+	// increments to each of the molecules in the steady state, one 
+	// at a time, and putting the resultant rate vector into a column
+	// of the J matrix.
+	// This needs a bit of heuristic to decide what is a 'small' increment.
+	// Use the CoInits for this. Stoichiometry shouldn't matter too much.
+	// I used the totals from consv rules earlier, but that can have 
+	// negative values.
+	double tot = 0.0;
+	Stoich* s = reinterpret_cast< Stoich* >( stoich_.eref().data() );
+	vector< double > nVec = LookupField< unsigned int, vector< double > >::get(
+		s->getKsolve(), "nVec", 0 );
+	for ( unsigned int i = 0; i < numVarPools_; ++i ) {
+		tot += nVec[i];
+	}
+	tot *= DELTA;
+	
+	vector< double > yprime( nVec.size(), 0.0 );
+	// Fill up Jacobian
+	for ( unsigned int i = 0; i < numVarPools_; ++i ) {
+		double orig = nVec[i];
+		if ( isNaN( orig ) ) {
+			cout << "Warning: SteadyState::classifyState: orig=nan\n";
+			solutionStatus_ = 2; // Steady state OK, eig failed
+			gsl_matrix_free ( J );
+			return;
+		}
+		if ( isNaN( tot ) ) {
+			cout << "Warning: SteadyState::classifyState: tot=nan\n";
+			solutionStatus_ = 2; // Steady state OK, eig failed
+			gsl_matrix_free ( J );
+			return;
+		}
+		nVec[i] = orig + tot;
 
-    double tot = 0.0;
-    Stoich* s = reinterpret_cast< Stoich* >( stoich_.eref().data() );
-    vector< double > nVec = LookupField< unsigned int, vector< double > >::get(
-                                s->getKsolve(), "nVec", 0 );
-    for ( unsigned int i = 0; i < numVarPools_; ++i )
-        tot += nVec[i];
+		pool_.updateRates( &nVec[0], &yprime[0] );
+		nVec[i] = orig;
 
-    tot *= DELTA;
+		// Assign the rates for each mol.
+		for ( unsigned int j = 0; j < numVarPools_; ++j ) {
+			gsl_matrix_set( J, i, j, yprime[j] );
+		}
+	}
 
-    vector< double > yprime( nVec.size(), 0.0 );
-    // Fill up Jacobian
-    for ( unsigned int i = 0; i < numVarPools_; ++i )
-    {
-        double orig = nVec[i];
-        if ( std::isnan( orig ) or std::isinf( orig ) )
-        {
-            cout << "Warning: SteadyState::classifyState: orig=nan\n";
-            solutionStatus_ = 2; // Steady state OK, eig failed
-            J.clear();
-            return;
-        }
-        if ( std::isnan( tot ) or std::isinf( tot ))
-        {
-            cout << "Warning: SteadyState::classifyState: tot=nan\n";
-            solutionStatus_ = 2; // Steady state OK, eig failed
-            J.clear();
-            return;
-        }
-        nVec[i] = orig + tot;
+	// Jacobian is now ready. Find eigenvalues.
+	gsl_vector_complex* vec = gsl_vector_complex_alloc( numVarPools_ );
+	gsl_eigen_nonsymm_workspace* workspace =
+		gsl_eigen_nonsymm_alloc( numVarPools_ );
+	int status = gsl_eigen_nonsymm( J, vec, workspace );
+	eigenvalues_.clear();
+	eigenvalues_.resize( numVarPools_, 0.0 );
+	if ( status != GSL_SUCCESS ) {
+		cout << "Warning: SteadyState::classifyState failed to find eigenvalues. Status = " <<
+			status << endl;
+		solutionStatus_ = 2; // Steady state OK, eig classification failed
+	} else { // Eigenvalues are ready. Classify state.
+		nNegEigenvalues_ = 0;
+		nPosEigenvalues_ = 0;
+		for ( unsigned int i = 0; i < numVarPools_; ++i ) {
+			gsl_complex z = gsl_vector_complex_get( vec, i );
+			double r = GSL_REAL( z );
+			nNegEigenvalues_ += ( r < -EPSILON );
+			nPosEigenvalues_ += ( r > EPSILON );
+			eigenvalues_[i] = r;
+			// We have a problem here because numVarPools_ usually > rank
+			// This means we have several zero eigenvalues.
+		}
 
-        pool_.updateRates( &nVec[0], &yprime[0] );
-        nVec[i] = orig;
+		if ( nNegEigenvalues_ == rank_ ) 
+			stateType_ = 0; // Stable
+		else if ( nPosEigenvalues_ == rank_ ) // Never see it.
+			stateType_ = 1; // Unstable
+		else  if (nPosEigenvalues_ == 1)
+			stateType_ = 2; // Saddle
+		else if ( nPosEigenvalues_ >= 2 )
+			stateType_ = 3; // putative oscillatory
+		else if ( nNegEigenvalues_ == ( rank_ - 1) && nPosEigenvalues_ == 0 )
+			stateType_ = 4; // one zero or unclassified eigenvalue. Messy.
+		else
+			stateType_ = 5; // Other
+	}
 
-        // Assign the rates for each mol.
-        for ( unsigned int j = 0; j < numVarPools_; ++j )
-        {
-            if( std::isnan( yprime[j] ) or std::isinf( yprime[j] ) )
-            {
-                cout << "Warning: Overflow/underflow. Can't continue " << endl;
-                solutionStatus_ = 2;
-                return;
-            }
-            J(i, j) = yprime[j];
-        }
-    }
-
-    // Jacobian is now ready. Find eigenvalues.
-    ublas::vector< std::complex< value_type_ > > eigenVec ( J.size1() );
-
-    ublas::matrix< std::complex<value_type_>, ublas::column_major >* vl, *vr;
-    vl = NULL; vr = NULL;
-
-    /*-----------------------------------------------------------------------------
-     *  INFO: Calling lapack routine geev to compute eigen vector of matrix J. 
-     *
-     *  Argument 3 and 4 are left- and right-eigenvectors. Since we do not need
-     *  them, they are set to NULL. Argument 2 holds eigen-vector and result is
-     *  copied to it (output ).
-     *-----------------------------------------------------------------------------*/
-    int status = lapack::geev( J, eigenVec, vl, vr, lapack::optimal_workspace() );
-
-    eigenvalues_.clear();
-    eigenvalues_.resize( numVarPools_, 0.0 );
-    if ( status != 0 )
-    {
-        cout << "Warning: SteadyState::classifyState failed to find eigenvalues. Status = " <<
-             status << endl;
-        solutionStatus_ = 2; // Steady state OK, eig classification failed
-    }
-    else     // Eigenvalues are ready. Classify state.
-    {
-        nNegEigenvalues_ = 0;
-        nPosEigenvalues_ = 0;
-        for ( unsigned int i = 0; i < numVarPools_; ++i )
-        {
-            std::complex<value_type> z = eigenVec[ i ];
-            double r = z.real();
-            nNegEigenvalues_ += ( r < -EPSILON );
-            nPosEigenvalues_ += ( r > EPSILON );
-            eigenvalues_[i] = r;
-            // We have a problem here because numVarPools_ usually > rank
-            // This means we have several zero eigenvalues.
-        }
-        if ( nNegEigenvalues_ == rank_ )
-            stateType_ = 0; // Stable
-        else if ( nPosEigenvalues_ == rank_ ) // Never see it.
-            stateType_ = 1; // Unstable
-        else  if (nPosEigenvalues_ == 1)
-            stateType_ = 2; // Saddle
-        else if ( nPosEigenvalues_ >= 2 )
-            stateType_ = 3; // putative oscillatory
-        else if ( nNegEigenvalues_ == ( rank_ - 1) && nPosEigenvalues_ == 0 )
-            stateType_ = 4; // one zero or unclassified eigenvalue. Messy.
-        else
-            stateType_ = 5; // Other
-    }
+	gsl_vector_complex_free( vec );
+	gsl_matrix_free ( J );
+	gsl_eigen_nonsymm_free( workspace );
+#endif
 }
 
-static bool isSolutionValid( const vector< double >& x )
+static bool isSolutionPositive( const vector< double >& x )
 {
-    for( auto v : x )
-    {
-        if ( std::isnan( v ) or std::isinf( v ) )
-        {
-            cout << "Warning: SteadyState iteration gave nan/inf concs\n";
-            return false;
-        }
-        else if( v < 0.0 )
-        {
-            cout << "Warning: SteadyState iteration gave negative concs\n";
-            return false;
-        }
-    }
-    return true;
+	for ( vector< double >::const_iterator 
+					i = x.begin(); i != x.end(); ++i ) {
+		if ( *i < 0.0 ) {
+			cout << "Warning: SteadyState iteration gave negative concs\n";
+			return false;
+		}
+	}
+	return true;
 }
 
 /**
@@ -734,230 +797,231 @@ static bool isSolutionValid( const vector< double >& x )
  */
 void SteadyState::settle( bool forceSetup )
 {
+#ifdef USE_GSL
+	gsl_set_error_handler_off();
+	
+	if ( !isInitialized_ ) {
+		cout << "Error: SteadyState object has not been initialized. No calculations done\n";
+		return;
+	}
+	if ( forceSetup || isSetup_ == 0 ) {
+		setupSSmatrix();
+	}
 
-    if ( !isInitialized_ )
-    {
-        cout << "Error: SteadyState object has not been initialized. No calculations done\n";
-        return;
-    }
+	// Setting up matrices and vectors for the calculation.
+	unsigned int nConsv = numVarPools_ - rank_;
+	double * T = (double *) calloc( nConsv, sizeof( double ) );
 
-    if ( forceSetup || isSetup_ == 0 )
-        setupSSmatrix();
-
-    // Setting up matrices and vectors for the calculation.
-    unsigned int nConsv = numVarPools_ - rank_;
-    double * T = (double *) calloc( nConsv, sizeof( double ) );
-
-    // Setting up matrices and vectors for the calculation.
-    Id ksolve = Field< Id >::get( stoich_, "ksolve" );
-
-    auto ss = NonlinearSystem( numVarPools_ );
-    ss.ri.rank = rank_;
-    ss.ri.num_reacs = nReacs_;
-    ss.ri.num_mols = numVarPools_;
-    ss.ri.T = T;
-    ss.ri.Nr = Nr_;
-    ss.ri.gamma = gamma_;
-    ss.ri.pool = &pool_;
-    ss.ri.nVec = LookupField< unsigned int, vector< double > >::get(
-             ksolve,"nVec", 0 
-             );
-    ss.ri.convergenceCriterion = convergenceCriterion_;
-
-    // This gives the starting point for finding the solution.
-    vector<value_type_> init( numVarPools_ );
-
-    // Instead of starting at sqrt( x ), 
-    for( size_t i = 0; i < numVarPools_; ++i )
-        init[i] = max( 0.0, sqrt(ss.ri.nVec[i]) );
-
-    ss.initialize<vector<value_type_>>( init );
-
-    // Fill up boundary condition values
-    if ( reassignTotal_ )   // The user has defined new conservation values.
-    {
-        for (size_t i = 0; i < nConsv; ++i )
-            T[i] = total_[i];
-        reassignTotal_ = 0;
-    }
-    else
-    {
-        for ( size_t i = 0; i < nConsv; ++i )
-            for ( size_t j = 0; j < numVarPools_; ++j )
-                T[i] += gamma_( i, j ) * ss.ri.nVec[ j ];
-        total_.assign( T, T + nConsv );
-    }
-
-    vector< double > repair( numVarPools_, 0.0 );
-
-    for ( unsigned int j = 0; j < numVarPools_; ++j )
-        repair[j] = ss.ri.nVec[j];
+	unsigned int i, j;
 
 
-    int status = 1;
+	Id ksolve = Field< Id >::get( stoich_, "ksolve" );
+	struct reac_info ri;
+	ri.rank = rank_;
+	ri.num_reacs = nReacs_;
+	ri.num_mols = numVarPools_;
+	ri.T = T;
+	ri.Nr = Nr_;
+	ri.gamma = gamma_;
+	ri.pool = &pool_;
+	ri.nVec = 
+			LookupField< unsigned int, vector< double > >::get(
+			ksolve,"nVec", 0 );
+	ri.convergenceCriterion = convergenceCriterion_;
 
-    // Find roots . If successful, set status to 0.
-    if( ss.find_roots_gnewton( ) )
-        status = 0;
+	// Fill up boundary condition values
+	if ( reassignTotal_ ) { // The user has defined new conservation values.
+		for ( i = 0; i < nConsv; ++i )
+			T[i] = total_[i];
+		reassignTotal_ = 0;
+	} else {
+		for ( i = 0; i < nConsv; ++i )
+			for ( j = 0; j < numVarPools_; ++j )
+				T[i] += gsl_matrix_get( gamma_, i, j ) * ri.nVec[ j ];
+		total_.assign( T, T + nConsv );
+	}
 
-    if ( status == 0 && isSolutionValid( ss.ri.nVec ) )
-    {
-        solutionStatus_ = 0; // Good solution
+	vector< double > repair( numVarPools_, 0.0 );
+	for ( unsigned int j = 0; j < numVarPools_; ++j )
+		repair[j] = ri.nVec[j];
 
-        LookupField< unsigned int, vector< double > >::set(
-            ksolve, "nVec", 0, ss.ri.nVec 
-            );
-        // Check what we set
-        auto t = LookupField< unsigned int, vector< double > >::get(
-             ksolve,"nVec", 0 
-             );
+	int status = iterate( gsl_multiroot_fsolver_hybrids, &ri, maxIter_ );
+	if ( status ) // It failed. Fall back with the Newton method
+		status = iterate( gsl_multiroot_fsolver_dnewton, &ri, maxIter_ );
+	status_ = string( gsl_strerror( status ) );
+	nIter_ = ri.nIter;
+	if ( status == GSL_SUCCESS && isSolutionPositive( ri.nVec ) ) {
+		solutionStatus_ = 0; // Good solution
+		LookupField< unsigned int, vector< double > >::set(
+			ksolve,"nVec", 0, ri.nVec );
+		classifyState( T );
+	} else {
+		cout << "Warning: SteadyState iteration failed, status = " <<
+			status_ << ", nIter = " << nIter_ << endl;
+		// Repair the mess
+		for ( unsigned int j = 0; j < numVarPools_; ++j )
+			ri.nVec[j] = repair[j];
+		solutionStatus_ = 1; // Steady state failed.
+		LookupField< unsigned int, vector< double > >::set(
+			ksolve,"nVec", 0, ri.nVec );
+	}
 
-        //classifyState( T );
-    }
-    else
-    {
-        cout << "Warning: SteadyState iteration failed, status = " <<
-             status_ << ", nIter = " << ss.ri.nIter << endl;
-
-        for ( unsigned int j = 0; j < numVarPools_; j++ )
-            ss.ri.nVec[j] = repair[j];
-
-        solutionStatus_ = 1; // Steady state failed.
-        LookupField< unsigned int, vector< double > >::set(
-            ksolve, "nVec", 0, ss.ri.nVec 
-            );
-
-    }
-
-    // Clean up.
-    free( T );
+	// Clean up.
+	free( T );
+#endif
 }
 
+// Long section here of functions using GSL
+#ifdef USE_GSL
+int ss_func( const gsl_vector* x, void* params, gsl_vector* f )
+{
+	struct reac_info* ri = (struct reac_info *)params;
+	// Stoich* s = reinterpret_cast< Stoich* >( ri->stoich.eref().data() );
+	int num_consv = ri->num_mols - ri->rank;
 
-/*-----------------------------------------------------------------------------
- *  These functions computes rank of a matrix.
- *-----------------------------------------------------------------------------*/
+	for ( unsigned int i = 0; i < ri->num_mols; ++i ) {
+		double temp = op( gsl_vector_get( x, i ) );
+		if ( isNaN( temp ) || isInfinity( temp ) ) { 
+			return GSL_ERANGE;
+		} else {
+			ri->nVec[i] = temp;
+		}
+	}
+	vector< double > vels;
+	ri->pool->updateReacVelocities( &ri->nVec[0], vels );
+	assert( vels.size() == static_cast< unsigned int >( ri->num_reacs ) );
+
+	// y = Nr . v
+	// Note that Nr is row-echelon: diagonal and above.
+	for ( int i = 0; i < ri->rank; ++i ) {
+		double temp = 0;
+		for ( int j = i; j < ri->num_reacs; ++j )
+			temp += gsl_matrix_get( ri->Nr, i, j ) * vels[j];
+		gsl_vector_set( f, i, temp );
+	}
+
+	// dT = gamma.S - T
+	for ( int i = 0; i < num_consv; ++i ) {
+		double dT = - ri->T[i];
+		for ( unsigned int j = 0; j < ri->num_mols; ++j )
+			dT += gsl_matrix_get( ri->gamma, i, j) * 
+				op( gsl_vector_get( x, j ) );
+
+		gsl_vector_set( f, i + ri->rank, dT );
+	}
+
+	return GSL_SUCCESS;
+}
 
 /**
- * @brief Swap row r1 and r2.
- *
- * @param mat Matrix input
- * @param r1 index of row 1
- * @param r2 index of row 2
+ * eliminateRowsBelow:
+ * Eliminates leftmost entry of all rows below 'start'.
+ * Returns the row index of the row which has the leftmost nonzero
+ * entry. If this sticks out beyond numReacs, then the elimination is
+ * complete, and it returns a zero to indicate this.
+ * In leftCol it returns the column # of this leftmost nonzero entry.
+ * Zeroes out anything below EPSILON.
  */
-void swapRows( ublas::matrix< value_type_ >& mat, unsigned int r1, unsigned int r2)
+void eliminateRowsBelow( gsl_matrix* U, int start, int leftCol )
 {
-    ublas::vector<value_type> temp( mat.size2() );
-    for (size_t i = 0; i < mat.size2(); i++) 
-    {
-        temp[i] = mat(r1, i );
-        mat(r1, i ) = mat(r2, i );
-    }
-
-    for (size_t i = 0; i < mat.size2(); i++) 
-        mat(r2, i) = temp[i]; 
+	int numMols = U->size1;
+	double pivot = gsl_matrix_get( U, start, leftCol );
+	assert( fabs( pivot ) > SteadyState::EPSILON );
+	for ( int i = start + 1; i < numMols; ++i ) {
+		double factor = gsl_matrix_get( U, i, leftCol );
+		if ( fabs ( factor ) > SteadyState::EPSILON ) {
+			factor = factor / pivot;
+			for ( size_t j = leftCol + 1; j < U->size2; ++j ) {
+				double x = gsl_matrix_get( U, i, j );
+				double y = gsl_matrix_get( U, start, j );
+				x -= y * factor;
+				if ( fabs( x ) < SteadyState::EPSILON )
+					x = 0.0;
+				gsl_matrix_set( U, i, j, x  );
+			}
+		}
+		gsl_matrix_set( U, i, leftCol, 0.0 ); // Cleaning up.
+	}
 }
 
-
-int reorderRows( ublas::matrix< value_type_ >& U, int start, int leftCol )
+/**
+ * reorderRows:
+ * Finds the leftmost row beginning from start, ignoring everything to the
+ * left of leftCol. Puts this row at 'start', swapping with the original.
+ * Assumes that the matrix is set up as [N I]. 
+ * Returns the new value of leftCol
+ * If there are no appropriate rows, returns numReacs.
+ */
+int reorderRows( gsl_matrix* U, int start, int leftCol )
 {
-    int leftMostRow = start;
-    int numReacs = U.size2() - U.size1();
-    int newLeftCol = numReacs;
-    for ( size_t i = start; i < U.size1(); ++i )
-    {
-        for ( int j = leftCol; j < numReacs; ++j )
-        {
-            if ( fabs( U(i,j )) > SteadyState::EPSILON )
-            {
-                if ( j < newLeftCol )
-                {
-                    newLeftCol = j;
-                    leftMostRow = i;
-                }
-                break;
-            }
-        }
-    }
-
-    if ( leftMostRow != start )   // swap them.
-        swapRows( U, start, leftMostRow );
-
-    return newLeftCol;
+	int leftMostRow = start;
+	int numReacs = U->size2 - U->size1;
+	int newLeftCol = numReacs;
+	for ( size_t i = start; i < U->size1; ++i ) {
+		for ( int j = leftCol; j < numReacs; ++j ) {
+			if ( fabs( gsl_matrix_get( U, i, j ) ) > SteadyState::EPSILON ){
+				if ( j < newLeftCol ) {
+					newLeftCol = j;
+					leftMostRow = i;
+				}
+				break;
+			}
+		}
+	}
+	if ( leftMostRow != start ) { // swap them.
+		gsl_matrix_swap_rows( U, start, leftMostRow );
+	}
+	return newLeftCol;
 }
 
-void eliminateRowsBelow( ublas::matrix< value_type_ >& U, int start, int leftCol )
+/**
+ * Does a simple gaussian decomposition. Assumes U has nice clean numbers
+ * so I can apply a generous EPSILON to zero things out.
+ * Assumes that the U matrix is the N matrix padded out by an identity 
+ * matrix on the right.
+ * Returns rank.
+ */
+int myGaussianDecomp( gsl_matrix* U )
 {
-    int numMols = U.size1();
-    double pivot = U( start, leftCol );
-    assert( fabs( pivot ) > SteadyState::EPSILON );
-    for ( int i = start + 1; i < numMols; ++i )
-    {
-        double factor = U(i, leftCol);
-        if( fabs ( factor ) > SteadyState::EPSILON )
-        {
-            factor = factor / pivot;
-            for ( size_t j = leftCol + 1; j < U.size2(); ++j )
-            {
-                double x = U(i,j);
-                double y = U( start, j );
-                x -= y * factor;
-                if ( fabs( x ) < SteadyState::EPSILON )
-                    x = 0.0;
-                U( i, j ) = x;
-            }
-        }
-        U(i, leftCol) = 0.0;
-    }
+	int numMols = U->size1;
+	int numReacs = U->size2 - numMols;
+	int i;
+	// Start out with a nonzero entry at 0,0
+	int leftCol = reorderRows( U, 0, 0 );
+
+	for ( i = 0; i < numMols - 1; ++i ) {
+		eliminateRowsBelow( U, i, leftCol );
+		leftCol = reorderRows( U, i + 1, leftCol );
+		if ( leftCol == numReacs )
+			break;
+	}
+	return i + 1;
 }
 
-unsigned int rankUsingBoost( ublas::matrix<value_type_>& U )
+//////////////////////////////////////////////////////////////////
+// Utility functions for doing scans for steady states
+//////////////////////////////////////////////////////////////////
+
+void recalcTotal( vector< double >& tot, gsl_matrix* g, const double* S )
 {
-    int numMols = U.size1();
-    int numReacs = U.size2() - numMols;
-    int i;
-    // Start out with a nonzero entry at 0,0
-    int leftCol = reorderRows( U, 0, 0 );
-
-    for ( i = 0; i < numMols - 1; ++i )
-    {
-        eliminateRowsBelow( U, i, leftCol );
-        leftCol = reorderRows( U, i + 1, leftCol );
-        if ( leftCol == numReacs )
-            break;
-    }
-    return i + 1;
+	assert( g->size1 == tot.size() );
+	for ( unsigned int i = 0; i < g->size1; ++i ) {
+		double t = 0.0;
+		for ( unsigned int j = 0; j < g->size2; ++j )
+			t += gsl_matrix_get( g, i, j ) * S[j];
+		tot[ i ] = t;
+	}
 }
-
+#endif // end of long section of functions using GSL
 
 static bool checkAboveZero( const vector< double >& y )
 {
-    for ( vector< double >::const_iterator
-            i = y.begin(); i != y.end(); ++i )
-    {
-        if ( *i < 0.0 )
-            return false;
-    }
-    return true;
-}
-
-/**
- * @brief Utility funtion to doing scans for steady states.
- *
- * @param tot
- * @param g
- * @param S
- */
-void recalcTotal( vector< double >& tot, ublas::matrix<double>& g, const double* S )
-{
-    assert( g.size1() == tot.size() );
-    for ( size_t i = 0; i < g.size1(); ++i ) 
-    {
-        double t = 0.0;
-        for ( unsigned int j = 0; j < g.size2(); ++j )
-            t += g( i, j ) * S[j];
-        tot[ i ] = t;
-    }
+	for ( vector< double >::const_iterator
+			i = y.begin(); i != y.end(); ++i ) {
+		if ( *i < 0.0 )
+			return false;
+	}
+	return true;
 }
 
 /**
@@ -966,102 +1030,94 @@ void recalcTotal( vector< double >& tot, ublas::matrix<double>& g, const double*
  */
 void SteadyState::randomizeInitialCondition( const Eref& me )
 {
-    Id ksolve = Field< Id >::get( stoich_, "ksolve" );
-    vector< double > nVec =
-        LookupField< unsigned int, vector< double > >::get(
-                ksolve,"nVec", 0 );
-    int numConsv = total_.size();
-    recalcTotal( total_, gamma_, &nVec[0] );
-    // The reorderRows function likes to have an I matrix at the end of
-    // numVarPools_, so we provide space for it, although only its first
-    // column is used for the total vector.
-    ublas::matrix<double> U(numConsv, numVarPools_ + numConsv, 0);
+#ifdef USE_GSL
+	Id ksolve = Field< Id >::get( stoich_, "ksolve" );
+	vector< double > nVec = 
+			LookupField< unsigned int, vector< double > >::get(
+			ksolve,"nVec", 0 );
+	int numConsv = total_.size();
+	recalcTotal( total_, gamma_, &nVec[0] );
+	// The reorderRows function likes to have an I matrix at the end of
+	// numVarPools_, so we provide space for it, although only its first
+	// column is used for the total vector.
+	gsl_matrix* U = gsl_matrix_calloc ( numConsv, numVarPools_ + numConsv );
+	for ( int i = 0; i < numConsv; ++i ) {
+		for ( unsigned int j = 0; j < numVarPools_; ++j ) {
+			gsl_matrix_set( U, i, j, gsl_matrix_get( gamma_, i, j ) );
+		}
+		gsl_matrix_set( U, i, numVarPools_, total_[i] );
+	}
+	// Do the forward elimination
+	int rank = myGaussianDecomp( U );
+	assert( rank = numConsv );
 
-    for ( int i = 0; i < numConsv; ++i )
-    {
-        for ( unsigned int j = 0; j < numVarPools_; ++j )
-            U(i, j) = gamma_(i, j);
+	vector< double > eliminatedTotal( numConsv, 0.0 );
+	for ( int i = 0; i < numConsv; ++i ) {
+		eliminatedTotal[i] = gsl_matrix_get( U, i, numVarPools_ );
+	}
 
-        U(i, numVarPools_) = total_[i];
-    }
-    // Do the forward elimination
-    int rank = rankUsingBoost( U );
-    assert( rank = numConsv );
+	// Put Find a vector Y that fits the consv rules.
+	vector< double > y( numVarPools_, 0.0 );
+	do {
+		fitConservationRules( U, eliminatedTotal, y );
+	} while ( !checkAboveZero( y ) );
 
-    vector< double > eliminatedTotal( numConsv, 0.0 );
-    for ( int i = 0; i < numConsv; ++i )
-        eliminatedTotal[i] = U( i, numVarPools_ );
+	// Sanity check. Try the new vector with the old gamma and tots
+	for ( int i = 0; i < numConsv; ++i ) {
+		double tot = 0.0;
+		for ( unsigned int j = 0; j < numVarPools_; ++j ) {
+			tot += y[j] * gsl_matrix_get( gamma_, i, j );
+		}
+		assert( fabs( tot - total_[i] ) / tot < EPSILON );
+	}
 
-    // Put Find a vector Y that fits the consv rules.
-    vector< double > y( numVarPools_, 0.0 );
-    do
-    {
-        fitConservationRules( U, eliminatedTotal, y );
-    }
-    while ( !checkAboveZero( y ) );
-
-    // Sanity check. Try the new vector with the old gamma and tots
-    for ( int i = 0; i < numConsv; ++i )
-    {
-        double tot = 0.0;
-        for ( unsigned int j = 0; j < numVarPools_; ++j )
-        {
-            tot += y[j] * gamma_( i, j );
-        }
-        assert( fabs( tot - total_[i] ) / tot < EPSILON );
-    }
-
-    // Put the new values into S.
-    // cout << endl;
-    for ( unsigned int j = 0; j < numVarPools_; ++j )
-    {
-        nVec[j] = y[j];
-        // cout << y[j] << " ";
-    }
-    LookupField< unsigned int, vector< double > >::set(
-        ksolve,"nVec", 0, nVec );
+	// Put the new values into S.
+	// cout << endl;
+	for ( unsigned int j = 0; j < numVarPools_; ++j ) {
+		nVec[j] = y[j];
+		// cout << y[j] << " ";
+	}
+	LookupField< unsigned int, vector< double > >::set(
+			ksolve,"nVec", 0, nVec );
+#endif
 }
 
 /**
  * This does the actual work of generating random numbers and
  * making sure they fit.
  */
-void SteadyState::fitConservationRules(
-    ublas::matrix<double>& U, const vector< double >& eliminatedTotal,
-    vector< double >&y
-)
+#ifdef USE_GSL
+void SteadyState::fitConservationRules( 
+	gsl_matrix* U, const vector< double >& eliminatedTotal,
+		vector< double >&y
+	)
 {
-    int numConsv = total_.size();
-    int lastJ = numVarPools_;
-    for ( int i = numConsv - 1; i >= 0; --i )
-    {
-        for ( unsigned int j = 0; j < numVarPools_; ++j )
-        {
-            double g = U( i, j );
-            if ( fabs( g ) > EPSILON )
-            {
-                // double ytot = calcTot( g, i, j, lastJ );
-                double ytot = 0.0;
-                for ( int k = j; k < lastJ; ++k )
-                {
-                    y[k] = dist( rng );
-                    ytot += y[k] * U( i, k );
-                }
-                assert( fabs( ytot ) > EPSILON );
-                double lastYtot = 0.0;
-                for ( unsigned int k = lastJ; k < numVarPools_; ++k )
-                {
-                    lastYtot += y[k] * U( i, k );
-                }
-                double scale = ( eliminatedTotal[i] - lastYtot ) / ytot;
-                for ( int k = j; k < lastJ; ++k )
-                {
-                    y[k] *= scale;
-                }
-                lastJ = j;
-                break;
-            }
-        }
-    }
+	int numConsv = total_.size();
+	int lastJ = numVarPools_;
+	for ( int i = numConsv - 1; i >= 0; --i ) {
+		for ( unsigned int j = 0; j < numVarPools_; ++j ) {
+			double g = gsl_matrix_get( U, i, j );
+			if ( fabs( g ) > EPSILON ) {
+				// double ytot = calcTot( g, i, j, lastJ );
+				double ytot = 0.0;
+				for ( int k = j; k < lastJ; ++k ) {
+					y[k] = mtrand();
+					ytot += y[k] * gsl_matrix_get( U, i, k );
+				}
+				assert( fabs( ytot ) > EPSILON );
+				double lastYtot = 0.0;
+				for ( unsigned int k = lastJ; k < numVarPools_; ++k ) {
+					lastYtot += y[k] * gsl_matrix_get( U, i, k );
+				}
+				double scale = ( eliminatedTotal[i] - lastYtot ) / ytot;
+				for ( int k = j; k < lastJ; ++k ) {
+					y[k] *= scale;
+				}
+				lastJ = j;
+				break;
+			}
+		}
+	}
 }
 
+#endif

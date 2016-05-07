@@ -10,11 +10,9 @@
 #ifndef _RANDSPIKE_H
 #define _RANDSPIKE_H
 
-#include "global.h"
-
 class RandSpike
 {
-public:
+  public:
     RandSpike();
 
     //////////////////////////////////////////////////////////////////

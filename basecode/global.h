@@ -9,12 +9,13 @@
 **********************************************************************/
 
 
-#ifndef  __MOOSE_GLOBAL_INC_
-#define  __MOOSE_GLOBAL_INC_
+#ifndef  GLOBAL_INC
+#define  GLOBAL_INC
 
+#include "header.h"
+#include "../external/debug/simple_test.hpp"
 #include <ctime>
 #include <map>
-#include <sstream>
 
 
 using namespace std;
@@ -35,7 +36,6 @@ extern stringstream errorSS;
  */
 extern unsigned int totalTests;
 
-
 /** @brief This macro prints the output of a test function onto console.  It
  * also keep track of index of the current test. The index of test is
  * automatically computed by increamenting the counter.
@@ -44,6 +44,12 @@ extern unsigned int totalTests;
 #define TEST_BEGIN cout << endl << "Test(" << totalTests << "): " << SIMPLE_CURRENT_FUNCTION;
 #define TEST_END totalTests++; \
     cout << std::right <<  setw(20) << "test of " << SIMPLE_CURRENT_FUNCTION << " finished."; 
+
+
+/*-----------------------------------------------------------------------------
+ *  Global clock in moose.
+ *-----------------------------------------------------------------------------*/
+
 
 /*-----------------------------------------------------------------------------
  *  Global functions in namespace moose
@@ -90,7 +96,7 @@ namespace moose
      *
      * @return 0 if path is all-right. Negative number if path is not OK.
      */
-    int checkPath( const string& path );
+     int checkPath( const string& path );
 
     /** @brief Append pathB to pathA and return the result. 
      *
@@ -175,4 +181,4 @@ namespace moose
     string moosePathToUserPath( string path );
 }
 
-#endif   /* ----- #ifndef __MOOSE_GLOBAL_INC_  ----- */
+#endif   /* ----- #ifndef GLOBAL_INC  ----- */

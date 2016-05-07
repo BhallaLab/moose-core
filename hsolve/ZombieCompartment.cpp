@@ -213,10 +213,3 @@ void ZombieCompartment::vSetSolver( const Eref& e , Id hsolve )
 	}
 	hsolve_ = reinterpret_cast< HSolve* >( hsolve.eref().data() );
 }
-
-#ifdef USE_BOOST
-double ZombieCompartment::mtrand( void )
-{
-    return dist(rng);
-}
-#endif

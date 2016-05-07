@@ -11,6 +11,7 @@ OBJ = \
     src/muParserDLL.o \
     src/muParserError.o \
     src/muParserInt.o \
+    src/muParserTest.o \
     src/muParserTokenReader.o \
 
 HEADERS = \

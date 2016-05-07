@@ -37,12 +37,11 @@ double KinSparseMatrix::computeRowRate(
 	const int* end = entry + numEntries;
 
 	double ret = 0.0;
-	for ( const int* i = entry; i != end; ++i ) 
-        {
-            ret += *i * v[ *colIndex++ ];
+	for ( const int* i = entry; i != end; ++i ) {
+		ret += *i * v[ *colIndex++ ];
 	}
 
-#if 0
+/*
 	for ( unsigned int i = 0; i < numEntries; ++i ) {
 		ret += entry[i] * v[ colIndex[i] ];
 
@@ -57,9 +56,8 @@ double KinSparseMatrix::computeRowRate(
 	for ( i = N_.begin() + rs; i != end; i++ )
 		ret += *i * v[ *j++ ];
 
-	assert ( !( ret !<>= 0.0 ) );
-#endif
-
+	// assert ( !( ret !<>= 0.0 ) );
+	*/
 	assert ( !( std::isnan( ret ) ) );
 	return ret;
 }

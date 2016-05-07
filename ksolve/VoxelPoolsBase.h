@@ -10,23 +10,16 @@
 #ifndef _VOXEL_POOLS_BASE_H
 #define _VOXEL_POOLS_BASE_H
 
-#include "global.h"
-
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
-
 /**
  * This is the base class for voxels used in reac-diffusion systems.
  * Each voxel manages all the molecular pools that live in it. This
  * is the S_ and Sinit_ vectors.
  * Additionally, the last set of entries in S_ and Sinit_ refer to the
- * proxy pools that participate in cross-node reactions, but are really
+ * proxy pools that participate in cross-node reactions, but are really 
  * located on other compartments.
  */
-
-class Stoich;
 class RateTerm;
-
+class Stoich;
 class VoxelPoolsBase
 {
 public:

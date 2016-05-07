@@ -15,6 +15,7 @@
 #include "SynHandlerBase.h"
 #include "SimpleSynHandler.h"
 #include "../shell/Shell.h"
+#include "../randnum/randnum.h"
 
 
 // This tests stuff without using the messaging.

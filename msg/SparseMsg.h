@@ -10,11 +10,6 @@
 #ifndef _SPARSE_MSG_H
 #define _SPARSE_MSG_H
 
-#include "global.h"
-
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
-
 /**
  * This is a parallelized sparse message.
  * It is a general message type optimized for sparse matrix like
@@ -28,7 +23,7 @@
  * equivalent of the original sparse matrix, but using only the appropriate
  * RNG seed.
  *
- * A typical case is from an array of IntFire objects to an array of
+ * A typical case is from an array of IntFire objects to an array of 
  * Synapses, which are array fields of IntFire objects.
  * The sparse connectivity maps between the source IntFire and target
  * Synapses.
@@ -40,7 +35,7 @@
  * any two IntFire objects.
  *
  * It is optimized for input coming on Element e1, and going to Element e2.
- * If you expect any significant backward data flow, please use
+ * If you expect any significant backward data flow, please use 
  * BiSparseMsg.
  * It can be modified after creation to add or remove message entries.
  */

@@ -3,7 +3,8 @@
  *
  *       Filename:  global.cpp
  *
- *    Description:  Some global declarations.
+ *    Description:  It contains global variables to track no of test run and
+ *    running performance of moose basecode.
  *
  *        Version:  1.0
  *        Created:  Tuesday 29 April 2014 10:18:35  IST
@@ -17,9 +18,9 @@
  */
 
 #include "global.h"
+#include "../external/debug/simple_logger.hpp"
 #include <numeric>
 #include <random>
-
 
 /*-----------------------------------------------------------------------------
  *  This variable keep track of how many tests have been performed.
@@ -29,10 +30,6 @@
 unsigned int totalTests = 0;
 
 stringstream errorSS;
-std::random_device rd;
-
-
-bool isRNGInitialized = false;
 
 clock_t simClock = clock();
 
@@ -41,7 +38,8 @@ extern string joinPath( string pathA, string pathB);
 extern string fixPath( string path);
 extern string dumpStats( int  );
 
-
+/* Logger */
+SimpleLogger logger;
 
 namespace moose {
 
@@ -191,4 +189,5 @@ namespace moose {
         sprintf(buffer, "%.17g", x );
         return string( buffer );
     }
+
 }

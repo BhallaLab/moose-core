@@ -11,11 +11,6 @@
 #ifndef _NEURON_H
 #define _NEURON_H
 
-#include "global.h"
-
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
-
 /**
  * The Neuron class to hold the Compartment class elements.
  */
@@ -162,6 +157,6 @@ private:
 
 };
 
-//
+// 
 
 #endif // 

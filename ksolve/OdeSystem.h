@@ -10,27 +10,25 @@
 #ifndef _ODE_SYSTEM_H
 #define _ODE_SYSTEM_H
 
-class BoostSys;
-
 class OdeSystem {
-    public:
-        OdeSystem()
-            : method( "rk54" ),
-            initStepSize( 1 ),
-            epsAbs( 1e-6 ),
-            epsRel( 1e-6 )
-    {;}
+	public:
+		OdeSystem()
+				: method( "rk5" ),
+					initStepSize( 1 ),
+					epsAbs( 1e-6 ),
+					epsRel( 1e-6 )
+		{;}
 
-        string method;
-
-#ifdef USE_BOOST
-        BoostSys* boostSys;
+		string method;
+		// GSL stuff
+#ifdef USE_GSL
+		gsl_odeiv2_system gslSys;
+		const gsl_odeiv2_step_type* gslStep;
 #endif
+		double initStepSize;
 
-        double initStepSize;
-
-        double epsAbs; // Absolute error
-        double epsRel; // Relative error
+		double epsAbs; // Absolute error
+		double epsRel; // Relative error
 };
 
 #endif // _ODE_SYSTEM_H

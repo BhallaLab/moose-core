@@ -316,8 +316,7 @@ double MarkovSolverBase::getInvDy() const
 
 Vector* MarkovSolverBase::bilinearInterpolate( ) const 
 {
-	bool isEndOfX = false;
-        bool isEndOfY = false;
+	bool isEndOfX, isEndOfY;
 
 	unsigned int xIndex = 
 		static_cast< unsigned int >( ( Vm_ - xMin_ ) * invDx_ );
@@ -342,13 +341,7 @@ Vector* MarkovSolverBase::bilinearInterpolate( ) const
 	Matrix* expQ01;
 	Matrix* expQ10;
 	Matrix* expQ11;
-
-        Vector _state00, _state01, _state10, _state11, _result;
 	Vector *state00, *state01, *state10, *state11, *result;
-
-        // Initialize to supress warnings.
-        state00 = &_state00; state11 = &_state11; 
-        state10 = &_state10; state01 = &_state01;
 
 	state00 = vecMatMul( &state_, expQ00 );
 	if ( isEndOfX ) 

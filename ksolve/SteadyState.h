@@ -10,15 +10,10 @@
 
 #ifndef _STEADYSTATE_H
 #define _STEADYSTATE_H
-
-#include "global.h"
-#include <boost/numeric/ublas/matrix.hpp>
-#include "BoostSys.h"
-
 class SteadyState
 {
 #ifdef DO_UNIT_TESTS
-    friend void testSteadyState();
+	friend void testSteadyState();
 #endif
 public:
     SteadyState();
@@ -129,5 +124,4 @@ private:
 };
 
 extern const Cinfo* initSteadyStateCinfo();
-
 #endif // _STEADYSTATE_H

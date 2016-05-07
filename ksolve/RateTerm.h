@@ -15,7 +15,6 @@ double assignRates( RateCalculation& r )
 }
 */
 #include "../utility/numutil.h"
-
 class RateTerm
 {
 	public:

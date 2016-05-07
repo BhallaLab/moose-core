@@ -10,16 +10,10 @@
 
 #ifndef _ZOMBIE_COMPARTMENT_H
 #define _ZOMBIE_COMPARTMENT_H
-
-#include "global.h"
-
 #include "header.h"
 #include "ElementValueFinfo.h"
 #include "../external/debug/print_function.hpp"
-
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
-
+#include "../randnum/randnum.h"
 #include "../biophysics/CompartmentBase.h"
 #include "../biophysics/Compartment.h"
 #include "HinesMatrix.h"
@@ -138,8 +132,6 @@ public:
     //////////////////////////////////////////////////////////////////
     // utility funcs
     //////////////////////////////////////////////////////////////////
-    double mtrand( void );
-
 private:
     HSolve* hsolve_;
 
