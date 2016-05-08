@@ -276,11 +276,9 @@ void Table::reinit( const Eref& e, ProcPtr p )
     input_ = 0.0;
     vec().resize( 0 );
     lastTime_ = 0;
-
     vector< double > ret;
     requestOut()->send( e, &ret );
     vec().insert( vec().end(), ret.begin(), ret.end() );
-
 
     if( useStreamer_ )
     {

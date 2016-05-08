@@ -91,7 +91,7 @@ void StreamerBase::writeToCSVFile( const string& filepath, const string& openmod
             fopen( filepath.c_str(), openmode.c_str() ), &fclose 
             );
 
-    if( ! fp )
+    if( fp == nullptr )
     {
         LOG( moose::warning, "Failed to open " << filepath );
         return;

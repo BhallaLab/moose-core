@@ -146,12 +146,14 @@ Streamer& Streamer::operator=( const Streamer& st )
 
 Streamer::~Streamer()
 {
+    cleanUp();
+}
+
+void Streamer::cleanUp( void )
+{
     /*  Write the left-overs. */
     zipWithTime( data_, currTime_ );
     StreamerBase::writeToOutFile( outfilePath_, format_, "a", data_, columns_ );
-    for( auto t : tables_ )
-        t->clearVec();
-    data_.clear();
 }
 
 /**

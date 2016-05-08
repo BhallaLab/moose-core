@@ -39,6 +39,9 @@ public:
 
     Streamer& operator=( const Streamer& st );
 
+    /* Cleaup before quitting */
+    void cleanUp( void );
+
     string getOutFilepath( void ) const;
     void setOutFilepath( string path );
 

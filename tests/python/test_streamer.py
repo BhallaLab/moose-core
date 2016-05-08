@@ -99,14 +99,15 @@ def test( ):
     moose.reinit( )
     print( '[INFO] Running for 57 seconds' )
     moose.start( 57 )
+    outfile = st.outfile
+    moose.quit() # Otherwise Streamer won't flush the rest of entries.
 
-    time.sleep( 0.1 )
     # Now read the table and verify that we have written
-    print(( '[INFO] Reading file %s' % st.outfile ))
-    data = np.genfromtxt(st.outfile, skip_header=1 )
+    print( '[INFO] Reading file %s' % outfile )
+    data = np.loadtxt(outfile, skiprows=1 )
     # Total rows should be 58 (counting zero as well).
-    assert data.shape == (58,4), data.shape
     print(data)
+    assert data.shape >= (58,4), data.shape
     print( '[INFO] Test 2 passed' )
 
 def main( ):
