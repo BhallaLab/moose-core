@@ -102,6 +102,11 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 
 ########################### COMPILER MACROS #####################################
 
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG( "-std=c++11" COMPILER_SUPPORTS_CXX11 )
+CHECK_CXX_COMPILER_FLAG( "-std=c++0x" COMPILER_SUPPORTS_CXX0X )
+CHECK_CXX_COMPILER_FLAG( "-Wno-strict-aliasing" COMPILER_WARNS_STRICT_ALIASING )
+
 # Turn warning to error: Not all of the options may be supported on all
 # versions of compilers. be careful here.
 add_definitions(-Wall
@@ -111,10 +116,11 @@ add_definitions(-Wall
     #-Wno-unused-private-field
     )
 add_definitions(-fPIC)
+if(COMPILER_WARNS_STRICT_ALIASING)
+    add_definitions( -Wno-strict-aliasing )
+endif(COMPILER_WARNS_STRICT_ALIASING)
 
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+
 if(COMPILER_SUPPORTS_CXX11)
     message(STATUS "Your compiler supports c++11 features. Enabling it")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -177,7 +183,6 @@ ENDIF()
 add_library(_moose MODULE pymoose/moosemodule.cpp)
 add_library(libmoose SHARED basecode/main.cpp)
 add_executable(moose.bin basecode/main.cpp)
-
 
 ################################### SETUP BUILD ################################
 

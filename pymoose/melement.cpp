@@ -48,7 +48,10 @@
 
 #include <Python.h>
 #include <structmember.h>
+
+#ifdef USE_BOOST
 #include <boost/format.hpp>
+#endif
 
 #include <iostream>
 #include <typeinfo>

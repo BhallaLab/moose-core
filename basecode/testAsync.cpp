@@ -29,8 +29,13 @@
 #include "../shell/Shell.h"
 #include "../mpi/PostMaster.h"
 
+
+#ifdef USE_BOOST
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
+#else      /* -----  not USE_BOOST  ----- */
+#include <random>
+#endif     /* -----  not USE_BOOST  ----- */
 
 int _seed_ = 0;
 
@@ -41,8 +46,13 @@ void _mtseed_( unsigned int seed )
 
 double _mtrand_( )
 {
+#ifdef  USE_BOOST
     static boost::random::mt19937 rng( _seed_ );
     static boost::random::uniform_01<double> dist;
+#else      /* -----  not USE_BOOST  ----- */
+    static std::mt19937 rng( _seed_ );
+    static std::uniform_real_distribution<double> dist(0, 1.0);
+#endif     /* -----  not USE_BOOST  ----- */
     return dist( rng );
 }
 

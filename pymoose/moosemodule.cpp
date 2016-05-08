@@ -29,11 +29,6 @@
 //            Decided not to expose any lower level moose API.
 //
 // 2012-04-20 Finalized the C interface
-//
-// 2016-04-25 Using boost::random to genearte random numbers.
-//            extern "C" is removed. 
-//            Old commentry is deleted. 
-//            Disabled old numpy API.
 
 #include <Python.h>
 
@@ -51,9 +46,12 @@
 #include <ctime>
 #include <csignal>
 #include <exception>
+
+#if USE_BOOST
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
 #include <boost/format.hpp>
+#endif
 
 #ifdef USE_MPI
 #include <mpi.h>
@@ -135,15 +133,7 @@ void pymoose_mtseed_( unsigned int seed )
 
 double pymoose_mtrand_( void )
 {
-
-#if 0
-    static moose::rng_type_ rng( moose::global::__rng_seed__ );
-    static moose::distribution_type_ dist;
-    return dist( rng );
-#else
     return moose::mtrand( );
-#endif
-
 }
 
 /**
@@ -2690,7 +2680,7 @@ int defineClass(PyObject * module_dict, const Cinfo * cinfo)
     get_moose_classes().insert(pair<string, PyTypeObject*> (className, new_class));
     Py_INCREF(new_class);
 
-#if 0
+#ifdef USE_BOOST
     LOG( debug, boost::format( "%1% %2% %|40t|%3% %4%")
                 % "`Created class " 
                 % new_class->tp_name 

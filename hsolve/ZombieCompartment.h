@@ -17,8 +17,12 @@
 #include "ElementValueFinfo.h"
 #include "../external/debug/print_function.hpp"
 
+#ifdef  USE_BOOST
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
+#else      /* -----  not USE_BOOST  ----- */
+#include <random>
+#endif     /* -----  not USE_BOOST  ----- */
 
 #include "../biophysics/CompartmentBase.h"
 #include "../biophysics/Compartment.h"
