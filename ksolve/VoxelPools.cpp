@@ -321,6 +321,7 @@ void VoxelPools::setVolumeAndDependencies( double vol )
 		stoichPtr_->getNumCoreRates() );
 }
 
+
 ////////////////////////////////////////////////////////////
 #if 0
 /**

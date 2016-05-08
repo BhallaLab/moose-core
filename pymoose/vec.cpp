@@ -76,7 +76,6 @@
 using namespace std;
 
 extern int verbosity;
-extern "C" {
     ///////////////////////////////////////////////
     // Python method lists for PyObject of Id
     ///////////////////////////////////////////////
@@ -1088,8 +1087,4 @@ extern "C" {
         
     }
     
-
-} // end extern "C"
-
-// 
 // vec.cpp ends here

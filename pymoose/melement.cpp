@@ -71,8 +71,6 @@
 
 using namespace std;
 
-extern "C" {
-
     extern PyTypeObject ObjIdType;
     extern PyTypeObject IdType;
     extern int PyType_IsSubtype(PyTypeObject *, PyTypeObject *);
@@ -2046,8 +2044,4 @@ PyObject* setDestFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1
     };
 
     
-
-}// extern "C"
-
-// 
 // melement.cpp ends here

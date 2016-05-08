@@ -182,9 +182,6 @@ void handle_keyboard_interrupts( int signum )
     exit( signum );
 }
 
-// C-wrapper to be used by Python
-extern "C" {
-
     // IdType and ObjIdType are defined in vec.cpp and
     // melement.cpp respectively.
     extern PyTypeObject IdType;
@@ -2867,8 +2864,6 @@ extern "C" {
 	return moose_module;
 #endif
     } //! init_moose
-
-} // end extern "C"
 
 //////////////////////////////////////////////
 // Main function
