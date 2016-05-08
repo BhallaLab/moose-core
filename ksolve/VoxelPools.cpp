@@ -95,6 +95,89 @@ void VoxelPools::advance( const ProcInfo* p )
 			cout << "Internal error\n";
 		assert( 0 );
 	}
+#else
+    /*-----------------------------------------------------------------------------
+    NOTICE: 04/21/2016 11:31:42 AM
+
+    We need to call this function here (unlike in GSL solver) because there
+    is no way we can update const vector_type_& y in evalRatesUsingBoost
+    function. In gsl implmentation one could do it, because const_cast can
+    take away the constantness of double*. This probably makes the call bit
+    cleaner.
+     *-----------------------------------------------------------------------------*/
+
+    VoxelPools* vp = reinterpret_cast< VoxelPools* >( sys_->params );
+    vp->stoichPtr_->updateFuncs( &Svec()[0], p->currTime );
+
+    /*-----------------------------------------------------------------------------
+     * Using integrate function works with with default stepper type.
+     *
+     *  FIXME: If you are writing your own custom typdedef of stepper_type_ (see
+     *  file BoostSystem.h), the you may run into troble.
+     *
+     *  http://boostw.boost.org/doc/libs/1_56_0/boost/numeric/odeint/integrate/integrate.hpp
+     *-----------------------------------------------------------------------------
+     */
+    auto system = std::bind(&VoxelPools::evalRates, _1, _2, _3, vp);
+
+    double absTol = sys_->epsAbs_;
+    double relTol = sys_->epsRel_;
+
+    string method = sys_->getMethod();
+    if( method == "rk2" )
+        rk_midpoint_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
+    else if( method == "rk4" )
+        rk_karp_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
+    else if( method == "rk5")
+        rk_karp_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
+    else if( method == "rk5a")
+        odeint::integrate_adaptive( 
+                odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol)
+                , system
+                , Svec()
+                , p->currTime - p->dt 
+                , p->currTime
+                , p->dt 
+                );
+    else if ("rk54" == method )
+        rk_karp_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
+    else if ("rk54a" == method )
+        odeint::integrate_adaptive( 
+                odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol )
+                , system, Svec()
+                , p->currTime - p->dt 
+                , p->currTime
+                , p->dt 
+                );
+    else if ("rk5" == method )
+        rk_dopri_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
+    else if ("rk5a" == method )
+        odeint::integrate_adaptive( 
+                odeint::make_controlled<rk_dopri_stepper_type_>( absTol, relTol )
+                , system, Svec()
+                , p->currTime - p->dt 
+                , p->currTime
+                , p->dt 
+                );
+    else if( method == "rk8" ) 
+        rk_felhberg_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
+    else if( method == "rk8a" ) 
+        odeint::integrate_adaptive(
+                odeint::make_controlled<rk_felhberg_stepper_type_>( absTol, relTol )
+                , system, Svec()
+                , p->currTime - p->dt 
+                , p->currTime
+                , p->dt 
+                );
+
+    else
+        odeint::integrate_adaptive( 
+                odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol )
+                , system, Svec()
+                , p->currTime - p->dt 
+                , p->currTime
+                , p->dt 
+                );
 #endif
 }
 
