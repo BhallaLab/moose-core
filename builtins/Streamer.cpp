@@ -146,6 +146,12 @@ Streamer& Streamer::operator=( const Streamer& st )
 
 Streamer::~Streamer()
 {
+    /*  Write the left-overs. */
+    zipWithTime( data_, currTime_ );
+    StreamerBase::writeToOutFile( outfilePath_, format_, "a", data_, columns_ );
+    for( auto t : tables_ )
+        t->clearVec();
+    data_.clear();
 }
 
 /**
@@ -165,16 +171,11 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
         string defaultPath = "_tables/" + moose::moosePathToUserPath( e.id().path() );
         setOutFilepath( defaultPath );
     }
-
-    double currTime = 0;
-
+    currTime_ = 0.0;
     // Prepare data.
-    vector<double> data;
-    zipWithTime( data, currTime );
-    StreamerBase::writeToOutFile( outfilePath_, format_, "w", data, columns_ );
-    // clean the arrays
-    for( auto t : tables_ )
-        t->clearVec();
+    zipWithTime( data_, currTime_ );
+    StreamerBase::writeToOutFile( outfilePath_, format_, "w", data_, columns_);
+    data_.clear();
 }
 
 /**
@@ -185,12 +186,11 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
  */
 void Streamer::process(const Eref& e, ProcPtr p)
 {
-    double currTime = p->currTime;
     // Prepare data.
-    vector<double> data;
-    zipWithTime( data, currTime );
-    StreamerBase::writeToOutFile( outfilePath_, format_, "a", data, columns_ );
+    zipWithTime( data_, currTime_ );
+    StreamerBase::writeToOutFile( outfilePath_, format_, "a", data_, columns_ );
     // clean the arrays
+    data_.clear();
     for( auto t : tables_ )
         t->clearVec();
 }
@@ -309,7 +309,9 @@ void Streamer::zipWithTime( vector<double>& data, double currTime)
     size_t N = tables_[0]->getVecSize();
     for (size_t i = 0; i < N; i++) 
     {
-        data.emplace_back( currTime - (N - i - 1)* dt_ );
+        /* Each entry we write, currTime_ increases by dt.  */
+        data.emplace_back( currTime_ );
+        currTime_ += tableDt_[0];               
         for ( auto t : tables_ )
             data.emplace_back( t->getVec()[i] );
     }

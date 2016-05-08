@@ -30,7 +30,7 @@
 
 using namespace std;
 
-class Streamer : private StreamerBase
+class Streamer
 {
 
 public:
@@ -69,18 +69,25 @@ public:
 
 private:
 
-    string outfilePath_;
+    string outfilePath_ = "";
     string format_ = "csv";
     bool isOutfilePathSet_ = false;
 
-    // dt_ of its clock
+    // dt_ of Table's clock
     vector<double> tableDt_;
-    double dt_;
+
+    // This currTime is not computed using the ProcPtr but rather using Tables
+    // dt_ and number of entries written.
+    double currTime_ = 0.0;
 
     // Used for adding or removing tables
     vector<Id> tableIds_;
     vector<Table*> tables_;
     vector<string> columns_ = { "time" };            /* Keep tabe names. */
+
+    /*  Keep data in vector */
+    vector<double> data_;
+
 };
 
 #endif   /* ----- #ifndef Streamer_INC  ----- */

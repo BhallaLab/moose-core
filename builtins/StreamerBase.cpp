@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <memory>
 
 // Class function definitions
 StreamerBase::StreamerBase() 
@@ -86,14 +87,15 @@ void StreamerBase::writeToCSVFile( const string& filepath, const string& openmod
         , const vector<double>& data, const vector<string>& columns )
 {
 
-    FILE* fp;
-    fp = fopen( filepath.c_str(), openmode.c_str() );
+    unique_ptr<FILE, decltype(&fclose)> fp(
+            fopen( filepath.c_str(), openmode.c_str() ), &fclose 
+            );
+
     if( ! fp )
     {
         LOG( moose::warning, "Failed to open " << filepath );
         return;
     }
-
 
     // If writing in "w" mode, write the header first.
     if( openmode == "w" )
@@ -102,7 +104,7 @@ void StreamerBase::writeToCSVFile( const string& filepath, const string& openmod
         for( auto t : columns ) 
             headerText += "\"" + t + "\"" + delimiter_;
         headerText += eol;
-        fprintf( fp, "%s", headerText.c_str() ); 
+        fprintf( fp.get(), "%s", headerText.c_str() ); 
     }
 
     string text = "";
@@ -115,8 +117,7 @@ void StreamerBase::writeToCSVFile( const string& filepath, const string& openmod
         // At the end of each row, we remove the delimiter_ and append newline_.
         text.pop_back(); text += eol ;
     }
-    fprintf(fp, "%s", text.c_str() );
-    fclose( fp );
+    fprintf( fp.get(), "%s", text.c_str() );
 }
 
 /*  write data to a numpy file */
