@@ -14,8 +14,7 @@
 #include <functional>
 #include <iostream>
 #include <iomanip>
-#include <gsl/gsl_linalg.h>
-//#include "/usr/include/gsl/gsl_linalg.h"
+
 using namespace std;
 #include "../basecode/SparseMatrix.h"
 #include "../basecode/doubleEq.h"

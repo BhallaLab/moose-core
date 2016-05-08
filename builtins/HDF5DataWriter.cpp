@@ -3,28 +3,8 @@
 // Filename: HDF5DataWriter.cpp
 // Description: 
 // Author: Subhasis Ray
-// Maintainer: 
+// Maintainer:  Dilawar Singh
 // Created: Sat Feb 25 16:03:59 2012 (+0530)
-// Version: 
-// Last-Updated: Thu Apr 28 21:44:18 2016 (-0400)
-//           By: subha
-//     Update #: 760
-// URL: 
-// Keywords: 
-// Compatibility: 
-// 
-// 
-
-// Commentary: 
-// 
-// 
-// 
-// 
-
-// Change log:
-// 
-// 2012-02-25 16:04:02 (+0530) Subha - started initial implementation
-// 
 
 // Code:
 

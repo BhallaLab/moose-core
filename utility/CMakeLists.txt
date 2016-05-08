@@ -7,4 +7,5 @@ add_library(utility
     numutil.cpp
     Annotator.cpp
     Vec.cpp
+    cnpy.cpp
     )

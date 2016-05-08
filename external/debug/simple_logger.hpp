@@ -279,10 +279,12 @@ class SimpleLogger {
         void dump(string type, string msg, bool autoFormat = true)
         {
 
-#ifndef ENABLE_LOGGER
+#if VERBOSITY < 0
             return;
 #endif
+
             stringstream ss;
+            ss.precision( 12 );
             ss << "[" << type << "] ";
             bool set = false;
             bool reset = true;
@@ -326,9 +328,6 @@ class SimpleLogger {
                 ss << T_RESET;
 
             logSS << ss.str() << endl;
-#if QUIET_MODE || VERBOSITY < 0
-            return;
-#endif
             cerr << ss.str() << endl;
         }
 

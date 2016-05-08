@@ -3,8 +3,7 @@
  *
  *       Filename:  global.cpp
  *
- *    Description:  It contains global variables to track no of test run and
- *    running performance of moose basecode.
+ *    Description:  Some global declarations.
  *
  *        Version:  1.0
  *        Created:  Tuesday 29 April 2014 10:18:35  IST
@@ -18,8 +17,9 @@
  */
 
 #include "global.h"
-#include "../external/debug/simple_logger.hpp"
 #include <numeric>
+#include <random>
+
 
 /*-----------------------------------------------------------------------------
  *  This variable keep track of how many tests have been performed.
@@ -29,6 +29,10 @@
 unsigned int totalTests = 0;
 
 stringstream errorSS;
+std::random_device rd;
+
+
+bool isRNGInitialized = false;
 
 clock_t simClock = clock();
 
@@ -37,10 +41,15 @@ extern string joinPath( string pathA, string pathB);
 extern string fixPath( string path);
 extern string dumpStats( int  );
 
-/* Logger */
-SimpleLogger logger;
+
 
 namespace moose {
+
+    int __rng_seed__ = rd();
+
+    rng_type_ rng( __rng_seed__ );
+    distribution_type_ dist;
+
     /* Check if path is OK */
     int checkPath( const string& path  )
     {
@@ -60,10 +69,6 @@ namespace moose {
     /* Join paths */
     string joinPath( string pathA, string pathB )
     {
-        errorSS.str("");
-        errorSS << "Calling a hacky function to fix paths. Ticket #134"
-            << endl;
-        dump(errorSS.str(), "BUG");
         pathA = moose::fixPath( pathA );
         string newPath = pathA + "/" + pathB;
         return moose::fixPath( newPath );
@@ -77,8 +82,118 @@ namespace moose {
             return path;
         else if( pathOk == MISSING_BRACKET_AT_END)
             return path + "[0]";
-        dump("I don't know how to fix this path: " + path, "FIXME");
         return path;
     }
 
+    /**
+     * @brief Set the global seed or all rngs.
+     *
+     * @param x 
+     */
+    void mtseed( unsigned int x )
+    {
+        moose::rng.seed( x );
+        moose::__rng_seed__ = x;
+        isRNGInitialized = true;
+    }
+
+    /*  Generate a random number */
+    double mtrand( void )
+    {
+        return moose::dist( rng );
+    }
+
+    // Fix the given path.
+    string createPosixPath( string s )
+    {
+        string undesired = ":?\"<>|[]";
+        for (auto it = s.begin() ; it < s.end() ; ++it)
+        {
+            bool found = undesired.find(*it) != string::npos;
+            if(found){
+                *it = '_';
+            }
+        }
+        return s;
+    }
+
+    /**
+     * @brief Create directories recursively needed to open the given file p. 
+     *
+     * @param path When successfully created, returns created path, else
+     * convert path to a filename by replacing '/' by '_'.
+     */
+    string createParentDirs( string p )
+    {
+        if( p.size() == 0 )
+            return string("");
+#ifdef  USE_BOOST
+        try 
+        {
+            boost::filesystem::path pdirs( p );
+            pdirs.remove_filename();
+            if( pdirs.string().size() == 0 )
+                return p;
+            boost::filesystem::create_directories( pdirs );
+            LOG( moose::info, "Created directory " << p );
+        }
+        catch(const boost::filesystem::filesystem_error& e)
+        {
+            LOG( moose::warning, "create_directories(" << p << ") failed with "
+                    << e.code().message()
+               );
+            std::replace(p.begin(), p.end(), '/', '_' );
+            std::replace(p.begin(), p.end(), '\\', '_' );
+            return p;
+        }
+#else      /* -----  not USE_BOOST  ----- */
+        std::replace(p.begin(), p.end(), '/', '_' );
+        std::replace(p.begin(), p.end(), '\\', '_' );
+        return p;
+#endif     /* -----  not USE_BOOST  ----- */
+        return p;
+    }
+
+
+    /*  return extension of a filename */
+    string getExtension(const string& path, bool without_dot )
+    {
+        auto dotPos = path.find_last_of( '.' );
+        if( dotPos == std::string::npos )
+            return "";
+
+        if( without_dot )
+            return path.substr( dotPos + 1 );
+
+        return path.substr( dotPos );
+    }
+
+    /*  returns `basename path`  */
+    string pathToName( const string& path )
+    {
+        return path.substr( path.find_last_of( '/' ) );
+    }
+
+    /*  /a[0]/b[1]/c[0] -> /a/b/c  */
+    string moosePathToUserPath( string path )
+    {
+        size_t p1 = path.find( '[', 0 );
+        while( p1 != std::string::npos )
+        {
+            size_t p2 = path.find( ']', p1 );
+            path.erase( p1, p2-p1+1 );
+            p1 = path.find( '[', p2 );
+        }
+        return path;
+    }
+
+    /*  Return formatted string 
+     *  Precision is upto 17 decimal points.
+     */
+    string toString( double x )
+    {
+        char buffer[50];
+        sprintf(buffer, "%.17g", x );
+        return string( buffer );
+    }
 }
