@@ -92,6 +92,7 @@ public:
     void print() const;
 private:
     BoostSys* sys_;                             /* The BOOST ode system. */
+    bool created_ = false;
 };
 
 #endif	// _VOXEL_POOLS_H

@@ -98,7 +98,8 @@ void VoxelPools::advance( const ProcInfo* p )
     else if( method == "rk5a")
         odeint::integrate_adaptive( 
                 odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol)
-                , system, Svec()
+                , system
+                , Svec()
                 , p->currTime - p->dt 
                 , p->currTime
                 , p->dt 
