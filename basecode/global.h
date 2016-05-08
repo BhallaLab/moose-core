@@ -134,9 +134,10 @@ namespace moose
      * @brief Create a POSIX compatible path from a given string.
      * Remove/replace bad characters.
      *
-     * @param path
+     * @param path Reutrn path is given path if creation was successful, else
+     * directory is renamed to a filename.
      */
-    string createPosixPath( string path );
+    string createPosixPath( const string& path );
 
     /**
      * @brief Convert a given value to string.
@@ -150,10 +151,19 @@ namespace moose
 
     /**
      * @brief Create directory, recursively.
-     *
-     * @param path
      */
-    string createParentDirs( string path );
+    bool createParentDirs( const string& path );
+
+    /**
+     * @brief Replace all directory sepearator with _. This creates a filepath
+     * which can be created in current directory without any need to create
+     * parent directory.
+     *
+     * @param path string 
+     *
+     * @return  filename without directory separator.
+     */
+    string toFilename( const string& path );
 
     /**
      * @brief Get the extension of a given filepath.

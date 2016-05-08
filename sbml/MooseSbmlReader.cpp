@@ -217,7 +217,7 @@ Id moose::SbmlReader::read( string filename, string location, string solverClass
                                         //string plotPath = location+pltClean;
                                         string plotPath = base_.path()+pltClean;
                                         Id plotSId(plotPath);
-                                        unsigned pos = pltClean.find('/');
+                                        size_t pos = pltClean.find('/');
                                         if (pos != std::string::npos)
                                             pltClean = pltClean.substr(pos+1,pltClean.length());
                                         /*

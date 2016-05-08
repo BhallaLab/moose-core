@@ -482,23 +482,23 @@ void writeMsgs( ofstream& fout, const vector< string >& msgs )
 			fout << *i << endl;
 }
 void writeGroup(ofstream& fout,Id model)
-{ 	vector < ObjId> group;
-	int x = 10;
-	int y = 20;
-	int num = wildcardFind( model.path() + "/##[TYPE=Neutral]", group );
-	for ( vector< ObjId >::iterator itr = group.begin(); itr != group.end();itr++)
-	{	string path = Field<string>::get(*itr,"path");
-		size_t pos = path.find( "/kinetics" );
-		if (pos != -1)
-		{
-		path = path.substr( pos );
-		fout << "simundump group " << path << " 0 " << 
-			"blue" << " " << "green"	 << " x 0 0 \"\" defaultfile \\\n";
-		fout << "  defaultfile.g 0 0 0 " << x << " " << y << " 0\n";
-		}
-
-	}
-
+{ 	
+    vector < ObjId> group;
+    int x = 10;
+    int y = 20;
+    int num = wildcardFind( model.path() + "/##[TYPE=Neutral]", group );
+    for ( vector< ObjId >::iterator itr = group.begin(); itr != group.end();itr++)
+    {	
+        string path = Field<string>::get(*itr,"path");
+        size_t pos = path.find( "/kinetics" );
+        if (pos != std::string::npos)
+        {
+            path = path.substr( pos );
+            fout << "simundump group " << path << " 0 " << 
+                "blue" << " " << "green"	 << " x 0 0 \"\" defaultfile \\\n";
+            fout << "  defaultfile.g 0 0 0 " << x << " " << y << " 0\n";
+        }
+    }
 }
 void writeKkit( Id model, const string& fname )
 {		ofstream fout( fname.c_str(), ios::out );

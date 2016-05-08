@@ -280,8 +280,11 @@ string Streamer::getOutFilepath( void ) const
 
 void Streamer::setOutFilepath( string filepath )
 {
-    outfilePath_ = moose::createParentDirs( filepath );
+    outfilePath_ = filepath;
     isOutfilePathSet_ = true;
+    if( ! moose::createParentDirs( filepath ) )
+        outfilePath_ = moose::toFilename( outfilePath_ );
+
     string format = moose::getExtension( outfilePath_, true );
     if( format.size() > 0)
         setFormat( format );

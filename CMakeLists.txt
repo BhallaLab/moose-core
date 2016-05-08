@@ -67,25 +67,16 @@ else()
     set(MACOSX FALSE)
 endif()
 
-################################# CMAKE OPTIONS ##################################
+################################ CMAKE OPTIONS ##################################
 
 option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
-
-option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 0)
-
-# Whether to notify the user after 1 second of simulation.
-option(NOTIFY_PROGRESS "Show progress of simulation" OFF)
-
-# STATS INSIDE MOOSE. TODO: Remove it and add support for gprof
-option(ENABLE_LOGGER  "Enable MOOSE logger [Deprecated]" OFF)
-
+option(VERBOSITY "Set MOOSE verbosity level (deprecated)" 0)
 ## Unit testing and debug mode.
 option(DEBUG "Build with debug support" OFF)
 option(GPROF "Build for profiling using gprof" OFF)
 option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
-option(WITH_CURSES "Enable ncurses support (deprecated)" OFF)
 
 # If SBML is available, it will automaticall enable the support. If ON, then
 # libSBML must be present.
@@ -115,7 +106,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 # versions of compilers. be careful here.
 add_definitions(-Wall
     #-Wno-return-type-c-linkage
-    -Wno-unused-variable
+    -Wno-unused-variable      
     -Wno-unused-function
     #-Wno-unused-private-field
     )
@@ -397,7 +388,6 @@ add_subdirectory(benchmarks)
 add_subdirectory(kinetics)
 add_subdirectory(synapse)
 add_subdirectory(intfire)
-add_subdirectory(examples)
 
 # These are always shared libraries.
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})

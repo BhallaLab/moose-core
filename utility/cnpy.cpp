@@ -150,4 +150,5 @@ void change_shape_in_header( const string& filename
     fwrite( newHeader.c_str(), sizeof(char), newHeader.size(), fp );
     fclose( fp );
 }
+
 }                                               /* Namespace cnpy2 ends. */

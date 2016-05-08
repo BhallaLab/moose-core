@@ -43,7 +43,7 @@ class Poisson:public Probability
     static double poissonSmall(const Poisson&);
     static double poissonLarge(const Poisson&);
     Gamma* gammaGen_;
-    Binomial* binomialGen_;
+    //Binomial* binomialGen_;
     double (*generator_)(const Poisson&);
     double mValue_;
 };

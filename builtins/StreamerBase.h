@@ -93,11 +93,6 @@ private:
     static const char eol = '\n';
     static const char delimiter_ = ' ';
 
-    // How many lines are written to the file.
-    size_t numLinesWritten_ = 0;
-
-    /*  Step size of this class */
-    double dt_;
 };
 
 #endif   /* ----- #ifndef StreamerBase_INC  ----- */

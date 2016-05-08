@@ -348,7 +348,8 @@ bool Table::getUseStreamer( void ) const
 void Table::setOutfile( string outpath )
 {
     outfile_ = moose::createPosixPath( outpath );
-    outfile_ = moose::createParentDirs( outfile_ );
+    if( ! moose::createParentDirs( outfile_ ) )
+        outfile_ = moose::toFilename( outfile_ );
 
     outfileIsSet = true;
     setUseStreamer( true );

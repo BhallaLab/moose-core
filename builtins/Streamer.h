@@ -77,12 +77,6 @@ private:
     vector<double> tableDt_;
     double dt_;
 
-    // No of lines written.
-    size_t numLinesWritten_ = 0;
-
-    // Total tables handled by this class.
-    unsigned int numTables_ = 0;
-
     // Used for adding or removing tables
     vector<Id> tableIds_;
     vector<Table*> tables_;

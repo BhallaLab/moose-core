@@ -104,8 +104,6 @@ private:
      * @brief format of data. Currently fixed to csv.
      */
     string format_ = ".csv";
-    const char delimiter_ = ' ';
-    const char newline_ = '\n';
 
     /**
      * @brief text_ to write.
@@ -116,13 +114,11 @@ private:
      * @brief dt of its clock. Needed for creating time co-ordinates,
      */
     double dt_ = 0.0;
-    size_t numLines = 0;
 
     /**
      * @brief Output stream.
      */
     std::ofstream of_;
-    ios_base::openmode mode_;
 
 };
 

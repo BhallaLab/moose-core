@@ -102,7 +102,7 @@ void StreamerBase::writeToCSVFile( const string& filepath, const string& openmod
         for( auto t : columns ) 
             headerText += "\"" + t + "\"" + delimiter_;
         headerText += eol;
-        fprintf( fp, headerText.c_str() ); 
+        fprintf( fp, "%s", headerText.c_str() ); 
     }
 
     string text = "";
@@ -115,7 +115,7 @@ void StreamerBase::writeToCSVFile( const string& filepath, const string& openmod
         // At the end of each row, we remove the delimiter_ and append newline_.
         text.pop_back(); text += eol ;
     }
-    fprintf(fp, text.c_str() );
+    fprintf(fp, "%s", text.c_str() );
     fclose( fp );
 }
 

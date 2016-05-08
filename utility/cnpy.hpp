@@ -26,14 +26,20 @@
 #include <vector>
 #include <array>
 #include <cstdint>
+#include <cassert>
 #include <complex>
 #include <typeinfo>
+#include <memory>
+
 
 #if USE_BOOST
 #include <boost/algorithm/string/split.hpp>
 #else
 #include <cstring>
 #endif
+
+#include "../external/debug/print_function.hpp"
+
 
 using namespace std;
 
@@ -77,17 +83,18 @@ void change_shape_in_header( const string& filename
         , const size_t data_len, const size_t numcols 
         );
 
-// Preamble of header. 8 bytes long.
-static array<char, 8> __pre__ = { 
+// Preamble of header. 8 bytes long. Double braces are required for c++11. 
+static array<char, 8> __pre__ = {  {
     (char)0x93, 'N', 'U', 'M', 'P', 'Y'     /* Magic */
-    , (char)0x01, (char) 0x00               /* format */
+        , (char)0x01, (char) 0x00               /* format */
+}
 };
 
 template< typename T>
-void write_header( FILE* fp
+void write_header( 
+        FILE* fp
         , const vector<string>& colnames
-        , vector<unsigned int>shape 
-        ,  char version
+        , vector<unsigned int>shape ,  char version
         )
 {
     // Heder are always at the begining of file.
@@ -134,12 +141,12 @@ void write_header( FILE* fp
     if( version == '2' )
     {
         uint32_t s = dict.size();
-        fwrite( (char*)&s, sizeof( uint32_t ), 1, fp);
+        fwrite( (char*)&s, sizeof( uint32_t ), 1, fp );
     }
     else
     {
         int16_t s = dict.size();
-        fwrite( (char*)&s, sizeof( uint16_t ), 1, fp);
+        fwrite( (char*)&s, sizeof( uint16_t ), 1, fp );
     }
     fwrite( dict.c_str(), sizeof(char), dict.size(), fp );
 }
@@ -153,7 +160,6 @@ void save_numpy(
         , const char version = '1'
         )
 {
-    FILE* fp;
 
     // In our application, we need to write a vector as matrix. We do not
     // support the stacking of matrices.
@@ -165,8 +171,14 @@ void save_numpy(
      */
     if( openmode == "w" )
     {
-        fp = fopen( outfile.c_str(), "wb" );
-        write_header<T>( fp, colnames, shape, version );
+        unique_ptr<FILE, decltype(&fclose)> fp( fopen(outfile.c_str(), "wb"), &fclose);
+        if( fp == nullptr) 
+        {
+            LOG( moose::warning, "Could not open file " << outfile );
+            return;
+        }
+
+        write_header<T>( fp.get(), colnames, shape, version );
     }
     else                                        /* Append mode. */
     {
@@ -178,17 +190,14 @@ void save_numpy(
                 << endl;
             return;
         }
-
-        // Unfortunetely we need to rewrite the header of the file.
+        // And change the shape in header.
         change_shape_in_header( outfile, vec.size(), colnames.size() );
-
-        //  now open the data in append mode 
-        fp = fopen( outfile.c_str(), "ab" );
     }
 
+    //  by default we open the file in append mode.
+    unique_ptr<FILE, decltype(&fclose)> fp(fopen( outfile.c_str(), "ab" ), &fclose);
     // Go to the very end of the file and write the data.
-    fwrite( &vec[0], sizeof(T), vec.size(), fp );
-    fclose( fp );
+    fwrite( &vec[0], sizeof(T), vec.size(), fp.get() );
 }
 
 
