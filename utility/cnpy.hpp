@@ -26,9 +26,9 @@
 #include <vector>
 #include <cassert>
 #include <complex>
+#include <typeinfo>
 
 #ifdef  ENABLE_CPP11
-#include <typeinfo>
 #include <memory>
 #include <array>
 #else      /* -----  not ENABLE_CPP11  ----- */
@@ -167,7 +167,11 @@ void save_numpy(
     // In our application, we need to write a vector as matrix. We do not
     // support the stacking of matrices.
     vector<unsigned int> shape;
-    shape.push_back( vec.size()/ colnames.size());
+
+    if( colnames.size() == 0)
+        return;
+
+    shape.push_back( vec.size() / colnames.size());
 
     /* In mode "w", open the file and write a header as well. When file is open
      * in mode "a", we assume that file is alreay a valid numpy file.

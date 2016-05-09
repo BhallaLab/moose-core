@@ -139,7 +139,14 @@ static const Cinfo* tableStreamCinfo = Streamer::initCinfo();
 
 Streamer::Streamer() 
 {
+    // Not all compilers allow initialization during the declaration of class
+    // methods.
+    format_ = "npy";
     columns_.push_back( "time" );               /* First column is time. */
+    tables_.resize(0);
+    tableIds_.resize(0);
+    columns_.resize(0);
+    data_.resize(0);
 }
 
 Streamer& Streamer::operator=( const Streamer& st )

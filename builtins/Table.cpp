@@ -191,7 +191,8 @@ const Cinfo* Table::initCinfo()
 
 static const Cinfo* tableCinfo = Table::initCinfo();
 
-Table::Table() : threshold_( 0.0 ) , lastTime_( 0.0 ) , input_( 0.0 ) 
+Table::Table() : threshold_( 0.0 ) , lastTime_( 0.0 ) , input_( 0.0 )
+                 , useStreamer_( false ) 
 {
     // Initialize the directory to which each table should stream.
     rootdir_ = "_tables";

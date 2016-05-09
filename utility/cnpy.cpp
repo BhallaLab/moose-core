@@ -18,6 +18,9 @@
 
 #include "cnpy.hpp"
 
+
+#include <cstring>
+
 using namespace std;
 
 namespace cnpy2 {
