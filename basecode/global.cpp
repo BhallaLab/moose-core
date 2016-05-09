@@ -41,8 +41,9 @@ extern string fixPath( string path);
 extern string dumpStats( int  );
 
 
-
 namespace moose {
+
+    int __rng_seed__ = 0;
 
     moose::RNG<double> rng;
 
