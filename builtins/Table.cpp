@@ -381,7 +381,7 @@ void Table::zipWithTime( const vector<double>& v
     size_t N = v.size();
     for (size_t i = 0; i < N; i++) 
     {
-        tvec.emplace_back( currTime - (N - i - 1 ) * dt_ );
-        tvec.emplace_back( v[i] );
+        tvec.push_back( currTime - (N - i - 1 ) * dt_ );
+        tvec.push_back( v[i] );
     }
 }

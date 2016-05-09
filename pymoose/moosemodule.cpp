@@ -173,7 +173,7 @@ void handle_keyboard_interrupts( int signum )
     LOG( moose::info, "Interrupt signal (" << signum << ") received.");
 
     // Get the shell and cleanup.
-    Shell* shell = reinterpret_cast<Shell*>(getShell(0, nullptr).eref().data());
+    Shell* shell = reinterpret_cast<Shell*>(getShell(0, NULL).eref().data());
     shell->cleanSimulation();
     exit( signum );
 }

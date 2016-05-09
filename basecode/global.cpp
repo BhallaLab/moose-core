@@ -18,7 +18,6 @@
 
 #include "global.h"
 #include <numeric>
-#include <random>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -31,8 +30,6 @@
 unsigned int totalTests = 0;
 
 stringstream errorSS;
-std::random_device rd;
-
 
 bool isRNGInitialized = false;
 
@@ -47,10 +44,7 @@ extern string dumpStats( int  );
 
 namespace moose {
 
-    int __rng_seed__ = rd();
-
-    rng_type_ rng( __rng_seed__ );
-    distribution_type_ dist;
+    moose::RNG<double> rng;
 
     /* Check if path is OK */
     int checkPath( const string& path  )
@@ -94,15 +88,14 @@ namespace moose {
      */
     void mtseed( unsigned int x )
     {
-        moose::rng.seed( x );
-        moose::__rng_seed__ = x;
+        moose::rng.setSeed( x );
         isRNGInitialized = true;
     }
 
     /*  Generate a random number */
     double mtrand( void )
     {
-        return moose::dist( rng );
+        return moose::rng.uniform( );
     }
 
     // Fix the given path.
@@ -110,12 +103,11 @@ namespace moose {
     {
         string s = path;                        /* Local copy */
         string undesired = ":?\"<>|[]";
-        for (auto it = s.begin() ; it < s.end() ; ++it)
+
+        for (size_t i = 0; i < s.size() ; ++i)
         {
-            bool found = undesired.find(*it) != string::npos;
-            if(found){
-                *it = '_';
-            }
+            bool found = undesired.find(s[i]) != string::npos;
+            if(found) s[i] = '_';
         }
         return s;
     }
@@ -132,7 +124,7 @@ namespace moose {
         // directory.
         string p = path;
         bool failed = false;
-        auto pos = p.find_last_of( '/' );
+        size_t pos = p.find_last_of( '/' );
         if( pos != std::string::npos )
             p = p.substr( 0, pos );
         else                                    /* no parent directory to create */
@@ -192,7 +184,7 @@ namespace moose {
     /*  return extension of a filename */
     string getExtension(const string& path, bool without_dot )
     {
-        auto dotPos = path.find_last_of( '.' );
+        size_t dotPos = path.find_last_of( '.' );
         if( dotPos == std::string::npos )
             return "";
 

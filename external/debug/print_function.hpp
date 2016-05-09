@@ -65,7 +65,7 @@ namespace moose {
             , error, fatal, failed 
     };
 
-    static vector<string> levels_ = { 
+    static string levels_[9] = { 
         "TRACE", "DEBUG", "INFO", "LOG"
             , "WARNING", "FIXME"
             , "ERROR", "FATAL", "FAILED" 

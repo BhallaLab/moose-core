@@ -25,6 +25,7 @@
 #include <iostream>
 #include <exception>
 #include <limits>
+#include <cmath>
 
 #include "current_function.hpp"
 #include "print_function.hpp"
@@ -33,28 +34,8 @@ using namespace std;
 
 inline bool doubleEq(double a, double b)
 {
-    return std::abs(a-b) < 1e-7;
+    return std::fabs(a-b) < 1e-7;
 }
-
-class FatalTestFailure : public exception
-{
-
-public:
-
-    FatalTestFailure( string msg = "" ) : msg_( msg )
-    {
-        msg_ = msg;
-    }
-
-    virtual const char* what() const throw()
-    {
-        moose::__dump__( msg_, moose::failed );
-        return msg_.c_str();
-    }
-
-private:
-    string msg_;
-};
 
 static ostringstream assertStream;
 
@@ -137,8 +118,8 @@ static ostringstream assertStream;
 #define ASSERT_TRUE( condition, msg) \
     if( !(condition) ) {\
         assertStream.str(""); \
-        assertStream << msg << endl; \
-        throw FatalTestFailure(assertStream.str());  \
+        assertStream << msg << endl;  \
+        throw runtime_error( assertStream.str() );\
     }
 
 #define ASSERT_FALSE( condition, msg) \

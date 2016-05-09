@@ -343,11 +343,19 @@ Vector* MarkovSolverBase::bilinearInterpolate( ) const
     Matrix* expQ10;
     Matrix* expQ11;
 
+#if ENABLE_CPP1
+    // Intialization to supress compiler warning.
     Vector *state00 = nullptr;
     Vector *state01 = nullptr;
     Vector *state10 = nullptr;
     Vector *state11 = nullptr;
     Vector *result = nullptr;
+#else
+    Vector *state00 = NULL, *state01 = NULL
+        , *state10 = NULL, *state11 = NULL
+        , *result = NULL
+        ;
+#endif
 
     state00 = vecMatMul( &state_, expQ00 );
     if ( isEndOfX ) 

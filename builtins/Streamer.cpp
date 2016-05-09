@@ -139,6 +139,7 @@ static const Cinfo* tableStreamCinfo = Streamer::initCinfo();
 
 Streamer::Streamer() 
 {
+    columns_.push_back( "time" );               /* First column is time. */
 }
 
 Streamer& Streamer::operator=( const Streamer& st )
@@ -168,8 +169,8 @@ void Streamer::cleanUp( void )
 void Streamer::reinit(const Eref& e, ProcPtr p)
 {
     // Push each table dt_ into vector of dt
-    for( auto t : tables_ )
-        tableDt_.push_back( t->getDt() );
+    for( size_t i = 0; i < tables_.size(); i++)
+        tableDt_.push_back( tables_[i]->getDt() );
 
     if( ! isOutfilePathSet_ )
     {
@@ -196,8 +197,8 @@ void Streamer::process(const Eref& e, ProcPtr p)
     StreamerBase::writeToOutFile( outfilePath_, format_, "a", data_, columns_ );
     // clean the arrays
     data_.clear();
-    for( auto t : tables_ )
-        t->clearVec();
+    for(size_t i = 0; i < tables_.size(); i++ )
+        tables_[i]->clearVec();
 }
 
 
@@ -209,8 +210,8 @@ void Streamer::process(const Eref& e, ProcPtr p)
 void Streamer::addTable( Id table )
 {
     // If this table is not already in the vector, add it.
-    for( auto t : tableIds_ )
-        if( table.path() == t.path() )
+    for( size_t i = 0; i < tableIds_.size(); i++)
+        if( table.path() == tableIds_[i].path() )
             return;                             /* Already added. */
 
     Table* t = reinterpret_cast<Table*>(table.eref().data());
@@ -230,7 +231,8 @@ void Streamer::addTable( Id table )
  */
 void Streamer::addTables( vector<Id> tables )
 {
-    for( auto t : tables ) addTable( t );
+    for( vector<Id>::const_iterator it = tables.begin(); it != tables.end(); it++)
+        addTable( *it );
 }
 
 
@@ -264,7 +266,8 @@ void Streamer::removeTable( Id table )
  */
 void Streamer::removeTables( vector<Id> tables )
 {
-    for( auto t : tables ) removeTable( t );
+    for( vector<Id>::const_iterator it = tables.begin(); it != tables.end(); it++)
+        removeTable( *it );
 }
 
 /**
@@ -315,9 +318,9 @@ void Streamer::zipWithTime( vector<double>& data, double currTime)
     for (size_t i = 0; i < N; i++) 
     {
         /* Each entry we write, currTime_ increases by dt.  */
-        data.emplace_back( currTime_ );
+        data.push_back( currTime_ );
         currTime_ += tableDt_[0];               
-        for ( auto t : tables_ )
-            data.emplace_back( t->getVec()[i] );
+        for( size_t i = 0; i < tables_.size(); i++)
+            data.push_back( tables_[i]->getVec()[i] );
     }
 }

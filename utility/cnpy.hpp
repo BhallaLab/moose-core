@@ -24,19 +24,21 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <array>
-#include <cstdint>
 #include <cassert>
 #include <complex>
+
+#ifdef  ENABLE_CPP11
 #include <typeinfo>
 #include <memory>
+#include <array>
+#else      /* -----  not ENABLE_CPP11  ----- */
+#endif     /* -----  not ENABLE_CPP11  ----- */
 
+#include <string>
 
-#if USE_BOOST
-#include <boost/algorithm/string/split.hpp>
-#else
-#include <cstring>
-#endif
+#include <stdint.h>
+
+#include "global.h"
 
 #include "../external/debug/print_function.hpp"
 
@@ -83,11 +85,10 @@ void change_shape_in_header( const string& filename
         , const size_t data_len, const size_t numcols 
         );
 
-// Preamble of header. 8 bytes long. Double braces are required for c++11. 
-static array<char, 8> __pre__ = {  {
+static const unsigned int __pre__size__ = 8;
+static char __pre__[__pre__size__] = {
     (char)0x93, 'N', 'U', 'M', 'P', 'Y'     /* Magic */
         , (char)0x01, (char) 0x00               /* format */
-}
 };
 
 template< typename T>
@@ -104,15 +105,16 @@ void write_header(
 
     string dict = ""; // This is the header to numpy file
     dict += "{'descr': [";
-    for( auto v : colnames )
-        dict += "('" + v + "' , '" + endianChar + formatChar + "'),";
+    for( vector<string>::const_iterator it = colnames.begin();
+            it != colnames.end(); it++ )
+        dict += "('" + *it + "' , '" + endianChar + formatChar + "'),";
 
     dict += "], 'fortran_order': False, 'shape': (";
-    dict += to_string(shape[0]);
+    dict += moose::toString(shape[0]);
     for(size_t i = 1; i < shape.size(); i++) 
     {
         dict += ",";
-        dict += to_string(shape[i]);
+        dict += moose::toString(shape[i]);
     }
     if( shape.size() == 1) dict += ",";
     dict += "), }";
@@ -130,11 +132,12 @@ void write_header(
     // dict needs to end with \n
     unsigned int remainder = 16 - (12 + dict.size()) % 16;
     dict.insert(dict.end(),remainder,' ');
-    dict.back() = '\n';
+    *(dict.end()-1) = '\n';
 
     if( version == '2' )
         __pre__[6] = (char) 0x02;
-    fwrite( __pre__.data(), sizeof( char ), __pre__.size(), fp );
+
+    fwrite( __pre__, sizeof( char ), __pre__size__, fp );
 
     // Now write the size of dict. It is 2bytes long in version 1 and 4 bytes
     // long in version 2.
@@ -171,14 +174,23 @@ void save_numpy(
      */
     if( openmode == "w" )
     {
+#ifdef  ENABLE_CPP11
         unique_ptr<FILE, decltype(&fclose)> fp( fopen(outfile.c_str(), "wb"), &fclose);
         if( fp == nullptr) 
+#else      /* -----  not ENABLE_CPP11  ----- */
+        FILE* fp = fopen( outfile.c_str(), "wb" );
+        if( NULL == fp )
+#endif     /* -----  not ENABLE_CPP11  ----- */
         {
             LOG( moose::warning, "Could not open file " << outfile );
             return;
         }
 
+#ifdef  ENABLE_CPP11
         write_header<T>( fp.get(), colnames, shape, version );
+#else      /* -----  not ENABLE_CPP11  ----- */
+        write_header<T>( fp, colnames, shape, version );
+#endif     /* -----  not ENABLE_CPP11  ----- */
     }
     else                                        /* Append mode. */
     {
@@ -194,10 +206,17 @@ void save_numpy(
         change_shape_in_header( outfile, vec.size(), colnames.size() );
     }
 
+#ifdef  ENABLE_CPP11
     //  by default we open the file in append mode.
     unique_ptr<FILE, decltype(&fclose)> fp(fopen( outfile.c_str(), "ab" ), &fclose);
     // Go to the very end of the file and write the data.
     fwrite( &vec[0], sizeof(T), vec.size(), fp.get() );
+#else      /* -----  not ENABLE_CPP11  ----- */
+    FILE* fp = fopen( outfile.c_str(), "ab" );
+    fwrite( &vec[0], sizeof(T), vec.size(), fp );
+    fclose( fp );
+#endif     /* -----  not ENABLE_CPP11  ----- */
+
 }
 
 

@@ -18,7 +18,11 @@
 #ifndef _NUMUTIL_CPP
 #define _NUMUTIL_CPP
 
+#ifdef  ENABLE_CPP11
 #include <ctgmath>
+#else      /* -----  not ENABLE_CPP11  ----- */
+#include <cmath>
+#endif     /* -----  not ENABLE_CPP11  ----- */
 
 bool almostEqual(float x, float y, float epsilon)
 {

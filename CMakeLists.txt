@@ -124,9 +124,11 @@ endif(COMPILER_WARNS_STRICT_ALIASING)
 if(COMPILER_SUPPORTS_CXX11)
     message(STATUS "Your compiler supports c++11 features. Enabling it")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    add_definitions( -DENABLE_CPP11 )
 elseif(COMPILER_SUPPORTS_CXX0X)
     message(STATUS "Your compiler supports c++0x features. Enabling it")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    add_definitions( -DENABLE_CPP11 )
 else()
     message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
 endif()
@@ -186,6 +188,8 @@ add_executable(moose.bin basecode/main.cpp)
 
 ################################### SETUP BUILD ################################
 
+# default include paths.
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
 # If this variable is used while packaging; we build this project using another
 # cmake script and pass the location of SBML static library using this variable.
@@ -536,7 +540,7 @@ if(WITH_PYTHON)
     set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
 
     find_package(NumPy REQUIRED)
-    find_package(PythonDev REQUIRED)
+    find_package(PythonLibs REQUIRED)
     include_directories(${PYTHON_INCLUDE_DIRS})
     message(STATUS "Python include dir: ${PYTHON_INCLUDE_DIRS}")
     message(STATUS "Python libraries: ${PYTHON_LIBRARIES}")

@@ -29,31 +29,21 @@
 #include "../shell/Shell.h"
 #include "../mpi/PostMaster.h"
 
-
-#ifdef USE_BOOST
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
-#else      /* -----  not USE_BOOST  ----- */
-#include <random>
-#endif     /* -----  not USE_BOOST  ----- */
+#include "randnum/RNG.h"
 
 int _seed_ = 0;
+
+moose::RNG<double> rng_;
 
 void _mtseed_( unsigned int seed )
 {
     _seed_ = seed;
+    rng_.setSeed( _seed_ );
 }
 
 double _mtrand_( )
 {
-#ifdef  USE_BOOST
-    static boost::random::mt19937 rng( _seed_ );
-    static boost::random::uniform_01<double> dist;
-#else      /* -----  not USE_BOOST  ----- */
-    static std::mt19937 rng( _seed_ );
-    static std::uniform_real_distribution<double> dist(0, 1.0);
-#endif     /* -----  not USE_BOOST  ----- */
-    return dist( rng );
+    return rng_.uniform( );
 }
 
 void showFields()

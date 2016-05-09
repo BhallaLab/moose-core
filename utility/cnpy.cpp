@@ -81,10 +81,10 @@ void split(vector<string>& strs, string& input, const string& pat)
  */
 bool is_valid_numpy_file( const string& npy_file )
 {
-    array<char, 8> buffer;
+    char buffer[8];
     FILE* fp = NULL;
     fp = fopen( npy_file.c_str(), "r" );
-    fread( buffer.data(), 1, 8, fp );
+    fread( buffer, 1, 8, fp );
     fclose( fp );
     return buffer == __pre__;
 }
@@ -118,7 +118,6 @@ void change_shape_in_header( const string& filename
         )
 {
     string header;
-
     // Always open file in r+b mode. a+b mode always append at the end.
     FILE* fp = fopen( filename.c_str(), "r+b" );
     parse_header( fp, header );
@@ -137,7 +136,7 @@ void change_shape_in_header( const string& filename
 
     string newShape = "";
     for (size_t i = 0; i < tokens.size(); i++) 
-        newShape += to_string( stoi( tokens[i] ) + data_len/numcols ) + ",";
+        newShape += moose::toString( atoi( tokens[i].c_str() ) + data_len/numcols ) + ",";
 
     string newHeader = prefixHeader + newShape + postfixHeader;
     if( newHeader.size() < header.size() )

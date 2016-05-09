@@ -87,11 +87,16 @@ void StreamerBase::writeToCSVFile( const string& filepath, const string& openmod
         , const vector<double>& data, const vector<string>& columns )
 {
 
+#ifdef  ENABLE_CPP11
     unique_ptr<FILE, decltype(&fclose)> fp(
-            fopen( filepath.c_str(), openmode.c_str() ), &fclose 
-            );
+                fopen( filepath.c_str(), openmode.c_str() ), &fclose 
+                );
 
     if( fp == nullptr )
+#else      /* -----  not ENABLE_CPP11  ----- */
+    FILE* fp = fopen( filepath.c_str(), openmode.c_str() );
+    if( NULL == fp )
+#endif     /* -----  not ENABLE_CPP11  ----- */
     {
         LOG( moose::warning, "Failed to open " << filepath );
         return;
@@ -101,10 +106,15 @@ void StreamerBase::writeToCSVFile( const string& filepath, const string& openmod
     if( openmode == "w" )
     {
         string headerText = "";
-        for( auto t : columns ) 
-            headerText += "\"" + t + "\"" + delimiter_;
+        for( vector<string>::const_iterator it = columns.begin(); 
+            it != columns.end(); it++ )
+            headerText += "\"" + *it + "\"" + delimiter_;
         headerText += eol;
+#ifdef  ENABLE_CPP11
         fprintf( fp.get(), "%s", headerText.c_str() ); 
+#else      /* -----  not ENABLE_CPP11  ----- */
+        fprintf( fp, "%s", headerText.c_str() ); 
+#endif     /* -----  not ENABLE_CPP11  ----- */
     }
 
     string text = "";
@@ -115,9 +125,14 @@ void StreamerBase::writeToCSVFile( const string& filepath, const string& openmod
             text += moose::toString( data[i+ii] ) + delimiter_;
 
         // At the end of each row, we remove the delimiter_ and append newline_.
-        text.pop_back(); text += eol ;
+        *(text.end()-1) = eol;
     }
+#ifdef  ENABLE_CPP11
     fprintf( fp.get(), "%s", text.c_str() );
+#else      /* -----  not ENABLE_CPP11  ----- */
+    fprintf( fp, "%s", text.c_str() );
+    fclose( fp );
+#endif     /* -----  not ENABLE_CPP11  ----- */
 }
 
 /*  write data to a numpy file */

@@ -19,14 +19,10 @@
 
 
 #ifdef  USE_BOOST
-
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
 #include <boost/filesystem.hpp>
-#else      /* -----  not USE_BOOST  ----- */
-#include <random>
-#endif     /* -----  not USE_BOOST  ----- */
+#endif
 
+#include "randnum/RNG.h"                        /* Use inbuilt rng */
 #include "../external/debug/print_function.hpp"
 
 using namespace std;
@@ -65,16 +61,7 @@ extern unsigned int totalTests;
 namespace moose
 {
 
-#ifdef  USE_BOOST
-    using rng_type_ = boost::random::mt19937;
-    using distribution_type_ = boost::random::uniform_01<double>;
-#else      /* -----  not USE_BOOST  ----- */
-    using rng_type_ = std::mt19937;
-    using distribution_type_ = std::uniform_real_distribution<double>;
-#endif     /* -----  not USE_BOOST  ----- */
-
-    extern rng_type_ rng;
-    extern distribution_type_ dist;
+    extern moose::RNG<double> rng;
 
     /**
      * @brief A global seed for all RNGs in moose. When moose.seed( x ) is called,

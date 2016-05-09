@@ -72,21 +72,21 @@ public:
 
 private:
 
-    string outfilePath_ = "";
-    string format_ = "csv";
-    bool isOutfilePathSet_ = false;
+    string outfilePath_;
+    string format_;
+    bool isOutfilePathSet_;
 
     // dt_ of Table's clock
     vector<double> tableDt_;
 
     // This currTime is not computed using the ProcPtr but rather using Tables
     // dt_ and number of entries written.
-    double currTime_ = 0.0;
+    double currTime_;
 
     // Used for adding or removing tables
     vector<Id> tableIds_;
     vector<Table*> tables_;
-    vector<string> columns_ = { "time" };            /* Keep tabe names. */
+    vector<string> columns_;
 
     /*  Keep data in vector */
     vector<double> data_;
