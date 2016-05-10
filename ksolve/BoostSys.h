@@ -20,7 +20,6 @@ typedef boost::numeric::odeint::modified_midpoint< vector_type_ > rk_midpoint_st
  *  implementation has runge_kutta_fehlberg78 solver.
  *-----------------------------------------------------------------------------*/
 typedef boost::numeric::odeint::runge_kutta_cash_karp54< vector_type_ > rk_karp_stepper_type_;
-
 typedef boost::numeric::odeint::runge_kutta_fehlberg78< vector_type_ > rk_felhberg_stepper_type_;
 
 

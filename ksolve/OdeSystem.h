@@ -37,7 +37,8 @@ class OdeSystem {
         double epsRel; // Relative error
 
 #if  USE_BOOST
-        BoostSys* pBoostSys;
+        //BoostSys* pBoostSys;
+        BoostSys boostSys;
         size_t dimension;
 #endif     /* -----  USE_BOOST  ----- */
 };

@@ -110,7 +110,7 @@ private:
 #else
 #endif
 
-    BoostSys* sys_;
+    BoostSys sys_;
 };
 
 #endif	// _VOXEL_POOLS_H
