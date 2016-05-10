@@ -107,7 +107,7 @@ namespace moose {
             unsigned int colums = width / size;
             ss.str("");
 
-            int i = 0;
+            size_t i = 0;
             for(unsigned int ii = 0; ii < row.size(); ii++)
             {
                 if(i < colums)

@@ -77,6 +77,8 @@ option(GPROF "Build for profiling using gprof" OFF)
 option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
+option(WITH_BOOST "Use boost library instead of GSL" OFF)
+option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
 
 # If SBML is available, it will automaticall enable the support. If ON, then
 # libSBML must be present.
@@ -191,6 +193,10 @@ add_executable(moose.bin basecode/main.cpp)
 # default include paths.
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
+if(WITH_BOOST)
+    set(WITH_GSL OFF)
+endif(WITH_BOOST)
+
 # If this variable is used while packaging; we build this project using another
 # cmake script and pass the location of SBML static library using this variable.
 # Otherwise, this is useless. FIXME: This is not a clean solution.
@@ -256,43 +262,49 @@ include_directories(msg basecode)
 set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
 
-## GSL
-if(GSL_STATIC_HOME)
-    SET(GSL_INCLUDE_DIRS "${GSL_STATIC_HOME}/include")
-    find_library(GSL_LIBRARY 
-        NAME libgsl.a 
-        PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64
-        NO_DEFAULT_PATH
-        )
-    find_library(GSLCBLAS_LIBRARY
-        NAME libgslcblas.a 
-        PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64 
-        NO_DEFAULT_PATH
-        )
-    SET(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
-    message(STATUS "STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
-    set(GSL_FOUND TRUE)
-ELSE()
-    find_package(GSL 1.16)
-    if(NOT GSL_FOUND)
-        message(FATAL_ERROR 
-            "=====================================================================\n"
-            " FATAL gsl(>1.16) not found.\n\n"
-            " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
-            " Please install the `dev` or `devel` package e.g. \n"
-            "     $ sudo apt-get install libgsl0-dev \n"
-            "     $ sudo yum install libgsl-devel \n"
-            "     $ brew install gsl \n\n"
-            " Or build and install gsl from source code \n"
-            "     https://www.gnu.org/software/gsl/ \n"
-            " After installing gsl, rerun cmake.\n\n"
-            " If you install gsl in non-standard place, set the GSL_HOME environment \n"
-            " variable. CMAKE use this to search for required files. \n"
-            "====================================================================\n"
+if(WITH_GSL)
+    if(GSL_STATIC_HOME)
+        SET(GSL_INCLUDE_DIRS "${GSL_STATIC_HOME}/include")
+        find_library(GSL_LIBRARY 
+            NAME libgsl.a 
+            PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64
+            NO_DEFAULT_PATH
             )
-    endif(NOT GSL_FOUND)
+        find_library(GSLCBLAS_LIBRARY
+            NAME libgslcblas.a 
+            PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64 
+            NO_DEFAULT_PATH
+            )
+        SET(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
+        message(STATUS "STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
+        set(GSL_FOUND TRUE)
+    ELSE()
+        find_package(GSL 1.16)
+        if(NOT GSL_FOUND)
+            message(FATAL_ERROR 
+                "=====================================================================\n"
+                " FATAL gsl(>1.16) not found.\n\n"
+                " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
+                " Please install the `dev` or `devel` package e.g. \n"
+                "     $ sudo apt-get install libgsl0-dev \n"
+                "     $ sudo yum install libgsl-devel \n"
+                "     $ brew install gsl \n\n"
+                " Or build and install gsl from source code \n"
+                "     https://www.gnu.org/software/gsl/ \n"
+                " After installing gsl, rerun cmake.\n\n"
+                " If you install gsl in non-standard place, set the GSL_HOME environment \n"
+                " variable. CMAKE use this to search for required files. \n"
+                "====================================================================\n"
+                )
+        endif(NOT GSL_FOUND)
+    endif()
+    add_definitions(-DUSE_GSL)
+elseif(WITH_BOOST)
+    #find_package(Boost 1.48 REQUIRED)
+    find_package(Boost REQUIRED)
+    add_definitions( -DUSE_BOOST -UUSE_GSL )
+    include_directories( ${Boost_INCLUDE_DIRS} )
 endif()
-add_definitions(-DUSE_GSL)
 
 ## Setup hdf5
 if(HDF5_STATIC_HOME)
@@ -423,13 +435,14 @@ elseif(LIBSBML_FOUND)
     list(APPEND SYSTEM_SHARED_LIBS ${LIBSBML_LIBRARIES})
 endif()
 
-
-if(GSL_STATIC_HOME)
-    message(STATUS "Using STATIC gsl libraries: ${GSL_LIBRARIES}")
-    list(APPEND STATIC_LIBRARIES ${GSL_LIBRARIES})
-else()
-    message(STATUS "Using system gsl : ${GSL_LIBRARIES}")
-    list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIBRARIES})
+if(WITH_GSL)
+    if(GSL_STATIC_HOME)
+        message(STATUS "Using STATIC gsl libraries: ${GSL_LIBRARIES}")
+        list(APPEND STATIC_LIBRARIES ${GSL_LIBRARIES})
+    else()
+        message(STATUS "Using system gsl : ${GSL_LIBRARIES}")
+        list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIBRARIES})
+    endif()
 endif()
 
 if(READLINE_FOUND AND TERMCAP_FOUND)

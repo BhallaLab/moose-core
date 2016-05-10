@@ -1,5 +1,6 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
+#include <boost/numeric/odeint.hpp>
 ** Messaging Object Oriented Simulation Environment.
 **           Copyright (C) 2003-2014 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
@@ -9,6 +10,8 @@
 
 #ifndef _VOXEL_POOLS_H
 #define _VOXEL_POOLS_H
+
+#include "BoostSys.h"
 
 class Stoich;
 /**
@@ -46,7 +49,7 @@ public:
                 ,  vector_type_& dydt ,  const double t 
                 , VoxelPools* params
                 );
-#else      /* -----  not USE_BOOST  ----- */
+#elif USE_GSL      /* -----  not USE_BOOST  ----- */
     static int gslFunc( double t, const double* y, double *dydt, void* params);
 #endif     /* -----  not USE_BOOST  ----- */
 
