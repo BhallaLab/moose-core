@@ -87,7 +87,7 @@ void change_shape_in_header( const string& filename
 
 static const unsigned int __pre__size__ = 8;
 static char __pre__[__pre__size__] = {
-    (char)0x93, 'N', 'U', 'M', 'P', 'Y'     /* Magic */
+    (char)0x93, 'N', 'U', 'M', 'P', 'Y'         /* Magic */
         , (char)0x01, (char) 0x00               /* format */
 };
 

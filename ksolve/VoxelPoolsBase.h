@@ -11,6 +11,8 @@
 #define _VOXEL_POOLS_BASE_H
 
 #include <map>
+#include <vector>
+
 using namespace std;
 
 class RateTerm;

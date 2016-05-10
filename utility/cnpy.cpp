@@ -89,7 +89,7 @@ bool is_valid_numpy_file( const string& npy_file )
     fp = fopen( npy_file.c_str(), "r" );
     fread( buffer, 1, 8, fp );
     fclose( fp );
-    return buffer == __pre__;
+    return string(buffer, __pre__size__) == string(__pre__, __pre__size__);
 }
 
 /**

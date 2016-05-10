@@ -12,11 +12,12 @@
 #define _VOXEL_POOLS_H
 
 #include "OdeSystem.h"
+#include "VoxelPoolsBase.h"
 
 #ifdef USE_BOOST
 #include "BoostSys.h"
-#include "VoxelPoolsBase.h"
 #endif
+
 
 class Stoich;
 class ProcInfo;

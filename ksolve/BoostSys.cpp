@@ -18,6 +18,8 @@
 #include <iostream>
 #include "VoxelPools.h"
 
+#ifdef  USE_BOOST
+
 BoostSys::BoostSys( )
 { ; }
 
@@ -30,3 +32,6 @@ void BoostSys::operator()( const vector_type_ y
 {
     VoxelPools::evalRates( y, dydt, t, vp );
 }
+
+#else      /* -----  not USE_BOOST  ----- */
+#endif     /* -----  not USE_BOOST  ----- */

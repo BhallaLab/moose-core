@@ -35,6 +35,7 @@
 #endif     /* -----  not USE_BOOST  ----- */
 
 #include <limits>
+#include <iostream>
 
 namespace moose {
 
@@ -59,10 +60,10 @@ class RNG
 #elif USE_BOOST
             boost::random::random_device rd;
             setSeed( rd() );
-#else      /* -----  not ENABLE_CPP11  ----- */
-
+#elif USE_GSL
             gsl_r_ = gsl_rng_alloc( gsl_rng_default );
             gsl_rng_set( gsl_r_, time(NULL) );
+#else      /* -----  not ENABLE_CPP11  ----- */
 
 #endif     /* -----  not ENABLE_CPP11  ----- */
 
@@ -92,8 +93,10 @@ class RNG
 #if defined(USE_BOOST) || defined(ENABLE_CPP11)
             seed_ = seed;
             rng_.seed( seed_ );
-#else 
+#elif USE_GSL
             gsl_rng_set(gsl_r_, seed );
+#else 
+            std::srand( seed_ );
 #endif
         }
 
@@ -106,11 +109,14 @@ class RNG
         T uniform( const T a, const T b)
         {
             size_t maxInt = std::numeric_limits<int>::max();
+            std::cout << dist_( rng_ ) << std::endl;
 
 #if defined(USE_BOOST) || defined(ENABLE_CPP11)
             return ( (b - a ) * dist_( rng_ ) / maxInt ) + a;
-#else
+#elif USE_GSL
             return ( (b -a ) * gsl_rng_get( gsl_r_ ) / gsl_rng_max( gsl_r_ ) + a );
+#else
+            return (b-a) * rand() / RAND_MAX + a;
 #endif
         }
 
@@ -124,8 +130,10 @@ class RNG
         {
 #if defined(USE_BOOST) || defined(ENABLE_CPP11)
             return dist_( rng_ ) / std::numeric_limits<int>::max();
-#else
+#elif USE_GSL
             return gsl_rng_uniform( gsl_r_ );
+#else
+            return rand( ) / RAND_MAX;
 #endif
         }
 

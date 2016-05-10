@@ -47,9 +47,8 @@
 #include <csignal>
 #include <exception>
 
+
 #if USE_BOOST
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
 #include <boost/format.hpp>
 #endif
 
