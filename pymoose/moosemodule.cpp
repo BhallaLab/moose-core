@@ -2679,15 +2679,6 @@ int defineClass(PyObject * module_dict, const Cinfo * cinfo)
     get_moose_classes().insert(pair<string, PyTypeObject*> (className, new_class));
     Py_INCREF(new_class);
 
-#ifdef USE_BOOST
-    LOG( debug, boost::format( "%1% %2% %|40t|%3% %4%")
-                % "`Created class " 
-                % new_class->tp_name 
-                % "base=" 
-                % new_class->tp_base->tp_name 
-       );
-#endif
-
 #ifdef PY3K
     PyDict_SetItemString(new_class->tp_dict, "__module__", PyUnicode_InternFromString("moose"));
 #endif
