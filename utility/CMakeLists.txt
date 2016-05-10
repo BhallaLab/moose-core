@@ -8,4 +8,5 @@ add_library(utility
     Annotator.cpp
     Vec.cpp
     cnpy.cpp
+    matrix_util.cpp
     )
