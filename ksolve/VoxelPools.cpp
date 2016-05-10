@@ -116,6 +116,10 @@ void VoxelPools::advance( const ProcInfo* p )
 
     assert( sys_->params );
     VoxelPools* vp = reinterpret_cast< VoxelPools* >( sys_->params );
+    // NOTE: Make sure to assing vp to BoostSys vp. In next call, it will be used by
+    // updateRates func. Unlike gsl call, we can't pass extra void*  to gslFunc. 
+    sys_->vp = vp;
+    assert( vp->stoichPtr_ );
     vp->stoichPtr_->updateFuncs( &Svec()[0], p->currTime );
 
     /*-----------------------------------------------------------------------------

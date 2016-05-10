@@ -30,6 +30,7 @@ BoostSys::~BoostSys()
 void BoostSys::operator()( const vector_type_ y
         , vector_type_& dydt, const double t )
 {
+    assert( vp );
     VoxelPools::evalRates( y, dydt, t, vp );
 }
 
