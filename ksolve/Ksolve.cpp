@@ -260,6 +260,7 @@ string Ksolve::getMethod() const
 
 void Ksolve::setMethod( string method )
 {
+#if USE_GSL
     if ( method == "rk5" || method == "gsl" )
     {
         method_ = "rk5";
@@ -275,6 +276,10 @@ void Ksolve::setMethod( string method )
              "' not known, using rk5\n";
         method_ = "rk5";
     }
+#elif USE_BOOST
+    // TODO: Check for boost related methods.
+    method_ = method;
+#endif
 }
 
 double Ksolve::getEpsAbs() const

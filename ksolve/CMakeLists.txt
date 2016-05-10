@@ -18,7 +18,7 @@ elseif(WITH_GSL)
     include_directories( ${GSL_INCLUDE_DIRS} )
 endif(WITH_BOOST)
 
-add_library(ksolve
+set(KSOLVE_SRCS
 	KinSparseMatrix.cpp	
 	ZombiePool.cpp 
         ZombieFunction.cpp
@@ -28,14 +28,21 @@ add_library(ksolve
 	ZombieMMenz.cpp 
         VoxelPoolsBase.cpp
 	VoxelPools.cpp 
-        BoostSys.cpp
         GssaVoxelPools.cpp
 	RateTerm.cpp 
         FuncTerm.cpp
 	Stoich.cpp 
 	Ksolve.cpp 
-        SteadyState.cpp
         Gsolve.cpp
         ZombiePoolInterface.cpp
         testKsolve.cpp
     )
+
+if(WITH_GSL)
+    list(APPEND KSOLVE_SRCS SteadyStateGsl.cpp )
+elseif(WITH_BOOST)
+    list(APPEND KSOLVE_SRCS SteadyStateBoost.cpp )
+    list(APPEND KSOLVE_SRCS BoostSys.cpp)
+endif(WITH_GSL)
+
+add_library( ksolve ${KSOLVE_SRCS} )
