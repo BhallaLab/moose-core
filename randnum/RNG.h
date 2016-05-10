@@ -109,14 +109,12 @@ class RNG
         T uniform( const T a, const T b)
         {
             size_t maxInt = std::numeric_limits<int>::max();
-            std::cout << dist_( rng_ ) << std::endl;
-
 #if defined(USE_BOOST) || defined(ENABLE_CPP11)
-            return ( (b - a ) * dist_( rng_ ) / maxInt ) + a;
+            return ( (b - a ) * (T)dist_( rng_ ) / maxInt ) + a;
 #elif USE_GSL
-            return ( (b -a ) * gsl_rng_get( gsl_r_ ) / gsl_rng_max( gsl_r_ ) + a );
+            return ( (b -a ) * (T)gsl_rng_get( gsl_r_ ) / gsl_rng_max( gsl_r_ ) + a );
 #else
-            return (b-a) * rand() / RAND_MAX + a;
+            return (b-a) * (T)rand() / RAND_MAX + a;
 #endif
         }
 
@@ -129,11 +127,11 @@ class RNG
         T uniform( void )
         {
 #if defined(USE_BOOST) || defined(ENABLE_CPP11)
-            return dist_( rng_ ) / std::numeric_limits<int>::max();
+            return (T)dist_( rng_ ) / std::numeric_limits<int>::max();
 #elif USE_GSL
-            return gsl_rng_uniform( gsl_r_ );
+            return (T)gsl_rng_uniform( gsl_r_ );
 #else
-            return rand( ) / RAND_MAX;
+            return (T)rand( ) / RAND_MAX;
 #endif
         }
 
