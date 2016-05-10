@@ -300,8 +300,7 @@ if(WITH_GSL)
     endif()
     add_definitions(-DUSE_GSL)
 elseif(WITH_BOOST)
-    #find_package(Boost 1.48 REQUIRED)
-    find_package(Boost REQUIRED)
+    find_package(Boost 1.48 COMPONENTS filesystem REQUIRED)
     add_definitions( -DUSE_BOOST -UUSE_GSL )
     include_directories( ${Boost_INCLUDE_DIRS} )
 endif()
@@ -412,6 +411,9 @@ add_subdirectory(intfire)
 
 # These are always shared libraries.
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
+if(WITH_BOOST)
+    list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
+endif(WITH_BOOST)
 
 # These libraries could be static of dynamic.
 # When building packages on OBS or launchpad, we build static library of a
@@ -445,9 +447,10 @@ if(WITH_GSL)
     endif()
 endif()
 
-if(READLINE_FOUND AND TERMCAP_FOUND)
-    list(APPEND SYSTEM_SHARED_LIBS ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
-endif()
+# Deprecated.
+#if(READLINE_FOUND AND TERMCAP_FOUND)
+#    list(APPEND SYSTEM_SHARED_LIBS ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
+#endif()
 
 if(WITH_MPI)
     if(MPI_CXX_FOUND)

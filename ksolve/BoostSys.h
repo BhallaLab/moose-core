@@ -6,7 +6,6 @@
 #include <vector>
 #include <boost/numeric/odeint.hpp>
 
-
 typedef double value_type_;
 typedef std::vector<value_type_> vector_type_;
 
@@ -23,6 +22,8 @@ typedef boost::numeric::odeint::runge_kutta_cash_karp54< vector_type_ > rk_karp_
 typedef boost::numeric::odeint::runge_kutta_fehlberg78< vector_type_ > rk_felhberg_stepper_type_;
 
 
+class VoxelPools;
+
 /*
  * =====================================================================================
  *        Class:  BoostSys
@@ -33,20 +34,15 @@ typedef boost::numeric::odeint::runge_kutta_fehlberg78< vector_type_ > rk_felhbe
 class BoostSys
 {
     public:
-        BoostSys ( std::string method ); 
+        BoostSys( );
         ~BoostSys();
 
+        /* Operator is called by boost ode-solver */
+        void operator()( const vector_type_ y , vector_type_& dydt, const double t ); 
+
         /* Pointer to the arbitrary parameters of the system */
+        VoxelPools* vp;
         void * params;
-
-        std::string getMethod( void );
-
-    public:
-        double epsAbs_;
-        double epsRel_;
-
-    private:
-        std::string method_;
 };
 
 #endif // USE_BOOST

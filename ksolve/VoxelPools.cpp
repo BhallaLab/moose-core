@@ -13,7 +13,6 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
 #elif USE_BOOST
-#include <boost/bind.hpp>
 #include <boost/numeric/odeint.hpp>
 using namespace boost::numeric;
 #endif
@@ -110,7 +109,8 @@ void VoxelPools::advance( const ProcInfo* p )
     cleaner.
      *-----------------------------------------------------------------------------*/
 
-    VoxelPools* vp = reinterpret_cast< VoxelPools* >( sys_->params );
+    VoxelPools* vp = reinterpret_cast< VoxelPools* >( ode_->params );
+    ode_->boostSys.vp = vp;
     vp->stoichPtr_->updateFuncs( &Svec()[0], p->currTime );
 
     /*-----------------------------------------------------------------------------
@@ -122,53 +122,51 @@ void VoxelPools::advance( const ProcInfo* p )
      *  http://boostw.boost.org/doc/libs/1_56_0/boost/numeric/odeint/integrate/integrate.hpp
      *-----------------------------------------------------------------------------
      */
-    auto system = boost::bind(&VoxelPools::evalRates, _1, _2, _3, vp);
+    double absTol = ode_->epsAbs;
+    double relTol = ode_->epsRel;
+    string method = ode_->method;
 
-    double absTol = sys_->epsAbs_;
-    double relTol = sys_->epsRel_;
-
-    string method = sys_->getMethod();
     if( method == "rk2" )
-        rk_midpoint_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
+        rk_midpoint_stepper_type_().do_step( ode_->boostSys , Svec(),  p->currTime, p->dt);
     else if( method == "rk4" )
-        rk_karp_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
+        rk_karp_stepper_type_().do_step( ode_->boostSys , Svec(),  p->currTime, p->dt);
     else if( method == "rk5")
-        rk_karp_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
+        rk_karp_stepper_type_().do_step( ode_->boostSys , Svec(),  p->currTime, p->dt);
     else if( method == "rk5a")
         odeint::integrate_adaptive( 
                 odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol)
-                , system
+                , ode_->boostSys
                 , Svec()
                 , p->currTime - p->dt 
                 , p->currTime
                 , p->dt 
                 );
     else if ("rk54" == method )
-        rk_karp_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
+        rk_karp_stepper_type_().do_step( ode_->boostSys , Svec(),  p->currTime, p->dt);
     else if ("rk54a" == method )
         odeint::integrate_adaptive( 
                 odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol )
-                , system, Svec()
+                , ode_->boostSys, Svec()
                 , p->currTime - p->dt 
                 , p->currTime
                 , p->dt 
                 );
     else if ("rk5" == method )
-        rk_dopri_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
+        rk_dopri_stepper_type_().do_step( ode_->boostSys , Svec(),  p->currTime, p->dt);
     else if ("rk5a" == method )
         odeint::integrate_adaptive( 
                 odeint::make_controlled<rk_dopri_stepper_type_>( absTol, relTol )
-                , system, Svec()
+                , ode_->boostSys, Svec()
                 , p->currTime - p->dt 
                 , p->currTime
                 , p->dt 
                 );
     else if( method == "rk8" ) 
-        rk_felhberg_stepper_type_().do_step( system , Svec(),  p->currTime, p->dt);
+        rk_felhberg_stepper_type_().do_step( ode_->boostSys , Svec(),  p->currTime, p->dt);
     else if( method == "rk8a" ) 
         odeint::integrate_adaptive(
                 odeint::make_controlled<rk_felhberg_stepper_type_>( absTol, relTol )
-                , system, Svec()
+                , ode_->boostSys, Svec()
                 , p->currTime - p->dt 
                 , p->currTime
                 , p->dt 
@@ -177,7 +175,7 @@ void VoxelPools::advance( const ProcInfo* p )
     else
         odeint::integrate_adaptive( 
                 odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol )
-                , system, Svec()
+                , ode_->boostSys, Svec()
                 , p->currTime - p->dt 
                 , p->currTime
                 , p->dt 
@@ -220,6 +218,13 @@ int VoxelPools::gslFunc( double t, const double* y, double *dydt,
 #endif
 }
 
+#elif USE_BOOST
+void VoxelPools::evalRates( 
+    const vector_type_& y,  vector_type_& dydt,  const double t, VoxelPools* vp
+    )
+{
+    vp->updateRates( &y[0], &dydt[0] );
+}
 #endif
 
 ///////////////////////////////////////////////////////////////////////

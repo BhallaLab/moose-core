@@ -10,6 +10,13 @@
 #ifndef _VOXEL_POOLS_BASE_H
 #define _VOXEL_POOLS_BASE_H
 
+#include <map>
+using namespace std;
+
+class RateTerm;
+class Stoich;
+class Id;
+
 /**
  * This is the base class for voxels used in reac-diffusion systems.
  * Each voxel manages all the molecular pools that live in it. This
@@ -18,8 +25,7 @@
  * proxy pools that participate in cross-node reactions, but are really 
  * located on other compartments.
  */
-class RateTerm;
-class Stoich;
+
 class VoxelPoolsBase
 {
 	public: 

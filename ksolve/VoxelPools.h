@@ -11,9 +11,16 @@
 #ifndef _VOXEL_POOLS_H
 #define _VOXEL_POOLS_H
 
+#include "OdeSystem.h"
+
+#ifdef USE_BOOST
 #include "BoostSys.h"
+#include "VoxelPoolsBase.h"
+#endif
 
 class Stoich;
+class ProcInfo;
+
 /**
  * This is the class for handling reac-diff voxels used for deterministic
  * computations.
@@ -99,9 +106,9 @@ private:
     gsl_odeiv2_driver* driver_;
     gsl_odeiv2_system sys_;
 #else
-    BoostSys* sys_;                             /* The BOOST ode system. */
 #endif
 
+    OdeSystem* ode_;
 };
 
 #endif	// _VOXEL_POOLS_H

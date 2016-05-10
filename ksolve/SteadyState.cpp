@@ -48,8 +48,8 @@
 #include "VoxelPools.h"
 #include "SteadyState.h"
 
-int ss_func( const gsl_vector* x, void* params, gsl_vector* f );
 #ifdef USE_GSL
+int ss_func( const gsl_vector* x, void* params, gsl_vector* f );
 int myGaussianDecomp( gsl_matrix* U );
 #endif
 
