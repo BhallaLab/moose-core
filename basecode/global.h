@@ -19,9 +19,9 @@
 
 
 #ifdef  USE_BOOST
-#ifdef BOOST_FILESYSTEM_EXISTS
+//#ifdef BOOST_FILESYSTEM_EXISTS
 #include <boost/filesystem.hpp>
-#endif                                          /* BOOST_FILESYSTEM_EXISTS */
+//#endif                                          /* BOOST_FILESYSTEM_EXISTS */
 #endif
 
 #include "randnum/RNG.h"                        /* Use inbuilt rng */

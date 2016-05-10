@@ -305,19 +305,19 @@ elseif(WITH_BOOST)
     find_package( LAPACK REQUIRED )
     add_definitions( -DUSE_BOOST -UUSE_GSL )
     include_directories( ${Boost_INCLUDE_DIRS} )
-    check_include_file_cxx(
-        ${Boost_INCLUDE_DIRS}/boost/random/random_device.hpp
-        BOOST_RANDOM_DEVICE_EXISTS
-        )
-    if(BOOST_RANDOM_DEVICE_EXISTS)
-        add_definitions(-DBOOST_RANDOM_DEVICE_EXISTS)
-    endif(BOOST_RANDOM_DEVICE_EXISTS)
-    check_include_file_cxx(
-        ${Boost_INCLUDE_DIRS}/boost/filesystem.hpp BOOST_FILESYSTEM_EXISTS
-        )
-    if(BOOST_FILESYSTEM_EXISTS)
-        add_definitions( -DBOOST_FILESYSTEM_EXISTS )
-    endif(BOOST_FILESYSTEM_EXISTS)
+    #    check_include_file_cxx(
+    #        ${Boost_INCLUDE_DIRS}/boost/random/random_device.hpp
+    #        BOOST_RANDOM_DEVICE_EXISTS
+    #        )
+    #    if(BOOST_RANDOM_DEVICE_EXISTS)
+    #        add_definitions(-DBOOST_RANDOM_DEVICE_EXISTS)
+    #    endif(BOOST_RANDOM_DEVICE_EXISTS)
+    #    check_include_file_cxx(
+    #        ${Boost_INCLUDE_DIRS}/boost/filesystem.hpp BOOST_FILESYSTEM_EXISTS
+    #        )
+    #    if(BOOST_FILESYSTEM_EXISTS)
+    #        add_definitions( -DBOOST_FILESYSTEM_EXISTS )
+    #    endif(BOOST_FILESYSTEM_EXISTS)
 endif()
 
 ## Setup hdf5

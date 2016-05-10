@@ -54,7 +54,7 @@ using namespace boost::numeric::bindings;
 using namespace boost::numeric;
 
 void ss_func( const vector_type& x, void* params, vector_type& f );
-unsigned int rankUsingBoost( ublas::matrix<value_type_>& U );
+unsigned int rankUsingBoost( ublas::matrix<double>& U );
 
 // Limit below which small numbers are treated as zero.
 const double SteadyState::EPSILON = 1e-9;
@@ -78,8 +78,8 @@ struct reac_info
     VoxelPools* pool;
     vector< double > nVec;
 
-    ublas::matrix< value_type_ >* Nr;
-    ublas::matrix< value_type_ >* gamma;
+    ublas::matrix< double >* Nr;
+    ublas::matrix< double >* gamma;
 };
 
 const Cinfo* SteadyState::initCinfo()
@@ -532,7 +532,7 @@ void SteadyState::setupSSmatrix()
 
     ublas::matrix<double> N(numVarPools_, nReacs_, 0.0);
 
-    LU_ = ublas::matrix< value_type_ >( numVarPools_, nTot, 0.0);
+    LU_ = ublas::matrix< double >( numVarPools_, nTot, 0.0);
 
     vector< int > entry = Field< vector< int > >::get(
                               stoich_, "matrixEntry" );
@@ -559,8 +559,8 @@ void SteadyState::setupSSmatrix()
 
     // This function reorgranize LU_.
     rank_ = rankUsingBoost( LU_ );
-    Nr_ = ublas::matrix< value_type_ >( rank_, nReacs_ );
-    Nr_.assign( ublas::zero_matrix< value_type_ >( rank_, nReacs_ ) );
+    Nr_ = ublas::matrix< double >( rank_, nReacs_ );
+    Nr_.assign( ublas::zero_matrix< double >( rank_, nReacs_ ) );
 
     unsigned int nConsv = numVarPools_ - rank_;
     if ( nConsv == 0 )
@@ -574,7 +574,7 @@ void SteadyState::setupSSmatrix()
         for ( unsigned int j = i; j < nReacs_; j++)
             Nr_(i,j) = LU_(i, j);
 
-    gamma_ = ublas::matrix< value_type_ >( nConsv, numVarPools_, 0.0 );
+    gamma_ = ublas::matrix< double >( nConsv, numVarPools_, 0.0 );
 
     // Fill up gamma
     for ( unsigned int i = rank_; i < numVarPools_; ++i )
@@ -609,7 +609,7 @@ void SteadyState::setupSSmatrix()
 void SteadyState::classifyState( const double* T )
 {
     /* column_major trait is needed for fortran */
-    ublas::matrix<value_type_, ublas::column_major> J(numVarPools_, numVarPools_);
+    ublas::matrix<double, ublas::column_major> J(numVarPools_, numVarPools_);
 
     double tot = 0.0;
     Stoich* s = reinterpret_cast< Stoich* >( stoich_.eref().data() );
@@ -658,9 +658,9 @@ void SteadyState::classifyState( const double* T )
     }
 
     // Jacobian is now ready. Find eigenvalues.
-    ublas::vector< std::complex< value_type_ > > eigenVec ( J.size1() );
+    ublas::vector< std::complex< double > > eigenVec ( J.size1() );
 
-    ublas::matrix< std::complex<value_type_>, ublas::column_major >* vl, *vr;
+    ublas::matrix< std::complex<double>, ublas::column_major >* vl, *vr;
     vl = NULL; vr = NULL;
 
     /*-----------------------------------------------------------------------------
@@ -751,7 +751,7 @@ void SteadyState::settle( bool forceSetup )
     // Setting up matrices and vectors for the calculation.
     Id ksolve = Field< Id >::get( stoich_, "ksolve" );
 
-    auto ss = NonlinearSystem( numVarPools_ );
+    NonLinearSystem ss( numVarPools_ );
     ss.ri.rank = rank_;
     ss.ri.num_reacs = nReacs_;
     ss.ri.num_mols = numVarPools_;
@@ -765,13 +765,13 @@ void SteadyState::settle( bool forceSetup )
     ss.ri.convergenceCriterion = convergenceCriterion_;
 
     // This gives the starting point for finding the solution.
-    vector<value_type_> init( numVarPools_ );
+    vector<double> init( numVarPools_ );
 
     // Instead of starting at sqrt( x ), 
     for( size_t i = 0; i < numVarPools_; ++i )
         init[i] = max( 0.0, sqrt(ss.ri.nVec[i]) );
 
-    ss.initialize<vector<value_type_>>( init );
+    ss.initialize<vector<double>>( init );
 
     // Fill up boundary condition values
     if ( reassignTotal_ )   // The user has defined new conservation values.
@@ -845,7 +845,7 @@ void SteadyState::settle( bool forceSetup )
  * @param r1 index of row 1
  * @param r2 index of row 2
  */
-void swapRows( ublas::matrix< value_type_ >& mat, unsigned int r1, unsigned int r2)
+void swapRows( ublas::matrix< double >& mat, unsigned int r1, unsigned int r2)
 {
     ublas::vector<value_type> temp( mat.size2() );
     for (size_t i = 0; i < mat.size2(); i++) 
@@ -859,7 +859,7 @@ void swapRows( ublas::matrix< value_type_ >& mat, unsigned int r1, unsigned int 
 }
 
 
-int reorderRows( ublas::matrix< value_type_ >& U, int start, int leftCol )
+int reorderRows( ublas::matrix< double >& U, int start, int leftCol )
 {
     int leftMostRow = start;
     int numReacs = U.size2() - U.size1();
@@ -886,7 +886,7 @@ int reorderRows( ublas::matrix< value_type_ >& U, int start, int leftCol )
     return newLeftCol;
 }
 
-void eliminateRowsBelow( ublas::matrix< value_type_ >& U, int start, int leftCol )
+void eliminateRowsBelow( ublas::matrix< double >& U, int start, int leftCol )
 {
     int numMols = U.size1();
     double pivot = U( start, leftCol );
@@ -911,7 +911,7 @@ void eliminateRowsBelow( ublas::matrix< value_type_ >& U, int start, int leftCol
     }
 }
 
-unsigned int rankUsingBoost( ublas::matrix<value_type_>& U )
+unsigned int rankUsingBoost( ublas::matrix<double>& U )
 {
     int numMols = U.size1();
     int numReacs = U.size2() - numMols;

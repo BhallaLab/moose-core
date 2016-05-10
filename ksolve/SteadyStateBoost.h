@@ -110,7 +110,7 @@ private:
     boost::numeric::ublas::matrix< value_type_ > gamma_;
 
     Id stoich_;
-    unsigned int numVarPools_;
+    size_t numVarPools_;
     unsigned int nReacs_;
     unsigned int rank_;
 
