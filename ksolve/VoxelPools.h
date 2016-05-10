@@ -107,10 +107,10 @@ private:
 #ifdef USE_GSL
     gsl_odeiv2_driver* driver_;
     gsl_odeiv2_system sys_;
-#else
+#elif USE_BOOST
+    BoostSys sys_;
 #endif
 
-    BoostSys sys_;
 };
 
 #endif	// _VOXEL_POOLS_H
