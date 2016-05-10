@@ -12,6 +12,10 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
+#elif USE_BOOST
+#include <boost/bind.hpp>
+#include <boost/numeric/odeint.hpp>
+using namespace boost::numeric;
 #endif
 
 #include "OdeSystem.h"
@@ -118,7 +122,7 @@ void VoxelPools::advance( const ProcInfo* p )
      *  http://boostw.boost.org/doc/libs/1_56_0/boost/numeric/odeint/integrate/integrate.hpp
      *-----------------------------------------------------------------------------
      */
-    auto system = std::bind(&VoxelPools::evalRates, _1, _2, _3, vp);
+    auto system = boost::bind(&VoxelPools::evalRates, _1, _2, _3, vp);
 
     double absTol = sys_->epsAbs_;
     double relTol = sys_->epsRel_;
@@ -188,6 +192,7 @@ void VoxelPools::setInitDt( double dt )
 #endif
 }
 
+#ifdef USE_GSL
 // static func. This is the function that goes into the Gsl solver.
 int VoxelPools::gslFunc( double t, const double* y, double *dydt, 
 						void* params )
@@ -214,6 +219,9 @@ int VoxelPools::gslFunc( double t, const double* y, double *dydt,
 	return 0;
 #endif
 }
+
+#endif
+
 ///////////////////////////////////////////////////////////////////////
 // Here are the internal reaction rate calculation functions
 ///////////////////////////////////////////////////////////////////////

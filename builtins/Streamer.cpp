@@ -17,10 +17,6 @@
 #include <algorithm>
 #include <sstream>
 
-#ifdef  USE_BOOST
-#include <boost/log/trivial.hpp>
-#endif     /* -----  not USE_BOOST  ----- */
-
 #include "global.h"
 #include "header.h"
 #include "Streamer.h"
