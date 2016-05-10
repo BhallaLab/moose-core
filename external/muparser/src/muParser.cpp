@@ -136,6 +136,7 @@ namespace mu
           else
               srand( seed );
       }
+      isSeedSet = true;
       return ((value_type) rand()) / (value_type) RAND_MAX;
 #endif
   }

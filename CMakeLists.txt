@@ -10,7 +10,17 @@ if(COMMAND cmake_policy)
 endif(COMMAND cmake_policy)
 
 project(moose)
-set(MOOSE_VERSION "3.0.2")
+
+# Set moose version
+# Get the latest abbreviated commit hash of the working branch
+execute_process(
+  COMMAND git describe --tags --long
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_VERSION_OUTPUT
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+add_definitions( -DMOOSE_VERSION="${GIT_VERSION_OUTPUT}")
+
 include(FindPkgConfig)
 
 # This snippet is from LLVM project.
@@ -140,14 +150,14 @@ endif()
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-if(ENABLE_UNIT_TESTS AND DEBUG)
+if(DEBUG)
     message(STATUS "Building for Debug/Unit testing")
     add_definitions(-DDO_UNIT_TESTS)
     set(CMAKE_BUILD_TYPE Debug)
-    add_definitions(-g)
-elseif(DEBUG AND ENABLE_UNIT_TESTS)
+elseif(ENABLE_UNIT_TESTS)
     MESSAGE(STATUS "Enabled Unit tests")
-    add_definitions(-DDO_UNIT_TESTS -g)
+    add_definitions(-DDO_UNIT_TESTS)
+    set(CMAKE_BUILD_TYPE Debug)
 else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
@@ -307,7 +317,6 @@ ELSE(HDF5_STATIC_HOME)
      endif()
 endif(HDF5_STATIC_HOME)
 
-#message(STATUS "Debug: HDF5_FOUND? = ${HDF5_FOUND}")
 if(NOT HDF5_FOUND)
     message(
         "==================================================================\n"
@@ -322,9 +331,7 @@ if(NOT HDF5_FOUND)
         " variable HDF5_ROOT to the location. Rerun cmake \n"
         "================================================================ \n"
         )
-ELSE(NOT HDF5_FOUND)
-    add_definitions(-DUSE_HDF5)
-    message(STATUS "DBG -- HDF5: ${HDF5_LIBRARIES} ## ${HDF5_CXX_LIBRARIES} ## ${HDF5_HL_LIBRARIES}")
+ELSEIF(HDF5_FOUND AND (NOT HDF5_STATIC_HOME))
     if(HDF5_HL_LIBRARIES)
         set(HDF5_LIBRARIES ${HDF5_HL_LIBRARIES})
     else()
@@ -332,6 +339,11 @@ ELSE(NOT HDF5_FOUND)
     endif()
     include_directories(${HDF5_INCLUDE_DIRS})
 endif(NOT HDF5_FOUND)
+
+if(HDF5_FOUND)
+    add_definitions( -DUSE_HDF5 )
+    include_directories( ${HDF5_INCLUDE_DIRS} )
+endif( HDF5_FOUND )
 
 # This is a fix for new HDF5 package on Debian/Ubuntu which installs hdf5
 # headers in non-standard path. issue #80.

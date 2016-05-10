@@ -37,7 +37,10 @@ GENESIS_COLOR_SEQUENCE = ((248, 0, 255), (240, 0, 255), (232, 0, 255), (224, 0, 
 #               --StimulusTable
 
 def write( modelpath, filename,sceneitems=None):
-        filename = filename[:filename.find('.')]
+        if filename.rfind('.') != -1:
+            filename = filename[:filename.rfind('.')]
+        else:
+            filename = filename[:len(filename)]
         filename = filename+'.g'
         global NA
         NA = 6.0221415e23
@@ -78,7 +81,9 @@ def write( modelpath, filename,sceneitems=None):
                 if tgraphs:
                         writeplot(tgraphs,f)
                         storePlotMsgs(tgraphs,f)
-                writeFooter(f)
+                writeFooter1(f)
+                writeNotes(modelpath,f)
+                writeFooter2(f)
                 return True
         else:
                 print("Warning: writeKkit:: No model found on " , modelpath)
@@ -321,7 +326,7 @@ def writeplot( tgraphs,f ):
                                         tabPath = re.sub("\[[0-9]+\]", "", tabPath)
                                         f.write("simundump xplot " + tabPath + " 3 524288 \\\n" + "\"delete_plot.w <s> <d>; edit_plot.D <w>\" " + fg + " 0 0 1\n")
 
-def writePool(modelpath,f,volIndex ):
+def writePool(modelpath,f,volIndex):
         for p in wildcardFind(modelpath+'/##[ISA=PoolBase]'):
                 slave_enable = 0
                 if (p.className == "BufPool" or p.className == "ZombieBufPool"):
@@ -363,7 +368,8 @@ def writePool(modelpath,f,volIndex ):
                         str(slave_enable) +
                         " /kinetics"+ geometryName + " " +
                         str(color) +" " + str(textcolor) + " " + str(int(x)) + " " + str(int(y)) + " "+ str(0)+"\n")
-
+                # print " notes ",notes
+                # return notes
 def getColorCheck(color,GENESIS_COLOR_SEQUENCE):
         if isinstance(color, str):
                 if color.startswith("#"):
@@ -495,7 +501,7 @@ def writeCompartment(modelpath,compts,f):
         return volIndex
 
 def writeGroup(modelpath,f,xmax,ymax):
-        ignore = ["graphs","moregraphs","geometry","groups","conc1","conc2","conc3","conc4"]
+        ignore = ["graphs","moregraphs","geometry","groups","conc1","conc2","conc3","conc4","model","data","graph_0","graph_1","graph_2","graph_3","graph_4","graph_5"]
         for g in wildcardFind(modelpath+'/##[TYPE=Neutral]'):
                 if not g.name in ignore:
                         if trimPath(g) != None:
@@ -574,10 +580,18 @@ def writeGui( f ):
         "simundump xtree /edit/draw/tree 0 \\\n"
         "  /kinetics/#[],/kinetics/#[]/#[],/kinetics/#[]/#[]/#[][TYPE!=proto],/kinetics/#[]/#[]/#[][TYPE!=linkinfo]/##[] \"edit_elm.D <v>; drag_from_edit.w <d> <S> <x> <y> <z>\" auto 0.6\n"
         "simundump xtext /file/notes 0 1\n")
-
-def writeFooter( f ):
-        f.write( "\nenddump\n" +
-           "complete_loading\n")
+def writeNotes(modelpath,f):
+    notes = ""
+    items = wildcardFind(modelpath+"/##[ISA=ChemCompt],/##[ISA=ReacBase],/##[ISA=PoolBase],/##[ISA=EnzBase],/##[ISA=Function],/##[ISA=StimulusTable]")
+    for item in items:
+        info = item.path+'/info'
+        notes = Annotator(info).getField('notes')
+        if (notes):
+            f.write("call /kinetics/"+ trimPath(item)+"/notes LOAD \ \n\""+Annotator(info).getField('notes')+"\"\n")
+def writeFooter1(f):
+    f.write("\nenddump\n // End of dump\n")
+def writeFooter2(f):
+    f.write("complete_loading\n")
 
 if __name__ == "__main__":
         import sys
