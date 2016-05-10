@@ -750,7 +750,8 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
                 time( &rawtime );
                 timeinfo = localtime( &rawtime );
                 strftime(now, 80, "%c", timeinfo);
-                cout << "@ " << now << ": " << 100 * currentTime_ / runTime_ << "\% of total " << runTime_ << " is over." << endl;
+                cout << "@ " << now << ": " << 100 * currentTime_ / runTime_ 
+                    << "\% of total " << runTime_ << " is over." << endl;
             }
         }
     }

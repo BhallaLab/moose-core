@@ -20,7 +20,7 @@
 
 #ifdef  USE_BOOST
 
-BoostSys::BoostSys( )
+BoostSys::BoostSys( ) : vp( NULL )
 { ; }
 
 BoostSys::~BoostSys()

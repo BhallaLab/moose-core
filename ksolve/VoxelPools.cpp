@@ -66,51 +66,56 @@ void VoxelPools::reinit( double dt )
 
 void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
 {
-	stoichPtr_ = s;
+    stoichPtr_ = s;
 #ifdef USE_GSL
-	if ( ode ) {
-		sys_ = ode->gslSys;
-		if ( driver_ )
-			gsl_odeiv2_driver_free( driver_ );
-		driver_ = gsl_odeiv2_driver_alloc_y_new( 
-			&sys_, ode->gslStep, ode->initStepSize, 
-			ode->epsAbs, ode->epsRel );
-	}
+    if ( ode ) {
+        sys_ = ode->gslSys;
+        if ( driver_ )
+            gsl_odeiv2_driver_free( driver_ );
+        driver_ = gsl_odeiv2_driver_alloc_y_new( 
+                &sys_, ode->gslStep, ode->initStepSize, 
+                ode->epsAbs, ode->epsRel );
+    }
+#elif USE_BOOST
+    if( ode )
+        sys_ = ode->pBoostSys;
 #endif
-	VoxelPoolsBase::reinit();
+    VoxelPoolsBase::reinit();
 }
 
 void VoxelPools::advance( const ProcInfo* p )
 {
+    double t = p->currTime - p->dt;
 #ifdef USE_GSL
-	double t = p->currTime - p->dt;
-	int status = gsl_odeiv2_driver_apply( driver_, &t, p->currTime, varS());
-	if ( status != GSL_SUCCESS ) {
-		cout << "Error: VoxelPools::advance: GSL integration error at time "
-			 << t << "\n";
-		cout << "Error info: " << status << ", " << 
-				gsl_strerror( status ) << endl;
-		if ( status == GSL_EMAXITER ) 
-			cout << "Max number of steps exceeded\n";
-		else if ( status == GSL_ENOPROG ) 
-			cout << "Timestep has gotten too small\n";
-		else if ( status == GSL_EBADFUNC ) 
-			cout << "Internal error\n";
-		assert( 0 );
-	}
-#else
-    /*-----------------------------------------------------------------------------
-    NOTICE: 04/21/2016 11:31:42 AM
+    int status = gsl_odeiv2_driver_apply( driver_, &t, p->currTime, varS());
+    if ( status != GSL_SUCCESS ) {
+        cout << "Error: VoxelPools::advance: GSL integration error at time "
+            << t << "\n";
+        cout << "Error info: " << status << ", " << 
+            gsl_strerror( status ) << endl;
+        if ( status == GSL_EMAXITER ) 
+            cout << "Max number of steps exceeded\n";
+        else if ( status == GSL_ENOPROG ) 
+            cout << "Timestep has gotten too small\n";
+        else if ( status == GSL_EBADFUNC ) 
+            cout << "Internal error\n";
+        assert( 0 );
+    }
+    
+#elif USE_BOOST
 
-    We need to call this function here (unlike in GSL solver) because there
+    /*-----------------------------------------------------------------------------
+    NOTE: 04/21/2016 11:31:42 AM
+
+    We need to call updateFuncs  here (unlike in GSL solver) because there
     is no way we can update const vector_type_& y in evalRatesUsingBoost
     function. In gsl implmentation one could do it, because const_cast can
     take away the constantness of double*. This probably makes the call bit
     cleaner.
      *-----------------------------------------------------------------------------*/
 
-    VoxelPools* vp = reinterpret_cast< VoxelPools* >( ode_->params );
-    ode_->boostSys.vp = vp;
+    assert( sys_->params );
+    VoxelPools* vp = reinterpret_cast< VoxelPools* >( sys_->params );
     vp->stoichPtr_->updateFuncs( &Svec()[0], p->currTime );
 
     /*-----------------------------------------------------------------------------
@@ -122,51 +127,52 @@ void VoxelPools::advance( const ProcInfo* p )
      *  http://boostw.boost.org/doc/libs/1_56_0/boost/numeric/odeint/integrate/integrate.hpp
      *-----------------------------------------------------------------------------
      */
-    double absTol = ode_->epsAbs;
-    double relTol = ode_->epsRel;
-    string method = ode_->method;
+
+    double absTol = sys_->epsAbs;
+    double relTol = sys_->epsRel;
+    string method = sys_->method;
 
     if( method == "rk2" )
-        rk_midpoint_stepper_type_().do_step( ode_->boostSys , Svec(),  p->currTime, p->dt);
+        rk_midpoint_stepper_type_().do_step( *sys_ , Svec(),  p->currTime, p->dt);
     else if( method == "rk4" )
-        rk_karp_stepper_type_().do_step( ode_->boostSys , Svec(),  p->currTime, p->dt);
+        rk_karp_stepper_type_().do_step( *sys_ , Svec(),  p->currTime, p->dt);
     else if( method == "rk5")
-        rk_karp_stepper_type_().do_step( ode_->boostSys , Svec(),  p->currTime, p->dt);
+        rk_karp_stepper_type_().do_step( *sys_ , Svec(),  p->currTime, p->dt);
     else if( method == "rk5a")
         odeint::integrate_adaptive( 
                 odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol)
-                , ode_->boostSys
+                , *sys_
                 , Svec()
                 , p->currTime - p->dt 
                 , p->currTime
                 , p->dt 
                 );
     else if ("rk54" == method )
-        rk_karp_stepper_type_().do_step( ode_->boostSys , Svec(),  p->currTime, p->dt);
+        rk_karp_stepper_type_().do_step( *sys_ , Svec(),  p->currTime, p->dt);
     else if ("rk54a" == method )
         odeint::integrate_adaptive( 
                 odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol )
-                , ode_->boostSys, Svec()
+                , *sys_, Svec()
                 , p->currTime - p->dt 
                 , p->currTime
                 , p->dt 
                 );
     else if ("rk5" == method )
-        rk_dopri_stepper_type_().do_step( ode_->boostSys , Svec(),  p->currTime, p->dt);
+        rk_dopri_stepper_type_().do_step( *sys_ , Svec(),  p->currTime, p->dt);
     else if ("rk5a" == method )
         odeint::integrate_adaptive( 
                 odeint::make_controlled<rk_dopri_stepper_type_>( absTol, relTol )
-                , ode_->boostSys, Svec()
+                , *sys_, Svec()
                 , p->currTime - p->dt 
                 , p->currTime
                 , p->dt 
                 );
     else if( method == "rk8" ) 
-        rk_felhberg_stepper_type_().do_step( ode_->boostSys , Svec(),  p->currTime, p->dt);
+        rk_felhberg_stepper_type_().do_step( *sys_ , Svec(),  p->currTime, p->dt);
     else if( method == "rk8a" ) 
         odeint::integrate_adaptive(
                 odeint::make_controlled<rk_felhberg_stepper_type_>( absTol, relTol )
-                , ode_->boostSys, Svec()
+                , *sys_, Svec()
                 , p->currTime - p->dt 
                 , p->currTime
                 , p->dt 
@@ -175,7 +181,7 @@ void VoxelPools::advance( const ProcInfo* p )
     else
         odeint::integrate_adaptive( 
                 odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol )
-                , ode_->boostSys, Svec()
+                , *sys_, Svec()
                 , p->currTime - p->dt 
                 , p->currTime
                 , p->dt 

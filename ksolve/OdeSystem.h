@@ -33,13 +33,12 @@ class OdeSystem {
         const gsl_odeiv2_step_type* gslStep;
 #endif
         double initStepSize;
-
         double epsAbs; // Absolute error
         double epsRel; // Relative error
 
 #if  USE_BOOST
-        BoostSys boostSys;
-        void* params;
+        BoostSys* pBoostSys;
+        size_t dimension;
 #endif     /* -----  USE_BOOST  ----- */
 };
 

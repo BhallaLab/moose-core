@@ -52,13 +52,14 @@ public:
     /// Set initial timestep to use by the solver.
     void setInitDt( double dt );
 
-#ifdef  USE_BOOST
-    static void evalRates( const vector_type_& y 
-                ,  vector_type_& dydt ,  const double t 
-                , VoxelPools* params
-                );
-#elif USE_GSL      /* -----  not USE_BOOST  ----- */
+#ifdef USE_GSL      /* -----  not USE_BOOST  ----- */
     static int gslFunc( double t, const double* y, double *dydt, void* params);
+#elif  USE_BOOST
+    static void evalRates( const vector_type_& y 
+                ,  vector_type_& dydt
+                ,  const double t 
+                , VoxelPools* vp
+                );
 #endif     /* -----  not USE_BOOST  ----- */
 
     //////////////////////////////////////////////////////////////////
@@ -109,7 +110,7 @@ private:
 #else
 #endif
 
-    OdeSystem* ode_;
+    BoostSys* sys_;
 };
 
 #endif	// _VOXEL_POOLS_H

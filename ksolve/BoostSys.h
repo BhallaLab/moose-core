@@ -4,6 +4,8 @@
 #ifdef USE_BOOST
 
 #include <vector>
+#include <string>
+
 #include <boost/numeric/odeint.hpp>
 
 typedef double value_type_;
@@ -42,7 +44,11 @@ class BoostSys
 
         /* Pointer to the arbitrary parameters of the system */
         VoxelPools* vp;
-        void * params;
+        void* params;
+
+        double epsAbs;
+        double epsRel;
+        std::string method;
 };
 
 #endif // USE_BOOST
