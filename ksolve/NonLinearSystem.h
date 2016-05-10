@@ -99,6 +99,7 @@ public:
         x1.resize( size_, 0);
 
         ri.nVec.resize( size_ );
+        dx_ = sqrt( numeric_limits<double>::epsilon() );  
     }
 
     vector_type compute_at(const vector_type& x)
@@ -326,7 +327,7 @@ public:
 public:
     const size_t size_;
 
-    double dx_ = sqrt( numeric_limits<double>::epsilon() ); 
+    double dx_;
 
     vector_type f_;
     vector_type x_;

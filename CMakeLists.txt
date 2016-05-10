@@ -1,5 +1,6 @@
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
+include(CheckIncludeFileCXX)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
@@ -300,10 +301,23 @@ if(WITH_GSL)
     endif()
     add_definitions(-DUSE_GSL)
 elseif(WITH_BOOST)
-    find_package(Boost 1.48 COMPONENTS filesystem REQUIRED)
+    find_package(Boost COMPONENTS filesystem REQUIRED)
     find_package( LAPACK REQUIRED )
     add_definitions( -DUSE_BOOST -UUSE_GSL )
     include_directories( ${Boost_INCLUDE_DIRS} )
+    check_include_file_cxx(
+        ${Boost_INCLUDE_DIRS}/boost/random/random_device.hpp
+        BOOST_RANDOM_DEVICE_EXISTS
+        )
+    if(BOOST_RANDOM_DEVICE_EXISTS)
+        add_definitions(-DBOOST_RANDOM_DEVICE_EXISTS)
+    endif(BOOST_RANDOM_DEVICE_EXISTS)
+    check_include_file_cxx(
+        ${Boost_INCLUDE_DIRS}/boost/filesystem.hpp BOOST_FILESYSTEM_EXISTS
+        )
+    if(BOOST_FILESYSTEM_EXISTS)
+        add_definitions( -DBOOST_FILESYSTEM_EXISTS )
+    endif(BOOST_FILESYSTEM_EXISTS)
 endif()
 
 ## Setup hdf5

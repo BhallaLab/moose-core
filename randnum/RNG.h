@@ -22,7 +22,11 @@
 #ifdef  USE_BOOST
 #include <boost/random.hpp>
 #include <boost/random/uniform_int.hpp>
+
+#if  BOOST_RANDOM_DEVICE_EXISTS
 #include <boost/random/random_device.hpp>
+#endif     /* -----  BOOST_RANDOM_DEVICE_EXISTS  ----- */
+
 #else      /* -----  not USE_BOOST  ----- */
 
 #ifdef  ENABLE_CPP11
@@ -57,7 +61,7 @@ class RNG
 #ifdef  ENABLE_CPP11 
             std::random_device rd;
             setSeed( rd() );
-#elif USE_BOOST
+#elif defined(USE_BOOST) && defined(BOOST_RANDOM_DEVICE_EXISTS)
             boost::random::random_device rd;
             setSeed( rd() );
 #elif USE_GSL

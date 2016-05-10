@@ -711,8 +711,9 @@ void SteadyState::classifyState( const double* T )
 
 static bool isSolutionValid( const vector< double >& x )
 {
-    for( auto v : x )
+    for( size_t i = 0; i < x.size(); i++ ) 
     {
+        double v = x[i];
         if ( std::isnan( v ) or std::isinf( v ) )
         {
             cout << "Warning: SteadyState iteration gave nan/inf concs\n";
