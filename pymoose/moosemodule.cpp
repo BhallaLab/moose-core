@@ -3144,7 +3144,7 @@ static struct PyModuleDef MooseModuleDef =
 };
 
 #define INITERROR return NULL
-#define MODINIT(name) PyInit##name()
+#define MODINIT(name) PyInit_##name()
 #else // Python 2
 #define INITERROR return
 #define MODINIT(name) init##name()
