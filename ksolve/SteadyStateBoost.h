@@ -15,6 +15,7 @@
 #include "BoostSys.h"
 #include "../randnum/RNG.h"
 
+class NonlinearSystem;
 
 class SteadyState
 {
@@ -125,6 +126,11 @@ private:
     VoxelPools pool_;
 
     moose::RNG<double> rng;
+
+#if USE_BOOST
+    NonlinearSystem* ss;
+#endif 
+
 };
 
 extern const Cinfo* initSteadyStateCinfo();

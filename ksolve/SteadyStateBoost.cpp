@@ -21,6 +21,7 @@
  * Likewise, if you want to carry out a dose-response calculation.
  */
 
+
 #include "header.h"
 #include "global.h"
 #include "SparseMatrix.h"
@@ -35,7 +36,7 @@
 #include "../randnum/RNG.h"
 
 /* Root finding algorithm is implemented here */
-#include "NonLinearSystem.h"                    
+#include "NonlinearSystem.h"                    
 
 /*
  * Bindings to lapack. These headers are not part of standard boost
@@ -751,27 +752,28 @@ void SteadyState::settle( bool forceSetup )
     // Setting up matrices and vectors for the calculation.
     Id ksolve = Field< Id >::get( stoich_, "ksolve" );
 
-    NonLinearSystem ss( numVarPools_ );
-    ss.ri.rank = rank_;
-    ss.ri.num_reacs = nReacs_;
-    ss.ri.num_mols = numVarPools_;
-    ss.ri.T = T;
-    ss.ri.Nr = Nr_;
-    ss.ri.gamma = gamma_;
-    ss.ri.pool = &pool_;
-    ss.ri.nVec = LookupField< unsigned int, vector< double > >::get(
-             ksolve,"nVec", 0 
-             );
-    ss.ri.convergenceCriterion = convergenceCriterion_;
+    ss = new NonlinearSystem( numVarPools_ );
+
+    ss->ri.rank = rank_;
+    ss->ri.num_reacs = nReacs_;
+    ss->ri.num_mols = numVarPools_;
+    ss->ri.T = T;
+    ss->ri.Nr = Nr_;
+    ss->ri.gamma = gamma_;
+    ss->ri.pool = &pool_;
+    ss->ri.nVec = LookupField< unsigned int, vector< double > >::get(
+            ksolve,"nVec", 0 
+            );
+    ss->ri.convergenceCriterion = convergenceCriterion_;
 
     // This gives the starting point for finding the solution.
     vector<double> init( numVarPools_ );
 
     // Instead of starting at sqrt( x ), 
     for( size_t i = 0; i < numVarPools_; ++i )
-        init[i] = max( 0.0, sqrt(ss.ri.nVec[i]) );
+        init[i] = max( 0.0, sqrt(ss->ri.nVec[i]) );
 
-    ss.initialize<vector<double>>( init );
+    ss->initialize<vector<double>>( init );
 
     // Fill up boundary condition values
     if ( reassignTotal_ )   // The user has defined new conservation values.
@@ -784,28 +786,28 @@ void SteadyState::settle( bool forceSetup )
     {
         for ( size_t i = 0; i < nConsv; ++i )
             for ( size_t j = 0; j < numVarPools_; ++j )
-                T[i] += gamma_( i, j ) * ss.ri.nVec[ j ];
+                T[i] += gamma_( i, j ) * ss->ri.nVec[ j ];
         total_.assign( T, T + nConsv );
     }
 
     vector< double > repair( numVarPools_, 0.0 );
 
     for ( unsigned int j = 0; j < numVarPools_; ++j )
-        repair[j] = ss.ri.nVec[j];
+        repair[j] = ss->ri.nVec[j];
 
 
     int status = 1;
 
     // Find roots . If successful, set status to 0.
-    if( ss.find_roots_gnewton( ) )
+    if( ss->find_roots_gnewton( ) )
         status = 0;
 
-    if ( status == 0 && isSolutionValid( ss.ri.nVec ) )
+    if ( status == 0 && isSolutionValid( ss->ri.nVec ) )
     {
         solutionStatus_ = 0; // Good solution
 
         LookupField< unsigned int, vector< double > >::set(
-            ksolve, "nVec", 0, ss.ri.nVec 
+            ksolve, "nVec", 0, ss->ri.nVec 
             );
         // Check what we set
         auto t = LookupField< unsigned int, vector< double > >::get(
@@ -817,14 +819,14 @@ void SteadyState::settle( bool forceSetup )
     else
     {
         cout << "Warning: SteadyState iteration failed, status = " <<
-             status_ << ", nIter = " << ss.ri.nIter << endl;
+             status_ << ", nIter = " << ss->ri.nIter << endl;
 
         for ( unsigned int j = 0; j < numVarPools_; j++ )
-            ss.ri.nVec[j] = repair[j];
+            ss->ri.nVec[j] = repair[j];
 
         solutionStatus_ = 1; // Steady state failed.
         LookupField< unsigned int, vector< double > >::set(
-            ksolve, "nVec", 0, ss.ri.nVec 
+            ksolve, "nVec", 0, ss->ri.nVec 
             );
 
     }
