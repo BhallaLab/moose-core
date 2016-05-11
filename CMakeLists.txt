@@ -239,8 +239,8 @@ if(LIBSBML_FOUND)
         target_link_libraries(libmoose PROPERTIES LINK_FLAGS
             "-L${LIBSBML_LIBRARY_DIRS}"
             )
-        target_link_libraries(_moose PROPERTIES LINK_FLAGS
-            "-L${LIBSBML_LIBRARY_DIRS}"
+        target_link_libraries(_moose 
+            PROPERTIES LINK_FLAGS "-L${LIBSBML_LIBRARY_DIRS}"
             )
     endif()
 
@@ -573,35 +573,44 @@ endif(WITH_DOC)
 SET(PROJECT_PYTHON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/python)
 if(WITH_PYTHON)
     message(STATUS "Building native python extension of MOOSE")
-
     set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
-
-    find_package(NumPy REQUIRED)
-    find_package(PythonLibs REQUIRED)
-    include_directories(${PYTHON_INCLUDE_DIRS})
-    message(STATUS "Python include dir: ${PYTHON_INCLUDE_DIRS}")
-    message(STATUS "Python libraries: ${PYTHON_LIBRARIES}")
-    message(STATUS "Python executable: ${PYTHON_EXECUTABLE}")
-
     EXEC_PROGRAM(${PYTHON_EXECUTABLE}
         ARGS "-c 'try: import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])
 except Exception: pass'"
         OUTPUT_VARIABLE PYTHON_SO_EXTENSION
         )
+    message( STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
 
-    add_subdirectory(pymoose)
-
+    find_package(NumPy REQUIRED)
     include_directories(${NUMPY_INCLUDE_DIRS})
     add_definitions(-DUSE_NUMPY)
 
-    set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
+    add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
+
+    execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --includes
+        OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --libs
+        OUTPUT_VARIABLE PYTHON_LIBRARIES
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    message( STATUS "Python include flags: ${PYTHON_INCLUDE_FLAGS}" )
+    add_subdirectory(pymoose)
+
     set_target_properties(_moose PROPERTIES 
+        COMPILE_DEFINITIONS "PYMOOSE"
+        COMPILE_FLAGS "${PYTHON_INCLUDE_FLAGS}"
         LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
-        PREFIX "")
-    if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
-        set_target_properties(_moose PROPERTIES
-        SUFFIX ${PYTHON_SO_EXTENSION})
-    endif()
+        PREFIX ""
+        SUFFIX ".so"
+        )
+
+    #if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
+    #    set_target_properties(_moose PROPERTIES
+    #    SUFFIX ${PYTHON_SO_EXTENSION})
+    #endif()
+
     # see issue #80
     if(HDF5_LIBRARY_DIRS)
         set_target_properties( _moose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )

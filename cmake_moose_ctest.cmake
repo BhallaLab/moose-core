@@ -85,8 +85,7 @@ ADD_TEST(NAME pymoose-test-rng
     COMMAND ${PROJECT_SOURCE_DIR}/tests/python/test_random_gen.sh
     )
 set_tests_properties(pymoose-test-rng PROPERTIES 
-        ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
-        ENVIRONMENT "PYTHON=${PYTHON_EXECUTABLE}"
+        ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python PYTHON=${PYTHON_EXECUTABLE}"
     )
 
 # Test Streamer class
