@@ -302,6 +302,9 @@ if(WITH_GSL)
         endif(NOT GSL_FOUND)
     endif()
     add_definitions(-DUSE_GSL)
+    # GSL is also used in RNG (whenever applicable), therefore include paths are
+    # top level.
+    include_directories( ${GSL_INCLUDE_DIRS} )
 elseif(WITH_BOOST)
     find_package(Boost 1.44 COMPONENTS filesystem REQUIRED)
     find_package( LAPACK REQUIRED )
