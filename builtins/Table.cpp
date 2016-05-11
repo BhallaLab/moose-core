@@ -324,6 +324,7 @@ double Table::getThreshold() const
 void Table::setFormat( string format )
 {
     format_ = format;
+    useStreamer_ = true;
 }
 
 // Get the format of table to which it has to be written.
