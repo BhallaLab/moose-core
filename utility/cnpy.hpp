@@ -153,6 +153,7 @@ void write_header(
     }
     fwrite( dict.c_str(), sizeof(char), dict.size(), fp );
 }
+
 // write to version 1 or version 2.
 template<typename T>
 void save_numpy( 
@@ -178,48 +179,33 @@ void save_numpy(
      */
     if( openmode == "w" )
     {
-#ifdef  ENABLE_CPP11
-        unique_ptr<FILE, decltype(&fclose)> fp( fopen(outfile.c_str(), "wb"), &fclose);
-        if( fp == nullptr) 
-#else      /* -----  not ENABLE_CPP11  ----- */
         FILE* fp = fopen( outfile.c_str(), "wb" );
         if( NULL == fp )
-#endif     /* -----  not ENABLE_CPP11  ----- */
         {
             LOG( moose::warning, "Could not open file " << outfile );
             return;
         }
-
-#ifdef  ENABLE_CPP11
-        write_header<T>( fp.get(), colnames, shape, version );
-#else      /* -----  not ENABLE_CPP11  ----- */
         write_header<T>( fp, colnames, shape, version );
-#endif     /* -----  not ENABLE_CPP11  ----- */
+        fclose( fp );
     }
     else                                        /* Append mode. */
     {
         // Do a sanity check if file is really a numpy file.
         if(! is_valid_numpy_file( outfile ) )
         {
-            cout << "Err : File " << outfile << " is not a valid numpy file"
-                << " I am not goind to write to it" 
-                << endl;
+            LOG( moose::warning,  
+                    outfile << " is not a valid numpy file" 
+                    << " I am not goind to write to it"
+               );
             return;
         }
         // And change the shape in header.
         change_shape_in_header( outfile, vec.size(), colnames.size() );
     }
 
-#ifdef  ENABLE_CPP11
-    //  by default we open the file in append mode.
-    unique_ptr<FILE, decltype(&fclose)> fp(fopen( outfile.c_str(), "ab" ), &fclose);
-    // Go to the very end of the file and write the data.
-    fwrite( &vec[0], sizeof(T), vec.size(), fp.get() );
-#else      /* -----  not ENABLE_CPP11  ----- */
     FILE* fp = fopen( outfile.c_str(), "ab" );
     fwrite( &vec[0], sizeof(T), vec.size(), fp );
     fclose( fp );
-#endif     /* -----  not ENABLE_CPP11  ----- */
 
 }
 

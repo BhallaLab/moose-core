@@ -31,33 +31,45 @@ endif(WITH_MPI)
 ADD_TEST(NAME pymoose-test-synchan
     COMMAND ${TEST_COMMAND} ${PROJECT_SOURCE_DIR}/tests/python/test_synchan.py
     )
-set_tests_properties(pymoose-test-synchan PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
+set_tests_properties(pymoose-test-synchan 
+    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+    )
 
 ADD_TEST(NAME pymoose-test-function
     COMMAND ${TEST_COMMAND} ${PROJECT_SOURCE_DIR}/tests/python/test_function.py
     )
-set_tests_properties(pymoose-test-function PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
+set_tests_properties(pymoose-test-function
+     PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+     )
 
 ADD_TEST(NAME pymoose-test-vec
     COMMAND ${TEST_COMMAND} ${PROJECT_SOURCE_DIR}/tests/python/test_vec.py
     )
-set_tests_properties(pymoose-test-vec PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
+set_tests_properties(pymoose-test-vec PROPERTIES ENVIRONMENT 
+    "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+    )
 
 ADD_TEST(NAME pymoose-pyrun
     COMMAND ${TEST_COMMAND} ${PROJECT_SOURCE_DIR}/tests/python/test_pyrun.py
     )
-set_tests_properties(pymoose-pyrun PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
+set_tests_properties(pymoose-pyrun 
+    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+    )
 
 # Do not run this test after packaging.
 ADD_TEST(NAME pymoose-neuroml-reader-test 
     COMMAND ${TEST_COMMAND} ${PROJECT_SOURCE_DIR}/tests/python/test_neuroml.py
     )
-set_tests_properties(pymoose-neuroml-reader-test PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
+set_tests_properties(pymoose-neuroml-reader-test 
+    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+    )
 
 ADD_TEST(NAME pymoose-nsdf-sanity-test
     COMMAND ${TEST_COMMAND} ${PROJECT_SOURCE_DIR}/tests/python/test_nsdf.py
     )
-set_tests_properties(pymoose-nsdf-sanity-test PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python")
+set_tests_properties(pymoose-nsdf-sanity-test 
+    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+    )
 
 # Test basic SBML support.
 ADD_TEST(NAME pymoose-test-basic-sbml-support
@@ -72,8 +84,9 @@ set_tests_properties(pymoose-test-basic-sbml-support
 ADD_TEST(NAME pymoose-test-rng
     COMMAND ${PROJECT_SOURCE_DIR}/tests/python/test_random_gen.sh
     )
-set_tests_properties(pymoose-test-rng
-    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+set_tests_properties(pymoose-test-rng PROPERTIES 
+        ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+        ENVIRONMENT "PYTHON=${PYTHON_EXECUTABLE}"
     )
 
 # Test Streamer class
