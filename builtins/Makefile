@@ -10,29 +10,31 @@
 TARGET = _builtins.o
 
 OBJ = \
-	Arith.o	\
-	Group.o	\
-	Mstring.o	\
-	Func.o \
-	Function.o	\
-	Variable.o	\
-	InputVariable.o	\
-	TableBase.o	\
-	Table.o	\
-	Interpol.o	\
-	StimulusTable.o	\
-	TimeTable.o	\
-	Stats.o	\
-	SpikeStats.o	\
-	Interpol2D.o \
-	HDF5WriterBase.o	\
-	HDF5DataWriter.o	\
-	NSDFWriter.o	\
-	testNSDF.o	\
-	testBuiltins.o	\
+      Arith.o	\
+      Group.o	\
+      Mstring.o	\
+      Func.o \
+      Function.o	\
+      Variable.o	\
+      InputVariable.o	\
+      TableBase.o	\
+      Table.o	\
+      Interpol.o	\
+      StimulusTable.o	\
+      TimeTable.o	\
+      Stats.o	\
+      SpikeStats.o	\
+      Interpol2D.o \
+      HDF5WriterBase.o	\
+      HDF5DataWriter.o	\
+      StreamerBase.o \
+      Streamer.o \
+      NSDFWriter.o	\
+      testNSDF.o	\
+      testBuiltins.o	\
 
 HEADERS = \
-	../basecode/header.h \
+	  ../basecode/header.h \
 
 
 default: $(TARGET)
@@ -57,7 +59,7 @@ HDF5DataWriter.o: HDF5DataWriter.h HDF5WriterBase.h
 testBuiltins.o:	Group.h Arith.h Stats.h ../msg/DiagonalMsg.h ../basecode/SetGet.h
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg -I../external/muparser/include $< -c
+	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I..  -I../scheduling -I../basecode -I../msg -I../external/muparser/include $< -c
 
 $(TARGET):		$(OBJ) $(SMOLDYN_OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) $(SMOLDYN_OBJ) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) 
