@@ -1,5 +1,6 @@
-#!/bin/bash
-PYTHON_EXECUTABLE=/usr/bin/python
+#!/usr/bin/env bash
+echo "Env $PYTHON"
+PYTHON_EXECUTABLE=${PYTHON:-/usr/bin/python}
 FAILED=0
 a=`${PYTHON_EXECUTABLE} -c 'import moose; moose.seed(1); print([moose.rand() for x in range(10)])'`
 b=`${PYTHON_EXECUTABLE} -c 'import moose; moose.seed(2); print([moose.rand() for x in range(10)])'`
