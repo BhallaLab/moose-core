@@ -126,10 +126,13 @@ class Neuron
 		/// Look up seg index of parent compartment, from index of spine.
 		vector< unsigned int > spineParentSegIndex_; 
 		vector< vector< Id > > spines_; /// Id of each compt in each spine.
+<<<<<<< HEAD
 
 		/// Ids of all spines on each compt, looked up by segIndex of compt.
 		vector< vector< Id > > allSpinesPerCompt_;
 
+=======
+>>>>>>> a3f101f... Fixes from dilawar/moose-core. Last commit is cherry-picked after merging.
 		/// Id of stoich associated with each spine. Typically all the same.
 		vector< Id > spineStoich_; 
 		/// Id of stoich associated with each PSD. Typically all the same.
@@ -147,7 +150,11 @@ class Neuron
 		/// Holder for spine operations. Contains pointer to current Neuron.
 		Spine spineEntry_; 
 
+<<<<<<< HEAD
 		vector< Id > segId_; /// Id of compartment in each Seg entry, below.
+=======
+		vector< Id > segId_; /// Id of each Seg entry, below.
+>>>>>>> a3f101f... Fixes from dilawar/moose-core. Last commit is cherry-picked after merging.
 		vector< SwcSegment > segs_;
 		vector< SwcBranch > branches_;
 
