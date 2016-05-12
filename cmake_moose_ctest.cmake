@@ -83,6 +83,7 @@ set_tests_properties(pymoose-test-basic-sbml-support
 # Test basic SBML support.
 ADD_TEST(NAME pymoose-test-rng
     COMMAND ${PROJECT_SOURCE_DIR}/tests/python/test_random_gen.sh
+    ${PYTHON_EXECUTABLE}
     )
 set_tests_properties(pymoose-test-rng PROPERTIES 
         ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python PYTHON=${PYTHON_EXECUTABLE}"
