@@ -11,6 +11,13 @@
 #ifndef _WILDCARD_H
 #define _WILDCARD_H
 
+#include <string>
+#include <vector>
+using namespace std;
+
+class Id;
+class ObjId;
+
 // Just a couple of extern definitions for general use.
 
 /**

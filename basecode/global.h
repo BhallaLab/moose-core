@@ -9,14 +9,25 @@
 **********************************************************************/
 
 
-#ifndef  GLOBAL_INC
-#define  GLOBAL_INC
+#ifndef  __MOOSE_GLOBAL_INC_
+#define  __MOOSE_GLOBAL_INC_
 
-#include "header.h"
-#include "../external/debug/simple_test.hpp"
 #include <ctime>
 #include <map>
+#include <sstream>
 
+
+
+#ifdef  USE_BOOST
+//#ifdef BOOST_FILESYSTEM_EXISTS
+#include <boost/filesystem.hpp>
+//#endif                                          /* BOOST_FILESYSTEM_EXISTS */
+#endif
+
+#include "randnum/RNG.h"                        /* Use inbuilt rng */
+#include "../external/debug/print_function.hpp"
+
+using namespace std;
 
 /**
  * @brief Global stringstream for message printing.
@@ -28,6 +39,7 @@ extern stringstream errorSS;
  */
 extern unsigned int totalTests;
 
+
 /** @brief This macro prints the output of a test function onto console.  It
  * also keep track of index of the current test. The index of test is
  * automatically computed by increamenting the counter.
@@ -36,12 +48,6 @@ extern unsigned int totalTests;
 #define TEST_BEGIN cout << endl << "Test(" << totalTests << "): " << SIMPLE_CURRENT_FUNCTION;
 #define TEST_END totalTests++; \
     cout << std::right <<  setw(20) << "test of " << SIMPLE_CURRENT_FUNCTION << " finished."; 
-
-
-/*-----------------------------------------------------------------------------
- *  Global clock in moose.
- *-----------------------------------------------------------------------------*/
-
 
 /*-----------------------------------------------------------------------------
  *  Global functions in namespace moose
@@ -57,6 +63,16 @@ extern unsigned int totalTests;
 namespace moose
 {
 
+    extern moose::RNG<double> rng;
+
+    /**
+     * @brief A global seed for all RNGs in moose. When moose.seed( x ) is called,
+     * this variable is set. Other's RNGs (except muparser) uses this seed to
+     * initialize them. By default it is initialized by random_device (see
+     * global.cpp).
+     */
+    extern int __rng_seed__;
+
     /**
      * @brief Fix a path. For testing purpose.
      *
@@ -64,7 +80,7 @@ namespace moose
      *
      * @return  A fixed path.
      */
-     string fixPath(string path);
+    string fixPath(string path);
 
     /**
      * @brief Checks if given path is correct. 
@@ -74,7 +90,7 @@ namespace moose
      *
      * @return 0 if path is all-right. Negative number if path is not OK.
      */
-     int checkPath( const string& path );
+    int checkPath( const string& path );
 
     /** @brief Append pathB to pathA and return the result. 
      *
@@ -87,7 +103,86 @@ namespace moose
      *
      * @return A string representing moose-path.
      */
-     string joinPath(string pathA, string pathB);
+    string joinPath(string pathA, string pathB);
+
+    /**
+     * @brief Seed seed for RNG.
+     *
+     * @param seed
+     */
+    void mtseed( unsigned int seed );
+
+    /**
+     * @brief Generate a random double between 0 and 1
+     *
+     * @return  A random number between 0 and 1.
+     */
+    double mtrand( void );
+
+    /**
+     * @brief Create a POSIX compatible path from a given string.
+     * Remove/replace bad characters.
+     *
+     * @param path Reutrn path is given path if creation was successful, else
+     * directory is renamed to a filename.
+     */
+    string createPosixPath( const string& path );
+
+    /**
+     * @brief Convert a given value to string.
+     *
+     * @tparam T
+     * @param x
+     *
+     * @return  String representation
+     */
+    string toString( double x );
+
+    /**
+     * @brief Create directory, recursively.
+     */
+    bool createParentDirs( const string& path );
+
+    /**
+     * @brief Replace all directory sepearator with _. This creates a filepath
+     * which can be created in current directory without any need to create
+     * parent directory.
+     *
+     * @param path string 
+     *
+     * @return  filename without directory separator.
+     */
+    string toFilename( const string& path );
+
+    /**
+     * @brief Get the extension of a given filepath.
+     *
+     * @param path Given path.
+     *
+     * @return Extension (with or without preceeding '.' )
+     */
+    string getExtension( const string& path, bool without_dot = true );
+
+    /**
+     * @brief Return the name when path is given. Its behaviour is exactly the
+     * same as of `basename`  command on unix system.
+     *
+     * @param path
+     *
+     * @return  name.
+     */
+    string pathToName( const string& path );
+
+    /**
+     * @brief When user gives a path /a/b/c, moose creates a path
+     * /a[0]/b[0]/c[0]. This is helpful in cases where one needs to create more
+     * than 1 element.
+     *
+     * @param path Removed '[0]' from path and return.
+     *
+     * @return 
+     */
+    string moosePathToUserPath( string path );
 }
 
-#endif   /* ----- #ifndef GLOBAL_INC  ----- */
+#endif   /* ----- #ifndef __MOOSE_GLOBAL_INC_  ----- */

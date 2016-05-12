@@ -217,7 +217,7 @@ Id moose::SbmlReader::read( string filename, string location, string solverClass
                                         //string plotPath = location+pltClean;
                                         string plotPath = base_.path()+pltClean;
                                         Id plotSId(plotPath);
-                                        unsigned pos = pltClean.find('/');
+                                        size_t pos = pltClean.find('/');
                                         if (pos != std::string::npos)
                                             pltClean = pltClean.substr(pos+1,pltClean.length());
                                         /*
@@ -387,9 +387,8 @@ map< string,Id > moose::SbmlReader::createCompartment(string location, Id parent
         if (dimension < 3)
             cout << "\n ###### Spatial Dimension is " << dimension <<" volume should not be converted from liter to cubicmeter which is happening as default check \n";
 
-        ASSERT_FALSE(name.empty() && id.empty()
-                , "Compartment name and id are empty"
-                );
+        if(name.empty() && id.empty())
+            cout <<  "Compartment name and id are empty" << endl;
 
         if (name.empty()) {
             if(! id.empty() )
