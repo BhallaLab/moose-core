@@ -10,162 +10,216 @@
 #ifndef _KSOLVE_H
 #define _KSOLVE_H
 
+#define _KSOLVE_SEQ 0
+#define _KSOLVE_OPENMP 0
+#define _KSOLVE_PTHREADS 1
+
+#include <pthread.h>
+#include <semaphore.h>
+#include <signal.h>
+#include <sys/syscall.h>
+
 class Stoich;
+const char *env_value = getenv("NUM_THREADS");
+const int NTHREADS  = *env_value - '0';
+
+//////////////////////////////////////////////////////////////////
+//For Pthread Parallelism by Rahul
+//////////////////////////////////////////////////////////////////
+#if _KSOLVE_PTHREADS
+
+//Structure that is passed as a parameter to pthread_create at the time of object initialization
+struct pthreadWrap
+{
+	   long tid;
+	   sem_t* sThread, *sMain;
+	   bool* destroySig;
+	   ProcPtr *p;
+	   VoxelPools** poolsArr_;
+	   int *pthreadBlock;
+
+	   pthreadWrap (long Id, sem_t* S1, sem_t* S2, bool* destroySignal, ProcPtr *ptr, VoxelPools** PA, int* block) : tid(Id), sThread(S1), sMain(S2), destroySig(destroySignal), p(ptr), poolsArr_(PA), pthreadBlock(block) {}
+};
+
+extern "C" void* call_func( void* f );
+
+#endif // _KSOLVE_PTHREADS
 
 class Ksolve: public ZombiePoolInterface
 {
-public:
-    Ksolve();
-    ~Ksolve();
+	public: 
+		Ksolve();
+		~Ksolve();
 
-    //////////////////////////////////////////////////////////////////
-    // Field assignment stuff
-    //////////////////////////////////////////////////////////////////
-    /// Assigns integration method
-    string getMethod() const;
-    void setMethod( string method );
+#if _KSOLVE_PTHREADS
 
-    /// Assigns Absolute tolerance for integration
-    double getEpsAbs() const;
-    void setEpsAbs( double val );
+//////////////////////////////////////////////////////////////////
+//For Pthread Parallelism  - data needed by each thread
+//////////////////////////////////////////////////////////////////
+		pthread_t* threads; //pthread_t for each thread in the loop
+		bool* destroySignal; //signal to indicate the worker thread that it is time to die
+		ProcPtr *pthreadP; // ProcPtr which each of the thread uses
+		VoxelPools** poolArray_; //portion of the VoxelPools that is updated by each thread
+		int *pthreadBlock; //blockSize for each thread
+		sem_t* mainSemaphor; //set of semaphores used by the main-thread to interact with worker-threads
+		sem_t* threadSemaphor; //set of semaphores used by the worker-threads to interact with main-thread
 
-    /// Assigns Relative tolerance for integration
-    double getEpsRel() const;
-    void setEpsRel( double val );
+#endif
 
-    /// Assigns Stoich object to Ksolve.
-    Id getStoich() const;
-    void setStoich( Id stoich ); /// Inherited from ZombiePoolInterface.
 
-    /// Assigns Dsolve object to Ksolve.
-    Id getDsolve() const;
-    void setDsolve( Id dsolve ); /// Inherited from ZombiePoolInterface.
+		//////////////////////////////////////////////////////////////////
+		// Field assignment stuff
+		//////////////////////////////////////////////////////////////////
+		/// Assigns integration method
+		string getMethod() const;
+		void setMethod( string method );
 
-    unsigned int getNumLocalVoxels() const;
-    unsigned int getNumAllVoxels() const;
-    /**
-     * Assigns the number of voxels used in the entire reac-diff
-     * system. Note that fewer than this may be used on any given node.
-     */
-    void setNumAllVoxels( unsigned int num );
+		/// Assigns Absolute tolerance for integration
+		double getEpsAbs() const;
+		void setEpsAbs( double val );
+		
+		/// Assigns Relative tolerance for integration
+		double getEpsRel() const;
+		void setEpsRel( double val );
 
-    /// Returns the vector of pool Num at the specified voxel.
-    vector< double > getNvec( unsigned int voxel) const;
-    void setNvec( unsigned int voxel, vector< double > vec );
+		/// Assigns Stoich object to Ksolve.
+		Id getStoich() const;
+		void setStoich( Id stoich ); /// Inherited from ZombiePoolInterface.
 
-    /**
-     * This does a quick and dirty estimate of the timestep suitable
-     * for this sytem
-     */
-    double getEstimatedDt() const;
+		/// Assigns Dsolve object to Ksolve.
+		Id getDsolve() const;
+		void setDsolve( Id dsolve ); /// Inherited from ZombiePoolInterface.
 
-    //////////////////////////////////////////////////////////////////
-    // Dest Finfos
-    //////////////////////////////////////////////////////////////////
-    void process( const Eref& e, ProcPtr p );
-    void reinit( const Eref& e, ProcPtr p );
-    void initProc( const Eref& e, ProcPtr p );
-    void initReinit( const Eref& e, ProcPtr p );
-    /**
-     * Handles request to change volumes of voxels in this Ksolve, and
-     * all cascading effects of this. At this point it won't handle
-     * change in size of voxel array.
-     */
-    void updateVoxelVol( vector< double > vols );
-    //////////////////////////////////////////////////////////////////
-    // Utility for SrcFinfo
-    //////////////////////////////////////////////////////////////////
+		unsigned int getNumLocalVoxels() const;
+		unsigned int getNumAllVoxels() const;
+		/**
+		 * Assigns the number of voxels used in the entire reac-diff 
+		 * system. Note that fewer than this may be used on any given node.
+		 */
+		void setNumAllVoxels( unsigned int num );
 
-    //////////////////////////////////////////////////////////////////
-    // Solver interface functions
-    //////////////////////////////////////////////////////////////////
-    unsigned int getPoolIndex( const Eref& e ) const;
-    unsigned int getVoxelIndex( const Eref& e ) const;
+		/// Returns the vector of pool Num at the specified voxel.
+		vector< double > getNvec( unsigned int voxel) const;
+		void setNvec( unsigned int voxel, vector< double > vec );
 
-    //////////////////////////////////////////////////////////////////
-    // ZombiePoolInterface inherited functions
-    //////////////////////////////////////////////////////////////////
+		/**
+		 * This does a quick and dirty estimate of the timestep suitable 
+		 * for this sytem
+		 */
+		double getEstimatedDt() const;
 
-    void setN( const Eref& e, double v );
-    double getN( const Eref& e ) const;
-    void setNinit( const Eref& e, double v );
-    double getNinit( const Eref& e ) const;
-    void setDiffConst( const Eref& e, double v );
-    double getDiffConst( const Eref& e ) const;
+		//////////////////////////////////////////////////////////////////
+		// Dest Finfos
+		//////////////////////////////////////////////////////////////////
+		void process( const Eref& e, ProcPtr p );
 
-    /**
-     * Assigns number of different pools (chemical species) present in
-     * each voxel.
-     * Inherited.
-     */
-    void setNumPools( unsigned int num );
-    unsigned int getNumPools() const;
-    VoxelPoolsBase* pools( unsigned int i );
-    double volume( unsigned int i ) const;
 
-    void getBlock( vector< double >& values ) const;
-    void setBlock( const vector< double >& values );
+		void reinit( const Eref& e, ProcPtr p );
+		void initProc( const Eref& e, ProcPtr p );
+		void initReinit( const Eref& e, ProcPtr p );
+		/**
+		 * Handles request to change volumes of voxels in this Ksolve, and
+		 * all cascading effects of this. At this point it won't handle
+		 * change in size of voxel array.
+		 */
+		void updateVoxelVol( vector< double > vols );
+		//////////////////////////////////////////////////////////////////
+		// Utility for SrcFinfo
+		//////////////////////////////////////////////////////////////////
 
-    void matchJunctionVols( vector< double >& vols, Id otherCompt )
-    const;
+		//////////////////////////////////////////////////////////////////
+		// Solver interface functions
+		//////////////////////////////////////////////////////////////////
+		unsigned int getPoolIndex( const Eref& e ) const;
+		unsigned int getVoxelIndex( const Eref& e ) const;
+		
+		//////////////////////////////////////////////////////////////////
+		// ZombiePoolInterface inherited functions
+		//////////////////////////////////////////////////////////////////
 
-    /**
-     * Rescale specified voxel rate term following rate constant change
-     * or volume change. If index == ~0U then does all terms.
-     */
-    void updateRateTerms( unsigned int index );
+		void setN( const Eref& e, double v );
+		double getN( const Eref& e ) const;
+		void setNinit( const Eref& e, double v );
+		double getNinit( const Eref& e ) const;
+		void setDiffConst( const Eref& e, double v );
+		double getDiffConst( const Eref& e ) const;
 
-    //////////////////////////////////////////////////////////////////
-    // Functions for cross-compartment transfer
-    //////////////////////////////////////////////////////////////////
-    void setupXfer( Id myKsolve, Id otherKsolve,
-                    unsigned int numProxyMols,
-                    const vector< VoxelJunction >& vj );
+		/**
+		 * Assigns number of different pools (chemical species) present in
+		 * each voxel.
+		 * Inherited.
+		 */
+		void setNumPools( unsigned int num );
+		unsigned int getNumPools() const;
+		VoxelPoolsBase* pools( unsigned int i );
+		double volume( unsigned int i ) const;
 
-    void assignXferIndex( unsigned int numProxyMols,
-                          unsigned int xferCompt,
-                          const vector< vector< unsigned int > >& voxy );
+		void getBlock( vector< double >& values ) const;
+		void setBlock( const vector< double >& values );
 
-    void assignXferVoxels( unsigned int xferCompt );
+		void matchJunctionVols( vector< double >& vols, Id otherCompt ) 
+				const;
+	
+		/**
+		 * Rescale specified voxel rate term following rate constant change 
+		 * or volume change. If index == ~0U then does all terms.
+		 */
+		void updateRateTerms( unsigned int index );
 
-    unsigned int assignProxyPools( const map< Id, vector< Id > >& xr,
-                                   Id myKsolve, Id otherKsolve, Id otherComptId );
+		//////////////////////////////////////////////////////////////////
+		// Functions for cross-compartment transfer
+		//////////////////////////////////////////////////////////////////
+		void setupXfer( Id myKsolve, Id otherKsolve, 
+						unsigned int numProxyMols,
+						const vector< VoxelJunction >& vj );
 
-    void buildCrossReacVolScaling( Id otherKsolve,
-                                   const vector< VoxelJunction >& vj );
-    //////////////////////////////////////////////////////////////////
-    // for debugging
-    void print() const;
+		void assignXferIndex( unsigned int numProxyMols, 
+						unsigned int xferCompt,
+						const vector< vector< unsigned int > >& voxy );
 
-    //////////////////////////////////////////////////////////////////
-    static SrcFinfo2< Id, vector< double > >* xComptOut();
-    static const Cinfo* initCinfo();
-private:
-    string method_;
-    double epsAbs_;
-    double epsRel_;
-    /**
-     * Each VoxelPools entry handles all the pools in a single voxel.
-     * Each entry knows how to update itself in order to complete
-     * the kinetic calculations for that voxel. The ksolver does
-     * multinode management by indexing only the subset of entries
-     * present on this node.
-     */
-    vector< VoxelPools > pools_;
+		void assignXferVoxels( unsigned int xferCompt );
 
-    /// First voxel indexed on the current node.
-    unsigned int startVoxel_;
+		unsigned int assignProxyPools( const map< Id, vector< Id > >& xr,
+					Id myKsolve, Id otherKsolve, Id otherComptId );
 
-    /// Utility ptr used to help Pool Id lookups by the Ksolve.
-    Stoich* stoichPtr_;
+		void buildCrossReacVolScaling( Id otherKsolve,
+				const vector< VoxelJunction >& vj );
+		//////////////////////////////////////////////////////////////////
+		// for debugging
+		void print() const;
 
-    /**
-     * Id of diffusion solver, needed for coordinating numerics.
-     */
-    Id dsolve_;
+		//////////////////////////////////////////////////////////////////
+		static SrcFinfo2< Id, vector< double > >* xComptOut();
+		static const Cinfo* initCinfo();
 
-    /// Pointer to diffusion solver
-    ZombiePoolInterface* dsolvePtr_;
+
+	private:
+		string method_;
+		double epsAbs_;
+		double epsRel_;
+		/**
+		 * Each VoxelPools entry handles all the pools in a single voxel.
+		 * Each entry knows how to update itself in order to complete 
+		 * the kinetic calculations for that voxel. The ksolver does
+		 * multinode management by indexing only the subset of entries
+		 * present on this node.
+		 */
+		vector< VoxelPools > pools_;
+
+		/// First voxel indexed on the current node.
+		unsigned int startVoxel_;
+
+		/// Utility ptr used to help Pool Id lookups by the Ksolve.
+		Stoich* stoichPtr_;
+
+		/**
+		 * Id of diffusion solver, needed for coordinating numerics.
+		 */
+		Id dsolve_;
+
+		/// Pointer to diffusion solver
+		ZombiePoolInterface* dsolvePtr_;
+
 };
 
 #endif	// _KSOLVE_H
