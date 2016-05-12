@@ -82,231 +82,232 @@ struct reac_info
 
 const Cinfo* SteadyState::initCinfo()
 {
-	/**
-	 * This picks up the entire Stoich data structure
-	static Finfo* gslShared[] =
-	{
-		new SrcFinfo( "reinitSrc", Ftype0::global() ),
-		new DestFinfo( "assignStoich",
-			Ftype1< void* >::global(),
-			RFCAST( &SteadyState::assignStoichFunc )
-			),
-		new DestFinfo( "setMolN",
-			Ftype2< double, unsigned int >::global(),
-			RFCAST( &SteadyState::setMolN )
-			),
-		new SrcFinfo( "requestYsrc", Ftype0::global() ),
-		new DestFinfo( "assignY",
-			Ftype1< double* >::global(),
-			RFCAST( &SteadyState::assignY )
-			),
-	};
-	 */
+    /**
+     * This picks up the entire Stoich data structure
+    static Finfo* gslShared[] =
+    {
+    	new SrcFinfo( "reinitSrc", Ftype0() ),
+    	new DestFinfo( "assignStoich",
+    		Ftype1< void* >(),
+    		RFCAST( &SteadyState::assignStoichFunc )
+    		),
+    	new DestFinfo( "setMolN",
+    		Ftype2< double, unsigned int >(),
+    		RFCAST( &SteadyState::setMolN )
+    		),
+    	new SrcFinfo( "requestYsrc", Ftype0() ),
+    	new DestFinfo( "assignY",
+    		Ftype1< double* >(),
+    		RFCAST( &SteadyState::assignY )
+    		),
+    };
+     */
 
-	/**
-	 * These are the fields of the SteadyState class
-	 */
-		///////////////////////////////////////////////////////
-		// Field definitions
-		///////////////////////////////////////////////////////
-		static ValueFinfo< SteadyState, Id > stoich( 
-			"stoich", 
-			"Specify the Id of the stoichiometry system to use",
-			&SteadyState::setStoich,
-			&SteadyState::getStoich
-		);
-		static ReadOnlyValueFinfo< SteadyState, bool > badStoichiometry( 
-			"badStoichiometry", 
-			"Bool: True if there is a problem with the stoichiometry",
-			&SteadyState::badStoichiometry
-		);
-		static ReadOnlyValueFinfo< SteadyState, bool > isInitialized( 
-			"isInitialized", 
-			"True if the model has been initialized successfully",
-			&SteadyState::isInitialized
-		);
-		static ReadOnlyValueFinfo< SteadyState, unsigned int > nIter( 
-			"nIter", 
-			"Number of iterations done by steady state solver",
-			&SteadyState::getNiter
-		);
-		static ReadOnlyValueFinfo< SteadyState, string > status( 
-			"status", 
-			"Status of solver",
-			&SteadyState::getStatus
-		);
-		static ValueFinfo< SteadyState, unsigned int > maxIter( 
-			"maxIter", 
-			"Max permissible number of iterations to try before giving up",
-			&SteadyState::setMaxIter,
-			&SteadyState::getMaxIter
-		);
-		static ValueFinfo< SteadyState, double> convergenceCriterion( 
-			"convergenceCriterion", 
-			"Fractional accuracy required to accept convergence",
-			&SteadyState::setConvergenceCriterion,
-			&SteadyState::getConvergenceCriterion
-		);
-		static ReadOnlyValueFinfo< SteadyState, unsigned int > numVarPools(
-			"numVarPools", 
-			"Number of variable molecules in reaction system.",
-			&SteadyState::getNumVarPools
-		);
-		static ReadOnlyValueFinfo< SteadyState, unsigned int > rank( 
-			"rank", 
-			"Number of independent molecules in reaction system",
-			&SteadyState::getRank
-		);
-		static ReadOnlyValueFinfo< SteadyState, unsigned int > stateType( 
-			"stateType", 
-			"0: stable; 1: unstable; 2: saddle; 3: osc?; 4: one near-zero eigenvalue; 5: other",
-			&SteadyState::getStateType
-		);
-		static ReadOnlyValueFinfo< SteadyState, unsigned int > 
-				nNegEigenvalues (
-			"nNegEigenvalues", 
-			"Number of negative eigenvalues: indicates type of solution",
-			&SteadyState::getNnegEigenvalues
-		);
-		static ReadOnlyValueFinfo< SteadyState, unsigned int > 
-				nPosEigenvalues( 
-			"nPosEigenvalues", 
-			"Number of positive eigenvalues: indicates type of solution",
-			&SteadyState::getNposEigenvalues
-		);
-		static ReadOnlyValueFinfo< SteadyState, unsigned int > solutionStatus(
-			"solutionStatus", 
-			"0: Good; 1: Failed to find steady states; "
-			"2: Failed to find eigenvalues",
-			&SteadyState::getSolutionStatus
-		);
-		static LookupValueFinfo< SteadyState, unsigned int, double > total( 
-				"total",
-				"Totals table for conservation laws. The exact mapping of"
-				"this to various sums of molecules is given by the "
-				"conservation matrix, and is currently a bit opaque."
-				"The value of 'total' is set to initial conditions when"
-				"the 'SteadyState::settle' function is called."
-				"Assigning values to the total is a special operation:"
-				"it rescales the concentrations of all the affected"
-				"molecules so that they are at the specified total."
-				"This happens the next time 'settle' is called.",
-				&SteadyState::setTotal,
-				&SteadyState::getTotal
-		);
-		static ReadOnlyLookupValueFinfo< 
-				SteadyState, unsigned int, double > eigenvalues( 
-			"eigenvalues",
-			"Eigenvalues computed for steady state",
-			&SteadyState::getEigenvalue
-		);
-		///////////////////////////////////////////////////////
-		// MsgDest definitions
-		///////////////////////////////////////////////////////
-		static DestFinfo setupMatrix( "setupMatrix", 
-			"This function initializes and rebuilds the matrices used "
-			"in the calculation.",
-			new OpFunc0< SteadyState >(&SteadyState::setupMatrix) 
-		);
+    /**
+     * These are the fields of the SteadyState class
+     */
+    ///////////////////////////////////////////////////////
+    // Field definitions
+    ///////////////////////////////////////////////////////
+    static ValueFinfo< SteadyState, Id > stoich(
+        "stoich",
+        "Specify the Id of the stoichiometry system to use",
+        &SteadyState::setStoich,
+        &SteadyState::getStoich
+    );
+    static ReadOnlyValueFinfo< SteadyState, bool > badStoichiometry(
+        "badStoichiometry",
+        "Bool: True if there is a problem with the stoichiometry",
+        &SteadyState::badStoichiometry
+    );
+    static ReadOnlyValueFinfo< SteadyState, bool > isInitialized(
+        "isInitialized",
+        "True if the model has been initialized successfully",
+        &SteadyState::isInitialized
+    );
+    static ReadOnlyValueFinfo< SteadyState, unsigned int > nIter(
+        "nIter",
+        "Number of iterations done by steady state solver",
+        &SteadyState::getNiter
+    );
+    static ReadOnlyValueFinfo< SteadyState, string > status(
+        "status",
+        "Status of solver",
+        &SteadyState::getStatus
+    );
+    static ValueFinfo< SteadyState, unsigned int > maxIter(
+        "maxIter",
+        "Max permissible number of iterations to try before giving up",
+        &SteadyState::setMaxIter,
+        &SteadyState::getMaxIter
+    );
+    static ValueFinfo< SteadyState, double> convergenceCriterion(
+        "convergenceCriterion",
+        "Fractional accuracy required to accept convergence",
+        &SteadyState::setConvergenceCriterion,
+        &SteadyState::getConvergenceCriterion
+    );
+    static ReadOnlyValueFinfo< SteadyState, unsigned int > numVarPools(
+        "numVarPools",
+        "Number of variable molecules in reaction system.",
+        &SteadyState::getNumVarPools
+    );
+    static ReadOnlyValueFinfo< SteadyState, unsigned int > rank(
+        "rank",
+        "Number of independent molecules in reaction system",
+        &SteadyState::getRank
+    );
+    static ReadOnlyValueFinfo< SteadyState, unsigned int > stateType(
+        "stateType",
+        "0: stable; 1: unstable; 2: saddle; 3: osc?; 4: one near-zero eigenvalue; 5: other",
+        &SteadyState::getStateType
+    );
+    static ReadOnlyValueFinfo< SteadyState, unsigned int >
+    nNegEigenvalues (
+        "nNegEigenvalues",
+        "Number of negative eigenvalues: indicates type of solution",
+        &SteadyState::getNnegEigenvalues
+    );
+    static ReadOnlyValueFinfo< SteadyState, unsigned int >
+    nPosEigenvalues(
+        "nPosEigenvalues",
+        "Number of positive eigenvalues: indicates type of solution",
+        &SteadyState::getNposEigenvalues
+    );
+    static ReadOnlyValueFinfo< SteadyState, unsigned int > solutionStatus(
+        "solutionStatus",
+        "0: Good; 1: Failed to find steady states; "
+        "2: Failed to find eigenvalues",
+        &SteadyState::getSolutionStatus
+    );
+    static LookupValueFinfo< SteadyState, unsigned int, double > total(
+        "total",
+        "Totals table for conservation laws. The exact mapping of"
+        "this to various sums of molecules is given by the "
+        "conservation matrix, and is currently a bit opaque."
+        "The value of 'total' is set to initial conditions when"
+        "the 'SteadyState::settle' function is called."
+        "Assigning values to the total is a special operation:"
+        "it rescales the concentrations of all the affected"
+        "molecules so that they are at the specified total."
+        "This happens the next time 'settle' is called.",
+        &SteadyState::setTotal,
+        &SteadyState::getTotal
+    );
+    static ReadOnlyLookupValueFinfo<
+    SteadyState, unsigned int, double > eigenvalues(
+        "eigenvalues",
+        "Eigenvalues computed for steady state",
+        &SteadyState::getEigenvalue
+    );
+    ///////////////////////////////////////////////////////
+    // MsgDest definitions
+    ///////////////////////////////////////////////////////
+    static DestFinfo setupMatrix( "setupMatrix",
+                                  "This function initializes and rebuilds the matrices used "
+                                  "in the calculation.",
+                                  new OpFunc0< SteadyState >(&SteadyState::setupMatrix)
+                                );
 
-		static DestFinfo settle( "settle", 
-			"Finds the nearest steady state to the current initial "
-			"conditions. This function rebuilds the entire calculation "
-			"only if the object has not yet been initialized.",
-			new OpFunc0< SteadyState >( &SteadyState::settleFunc )
-		);
-		static DestFinfo resettle( "resettle", 
-			"Finds the nearest steady state to the current initial "
-			"conditions. This function rebuilds the entire calculation ",
-			new OpFunc0< SteadyState >( &SteadyState::resettleFunc )
-		);
-		static DestFinfo showMatrices( "showMatrices", 
-			"Utility function to show the matrices derived for the calculations on the reaction system. Shows the Nr, gamma, and total matrices",
-			new OpFunc0< SteadyState >( &SteadyState::showMatrices )
-		);
-		static DestFinfo randomInit( "randomInit", 
-			"Generate random initial conditions consistent with the mass"
-			"conservation rules. Typically invoked in order to scan"
-			"states",
-			new EpFunc0< SteadyState >( 
-					&SteadyState::randomizeInitialCondition )
-		);
-		///////////////////////////////////////////////////////
-		// Shared definitions
-		///////////////////////////////////////////////////////
+    static DestFinfo settle( "settle",
+                             "Finds the nearest steady state to the current initial "
+                             "conditions. This function rebuilds the entire calculation "
+                             "only if the object has not yet been initialized.",
+                             new OpFunc0< SteadyState >( &SteadyState::settleFunc )
+                           );
+    static DestFinfo resettle( "resettle",
+                               "Finds the nearest steady state to the current initial "
+                               "conditions. This function rebuilds the entire calculation ",
+                               new OpFunc0< SteadyState >( &SteadyState::resettleFunc )
+                             );
+    static DestFinfo showMatrices( "showMatrices",
+                                   "Utility function to show the matrices derived for the calculations on the reaction system. Shows the Nr, gamma, and total matrices",
+                                   new OpFunc0< SteadyState >( &SteadyState::showMatrices )
+                                 );
+    static DestFinfo randomInit( "randomInit",
+                                 "Generate random initial conditions consistent with the mass"
+                                 "conservation rules. Typically invoked in order to scan"
+                                 "states",
+                                 new EpFunc0< SteadyState >(
+                                     &SteadyState::randomizeInitialCondition )
+                               );
+    ///////////////////////////////////////////////////////
+    // Shared definitions
+    ///////////////////////////////////////////////////////
 
-	static Finfo * steadyStateFinfos[] = {
-			&stoich,				// Value
-			&badStoichiometry,		// ReadOnlyValue
-			&isInitialized,			// ReadOnlyValue
-			&nIter,					// ReadOnlyValue
-			&status,				// ReadOnlyValue
-			&maxIter,				// Value
-			&convergenceCriterion,	// ReadOnlyValue
-			&numVarPools,			// ReadOnlyValue
-			&rank,					// ReadOnlyValue
-			&stateType,				// ReadOnlyValue
-			&nNegEigenvalues,		// ReadOnlyValue
-			&nPosEigenvalues,		// ReadOnlyValue
-			&solutionStatus,		// ReadOnlyValue
-			&total,					// LookupValue
-			&eigenvalues,			// ReadOnlyLookupValue
-			&setupMatrix,			// DestFinfo
-			&settle,				// DestFinfo
-			&resettle,				// DestFinfo
-			&showMatrices,			// DestFinfo
-			&randomInit,			// DestFinfo
+    static Finfo * steadyStateFinfos[] =
+    {
+        &stoich,				// Value
+        &badStoichiometry,		// ReadOnlyValue
+        &isInitialized,			// ReadOnlyValue
+        &nIter,					// ReadOnlyValue
+        &status,				// ReadOnlyValue
+        &maxIter,				// Value
+        &convergenceCriterion,	// ReadOnlyValue
+        &numVarPools,			// ReadOnlyValue
+        &rank,					// ReadOnlyValue
+        &stateType,				// ReadOnlyValue
+        &nNegEigenvalues,		// ReadOnlyValue
+        &nPosEigenvalues,		// ReadOnlyValue
+        &solutionStatus,		// ReadOnlyValue
+        &total,					// LookupValue
+        &eigenvalues,			// ReadOnlyLookupValue
+        &setupMatrix,			// DestFinfo
+        &settle,				// DestFinfo
+        &resettle,				// DestFinfo
+        &showMatrices,			// DestFinfo
+        &randomInit,			// DestFinfo
 
 
-	};
-	
-	static string doc[] =
-	{
-		"Name", "SteadyState",
-		"Author", "Upinder S. Bhalla, 2009, updated 2014, NCBS",
-		"Description", "SteadyState: works out a steady-state value for "
-		"a reaction system. "
-		"This class uses the GSL multidimensional root finder algorithms "
-		"to find the fixed points closest to the "
-		"current molecular concentrations. "
-		"When it finds the fixed points, it figures out eigenvalues of "
-		"the solution, as a way to help classify the fixed points. "
-		"Note that the method finds unstable as well as stable fixed "
-		"points.\n "
-		"The SteadyState class also provides a utility function "
-	    "*randomInit()*	to "
-		"randomly initialize the concentrations, within the constraints "
-		"of stoichiometry. This is useful if you are trying to find "
-		"the major fixed points of the system. Note that this is "
-		"probabilistic. If a fixed point is in a very narrow range of "
-		"state space the probability of finding it is small and you "
-		"will have to run many iterations with different initial "
-		"conditions to find it.\n "
-		"The numerical calculations used by the SteadyState solver are "
-		"prone to failing on individual calculations. All is not lost, "
-		"because the system reports the solutionStatus. "
-		"It is recommended that you test this field after every "
-		"calculation, so you can simply ignore "
-		"cases where it failed and try again with different starting "
-		"conditions.\n "
-		"Another rule of thumb is that the SteadyState object is more "
-		"likely to succeed in finding solutions from a new starting point "
-		"if you numerically integrate the chemical system for a short "
-		"time (typically under 1 second) before asking it to find the "
-		"fixed point. "
-	};
-	
-	static Dinfo< SteadyState > dinfo;
-	static Cinfo steadyStateCinfo(
-		"SteadyState",
-		Neutral::initCinfo(),
-		steadyStateFinfos,
-		sizeof( steadyStateFinfos )/sizeof(Finfo *),
-		&dinfo,
-		doc, sizeof( doc ) / sizeof( string )
-	);
+    };
 
-	return &steadyStateCinfo;
+    static string doc[] =
+    {
+        "Name", "SteadyState",
+        "Author", "Upinder S. Bhalla, 2009, updated 2014, NCBS",
+        "Description", "SteadyState: works out a steady-state value for "
+        "a reaction system. "
+        "This class uses the multidimensional root finder algorithms "
+        "to find the fixed points closest to the "
+        "current molecular concentrations. "
+        "When it finds the fixed points, it figures out eigenvalues of "
+        "the solution, as a way to help classify the fixed points. "
+        "Note that the method finds unstable as well as stable fixed "
+        "points.\n "
+        "The SteadyState class also provides a utility function "
+        "*randomInit()*	to "
+        "randomly initialize the concentrations, within the constraints "
+        "of stoichiometry. This is useful if you are trying to find "
+        "the major fixed points of the system. Note that this is "
+        "probabilistic. If a fixed point is in a very narrow range of "
+        "state space the probability of finding it is small and you "
+        "will have to run many iterations with different initial "
+        "conditions to find it.\n "
+        "The numerical calculations used by the SteadyState solver are "
+        "prone to failing on individual calculations. All is not lost, "
+        "because the system reports the solutionStatus. "
+        "It is recommended that you test this field after every "
+        "calculation, so you can simply ignore "
+        "cases where it failed and try again with different starting "
+        "conditions.\n "
+        "Another rule of thumb is that the SteadyState object is more "
+        "likely to succeed in finding solutions from a new starting point "
+        "if you numerically integrate the chemical system for a short "
+        "time (typically under 1 second) before asking it to find the "
+        "fixed point. "
+    };
+
+    static Dinfo< SteadyState > dinfo;
+    static Cinfo steadyStateCinfo(
+        "SteadyState",
+        Neutral::initCinfo(),
+        steadyStateFinfos,
+        sizeof( steadyStateFinfos )/sizeof(Finfo *),
+        &dinfo,
+        doc, sizeof( doc ) / sizeof( string )
+    );
+
+    return &steadyStateCinfo;
 }
 
 static const Cinfo* steadyStateCinfo = SteadyState::initCinfo();
@@ -340,7 +341,7 @@ SteadyState::SteadyState()
 		solutionStatus_( 0 ),
 		numFailed_( 0 )
 {
-	;
+    rng.seed( moose::__rng_seed__ );
 }
 
 SteadyState::~SteadyState()
