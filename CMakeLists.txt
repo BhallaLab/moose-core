@@ -77,6 +77,7 @@ option(GPROF "Build for profiling using gprof" OFF)
 option(ENABLE_UNIT_TESTS "Enable unit tests" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
+option(WITH_OPENMP  "Enable OPENMP support" ON)
 option(WITH_CURSES "Enable ncurses support (deprecated)" OFF)
 option(WARN_AS_ERROR "Treat warnings as error while compiling" OFF)
 option(USE_BOOST "Use boost library (experimental, development)" ON)
@@ -333,6 +334,17 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
     add_definitions(-DUSE_READLINE)
     include_directories(${Readline_INCLUDE_DIR})
 endif()
+
+
+if(WITH_OPENMP)
+    find_package(OpenMP REQUIRED)
+    MESSAGE("++ OpenMPI support is ON")
+    add_definitions(-DUSE_OPENMPI -O1)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${-pthread}")
+	
+endif(WITH_OPENMP)
 
 # Openmpi
 if(WITH_MPI)
