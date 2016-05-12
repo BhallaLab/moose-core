@@ -8,16 +8,16 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-// #include "header.h"
+using namespace std;
+
 #include <algorithm>
 #include <vector>
 #include <map>
 #include <cassert>
 #include <iostream>
-using namespace std;
 #include "SparseMatrix.h"
+
 
 const unsigned int SM_MAX_ROWS = 200000;
 const unsigned int SM_MAX_COLUMNS = 200000;
 const unsigned int SM_RESERVE = 8;
-
