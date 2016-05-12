@@ -197,6 +197,7 @@ Table::Table() : threshold_( 0.0 ) , lastTime_( 0.0 ) , input_( 0.0 )
     rootdir_ = "_tables";
     useStreamer_ = false;
     format_ = "csv";
+    outfileIsSet_ = false;
 }
 
 Table::~Table( )
@@ -269,7 +270,7 @@ void Table::reinit( const Eref& e, ProcPtr p )
 
         // If user has not set the filepath, then use the table path prefixed
         // with rootdit as path.
-        if( ! outfileIsSet )
+        if( ! outfileIsSet_ )
             setOutfile( rootdir_ +
                     moose::moosePathToUserPath(tablePath_) + '.' + format_ 
                     );
@@ -325,10 +326,7 @@ double Table::getThreshold() const
 void Table::setFormat( string format )
 {
     if( format == "csv" or format == "npy" )
-    {
         format_ = format;
-        useStreamer_ = true;
-    }
     else
         LOG( moose::warning
                 , "Unsupported format " << format 
@@ -360,7 +358,7 @@ void Table::setOutfile( string outpath )
     if( ! moose::createParentDirs( outfile_ ) )
         outfile_ = moose::toFilename( outfile_ );
 
-    outfileIsSet = true;
+    outfileIsSet_ = true;
     setUseStreamer( true );
 
     // If possible get the format of file as well.

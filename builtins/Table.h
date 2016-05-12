@@ -98,7 +98,10 @@ private:
     // `pwd1/_tables_/table.path().
     string outfile_;
 
-    bool outfileIsSet;
+    /**
+     * @brief Wheather or not outfile path is set by user
+     */
+    bool outfileIsSet_;                         
 
     /**
      * @brief format of data. Currently fixed to csv.

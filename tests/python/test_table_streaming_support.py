@@ -43,6 +43,7 @@ def test( ):
 
     tabA = moose.Table2( '/compt/a/tabA' )
     tabA.format = 'npy'
+    tabA.useStreamer = 1   # Setting format alone is not good enough
 
     tabB = moose.Table2( '/compt/b/tabB' )
     tabB.outfile = 'table2.npy'
