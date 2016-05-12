@@ -49,10 +49,10 @@ script:
     - mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 ..
     - make && ctest --output-on-failure
     - cd .. # Now with boost.
-    - mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && cmake -DUSE_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python ..
+    - mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python ..
     - make && ctest --output-on-failure
     - cd .. # Now with boost and python3.
-    - mkdir -p _BOOST_BUILD2 && cd _BOOST_BUILD2 && cmake -DUSE_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 ..
+    - mkdir -p _BOOST_BUILD2 && cd _BOOST_BUILD2 && cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 ..
     - make && ctest --output-on-failure
     - cd ..
     - echo "All done. Phew"
