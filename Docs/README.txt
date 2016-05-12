@@ -4,6 +4,7 @@ the following directories:
     - user: This is for anyone wishing to learn/use MOOSE.
             This part of the documentation is encoded in Markdown format.
     - developer: If you wish to learn about MOOSE code, go here.
+    - doxygen: Source code documentation generation.
     - markdown: This contains a quick introduction to Markdown itself.
     - images: These are images that are included in the user and developer
               documentation.

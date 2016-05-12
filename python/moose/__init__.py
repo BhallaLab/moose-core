@@ -23,5 +23,7 @@ Builtin functions and classes in moose module (Python only)
 
 """
 from .moose import *
-# import genesis
 
+# Wrapper to get moose version information.
+__version__ = moose._moose.__version__
+VERSION = moose._moose.VERSION

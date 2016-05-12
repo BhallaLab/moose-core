@@ -159,6 +159,12 @@ const Cinfo* Neutral::initCinfo()
 		"the specified SrcFinfo", 
 			&Neutral::getMsgDestFunctions );
 
+	static ReadOnlyLookupElementValueFinfo< Neutral, string, bool >isA( 
+		"isA",
+		"Returns true if the current object is derived from the specified "
+		"the specified class", 
+			&Neutral::isA );
+
 	/////////////////////////////////////////////////////////////////
 	// Value Finfos
 	/////////////////////////////////////////////////////////////////
@@ -232,6 +238,7 @@ const Cinfo* Neutral::initCinfo()
 		&neighbors,			// ReadOnlyLookupValue
 		&msgDests,				// ReadOnlyLookupValue
 		&msgDestFunctions,		// ReadOnlyLookupValue
+		&isA,					// ReadOnlyLookupValue
 	};
 
 	/////////////////////////////////////////////////////////////////
@@ -564,6 +571,11 @@ vector< string > Neutral::getMsgDestFunctions( const Eref& e, string field ) con
 				"' not found or not a SrcFinfo\n";
 	}
 	return ret;
+}
+
+bool Neutral::isA( const Eref& e, string className ) const
+{
+	return e.element()->cinfo()->isA( className );
 }
 
 //////////////////////////////////////////////////////////////////////////

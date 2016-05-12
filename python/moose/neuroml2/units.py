@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jul 25 16:30:14 2013 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 25 17:55:16 2013 (+0530)
+# Last-Updated: Sat Mar  5 14:56:35 2016 (-0500)
 #           By: subha
-#     Update #: 50
+#     Update #: 57
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -49,11 +49,15 @@
 in NeuroMLCoreDimensions.xml) to SI
 
 """
+from __future__ import print_function
+import os
 import numpy as np
 import re
 from xml.etree import ElementTree
 
-unitsdoc = ElementTree.parse('NeuroMLCoreDimensions.xml')
+# The units and dimensions used in NeuroML2 are defined in this file:
+# https://github.com/NeuroML/NeuroML2/blob/master/NeuroML2CoreTypes/NeuroMLCoreDimensions.xml
+unitsdoc = ElementTree.parse(os.path.join(os.path.dirname(__file__),'schema', 'NeuroMLCoreDimensions.xml'))
 dims = dict([(el.name, el) for el in unitsdoc.getroot() if el.tag == 'Dimension'])
 units = dict([(el.symbol, el) for el in unitsdoc.getroot() if el.tag == 'Unit'])
 

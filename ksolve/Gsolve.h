@@ -111,6 +111,11 @@ class Gsolve: public ZombiePoolInterface
 		/// Flag: set true if randomized round to integers is to be done.
 		void setRandInit( bool val );
 
+		/// Flag: returns true if randomized round to integers is done.
+		bool getClockedUpdate() const;
+		/// Flag: set true if randomized round to integers is to be done.
+		void setClockedUpdate( bool val );
+
 		//////////////////////////////////////////////////////////////////
 		static SrcFinfo2< Id, vector< double > >* xComptOut();
 		static const Cinfo* initCinfo();
@@ -138,6 +143,9 @@ class Gsolve: public ZombiePoolInterface
 
 		/// Pointer to diffusion solver
 		ZombiePoolInterface* dsolvePtr_;
+		
+		/// Flag: True if atot should be updated every clock tick
+		bool useClockedUpdate_;
 };
 
 #endif	// _GSOLVE_H

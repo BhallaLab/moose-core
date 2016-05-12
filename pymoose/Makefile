@@ -16,7 +16,7 @@ $(TARGET): $(OBJ) $(HEADERS) ../basecode/main.cpp ../utility/_utility.o ../basec
 	$(LD) -r -o $(TARGET) $(OBJ) $(LDFLAGS)
 
 .cpp.o: $(HEADERS)
-	$(CXX) $(CXXFLAGS) $(NUMPY_WARNING_FLAG) $< -c
+	$(CXX) $(CXXFLAGS) $(NUMPY_WARNING_FLAG) -I.. -I../basecode $< -c
 clean: 
 	-rm -f *.o
 

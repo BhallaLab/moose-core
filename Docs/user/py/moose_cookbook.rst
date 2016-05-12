@@ -1,5 +1,5 @@
 .. A cookbook for MOOSE
-.. Lists all the snippets in Demos/snippets directory
+.. Lists all the snippets in moose-examples/snippets directory
 
 MOOSE Cookbook   
 ==============
@@ -25,7 +25,7 @@ The Hodgkin-Huxley demo
 This is a self-contained graphical demo implemented by Subhasis Ray,
 closely based on the 'Squid' demo by Mark Nelson which ran in GENESIS.
 
-.. figure:: images/squid_demo.png
+.. figure:: ../../images/squid_demo.png
    :alt: Hodgkin-Huxley's squid giant axon experiment
 
    Simulation of Hodgkin-Huxley's experiment on squid giant axon
@@ -33,7 +33,7 @@ closely based on the 'Squid' demo by Mark Nelson which ran in GENESIS.
       
 
 The demo has built-in documentation and may be run from the
-``Demos/squid`` subdirectory of MOOSE. If you want to read a simpler
+``moose-examples/squid`` subdirectory of MOOSE. If you want to read a simpler
 implementation of the same (without the code for setting up GUI),
 check out :ref:`hhmodel`.
 
@@ -51,7 +51,7 @@ Accessing and tweaking parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: tweakingParameters
    :members:
-.. figure:: images/tweakingParameters.png
+.. figure:: ../../images/tweakingParameters.png
    :alt: Three oscillation patterns after tweaking model parameters.
 
 Storing simulation output
@@ -73,7 +73,7 @@ Sometimes you want to calculate arbitrary function of the state
 variables of one or more elements and feed the result into another
 element during a simulation. The Function class is useful for this.
 
-.. figure:: images/function.png
+.. figure:: ../../images/function.png
    :alt: Outputs of Function object calculating z = c0 * exp(c1 * x) * cos(y)
    :scale: 50%    
 
@@ -142,7 +142,7 @@ Finding steady states
 
 Making a dose-response curve
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. figure:: images/chemDoseResponse.png
+.. figure:: ../../images/chemDoseResponse.png
    :alt: Dose-response curve example for a bistable system.
 .. automodule:: chemDoseResponse
    :members:
@@ -232,7 +232,7 @@ the model has been loaded from a file. See
 Oscillation models
 ^^^^^^^^^^^^^^^^^^
 There are several chemical oscillators defined in the 
-``Demos/tutorials/ChemkcalOscillators`` directory. These include:
+``moose-examples/tutorials/ChemkcalOscillators`` directory. These include:
 
 1. Slow Feedback Oscillator based on a model by Boris Kholdenko
 
@@ -253,7 +253,7 @@ There are several chemical oscillators defined in the
 Bistability models
 ^^^^^^^^^^^^^^^^^^
 There are several bistable models defined in the 
-``Demos/tutorials/ChemkcalBistables`` directory. These include:
+``moose-examples/tutorials/ChemkcalBistables`` directory. These include:
 
 1. MAPK feedback loop model.
 
@@ -323,7 +323,7 @@ in every compartment of the model neurons, so as to see nice oscillations
 and animations. The first example has a particularly striking pseudo-3D
 rendition of the neuron and the molecular spatial oscillations within it.
 
-.. figure:: images/reacDiffBranchingNeuron.png
+.. figure:: ../../images/reacDiffBranchingNeuron.png
    :alt: Pseudo-3-D rendition of branching neuron and the concs in it.
 
 .. automodule:: reacDiffBranchingNeuron
@@ -522,13 +522,13 @@ and visualization of activity proceeds concurrently with the simulation.
 Support for creating and editing channels, morphology and networks is
 planned for the future. MOOSEGUI uses SI units throughout.
 
-Demos
-^^^^^
+moose-examples
+^^^^^^^^^^^^^^^
 
 -  **Cerebellar granule cell**  
 
    **File -> Load ->**  
-   ~/moose/Demos/neuroml/GranuleCell/GranuleCell.net.xml  
+   ~/moose/moose-examples/neuroml/GranuleCell/GranuleCell.net.xml  
    
    This is a single compartment Cerebellar granule cell with a variety
    of channels `Maex, R. and De Schutter, E.,
@@ -542,13 +542,13 @@ Demos
 -  **Pyloric rhythm generator in the stomatogastric ganglion of lobster**  
 
    **File -> Load ->**  
-   ~/moose/Demos/neuroml/pyloric/Generated.net.xml
+   ~/moose/moose-examples/neuroml/pyloric/Generated.net.xml
 
 
 -  **Purkinje cell**  
 
    **File -> Load ->**  
-   ~/moose/Demos/neuroml/PurkinjeCell/Purkinje.net.xml  
+   ~/moose/moose-examples/neuroml/PurkinjeCell/Purkinje.net.xml  
    
    This is a purely passive cell, but with extensive morphology [De
    Schutter, E. and Bower, J. M., 1994] (exported from
@@ -559,7 +559,7 @@ Demos
 -  **Olfactory bulb subnetwork**  
 
    **File -> Load ->**  
-   ~/moose/Demos/neuroml/OlfactoryBulb/numgloms2_seed100.0_decimated.xml  
+   ~/moose/moose-examples/neuroml/OlfactoryBulb/numgloms2_seed100.0_decimated.xml  
    
    This is a pruned and decimated version of a detailed network model
    of the Olfactory bulb [Gilra A. and Bhalla U., in preparation]
@@ -570,22 +570,22 @@ Demos
 -  **All channels cell**  
 
    **File -> Load ->**  
-   ~/moose/Demos/neuroml/allChannelsCell/allChannelsCell.net.xml  
+   ~/moose/moose-examples/neuroml/allChannelsCell/allChannelsCell.net.xml  
    
    This is the Cerebellar granule cell as above, but with loads of
    channels from various cell types (exported from
    http://www.neuroconstruct.org/). Play around with the channel
    properties to see what they do. You can also edit the ChannelML files
-   in ~/moose/Demos/neuroml/allChannelsCell/cells_channels/ to
+   in ~/moose/moose-examples/neuroml/allChannelsCell/cells_channels/ to
    experiment further.
 
 
 -  **NeuroML python scripts**  
-   In directory ~/moose/Demos/neuroml/GranuleCell, you can run
+   In directory ~/moose/moose-examples/neuroml/GranuleCell, you can run
    python FvsI_Granule98.py which plots firing rate vs injected
    current for the granule cell. Consult this python script to see how
    to read in a NeuroML model and to set up simulations. There are ample
-   snippets in ~/moose/Demos/snippets too.
+   snippets in ~/moose/moose-examples/snippets too.
 
 Loading, modifying, saving
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -621,7 +621,7 @@ stimulating the presynaptic cell as part of experimental setup. The
 cells are defined as single-compartments with Hodgkin-Huxley type Na+
 and K+ channels (see :ref:`hhmodel`)
 
-.. figure:: images/twoCells.png
+.. figure:: ../../images/twoCells.png
    :scale: 50%	    
    :alt: Two cells connected via synapse
       
@@ -643,7 +643,7 @@ Providing random input to a cell
 .. automodule:: randomspike
    :members:
 
-.. figure:: images/randomSpike.png
+.. figure:: ../../images/randomSpike.png
    :scale: 50%
    :alt: Random spike input to a cell
 

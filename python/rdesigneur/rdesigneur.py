@@ -15,19 +15,20 @@
 ## latter in the former, including mapping entities like calcium and
 ## channel conductances, between them.
 ##########################################################################
+from __future__ import print_function
 import imp
 import os
 import moose
 import numpy as np
+import pylab
 import math
-
+import rmoogli
+#import rdesigneurProtos
+from rdesigneurProtos import *
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
 
 #EREST_ACT = -70e-3
-NA = 6.022e23
-PI = 3.14159265359
-FaradayConst = 96485.3365 # Coulomb/mol
 
 class BuildError(Exception):
     def __init__(self, value):
@@ -43,45 +44,59 @@ class rdesigneur:
     Params:
         useGssa: True/False               for GSSA in spine and PSD
         combineSegments: True/False       for NeuroML models
-        meshLambda: default 2e-6
+        diffusionLength: default 2e-6
         adaptCa: [( Ca_wildcard_string, chem_wildcard_string, offset, scale ),...]
         adaptChem: [( Chem_wildcard_string, elec_wildcard_string, offset, scale ),...]
 
     I need to put the extra channels now into the NeuroML definition.
     """
     ################################################################
-    def __init__(self, \
-            modelPath = '/model', \
-            useGssa = True, \
-            combineSegments = True, \
-            stealCellFromLibrary = False, \
-            meshLambda= 2e-6, \
-            temperature = 32, \
-            chemDt= 0.001, \
-            diffDt= 0.001, \
-            elecDt= 50e-6, \
-            cellProto = [], \
-            spineProto = [], \
-            chanProto = [], \
-            chemProto = [], \
-            passiveDistrib= [], \
-            spineDistrib= [], \
-            chanDistrib = [], \
-            chemDistrib = [], \
-            adaptorList= [] \
+    def __init__(self,
+            modelPath = '/model',
+            turnOffElec = False,
+            useGssa = True,
+            combineSegments = True,
+            stealCellFromLibrary = False,
+            diffusionLength= 2e-6,
+            meshLambda = -1.0,    #This is a backward compatibility hack
+            temperature = 32,
+            chemDt= 0.001,          # Much finer than MOOSE, for multiscale
+            diffDt= 0.001,          # 10x finer than MOOSE, for multiscale
+            elecDt= 50e-6,          # Same default as from MOOSE
+            chemPlotDt = 1.0,       # Same default as from MOOSE
+            elecPlotDt = 0.1e-3,    # Same default as from MOOSE
+            cellProto = [],
+            spineProto = [],
+            chanProto = [],
+            chemProto = [],
+            passiveDistrib= [],
+            spineDistrib= [],
+            chanDistrib = [],
+            chemDistrib = [],
+            adaptorList= [],
+            stimList = [],
+            plotList = [],
+            moogList = []
         ):
         """ Constructor of the rdesigner. This just sets up internal fields
             for the model building, it doesn't actually create any objects.
         """
 
+        self.modelPath = modelPath
+        self.turnOffElec = turnOffElec
         self.useGssa = useGssa
         self.combineSegments = combineSegments
         self.stealCellFromLibrary = stealCellFromLibrary
-        self.meshLambda= meshLambda
+        self.diffusionLength= diffusionLength
+        if meshLambda > 0.0:
+            print("Warning: meshLambda argument is deprecated. Please use 'diffusionLength' instead.\nFor now rdesigneur will accept this argument.")
+            self.diffusionLength = meshLambda
         self.temperature = temperature
         self.chemDt= chemDt
         self.diffDt= diffDt
         self.elecDt= elecDt
+        self.elecPlotDt= elecPlotDt
+        self.chemPlotDt= chemPlotDt
 
         self.cellProtoList = cellProto
         self.spineProtoList = spineProto
@@ -94,42 +109,56 @@ class rdesigneur:
         self.chemDistrib = chemDistrib
 
         self.adaptorList = adaptorList
+        self.stimList = stimList
+        self.plotList = plotList
+        self.moogList = moogList
+        self.plotNames = []
+        self.moogNames = []
         self.cellPortionElist = []
         self.spineComptElist = []
 
-
-    ################################################################
-    def _printModelStats( self ):
-        print "Rdesigneur: Elec model has", \
-            self.elecid.numCompartments, "compartments and", \
-            self.elecid.numSpines, "spines on", \
-            len( self.cellPortionElist ), "compartments."
-        if hasattr( self , 'chemid' ):
-            dmstoich = moose.element( self.dendCompt.path + '/stoich' )
-            smstoich = moose.element( self.spineCompt.path + '/stoich' )
-            pmstoich = moose.element( self.psdCompt.path + '/stoich' )
-            print "Chem part of model has ", \
-                self.dendCompt.mesh.num, "dendrite voxels X", \
-                dmstoich.numAllPools, "pools,\n    ", \
-                self.spineCompt.mesh.num, "spine voxels X", \
-                smstoich.numAllPools, "pools,", \
-                self.psdCompt.mesh.num, "psd voxels X", \
-                pmstoich.numAllPools, "pools."
-
-    def buildModel( self, modelPath ):
         if not moose.exists( '/library' ):
             library = moose.Neutral( '/library' )
-        if moose.exists( modelPath ):
-            print "rdesigneur::buildModel: Build failed. Model '", \
-                modelPath, "' already exists."
-            return
-        self.model = moose.Neutral( modelPath )
         try:
             self.buildCellProto()
             self.buildChanProto()
             self.buildSpineProto()
             self.buildChemProto()
-            # Protos made. Now install the elec and chem protos on model.
+        except BuildError as msg:
+            print("Error: rdesigneur: Prototype build failed:", msg)
+            quit()
+            
+
+
+    ################################################################
+    def _printModelStats( self ):
+        print("Rdesigneur: Elec model has",
+            self.elecid.numCompartments, "compartments and",
+            self.elecid.numSpines, "spines on",
+            len( self.cellPortionElist ), "compartments.")
+        if hasattr( self , 'chemid' ):
+            dmstoich = moose.element( self.dendCompt.path + '/stoich' )
+            print("Chem part of model has ",
+                self.dendCompt.mesh.num, "dendrite voxels X",
+                dmstoich.numAllPools, "pools,\n    ")
+            if hasattr( self , 'spineCompt' ):
+                smstoich = moose.element( self.spineCompt.path + '/stoich')
+                pmstoich = moose.element( self.psdCompt.path + '/stoich' )
+                print(self.spineCompt.mesh.num, "spine voxels X",
+                    smstoich.numAllPools, "pools,",
+                    self.psdCompt.mesh.num, "psd voxels X",
+                    pmstoich.numAllPools, "pools.")
+
+    def buildModel( self, modelPath = '/model' ):
+        if moose.exists( modelPath ):
+            print("rdesigneur::buildModel: Build failed. Model '",
+                modelPath, "' already exists.")
+            return
+        self.model = moose.Neutral( modelPath )
+        self.modelPath = modelPath
+        try:
+            # Protos made in the init phase. Now install the elec and 
+            # chem protos on model.
             self.installCellFromProtos()
             # Now assign all the distributions
             self.buildPassiveDistrib()
@@ -138,11 +167,14 @@ class rdesigneur:
             self.buildChemDistrib()
             self._configureSolvers()
             self.buildAdaptors()
+            self._buildPlots()
+            self._buildMoogli()
+            self._buildStims()
             self._configureClocks()
             self._printModelStats()
 
-        except BuildError, msg:
-            print "Error: rdesigneur: model build failed: ", msg
+        except BuildError as msg:
+            print("Error: rdesigneur: model build failed:", msg)
             moose.delete( self.model )
 
     def installCellFromProtos( self ):
@@ -202,7 +234,7 @@ class rdesigneur:
             return False
         if not func[0:bracePos] in globals():
             raise BuildError( \
-                protoName + "Proto: global function '" +func+"' not known.")
+                protoName + " Proto: global function '" +func+"' not known.")
         globals().get( func[0:bracePos] )( protoName )
         return True
 
@@ -252,7 +284,7 @@ class rdesigneur:
                 return True
             if moose.exists( '/library/' + protoVec[0] ):
                 #moose.copy('/library/' + protoVec[0], '/library/', protoVec[1])
-                print 'renaming /library/' + protoVec[0] + ' to ' + protoVec[1]
+                print('renaming /library/' + protoVec[0] + ' to ' + protoVec[1])
                 moose.element( '/library/' + protoVec[0]).name = protoVec[1]
                 #moose.le( '/library' )
                 return True
@@ -269,6 +301,23 @@ class rdesigneur:
     # Here are the functions to build the type-specific prototypes.
     ################################################################
     def buildCellProto( self ):
+        if len( self.cellProtoList ) == 0:
+            ''' Make HH squid model sized compartment:
+            len and dia 500 microns. CM = 0.01 F/m^2, RA =
+            '''
+            self.elecid = makePassiveHHsoma( name = 'cell' )
+            assert( moose.exists( '/library/cell/soma' ) )
+            self.soma = moose.element( '/library/cell/soma' )
+
+            '''
+            self.elecid = moose.Neuron( '/library/cell' )
+            dia = 500e-6
+            self.soma = buildCompt( self.elecid, 'soma', dia, dia, 0.0,
+                0.33333333, 3000, 0.01 )
+            self.soma.initVm = -65e-3 # Resting of -65, from HH
+            self.soma.Em = -54.4e-3 # 10.6 mV above resting of -65, from HH
+            '''
+
         for i in self.cellProtoList:
             if self.checkAndBuildProto( "cell", i, \
                 ["Compartment", "SymCompartment"], ["swc", "p", "nml", "xml"] ):
@@ -333,10 +382,34 @@ class rdesigneur:
         self.elecid.channelDistribution = temp
 
     def buildSpineDistrib( self ):
+        # For uniformity and conciseness, we don't use a dictionary.
+        # ordering of spine distrib is
+        # name, path, spacing, spacingDistrib, size, sizeDistrib, angle, angleDistrib
+        # [i for i in L1 if i in L2]
+        # The first two args are compulsory, and don't need arg keys.
+        usageStr = 'Usage: name, path, [spacing, spacingDistrib, size, sizeDistrib, angle, angleDistrib]'
         temp = []
+        defaults = ['spine', '#dend#,#apical#', '10e-6', '1e-6', '1', '0.5', '0', '6.2831853' ]
+        argKeys = ['spacing', 'spacingDistrib', 'size', 'sizeDistrib', 'angle', 'angleDistrib' ]
         for i in self.spineDistrib:
-            temp.extend( i )
-            temp.extend( [""] )
+            if len(i) >= 2 :
+                arg = i[:2]
+                # Backward compat hack here
+                bcKeys = [ j for j in i[2:] if j in argKeys ]
+                if len( bcKeys ) > 0: # Looks like we have an old arg str
+                    print('Rdesigneur::buildSpineDistrib: Warning: Deprecated argument format.\nWill accept for now.')
+                    print(usageStr)
+                    temp.extend( i + [''] )
+                elif len( i ) > len( defaults ):
+                    print('Rdesigneur::buildSpineDistrib: Warning: too many arguments in spine definition')
+                    print(usageStr)
+                else:
+                    optArg = i[2:] + defaults[ len(i):]
+                    assert( len( optArg ) == len( argKeys ) )
+                    for j in zip( argKeys, optArg ):
+                        arg.extend( [j[0], j[1]] )
+                    temp.extend( arg + [''] )
+
         self.elecid.spineDistribution = temp
 
     def buildChemDistrib( self ):
@@ -345,15 +418,17 @@ class rdesigneur:
             # Assign any other params. Possibly the first param should
             # be a global scaling factor.
             self.cellPortionElist = self.elecid.compartmentsFromExpression[ pair ]
-            self.spineComptElist = self.elecid.spinesFromExpression[ pair ]
             if len( self.cellPortionElist ) == 0:
                 raise BuildError( \
                     "buildChemDistrib: No elec compartments found in path: '" \
                         + pair + "'" )
+            self.spineComptElist = self.elecid.spinesFromExpression[ pair ]
+            '''
             if len( self.spineComptElist ) == 0:
                 raise BuildError( \
                     "buildChemDistrib: No spine compartments found in path: '" \
                         + pair + "'" )
+            '''
             # Build the neuroMesh
             # Check if it is good. Need to catch the ValueError here.
             self._buildNeuroMesh()
@@ -382,18 +457,214 @@ class rdesigneur:
             else:
                 self._buildAdaptor( mesh, i[2], i[3], name, i[1], False, i[4], i[5] )
 
+    ################################################################
+    # Here we set up the plots. Dummy for cases that don't match conditions
+    ################################################################
+    def _collapseElistToPathAndClass( self, comptList, path, className ):
+        dummy = moose.element( '/' )
+        ret = [ dummy ] * len( comptList )
+        j = 0
+        for i in comptList:
+            if moose.exists( i.path + '/' + path ):
+                obj = moose.element( i.path + '/' + path )
+                if obj.isA[ className ]:
+                    ret[j] = obj
+            j += 1
+        return ret
+
+    # Returns vector of source objects, and the field to use.
+    # plotSpec is of the form
+    #   [ region_wildcard, region_expr, path, field, title]
+    def _parseComptField( self, comptList, plotSpec, knownFields ):
+        # Put in stuff to go through fields if the target is a chem object
+        field = plotSpec[3]
+        if not field in knownFields:
+            print("Warning: Rdesigneur::_parseComptField: Unknown field '", field, "'")
+            return (), ""
+
+        kf = knownFields[field] # Find the field to decide type.
+        if ( kf[0] == 'CaConcBase' or kf[0] == 'ChanBase' ):
+            objList = self._collapseElistToPathAndClass( comptList, plotSpec[2], kf[0] )
+            return objList, kf[1]
+        elif (field == 'n' or field == 'conc'  ):
+            path = plotSpec[2]
+            pos = path.find( '/' )
+            if pos == -1:   # Assume it is in the dend compartment.
+                path  = 'dend/' + path
+            pos = path.find( '/' )
+            chemCompt = path[:pos]
+            cc = moose.element( self.modelPath + '/chem/' + chemCompt)
+            voxelVec = []
+            if ( chemCompt == 'dend' ):
+                for i in comptList:
+                    voxelVec.extend( cc.dendVoxelsOnCompartment[i] )
+            else:
+                em = cc.elecComptMap
+                elecComptMap = { moose.element(em[i]):i for i in range(len(em)) }
+                for i in comptList:
+                    if i in elecComptMap:
+                        voxelVec.extend( [ elecComptMap[i] ] )
+            # Here we collapse the voxelVec into objects to plot.
+            allObj = moose.vec( self.modelPath + '/chem/' + plotSpec[2] )
+            #print "####### allObj=", self.modelPath + '/chem/' + plotSpec[2]
+            if len( allObj ) >= len( voxelVec ):
+                objList = [ allObj[int(j)] for j in voxelVec]
+            else:
+                objList = []
+                print( "Warning: Rdesigneur::_parseComptField: unknown Object: '", plotSpec[2], "'" )
+            #print "############", chemCompt, len(objList), kf[1]
+            return objList, kf[1]
+
+        else:
+            return comptList, kf[1]
+
+
+    def _buildPlots( self ):
+        knownFields = {
+            'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)' ),
+            'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)' ),
+            'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)' ),
+            'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)' ),
+            'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)' ),
+            'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)' ),
+            'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)' ),
+            'n':('PoolBase', 'getN', 1, '# of molecules'),
+            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' )
+        }
+        graphs = moose.Neutral( self.modelPath + '/graphs' )
+        dummy = moose.element( '/' )
+        k = 0
+        for i in self.plotList:
+            pair = i[0] + " " + i[1]
+            dendCompts = self.elecid.compartmentsFromExpression[ pair ]
+            spineCompts = self.elecid.spinesFromExpression[ pair ]
+            #print( "DENDENDENDNEDN = ", len(dendCompts), pair )
+            #print( "SPINESPINESPINE = ", len(spineCompts), pair )
+            plotObj, plotField = self._parseComptField( dendCompts, i, knownFields )
+            plotObj2, plotField2 = self._parseComptField( spineCompts, i, knownFields )
+            assert( plotField == plotField2 )
+            plotObj3 = plotObj + plotObj2
+            numPlots = sum( i != dummy for i in plotObj3 )
+            if numPlots > 0:
+                tabname = graphs.path + '/plot' + str(k)
+                scale = knownFields[i[3]][2]
+                units = knownFields[i[3]][3]
+                self.plotNames.append( ( tabname, i[4], k, scale, units ) )
+                k += 1
+                if i[3] == 'n' or i[3] == 'conc':
+                    tabs = moose.Table2( tabname, numPlots )
+                else:
+                    tabs = moose.Table( tabname, numPlots )
+                vtabs = moose.vec( tabs )
+                q = 0
+                for p in [ x for x in plotObj3 if x != dummy ]:
+                    moose.connect( vtabs[q], 'requestOut', p, plotField )
+                    q += 1
+
+    def _buildMoogli( self ):
+        knownFields = {
+            'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)', -80.0, 40.0 ),
+            'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)', -10, 10 ),
+            'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)', -10, 10 ),
+            'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)', 0, 1 ),
+            'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)', 0, 1 ),
+            'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)', -10, 10 ),
+            'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)', 0, 10 ),
+            'n':('PoolBase', 'getN', 1, '# of molecules', 0, 200 ),
+            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)', 0, 2 )
+        }
+        moogliBase = moose.Neutral( self.modelPath + '/moogli' )
+        k = 0
+        for i in self.moogList:
+            kf = knownFields[i[3]]
+            pair = i[0] + " " + i[1]
+            dendCompts = self.elecid.compartmentsFromExpression[ pair ]
+            spineCompts = self.elecid.spinesFromExpression[ pair ]
+            dendObj, mooField = self._parseComptField( dendCompts, i, knownFields )
+            spineObj, mooField2 = self._parseComptField( spineCompts, i, knownFields )
+            assert( mooField == mooField2 )
+            mooObj3 = dendObj + spineObj
+            numMoogli = len( mooObj3 )
+            #dendComptMap = self.dendCompt.elecComptMap
+            #self.moogliViewer = rmoogli.makeMoogli( self, mooObj3, mooField )
+            if len( i ) == 5:
+                i.extend( kf[4:6] )
+            elif len( i ) == 6:
+                i.extend( [kf[5]] )
+            #self.moogliViewer = rmoogli.makeMoogli( self, mooObj3, i, kf )
+            self.moogNames.append( rmoogli.makeMoogli( self, mooObj3, i, kf ) )
+
+
+    ################################################################
+    # Here we display the plots and moogli
+    ################################################################
+    def displayMoogli( self, moogliDt, runtime, rotation = math.pi/500.0):
+        rmoogli.displayMoogli( self, moogliDt, runtime, rotation )
+
+    def display( self ):
+        for i in self.plotNames:
+            pylab.figure( i[2] )
+            pylab.title( i[1] )
+            pylab.xlabel( "Time (s)" )
+            pylab.ylabel( i[4] )
+            vtab = moose.vec( i[0] )
+            t = np.arange( 0, vtab[0].vector.size, 1 ) * vtab[0].dt
+            for j in vtab:
+                pylab.plot( t, j.vector * i[3] )
+        if len( self.moogList ) > 0:
+            pylab.ion()
+        pylab.show()
+
+    ################################################################
+    # Here we set up the stims
+    ################################################################
+    def _buildStims( self ):
+        knownFields = {
+                'inject':('CompartmentBase', 'setInject'),
+                'Ca':('CaConcBase', 'getCa'),
+                'n':('PoolBase', 'setN'),
+                'conc':('PoolBase''setConc')
+        }
+        stims = moose.Neutral( self.modelPath + '/stims' )
+        k = 0
+        for i in self.stimList:
+            pair = i[0] + " " + i[1]
+            dendCompts = self.elecid.compartmentsFromExpression[ pair ]
+            spineCompts = self.elecid.spinesFromExpression[ pair ]
+            stimObj, stimField = self._parseComptField( dendCompts, i, knownFields )
+            stimObj2, stimField2 = self._parseComptField( spineCompts, i, knownFields )
+            assert( stimField == stimField2 )
+            stimObj3 = stimObj + stimObj2
+            numStim = len( stimObj3 )
+            if numStim > 0:
+                funcname = stims.path + '/stim' + str(k)
+                k += 1
+                func = moose.Function( funcname )
+                func.expr = i[4]
+                for q in stimObj3:
+                    moose.connect( func, 'valueOut', q, stimField )
 
     ################################################################
     # Utility function for setting up clocks.
     def _configureClocks( self ):
-        for i in range( 0, 8 ):
-            moose.setClock( i, self.elecDt )
-        moose.setClock( 10, self.diffDt )
+        if self.turnOffElec:
+            elecDt = 1e6
+            elecPlotDt = 1e6
+            diffDt = 0.1    # Slow it down again because no multiscaling
+            chemDt = 0.1    # Slow it down again because no multiscaling
+        else:
+            elecDt = self.elecDt
+            diffDt = self.diffDt
+            chemDt = self.chemDt
+        for i in range( 0, 9 ):
+            moose.setClock( i, elecDt )
+        moose.setClock( 10, diffDt )
         for i in range( 11, 18 ):
-            moose.setClock( i, self.chemDt )
-        moose.setClock( 18, self.chemDt * 5.0 )
+            moose.setClock( i, chemDt )
+        moose.setClock( 8, self.elecPlotDt )
+        moose.setClock( 18, self.chemPlotDt )
         hsolve = moose.HSolve( self.elecid.path + '/hsolve' )
-        hsolve.dt = self.elecDt
+        hsolve.dt = elecDt
         hsolve.target = self.soma.path
     ################################################################
     ################################################################
@@ -446,9 +717,9 @@ class rdesigneur:
         nmdarList = moose.wildcardFind( ep + '/##[ISA=NMDAChan]' )
 
         self.comptList = moose.wildcardFind( ep + '/#[ISA=CompartmentBase]')
-        print "Rdesigneur: Elec model has ", len( self.comptList ), \
-            " compartments and ", len( self.spineList ), \
-            " spines with ", len( nmdarList ), " NMDARs"
+        print("Rdesigneur: Elec model has ", len( self.comptList ),
+            " compartments and ", len( self.spineList ),
+            " spines with ", len( nmdarList ), " NMDARs")
 
 
         self._buildNeuroMesh()
@@ -456,7 +727,7 @@ class rdesigneur:
 
         self._configureSolvers()
         for i in self.adaptorList:
-            print i
+            print(i)
             self._buildAdaptor( i[0],i[1],i[2],i[3],i[4],i[5],i[6] )
 
     ################################################################
@@ -535,7 +806,7 @@ class rdesigneur:
         args = []
         for i in self.addSpineList:
             if not moose.exists( '/library/' + i[0] ):
-                print 'Warning: _decorateWithSpines: spine proto ', i[0], ' not found.'
+                print('Warning: _decorateWithSpines: spine proto ', i[0], ' not found.')
                 continue
             s = ""
             for j in range( 9 ):
@@ -549,12 +820,12 @@ class rdesigneur:
     def _loadElec( self, efile, elecname ):
         if ( efile[ len( efile ) - 2:] == ".p" ):
             self.elecid = moose.loadModel( efile, '/library/' + elecname)[0]
-            print self.elecid
+            print(self.elecid)
         elif ( efile[ len( efile ) - 4:] == ".swc" ):
             self.elecid = moose.loadModel( efile, '/library/' + elecname)[0]
         else:
             nm = NeuroML()
-            print "in _loadElec, combineSegments = ", self.combineSegments
+            print("in _loadElec, combineSegments = ", self.combineSegments)
             nm.readNeuroMLFromFile( efile, \
                     params = {'combineSegments': self.combineSegments, \
                     'createPotentialSynapses': True } )
@@ -587,11 +858,15 @@ class rdesigneur:
         if len( comptlist ) == 0:
             raise BuildError( "validateChem: no compartment on: " + cpath )
 
+        if len( comptlist ) == 1:
+            return;
+
         # Sort comptlist in decreasing order of volume
         sortedComptlist = sorted( comptlist, key=lambda x: -x.volume )
         if ( len( sortedComptlist ) != 3 ):
-            print cpath, sortedComptlist
+            print(cpath, sortedComptlist)
             raise BuildError( "validateChem: Require 3 chem compartments, have: " + str( len( sortedComptlist ) ) )
+        '''
         if not( sortedComptlist[0].name.lower() == 'dend' and \
             sortedComptlist[1].name.lower() == 'spine' and \
             sortedComptlist[2].name.lower() == 'psd' ):
@@ -599,6 +874,7 @@ class rdesigneur:
                     + sortedComptList[0].name + ", " \
                     + sortedComptList[1].name + ", " \
                     + sortedComptList[2].name )
+        '''
 
     #################################################################
 
@@ -609,17 +885,20 @@ class rdesigneur:
         self.chemid.name = 'temp_chem'
         newChemid = moose.Neutral( self.model.path + '/chem' )
         self.dendCompt = moose.NeuroMesh( newChemid.path + '/dend' )
-        self.dendCompt.separateSpines = 1
         self.dendCompt.geometryPolicy = 'cylinder'
-        self.spineCompt = moose.SpineMesh( newChemid.path + '/spine' )
-        moose.connect( self.dendCompt, 'spineListOut', self.spineCompt, 'spineList' )
-        self.psdCompt = moose.PsdMesh( newChemid.path + '/psd' )
-        moose.connect( self.dendCompt, 'psdListOut', self.psdCompt, 'psdList','OneToOne')
+        self.dendCompt.separateSpines = 0
+        if len( sortedComptList ) == 3:
+            self.dendCompt.separateSpines = 1
+            self.spineCompt = moose.SpineMesh( newChemid.path + '/spine' )
+            moose.connect( self.dendCompt, 'spineListOut', self.spineCompt, 'spineList' )
+            self.psdCompt = moose.PsdMesh( newChemid.path + '/psd' )
+            moose.connect( self.dendCompt, 'psdListOut', self.psdCompt, 'psdList','OneToOne')
         #Move the old reac systems onto the new compartments.
         self._moveCompt( sortedComptList[0], self.dendCompt )
-        self._moveCompt( sortedComptList[1], self.spineCompt )
-        self._moveCompt( sortedComptList[2], self.psdCompt )
-        self.dendCompt.diffLength = self.meshLambda
+        if len( sortedComptList ) == 3:
+            self._moveCompt( sortedComptList[1], self.spineCompt )
+            self._moveCompt( sortedComptList[2], self.psdCompt )
+        self.dendCompt.diffLength = self.diffusionLength
         self.dendCompt.subTree = self.cellPortionElist
         moose.delete( self.chemid )
         self.chemid = newChemid
@@ -637,42 +916,44 @@ class rdesigneur:
         dmstoich.ksolve = dmksolve
         dmstoich.dsolve = dmdsolve
         dmstoich.path = self.dendCompt.path + "/##"
+        # Below we have code that only applies if there are spines
         # Put in spine solvers. Note that these get info from the dendCompt
-        if self.useGssa:
-            smksolve = moose.Gsolve( self.spineCompt.path + '/ksolve' )
-        else:
-            smksolve = moose.Ksolve( self.spineCompt.path + '/ksolve' )
-        smdsolve = moose.Dsolve( self.spineCompt.path + '/dsolve' )
-        smstoich = moose.Stoich( self.spineCompt.path + '/stoich' )
-        smstoich.compartment = self.spineCompt
-        smstoich.ksolve = smksolve
-        smstoich.dsolve = smdsolve
-        smstoich.path = self.spineCompt.path + "/##"
-        # Put in PSD solvers. Note that these get info from the dendCompt
-        if self.useGssa:
-            pmksolve = moose.Gsolve( self.psdCompt.path + '/ksolve' )
-        else:
-            pmksolve = moose.Ksolve( self.psdCompt.path + '/ksolve' )
-        pmdsolve = moose.Dsolve( self.psdCompt.path + '/dsolve' )
-        pmstoich = moose.Stoich( self.psdCompt.path + '/stoich' )
-        pmstoich.compartment = self.psdCompt
-        pmstoich.ksolve = pmksolve
-        pmstoich.dsolve = pmdsolve
-        pmstoich.path = self.psdCompt.path + "/##"
+        if hasattr( self, 'spineCompt' ):
+            if self.useGssa:
+                smksolve = moose.Gsolve( self.spineCompt.path + '/ksolve' )
+            else:
+                smksolve = moose.Ksolve( self.spineCompt.path + '/ksolve' )
+            smdsolve = moose.Dsolve( self.spineCompt.path + '/dsolve' )
+            smstoich = moose.Stoich( self.spineCompt.path + '/stoich' )
+            smstoich.compartment = self.spineCompt
+            smstoich.ksolve = smksolve
+            smstoich.dsolve = smdsolve
+            smstoich.path = self.spineCompt.path + "/##"
+            # Put in PSD solvers. Note that these get info from the dendCompt
+            if self.useGssa:
+                pmksolve = moose.Gsolve( self.psdCompt.path + '/ksolve' )
+            else:
+                pmksolve = moose.Ksolve( self.psdCompt.path + '/ksolve' )
+            pmdsolve = moose.Dsolve( self.psdCompt.path + '/dsolve' )
+            pmstoich = moose.Stoich( self.psdCompt.path + '/stoich' )
+            pmstoich.compartment = self.psdCompt
+            pmstoich.ksolve = pmksolve
+            pmstoich.dsolve = pmdsolve
+            pmstoich.path = self.psdCompt.path + "/##"
 
-        # Put in cross-compartment diffusion between ksolvers
-        dmdsolve.buildNeuroMeshJunctions( smdsolve, pmdsolve )
-        # Put in cross-compartment reactions between ksolvers
-        smstoich.buildXreacs( pmstoich )
-        #pmstoich.buildXreacs( smstoich )
-        smstoich.buildXreacs( dmstoich )
-        dmstoich.filterXreacs()
-        smstoich.filterXreacs()
-        pmstoich.filterXreacs()
+            # Put in cross-compartment diffusion between ksolvers
+            dmdsolve.buildNeuroMeshJunctions( smdsolve, pmdsolve )
+            # Put in cross-compartment reactions between ksolvers
+            smstoich.buildXreacs( pmstoich )
+            #pmstoich.buildXreacs( smstoich )
+            smstoich.buildXreacs( dmstoich )
+            dmstoich.filterXreacs()
+            smstoich.filterXreacs()
+            pmstoich.filterXreacs()
 
-        # set up the connections so that the spine volume scaling can happen
-        self.elecid.setSpineAndPsdMesh( self.spineCompt, self.psdCompt )
-        self.elecid.setSpineAndPsdDsolve( smdsolve, pmdsolve )
+            # set up the connections so that the spine volume scaling can happen
+            self.elecid.setSpineAndPsdMesh( self.spineCompt, self.psdCompt)
+            self.elecid.setSpineAndPsdDsolve( smdsolve, pmdsolve )
     ################################################################
 
     def _loadChem( self, fname, chemName ):
@@ -680,13 +961,13 @@ class rdesigneur:
         modelId = moose.loadModel( fname, chem.path, 'ee' )
         comptlist = moose.wildcardFind( chem.path + '/#[ISA=ChemCompt]' )
         if len( comptlist ) == 0:
-            print "loadChem: No compartment found in file: ", fname
+            print("loadChem: No compartment found in file: ", fname)
             return
         # Sort comptlist in decreasing order of volume
         sortedComptlist = sorted( comptlist, key=lambda x: -x.volume )
         if ( len( sortedComptlist ) != 3 ):
-            print "loadChem: Require 3 chem compartments, have: ",\
-                len( sortedComptlist )
+            print("loadChem: Require 3 chem compartments, have: ",\
+                len( sortedComptlist ))
             return False
         sortedComptlist[0].name = 'dend'
         sortedComptlist[1].name = 'spine'
@@ -703,6 +984,7 @@ class rdesigneur:
     ################################################################
     def _buildAdaptor( self, meshName, elecRelPath, elecField, \
             chemRelPath, chemField, isElecToChem, offset, scale ):
+        #print "offset = ", offset, ", scale = ", scale
         mesh = moose.element( '/model/chem/' + meshName )
         #elecComptList = mesh.elecComptList
         if elecRelPath == 'spine':
@@ -742,8 +1024,7 @@ class rdesigneur:
                 adName += elecRelPath[1-i]
                 break
         ad = moose.Adaptor( chemObj.path + adName, len( elecComptList ) )
-        print 'building ', len( elecComptList ), 'adaptors ', adName, \
-               ' for: ', mesh.name, elecRelPath, elecField, chemRelPath
+        #print 'building ', len( elecComptList ), 'adaptors ', adName, ' for: ', mesh.name, elecRelPath, elecField, chemRelPath
         av = ad.vec
         chemVec = moose.element( mesh.path + '/' + chemRelPath ).vec
 
@@ -772,180 +1053,3 @@ class rdesigneur:
                 for j in range( i[1], i[2] ):
                     moose.connect( i[3], 'requestOut', chemVec[j], chemFieldSrc)
                 msg = moose.connect( i[3], 'output', elObj, elecFieldDest )
-
-    #################################################################
-    # Here we have a series of utility functions for building cell
-    # prototypes.
-    #################################################################
-def transformNMDAR( path ):
-    for i in moose.wildcardFind( path + "/##/#NMDA#[ISA!=NMDAChan]" ):
-        chanpath = i.path
-        pa = i.parent
-        i.name = '_temp'
-        if ( chanpath[-3:] == "[0]" ):
-            chanpath = chanpath[:-3]
-        nmdar = moose.NMDAChan( chanpath )
-        sh = moose.SimpleSynHandler( chanpath + '/sh' )
-        moose.connect( sh, 'activationOut', nmdar, 'activation' )
-        sh.numSynapses = 1
-        sh.synapse[0].weight = 1
-        nmdar.Ek = i.Ek
-        nmdar.tau1 = i.tau1
-        nmdar.tau2 = i.tau2
-        nmdar.Gbar = i.Gbar
-        nmdar.CMg = 12
-        nmdar.KMg_A = 1.0 / 0.28
-        nmdar.KMg_B = 1.0 / 62
-        nmdar.temperature = 300
-        nmdar.extCa = 1.5
-        nmdar.intCa = 0.00008
-        nmdar.intCaScale = 1
-        nmdar.intCaOffset = 0.00008
-        nmdar.condFraction = 0.02
-        moose.delete( i )
-        moose.connect( pa, 'channel', nmdar, 'channel' )
-        caconc = moose.wildcardFind( pa.path + '/#[ISA=CaConcBase]' )
-        if ( len( caconc ) < 1 ):
-            print 'no caconcs found on ', pa.path
-        else:
-            moose.connect( nmdar, 'ICaOut', caconc[0], 'current' )
-            moose.connect( caconc[0], 'concOut', nmdar, 'assignIntCa' )
-    ################################################################
-    # Utility function for building a compartment, used for spines.
-def buildCompt( pa, name, length, dia, xoffset, RM, RA, CM ):
-    compt = moose.Compartment( pa.path + '/' + name )
-    compt.x0 = xoffset
-    compt.y0 = 0
-    compt.z0 = 0
-    compt.x = length + xoffset
-    compt.y = 0
-    compt.z = 0
-    compt.diameter = dia
-    compt.length = length
-    xa = dia * dia * PI / 4.0
-    sa = length * dia * PI
-    compt.Ra = length * RA / xa
-    compt.Rm = RM / sa
-    compt.Cm = CM * sa
-    return compt
-
-    ################################################################
-    # Utility function for building a synapse, used for spines.
-def buildSyn( name, compt, Ek, tau1, tau2, Gbar, CM ):
-    syn = moose.SynChan( compt.path + '/' + name )
-    syn.Ek = Ek
-    syn.tau1 = tau1
-    syn.tau2 = tau2
-    syn.Gbar = Gbar * compt.Cm / CM
-    #print "BUILD SYN: ", name, Gbar, syn.Gbar, CM
-    moose.connect( compt, 'channel', syn, 'channel' )
-    sh = moose.SimpleSynHandler( syn.path + '/sh' )
-    moose.connect( sh, 'activationOut', syn, 'activation' )
-    sh.numSynapses = 1
-    sh.synapse[0].weight = 1
-    return syn
-
-######################################################################
-# Utility function, borrowed from proto18.py, for making an LCa channel.
-# Based on Traub's 91 model, I believe.
-def make_LCa():
-        EREST_ACT = -0.060 #/* hippocampal cell resting potl */
-        ECA = 0.140 + EREST_ACT #// 0.080
-	if moose.exists( 'LCa' ):
-		return
-	Ca = moose.HHChannel( 'LCa' )
-	Ca.Ek = ECA
-	Ca.Gbar = 0
-	Ca.Gk = 0
-	Ca.Xpower = 2
-	Ca.Ypower = 1
-	Ca.Zpower = 0
-
-	xgate = moose.element( 'LCa/gateX' )
-	xA = np.array( [ 1.6e3, 0, 1.0, -1.0 * (0.065 + EREST_ACT), -0.01389, -20e3 * (0.0511 + EREST_ACT), 20e3, -1.0, -1.0 * (0.0511 + EREST_ACT), 5.0e-3, 3000, -0.1, 0.05 ] )
-        xgate.alphaParms = xA
-	ygate = moose.element( 'LCa/gateY' )
-	ygate.min = -0.1
-	ygate.max = 0.05
-	ygate.divs = 3000
-	yA = np.zeros( (ygate.divs + 1), dtype=float)
-	yB = np.zeros( (ygate.divs + 1), dtype=float)
-
-
-#Fill the Y_A table with alpha values and the Y_B table with (alpha+beta)
-	dx = (ygate.max - ygate.min)/ygate.divs
-	x = ygate.min
-	for i in range( ygate.divs + 1 ):
-		if ( x > EREST_ACT):
-			yA[i] = 5.0 * math.exp( -50 * (x - EREST_ACT) )
-		else:
-			yA[i] = 5.0
-		yB[i] = 5.0
-		x += dx
-	ygate.tableA = yA
-	ygate.tableB = yB
-        return Ca
-
-    ################################################################
-    # API function for building spine prototypes. Here we put in the
-    # spine dimensions, and options for standard channel types.
-    # The synList tells it to create dual alpha function synchans:
-    # [name, Erev, tau1, tau2, conductance_density, connectToCa]
-    # The chanList tells it to copy over channels defined in /library
-    # and assign the specified conductance density.
-    # If caTau <= zero then there is no caConc created, otherwise it
-    # creates one and assigns the desired tau in seconds.
-    # With the default arguments here it will create a glu, NMDA and LCa,
-    # and add a Ca_conc.
-def addSpineProto( name = 'spine', \
-        RM = 1.0, RA = 1.0, CM = 0.01, \
-        shaftLen = 1.e-6 , shaftDia = 0.2e-6, \
-        headLen = 0.5e-6, headDia = 0.5e-6, \
-        synList = ( ['glu', 0.0, 2e-3, 9e-3, 200.0, False],
-                    ['NMDA', 0.0, 20e-3, 20e-3, 80.0, True] ),
-        chanList = ( ['Ca', 1.0, True ], ),
-        caTau = 13.333e-3
-        ):
-    if not moose.exists( '/library' ):
-        library = moose.Neutral( '/library' )
-    spine = moose.Neutral( '/library/spine' )
-    shaft = buildCompt( spine, 'shaft', shaftLen, shaftDia, 0.0, RM, RA, CM )
-    head = buildCompt( spine, 'head', headLen, headDia, shaftLen, RM, RA, CM )
-    moose.connect( shaft, 'axial', head, 'raxial' )
-
-    if caTau > 0.0:
-        conc = moose.CaConc( head.path + '/Ca_conc' )
-        conc.tau = caTau
-        conc.length = head.length
-        conc.diameter = head.diameter
-        conc.thick = 0.0
-        # The 'B' field is deprecated.
-        # B = 1/(ion_charge * Faraday * volume)
-        #vol = head.length * head.diameter * head.diameter * PI / 4.0
-        #conc.B = 1.0 / ( 2.0 * FaradayConst * vol )
-        conc.Ca_base = 0.0
-    for i in synList:
-        syn = buildSyn( i[0], head, i[1], i[2], i[3], i[4], CM )
-        if i[5] and caTau > 0.0:
-            moose.connect( syn, 'IkOut', conc, 'current' )
-    for i in chanList:
-        if ( moose.exists( '/library/' + i[0] ) ):
-            chan = moose.copy( '/library/' + i[0], head )
-        else:
-            moose.setCwe( head )
-            chan = make_LCa()
-            chan.name = i[0]
-            moose.setCwe( '/' )
-        chan.Gbar = i[1] * head.Cm / CM
-        #print "CHAN = ", chan, chan.tick, chan.Gbar
-        moose.connect( head, 'channel', chan, 'channel' )
-        if i[2] and caTau > 0.0:
-            moose.connect( chan, 'IkOut', conc, 'current' )
-    transformNMDAR( '/library/spine' )
-    return spine
-
-# Wrapper function. This is used by the proto builder from rdesigneur
-def makeSpineProto( name ):
-    addSpineProto( name = name, chanList = () )
-
-
