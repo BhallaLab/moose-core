@@ -192,10 +192,11 @@ const Cinfo* Table::initCinfo()
 static const Cinfo* tableCinfo = Table::initCinfo();
 
 Table::Table() : threshold_( 0.0 ) , lastTime_( 0.0 ) , input_( 0.0 )
-                 , useStreamer_( false ) 
 {
     // Initialize the directory to which each table should stream.
     rootdir_ = "_tables";
+    useStreamer_ = false;
+    format_ = "csv";
 }
 
 Table::~Table( )
@@ -323,8 +324,16 @@ double Table::getThreshold() const
 // Set the format of table to which its data should be written.
 void Table::setFormat( string format )
 {
-    format_ = format;
-    useStreamer_ = true;
+    if( format == "csv" or format == "npy" )
+    {
+        format_ = format;
+        useStreamer_ = true;
+    }
+    else
+        LOG( moose::warning
+                , "Unsupported format " << format 
+                << " only npy and csv are supported"
+           );
 }
 
 // Get the format of table to which it has to be written.
