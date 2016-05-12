@@ -28,11 +28,11 @@ before_script:
     - sudo apt-get install -qq  python-numpy python-matplotlib
     - sudo apt-get install -qq  python3-numpy python3-matplotlib python3-dev
     - sudo apt-get install -qq libboost-all-dev
+    - sudo apt-get install -qq libgsl0-dev
 
 before_install:
     - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
     - wget "$sbmlurl" -O libsbml.deb && sudo dpkg -i libsbml.deb 
-    - wget "http://ftp.debian.org/debian/pool/main/g/gsl/libgsl0-dev_1.16+dfsg-4_amd64.deb" -O gsl_1.16-dev.deb
     - sudo apt-get install -f
 
 install:
