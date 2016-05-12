@@ -47,6 +47,7 @@
 
 # Code:
 
+from __future__ import print_function
 import os
 import numpy as np
 import uuid
@@ -82,9 +83,9 @@ class TestFindRateFn(unittest.TestCase):
         self.p_dblexp = p_dblexp
 
     def test_sigmoid(self):
-        print 'Testing sigmoid'
+        print('Testing sigmoid')
         fn, params = hhfit.find_ratefn(self.v_array, self.sigmoid)
-        print 'Sigmoid params original:', self.p_sigmoid, 'detected:', params
+        print('Sigmoid params original:', self.p_sigmoid, 'detected:', params)
         pylab.plot(self.v_array, self.sigmoid, 'y-', 
                    self.v_array, hhfit.sigmoid(self.v_array, *self.p_sigmoid), 'b--', 
                    self.v_array, fn(self.v_array, *params), 'r-.')
@@ -95,9 +96,9 @@ class TestFindRateFn(unittest.TestCase):
         self.assertAlmostEqual(rms_error/max(abs(self.sigmoid)), 0.0, places=3)
 
     def test_exponential(self):
-        print 'Testing exponential'
+        print('Testing exponential')
         fn, params = hhfit.find_ratefn(self.v_array, self.exp)
-        print 'Exponential params original:', self.p_exp, 'detected:', params
+        print('Exponential params original:', self.p_exp, 'detected:', params)
         fnval = hhfit.exponential(self.v_array, *params)
         pylab.plot(self.v_array, self.exp, 'y-',
                    self.v_array, hhfit.exponential(self.v_array, *self.p_exp), 'b--',
@@ -112,13 +113,13 @@ class TestFindRateFn(unittest.TestCase):
         # pylab.plot(self.v_array, self.exp, 'b-')
         # pylab.plot(self.v_array, fnval, 'r-.') 
         # pylab.show()
-        print rms_error, rms_error/max(self.exp)
+        print(rms_error, rms_error/max(self.exp))
         self.assertAlmostEqual(rms_error/max(self.exp), 0.0, places=3)
 
     def test_linoid(self):
-        print 'Testing linoid'
+        print('Testing linoid')
         fn, params = hhfit.find_ratefn(self.v_array, self.linoid)
-        print 'Linoid params original:', self.p_linoid, 'detected:', params
+        print('Linoid params original:', self.p_linoid, 'detected:', params)
         pylab.plot(self.v_array, self.linoid, 'y-', 
                    self.v_array, hhfit.linoid(self.v_array, *self.p_linoid), 'b--',
                    self.v_array, fn(self.v_array, *params), 'r-.')
@@ -133,7 +134,7 @@ class TestFindRateFn(unittest.TestCase):
         #     self.assertAlmostEqual(abs(err/orig), 0.0, places=2)
 
     def test_dblexponential(self):
-        print 'Testing double exponential'
+        print('Testing double exponential')
         fn, params = hhfit.find_ratefn(self.v_array, self.dblexp)
         fnval = fn(self.v_array, *params)
         pylab.plot(self.v_array, self.dblexp, 'y-', 
@@ -143,7 +144,7 @@ class TestFindRateFn(unittest.TestCase):
         pylab.show()
         self.assertEqual(hhfit.double_exp, fn)
         rms_error = np.sqrt(np.mean((self.dblexp - fnval)**2))
-        print params, rms_error
+        print(params, rms_error)
         self.assertAlmostEqual(rms_error/max(self.dblexp), 0.0, places=3)
 
 

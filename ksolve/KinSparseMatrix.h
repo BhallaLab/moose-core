@@ -48,8 +48,10 @@ class KinSparseMatrix: public SparseMatrix< int >
 	    /** 
          * Fires a stochastic reaction: It undergoes a single transition
          * This operation updates the mol concs due to the reacn.
+		 * Direction is +1 or -1, specifies direction of reaction
          */
-        void fireReac( unsigned int reacIndex, vector< double >& S ) const;
+        void fireReac( unsigned int reacIndex, vector< double >& S, 
+						double direction ) const;
     
         /** 
         * This function generates a new internal list of rowEnds, such

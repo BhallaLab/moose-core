@@ -6,9 +6,9 @@
  * Maintainer: 
  * Created: Thu Jun 18 23:06:59 2015 (-0400)
  * Version: 
- * Last-Updated: 
- *           By: 
- *     Update #: 0
+ * Last-Updated: Sun Dec 20 23:17:32 2015 (-0500)
+ *           By: subha
+ *     Update #: 2
  * URL: 
  * Keywords: 
  * Compatibility: 
@@ -93,6 +93,7 @@ class NSDFWriter: public HDF5DataWriter
     void closeUniformData();
     void openEventData(const Eref &eref);
     void closeEventData();
+    virtual void close();
     void createUniformMap();
     void createEventMap();
     void writeModelTree();

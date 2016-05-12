@@ -68,7 +68,7 @@
 
 void testCreateStringDataset()
 {
-    char * data[STR_DSET_LEN] = {"You have to", "live", "life", "to the limit"};
+    const char * data[STR_DSET_LEN] = {"You have to", "live", "life", "to the limit"};
     hid_t file, memtype, dset;
     hsize_t size = STR_DSET_LEN;
     herr_t status;

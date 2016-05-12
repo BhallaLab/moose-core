@@ -106,7 +106,7 @@ MarkovChannel.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h ChanB
 VClamp.o: VClamp.h
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c
+	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../external/muparser/include -I .. -I../basecode -I../msg $< -c
 
 $(TARGET): $(OBJ) $(SMOLDYN_OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) $(SMOLDYN_OBJ) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) $(GSL_LIBS)

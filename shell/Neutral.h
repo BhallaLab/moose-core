@@ -90,6 +90,11 @@ class Neutral
 						const Eref& e, string src ) const;
 
 		/**
+		 * Returns True if the object is derived from the specified class
+		 */
+		bool isA( const Eref& e, string className ) const;
+
+		/**
 		 * Simply returns own ObjId
 		 */
 		ObjId getObjId( const Eref& e ) const;

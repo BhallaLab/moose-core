@@ -44,9 +44,10 @@
 // 
 
 // Code:
+
+#include "Python.h"
 #include <iostream>
 #include <cstring>
-#include "Python.h"
 #include "../basecode/header.h"
 #include "../basecode/Id.h"
 #include "../basecode/ObjId.h"

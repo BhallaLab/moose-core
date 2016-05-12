@@ -29,7 +29,8 @@ class FuncRate: public ExternReac
 		}
 
 		double operator() ( const double* S ) const {
-			return func_( S, 0.0 ); // get rate from func calculation.
+			double t = Field< double >::get( Id(1), "currentTime" );
+			return func_( S, t ); // get rate from func calculation.
 		}
 
 		unsigned int getReactants( vector< unsigned int >& molIndex ) const{

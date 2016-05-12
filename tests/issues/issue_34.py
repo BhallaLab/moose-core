@@ -18,9 +18,11 @@ pools['ca'].nInit = 20
 
 r_p0_p1 = moose.Reac('/compt/reacA')
 funA = moose.Function('/compt/funA')
-funA.expr = "{0}*(y0/{1})^6/(1+(y0/{1})^3)^2".format("1.5", "0.7e-3")
-moose.connect(funA, 'requestOut',  pools['ca'], 'getConc')
-moose.connect(funA, 'valueOut', pools['S1'], 'setConc')
+funA.x.num = 1
+funA.expr = "{0}*(x0/{1})^6/(1+(x0/{1})^3)^2".format("1.5", "0.7e-3")
+# moose.connect(funA.x[0], 'input',  pools['ca'], 'getN')
+moose.connect(pools['ca'], 'nOut', funA.x[0], 'input')
+moose.connect(funA, 'valueOut', pools['S1'], 'setN')
 moose.connect(r_p0_p1, 'sub', pools['S'], 'reac')
 moose.connect(r_p0_p1, 'prd', pools['S1'], 'reac')
 

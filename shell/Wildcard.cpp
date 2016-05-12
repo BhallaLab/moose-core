@@ -23,7 +23,7 @@ static unsigned int findBraceContent( const string& path,
 static bool matchName( ObjId id, unsigned int index,
 	const string& beforeBrace, const string& insideBrace ); 
 
-static bool matchBeforeBrace( ObjId id, const string& name );
+// static bool matchBeforeBrace( ObjId id, const string& name );
 
 static bool matchInsideBrace( ObjId id, const string& inside );
 /**

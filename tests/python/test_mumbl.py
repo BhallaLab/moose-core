@@ -31,15 +31,20 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import sys
-sys.path.append('../../python')
+import os
+
 import moose
 import moose.neuroml as nml
 import moose.utils as utils
 import moose.backend.graphviz as graphviz
 
+# the model lives in the same directory as the test script
+modeldir = os.path.dirname(__file__)
+
 def main():
     utils.parser
-    nml.loadNeuroML_L123('./two_cells_nml_1.8/two_cells.nml')
+    p = os.path.join(modeldir, 'two_cells_nml_1.8/two_cells.nml')
+    nml.loadNeuroML_L123(p)
     #mumbl.loadMumbl("./two_cells_nml_1.8/mumbl.xml")
     table1 = utils.recordTarget('/tableA', '/cells/purkinjeGroup_0/Dend_37_41', 'vm')
     table2 = utils.recordTarget('/tableB', '/cells/granuleGroup_0/Soma_0', 'vm')
@@ -48,7 +53,7 @@ def main():
     moose.useClock(0, '/##', 'init')
     moose.reinit()
     utils.run(0.1, verify=True)
-    graphviz.writeGraphviz(__file__+".dot", ignore='/library')
+    graphviz.writeGraphviz('test_mumble.dot', ignore='/library')
     utils.plotRecords({ 'Dend 37' : table1, 'Soma 0' : table2 }
             , outfile = '%s.png' % sys.argv[0]
             , subplot = True

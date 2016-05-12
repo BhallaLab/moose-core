@@ -10,17 +10,17 @@
 #include "header.h"
 #include "ElementValueFinfo.h"
 #include "LookupElementValueFinfo.h"
-#include "../shell/Shell.h"
-#include "../shell/Wildcard.h"
+#include "shell/Shell.h"
+#include "shell/Wildcard.h"
 #include "ReadCell.h"
-#include "../utility/Vec.h"
-#include "../randnum/Normal.h"
-#include "../randnum/randnum.h"
+#include "utility/Vec.h"
+#include "randnum/Normal.h"
+#include "randnum/randnum.h"
 #include "SwcSegment.h"
 #include "Spine.h"
 #include "Neuron.h"
 
-#include "../external/muparser/muParser.h"
+#include "muParser.h"
 
 class nuParser: public mu::Parser
 {
@@ -390,8 +390,11 @@ const Cinfo* Neuron::initCinfo()
 	static ReadOnlyLookupElementValueFinfo< Neuron, string, vector< ObjId > > 
 			spinesFromExpression( 
 		"spinesFromExpression",
-		"Vector of ObjIds of spines/heads sitting on the electrical "
-		"compartments that match the 'path expression' pair in the "
+		//"Vector of ObjIds of spines/heads sitting on the electrical "
+		//"compartments that match the 'path expression' pair in the "
+		//"argument string.",
+		"Vector of ObjIds of compartments comprising spines/heads "
+		"that match the 'path expression' pair in the "
 		"argument string.",
 		&Neuron::getSpinesFromExpression
 	);
@@ -926,7 +929,12 @@ vector< double > Neuron::getExprVal( const Eref& e, string line ) const
 vector< ObjId > Neuron::getSpinesFromExpression( 
 				const Eref& e, string line ) const
 {
-	vector< ObjId > temp = getExprElist( e, line );
+	unsigned long pos = line.find_first_of( " \t" );
+	string path = line.substr( 0, pos );
+	string expr = line.substr( pos );
+
+	// Look for all compartments that fit the expression.
+	vector< ObjId > temp = getExprElist( e, "# " + expr );
 	// indexed by segIndex, includes all compts in all spines.
 	vector< vector< Id > > allSpinesPerCompt( segId_.size() ); 
 	for ( unsigned int i = 0; i < spines_.size(); ++i ) {
@@ -942,7 +950,13 @@ vector< ObjId > Neuron::getSpinesFromExpression(
 		assert( si != segIndex_.end() );
 		assert( si->second < segId_.size() );
 		vector< Id >& s = allSpinesPerCompt[ si->second ];
-		ret.insert( ret.end(), s.begin(), s.end() );
+		for ( vector< Id >::iterator j = s.begin(); j != s.end(); ++j ){
+			// This is messy, would be better to use the wildcard parsing
+			// from Shell.
+			if ( matchBeforeBrace( *j, path ) )
+				ret.push_back( *j );
+		}
+		// ret.insert( ret.end(), s.begin(), s.end() );
 	}
 	return ret;
 }

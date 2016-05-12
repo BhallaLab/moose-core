@@ -1,47 +1,47 @@
-// Func.cpp --- 
-// 
+// Func.cpp ---
+//
 // Filename: Func.cpp
 // Description: Implementation of a wrapper around GNU libmatheval to calculate arbitrary functions.
 // Author: Subhasis Ray
 // Maintainer: Subhasis Ray
 // Created: Sat May 25 16:35:17 2013 (+0530)
-// Version: 
+// Version:
 // Last-Updated: Tue Jun 11 16:49:01 2013 (+0530)
 //           By: subha
 //     Update #: 619
-// URL: 
-// Keywords: 
-// Compatibility: 
-// 
-// 
+// URL:
+// Keywords:
+// Compatibility:
+//
+//
 
-// Commentary: 
-// 
-// 
-// 
-// 
+// Commentary:
+//
+//
+//
+//
 
 // Change log:
-// 
-// 
-// 
-// 
+//
+//
+//
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License as
 // published by the Free Software Foundation; either version 3, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; see the file COPYING.  If not, write to
 // the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 // Floor, Boston, MA 02110-1301, USA.
-// 
-// 
+//
+//
 
 // Code:
 
@@ -60,32 +60,32 @@ static SrcFinfo1<double> *valueOut()
 static SrcFinfo1< double > *derivativeOut()
 {
     static SrcFinfo1< double > derivativeOut("derivativeOut",
-                                             "Value of derivative of the function for the current variable values");
+            "Value of derivative of the function for the current variable values");
     return &derivativeOut;
 }
 
 const Cinfo * Func::initCinfo()
 {
     ////////////////////////////////////////////////////////////
-    // Value fields    
+    // Value fields
     ////////////////////////////////////////////////////////////
     static  ReadOnlyValueFinfo< Func, double > value("value",
-                                                     "Result of the function evaluation with current variable values.",
-                                                     &Func::getValue);
+            "Result of the function evaluation with current variable values.",
+            &Func::getValue);
     static ReadOnlyValueFinfo< Func, double > derivative("derivative",
-                                                         "Derivative of the function at given variable values.",
-                                                         &Func::getDerivative);
+            "Derivative of the function at given variable values.",
+            &Func::getDerivative);
     static ValueFinfo< Func, unsigned int > mode("mode",
-                                                 "Mode of operation: \n"
-                                                 " 1: only the function value will be calculated\n"
-                                                 " 2: only the derivative will be calculated\n"
-                                                 " 3: both function value and derivative at current variable values will be calculated.",
-                                                 &Func::setMode,
-                                                 &Func::getMode);
+            "Mode of operation: \n"
+            " 1: only the function value will be calculated\n"
+            " 2: only the derivative will be calculated\n"
+            " 3: both function value and derivative at current variable values will be calculated.",
+            &Func::setMode,
+            &Func::getMode);
     static ValueFinfo< Func, string > expr("expr",
                                            "Mathematical expression defining the function. The underlying parser\n"
-                                           "is muParser. Hence the available functions and operators are (from\n"
-                                           "muParser docs):\n"
+                                           "is muParser. In addition to the available functions and operators  from\n"
+                                           "muParser, some more functions are added.\n"
                                            "\nFunctions\n"
                                            "Name        args    explanation\n"
                                            "sin         1       sine function\n"
@@ -103,7 +103,7 @@ const Cinfo * Func::initCinfo()
                                            "log2        1       logarithm to the base 2\n"
                                            "log10       1       logarithm to the base 10\n"
                                            "log         1       logarithm to the base 10\n"
-                                           "ln  1       logarithm to base e (2.71828...)\n"
+                                           "ln          1       logarithm to base e (2.71828...)\n"
                                            "exp         1       e raised to the power of x\n"
                                            "sqrt        1       square root of a value\n"
                                            "sign        1       sign function -1 if x<0; 1 if x>0\n"
@@ -113,6 +113,11 @@ const Cinfo * Func::initCinfo()
                                            "max         var.    max of all arguments\n"
                                            "sum         var.    sum of all arguments\n"
                                            "avg         var.    mean value of all arguments\n"
+                                           "rand        1       rand(seed), random float between 0 and 1, \n"
+                                           "                    if seed = -1, then a 'random' seed is created.\n"
+                                           "rand2       3       rand(a, b, seed), random float between a and b, \n"
+                                           "                    if seed = -1, a 'random' seed is created using either\n"
+                                           "                    by random_device or by reading system clock\n"
                                            "\nOperators\n"
                                            "Op  meaning         prioroty\n"
                                            "=   assignement     -1\n"
@@ -134,12 +139,12 @@ const Cinfo * Func::initCinfo()
                                            &Func::setExpr,
                                            &Func::getExpr);
     static LookupValueFinfo < Func, string, double > var("var",
-                                                         "Lookup table for variable values.",
-                                                         &Func::setVar,
-                                                         &Func::getVar);
+            "Lookup table for variable values.",
+            &Func::setVar,
+            &Func::getVar);
     static ReadOnlyValueFinfo< Func, vector<string> > vars("vars",
-                                                           "Variable names in the expression",
-                                                           &Func::getVars);
+            "Variable names in the expression",
+            &Func::getVars);
     static ValueFinfo< Func, double > x("x",
                                         "Value for variable named x. This is a shorthand. If the\n"
                                         "expression does not have any variable named x, this the first variable\n"
@@ -196,7 +201,7 @@ const Cinfo * Func::initCinfo()
                              "Utility function to assign the variable values of the function.\n"
                              "Takes a list of variable names and a list of corresponding values.",
                              new OpFunc2< Func, vector< string >, vector< double > > (&Func::setVarValues));
-    
+
     // TODO - a way to allow connect a source to a specific variable without the source knowing the variable name
     // simple case of x, [y, [z]] variables
 
@@ -210,10 +215,10 @@ const Cinfo * Func::initCinfo()
                              "Handles reinit call.",
                              new ProcOpFunc< Func >( &Func::reinit ) );
     static Finfo* processShared[] =
-            {
-		&process, &reinit
-            };
-    
+    {
+        &process, &reinit
+    };
+
     static SharedFinfo proc( "proc",
                              "This is a shared message to receive Process messages "
                              "from the scheduler objects."
@@ -223,57 +228,57 @@ const Cinfo * Func::initCinfo()
                              "time, thread, dt and so on. The second entry is a MsgDest "
                              "for the Reinit operation. It also uses ProcInfo. ",
                              processShared, sizeof( processShared ) / sizeof( Finfo* )
-                             );
+                           );
 
     static Finfo *funcFinfos[] =
-            {
-                &value,
-                &derivative,
-                &mode,
-                &expr,
-                &var,
-                &vars,
-                &x,
-                &y,
-                &z,
-                &varIn,
-                &xIn,
-                &yIn,
-                &zIn,
-                &xyIn,
-                &xyzIn,
-                &proc,
-                valueOut(),
-                derivativeOut(),
-            };
-    
+    {
+        &value,
+        &derivative,
+        &mode,
+        &expr,
+        &var,
+        &vars,
+        &x,
+        &y,
+        &z,
+        &varIn,
+        &xIn,
+        &yIn,
+        &zIn,
+        &xyIn,
+        &xyzIn,
+        &proc,
+        valueOut(),
+        derivativeOut(),
+    };
+
     static string doc[] =
-            {
-                "Name", "Func",
-                "Author", "Subhasis Ray",
-                "Description",
-                "Func: general purpose function calculator using real numbers. It can\n"
-                "parse mathematical expression defining a function and evaluate it\n"                
-                "and/or its derivative for specified variable values.\n"
-                "The variables can be input from other moose objects. In case of\n"
-                "arbitrary variable names, the source message must have the variable\n"
-                "name as the first argument. For most common cases, input messages to\n"
-                "set x, y, z and xy, xyz are made available without such\n"
-                "requirement. This class handles only real numbers\n"
-                "(C-double). Predefined constants are: pi=3.141592...,\n"
-                "e=2.718281... \n"
-            };
-    
-	static Dinfo< Func > dinfo;
+    {
+        "Name", "Func",
+        "Author", "Subhasis Ray",
+        "Description",
+        "Func: general purpose function calculator using real numbers. It can\n"
+        "parse mathematical expression defining a function and evaluate it\n"
+        "and/or its derivative for specified variable values.\n"
+        "The variables can be input from other moose objects. In case of\n"
+        "arbitrary variable names, the source message must have the variable\n"
+        "name as the first argument. For most common cases, input messages to\n"
+        "set x, y, z and xy, xyz are made available without such\n"
+        "requirement. This class handles only real numbers\n"
+        "(C-double). Predefined constants are: pi=3.141592...,\n"
+        "e=2.718281... \n"
+    };
+
+    static Dinfo< Func > dinfo;
     static Cinfo funcCinfo("Func",
-                            Neutral::initCinfo(),
-                            funcFinfos,
-                            sizeof(funcFinfos) / sizeof(Finfo*),
-							&dinfo,
-                            doc,
-                            sizeof(doc)/sizeof(string));
+                           Neutral::initCinfo(),
+                           funcFinfos,
+                           sizeof(funcFinfos) / sizeof(Finfo*),
+                           &dinfo,
+                           doc,
+                           sizeof(doc)/sizeof(string));
     return &funcCinfo;
-                                                    
+
 }
 
 static const Cinfo * funcCinfo = Func::initCinfo();
@@ -298,7 +303,8 @@ Func::Func(const Func& rhs): _mode(rhs._mode)
     _parser.DefineConst(_T("e"), (mu::value_type)M_E);
     setExpr(rhs.getExpr());
     vector <string> vars = rhs.getVars();
-    for (unsigned int ii = 0; ii < vars.size(); ++ii){
+    for (unsigned int ii = 0; ii < vars.size(); ++ii)
+    {
         setVar(vars[ii], rhs.getVar(vars[ii]));
     }
 }
@@ -312,7 +318,8 @@ Func& Func::operator=(const Func rhs)
     _parser.DefineConst(_T("e"), (mu::value_type)M_E);
     setExpr(rhs.getExpr());
     vector <string> vars = rhs.getVars();
-    for (unsigned int ii = 0; ii < vars.size(); ++ii){
+    for (unsigned int ii = 0; ii < vars.size(); ++ii)
+    {
         setVar(vars[ii], rhs.getVar(vars[ii]));
     }
     return *this;
@@ -327,7 +334,8 @@ Func::~Func()
 void Func::_clearBuffer()
 {
     _parser.ClearVar();
-    for (unsigned int ii = 0; ii < _varbuf.size(); ++ii){
+    for (unsigned int ii = 0; ii < _varbuf.size(); ++ii)
+    {
         delete _varbuf[ii];
     }
     _varbuf.clear();
@@ -335,7 +343,7 @@ void Func::_clearBuffer()
 
 void Func::_showError(mu::Parser::exception_type &e) const
 {
-    cout << "Error occurred in parser.\n" 
+    cout << "Error occurred in parser.\n"
          << "Message:  " << e.GetMsg() << "\n"
          << "Formula:  " << e.GetExpr() << "\n"
          << "Token:    " << e.GetToken() << "\n"
@@ -343,7 +351,7 @@ void Func::_showError(mu::Parser::exception_type &e) const
          << "Error code:     " << e.GetCode() << endl;
 }
 /**
-   Call-back to add variables to parser automatically. 
+   Call-back to add variables to parser automatically.
  */
 static double * _addVar(const char *name, void *data)
 {
@@ -361,35 +369,48 @@ void Func::setExpr(string expr)
     _y = NULL;
     _z = NULL;
     mu::varmap_type vars;
-    try{
+    try
+    {
         _parser.SetExpr(expr);
         vars = _parser.GetUsedVar();
-    } catch (mu::Parser::exception_type &e) {
+    }
+    catch (mu::Parser::exception_type &e)
+    {
         _showError(e);
         _clearBuffer();
         return;
     }
     mu::varmap_type::iterator v = vars.find("x");
-    if (v != vars.end()){
+    if (v != vars.end())
+    {
         _x = v->second;
-    } else if (vars.size() >= 1){
+    }
+    else if (vars.size() >= 1)
+    {
         v = vars.begin();
         _x = v->second;
     }
     v = vars.find("y");
-    if (v != vars.end()){
+    if (v != vars.end())
+    {
         _y = v->second;
-    } else if (vars.size() >= 2){
+    }
+    else if (vars.size() >= 2)
+    {
         v = vars.begin();
         ++v;
         _y = v->second;
     }
     v = vars.find("z");
-    if (v != vars.end()){
+    if (v != vars.end())
+    {
         _z = v->second;
-    } else if (vars.size() >= 3){
+    }
+    else if (vars.size() >= 3)
+    {
         v = vars.begin();
-        v++; v++;
+        v++;
+        v++;
         _z = v->second;
     }
     _valid = true;
@@ -397,7 +418,8 @@ void Func::setExpr(string expr)
 
 string Func::getExpr() const
 {
-    if (!_valid){
+    if (!_valid)
+    {
         cout << "Error: Func::getExpr() - invalid parser state" << endl;
         return "";
     }
@@ -409,22 +431,29 @@ string Func::getExpr() const
 */
 void Func::setVar(string name, double value)
 {
-    if (!_valid){
+    if (!_valid)
+    {
         cout << "Error: Func::setVar() - invalid parser state" << endl;
         return;
     }
     mu::varmap_type vars;
-    try{
+    try
+    {
         vars = _parser.GetVar();
-    } catch (mu::Parser::exception_type &e) {
+    }
+    catch (mu::Parser::exception_type &e)
+    {
         _valid = false;
         _showError(e);
         return;
     }
     mu::varmap_type::iterator v = vars.find(name);
-    if (v != vars.end()){
+    if (v != vars.end())
+    {
         *v->second = value;
-    } else {
+    }
+    else
+    {
         cout << "Error: no such variable " << name << endl;
     }
 }
@@ -434,91 +463,109 @@ void Func::setVar(string name, double value)
 */
 double Func::getVar(string name) const
 {
-    if (!_valid){
+    if (!_valid)
+    {
         cout << "Error: Func::getVar() - invalid parser state" << endl;
         return 0.0;
     }
-    try{
+    try
+    {
         const mu::varmap_type &vars = _parser.GetVar();
         mu::varmap_type::const_iterator v = vars.find(name);
-        if (v != vars.end()){
+        if (v != vars.end())
+        {
             return *v->second;
-        } else {
+        }
+        else
+        {
             cout << "Error: no such variable " << name << endl;
             return 0.0;
         }
-    } catch (mu::Parser::exception_type &e) {
+    }
+    catch (mu::Parser::exception_type &e)
+    {
         _showError(e);
         return 0.0;
     }
 }
 
-void Func::setX(double x) 
+void Func::setX(double x)
 {
-    if (_x != NULL){
+    if (_x != NULL)
+    {
         *_x = x;
     }
 }
 
 double Func::getX() const
 {
-    if (_x != NULL){
+    if (_x != NULL)
+    {
         return *_x;
     }
     return 0.0;
 }
 
-void Func::setY(double y) 
+void Func::setY(double y)
 {
-    if (_y != NULL){
+    if (_y != NULL)
+    {
         *_y = y;
     }
 }
 
 double Func::getY() const
 {
-    if (_y != NULL){
+    if (_y != NULL)
+    {
         return *_y;
     }
     return 0.0;
 }
-void Func::setZ(double z) 
+void Func::setZ(double z)
 {
-    if (_z != NULL){
+    if (_z != NULL)
+    {
         *_z = z;
     }
 }
 
 double Func::getZ() const
 {
-    if (_z != NULL){
+    if (_z != NULL)
+    {
         return *_z;
     }
     return 0.0;
 }
 
-void Func::setXY(double x, double y) 
+void Func::setXY(double x, double y)
 {
-    if (_x != NULL){
+    if (_x != NULL)
+    {
         *_x = x;
     }
-    if (_y != NULL){
+    if (_y != NULL)
+    {
         *_y = y;
     }
 }
 
-void Func::setXYZ(double x, double y, double z) 
+void Func::setXYZ(double x, double y, double z)
 {
-    if (_x != NULL){
+    if (_x != NULL)
+    {
         *_x = x;
     }
-    if (_y != NULL){
+    if (_y != NULL)
+    {
         *_y = y;
     }
-    if (_z != NULL){
+    if (_z != NULL)
+    {
         *_z = z;
     }
-}                           
+}
 
 void Func::setMode(unsigned int mode)
 {
@@ -533,13 +580,17 @@ unsigned int Func::getMode() const
 double Func::getValue() const
 {
     double value = 0.0;
-    if (!_valid){
-        cout << "Error: Func::getValue() - invalid state" << endl;        
+    if (!_valid)
+    {
+        cout << "Error: Func::getValue() - invalid state" << endl;
         return value;
     }
-    try{
+    try
+    {
         value = _parser.Eval();
-    } catch (mu::Parser::exception_type &e){
+    }
+    catch (mu::Parser::exception_type &e)
+    {
         _showError(e);
     }
     return value;
@@ -547,15 +598,20 @@ double Func::getValue() const
 
 double Func::getDerivative() const
 {
-    double value = 0.0;    
-    if (!_valid){
-        cout << "Error: Func::getDerivative() - invalid state" << endl;        
+    double value = 0.0;
+    if (!_valid)
+    {
+        cout << "Error: Func::getDerivative() - invalid state" << endl;
         return value;
     }
-    if (_x != NULL){
-        try{
+    if (_x != NULL)
+    {
+        try
+        {
             value = _parser.Diff(_x, *_x);
-        } catch (mu::Parser::exception_type &e){
+        }
+        catch (mu::Parser::exception_type &e)
+        {
             _showError(e);
         }
     }
@@ -566,18 +622,23 @@ double Func::getDerivative() const
 vector<string> Func::getVars() const
 {
     vector< string > ret;
-    if (!_valid){
-        cout << "Error: Func::getVars() - invalid parser state" << endl;        
+    if (!_valid)
+    {
+        cout << "Error: Func::getVars() - invalid parser state" << endl;
         return ret;
     }
     mu::varmap_type vars;
-    try{
+    try
+    {
         vars = _parser.GetVar();
         for (mu::varmap_type::iterator ii = vars.begin();
-             ii != vars.end(); ++ii){
+                ii != vars.end(); ++ii)
+        {
             ret.push_back(ii->first);
         }
-    } catch (mu::Parser::exception_type &e){
+    }
+    catch (mu::Parser::exception_type &e)
+    {
         _showError(e);
     }
     return ret;
@@ -585,14 +646,17 @@ vector<string> Func::getVars() const
 
 void Func::setVarValues(vector<string> vars, vector<double> vals)
 {
-    
-    if (vars.size() > vals.size() || !_valid){
+
+    if (vars.size() > vals.size() || !_valid)
+    {
         return;
     }
     mu::varmap_type varmap = _parser.GetVar();
-    for (unsigned int ii = 0; ii < vars.size(); ++ii){
+    for (unsigned int ii = 0; ii < vars.size(); ++ii)
+    {
         mu::varmap_type::iterator v = varmap.find(vars[ii]);
-        if ( v != varmap.end()){
+        if ( v != varmap.end())
+        {
             *v->second = vals[ii];
         }
     }
@@ -600,28 +664,33 @@ void Func::setVarValues(vector<string> vars, vector<double> vals)
 
 void Func::process(const Eref &e, ProcPtr p)
 {
-    if (!_valid){
+    if (!_valid)
+    {
         return;
     }
-    if (_mode & 1){
+    if (_mode & 1)
+    {
         valueOut()->send(e, getValue());
     }
-    if (_mode & 2){
+    if (_mode & 2)
+    {
         derivativeOut()->send(e, getDerivative());
     }
 }
 
 void Func::reinit(const Eref &e, ProcPtr p)
 {
-    if (!_valid){
+    if (!_valid)
+    {
         cout << "Error: Func::reinit() - invalid parser state. Will do nothing." << endl;
         return;
     }
-    if (trim(_parser.GetExpr(), " \t\n\r").length() == 0){
+    if (trim(_parser.GetExpr(), " \t\n\r").length() == 0)
+    {
         cout << "Error: no expression set. Will do nothing." << endl;
         setExpr("0.0");
         _valid = false;
     }
 }
-// 
+//
 // Func.cpp ends here
