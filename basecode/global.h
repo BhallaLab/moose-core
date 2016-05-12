@@ -9,22 +9,25 @@
 **********************************************************************/
 
 
-#ifndef  GLOBAL_INC
-#define  GLOBAL_INC
+#ifndef  __MOOSE_GLOBAL_INC_
+#define  __MOOSE_GLOBAL_INC_
 
-#include "header.h"
-#include "../external/debug/simple_test.hpp"
 #include <ctime>
 #include <map>
+#include <sstream>
 
+
+
+#ifdef  USE_BOOST
+//#ifdef BOOST_FILESYSTEM_EXISTS
+#include <boost/filesystem.hpp>
+//#endif                                          /* BOOST_FILESYSTEM_EXISTS */
+#endif
+
+#include "randnum/RNG.h"                        /* Use inbuilt rng */
+#include "../external/debug/print_function.hpp"
 
 using namespace std;
-
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
-#include <boost/filesystem.hpp>
-
-#include "../external/debug/print_function.hpp"
 
 /**
  * @brief Global stringstream for message printing.
@@ -36,6 +39,7 @@ extern stringstream errorSS;
  */
 extern unsigned int totalTests;
 
+
 /** @brief This macro prints the output of a test function onto console.  It
  * also keep track of index of the current test. The index of test is
  * automatically computed by increamenting the counter.
@@ -44,12 +48,6 @@ extern unsigned int totalTests;
 #define TEST_BEGIN cout << endl << "Test(" << totalTests << "): " << SIMPLE_CURRENT_FUNCTION;
 #define TEST_END totalTests++; \
     cout << std::right <<  setw(20) << "test of " << SIMPLE_CURRENT_FUNCTION << " finished."; 
-
-
-/*-----------------------------------------------------------------------------
- *  Global clock in moose.
- *-----------------------------------------------------------------------------*/
-
 
 /*-----------------------------------------------------------------------------
  *  Global functions in namespace moose
@@ -65,11 +63,7 @@ extern unsigned int totalTests;
 namespace moose
 {
 
-    typedef boost::random::mt19937 rng_type_;
-    typedef boost::random::uniform_01<double> distribution_type_;
-
-    extern rng_type_ rng;
-    extern distribution_type_ dist;
+    extern moose::RNG<double> rng;
 
     /**
      * @brief A global seed for all RNGs in moose. When moose.seed( x ) is called,
@@ -96,7 +90,7 @@ namespace moose
      *
      * @return 0 if path is all-right. Negative number if path is not OK.
      */
-     int checkPath( const string& path );
+    int checkPath( const string& path );
 
     /** @brief Append pathB to pathA and return the result. 
      *
@@ -129,9 +123,10 @@ namespace moose
      * @brief Create a POSIX compatible path from a given string.
      * Remove/replace bad characters.
      *
-     * @param path
+     * @param path Reutrn path is given path if creation was successful, else
+     * directory is renamed to a filename.
      */
-    string createPosixPath( string path );
+    string createPosixPath( const string& path );
 
     /**
      * @brief Convert a given value to string.
@@ -145,10 +140,19 @@ namespace moose
 
     /**
      * @brief Create directory, recursively.
-     *
-     * @param path
      */
-    string createParentDirs( string path );
+    bool createParentDirs( const string& path );
+
+    /**
+     * @brief Replace all directory sepearator with _. This creates a filepath
+     * which can be created in current directory without any need to create
+     * parent directory.
+     *
+     * @param path string 
+     *
+     * @return  filename without directory separator.
+     */
+    string toFilename( const string& path );
 
     /**
      * @brief Get the extension of a given filepath.
@@ -181,4 +185,4 @@ namespace moose
     string moosePathToUserPath( string path );
 }
 
-#endif   /* ----- #ifndef GLOBAL_INC  ----- */
+#endif   /* ----- #ifndef __MOOSE_GLOBAL_INC_  ----- */

@@ -31,7 +31,7 @@ class ReadSwc
 					   vector< int >& cable	) const;
 		bool build( Id parent, 
 					double lambda, double RM, double RA, double CM );
-		string diagnostics() const;
+		void diagnostics() const;
 
 	private:
 		vector< SwcSegment > segs_;

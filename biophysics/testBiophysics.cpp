@@ -36,214 +36,200 @@ extern void testMarkovSolver();		//Defined in MarkovSolver.cpp
 // Use a larger value of runsteps when benchmarking
 void testIntFireNetwork( unsigned int runsteps = 5 )
 {
-    static const double thresh = 0.8;
-    static const double Vmax = 1.0;
-    static const double refractoryPeriod = 0.4;
-    static const double weightMax = 0.02;
-    static const double timestep = 0.2;
-    static const double delayMax = 4;
-    static const double delayMin = 0;
-    static const double connectionProbability = 0.1;
-    static const unsigned int NUM_TOT_SYN = 104576;
-    unsigned int size = 1024;
-    string arg;
-    Eref sheller( Id().eref() );
-    Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	static const double thresh = 0.8;
+	static const double Vmax = 1.0;
+	static const double refractoryPeriod = 0.4;
+	static const double weightMax = 0.02;
+	static const double timestep = 0.2;
+	static const double delayMax = 4;
+	static const double delayMin = 0;
+	static const double connectionProbability = 0.1;
+	static const unsigned int NUM_TOT_SYN = 104576;
+	unsigned int size = 1024;
+	string arg;
+	Eref sheller( Id().eref() );
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-    Id fire = shell->doCreate( "IntFire", Id(), "network", size );
-    assert( fire.element()->getName() == "network" );
+	Id fire = shell->doCreate( "IntFire", Id(), "network", size );
+	assert( fire.element()->getName() == "network" );
 
-    Id i2 = shell->doCreate( "SimpleSynHandler", fire, "syns", size );
-    assert( i2.element()->getName() == "syns" );
+	Id i2 = shell->doCreate( "SimpleSynHandler", fire, "syns", size );
+	assert( i2.element()->getName() == "syns" );
 
-    Id synId( i2.value() + 1 );
-    Element* syn = synId.element();
-    assert( syn->getName() == "synapse" );
+	Id synId( i2.value() + 1 );
+	Element* syn = synId.element();
+	assert( syn->getName() == "synapse" );
 
-    DataId di( 1 ); // DataId( data, field )
-    Eref syne( syn, di );
+	DataId di( 1 ); // DataId( data, field )
+	Eref syne( syn, di );
 
-    ObjId mid = shell->doAddMsg( "Sparse", fire, "spikeOut",
-            ObjId( synId, 0 ), "addSpike" );
+	ObjId mid = shell->doAddMsg( "Sparse", fire, "spikeOut",
+		ObjId( synId, 0 ), "addSpike" );
+	
+	SetGet2< double, long >::set( mid, "setRandomConnectivity", 
+		connectionProbability, 5489UL );
 
-    SetGet2< double, long >::set( mid, "setRandomConnectivity", 
-            connectionProbability, 5489UL );
+	mid = shell->doAddMsg( "OneToOne", i2, "activationOut",
+		fire, "activation" );
+	assert( !mid.bad() );
 
-    mid = shell->doAddMsg( "OneToOne", i2, "activationOut",
-            fire, "activation" );
-    assert( !mid.bad() );
+	unsigned int nd = syn->totNumLocalField();
+	if ( Shell::numNodes() == 1 )
+		assert( nd == NUM_TOT_SYN );
+	else if ( Shell::numNodes() == 2 )
+		assert( nd == 52446 );
+	else if ( Shell::numNodes() == 3 )
+		//assert( nd == 34969 );
+		assert( nd == 35087 );
+	else if ( Shell::numNodes() == 4 )
+		assert( nd == 26381 );
 
-    unsigned int nd = syn->totNumLocalField();
-    if ( Shell::numNodes() == 1 )
-        assert( nd == NUM_TOT_SYN );
-    else if ( Shell::numNodes() == 2 )
-        assert( nd == 52446 );
-    else if ( Shell::numNodes() == 3 )
-        //assert( nd == 34969 );
-        assert( nd == 35087 );
-    else if ( Shell::numNodes() == 4 )
-        assert( nd == 26381 );
+	//////////////////////////////////////////////////////////////////
+	// Checking access to message info through SparseMsg on many nodes.
+	//////////////////////////////////////////////////////////////////
+	vector< ObjId > tgts;
+	vector< string > funcs;
+	ObjId oi( fire, 123 );
+	tgts = LookupField< string, vector< ObjId > >::
+			get( oi, "msgDests", "spikeOut" );
+	funcs = LookupField< string, vector< string > >::
+			get( oi, "msgDestFunctions", "spikeOut" );
+	assert( tgts.size() == funcs.size() );
+	/*
+	assert( tgts.size() == 116  );
+	assert( tgts[0] == ObjId( synId, 20, 11 ) );
+	assert( tgts[1] == ObjId( synId, 27, 15 ) );
+	assert( tgts[2] == ObjId( synId, 57, 14 ) );
+	assert( tgts[90] == ObjId( synId, 788, 15 ) );
+	assert( tgts[91] == ObjId( synId, 792, 12 ) );
+	assert( tgts[92] == ObjId( synId, 801, 17 ) );
+	*/
+	for ( unsigned int i = 0; i < funcs.size(); ++i )
+		assert( funcs[i] == "addSpike" );
 
-    //////////////////////////////////////////////////////////////////
-    // Checking access to message info through SparseMsg on many nodes.
-    //////////////////////////////////////////////////////////////////
-    vector< ObjId > tgts;
-    vector< string > funcs;
-    ObjId oi( fire, 123 );
-    tgts = LookupField< string, vector< ObjId > >::
-        get( oi, "msgDests", "spikeOut" );
-    funcs = LookupField< string, vector< string > >::
-        get( oi, "msgDestFunctions", "spikeOut" );
-    assert( tgts.size() == funcs.size() );
-    /*
-       assert( tgts.size() == 116  );
-       assert( tgts[0] == ObjId( synId, 20, 11 ) );
-       assert( tgts[1] == ObjId( synId, 27, 15 ) );
-       assert( tgts[2] == ObjId( synId, 57, 14 ) );
-       assert( tgts[90] == ObjId( synId, 788, 15 ) );
-       assert( tgts[91] == ObjId( synId, 792, 12 ) );
-       assert( tgts[92] == ObjId( synId, 801, 17 ) );
-       */
-    for ( unsigned int i = 0; i < funcs.size(); ++i )
-        assert( funcs[i] == "addSpike" );
+	//////////////////////////////////////////////////////////////////
+	// Here we have an interesting problem. The mtRand might be called
+	// by multiple threads if the above Set call is not complete.
 
-    //////////////////////////////////////////////////////////////////
-    // Here we have an interesting problem. The mtRand might be called
-    // by multiple threads if the above Set call is not complete.
+	vector< double > origVm( size, 0.0 );
+	for ( unsigned int i = 0; i < size; ++i )
+		origVm[i] = mtrand() * Vmax;
 
-    moose::mtseed( 5489U );
-    vector< double > origVm( size, 0.0 );
-    for ( unsigned int i = 0; i < size; ++i )
-        origVm[i] = moose::mtrand() * Vmax;
+	double origVm100 = origVm[100];
+	double origVm900 = origVm[900];
 
-    double origVm100 = origVm[100];
-    double origVm900 = origVm[900];
+	vector< double > temp;
+	temp.clear();
+	temp.resize( size, thresh );
+	bool ret = Field< double >::setVec( fire, "thresh", temp );
+	assert( ret );
+	temp.clear();
+	temp.resize( size, refractoryPeriod );
+	ret = Field< double >::setVec( fire, "refractoryPeriod", temp );
+	assert( ret );
 
-    vector< double > temp;
-    temp.clear();
-    temp.resize( size, thresh );
-    bool ret = Field< double >::setVec( fire, "thresh", temp );
-    assert( ret );
-    temp.clear();
-    temp.resize( size, refractoryPeriod );
-    ret = Field< double >::setVec( fire, "refractoryPeriod", temp );
-    assert( ret );
+	// cout << Shell::myNode() << ": fieldSize = " << fieldSize << endl;
+	vector< unsigned int > numSynVec;
+	Field< unsigned int >::getVec( i2, "numSynapses", numSynVec );
+	assert ( numSynVec.size() == size );
+	unsigned int numTotSyn = 0;
+	for ( unsigned int i = 0; i < size; ++i )
+		numTotSyn += numSynVec[i];
+	assert( numTotSyn == NUM_TOT_SYN );
 
-    // cout << Shell::myNode() << ": fieldSize = " << fieldSize << endl;
-    vector< unsigned int > numSynVec;
-    Field< unsigned int >::getVec( i2, "numSynapses", numSynVec );
-    assert ( numSynVec.size() == size );
-    unsigned int numTotSyn = 0;
-    for ( unsigned int i = 0; i < size; ++i )
-        numTotSyn += numSynVec[i];
-    assert( numTotSyn == NUM_TOT_SYN );
+	vector< vector< double > > weight( size );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		weight[i].resize( numSynVec[i], 0.0 );
+		vector< double > delay( numSynVec[i], 0.0 );
+		for ( unsigned int j = 0; j < numSynVec[i]; ++j ) {
+			weight[i][ j ] = mtrand() * weightMax;
+			delay[ j ] = delayMin + mtrand() * ( delayMax - delayMin );
+		}
+		ret = Field< double >::
+				setVec( ObjId( synId, i ), "weight", weight[i] );
+		assert( ret );
+		ret = Field< double >::setVec( ObjId( synId, i ), "delay", delay );
+		assert( ret );
+	}
 
-    vector< vector< double > > weight( size );
-    for ( unsigned int i = 0; i < size; ++i ) {
-        weight[i].resize( numSynVec[i], 0.0 );
-        vector< double > delay( numSynVec[i], 0.0 );
-        for ( unsigned int j = 0; j < numSynVec[i]; ++j ) {
-            weight[i][ j ] = moose::mtrand() * weightMax;
-            delay[ j ] = delayMin + moose::mtrand() * ( delayMax - delayMin );
-        }
-        ret = Field< double >::
-            setVec( ObjId( synId, i ), "weight", weight[i] );
-        assert( ret );
-        ret = Field< double >::setVec( ObjId( synId, i ), "delay", delay );
-        assert( ret );
-    }
+	for ( unsigned int i = 0; i < size; ++i ) {
+		vector< double > retVec(0);
+		Field< double >::getVec( ObjId( synId, i ), "weight", retVec );
+		assert( retVec.size() == numSynVec[i] );
+		for ( unsigned int j = 0; j < numSynVec[i]; ++j ) {
+			assert( doubleEq( retVec[j], weight[i][j] ) );
+		}
+	}
 
-    for ( unsigned int i = 0; i < size; ++i ) {
-        vector< double > retVec(0);
-        Field< double >::getVec( ObjId( synId, i ), "weight", retVec );
-        assert( retVec.size() == numSynVec[i] );
-        for ( unsigned int j = 0; j < numSynVec[i]; ++j ) {
-            assert( doubleEq( retVec[j], weight[i][j] ) );
-        }
-    }
+	// We have to have the SynHandlers called before the network of
+	// IntFires since the 'activation' message must be delivered within
+	// the same timestep.
+	shell->doUseClock("/network/syns", "process", 0 );
+	shell->doUseClock("/network", "process", 1 );
+	shell->doSetClock( 0, timestep );
+	shell->doSetClock( 1, timestep );
+	shell->doSetClock( 9, timestep );
+	shell->doReinit();
+	ret = Field< double >::setVec( fire, "Vm", origVm );
+	assert( ret );
 
-    // We have to have the SynHandlers called before the network of
-    // IntFires since the 'activation' message must be delivered within
-    // the same timestep.
-    shell->doUseClock("/network/syns", "process", 0 );
-    shell->doUseClock("/network", "process", 1 );
-    shell->doSetClock( 0, timestep );
-    shell->doSetClock( 1, timestep );
-    shell->doSetClock( 9, timestep );
-    shell->doReinit();
-    ret = Field< double >::setVec( fire, "Vm", origVm );
-    assert( ret );
+	double retVm100 = Field< double >::get( ObjId( fire, 100 ), "Vm" );
+	double retVm900 = Field< double >::get( ObjId( fire, 900 ), "Vm" );
+	assert( fabs( retVm100 - origVm100 ) < 1e-6 );
+	assert( fabs( retVm900 - origVm900 ) < 1e-6 );
 
-    double retVm100 = Field< double >::get( ObjId( fire, 100 ), "Vm" );
-    double retVm900 = Field< double >::get( ObjId( fire, 900 ), "Vm" );
-    assert( fabs( retVm100 - origVm100 ) < 1e-6 );
-    assert( fabs( retVm900 - origVm900 ) < 1e-6 );
+	shell->doStart( static_cast< double >( timestep * runsteps) + 0.0 );
+	if ( runsteps == 5 ) { // default for unit tests, others are benchmarks
+		retVm100 = Field< double >::get( ObjId( fire, 100 ), "Vm" );
+		double retVm101 = Field< double >::get( ObjId( fire, 101 ), "Vm" );
+		double retVm102 = Field< double >::get( ObjId( fire, 102 ), "Vm" );
+		double retVm99 = Field< double >::get( ObjId( fire, 99 ), "Vm" );
+		retVm900 = Field< double >::get( ObjId( fire, 900 ), "Vm" );
+		double retVm901 = Field< double >::get( ObjId( fire, 901 ), "Vm" );
+		double retVm902 = Field< double >::get( ObjId( fire, 902 ), "Vm" );
 
-    shell->doStart( static_cast< double >( timestep * runsteps) + 0.0 );
-    if ( runsteps == 5 ) { // default for unit tests, others are benchmarks
-        retVm100 = Field< double >::get( ObjId( fire, 100 ), "Vm" );
-        double retVm101 = Field< double >::get( ObjId( fire, 101 ), "Vm" );
-        double retVm102 = Field< double >::get( ObjId( fire, 102 ), "Vm" );
-        double retVm99 = Field< double >::get( ObjId( fire, 99 ), "Vm" );
-        retVm900 = Field< double >::get( ObjId( fire, 900 ), "Vm" );
-        double retVm901 = Field< double >::get( ObjId( fire, 901 ), "Vm" );
-        double retVm902 = Field< double >::get( ObjId( fire, 902 ), "Vm" );
+		/*
+		assert( doubleEq( retVm100, 0.00734036 ) );
+		assert( doubleEq( retVm101, 0.246818 ) );
+		assert( doubleEq( retVm102, 0.200087 ) );
+		assert( doubleEq( retVm99, 0.0095779083 ) );
+		assert( doubleEq( retVm900, 0.1150573482 ) );
+		assert( doubleEq( retVm901, 0.289321534 ) );
+		assert( doubleEq( retVm902, 0.01011172486 ) );
+		assert( doubleEq( retVm100, 0.008593194687366486 ) );
+		assert( doubleEq( retVm101, 0.24931678857743744 ) );
+		assert( doubleEq( retVm102, 0.19668269662484533 ) );
+		assert( doubleEq( retVm99, 0.00701607616202429 ) );
+		assert( doubleEq( retVm900, 0.12097053045094018 ) );
+		assert( doubleEq( retVm901, 0.2902593120492995 ) );
+		assert( doubleEq( retVm902, 0.00237157280699805 ) );
+		assert( doubleEq( retVm100, 0.015766608829826119 ) );
+		assert( doubleEq( retVm101, 0.24405557875013356 ) );
+		assert( doubleEq( retVm102, 0.20878261213859917 ) );
+		assert( doubleEq( retVm99, 0.0081746848675747306 ) );
+		assert( doubleEq( retVm900, 0.12525297735741736 ) );
+		assert( doubleEq( retVm901, 0.28303358631241327 ) );
+		assert( doubleEq( retVm902, 0.0096374021108587178 ) );
+		*/
+		assert( doubleEq( retVm100, 0.069517018453329804 ) );
+		assert( doubleEq( retVm101, 0.32823493598699577 ) );
+		assert( doubleEq( retVm102, 0.35036493874475361 ) );
+		assert( doubleEq( retVm99,  0.04087358817787364 ) );
+		assert( doubleEq( retVm900, 0.26414663635984065 ) );
+		assert( doubleEq( retVm901, 0.39864519810259352 ) );
+		assert( doubleEq( retVm902, 0.04818717439429359 ) );
 
-        /*
-           assert( doubleEq( retVm100, 0.00734036 ) );
-           assert( doubleEq( retVm101, 0.246818 ) );
-           assert( doubleEq( retVm102, 0.200087 ) );
-           assert( doubleEq( retVm99, 0.0095779083 ) );
-           assert( doubleEq( retVm900, 0.1150573482 ) );
-           assert( doubleEq( retVm901, 0.289321534 ) );
-           assert( doubleEq( retVm902, 0.01011172486 ) );
-           assert( doubleEq( retVm100, 0.008593194687366486 ) );
-           assert( doubleEq( retVm101, 0.24931678857743744 ) );
-           assert( doubleEq( retVm102, 0.19668269662484533 ) );
-           assert( doubleEq( retVm99, 0.00701607616202429 ) );
-           assert( doubleEq( retVm900, 0.12097053045094018 ) );
-           assert( doubleEq( retVm901, 0.2902593120492995 ) );
-           assert( doubleEq( retVm902, 0.00237157280699805 ) );
-           assert( doubleEq( retVm100, 0.015766608829826119 ) );
-           assert( doubleEq( retVm101, 0.24405557875013356 ) );
-           assert( doubleEq( retVm102, 0.20878261213859917 ) );
-           assert( doubleEq( retVm99, 0.0081746848675747306 ) );
-           assert( doubleEq( retVm900, 0.12525297735741736 ) );
-           assert( doubleEq( retVm901, 0.28303358631241327 ) );
-           assert( doubleEq( retVm902, 0.0096374021108587178 ) );
-           */
+	}
+	/*
+	cout << "testIntFireNetwork: Vm100 = " << retVm100 << ", " <<
+			retVm101 << ", " << retVm102 << ", " << retVm99 <<
+			", " << Vm100 << endl;
+	cout << "Vm900 = " << retVm900 << ", "<< retVm901 << ", " <<
+			retVm902 << ", " << Vm900 << endl;
+			*/
 
-#if 0
-        cout.precision( 12 );
-        cout << retVm100<< endl; 
-        cout << retVm101<< endl;
-        cout << retVm102<< endl;
-        cout << retVm99<< endl;
-        cout << retVm900<< endl;
-        cout << retVm901<< endl;
-        cout << retVm902<< endl;
-#endif
-
-        ASSERT_EQ( retVm100,  0.189304207678  , "" );
-        ASSERT_EQ( retVm101,  0.352776164289  , "" );
-        ASSERT_EQ( retVm102,  0.367242141036  , "" );
-        ASSERT_EQ( retVm99,   0.123552428475  , "" );
-        ASSERT_EQ( retVm900,  0.0714865703958 , "" );
-        ASSERT_EQ( retVm901,  0.35823689362   , "" );
-        ASSERT_EQ( retVm902,  0.0307787676562 , "" );
-
-    }
-
-    /*
-       cout << "testIntFireNetwork: Vm100 = " << retVm100 << ", " <<
-       retVm101 << ", " << retVm102 << ", " << retVm99 <<
-       ", " << Vm100 << endl;
-       cout << "Vm900 = " << retVm900 << ", "<< retVm901 << ", " <<
-       retVm902 << ", " << Vm900 << endl;
-       */
-
-    cout << "." << flush;
-    shell->doDelete( fire );
+	cout << "." << flush;
+	shell->doDelete( fire );
 }
 
 

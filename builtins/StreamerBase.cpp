@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <memory>
 
 // Class function definitions
 StreamerBase::StreamerBase() 
@@ -86,23 +87,22 @@ void StreamerBase::writeToCSVFile( const string& filepath, const string& openmod
         , const vector<double>& data, const vector<string>& columns )
 {
 
-    FILE* fp;
-    fp = fopen( filepath.c_str(), openmode.c_str() );
-    if( ! fp )
+    FILE* fp = fopen( filepath.c_str(), openmode.c_str() );
+    if( NULL == fp )
     {
         LOG( moose::warning, "Failed to open " << filepath );
         return;
     }
 
-
     // If writing in "w" mode, write the header first.
     if( openmode == "w" )
     {
         string headerText = "";
-        for( auto t : columns ) 
-            headerText += "\"" + t + "\"" + delimiter_;
+        for( vector<string>::const_iterator it = columns.begin(); 
+            it != columns.end(); it++ )
+            headerText += "\"" + *it + "\"" + delimiter_;
         headerText += eol;
-        fprintf( fp, headerText.c_str() ); 
+        fprintf( fp, "%s", headerText.c_str() ); 
     }
 
     string text = "";
@@ -113,9 +113,9 @@ void StreamerBase::writeToCSVFile( const string& filepath, const string& openmod
             text += moose::toString( data[i+ii] ) + delimiter_;
 
         // At the end of each row, we remove the delimiter_ and append newline_.
-        text.pop_back(); text += eol ;
+        *(text.end()-1) = eol;
     }
-    fprintf(fp, text.c_str() );
+    fprintf( fp, "%s", text.c_str() );
     fclose( fp );
 }
 

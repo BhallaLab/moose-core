@@ -12,6 +12,9 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
+#elif USE_BOOST
+#include <boost/numeric/odeint.hpp>
+using namespace boost::numeric;
 #endif
 
 #include "OdeSystem.h"
@@ -63,38 +66,128 @@ void VoxelPools::reinit( double dt )
 
 void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
 {
-	stoichPtr_ = s;
+    stoichPtr_ = s;
 #ifdef USE_GSL
-	if ( ode ) {
-		sys_ = ode->gslSys;
-		if ( driver_ )
-			gsl_odeiv2_driver_free( driver_ );
-		driver_ = gsl_odeiv2_driver_alloc_y_new( 
-			&sys_, ode->gslStep, ode->initStepSize, 
-			ode->epsAbs, ode->epsRel );
-	}
+    if ( ode ) {
+        sys_ = ode->gslSys;
+        if ( driver_ )
+            gsl_odeiv2_driver_free( driver_ );
+        driver_ = gsl_odeiv2_driver_alloc_y_new( 
+                &sys_, ode->gslStep, ode->initStepSize, 
+                ode->epsAbs, ode->epsRel );
+    }
+#elif USE_BOOST
+    if( ode )
+        sys_ = ode->boostSys;
 #endif
-	VoxelPoolsBase::reinit();
+    VoxelPoolsBase::reinit();
 }
 
 void VoxelPools::advance( const ProcInfo* p )
 {
+    double t = p->currTime - p->dt;
 #ifdef USE_GSL
-	double t = p->currTime - p->dt;
-	int status = gsl_odeiv2_driver_apply( driver_, &t, p->currTime, varS());
-	if ( status != GSL_SUCCESS ) {
-		cout << "Error: VoxelPools::advance: GSL integration error at time "
-			 << t << "\n";
-		cout << "Error info: " << status << ", " << 
-				gsl_strerror( status ) << endl;
-		if ( status == GSL_EMAXITER ) 
-			cout << "Max number of steps exceeded\n";
-		else if ( status == GSL_ENOPROG ) 
-			cout << "Timestep has gotten too small\n";
-		else if ( status == GSL_EBADFUNC ) 
-			cout << "Internal error\n";
-		assert( 0 );
-	}
+    int status = gsl_odeiv2_driver_apply( driver_, &t, p->currTime, varS());
+    if ( status != GSL_SUCCESS ) {
+        cout << "Error: VoxelPools::advance: GSL integration error at time "
+            << t << "\n";
+        cout << "Error info: " << status << ", " << 
+            gsl_strerror( status ) << endl;
+        if ( status == GSL_EMAXITER ) 
+            cout << "Max number of steps exceeded\n";
+        else if ( status == GSL_ENOPROG ) 
+            cout << "Timestep has gotten too small\n";
+        else if ( status == GSL_EBADFUNC ) 
+            cout << "Internal error\n";
+        assert( 0 );
+    }
+    
+#elif USE_BOOST
+
+
+    // NOTE: Make sure to assing vp to BoostSys vp. In next call, it will be used by
+    // updateRates func. Unlike gsl call, we can't pass extra void*  to gslFunc. 
+    VoxelPools* vp = reinterpret_cast< VoxelPools* >( sys_.params );
+    sys_.vp = vp;
+    /*-----------------------------------------------------------------------------
+    NOTE: 04/21/2016 11:31:42 AM
+
+    We need to call updateFuncs  here (unlike in GSL solver) because there
+    is no way we can update const vector_type_& y in evalRatesUsingBoost
+    function. In gsl implmentation one could do it, because const_cast can
+    take away the constantness of double*. This probably makes the call bit
+    cleaner.
+     *-----------------------------------------------------------------------------*/
+    vp->stoichPtr_->updateFuncs( &Svec()[0], p->currTime );
+
+    /*-----------------------------------------------------------------------------
+     * Using integrate function works with with default stepper type.
+     *
+     *  NOTICE to developer: 
+     *  If you are planning your own custom typdedef of stepper_type_ (see
+     *  file BoostSystem.h), the you may run into troble. Have a look at this 
+     *  http://boostw.boost.org/doc/libs/1_56_0/boost/numeric/odeint/integrate/integrate.hpp
+     *-----------------------------------------------------------------------------
+     */
+
+    double absTol = sys_.epsAbs;
+    double relTol = sys_.epsRel;
+    string method = sys_.method;
+
+    if( method == "rk2" )
+        rk_midpoint_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
+    else if( method == "rk4" )
+        rk_karp_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
+    else if( method == "rk5")
+        rk_karp_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
+    else if( method == "rk5a")
+        odeint::integrate_adaptive( 
+                odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol)
+                , sys_
+                , Svec()
+                , p->currTime - p->dt 
+                , p->currTime
+                , p->dt 
+                );
+    else if ("rk54" == method )
+        rk_karp_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
+    else if ("rk54a" == method )
+        odeint::integrate_adaptive( 
+                odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol )
+                , sys_, Svec()
+                , p->currTime - p->dt 
+                , p->currTime
+                , p->dt 
+                );
+    else if ("rk5" == method )
+        rk_dopri_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
+    else if ("rk5a" == method )
+        odeint::integrate_adaptive( 
+                odeint::make_controlled<rk_dopri_stepper_type_>( absTol, relTol )
+                , sys_, Svec()
+                , p->currTime - p->dt 
+                , p->currTime
+                , p->dt 
+                );
+    else if( method == "rk8" ) 
+        rk_felhberg_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
+    else if( method == "rk8a" ) 
+        odeint::integrate_adaptive(
+                odeint::make_controlled<rk_felhberg_stepper_type_>( absTol, relTol )
+                , sys_, Svec()
+                , p->currTime - p->dt 
+                , p->currTime
+                , p->dt 
+                );
+
+    else
+        odeint::integrate_adaptive( 
+                odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol )
+                , sys_, Svec()
+                , p->currTime - p->dt 
+                , p->currTime
+                , p->dt 
+                );
 #endif
 }
 
@@ -105,6 +198,7 @@ void VoxelPools::setInitDt( double dt )
 #endif
 }
 
+#ifdef USE_GSL
 // static func. This is the function that goes into the Gsl solver.
 int VoxelPools::gslFunc( double t, const double* y, double *dydt, 
 						void* params )
@@ -131,6 +225,16 @@ int VoxelPools::gslFunc( double t, const double* y, double *dydt,
 	return 0;
 #endif
 }
+
+#elif USE_BOOST
+void VoxelPools::evalRates( 
+    const vector_type_& y,  vector_type_& dydt,  const double t, VoxelPools* vp
+    )
+{
+    vp->updateRates( &y[0], &dydt[0] );
+}
+#endif
+
 ///////////////////////////////////////////////////////////////////////
 // Here are the internal reaction rate calculation functions
 ///////////////////////////////////////////////////////////////////////
@@ -237,6 +341,7 @@ void VoxelPools::setVolumeAndDependencies( double vol )
 	updateAllRateTerms( stoichPtr_->getRateTerms(), 
 		stoichPtr_->getNumCoreRates() );
 }
+
 
 ////////////////////////////////////////////////////////////
 #if 0

@@ -219,15 +219,13 @@ static const Cinfo* gsolveCinfo = Gsolve::initCinfo();
 //////////////////////////////////////////////////////////////
 
 Gsolve::Gsolve()
-    :
-    pools_( 1 ),
-    startVoxel_( 0 ),
-    dsolve_(),
-    dsolvePtr_( 0 ),
-    useClockedUpdate_( false )
-{
-    rng.seed( moose::__rng_seed__ );
-}
+	: 
+		pools_( 1 ),
+		startVoxel_( 0 ),
+		dsolve_(),
+		dsolvePtr_( 0 ),
+		useClockedUpdate_( false )
+{;}
 
 Gsolve::~Gsolve()
 {;}
@@ -429,47 +427,39 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 
 void Gsolve::reinit( const Eref& e, ProcPtr p )
 {
-    rng.seed( moose::__rng_seed__ );
-
-    if ( !stoichPtr_ )
-        return;
-    if ( !sys_.isReady )
-        rebuildGssaSystem();
-    // First reinit concs.
-    for ( vector< GssaVoxelPools >::iterator
-            i = pools_.begin(); i != pools_.end(); ++i )
-    {
-        i->reinit( &sys_ );
-    }
-
-    // Second, take the arrived xCompt reac values and update S with them.
-    // Here the roundoff issues are handled by the GssaVoxelPools functions
-    for ( unsigned int i = 0; i < xfer_.size(); ++i )
-    {
-        const XferInfo& xf = xfer_[i];
-        for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j )
-        {
-            pools_[xf.xferVoxel[j]].xferInOnlyProxies(
-                xf.xferPoolIdx, xf.values,
-                stoichPtr_->getNumProxyPools(), j );
-        }
-    }
-    // Third, record the current value of pools as the reference for the
-    // next cycle.
-    for ( unsigned int i = 0; i < xfer_.size(); ++i )
-    {
-        XferInfo& xf = xfer_[i];
-        for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j )
-        {
-            pools_[xf.xferVoxel[j]].xferOut( j, xf.lastValues, xf.xferPoolIdx );
-        }
-    }
-    // Fourth, update the atots.
-    for ( vector< GssaVoxelPools >::iterator
-            i = pools_.begin(); i != pools_.end(); ++i )
-    {
-        i->refreshAtot( &sys_ );
-    }
+	if ( !stoichPtr_ )
+		return;
+	if ( !sys_.isReady )
+		rebuildGssaSystem();
+	// First reinit concs.
+	for ( vector< GssaVoxelPools >::iterator 
+					i = pools_.begin(); i != pools_.end(); ++i ) {
+		i->reinit( &sys_ );
+	}
+	
+	// Second, take the arrived xCompt reac values and update S with them.
+	// Here the roundoff issues are handled by the GssaVoxelPools functions
+	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
+		const XferInfo& xf = xfer_[i];
+		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
+			pools_[xf.xferVoxel[j]].xferInOnlyProxies( 
+					xf.xferPoolIdx, xf.values, 
+					stoichPtr_->getNumProxyPools(), j );
+		}
+	}
+	// Third, record the current value of pools as the reference for the
+	// next cycle.
+	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
+		XferInfo& xf = xfer_[i];
+		for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j ) {
+			pools_[xf.xferVoxel[j]].xferOut( j, xf.lastValues, xf.xferPoolIdx );
+		}
+	}
+	// Fourth, update the atots.
+	for ( vector< GssaVoxelPools >::iterator 
+					i = pools_.begin(); i != pools_.end(); ++i ) {
+		i->refreshAtot( &sys_ );
+	}
 }
 
 //////////////////////////////////////////////////////////////

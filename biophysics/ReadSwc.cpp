@@ -16,8 +16,6 @@
 #include "Compartment.h"
 #include "SymCompartment.h"
 #include <fstream>
-#include <boost/format.hpp>
-
 
 // Minimum allowed radius of segment, in microns
 // Believe it or not, some otherwise reasonable files do have smaller radii
@@ -25,42 +23,41 @@ static const double MinRadius = 0.04;
 
 ReadSwc::ReadSwc( const string& fname )
 {
-    ifstream fin( fname.c_str() );
-    if ( !fin ) {
-        cerr << "ReadSwc:: could not open file " << fname << endl;
-        return;
-    }
+	ifstream fin( fname.c_str() );
+	if ( !fin ) {
+		cerr << "ReadSwc:: could not open file " << fname << endl;
+		return;
+	}
 
-    string temp;
-    int badSegs = 0;
-    while( getline( fin, temp ) ) {
-        if ( temp.length() == 0 ) 
-            continue;
-        string::size_type pos = temp.find_first_not_of( "\t " );
-        if ( pos == string::npos )
-            continue;
-        if ( temp[pos] == '#' )
-            continue;
+	string temp;
+	int badSegs = 0;
+	while( getline( fin, temp ) ) {
+		if ( temp.length() == 0 ) 
+			continue;
+		string::size_type pos = temp.find_first_not_of( "\t " );
+		if ( pos == string::npos )
+			continue;
+		if ( temp[pos] == '#' )
+			continue;
 
-        SwcSegment t( temp );
-        if ( t.OK() )
-            segs_.push_back( SwcSegment( temp ) );
-        else
-            badSegs++;
-    }
-    bool valid = validate();
-    if ( valid ) {
-        assignKids();
-        cleanZeroLength();
-        parseBranches();
-    }
-
-    cout << string( 40, '_' ) << endl;
-    cout << "ReadSwc DIAGONISTICS\n";
-    cout << "File: " << fname << " NumSegs = " << segs_.size() << endl;
-    cout << "Bad = " << badSegs << ", Validated = " << valid << 
-        ", numBranches = " << branches_.size() << endl;
-    cout << diagnostics();
+		SwcSegment t( temp );
+		if ( t.OK() )
+			segs_.push_back( SwcSegment( temp ) );
+		else
+			badSegs++;
+	}
+	bool valid = validate();
+	if ( valid ) {
+		assignKids();
+		cleanZeroLength();
+		parseBranches();
+	}
+	cout << "ReadSwc: " << fname << "	: NumSegs = " << segs_.size() << 
+			", bad = " << badSegs <<
+			", Validated = " << valid << 
+			", numBranches = " << branches_.size() << 
+			endl;
+	diagnostics();
 }
 
 bool ReadSwc::validate() const
@@ -194,32 +191,21 @@ void ReadSwc::parseBranches()
 	}
 }
 
-string ReadSwc::diagnostics() const
+void ReadSwc::diagnostics() const
 {
-    ostringstream diagSS;
-    vector< int > diag( 14 );
+	vector< int > diag( 14 );
+	for ( unsigned int i = 0; i < segs_.size(); ++i ) {
+		const SwcSegment& s = segs_[i];
+		if ( s.type() < 14 )
+			diag[s.type()]++;
+	}
+	for ( int i = 0; i < 14; ++i )
+		cout << "ReadSwc::diagnostics: " << SwcSegment::typeName[i] << " :	" << diag[i] << endl;
 
-    for ( unsigned int i = 0; i < segs_.size(); ++i ) 
-    {
-        const SwcSegment& s = segs_[i];
-        if ( s.type() < 14 )
-            diag[s.type()]++;
-    }
-
-    diagSS << string( 40, '-' ) << endl;
-    for ( int i = 0; i < 7; ++i )
-    {
-        diagSS << boost::format( "|| %1% %|15t|%2$3d | " ) % SwcSegment::typeName[i] % diag[i]
-            << boost::format( " %1% %|15t|%2$3d ||\n" ) % SwcSegment::typeName[i+1] % diag[i+1]
-            ;
-    }
-    diagSS << string( 40, '-' ) << endl;
-
-    /*
-       for ( unsigned int i = 0; i < branches_.size(); ++i )
-       branches_[i].printDiagnostics();
-       */
-    return diagSS.str();
+	/*
+	for ( unsigned int i = 0; i < branches_.size(); ++i )
+		branches_[i].printDiagnostics();
+		*/
 }
 
 static Id makeCompt( Id parent, 

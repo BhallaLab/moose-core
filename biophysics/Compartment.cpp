@@ -81,14 +81,11 @@ Compartment::Compartment()
 	Ra_ = 1.0;
 	Im_ = 0.0;
     lastIm_ = 0.0;
-    inject_ = 0.0;
-    sumInject_ = 0.0;
-    initVm_ = -0.06;
-    A_ = 0.0;
-    B_ = 0.0;
-
-    // seed the rng.
-    rng.seed( moose::__rng_seed__ );
+	inject_ = 0.0;
+	sumInject_ = 0.0;
+	initVm_ = -0.06;
+	A_ = 0.0;
+	B_ = 0.0;
 }
 
 Compartment::~Compartment()
@@ -204,19 +201,16 @@ void Compartment::vProcess( const Eref& e, ProcPtr p )
 
 void Compartment::vReinit(  const Eref& e, ProcPtr p )
 {
-    Vm_ = initVm_;
-    A_ = 0.0;
-    B_ = invRm_;
-    Im_ = 0.0;
-    lastIm_ = 0.0;
-    sumInject_ = 0.0;
-    dt_ = p->dt;
-
-    // Seed the RNG.
-    rng.seed( moose::__rng_seed__ );
-
-    // Send out the resting Vm to channels, SpikeGens, etc.
-    VmOut()->send( e, Vm_ );
+	Vm_ = initVm_;
+	A_ = 0.0;
+	B_ = invRm_;
+	Im_ = 0.0;
+        lastIm_ = 0.0;
+	sumInject_ = 0.0;
+	dt_ = p->dt;
+	
+	// Send out the resting Vm to channels, SpikeGens, etc.
+	VmOut()->send( e, Vm_ );
 }
 
 void Compartment::vInitProc( const Eref& e, ProcPtr p )

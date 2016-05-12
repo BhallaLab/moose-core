@@ -506,24 +506,22 @@ static const Cinfo* neuronCinfo = Neuron::initCinfo();
 
 ////////////////////////////////////////////////////////////////////////
 Neuron::Neuron()
-    :
-    RM_( 1.0 ),
-    RA_( 1.0 ),
-    CM_( 0.01 ),
-    Em_( -0.065 ),
-    theta_( 0.0 ),
-    phi_( 0.0 ),
-    maxP_( 0.0 ),
-    maxG_( 0.0 ),
-    maxL_( 0.0 ),
-    sourceFile_( "" ),
-    compartmentLengthInLambdas_( 0.2 ),
-    spineEntry_( this )
-{
-    rng.seed( moose::__rng_seed__);
-}
+	: 
+			RM_( 1.0 ),
+			RA_( 1.0 ),
+			CM_( 0.01 ),
+			Em_( -0.065 ),
+			theta_( 0.0 ),
+			phi_( 0.0 ),
+			maxP_( 0.0 ),
+			maxG_( 0.0 ),
+			maxL_( 0.0 ),
+			sourceFile_( "" ),
+			compartmentLengthInLambdas_( 0.2 ),
+			spineEntry_( this )
+{;}
 
-// When copying Neuron, we next have to rerun buildSegmentTree() and
+// When copying Neuron, we next have to rerun buildSegmentTree() and 
 // setSpineAndPsdMesh
 Neuron::Neuron( const Neuron& other )
 	: 
@@ -1557,197 +1555,213 @@ string findArg( const vector<string>& line, const string& field )
 
 /// Add entries into the pos vector for a given compartment i.
 static void addPos( unsigned int segIndex, unsigned int eIndex,
-                    double spacing, double minSpacing,
-                    double dendLength,
-                    vector< unsigned int >& seglistIndex,
-                    vector< unsigned int >& elistIndex,
-                    vector< double >& pos )
+		double spacing, double minSpacing, 
+		double dendLength,
+		vector< unsigned int >& seglistIndex,
+		vector< unsigned int >& elistIndex,
+		vector< double >& pos )
 {
-    if ( minSpacing < spacing * 0.1 && minSpacing < 1e-7 )
-        minSpacing = spacing * 0.1;
-    if ( minSpacing > spacing * 0.5 )
-        minSpacing = spacing * 0.5;
-    unsigned int n = 1 + dendLength / minSpacing;
-    double dx = dendLength / n;
-    for( unsigned int i = 0; i < n; ++i )
-    {
-        if ( moose::mtrand() < dx / spacing )
-        {
-            seglistIndex.push_back( segIndex );
-            elistIndex.push_back( eIndex );
-            pos.push_back( i * dx + dx*0.5 );
-        }
-    }
+	if ( minSpacing < spacing * 0.1 && minSpacing < 1e-7 )
+		minSpacing = spacing * 0.1;
+	if ( minSpacing > spacing * 0.5 )
+		minSpacing = spacing * 0.5;
+	unsigned int n = 1 + dendLength / minSpacing;
+	double dx = dendLength / n;
+	for( unsigned int i = 0; i < n; ++i ) {
+		if ( mtrand() < dx / spacing ) {
+			seglistIndex.push_back( segIndex );
+			elistIndex.push_back( eIndex );
+			pos.push_back( i * dx + dx*0.5 );
+		}
+	}
+}
+/*
+ * This version tries to put in Pos using simple increments from the
+ * start of each compt. Multiple issues including inability to put 
+ * spines in small compartments, even if many of them.
+ *
+static void addPos( unsigned int segIndex, unsigned int eIndex,
+		double spacing, double spacingDistrib, 
+		double dendLength,
+		vector< unsigned int >& seglistIndex,
+		vector< unsigned int >& elistIndex,
+		vector< double >& pos )
+{
+	if ( spacingDistrib > 0.0 ) {
+		double position = spacing * 0.5 + 
+				( mtrand() - 0.5 ) * spacingDistrib;
+		while ( position < dendLength ) {
+			seglistIndex.push_back( segIndex );
+			elistIndex.push_back( eIndex );
+			pos.push_back( position );
+			position += spacing + ( mtrand() - 0.5 ) * spacingDistrib;
+		} 
+	} else {
+		for ( double position = spacing * 0.5; 
+				position < dendLength; position += spacing ) {
+			seglistIndex.push_back( segIndex );
+			elistIndex.push_back( eIndex );
+			pos.push_back( position );
+		}
+	}
+}
+*/
+
+void Neuron::makeSpacingDistrib( const vector< ObjId >& elist, 
+		const vector< double >& val,
+		vector< unsigned int >& seglistIndex,
+		vector< unsigned int >& elistIndex,
+		vector< double >& pos,
+		const vector< string >& line ) const
+{
+	string distribExpr = findArg( line, "spacingDistrib"  );
+	pos.resize( 0 );
+	elistIndex.resize( 0 );
+
+	try {
+		nuParser parser( distribExpr );
+
+		for ( unsigned int i = 0; i < elist.size(); ++i ) {
+			unsigned int j = i * nuParser::numVal;
+			if ( val[ j + nuParser::EXPR ] > 0 ) {
+				double spacing = val[ j + nuParser::EXPR ];
+				double spacingDistrib = parser.eval( val.begin() + j );
+				if ( spacingDistrib > spacing || spacingDistrib < 0 ) {
+					cout << "Warning: Neuron::makeSpacingDistrib: " << 
+						"0 < " << spacingDistrib << " < " << spacing <<
+						" fails on " << elist[i].path() << ". Using 0.\n";
+					spacingDistrib = 0.0;
+				}
+				map< Id, unsigned int>::const_iterator 
+					lookupDend = segIndex_.find( elist[i] );
+				if ( lookupDend != segIndex_.end() ) {
+					double dendLength = segs_[lookupDend->second].length();
+					addPos( lookupDend->second, i, 
+								spacing, spacingDistrib, dendLength, 
+								seglistIndex, elistIndex, pos );
+				}
+			}
+		}
+	}
+	catch ( mu::Parser::exception_type& err )
+	{
+		cout << err.GetMsg() << endl;
+	}
 }
 
-void Neuron::makeSpacingDistrib( const vector< ObjId >& elist,
-                                 const vector< double >& val,
-                                 vector< unsigned int >& seglistIndex,
-                                 vector< unsigned int >& elistIndex,
-                                 vector< double >& pos,
-                                 const vector< string >& line ) const
+static void makeAngleDistrib ( const vector< ObjId >& elist, 
+		const vector< double >& val, 
+		vector< unsigned int >& elistIndex,
+		vector< double >& theta,
+		const vector< string >& line )
 {
-    string distribExpr = findArg( line, "spacingDistrib"  );
-    pos.resize( 0 );
-    elistIndex.resize( 0 );
+	string angleExpr = findArg( line, "angle" );
+	string angleDistribExpr = findArg( line, "angleDistrib" );
+	// I won't bother with rotation and rotation distrb for now.
+	// Easy to add, but on reflection they don't make sense.
+	theta.clear();
+	theta.resize( elistIndex.size(), 0.0 );
 
-    try
-    {
-        nuParser parser( distribExpr );
-
-        for ( unsigned int i = 0; i < elist.size(); ++i )
-        {
-            unsigned int j = i * nuParser::numVal;
-            if ( val[ j + nuParser::EXPR ] > 0 )
-            {
-                double spacing = val[ j + nuParser::EXPR ];
-                double spacingDistrib = parser.eval( val.begin() + j );
-                if ( spacingDistrib > spacing || spacingDistrib < 0 )
-                {
-                    cout << "Warning: Neuron::makeSpacingDistrib: " <<
-                         "0 < " << spacingDistrib << " < " << spacing <<
-                         " fails on " << elist[i].path() << ". Using 0.\n";
-                    spacingDistrib = 0.0;
-                }
-                map< Id, unsigned int>::const_iterator
-                lookupDend = segIndex_.find( elist[i] );
-                if ( lookupDend != segIndex_.end() )
-                {
-                    double dendLength = segs_[lookupDend->second].length();
-                    addPos( lookupDend->second, i,
-                            spacing, spacingDistrib, dendLength,
-                            seglistIndex, elistIndex, pos );
-                }
-            }
-        }
-    }
-    catch ( mu::Parser::exception_type& err )
-    {
-        cout << err.GetMsg() << endl;
-    }
+	try {
+		nuParser angleParser( angleExpr );
+		nuParser distribParser( angleDistribExpr );
+		unsigned int lastIndex = ~0U;
+		double angle = 0;
+		double angleDistrib = 0;
+		for ( unsigned int k = 0; k < elistIndex.size(); ++k ) {
+			unsigned int i = elistIndex[k];
+			if ( i != lastIndex ) {
+				lastIndex = i;
+				unsigned int j = i * nuParser::numVal;
+				angle = angleParser.eval( val.begin() + j );
+				angleDistrib = distribParser.eval( val.begin() + j);
+			}
+			if ( angleDistrib > 0 )
+				theta[k] = angle + ( mtrand() - 0.5 ) * angleDistrib;
+			else
+				theta[k] = angle;
+		}
+	}
+	catch ( mu::Parser::exception_type& err )
+	{
+		cout << err.GetMsg() << endl;
+	}
 }
 
-static void makeAngleDistrib ( const vector< ObjId >& elist,
-                               const vector< double >& val,
-                               vector< unsigned int >& elistIndex,
-                               vector< double >& theta,
-                               const vector< string >& line )
+static void makeSizeDistrib ( const vector< ObjId >& elist, 
+		const vector< double >& val, 
+		vector< unsigned int >& elistIndex,
+		vector< double >& size,
+		const vector< string >& line )
 {
-    string angleExpr = findArg( line, "angle" );
-    string angleDistribExpr = findArg( line, "angleDistrib" );
-    // I won't bother with rotation and rotation distrb for now.
-    // Easy to add, but on reflection they don't make sense.
-    theta.clear();
-    theta.resize( elistIndex.size(), 0.0 );
+	string sizeExpr = findArg( line, "size" );
+	string sizeDistribExpr = findArg( line, "sizeDistrib" );
+	size.clear();
+	size.resize( elistIndex.size(), 0.0 );
 
-    try
-    {
-        nuParser angleParser( angleExpr );
-        nuParser distribParser( angleDistribExpr );
-        unsigned int lastIndex = ~0U;
-        double angle = 0;
-        double angleDistrib = 0;
-        for ( unsigned int k = 0; k < elistIndex.size(); ++k )
-        {
-            unsigned int i = elistIndex[k];
-            if ( i != lastIndex )
-            {
-                lastIndex = i;
-                unsigned int j = i * nuParser::numVal;
-                angle = angleParser.eval( val.begin() + j );
-                angleDistrib = distribParser.eval( val.begin() + j);
-            }
-            if ( angleDistrib > 0 )
-                theta[k] = angle + ( moose::mtrand() - 0.5 ) * angleDistrib;
-            else
-                theta[k] = angle;
-        }
-    }
-    catch ( mu::Parser::exception_type& err )
-    {
-        cout << err.GetMsg() << endl;
-    }
+	try {
+		nuParser sizeParser( sizeExpr );
+		nuParser distribParser( sizeDistribExpr );
+		unsigned int lastIndex = ~0U;
+		double sz = 1.0;
+		double sizeDistrib = 0;
+		for ( unsigned int k = 0; k < elistIndex.size(); ++k ) {
+			unsigned int i = elistIndex[k];
+			if ( i != lastIndex ) {
+				lastIndex = i;
+				unsigned int j = i * nuParser::numVal;
+				sz = sizeParser.eval( val.begin() + j );
+				sizeDistrib = distribParser.eval( val.begin() + j);
+			}
+			if ( sizeDistrib > 0 )
+				size[k] = sz + ( mtrand() - 0.5 ) * sizeDistrib;
+			else
+				size[k] = sz;
+		}
+	}
+	catch ( mu::Parser::exception_type& err )
+	{
+		cout << err.GetMsg() << endl;
+	}
 }
 
-static void makeSizeDistrib ( const vector< ObjId >& elist,
-                              const vector< double >& val,
-                              vector< unsigned int >& elistIndex,
-                              vector< double >& size,
-                              const vector< string >& line )
+void Neuron::installSpines( const vector< ObjId >& elist, 
+		const vector< double >& val, const vector< string >& line )
 {
-    string sizeExpr = findArg( line, "size" );
-    string sizeDistribExpr = findArg( line, "sizeDistrib" );
-    size.clear();
-    size.resize( elistIndex.size(), 0.0 );
+	Id spineProto( "/library/spine" );
 
-    try
-    {
-        nuParser sizeParser( sizeExpr );
-        nuParser distribParser( sizeDistribExpr );
-        unsigned int lastIndex = ~0U;
-        double sz = 1.0;
-        double sizeDistrib = 0;
-        for ( unsigned int k = 0; k < elistIndex.size(); ++k )
-        {
-            unsigned int i = elistIndex[k];
-            if ( i != lastIndex )
-            {
-                lastIndex = i;
-                unsigned int j = i * nuParser::numVal;
-                sz = sizeParser.eval( val.begin() + j );
-                sizeDistrib = distribParser.eval( val.begin() + j);
-            }
-            if ( sizeDistrib > 0 )
-                size[k] = sz + ( moose::mtrand() - 0.5 ) * sizeDistrib;
-            else
-                size[k] = sz;
-        }
-    }
-    catch ( mu::Parser::exception_type& err )
-    {
-        cout << err.GetMsg() << endl;
-    }
-}
+	if ( spineProto == Id() ) {
+		cout << "Warning: Neuron::installSpines: Unable to find prototype spine: /library/spine\n";
+		return;
+	}
+	// Look up elist index from pos index, since there may be many 
+	// spines on each segment.
+	vector< unsigned int > elistIndex; 
+	vector< double > pos; // spacing of the new spines along compt.
+	vector< double > theta; // Angle of spines
+	vector< double > size; // Size scaling of spines
+	pos.reserve( elist.size() );
+	elistIndex.reserve( elist.size() );
 
-void Neuron::installSpines( const vector< ObjId >& elist,
-                            const vector< double >& val, const vector< string >& line )
-{
-    Id spineProto( "/library/spine" );
-
-    if ( spineProto == Id() )
-    {
-        cout << "Warning: Neuron::installSpines: Unable to find prototype spine: /library/spine\n";
-        return;
-    }
-    // Look up elist index from pos index, since there may be many
-    // spines on each segment.
-    vector< unsigned int > elistIndex;
-    vector< double > pos; // spacing of the new spines along compt.
-    vector< double > theta; // Angle of spines
-    vector< double > size; // Size scaling of spines
-    pos.reserve( elist.size() );
-    elistIndex.reserve( elist.size() );
-
-    makeSpacingDistrib( elist, val,
-                        spineParentSegIndex_, elistIndex, pos, line);
-    makeAngleDistrib( elist, val, elistIndex, theta, line );
-    makeSizeDistrib( elist, val, elistIndex, size, line );
-    for ( unsigned int k = 0; k < spineParentSegIndex_.size(); ++k )
-    {
-        unsigned int i = spineParentSegIndex_[k];
-        Vec x, y, z;
-        coordSystem( soma_, segId_[i], x, y, z );
-        spines_.push_back(
-            addSpine( segId_[i], spineProto, pos[k], theta[k],
-                      x, y, z, size[k], k )
-        );
-    }
-    spineToMeshOrdering_.clear();
-    spineToMeshOrdering_.resize( spines_.size(), 0 );
-    spineStoich_.clear();
-    spineStoich_.resize( spines_.size() );
-    psdStoich_.clear();
-    psdStoich_.resize( spines_.size() );
+	makeSpacingDistrib( elist, val, 
+					spineParentSegIndex_, elistIndex, pos, line);
+	makeAngleDistrib( elist, val, elistIndex, theta, line );
+	makeSizeDistrib( elist, val, elistIndex, size, line );
+	for ( unsigned int k = 0; k < spineParentSegIndex_.size(); ++k ) {
+		unsigned int i = spineParentSegIndex_[k];
+		Vec x, y, z;
+		coordSystem( soma_, segId_[i], x, y, z );
+		spines_.push_back( 
+			addSpine( segId_[i], spineProto, pos[k], theta[k], 
+				x, y, z, size[k], k )
+		);
+	}
+	spineToMeshOrdering_.clear();
+	spineToMeshOrdering_.resize( spines_.size(), 0 );
+	spineStoich_.clear();
+	spineStoich_.resize( spines_.size() );
+	psdStoich_.clear();
+	psdStoich_.resize( spines_.size() );
 }
 ////////////////////////////////////////////////////////////////////////
 // Interface funcs for spines

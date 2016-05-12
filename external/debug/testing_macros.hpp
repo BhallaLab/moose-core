@@ -21,32 +21,21 @@
 
 
 #include <sstream>
+#include <exception>
 #include <iostream>
 #include <exception>
+#include <limits>
+#include <cmath>
+
 #include "current_function.hpp"
 #include "print_function.hpp"
 
 using namespace std;
 
-class FatalTestFailure 
+inline bool doubleEq(double a, double b)
 {
-
-public:
-
-    FatalTestFailure( string msg = "" ) : msg_( msg )
-    {
-        msg_ = msg;
-    }
-
-    virtual const char* what() const throw()
-    {
-        moose::__dump__( msg_, moose::failed );
-        return msg_.c_str();
-    }
-
-private:
-    string msg_;
-};
+    return std::fabs(a-b) < 1e-7;
+}
 
 static ostringstream assertStream;
 
@@ -59,7 +48,7 @@ static ostringstream assertStream;
         assertStream.str(""); \
         LOCATION( assertStream ); \
         assertStream << msg << endl; \
-        dump(assertStream.str(), "EXPECT_FAILURE"); \
+        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_FALSE( condition, msg) \
@@ -67,7 +56,7 @@ static ostringstream assertStream;
         assertStream.str(""); \
         LOCATION( assertStream ); \
         assertStream << msg << endl; \
-        dump(assertStream.str(), "EXPECT_FAILURE"); \
+        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_EQ(a, b, token)  \
@@ -76,7 +65,7 @@ static ostringstream assertStream;
         LOCATION(assertStream) \
         assertStream << "Expected " << a << ", received " << b  << endl; \
         assertStream << token << endl; \
-        dump(assertStream.str(), "EXPECT_FAILURE"); \
+        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_NEQ(a, b, token)  \
@@ -85,7 +74,7 @@ static ostringstream assertStream;
         LOCATION(assertStream); \
         assertStream << "Not expected " << a << endl; \
         assertStream << token << endl; \
-        dump(assertStream.str(), "EXPECT_FAILURE"); \
+        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_GT(a, b, token)  \
@@ -94,7 +83,7 @@ static ostringstream assertStream;
         LOCATION(assertStream); \
         assertStream << "Expected greater than " << a << ", received " << b << endl; \
         assertStream << token << endl; \
-        dump(assertStream.str(), "EXPECT_FAILURE"); \
+        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_GTE(a, b, token)  \
@@ -104,7 +93,7 @@ static ostringstream assertStream;
         assertStream << "Expected greater than or equal to " << a  \
             << ", received " << b << endl; \
         assertStream << token << endl; \
-        dump(assertStream.str(), "EXPECT_FAILURE"); \
+        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_LT(a, b, token)  \
@@ -113,7 +102,7 @@ static ostringstream assertStream;
         LOCATION(assertStream); \
         assertStream << "Expected less than " << a << ", received " << b << endl; \
         assertStream << token << endl; \
-        dump(assertStream.str(), "EXPECT_FAILURE"); \
+        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define EXPECT_LTE(a, b, token)  \
@@ -123,19 +112,20 @@ static ostringstream assertStream;
         assertStream << "Expected less than or equal to " << a \
             << ", received " << b << endl; \
         assertStream << token << endl; \
-        dump(assertStream.str(), "EXPECT_FAILURE"); \
+        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
 #define ASSERT_TRUE( condition, msg) \
     if( !(condition) ) {\
         assertStream.str(""); \
-        assertStream << msg << endl; \
-        throw FatalTestFailure(assertStream.str());  \
+        assertStream << msg << endl;  \
+        throw runtime_error( assertStream.str() );\
     }
 
 #define ASSERT_FALSE( condition, msg) \
     if( (condition) ) {\
         assertStream.str(""); \
+        assertStream.precision( 9 ); \
         assertStream << msg << endl; \
         throw FatalTestFailure(assertStream.str()); \
     }
@@ -143,12 +133,14 @@ static ostringstream assertStream;
 #define ASSERT_LT( a, b, msg) \
     EXPECT_LT(a, b, msg); \
     assertStream.str(""); \
+    assertStream.precision( 9 ); \
     assertStream << msg; \
     throw FatalTestFailure( assertStream.str() ); \
 
 #define ASSERT_EQ(a, b, token)  \
-    if( (a) != (b)) { \
+    if( ! doubleEq((a), (b)) ) { \
         assertStream.str(""); \
+        assertStream.precision( 9 ); \
         LOCATION(assertStream) \
         assertStream << "Expected " << a << ", received " << b  << endl; \
         assertStream << token << endl; \

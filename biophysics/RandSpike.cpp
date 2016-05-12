@@ -105,16 +105,14 @@ const Cinfo* RandSpike::initCinfo()
 static const Cinfo* spikeGenCinfo = RandSpike::initCinfo();
 
 RandSpike::RandSpike()
-    :
-    rate_( 0.0 ),
-    realRate_( 0.0 ),
-    refractT_(0.0),
-    lastEvent_(0.0),
-    threshold_(0.0),
-    fired_( 0 )
-{
-    rng.seed( moose::__rng_seed__ );
-}
+	: 
+	  rate_( 0.0 ),
+	  realRate_( 0.0 ),
+      refractT_(0.0),
+      lastEvent_(0.0),
+	  threshold_(0.0),
+	  fired_( 0 )
+{;}
 
 //////////////////////////////////////////////////////////////////
 // Here we put the RandSpike class functions.
@@ -174,17 +172,12 @@ void RandSpike::process( const Eref& e, ProcPtr p )
 // Set it so that first spike is allowed.
 void RandSpike::reinit( const Eref& e, ProcPtr p )
 {
-    rng.seed( moose::__rng_seed__ );
-
-    if ( rate_ <= 0.0 )
-    {
-        lastEvent_ = 0.0;
-        realRate_ = 0.0;
-    }
-    else
-    {
-        double prob = mtrand();
-        double m = 1.0 / rate_;
-        lastEvent_ = m * log( prob );
-    }
+	if ( rate_ <= 0.0 ) {
+		lastEvent_ = 0.0;
+		realRate_ = 0.0;
+	} else {
+		double prob = mtrand();
+		double m = 1.0 / rate_;
+		lastEvent_ = m * log( prob );
+	}
 }

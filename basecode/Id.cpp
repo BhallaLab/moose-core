@@ -16,24 +16,30 @@
 //////////////////////////////////////////////////////////////
 
 Id::Id()
-	// : id_( 0 ), index_( 0 )
-	: id_( 0 )
-{;}
+// : id_( 0 ), index_( 0 )
+    : id_( 0 )
+{
+    ;
+}
 
 Id::Id( unsigned int id )
-	: id_( id )
-{;}
+    : id_( id )
+{
+    ;
+}
 
 Id::Id( const string& path, const string& separator )
 {
-	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	assert( shell );
-	id_ = shell->doFind( path ).id.id_;
+    Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+    assert( shell );
+    id_ = shell->doFind( path ).id.id_;
 }
 
 Id::Id( const ObjId& oi )
-	: id_( oi.id.id_ )
-{;}
+    : id_( oi.id.id_ )
+{
+    ;
+}
 
 /**
  * Static func to extract an id from a string. We need to accept ids
@@ -42,8 +48,8 @@ Id::Id( const ObjId& oi )
  */
 Id Id::str2Id( const std::string& s )
 {
-	// unsigned int val = atoi( s.c_str() );
-	return Id( s );
+    // unsigned int val = atoi( s.c_str() );
+    return Id( s );
 }
 
 //////////////////////////////////////////////////////////////
@@ -52,8 +58,8 @@ Id Id::str2Id( const std::string& s )
 
 vector< Element* >& Id::elements()
 {
-	static vector< Element* > e;
-	return e;
+    static vector< Element* > e;
+    return e;
 }
 
 //////////////////////////////////////////////////////////////
@@ -63,25 +69,27 @@ vector< Element* >& Id::elements()
 // static func to convert id into a string.
 string Id::id2str( Id id )
 {
-	return id.path();
+    return id.path();
 }
 
 // Function to convert it into its fully separated path.
-string Id::path( const string& separator) const 
+string Id::path( const string& separator) const
 {
-	string ret = Neutral::path( eref() );
-	// Trim off trailing []
-	assert( ret.length() > 0 );
-	// the 'back' operation is not supported by pre 2011 compilers
+    string ret = Neutral::path( eref() );
+    // Trim off trailing []
+    assert( ret.length() > 0 );
+    // the 'back' operation is not supported by pre 2011 compilers
 
-	while ( ret[ ret.length() - 1 ] == ']' ) {
-		size_t pos = ret.find_last_of( '[' );
-		if ( pos != string::npos && pos > 0 ) {
-			ret = ret.substr( 0, pos );
-		}
-	}
+    while ( ret[ ret.length() - 1 ] == ']' )
+    {
+        size_t pos = ret.find_last_of( '[' );
+        if ( pos != string::npos && pos > 0 )
+        {
+            ret = ret.substr( 0, pos );
+        }
+    }
 
-	return ret;
+    return ret;
 }
 
 /**
@@ -104,54 +112,56 @@ Element* Id::operator()() const
 /// Synonym for Id::operator()()
 Element* Id::element() const
 {
-	return elements()[ id_ ];
+    return elements()[ id_ ];
 }
 
 /*
-unsigned int Id::index() const 
+unsigned int Id::index() const
 {
 	return index_;
 }
 */
 
-Eref Id::eref() const 
+Eref Id::eref() const
 {
-	return Eref( elements()[ id_ ], 0 );
-	// return Eref( elements()[ id_ ], index_ );
+    return Eref( elements()[ id_ ], 0 );
+    // return Eref( elements()[ id_ ], index_ );
 }
 
 // Static func.
 Id Id::nextId()
 {
-	// Should really look up 'available' list.
-	// Should really put the returned value onto the 'reserved' list
-	// so they don't go dangling.
-	Id ret( elements().size() );
-	elements().push_back( 0 );
-	return ret;
+    // Should really look up 'available' list.
+    // Should really put the returned value onto the 'reserved' list
+    // so they don't go dangling.
+    Id ret( elements().size() );
+    elements().push_back( 0 );
+    return ret;
 }
 
 // Static func.
 unsigned int Id::numIds()
 {
-	return elements().size();
+    return elements().size();
 }
 
 void Id::bindIdToElement( Element* e )
 {
-	if ( elements().size() <= id_ ) {
-		if ( elements().size() % 1000 == 0 ) {
-			elements().reserve( elements().size() + 1000 );
-		}
-		elements().resize( id_ + 1, 0 );
-	}
-	assert( elements()[ id_ ] == 0 );
-	/*
-	if ( elements()[ id_ ] != 0 )
-		cout << "Warning: assigning Element to existing id " << id_ << "\n";
-		*/
-	elements()[ id_ ] = e;
-	// cout << "Id::bindIdToElement '" << e->getName() << "' = " << id_ << endl;
+    if ( elements().size() <= id_ )
+    {
+        if ( elements().size() % 1000 == 0 )
+        {
+            elements().reserve( elements().size() + 1000 );
+        }
+        elements().resize( id_ + 1, 0 );
+    }
+    assert( elements()[ id_ ] == 0 );
+    /*
+    if ( elements()[ id_ ] != 0 )
+    	cout << "Warning: assigning Element to existing id " << id_ << "\n";
+    	*/
+    elements()[ id_ ] = e;
+    // cout << "Id::bindIdToElement '" << e->getName() << "' = " << id_ << endl;
 }
 
 /*
@@ -165,36 +175,41 @@ Id Id::create( Element* e )
 
 void Id::destroy() const
 {
-	if ( elements()[ id_ ] ) {
-	// cout << "Id::destroy '" << elements()[ id_ ]->getName() << "' = " << id_ << endl;
-		delete elements()[ id_ ];
-		elements()[ id_ ] = 0;
-		// Put id_ on 'available' list
-	} else {
-		cout << "Warning: Id::destroy: " << id_ << " already zeroed\n";
-	}
+    if ( elements()[ id_ ] )
+    {
+        // cout << "Id::destroy '" << elements()[ id_ ]->getName() << "' = " << id_ << endl;
+        delete elements()[ id_ ];
+        elements()[ id_ ] = 0;
+        // Put id_ on 'available' list
+    }
+    else
+    {
+        cout << "Warning: Id::destroy: " << id_ << " already zeroed\n";
+    }
 }
 
 void Id::zeroOut() const
 {
-	assert ( id_ < elements().size() );
-	elements()[ id_ ] = 0;
+    assert ( id_ < elements().size() );
+    elements()[ id_ ] = 0;
 }
 
-unsigned int Id::value() const 
+unsigned int Id::value() const
 {
-	return id_;
+    return id_;
 }
 
 void Id::clearAllElements()
 {
-	for ( vector< Element* >::iterator
-					i = elements().begin(); i != elements().end(); ++i ) {
-		if ( *i ) {
-			(*i)->clearAllMsgs();
-			delete *i;
-		}
-	}
+    for ( vector< Element* >::iterator
+            i = elements().begin(); i != elements().end(); ++i )
+    {
+        if ( *i )
+        {
+            (*i)->clearAllMsgs();
+            delete *i;
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////
@@ -203,20 +218,20 @@ void Id::clearAllElements()
 
 ostream& operator <<( ostream& s, const Id& i )
 {
-	s << i.id_;
-	/*
-	if ( i.index_ == 0 )
-		s << i.id_;
-	else 
-		s << i.id_ << "[" << i.index_ << "]";
-	*/
-	return s;
+    s << i.id_;
+    /*
+    if ( i.index_ == 0 )
+    	s << i.id_;
+    else
+    	s << i.id_ << "[" << i.index_ << "]";
+    */
+    return s;
 }
 
 istream& operator >>( istream& s, Id& i )
 {
-	s >> i.id_;
-	return s;
+    s >> i.id_;
+    return s;
 }
 
 /*

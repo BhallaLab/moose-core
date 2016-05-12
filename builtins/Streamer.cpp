@@ -16,7 +16,6 @@
 
 #include <algorithm>
 #include <sstream>
-#include <boost/log/trivial.hpp>
 
 #include "global.h"
 #include "header.h"
@@ -136,6 +135,14 @@ static const Cinfo* tableStreamCinfo = Streamer::initCinfo();
 
 Streamer::Streamer() 
 {
+    // Not all compilers allow initialization during the declaration of class
+    // methods.
+    format_ = "npy";
+    columns_.push_back( "time" );               /* First column is time. */
+    tables_.resize(0);
+    tableIds_.resize(0);
+    columns_.resize(0);
+    data_.resize(0);
 }
 
 Streamer& Streamer::operator=( const Streamer& st )
@@ -146,6 +153,14 @@ Streamer& Streamer::operator=( const Streamer& st )
 
 Streamer::~Streamer()
 {
+    cleanUp();
+}
+
+void Streamer::cleanUp( void )
+{
+    /*  Write the left-overs. */
+    zipWithTime( data_, currTime_ );
+    StreamerBase::writeToOutFile( outfilePath_, format_, "a", data_, columns_ );
 }
 
 /**
@@ -157,24 +172,19 @@ Streamer::~Streamer()
 void Streamer::reinit(const Eref& e, ProcPtr p)
 {
     // Push each table dt_ into vector of dt
-    for( auto t : tables_ )
-        tableDt_.push_back( t->getDt() );
+    for( size_t i = 0; i < tables_.size(); i++)
+        tableDt_.push_back( tables_[i]->getDt() );
 
     if( ! isOutfilePathSet_ )
     {
         string defaultPath = "_tables/" + moose::moosePathToUserPath( e.id().path() );
         setOutFilepath( defaultPath );
     }
-
-    double currTime = 0;
-
+    currTime_ = 0.0;
     // Prepare data.
-    vector<double> data;
-    zipWithTime( data, currTime );
-    StreamerBase::writeToOutFile( outfilePath_, format_, "w", data, columns_ );
-    // clean the arrays
-    for( auto t : tables_ )
-        t->clearVec();
+    zipWithTime( data_, currTime_ );
+    StreamerBase::writeToOutFile( outfilePath_, format_, "w", data_, columns_);
+    data_.clear();
 }
 
 /**
@@ -185,14 +195,13 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
  */
 void Streamer::process(const Eref& e, ProcPtr p)
 {
-    double currTime = p->currTime;
     // Prepare data.
-    vector<double> data;
-    zipWithTime( data, currTime );
-    StreamerBase::writeToOutFile( outfilePath_, format_, "a", data, columns_ );
+    zipWithTime( data_, currTime_ );
+    StreamerBase::writeToOutFile( outfilePath_, format_, "a", data_, columns_ );
     // clean the arrays
-    for( auto t : tables_ )
-        t->clearVec();
+    data_.clear();
+    for(size_t i = 0; i < tables_.size(); i++ )
+        tables_[i]->clearVec();
 }
 
 
@@ -204,8 +213,8 @@ void Streamer::process(const Eref& e, ProcPtr p)
 void Streamer::addTable( Id table )
 {
     // If this table is not already in the vector, add it.
-    for( auto t : tableIds_ )
-        if( table.path() == t.path() )
+    for( size_t i = 0; i < tableIds_.size(); i++)
+        if( table.path() == tableIds_[i].path() )
             return;                             /* Already added. */
 
     Table* t = reinterpret_cast<Table*>(table.eref().data());
@@ -225,7 +234,8 @@ void Streamer::addTable( Id table )
  */
 void Streamer::addTables( vector<Id> tables )
 {
-    for( auto t : tables ) addTable( t );
+    for( vector<Id>::const_iterator it = tables.begin(); it != tables.end(); it++)
+        addTable( *it );
 }
 
 
@@ -259,7 +269,8 @@ void Streamer::removeTable( Id table )
  */
 void Streamer::removeTables( vector<Id> tables )
 {
-    for( auto t : tables ) removeTable( t );
+    for( vector<Id>::const_iterator it = tables.begin(); it != tables.end(); it++)
+        removeTable( *it );
 }
 
 /**
@@ -280,8 +291,11 @@ string Streamer::getOutFilepath( void ) const
 
 void Streamer::setOutFilepath( string filepath )
 {
-    outfilePath_ = moose::createParentDirs( filepath );
+    outfilePath_ = filepath;
     isOutfilePathSet_ = true;
+    if( ! moose::createParentDirs( filepath ) )
+        outfilePath_ = moose::toFilename( outfilePath_ );
+
     string format = moose::getExtension( outfilePath_, true );
     if( format.size() > 0)
         setFormat( format );
@@ -306,8 +320,10 @@ void Streamer::zipWithTime( vector<double>& data, double currTime)
     size_t N = tables_[0]->getVecSize();
     for (size_t i = 0; i < N; i++) 
     {
-        data.emplace_back( currTime - (N - i - 1)* dt_ );
-        for ( auto t : tables_ )
-            data.emplace_back( t->getVec()[i] );
+        /* Each entry we write, currTime_ increases by dt.  */
+        data.push_back( currTime_ );
+        currTime_ += tableDt_[0];               
+        for( size_t i = 0; i < tables_.size(); i++)
+            data.push_back( tables_[i]->getVec()[i] );
     }
 }
