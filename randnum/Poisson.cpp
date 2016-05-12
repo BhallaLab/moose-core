@@ -31,7 +31,8 @@
 
 using namespace std;
 
-Poisson::Poisson(double mean):mean_(mean), gammaGen_(NULL), binomialGen_(NULL), generator_(NULL)
+Poisson::Poisson(double mean):mean_(mean), gammaGen_(NULL) //, binomialGen_(NULL)
+    , generator_(NULL)
 {
     /* replicates setMean */
     if (mean <= 0.0)

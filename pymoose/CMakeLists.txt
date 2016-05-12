@@ -1,9 +1,16 @@
-# Find Numpy 
 add_definitions(-DPYMOOSE)
+
 include_directories(../basecode ../msg)
-include_directories(${NUMPY_INCLUDE_DIRS})
-add_definitions(-DUSE_NUMPY)
-add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
+
+execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --includes
+    OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --libs
+    OUTPUT_VARIABLE PYTHON_LIBRARIES
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+message( STATUS "Python include flags: ${PYTHON_INCLUDE_FLAGS}" )
 
 add_library(moosepython 
     vec.cpp
@@ -12,4 +19,8 @@ add_library(moosepython
     melement.cpp
     test_moosemodule.cpp 
     PyRun.cpp
+    )
+
+set_target_properties( moosepython 
+    PROPERTIES COMPILE_FLAGS "${PYTHON_INCLUDE_FLAGS}"
     )

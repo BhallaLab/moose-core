@@ -107,12 +107,15 @@ class ReadCell
 		double RA_;
 		double EREST_ACT_;
 		double ELEAK_;
+#if 0                                           /* These are not used */
 		double dendrDiam;
 		double aveLength;
 		double spineSurf;
 		double spineDens;
 		double spineFreq;
 		double membFactor;
+#endif
+
 		bool erestFlag_;
 		bool eleakFlag_;
 		

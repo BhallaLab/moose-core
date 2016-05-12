@@ -46,7 +46,7 @@
 #include "VoxelPoolsBase.h"
 #include "OdeSystem.h"
 #include "VoxelPools.h"
-#include "SteadyState.h"
+#include "SteadyStateGsl.h"
 
 int ss_func( const gsl_vector* x, void* params, gsl_vector* f );
 #ifdef USE_GSL
