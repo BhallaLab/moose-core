@@ -1,8 +1,8 @@
 #!/bin/bash
-
+PYTHON_EXECUTABLE=/usr/bin/python
 FAILED=0
-a=`python -c 'import moose; moose.seed(1); print([moose.rand() for x in range(10)])'`
-b=`python -c 'import moose; moose.seed(2); print([moose.rand() for x in range(10)])'`
+a=`${PYTHON_EXECUTABLE} -c 'import moose; moose.seed(1); print([moose.rand() for x in range(10)])'`
+b=`${PYTHON_EXECUTABLE} -c 'import moose; moose.seed(2); print([moose.rand() for x in range(10)])'`
 a=`printf "$a" | tail -n1`
 b=`printf "$b" | tail -n1`
 echo $a
@@ -16,9 +16,9 @@ else
     echo "Test 1 passed"
 fi
 
-c=`python -c 'import moose; moose.seed(10); print([moose.rand() for x in \
+c=`${PYTHON_EXECUTABLE} -c 'import moose; moose.seed(10); print([moose.rand() for x in \
     range(10)])'`
-d=`python -c 'import moose; moose.seed(10); print([moose.rand() for x in \
+d=`${PYTHON_EXECUTABLE} -c 'import moose; moose.seed(10); print([moose.rand() for x in \
     range(10)])'`
 c=`printf "$c" | tail -n1`
 d=`printf "$d" | tail -n1`

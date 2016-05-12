@@ -41,35 +41,60 @@ public:
     void setOutFilepath( string stream );
     string getOutFilepath() const;
 
-    /*  To set and get format names.  */
-    void setFormat( string formatname );
-    string getFormat( ) const;
+    /** @brief Write to a output file in given format.  
+     *
+     * @param filepath, path of
+     * output file. If parent directories do not exist, they will be created. If
+     * creation fails for some reason, data will be saved in current working
+     * directory. The name of the file will be computed from the given directory
+     * name by replacing '/' or '\' by '_'.  
+     *
+     * @param format 
+     *
+     *  npy : numpy binary format (version 1 and 2), version 1 is default.
+     *  csv : comma separated value (delimiter ',' )
+     *
+     * @param  openmode (write or append)
+     * 
+     * @param  data, vector of values
+     *
+     * @param ncols (number of columns). Incoming data will be formatted into a
+     * matrix with ncols.
+     */
+    static void writeToOutFile( 
+            const string& filepath, const string& format
+            , const string& openmode
+            , const vector<double>& data 
+            , const vector<string>& columns
+            );
 
+    /**
+     * @brief Write data to csv file. See the documentation of writeToOutfile
+     * for details.
+     */
+    static void writeToCSVFile( const string& filepath, const string& openmode
+            , const vector<double>& data, const vector<string>& columns
+            );
 
-    // Write given text to output file. Clear the text after writing it.
-    void write( string& text );
-
-    // Initialize output file
-    void initOutfile( const Eref& e );
+    /**
+     * @brief  Write to NPY format. See the documentation of
+     * writeToOutfile for more details.
+     */
+    static void writeToNPYFile( const string& filepath, const string& openmode
+            , const vector<double>& data
+            , const vector<string>& columns 
+            );
 
 
 private:
 
     string outfilePath_;
 
-    // format and delimiter 
-    string format_ = "csv";
-    string delimiter_ = ",";
-
+    static const char eol = '\n';
+    static const char delimiter_ = ' ';
 
     // How many lines are written to the file.
     size_t numLinesWritten_ = 0;
-
-    // Write to file stream.
-    std::ofstream of_;
-
-    // Temporary storage to lines
-    std::string text_;
 
     /*  Step size of this class */
     double dt_;

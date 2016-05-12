@@ -47,8 +47,8 @@
 // Code:
 
 #include <Python.h>
-#include <structmember.h> // This defines the type id macros like T_STRING
-// #include "numpy/arrayobject.h"
+#include <structmember.h>
+#include <boost/format.hpp>
 
 #include <iostream>
 #include <typeinfo>
@@ -228,11 +228,11 @@ int moose_ObjId_init_from_path(_ObjId * self, PyObject * args,
         return -1;
     }
 
-#ifndef QUIET_MODE
-    cout << "Created " << new_id << " path=" << path << " numData=" << numData << " isGlobal=" << isGlobal << " baseType=" << basetype_str << endl;
-#else
-    //cout << "+";
-#endif
+    LOG( moose::debug , boost::format( 
+            "Created %1% path=%2% %|40t|numData=%3% isGlobal=%4% baseType=%5%"
+                ) % new_id % path % numData % isGlobal % basetype_str
+       );
+
     self->oid_ = ObjId(new_id);
     return 0;
 }

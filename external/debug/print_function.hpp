@@ -30,8 +30,8 @@
 #include <string>
 #include <map>
 #include <iomanip>
-
-//#include <sys/ioctl.h>
+#include <ctime>
+#include <algorithm>
 
 #define T_RESET       "\033[0m"
 #define T_BLACK       "\033[30m"      /* Black */
@@ -53,184 +53,214 @@
 
 using namespace std;
 
-/* 
- * ===  FUNCTION  ==============================================================
- *         Name:  mapToString
- *  Description:  GIven a map, return a string representation of it.
- *
- *  If the second argument is true then print the value with key. But default it
- *  is true.
- * ==============================================================================
- */
+namespace moose {
+
+
+    /**
+     * @brief Enumerate type for debug and log.
+     */
+    enum serverity_level_ { 
+        trace, debug, info
+            , warning, fixme
+            , error, fatal, failed 
+    };
+
+    static vector<string> levels_ = { 
+        "TRACE", "DEBUG", "INFO", "LOG"
+            , "WARNING", "FIXME"
+            , "ERROR", "FATAL", "FAILED" 
+    };
+
+    /* 
+     * ===  FUNCTION  ==============================================================
+     *         Name:  mapToString
+     *  Description:  GIven a map, return a string representation of it.
+     *
+     *  If the second argument is true then print the value with key. But default it
+     *  is true.
+     * ==============================================================================
+     */
+
     template<typename A, typename B>
-string mapToString(const map<A, B>& m, bool value=true)
-{
-    unsigned int width = 81;
-    unsigned int mapSize = m.size();
-    unsigned int size = 0;
-
-    vector<string> row;
-
-    /* Get the maximum size of any entry in map */
-    stringstream ss;
-    typename map<A, B>::const_iterator it;
-    for(it = m.begin(); it != m.end(); it++)
-    {
-        ss.str("");
-        ss << it->first;
-        if(value)
-            ss << ": " << it->second;
-        row.push_back(ss.str());
-        if(ss.str().size() > size)
-            size = ss.str().size()+1;
-    }
-
-    unsigned int colums = width / size;
-    ss.str("");
-
-    int i = 0;
-    for(unsigned int ii = 0; ii < row.size(); ii++)
-    {
-        if(i < colums)
+        string mapToString(const map<A, B>& m, bool value=true)
         {
-            ss << setw(size+1) << row[ii];
-            i++;
-        }
-        else
-        {
-            ss << endl;
-            i = 0;
-        }
-    }
-    return ss.str();
-}
+            unsigned int width = 81;
+            unsigned int mapSize = m.size();
+            unsigned int size = 0;
 
-#include <ctime>
-#include <algorithm>
+            vector<string> row;
 
-inline string colored(string msg)
-{
-    stringstream ss;
-    ss << T_RED << msg << T_RESET;
-    return ss.str();
-}
-
-inline string colored(string msg, string colorName)
-{
-    stringstream ss;
-    ss << colorName << msg << T_RESET;
-    return ss.str();
-}
-
-inline string debugPrint(string msg, string prefix = "DEBUG"
-        , string color=T_RESET, unsigned debugLevel = 0
-        ) 
-{
-    stringstream ss; ss.str("");
-    if(debugLevel <= DEBUG_LEVEL)
-    {
-        ss << setw(debugLevel/2) << "[" << prefix << "] " 
-            << color << msg << T_RESET;
-    }
-    return ss.str();
-}
-
-/*-----------------------------------------------------------------------------
- *  This function __dump__s a message onto console. Fills appropriate colors as
- *  needed. 
- *-----------------------------------------------------------------------------*/
-
-inline void __dump__(string msg, string type = "DEBUG", bool autoFormat = true)
-{
-
-    stringstream ss;
-    ss << "[" << type << "] ";
-    bool set = false;
-    bool reset = true;
-    string color = T_GREEN;
-    if(type == "WARNING" || type == "WARN" || type == "FIXME")
-        color = T_YELLOW;
-    else if(type == "DEBUG")
-        color = T_CYAN;
-    else if(type == "ERROR" || type == "FAIL" || type == "FATAL" || type == "ASSERT_FAILURE")
-        color = T_RED;
-    else if(type == "INFO" || type == "EXPECT_FAILURE")
-        color = T_MAGENTA;
-    else if(type == "LOG")
-        color = T_BLUE;
-
-    for(unsigned int i = 0; i < msg.size(); ++i)
-    {
-        if('`' == msg[i])
-        {
-            if(!set and reset) 
+            /* Get the maximum size of any entry in map */
+            stringstream ss;
+            typename map<A, B>::const_iterator it;
+            for(it = m.begin(); it != m.end(); it++)
             {
-                set = true;
-                reset = false;
-                ss << color;
+                ss.str("");
+                ss << it->first;
+                if(value)
+                    ss << ": " << it->second;
+                row.push_back(ss.str());
+                if(ss.str().size() > size)
+                    size = ss.str().size()+1;
             }
-            else if(set && !reset)
+
+            unsigned int colums = width / size;
+            ss.str("");
+
+            int i = 0;
+            for(unsigned int ii = 0; ii < row.size(); ii++)
             {
-                reset = true;
-                set = false;
-                ss << T_RESET;
+                if(i < colums)
+                {
+                    ss << setw(size+1) << row[ii];
+                    i++;
+                }
+                else
+                {
+                    ss << endl;
+                    i = 0;
+                }
             }
+            return ss.str();
         }
-        else if('\n' == msg[i])
-            ss << "\n + ";
-        else
-            ss << msg[i];
+
+    inline string colored(string msg)
+    {
+        stringstream ss;
+        ss << T_RED << msg << T_RESET;
+        return ss.str();
     }
 
-    /*  Be safe than sorry */
-    if(!reset)
-        ss << T_RESET;
-    cerr << ss.str() << endl;
+    inline string colored(string msg, string colorName)
+    {
+        stringstream ss;
+        ss << colorName << msg << T_RESET;
+        return ss.str();
+    }
+
+    inline string debugPrint(string msg, string prefix = "DEBUG"
+            , string color=T_RESET, unsigned debugLevel = 0
+            ) 
+    {
+        stringstream ss; ss.str("");
+        if(debugLevel <= DEBUG_LEVEL)
+        {
+            ss << setw(debugLevel/2) << "[" << prefix << "] " 
+                << color << msg << T_RESET;
+        }
+        return ss.str();
+    }
+
+    /*-----------------------------------------------------------------------------
+     *  This function __dump__ a message onto console. Fills appropriate colors as
+     *  needed. 
+     *-----------------------------------------------------------------------------*/
+
+    inline void __dump__(string msg, serverity_level_ type = debug, bool autoFormat = true)
+    {
+        stringstream ss;
+        ss << "[" << levels_[type] << "] ";
+        bool set = false;
+        bool reset = true;
+        string color = T_GREEN;
+        if(type == warning || type == fixme )
+            color = T_YELLOW;
+        else if(type ==  debug )
+            color = T_CYAN;
+        else if(type == error || type == failed )
+            color = T_RED;
+        else if(type == info )
+            color = T_MAGENTA;
+
+        for(unsigned int i = 0; i < msg.size(); ++i)
+        {
+            if('`' == msg[i])
+            {
+                if(!set and reset) 
+                {
+                    set = true;
+                    reset = false;
+                    ss << color;
+                }
+                else if(set && !reset)
+                {
+                    reset = true;
+                    set = false;
+                    ss << T_RESET;
+                }
+            }
+            else if('\n' == msg[i])
+                ss << "\n + ";
+            else
+                ss << msg[i];
+        }
+
+        /*  Be safe than sorry */
+        if(!reset)
+            ss << T_RESET;
+        cout << ss.str() << endl;
+    }
+
+    /**
+     * @brief This macro only expands when not compiling for release.
+     *
+     * @param a Stream to write to logger /console.
+     * @param t Type of the stream.
+     * @return  Nothing.
+     */
+
+#ifdef  NDEBUG
+#define LOG(a, t ) ((void)0);
+#else      /* -----  not NDEBUG  ----- */
+#define LOG(t, a) { stringstream __ss__;  __ss__ << a; moose::__dump__(__ss__.str(), t ); } 
+#endif     /* -----  not NDEBUG  ----- */
+
+    /*-----------------------------------------------------------------------------
+     *  Log to a file, and also to console.
+     *-----------------------------------------------------------------------------*/
+    inline bool isBackTick(char a)
+    {
+        if('`' == a)
+            return true;
+        return false;
+    }
+
+    inline string formattedMsg(string& msg)
+    {
+        remove_if(msg.begin(), msg.end(), isBackTick);
+        return msg;
+    }
+
+    /**
+     * @brief Log to console (and to a log-file)
+     *
+     * @param msg String, message to be written.
+     * @param type Type of the message.
+     * @param redirectToConsole 
+     * @param removeTicks
+     */
+    inline void log(string msg, serverity_level_ type = debug
+            , bool redirectToConsole = true
+            , bool removeTicks = true 
+            )
+    {
+
+        if(redirectToConsole)
+            __dump__(msg, type, true);
+
+        /* remove any backtick from the string. */
+        formattedMsg( msg );
+
+        fstream logF;
+        logF.open( "__moose__.log", ios::app);
+        time_t rawtime; time(&rawtime);
+        struct tm* timeinfo;
+        timeinfo = localtime(&rawtime);
+
+        logF << asctime(timeinfo) << ": " << msg;
+
+        logF.close();
+    }
 
 }
-
-/* A macro would be cool. */
-#define DUMP(a, t) \
-    ostringstream ss; \
-    ss << a << endl;\
-    __dump__(ss.str(), t); \
-
-/*-----------------------------------------------------------------------------
- *  Log to a file, and also to console.
- *-----------------------------------------------------------------------------*/
-inline bool isBackTick(char a)
-{
-    if('`' == a)
-        return true;
-    return false;
-}
-
-inline string formattedMsg(string& msg)
-{
-    remove_if(msg.begin(), msg.end(), isBackTick);
-    return msg;
-}
-
-inline void log(string msg, string type = "DEBUG"
-        , bool redirectToConsole = true
-        , bool removeTicks = true 
-        )
-{
-    if(redirectToConsole)
-        __dump__(msg, type, true);
-
-    /* remove any backtick from the string. */
-    formattedMsg( msg );
-
-    fstream logF;
-    logF.open( "__moose__.log", ios::app);
-    time_t rawtime; time(&rawtime);
-    struct tm* timeinfo;
-    timeinfo = localtime(&rawtime);
-
-    logF << asctime(timeinfo) << ": " << msg;
-
-    logF.close();
-}
-
 #endif   /* ----- #ifndef print_function_INC  ----- */

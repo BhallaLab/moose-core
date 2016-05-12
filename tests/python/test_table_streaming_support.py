@@ -26,22 +26,6 @@ def print_table( table ):
     msg += ' Path: %s' % table.path 
     print( msg )
 
-def sanity_test( ):
-    a = moose.Table( '/t1' )
-    b = moose.Table( '/t1/t1' )
-    c = moose.Table( '/t1/t1/t1' )
-    tables = [ a, b, c ]
-    assert a.useStreamer == 0
-
-    [ print_table( x ) for x in tables ]
-    b.useStreamer = 1
-
-    moose.reinit()
-    [ print_table( x ) for x in tables ]
-    assert b.useStreamer == 1
-    print( '[TEST 1] passed ' )
-
-
 def test( ):
     compt = moose.CubeMesh( '/compt' )
     r = moose.Reac( '/compt/r' )
@@ -57,13 +41,15 @@ def test( ):
     r.Kf = 0.1
     r.Kb = 0.01
 
-    tabA = moose.Table2( '/compt/a/tab' )
+    tabA = moose.Table2( '/compt/a/tabA' )
     tabA.useStreamer = 1
+    tabA.format = 'npy'
 
-    tabB = moose.Table2( '/compt/tabB' )
-    tabB.outfile = 'table2.dat'
+    tabB = moose.Table2( '/compt/b/tabB' )
+    tabB.outfile = 'table2.npy'
 
-    tabC = moose.Table2( '/compt/tabB/tabC' )
+    tabC = moose.Table2( '/compt/c/tabC' )
+    tabC.outfile = 'tablec.csv'
 
     moose.connect( tabA, 'requestOut', a, 'getConc' )
     moose.connect( tabB, 'requestOut', b, 'getConc' )
@@ -71,12 +57,20 @@ def test( ):
 
     moose.reinit( )
     [ print_table( x) for x in [tabA, tabB, tabC] ]
-    moose.start( 57 )
+    moose.start( 10000 )
 
-    print( '[TEST 2] Passed' )
+    # Now read the numpy and csv and check the results.
+    a = np.load( '_tables/compt/a/tabA.npy' )
+    b = np.load( 'table2.npy' )
+    c = np.loadtxt( 'tablec.csv', skiprows=1 )
+    print( a )
+    print( b )
+    print( c )
+    print(a['time'])
+    print(b['time'])
+    assert len(a['time']) == len(a['/compt/a/tabA'])
 
 def main( ):
-    sanity_test( )
     test( )
     print( '[INFO] All tests passed' )
 

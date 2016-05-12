@@ -113,7 +113,7 @@ RandSpike::RandSpike()
     threshold_(0.0),
     fired_( 0 )
 {
-    rng.seed( moose::global::__rng_seed__ );
+    rng.seed( moose::__rng_seed__ );
 }
 
 //////////////////////////////////////////////////////////////////
@@ -184,7 +184,7 @@ void RandSpike::process( const Eref& e, ProcPtr p )
 // Set it so that first spike is allowed.
 void RandSpike::reinit( const Eref& e, ProcPtr p )
 {
-    rng.seed( moose::global::__rng_seed__ );
+    rng.seed( moose::__rng_seed__ );
 
     if ( rate_ <= 0.0 )
     {

@@ -72,9 +72,9 @@ endif()
 option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
 
 ## Unit testing and debug mode.
-option(DEBUG "Build with debug support" ON)
+option(DEBUG "Build with debug support" OFF)
 option(GPROF "Build for profiling using gprof" OFF)
-option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" ON)
+option(ENABLE_UNIT_TESTS "Enable unit tests" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_CURSES "Enable ncurses support (deprecated)" OFF)
@@ -369,7 +369,7 @@ add_subdirectory(benchmarks)
 add_subdirectory(kinetics)
 add_subdirectory(synapse)
 add_subdirectory(intfire)
-add_subdirectory(examples)
+add_subdirectory(external/muparser)
 
 if(LIBSBML_FOUND)
     add_subdirectory(sbml)
@@ -418,15 +418,6 @@ if(WITH_MPI)
     endif()
 endif(WITH_MPI)
 
-pkg_check_modules(MUPARSER muparser)
-if(MUPARSER_FOUND)
-    message(STATUS "Using system muparser ${MUPARSER_VERSION}")
-    list(APPEND SYSTEM_SHARED_LIBS ${MUPARSER_LIBRARIES})
-else()
-    message(STATUS "Using private muparser")
-    add_subdirectory(external/muparser)
-    list(APPEND MOOSE_LIBRARIES muparser)
-endif()
 
 #pkg_check_modules(TINYXML tinyxml)
 #if(TINYXML_FOUND)
@@ -458,6 +449,7 @@ list(APPEND MOOSE_LIBRARIES
     ksolve
     device
     basecode
+    muparser
     )
 
 

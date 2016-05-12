@@ -159,8 +159,8 @@ class Gsolve: public ZombiePoolInterface
         /// Flag: True if atot should be updated every clock tick
         bool useClockedUpdate_;
 
-        moose::global::rng_type_ rng;
-        moose::global::distribution_type_ dist;
+        moose::rng_type_ rng;
+        moose::distribution_type_ dist;
 
 };
 
