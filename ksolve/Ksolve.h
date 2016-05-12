@@ -10,7 +10,42 @@
 #ifndef _KSOLVE_H
 #define _KSOLVE_H
 
+#define _KSOLVE_SEQ 0
+#define _KSOLVE_OPENMP_FOR 1
+#define _KSOLVE_OPENMP_TASK 0
+#define _KSOLVE_PTHREADS 0
+
+#include <pthread.h>
+#include <semaphore.h>
+#include <signal.h>
+#include <sys/syscall.h>
+
 class Stoich;
+
+//////////////////////////////////////////////////////////////////
+//For Pthread Parallelism by Rahul
+//////////////////////////////////////////////////////////////////
+#if _KSOLVE_PTHREADS
+
+#define NTHREADS 1
+		
+bool threadWork[NTHREADS];
+
+struct pthreadWrap
+{
+	   long tid;
+	   sem_t* sThread, *sMain;
+	   bool* destroySig;
+	   ProcPtr *p;
+	   VoxelPools** poolsArr_;
+	   int *pthreadBlock;
+
+	   pthreadWrap (long Id, sem_t* S1, sem_t* S2, bool* destroySignal, ProcPtr *ptr, VoxelPools** PA, int* block) : tid(Id), sThread(S1), sMain(S2), destroySig(destroySignal), p(ptr), poolsArr_(PA), pthreadBlock(block) {}
+};
+
+extern "C" void* call_func( void* f );
+
+#endif // _KSOLVE_PTHREADS
 
 class Ksolve: public ZombiePoolInterface
 {

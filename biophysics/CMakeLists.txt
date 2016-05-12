@@ -1,5 +1,8 @@
 include_directories(../basecode ../synapse ../utility ../)
-include_directories(../external/muparser/include ${GSL_INCLUDE_DIRS})
+include_directories(../external/muparser/include )
+if(WITH_GSL)
+    include_directories(${GSL_INCLUDE_DIRS})
+endif(WITH_GSL)
 
 set(BIOPHYSICS_SRC 
     CaConcBase.cpp

@@ -39,5 +39,5 @@ install:
     - echo "nothing to do here"
 
 script:
-    - mkdir -p _build && cd _build && cmake -DDEBUG=ON -DWITH_DOC=ON -DBUILD_MOOGLI=ON .. && make
+    - mkdir -p _build && cd _build && cmake -DDEBUG=ON -DWITH_DOC=OFF -WITH_MPI=ON  .. && make
     - ctest -V

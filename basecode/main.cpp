@@ -40,6 +40,12 @@
 #include <sys/sysctl.h>
 #endif // MACOSX
 
+#if defined(__GXX_EXPERIMENTAL_CXX0X) || __cplusplus >= 201103L
+// Use it to get the number of processors.
+#include <thread>
+#endif
+
+
 #ifdef DO_UNIT_TESTS
 extern void testSync();
 extern void testAsync();
@@ -90,15 +96,20 @@ extern void mooseBenchmarks( unsigned int option );
 unsigned int getNumCores()
 {
 	unsigned int numCPU = 0;
+
+#if defined(__GXX_EXPERIMENTAL_CXX0X) || __cplusplus >= 201103L
+        numCPU = std::thread::hardware_concurrency();
+#else  // if c++11 
+
 #ifdef WIN_32
 	SYSTEM_INFO sysinfo;
 	GetSystemInfo( &sysinfo );
-
 	numCPU = sysinfo.dwNumberOfProcessors;
 #endif
 
+
 #ifdef LINUX
-	numCPU = sysconf( _SC_NPROCESSORS_ONLN );
+	numCPU = sysconf( _SC_NPROCESSORS_CONF );
 #endif
 
 #ifdef MACOSX
@@ -118,11 +129,14 @@ unsigned int getNumCores()
 		sysctl( mib, 2, &numCPU, &len, NULL, 0 );
 	}
 #endif
+#endif // if c++11 
+
 	if ( numCPU < 1 )
 	{
 		cout << "No CPU information available. Assuming single core." << endl;
 		numCPU = 1;
 	}
+
 	return numCPU;
 }
 

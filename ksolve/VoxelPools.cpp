@@ -6,8 +6,9 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+#include <math.h>
 #include "header.h"
-
+#include <sys/time.h>
 #ifdef USE_GSL
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
@@ -32,6 +33,9 @@ using namespace boost::numeric;
 //////////////////////////////////////////////////////////////
 // Class definitions
 //////////////////////////////////////////////////////////////
+
+//Rahul - adding some random work just to increase the time spent in process function...
+time_t time_taken_voxel = 0;
 
 VoxelPools::VoxelPools()
 {
@@ -83,6 +87,238 @@ void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
     VoxelPoolsBase::reinit();
 }
 
+
+static int rkf45_OpenMP_apply (void *vstate, size_t dim, double t, double h, double y[], double yerr[], const double dydt_in[], double dydt_out[], const gsl_odeiv2_system * sys)
+{
+	    rkf45_state_t *state = (rkf45_state_t *) vstate;
+	    size_t i;
+	    double *const k1 = state->k1;
+	    double *const k2 = state->k2;
+	    double *const k3 = state->k3;
+	    double *const k4 = state->k4;
+	    double *const k5 = state->k5;
+	    double *const k6 = state->k6;
+	    double *const ytmp = state->ytmp;
+	    double *const y0 = state->y0;
+
+	    int cellsPerThread = 1;
+	    int numThreads = 4;
+
+	    memcpy (y0, y, dim);
+
+	    /*K1 step */
+	    {
+		    if (dydt_in != NULL)
+				  memcpy (k1, dydt_in, dim);
+		    else 
+		    {
+				  int s = GSL_ODEIV_FN_EVAL (sys, t, y, k1);
+				  if (s != GSL_SUCCESS)
+						return s;
+		    }
+	    }
+
+#pragma omp parallel for private(i) shared(dim,h) schedule(guided, cellsPerThread) num_threads(numThreads)
+	    for (i = 0; i < dim; i++)
+			  ytmp[i] = y[i] +  ah[0] * h * k1[i];
+	    /*k2 step */
+	    {
+		    int s = GSL_ODEIV_FN_EVAL (sys, t + ah[0] * h, ytmp, k2);
+		    if (s != GSL_SUCCESS)
+				  return s;
+	    }
+
+#pragma omp parallel for private(i) shared(dim,h) schedule(guided, cellsPerThread) num_threads(numThreads)
+	    for (i = 0; i < dim; i++)
+			  ytmp[i] = y[i] + h * (b3[0] * k1[i] + b3[1] * k2[i]);
+
+	    /*k3 step */
+	    {
+		     int s = GSL_ODEIV_FN_EVAL (sys, t + ah[1] * h, ytmp, k3);
+			if (s != GSL_SUCCESS)
+				   return s;
+	    }
+
+#pragma omp parallel for private(i) shared(dim,h) schedule(guided, cellsPerThread) num_threads(numThreads)
+	    for (i = 0; i < dim; i++)
+			  ytmp[i] = y[i] + h * (b4[0] * k1[i] + b4[1] * k2[i] + b4[2] * k3[i]);
+
+		 /*k4 step*/ 
+	    {
+			 int s = GSL_ODEIV_FN_EVAL (sys, t + ah[2] * h, ytmp, k4);
+			 if (s != GSL_SUCCESS)
+				    return s;
+	    }
+
+#pragma omp parallel for private(i) shared(dim,h) schedule(guided, cellsPerThread) num_threads(numThreads)
+	    for (i = 0; i < dim; i++)
+			  ytmp[i] = y[i] + h * (b5[0] * k1[i] + b5[1] * k2[i] + b5[2] * k3[i] +
+b5[3] * k4[i]);
+
+		 /*k5 step */
+	    {
+			 int s = GSL_ODEIV_FN_EVAL (sys, t + ah[3] * h, ytmp, k5);
+			 if (s != GSL_SUCCESS)
+				    return s;
+	    }
+#pragma omp parallel for private(i) shared(dim,h) schedule(guided, cellsPerThread) num_threads(numThreads)
+			for (i = 0; i < dim; i++)
+				   ytmp[i] = y[i] + h * (b4[0] * k1[i] + b4[1] * k2[i] + b4[2] * k3[i]);
+
+		 /*k6 and final sum */
+	    {
+			 int s = GSL_ODEIV_FN_EVAL (sys, t + ah[4] * h, ytmp, k6);
+			 if (s != GSL_SUCCESS)
+				    return s;
+	    }
+#pragma omp parallel for private(i) shared(dim,h) schedule(guided, cellsPerThread) num_threads(numThreads)
+			 for (i = 0; i < dim; i++)
+			 {
+				    const double d_i = c1 * k1[i] + c3 * k3[i] + c4 * k4[i] + c5 * k5[i] + c6 * k6[i];
+				    y[i] += h * d_i;
+			 }
+
+			 /* Derivatives at output */
+					   
+			 if (dydt_out != NULL)
+			 {
+				    int s = GSL_ODEIV_FN_EVAL (sys, t + h, y, dydt_out);
+				    if (s != GSL_SUCCESS)
+				    {
+						  /* Restore initial values */
+						  memcpy (y, y0, dim);
+						  return s;
+				    }
+			 }
+/* difference between 4th and 5th order */
+#pragma omp parallel for private(i) shared(dim,h) schedule(guided, cellsPerThread) num_threads(numThreads)
+			 for (i = 0; i < dim; i++)
+				    yerr[i] = h * (ec[1] * k1[i] + ec[3] * k3[i] + ec[4] * k4[i] + ec[5] * k5[i] + ec[6] * k6[i]);
+
+
+			 return GSL_SUCCESS;
+}
+
+
+int VoxelPools::rungeKutta45(void *vstate, size_t dim, double t, double h, double y[], double yerr[], const double dydt_in[], double dydt_out[], const gsl_odeiv2_system * sys)
+{
+
+	   double tmpVar = 7.345;
+	   double ttmp = 0.847; 
+	   for(int j = 0; j < 90; j++)
+			 for(int k = 0; k < 100; k++)
+				    tmpVar += ttmp;
+
+	struct timeval stop, start;
+	gettimeofday(&start, NULL);
+
+	    int GSLSUCCESS = 0;
+	    rkf45_state_t *state = (rkf45_state_t *) vstate;
+	    size_t i;
+	    double *const k1 = state->k1;
+	    double *const k2 = state->k2;
+	    double *const k3 = state->k3;
+	    double *const k4 = state->k4;
+	    double *const k5 = state->k5;
+	    double *const k6 = state->k6;
+	    double *const ytmp = state->ytmp;
+	    double *const y0 = state->y0;
+
+
+	    memcpy (y0, y, dim); // memcpy in case of failure...
+
+	    /*K1 step */
+	    {
+		    if (dydt_in == NULL)
+		    {
+				  int s = RKF45_ODEIV_FN_EVAL (sys, t, y, k1);
+				  if (s != GSLSUCCESS)
+						return s;
+		    }
+		    else
+				  memcpy (k1, dydt_in, dim);
+	    }
+		    for (i = 0; i < dim; i++)
+				  ytmp[i] = y[i] + ah[0] * h * k1[i];
+
+	    /*k2 step */
+	    {
+		    int s = RKF45_ODEIV_FN_EVAL (sys, t + ah[0] * h, ytmp, k2);
+		    if (s != GSLSUCCESS)
+				  return s;
+	    }
+		    for (i = 0; i < dim; i++)
+				  ytmp[i] = y[i] + h * (b3[0] * k1[i] + b3[1] * k2[i]);
+
+	    /*k3 step */
+	    {
+		     int s = RKF45_ODEIV_FN_EVAL (sys, t + ah[1] * h, ytmp, k3);
+			if (s != GSLSUCCESS)
+				   return s;
+	    }
+
+			for (i = 0; i < dim; i++)
+				   ytmp[i] = y[i] + h * (b4[0] * k1[i] + b4[1] * k2[i] + b4[2] * k3[i]);
+
+		 /*k4 step*/ 
+	    {
+			 int s = RKF45_ODEIV_FN_EVAL (sys, t + ah[2] * h, ytmp, k4);
+			 if (s != GSLSUCCESS)
+				    return s;
+	    }
+
+			 for (i = 0; i < dim; i++)
+				    ytmp[i] =  y[i] + h * (b5[0] * k1[i] + b5[1] * k2[i] + b5[2] * k3[i] + b5[3] * k4[i]);
+
+		 /*k5 step */
+	    {
+			 int s = RKF45_ODEIV_FN_EVAL (sys, t + ah[3] * h, ytmp, k5);
+			 if (s != GSLSUCCESS)
+				    return s;
+	    }
+
+			 for (i = 0; i < dim; i++)
+				    ytmp[i] = y[i] + h * (b6[0] * k1[i] + b6[1] * k2[i] + b6[2] * k3[i] + b6[3] * k4[i] + b6[4] * k5[i]);
+
+		 /*k6 and final sum */
+	    {
+			 int s = RKF45_ODEIV_FN_EVAL (sys, t + ah[4] * h, ytmp, k6);
+			 if (s != GSLSUCCESS)
+				    return s;
+	    }
+
+			 for (i = 0; i < dim; i++)
+			 {
+				    const double d_i = c1 * k1[i] + c3 * k3[i] + c4 * k4[i] + c5 * k5[i] + c6 * k6[i];
+				    y[i] += h * d_i;
+			 }
+
+			 /* Derivatives at output */
+					   
+			 if (dydt_out != NULL)
+			 {
+				    int s = RKF45_ODEIV_FN_EVAL (sys, t + h, y, dydt_out);
+				    if (s != GSLSUCCESS)
+				    {
+						  /* Restore initial values */
+						  memcpy (y, y0, dim);
+						  return s;
+				    }
+			 }
+			 /* difference between 4th and 5th order */
+			   for (i = 0; i < dim; i++)
+					 yerr[i] = h * (ec[1] * k1[i] + ec[3] * k3[i] + ec[4] * k4[i] + ec[5] * k5[i] + ec[6] * k6[i]);
+
+
+	gettimeofday(&stop, NULL);
+	
+	time_taken_voxel = stop.tv_usec - start.tv_usec;
+
+//	cout << "Time Taken from rungekutta = " << time_taken_voxel << endl;
+			     
+			   return GSLSUCCESS;
+}
+
 void VoxelPools::advance( const ProcInfo* p )
 {
     double t = p->currTime - p->dt;
@@ -128,66 +364,66 @@ void VoxelPools::advance( const ProcInfo* p )
      *  file BoostSystem.h), the you may run into troble. Have a look at this 
      *  http://boostw.boost.org/doc/libs/1_56_0/boost/numeric/odeint/integrate/integrate.hpp
      *-----------------------------------------------------------------------------
-     */
+	if ( status != GSL_SUCCESS ) {
+		cout << "Error: VoxelPools::advance: GSL integration error at time "
+			 << T << "\n";
+		cout << "Error info: " << status << ", " << 
+				gsl_strerror( status ) << endl;
+		if ( status == GSL_EMAXITER ) 
+			cout << "Max number of steps exceeded\n";
+		else if ( status == GSL_ENOPROG ) 
+			cout << "Timestep has gotten too small\n";
+		else if ( status == GSL_EBADFUNC ) 
+			cout << "Internal error\n";
+		assert( 0 );
+	}
 
-    double absTol = sys_.epsAbs;
-    double relTol = sys_.epsRel;
-    string method = sys_.method;
-
-    if( method == "rk2" )
-        rk_midpoint_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
-    else if( method == "rk4" )
-        rk_karp_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
-    else if( method == "rk5")
-        rk_karp_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
-    else if( method == "rk5a")
-        odeint::integrate_adaptive( 
-                odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol)
-                , sys_
-                , Svec()
-                , p->currTime - p->dt 
-                , p->currTime
-                , p->dt 
-                );
-    else if ("rk54" == method )
-        rk_karp_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
-    else if ("rk54a" == method )
-        odeint::integrate_adaptive( 
-                odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol )
-                , sys_, Svec()
-                , p->currTime - p->dt 
-                , p->currTime
-                , p->dt 
-                );
-    else if ("rk5" == method )
-        rk_dopri_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
-    else if ("rk5a" == method )
-        odeint::integrate_adaptive( 
-                odeint::make_controlled<rk_dopri_stepper_type_>( absTol, relTol )
-                , sys_, Svec()
-                , p->currTime - p->dt 
-                , p->currTime
-                , p->dt 
-                );
-    else if( method == "rk8" ) 
-        rk_felhberg_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
-    else if( method == "rk8a" ) 
-        odeint::integrate_adaptive(
-                odeint::make_controlled<rk_felhberg_stepper_type_>( absTol, relTol )
-                , sys_, Svec()
-                , p->currTime - p->dt 
-                , p->currTime
-                , p->dt 
-                );
-
-    else
-        odeint::integrate_adaptive( 
-                odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol )
-                , sys_, Svec()
-                , p->currTime - p->dt 
-                , p->currTime
-                , p->dt 
-                );
+//	   int status;
+//	   int GSLSUCCESS = 0;
+//
+//	   const double t1 = p->currTime;
+//			 
+//	   const gsl_odeiv2_system* dydt = driver_->sys;
+//	   double h0 = driver_->h;
+//	   int final_step = 0;
+//
+//
+//
+//    /* Determine integration direction sign */
+//
+//	    while (t1 - T > 0.0)
+//	    {
+//			 const gsl_odeiv2_system* dydt = driver_->sys;
+//			 double h0 = driver_->h;
+//			 int final_step = 0;
+//			 double dt = t1 - T;
+//			
+//			 if ((dt >= 0.0 && h0 > dt) || (dt < 0.0 && h0 < dt))
+//			 {
+//				    h0 = dt;
+//				    final_step = 1;
+//			 }
+//			 else
+//				    final_step = 0;
+//					  
+//			 if (driver_->s->type->can_use_dydt_in)
+//				    status = rungeKutta45(driver_->s->state, driver_->s->dimension, T, h0, varS(), driver_->e->yerr, driver_->e->dydt_in, driver_->e->dydt_out, dydt);
+//
+//			 if (final_step)
+//				    T = t1;
+//			 else
+//				    T = T + h0;
+//					    
+//			 /* Suggest step size for next time-step. Change of step size is not  suggested in the final step, because that step can be very small compared to previous step, to reach t1. */
+//			 if (final_step == 0) driver_->h = h0;
+//	    }
+//
+//	if ( status != GSLSUCCESS ) 
+//	{
+//		cout << "Error: VoxelPools::advance: GSL integration error at time " << T << "\n";
+//		assert( 0 );
+//	}
+>>>>>>> c0604f3f51771c9bd775b4ae5240d1dfd2be2025
 #endif
 }
 
@@ -200,22 +436,10 @@ void VoxelPools::setInitDt( double dt )
 
 #ifdef USE_GSL
 // static func. This is the function that goes into the Gsl solver.
-int VoxelPools::gslFunc( double t, const double* y, double *dydt, 
-						void* params )
+int VoxelPools::gslFunc( double t, const double* y, double *dydt, void* params )
 {
 	VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
-	// Stoich* s = reinterpret_cast< Stoich* >( params );
 	double* q = const_cast< double* >( y ); // Assign the func portion.
-
-	// Assign the buffered pools
-	// Not possible because this is a static function
-	// Not needed because dydt = 0;
-	/*
-	double* b = q + s->getNumVarPools();
-	vector< double >::const_iterator sinit = Sinit_.begin() + s->getNumVarPools();
-	for ( unsigned int i = 0; i < s->getNumBufPools(); ++i )
-		*b++ = *sinit++;
-		*/
 
 	vp->stoichPtr_->updateFuncs( q, t );
 	vp->updateRates( y, dydt );
