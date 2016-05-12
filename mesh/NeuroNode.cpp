@@ -503,9 +503,6 @@ void NeuroNode::setParentAndChildren( unsigned int index, int dendParent,
 	vector< NeuroNode >& nodes, const map< Id, unsigned int >& dendMap )
 {
 	parent_ = dendParent;
-	if ( dendParent < 0 || 
-			static_cast< unsigned int >( dendParent ) > nodes.size() )
-		return;
 	const map< Id, unsigned int >::const_iterator dendLookup =
 			dendMap.find( nodes[dendParent].elecCompt_ );
 	if ( dendLookup != dendMap.end() ) {
