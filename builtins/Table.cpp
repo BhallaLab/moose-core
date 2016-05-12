@@ -9,13 +9,13 @@
 
 #include "header.h"
 #include "global.h"
+
 #include <fstream>
 
 #include "TableBase.h"
 #include "Table.h"
 #include "Clock.h"
 #include "StreamerBase.h"
-
 
 // Write to numpy arrays.
 #include "../utility/cnpy.hpp"

@@ -10,10 +10,10 @@
 #ifndef _TABLE_H
 #define _TABLE_H
 
-
 #if  USE_BOOST
 #include <boost/filesystem.hpp>
 #endif     /* -----  USE_BOOST  ----- */
+#include <fstream>
 
 /**
  * Receives and records inputs. Handles plot and spiking data in batch mode.

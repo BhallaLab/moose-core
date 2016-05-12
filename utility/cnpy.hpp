@@ -35,12 +35,10 @@
 #endif     /* -----  not ENABLE_CPP11  ----- */
 
 #include <string>
-
 #include <stdint.h>
-
 #include "global.h"
 
-#include "../external/debug/print_function.hpp"
+#include "../utility/print_function.hpp"
 
 
 using namespace std;

@@ -56,7 +56,7 @@
 #include <mpi.h>
 #endif
 
-#include "../external/debug/print_function.hpp"
+#include "../utility/print_function.hpp"
 #include "../basecode/header.h"
 #include "../basecode/global.h"
 #include "../basecode/Id.h"

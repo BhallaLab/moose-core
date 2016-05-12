@@ -1,5 +1,4 @@
-/*
- * ==============================================================================
+ /* ==============================================================================
  *
  *       Filename:  testing_macros.hpp
  *
@@ -48,7 +47,7 @@ static ostringstream assertStream;
         assertStream.str(""); \
         LOCATION( assertStream ); \
         assertStream << msg << endl; \
-        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
+        moose::__dump__(assertStream.str(), moose::failed); \
     }
 
 #define EXPECT_FALSE( condition, msg) \
@@ -56,7 +55,7 @@ static ostringstream assertStream;
         assertStream.str(""); \
         LOCATION( assertStream ); \
         assertStream << msg << endl; \
-        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
+        moose::__dump__(assertStream.str(), moose::failed); \
     }
 
 #define EXPECT_EQ(a, b, token)  \
@@ -65,7 +64,16 @@ static ostringstream assertStream;
         LOCATION(assertStream) \
         assertStream << "Expected " << a << ", received " << b  << endl; \
         assertStream << token << endl; \
-        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
+        moose::__dump__(assertStream.str(), moose::failed); \
+    }
+
+#define EXPECT_DOUBLE_EQ(a, b, token)  \
+    if( ! doubleEq(a, b) ) { \
+        assertStream.str(""); \
+        LOCATION(assertStream) \
+        assertStream << "Expected " << a << ", received " << b  << endl; \
+        assertStream << token << endl; \
+        moose::__dump__(assertStream.str(), moose::failed); \
     }
 
 #define EXPECT_NEQ(a, b, token)  \
@@ -74,7 +82,7 @@ static ostringstream assertStream;
         LOCATION(assertStream); \
         assertStream << "Not expected " << a << endl; \
         assertStream << token << endl; \
-        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
+        moose::__dump__(assertStream.str(), moose::failed); \
     }
 
 #define EXPECT_GT(a, b, token)  \
@@ -83,7 +91,7 @@ static ostringstream assertStream;
         LOCATION(assertStream); \
         assertStream << "Expected greater than " << a << ", received " << b << endl; \
         assertStream << token << endl; \
-        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
+        moose::__dump__(assertStream.str(), moose::failed); \
     }
 
 #define EXPECT_GTE(a, b, token)  \
@@ -93,7 +101,7 @@ static ostringstream assertStream;
         assertStream << "Expected greater than or equal to " << a  \
             << ", received " << b << endl; \
         assertStream << token << endl; \
-        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
+        moose::__dump__(assertStream.str(), moose::failed); \
     }
 
 #define EXPECT_LT(a, b, token)  \
@@ -102,7 +110,7 @@ static ostringstream assertStream;
         LOCATION(assertStream); \
         assertStream << "Expected less than " << a << ", received " << b << endl; \
         assertStream << token << endl; \
-        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
+        moose::__dump__(assertStream.str(), moose::failed); \
     }
 
 #define EXPECT_LTE(a, b, token)  \
@@ -112,7 +120,7 @@ static ostringstream assertStream;
         assertStream << "Expected less than or equal to " << a \
             << ", received " << b << endl; \
         assertStream << token << endl; \
-        __dump__(assertStream.str(), "EXPECT_FAILURE"); \
+        moose::__dump__(assertStream.str(), moose::failed); \
     }
 
 #define ASSERT_TRUE( condition, msg) \
@@ -127,7 +135,7 @@ static ostringstream assertStream;
         assertStream.str(""); \
         assertStream.precision( 9 ); \
         assertStream << msg << endl; \
-        throw FatalTestFailure(assertStream.str()); \
+        throw runtime_error(assertStream.str()); \
     }
 
 #define ASSERT_LT( a, b, msg) \
@@ -135,7 +143,7 @@ static ostringstream assertStream;
     assertStream.str(""); \
     assertStream.precision( 9 ); \
     assertStream << msg; \
-    throw FatalTestFailure( assertStream.str() ); \
+    throw runtime_error( assertStream.str() ); \
 
 #define ASSERT_EQ(a, b, token)  \
     if( ! doubleEq((a), (b)) ) { \
@@ -144,7 +152,17 @@ static ostringstream assertStream;
         LOCATION(assertStream) \
         assertStream << "Expected " << a << ", received " << b  << endl; \
         assertStream << token << endl; \
-        throw FatalTestFailure(assertStream.str()); \
+        throw runtime_error(assertStream.str()); \
+    }
+
+#define ASSERT_DOUBLE_EQ(a, b, token)  \
+    if(! doubleEq(a, b) ) { \
+        assertStream.str(""); \
+        LOCATION(assertStream); \
+        assertStream << "Expected " << a << ", received " << b  << endl; \
+        assertStream << token << endl; \
+        moose::__dump__(assertStream.str(), moose::failed); \
+        throw runtime_error( "float equality test failed" ); \
     }
 
 #define ASSERT_NEQ(a, b, token)  \
@@ -153,7 +171,7 @@ static ostringstream assertStream;
         LOCATION(assertStream); \
         assertStream << "Not expected " << a << endl; \
         assertStream << token << endl; \
-        throw FatalTestFailure(assertStream.str()); \
+        throw runtime_error(assertStream.str()); \
     }
 
 
