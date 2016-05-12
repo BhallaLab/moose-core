@@ -263,9 +263,7 @@ double HHChannel::vGetZ( const Eref& e ) const
 }
 
 void HHChannel::vSetUseConcentration( const Eref& e, int value )
-{
-	useConcentration_ = value;
-}
+{;}
 
 ///////////////////////////////////////////////////
 // Dest function definitions

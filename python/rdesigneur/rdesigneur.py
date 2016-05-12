@@ -115,7 +115,7 @@ class rdesigneur:
         self.plotNames = []
         self.moogNames = []
         self.cellPortionElist = []
-        self.spineComptElist = [] # deprecated.
+        self.spineComptElist = []
 
         if not moose.exists( '/library' ):
             library = moose.Neutral( '/library' )
@@ -411,8 +411,6 @@ class rdesigneur:
                     temp.extend( arg + [''] )
 
         self.elecid.spineDistribution = temp
-        #print( "SPINE DISTRIB = " +  '|'.join( temp ) )
-        #print( self.elecid.spineDistribution )
 
     def buildChemDistrib( self ):
         for i in self.chemDistrib:
@@ -424,8 +422,6 @@ class rdesigneur:
                 raise BuildError( \
                     "buildChemDistrib: No elec compartments found in path: '" \
                         + pair + "'" )
-
-            # Deprecated.
             self.spineComptElist = self.elecid.spinesFromExpression[ pair ]
             '''
             if len( self.spineComptElist ) == 0:
@@ -542,6 +538,8 @@ class rdesigneur:
             pair = i[0] + " " + i[1]
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
             spineCompts = self.elecid.spinesFromExpression[ pair ]
+            #print( "DENDENDENDNEDN = ", len(dendCompts), pair )
+            #print( "SPINESPINESPINE = ", len(spineCompts), pair )
             plotObj, plotField = self._parseComptField( dendCompts, i, knownFields )
             plotObj2, plotField2 = self._parseComptField( spineCompts, i, knownFields )
             assert( plotField == plotField2 )
@@ -729,7 +727,7 @@ class rdesigneur:
 
         self._configureSolvers()
         for i in self.adaptorList:
-            #print(i)
+            print(i)
             self._buildAdaptor( i[0],i[1],i[2],i[3],i[4],i[5],i[6] )
 
     ################################################################
@@ -822,7 +820,7 @@ class rdesigneur:
     def _loadElec( self, efile, elecname ):
         if ( efile[ len( efile ) - 2:] == ".p" ):
             self.elecid = moose.loadModel( efile, '/library/' + elecname)[0]
-            #print(self.elecid)
+            print(self.elecid)
         elif ( efile[ len( efile ) - 4:] == ".swc" ):
             self.elecid = moose.loadModel( efile, '/library/' + elecname)[0]
         else:

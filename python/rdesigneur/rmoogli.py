@@ -47,6 +47,8 @@ def prelude( view ):
 def interlude( view ):
     moose.start( moogliDt )
     val = [ moose.getField( i, view.mooField, "double" ) * view.mooScale for i in view.mooObj ]
+    #print "LEN = ", len( val ), "field = ", view.mooField
+    
     view.mooGroup.set("color", val, view.mapper)
     view.yaw( rotation )
     #print moogliDt, len( val ), runtime
@@ -130,7 +132,6 @@ def makeMoogli( rd, mooObj, moogliEntry, fieldInfo ):
                                  scalar_range=moogli.geometry.Vec2f(
                                      moogliEntry[5],
                                      moogliEntry[6]))
-    cb.set_num_labels(3)
     view.attach_color_bar(cb)
     view.rd = rd
     view.mooObj = displayObj
