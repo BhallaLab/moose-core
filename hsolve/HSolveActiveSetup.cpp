@@ -270,7 +270,7 @@ void HSolveActive::readHHChannels()
     }
 #ifdef USE_CUDA
     // Getting indices in the expanded(3*) array
-	for(int i=0;i<channel_.size();i++){
+	for(unsigned int i=0;i<channel_.size();i++){
 		int x = 0;
 		if(channel_[i].Xpower_ > 0){
 			h_gate_expand_indices.push_back(3*i+x);
@@ -387,7 +387,7 @@ void HSolveActive::readCalcium()
     }
 
 #ifdef USE_CUDA
-    for (int ichan = 0; ichan < channel_.size(); ++ichan )
+    for (unsigned int ichan = 0; ichan < channel_.size(); ++ichan )
     {
     	if(caTargetIndex[ichan] != -1){
     		h_catarget_channel_indices.push_back(ichan);

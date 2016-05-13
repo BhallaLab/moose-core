@@ -424,9 +424,6 @@ void HSolveActive::hinesMatrixSolverWrapper(){
 
 	solverTimer.Stop();
 
-	if(step_num < 0){
-		cout << solverTimer.Elapsed() << endl;
-	}
 
 	/* ---------------------- USING CUSOLVER HIGH LEVEL LU SOLVER ---------------------------------------
 	// Updating HS_ data

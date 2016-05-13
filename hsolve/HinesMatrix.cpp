@@ -25,7 +25,12 @@ HinesMatrix::HinesMatrix()
     dt_( 0.0 ),
     stage_( -1 )
 {
-    ;
+#ifdef USE_CUDA
+	mat_nnz = 0;
+#else
+	;
+#endif
+
 }
 
 void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
@@ -70,15 +75,15 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
    // SWC file
    vector<pair<int,int> > edges;
    // edge information at junctions.
-   for(int i=0;i<coupled_.size();i++){
+   for(unsigned int i=0;i<coupled_.size();i++){
 	   int parentId = coupled_[i][coupled_[i].size()-1];
-	   for(int j=0;j<coupled_[i].size()-1;j++){
+	   for(unsigned int j=0;j<coupled_[i].size()-1;j++){
 		   edges.push_back(make_pair(coupled_[i][j]+1,parentId+1));
 	   }
    	}
 
    // edge information of branches
-   for (int i = 0; i < nCompt_; ++i) {
+   for (unsigned int i = 0; i < nCompt_; ++i) {
 	   vector<unsigned int> children = tree[i].children;
 	   if(children.size() == 1){
 		   if(children[0] > i)
@@ -92,7 +97,7 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
 	edges.insert(edges.begin(), make_pair(nCompt_,-1));
 
    ofstream swc_file("neuron.swc");
-   for(int i=0;i<edges.size();i++){
+   for(unsigned int i=0;i<edges.size();i++){
 	   //printf("%d %d\n",edges[i].first, edges[i].second);
 	   swc_file << edges[i].first << " " << edges[i].second << endl;
    }
@@ -152,7 +157,7 @@ void HinesMatrix::makeCsrMatrixGpu(){
 	h_tridiag_data = new double[3*nCompt_]();
 
 	// Adding passive data to main diagonal
-	for(int i=0;i<nCompt_;i++){
+	for(unsigned int i=0;i<nCompt_;i++){
 		h_main_diag_passive[i] = (*tree_)[i].Cm/(dt_ / 2.0) + 1.0/(*tree_)[i].Rm;
 	}
 
@@ -161,7 +166,7 @@ void HinesMatrix::makeCsrMatrixGpu(){
 	int node1, node2;
 	double gi, gj, gij;
 	double junction_sum;
-	for(int i=0;i<nCompt_;i++){
+	for(unsigned int i=0;i<nCompt_;i++){
 		// calculating junction sum
 		junction_sum = 0;
 
@@ -170,18 +175,18 @@ void HinesMatrix::makeCsrMatrixGpu(){
 		branch_nodes.push_back(i);  // pushing the parent to the front of branch_nodes
 		branch_nodes.insert(branch_nodes.end(), ( *tree_ )[ i ].children.begin(), ( *tree_ )[ i ].children.end()); // Appending children later
 
-		for(int j=0;j<branch_nodes.size();j++){
+		for(unsigned int j=0;j<branch_nodes.size();j++){
 			junction_sum += Ga_[branch_nodes[j]];
 		}
 
 		// Calculating admittance values and pushing off-diag elements to non-zero set
-		for(int j=0;j<branch_nodes.size();j++){
+		for(unsigned int j=0;j<branch_nodes.size();j++){
 			node1 = branch_nodes[j];
 
 			// Including passive effect to main diagonal elements
 			h_main_diag_passive[node1] += Ga_[node1]*(1.0 - Ga_[node1]/junction_sum);
 
-			for(int k=j+1;k<branch_nodes.size();k++){
+			for(unsigned int k=j+1;k<branch_nodes.size();k++){
 				node2 = branch_nodes[k];
 
 				gi = Ga_[node1];
@@ -195,7 +200,7 @@ void HinesMatrix::makeCsrMatrixGpu(){
 	}
 
 	// Pushing main diagonal elements to non-zero set
-	for(int i=0;i<nCompt_;i++){
+	for(unsigned int i=0;i<nCompt_;i++){
 		non_zero_elements.push_back(make_pair(i*nCompt_+i, h_main_diag_passive[i]));
 	}
 
@@ -249,7 +254,7 @@ void HinesMatrix::makeCsrMatrixGpu(){
 	int temp;
 	int sum = 0;
 	// Scan operation on rowPtr;
-	for (int i = 0; i < nCompt_+1; ++i)
+	for (unsigned int i = 0; i < nCompt_+1; ++i)
 	{
 		temp = h_mat_rowPtr[i];
 		h_mat_rowPtr[i] = sum;
@@ -276,7 +281,7 @@ void HinesMatrix::makeCsrMatrixGpu(){
 	// Compare two CSR matrices, one from HS_,HJ_ and other from direct method.
 	vector<pair<int,double> > non_zeros;
 
-	for(int i=0;i<nCompt_;i++){
+	for(unsigned int i=0;i<nCompt_;i++){
 		if(HS_[4*i] != 0)
 			non_zeros.push_back(make_pair(i*nCompt_+i, HS_[4*i]));
 
@@ -292,7 +297,7 @@ void HinesMatrix::makeCsrMatrixGpu(){
 	int comp_num;
 	int size;
 	int col_ind, col;
-	for(int i=0;i<junction_.size();i++){
+	for(unsigned int i=0;i<junction_.size();i++){
 		comp_num = junction_[i].index;
 		size = junction_[i].rank;
 
@@ -317,7 +322,7 @@ void HinesMatrix::makeCsrMatrixGpu(){
 	// Check error
 	double error = 0;
 	double cur_error = 0;
-	for(int i=0;i<nCompt_;i++){
+	for(unsigned int i=0;i<nCompt_;i++){
 		for(int j=h_mat_rowPtr[i];j<h_mat_rowPtr[i+1];j++){
 			cur_error = (non_zeros[j].second - h_mat_values[j]);
 			error += cur_error;
@@ -437,21 +442,21 @@ void HinesMatrix::makeForwardFlowMatrix(){
 	ff_offdiag_mapping = new int[nCompt_]();
 
 	// Setting up passive part of main diagonal
-	for(int i=0;i<nCompt_;i++){
+	for(unsigned int i=0;i<nCompt_;i++){
 		ff_system[2*nCompt_ + i] = (*tree_)[i].Cm/(dt_ / 2.0) + 1.0/(*tree_)[i].Rm;
 	}
 
    // Mapping is nothing but swc file with -1 parent entry.
    // Edge information at junctions.
-   for(int i=0;i<coupled_.size();i++){
+   for(unsigned int i=0;i<coupled_.size();i++){
 	   int parentId = coupled_[i][coupled_[i].size()-1];
-	   for(int j=0;j<coupled_[i].size()-1;j++){
+	   for(unsigned int j=0;j<coupled_[i].size()-1;j++){
 		   ff_offdiag_mapping[coupled_[i][j]] = parentId;
 	   }
 	}
 
    // Edge information of branches
-   for (int i = 0; i < nCompt_; ++i) {
+   for (unsigned int i = 0; i < nCompt_; ++i) {
 	   vector<unsigned int> children = ( *tree_ )[ i ].children;
 	   if(children.size() == 1){
 		   if(children[0] > i)
@@ -472,10 +477,10 @@ void HinesMatrix::makeForwardFlowMatrix(){
 	double gi, gj, gij;
 	double junction_sum;
    // Contributing junctions to matrix
-   for(int i=0;i<coupled_.size();i++){
+   for(unsigned int i=0;i<coupled_.size();i++){
    	   int parentId = coupled_[i][coupled_[i].size()-1];
    	   junction_sum = 0;
-   	   for(int j=0;j<coupled_[i].size();j++){
+   	   for(unsigned int j=0;j<coupled_[i].size();j++){
    		   junction_sum += Ga_[coupled_[i][j]];
    	   }
 
@@ -484,7 +489,7 @@ void HinesMatrix::makeForwardFlowMatrix(){
    	   ff_system[nCompt_+node1] += Ga_[node1]*(1.0 - Ga_[node1]/junction_sum);
    	   ff_system[2*nCompt_+node1] += Ga_[node1]*(1.0 - Ga_[node1]/junction_sum);
 
-   	   for(int j=0;j<coupled_[i].size()-1;j++){
+   	   for(unsigned int j=0;j<coupled_[i].size()-1;j++){
    		   node2 = coupled_[i][j];
 
    		   gi = Ga_[node1];
@@ -499,7 +504,7 @@ void HinesMatrix::makeForwardFlowMatrix(){
    	}
 
    // Contributing branches to matrix
-   for (int i = 0; i < nCompt_; ++i) {
+   for (unsigned int i = 0; i < nCompt_; ++i) {
 	   vector<unsigned int> children = ( *tree_ )[ i ].children;
    	   if(children.size() == 1){
    		   if(children[0] > i){
@@ -527,15 +532,15 @@ void HinesMatrix::makeForwardFlowMatrix(){
    // Verification
    double error = 0;
    double* row_sums = new double[nCompt_]();
-   for(int i=0;i<nCompt_;i++){
+   for(unsigned int i=0;i<nCompt_;i++){
 	   row_sums[i] += ff_system[nCompt_+i];
    }
-   for(int i=0;i<nCompt_-1;i++){
+   for(unsigned int i=0;i<nCompt_-1;i++){
 	   row_sums[ff_offdiag_mapping[i]] += ff_system[i+1];
 	   row_sums[i] += ff_system[i+1];
    }
 
-   for(int i=0;i<nCompt_;i++){
+   for(unsigned int i=0;i<nCompt_;i++){
 	   //cout << row_sums[i] << endl;
 	   error += row_sums[i];
    }
@@ -564,7 +569,7 @@ void HinesMatrix::generate_coosr_matrix(int num_comp, const vector<pair<long lon
 
 	int r,c;
 	double value;
-	for(int i=0;i<full_tri.size();i++){
+	for(unsigned int i=0;i<full_tri.size();i++){
 		r = full_tri[i].first/num_comp;
 		c = full_tri[i].first%num_comp;
 		value = full_tri[i].second;
@@ -670,27 +675,27 @@ void HinesMatrix::storePervasiveMatrix(vector<vector<int> > &child_list){
 	vector<pair<long long int,double> > upper_mat_flat; // Includes main diagonal elements
 
 	// Setting up passive part of main diagonal
-	for(int i=0;i<nCompt_;i++){
+	for(unsigned int i=0;i<nCompt_;i++){
 		per_mainDiag_passive[i] = (*tree_)[i].Cm/(dt_ / 2.0) + 1.0/(*tree_)[i].Rm;
 	}
 
 	// Getting all non-zero elements with values.
-	for (int i = 0; i < nCompt_; ++i)
+	for (unsigned int i = 0; i < nCompt_; ++i)
 	{
 		// Calculating junction sum
 		junction_sum = 0;
-		for (int k = 0; k < child_list[i].size(); ++k)
+		for (unsigned int k = 0; k < child_list[i].size(); ++k)
 			junction_sum += Ga_[child_list[i][k]];
 
 		// Putting admittance in off diagonal elements.
-		for (int j = 0; j < child_list[i].size(); ++j)
+		for (unsigned int j = 0; j < child_list[i].size(); ++j)
 		{
 			node1 = child_list[i][j];
 
 			// Inducing passive effect to main diagonal elements
 			per_mainDiag_passive[node1] += Ga_[node1]*(1.0 - Ga_[node1]/junction_sum);
 
-			for (int k = j+1; k < child_list[i].size(); ++k)
+			for (unsigned int k = j+1; k < child_list[i].size(); ++k)
 			{
 				node2 = child_list[i][k];
 
@@ -717,7 +722,7 @@ void HinesMatrix::storePervasiveMatrix(vector<vector<int> > &child_list){
 	}
 
 	// Add main diagonal to non_zero_elements.
-	for (int i = 0; i < nCompt_; ++i){
+	for (unsigned int i = 0; i < nCompt_; ++i){
 		full_mat_flat.push_back(make_pair(i*nCompt_+i, per_mainDiag_passive[i]));
 		upper_mat_flat.push_back(make_pair(i*nCompt_+i, per_mainDiag_passive[i]));
 	}
@@ -732,7 +737,7 @@ void HinesMatrix::storePervasiveMatrix(vector<vector<int> > &child_list){
 	generate_coosr_matrix(nCompt_, lower_mat_flat, lower_mat);
 
 	// Storing indices of main diagonal elements in upper matrix.
-	for (int i = 0; i < nCompt_; ++i) {
+	for (unsigned int i = 0; i < nCompt_; ++i) {
 		per_mainDiag_map[i] = upper_mat.rowPtr[i];
 	}
 
@@ -754,20 +759,20 @@ void HinesMatrix::makePervasiveFlowMatrix(){
 	vector< vector<int> > child_list(nCompt_);
 
 	// Adding itself
-	for (int i = 0; i < nCompt_; ++i) {
+	for (unsigned int i = 0; i < nCompt_; ++i) {
 		child_list[i].push_back(i);
 	}
 
 	// edge information at junctions.
-   for(int i=0;i<coupled_.size();i++){
+   for(unsigned int i=0;i<coupled_.size();i++){
 	   int parentId = coupled_[i][coupled_[i].size()-1];
-	   for(int j=0;j<coupled_[i].size()-1;j++){
+	   for(unsigned int j=0;j<coupled_[i].size()-1;j++){
 		   child_list[parentId].push_back(coupled_[i][j]);
 	   }
 	}
 
    // edge information of branches
-	for (int i = 0; i < nCompt_; ++i) {
+	for (unsigned int i = 0; i < nCompt_; ++i) {
 		vector<unsigned int> children = (*tree_)[i].children;
 		if(children.size() == 1){
 		   if(children[0] > i)
@@ -805,7 +810,7 @@ void HinesMatrix::makePervasiveFlowMatrix(){
 		}
 	}
 
-	for(int i=0;i<nCompt_;i++){
+	for(unsigned int  i=0;i<nCompt_;i++){
 	   //cout << row_sums[i] << endl;
 	   error += row_sums[i];
 	}

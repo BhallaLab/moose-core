@@ -137,8 +137,9 @@ protected:
 		*   channels so that you can send out Calcium concentrations in only
 		*   those compartments. */
 #ifdef USE_CUDA    
-		double total_time[10];
-		int total_count;
+    int step_num;
+	double total_time[10];
+	int total_count;
     int                       current_ca_position;
     vector<ChannelData>		  channel_data_;
     ChannelData 			  * channel_data_d;
@@ -228,15 +229,15 @@ protected:
 	double* workspaceBuffer;
 
 	/* Get handle to the CUBLAS context */
-	cublasHandle_t cublas_handle = 0;
+	cublasHandle_t cublas_handle;
 	cublasStatus_t cublasStatus;
 
 	/* Get handle to the CUSPARSE context */
-	cusparseHandle_t cusparse_handle = 0;
-	cusparseMatDescr_t cusparse_descr = 0;
+	cusparseHandle_t cusparse_handle;
+	cusparseMatDescr_t cusparse_descr;
 
 	/* Get handle for CUSOLVER context*/
-	cusolverSpHandle_t cusolver_handle = 0;
+	cusolverSpHandle_t cusolver_handle;
 
 	// Compartment related
 
@@ -253,16 +254,11 @@ protected:
 	int* d_temp_keys;
 	double* d_temp_values;
 
-	int num_comps_with_chans = 0; // Stores number of compartments with >=1 channels.
+	int num_comps_with_chans; // Stores number of compartments with >=1 channels.
 
 	// temp code
-	bool is_initialized = false;
+	bool is_initialized;
 #endif
-
-	int num_time_prints = 0;
-	int num_um_prints = 0;
-	int num_profile_prints = 0;
-	int step_num = 0;
 
     static const int INSTANT_X;
     static const int INSTANT_Y;

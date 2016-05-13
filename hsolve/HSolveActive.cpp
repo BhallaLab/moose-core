@@ -72,6 +72,17 @@ HSolveActive::HSolveActive()
 		total_time[i] = 0;
 	}
 	total_count = 0;
+
+	// Initializing varibales
+	step_num = 0;
+
+	cublas_handle = 0;
+	cusparse_handle = 0;
+	cusparse_descr = 0;
+	cusolver_handle = 0;
+
+	num_comps_with_chans = 0;
+	is_initialized = false;
 #endif
 
 
@@ -109,8 +120,8 @@ void HSolveActive::step( ProcPtr info )
     double sendSpikesTime;
     double memoryTransferTime;
 
-    GpuTimer advChanTimer, calcChanTimer, umTimer, solverTimer, advCalcTimer;
 #ifdef USE_CUDA
+    GpuTimer advChanTimer, calcChanTimer, umTimer, solverTimer, advCalcTimer;
     advChanTimer.Start();
     	advanceChannels( info->dt );
     advChanTimer.Stop();
@@ -130,7 +141,7 @@ void HSolveActive::step( ProcPtr info )
 		HSolvePassive::forwardEliminate();
 		HSolvePassive::backwardSubstitute();
 		cudaMemcpy(d_Vmid, &(VMid_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
-		//cudaMemcpy(d_V, &(V_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(d_V, &(V_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 
 		//hinesMatrixSolverWrapper();
 	solverTimer.Stop();
@@ -173,23 +184,21 @@ void HSolveActive::step( ProcPtr info )
 	calcChanCurTime = (end-start)/1000.0f;
 
 	start = getTime();
-		//updateMatrix();
+		updateMatrix();
 		//updateForwardFlowMatrix();
-		updatePervasiveFlowMatrix();
+		//updatePervasiveFlowMatrix();
 	end = getTime();
 	updateMatTime = (end-start)/1000.0f;
 
 	start = getTime();
-		/*
 		HSolvePassive::forwardEliminate();
 		HSolvePassive::backwardSubstitute();
-		*/
 
 		// Using forward flow solution
 		//forwardFlowSolver();
 
 		// Using pervasive flow solution
-		pervasiveFlowSolver();
+		//pervasiveFlowSolver();
 	end = getTime();
 	solverTime = (end-start)/1000.0f;
 
@@ -214,25 +223,6 @@ void HSolveActive::step( ProcPtr info )
 	sendSpikesTime = (end-start)/1000.0f;
 
 #endif
-
-	if(num_profile_prints > 0){
-	printf("%lf %lf %lf %lf %lf %lf %lf %lf %lf\n"
-			,advanceChannelsTime
-			    ,calcChanCurTime
-			    ,updateMatTime
-			    ,solverTime
-			    ,advCalcTime
-			    ,advSynchanTime
-			    ,sendValuesTime
-			    ,sendSpikesTime,
-			    memoryTransferTime);
-	num_profile_prints--;
-	}
-
-	if(num_profile_prints > 0){
-		printf("%lf\n",solverTime);
-		num_profile_prints--;
-	}
 
     externalCurrent_.assign( externalCurrent_.size(), 0.0 );
     
@@ -348,7 +338,7 @@ void HSolveActive::updateForwardFlowMatrix()
 {
 	double GkSum, GkEkSum; vector< CurrentStruct >::iterator icurrent = current_.begin();
 	vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
-	for (int i = 0; i < compartment_.size(); ++i)
+	for (unsigned int i = 0; i < compartment_.size(); ++i)
 	{
 		GkSum   = 0.0;
 		GkEkSum = 0.0;
@@ -364,19 +354,25 @@ void HSolveActive::updateForwardFlowMatrix()
 		++iboundary;
 	}
 
-    map< unsigned int, InjectStruct >::iterator inject;
-    for ( inject = inject_.begin(); inject != inject_.end(); ++inject )
-    {
-        unsigned int ic = inject->first;
-        InjectStruct& value = inject->second;
+	#ifdef USE_CUDA
+		for(unsigned int i=0;i<inject_.size();i++){
+			ff_system[ 3*nCompt_ + i ] += inject_[i].injectVarying + inject_[i].injectBasal;
+			inject_[i].injectVarying = 0;
+		}
+	#else
+		map< unsigned int, InjectStruct >::iterator inject;
+		for ( inject = inject_.begin(); inject != inject_.end(); ++inject )
+		{
+			unsigned int ic = inject->first;
+			InjectStruct& value = inject->second;
 
-        ff_system[3*nCompt_+ic] += value.injectVarying + value.injectBasal;
-        value.injectVarying = 0.0;
-    }
-
+			ff_system[3*nCompt_+ic] += value.injectVarying + value.injectBasal;
+			value.injectVarying = 0.0;
+		}
+	#endif
 
     vector< double >::iterator iec;
-    for (int i = 0; i < nCompt_; i++)
+    for (unsigned int i = 0; i < nCompt_; i++)
     {
     	ff_system[nCompt_+i] += externalCurrent_[2*i];
     	ff_system[3*nCompt_+i] += externalCurrent_[2*i+1];
@@ -398,7 +394,7 @@ void HSolveActive::forwardFlowSolver(){
 
 	// Forward Elimination
 	int parentId;
-	for(int i=1;i<nCompt_;i++){
+	for(unsigned int i=1;i<nCompt_;i++){
 		parentId = ff_offdiag_mapping[i-1];
 		ff_system[nCompt_+parentId] -= (ff_system[i])*(ff_system[i])/ff_system[nCompt_+i-1];
 		ff_system[3*nCompt_+parentId] -= (ff_system[3*nCompt_+(i-1)]*ff_system[i])/ff_system[nCompt_+i-1];
@@ -424,7 +420,7 @@ void HSolveActive::updatePervasiveFlowMatrix(){
 
 	double GkSum, GkEkSum; vector< CurrentStruct >::iterator icurrent = current_.begin();
 	vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
-	for (int i = 0; i < compartment_.size(); ++i)
+	for (unsigned int i = 0; i < compartment_.size(); ++i)
 	{
 		GkSum   = 0.0;
 		GkEkSum = 0.0;
@@ -440,19 +436,26 @@ void HSolveActive::updatePervasiveFlowMatrix(){
 		++iboundary;
 	}
 
-    map< unsigned int, InjectStruct >::iterator inject;
-    for ( inject = inject_.begin(); inject != inject_.end(); ++inject )
-    {
-        unsigned int ic = inject->first;
-        InjectStruct& value = inject->second;
+	#ifdef USE_CUDA
+		for(unsigned int i=0;i<inject_.size();i++){
+			per_rhs[i] += inject_[i].injectVarying + inject_[i].injectBasal;
+			inject_[i].injectVarying = 0;
+		}
+	#else
+	    map< unsigned int, InjectStruct >::iterator inject;
+	    for ( inject = inject_.begin(); inject != inject_.end(); ++inject )
+	    {
+	        unsigned int ic = inject->first;
+	        InjectStruct& value = inject->second;
 
-        per_rhs[ic] += value.injectVarying + value.injectBasal;
-        value.injectVarying = 0.0;
-    }
+	        per_rhs[ic] += value.injectVarying + value.injectBasal;
+	        value.injectVarying = 0.0;
+	    }
+	#endif
 
 
     vector< double >::iterator iec;
-    for (int i = 0; i < nCompt_; i++)
+    for (unsigned int i = 0; i < nCompt_; i++)
     {
     	upper_mat.values[per_mainDiag_map[i]] += externalCurrent_[2*i];
     	per_rhs[i] += externalCurrent_[2*i+1];
@@ -492,7 +495,7 @@ void HSolveActive::pervasiveFlowSolver(){
 		VMid_[i] = (per_rhs[i]-sum)/upper_mat.values[upper_mat.rowPtr[i]];
 	}
 
-	for (int i = 0; i < nCompt_; ++i) {
+	for (unsigned int i = 0; i < nCompt_; ++i) {
 		V_[i] = 2*VMid_[i] - V_[i];
 	}
 
@@ -600,7 +603,7 @@ void HSolveActive::advanceChannels( double dt )
 		cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
 
 		// Initializing device gate fraction values.
-		for(int i=0;i<h_gate_expand_indices.size();i++){
+		for(unsigned int i=0;i<h_gate_expand_indices.size();i++){
 			test_gate_values[h_gate_expand_indices[i]] = state_[i];
 		}
 		cudaMemcpy(d_gate_values, test_gate_values, num_gates*sizeof(double), cudaMemcpyHostToDevice);
@@ -756,11 +759,6 @@ void HSolveActive::advanceChannels( double dt )
     }
 
     u64 cpu_advchan_end = getTime();
-
-    if(num_time_prints > 0){
-    	printf("chan,%lf\n", (cpu_advchan_end-cpu_advchan_start)/1000.0f);
-    	num_time_prints--;
-    }
 
 #endif
       
@@ -1002,7 +1000,7 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	std::fill_n(chan_x, nCompt_, 1);
 
 	// Filling column indices
-	for(int i=0;i<nCompt_;i++){
+	for(unsigned int i=0;i<nCompt_;i++){
 		for(int j=chan_rowPtr[i];j<chan_rowPtr[i+1];j++){
 			chan_colIndex[j] = j-chan_rowPtr[i];
 		}
@@ -1027,7 +1025,7 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	int* temp_colIndex = new int[num_catarget_chans]();
 
 	// Setting up row count
-	for(int i=0;i<h_catarget_capool_indices.size();i++){
+	for(unsigned int i=0;i<h_catarget_capool_indices.size();i++){
 		temp_rowPtr[h_catarget_capool_indices[i]]++;
 	}
 

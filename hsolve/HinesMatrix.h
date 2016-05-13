@@ -110,7 +110,7 @@ protected:
     double* d_tridiag_data;
     double* d_b;
 
-    int mat_nnz = 0;
+    int mat_nnz;
 #endif
 
     //// Forward flow matrix data structures
