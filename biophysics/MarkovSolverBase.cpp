@@ -316,104 +316,91 @@ double MarkovSolverBase::getInvDy() const
 
 Vector* MarkovSolverBase::bilinearInterpolate( ) const 
 {
-    bool isEndOfX = false;
-    bool isEndOfY = false;
+	bool isEndOfX, isEndOfY;
 
-    unsigned int xIndex = 
-        static_cast< unsigned int >( ( Vm_ - xMin_ ) * invDx_ );
-    unsigned int yIndex = 
-        static_cast< unsigned int >( ( ligandConc_ - yMin_ ) * invDy_ );
-    double xv = (Vm_ - xMin_) * invDx_;
-    double yv = (ligandConc_ - yMin_) * invDy_;
+	unsigned int xIndex = 
+		static_cast< unsigned int >( ( Vm_ - xMin_ ) * invDx_ );
+	unsigned int yIndex = 
+		static_cast< unsigned int >( ( ligandConc_ - yMin_ ) * invDy_ );
+	double xv = (Vm_ - xMin_) * invDx_;
+	double yv = (ligandConc_ - yMin_) * invDy_;
 
-    double xF = xv - xIndex;
-    double yF = yv - yIndex;
-    double xFyF = xF * yF;
+	double xF = xv - xIndex;
+	double yF = yv - yIndex;
+	double xFyF = xF * yF;
 
-    ( xIndex == xDivs_ ) ? isEndOfX = true : isEndOfX = false;
-    ( yIndex == yDivs_ ) ? isEndOfY = true : isEndOfY = false;
+	( xIndex == xDivs_ ) ? isEndOfX = true : isEndOfX = false;
+	( yIndex == yDivs_ ) ? isEndOfY = true : isEndOfY = false;
 
-    vector< vector< Matrix* > >::const_iterator iExpQ0 = 
-        expMats2d_.begin() + xIndex;
-    vector< Matrix* >::const_iterator iExpQ00 = iExpQ0->begin() + yIndex;
-    vector< Matrix* >::const_iterator iExpQ10;
+	vector< vector< Matrix* > >::const_iterator iExpQ0 = 
+																					expMats2d_.begin() + xIndex;
+	vector< Matrix* >::const_iterator iExpQ00 = iExpQ0->begin() + yIndex;
+	vector< Matrix* >::const_iterator iExpQ10;
 
-    Matrix* expQ00 = *iExpQ00;
-    Matrix* expQ01;
-    Matrix* expQ10;
-    Matrix* expQ11;
+	Matrix* expQ00 = *iExpQ00;
+	Matrix* expQ01;
+	Matrix* expQ10;
+	Matrix* expQ11;
+	Vector *state00, *state01, *state10, *state11, *result;
 
-#if ENABLE_CPP1
-    // Intialization to supress compiler warning.
-    Vector *state00 = nullptr;
-    Vector *state01 = nullptr;
-    Vector *state10 = nullptr;
-    Vector *state11 = nullptr;
-    Vector *result = nullptr;
-#else
-    Vector *state00 = NULL, *state01 = NULL
-        , *state10 = NULL, *state11 = NULL
-        , *result = NULL
-        ;
-#endif
+	state00 = vecMatMul( &state_, expQ00 );
+	if ( isEndOfX ) 
+	{
+		if ( isEndOfY )
+			return state00;
+		else
+		{
+			expQ01 = *(iExpQ00 + 1);
+			state01 = vecMatMul( &state_, expQ01 );
+			result =  vecVecScalAdd( state00, state01, 
+				 					  					(1 - yF), yF );
+		}
+	}
+	else
+	{
+		iExpQ10 = ( iExpQ0 + 1 )->begin() + yIndex;
+		expQ10 = *iExpQ10;
+		state10 = vecMatMul( &state_, expQ10 );
 
-    state00 = vecMatMul( &state_, expQ00 );
-    if ( isEndOfX ) 
-    {
-        if ( isEndOfY )
-            return state00;
-        else
-        {
-            expQ01 = *(iExpQ00 + 1);
-            state01 = vecMatMul( &state_, expQ01 );
-            result =  vecVecScalAdd( state00, state01, 
-                    (1 - yF), yF );
-        }
-    }
-    else
-    {
-        iExpQ10 = ( iExpQ0 + 1 )->begin() + yIndex;
-        expQ10 = *iExpQ10;
-        state10 = vecMatMul( &state_, expQ10 );
+		if ( isEndOfY )
+		{
+			result =  vecVecScalAdd( state00, state10, 
+							   							( 1 - xF ), xF );
+		}
+		else
+		{
+			expQ01 = *( iExpQ00 + 1 );
+			expQ11 = *( iExpQ10 + 1 );
 
-        if ( isEndOfY )
-        {
-            result =  vecVecScalAdd( state00, state10, ( 1 - xF ), xF ); 
-        }
-        else
-        {
-            expQ01 = *( iExpQ00 + 1 );
-            expQ11 = *( iExpQ10 + 1 );
+			state01 = vecMatMul( &state_, expQ01 );
+			state11 = vecMatMul( &state_, expQ11 );
 
-            state01 = vecMatMul( &state_, expQ01 );
-            state11 = vecMatMul( &state_, expQ11 );
+			Vector *temp1, *temp2;
 
-            Vector *temp1, *temp2;
+			temp1 = vecVecScalAdd( state00, state10, 
+												( 1 - xF - yF + xFyF ),
+												( xF - xFyF )
+														); 
 
-            temp1 = vecVecScalAdd( state00, state10, 
-                    ( 1 - xF - yF + xFyF ),
-                    ( xF - xFyF )
-                    ); 
+			temp2 = vecVecScalAdd( state01, state11, ( yF - xFyF ), xFyF );
 
-            temp2 = vecVecScalAdd( state01, state11, ( yF - xFyF ), xFyF );
+			result = vecVecScalAdd( temp1, temp2, 1.0, 1.0 );
 
-            result = vecVecScalAdd( temp1, temp2, 1.0, 1.0 );
+			delete temp1;
+			delete temp2;
+		}
+	}
 
-            delete temp1;
-            delete temp2;
-        }
-    }
+	if ( state00 )
+		delete state00;	
+	if ( state01 )
+		delete state01;
+	if ( state10 )
+		delete state10;
+	if ( state11) 
+		delete state11;
 
-    if ( state00 )
-        delete state00;	
-    if ( state01 )
-        delete state01;
-    if ( state10 )
-        delete state10;
-    if ( state11 ) 
-        delete state11;
-
-    return result;
+	return result;
 }
 
 Vector* MarkovSolverBase::linearInterpolate() const

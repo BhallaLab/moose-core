@@ -399,6 +399,25 @@ const Cinfo* Neuron::initCinfo()
 		&Neuron::getSpinesFromExpression
 	);
 
+	static ReadOnlyLookupElementValueFinfo< Neuron, ObjId,vector< ObjId > >
+			spinesOnCompartment( 
+		"spinesOnCompartment",
+		"Vector of ObjIds of spines shafts/heads sitting on the specified "
+		"electrical compartment. If each spine has a shaft and a head,"
+		"and there are 10 spines on the compartment, there will be 20 "
+		"entries in the returned vector, ordered "
+		"shaft0, head0, shaft1, head1, ... ",
+		&Neuron::getSpinesOnCompartment
+	);
+
+	static ReadOnlyLookupElementValueFinfo< Neuron, ObjId, ObjId > 
+			parentCompartmentOfSpine( 
+		"parentCompartmentOfSpine",
+		"Returns parent compartment of specified spine compartment."
+		"Both the spine head or its shaft will return the same parent.",
+		&Neuron::getParentCompartmentOfSpine
+	);
+
 	/////////////////////////////////////////////////////////////////////
 	// DestFinfos
 	/////////////////////////////////////////////////////////////////////
@@ -475,6 +494,8 @@ const Cinfo* Neuron::initCinfo()
 		&compartmentsFromExpression,	// ReadOnlyLookupValueFinfo
 		&valuesFromExpression,		// ReadOnlyLookupValueFinfo
 		&spinesFromExpression,  	// ReadOnlyLookupValueFinfo
+		&spinesOnCompartment,	  	// ReadOnlyLookupValueFinfo
+		&parentCompartmentOfSpine, 	// ReadOnlyLookupValueFinfo
 		&buildSegmentTree,			// DestFinfo
 		&setSpineAndPsdMesh,		// DestFinfo
 		&setSpineAndPsdDsolve,		// DestFinfo
@@ -936,29 +957,59 @@ vector< ObjId > Neuron::getSpinesFromExpression(
 	// Look for all compartments that fit the expression.
 	vector< ObjId > temp = getExprElist( e, "# " + expr );
 	// indexed by segIndex, includes all compts in all spines.
+	/*
 	vector< vector< Id > > allSpinesPerCompt( segId_.size() ); 
 	for ( unsigned int i = 0; i < spines_.size(); ++i ) {
 		assert( allSpinesPerCompt.size() > spineParentSegIndex_[i] );
 		vector< Id >& s = allSpinesPerCompt[ spineParentSegIndex_[i] ];
 		s.insert( s.end(), spines_[i].begin(), spines_[i].end() );
 	}
+	*/
 	vector< ObjId >ret;
+	if ( allSpinesPerCompt_.size() == 0 )
+		return ret;
 	for ( vector< ObjId >::iterator
 					i = temp.begin(); i != temp.end(); ++i ) {
 		map< Id, unsigned int >::const_iterator si = 
 				segIndex_.find( i->id );
 		assert( si != segIndex_.end() );
 		assert( si->second < segId_.size() );
-		vector< Id >& s = allSpinesPerCompt[ si->second ];
-		for ( vector< Id >::iterator j = s.begin(); j != s.end(); ++j ){
-			// This is messy, would be better to use the wildcard parsing
-			// from Shell.
-			if ( matchBeforeBrace( *j, path ) )
-				ret.push_back( *j );
+		if ( allSpinesPerCompt_.size() > si->second ) {
+			const vector< Id >& s = allSpinesPerCompt_[ si->second ];
+			for ( vector< Id >::const_iterator j = s.begin(); j != s.end(); ++j ){
+				if ( matchBeforeBrace( *j, path ) )
+					ret.push_back( *j );
+			}
 		}
-		// ret.insert( ret.end(), s.begin(), s.end() );
 	}
 	return ret;
+}
+
+vector< ObjId > Neuron::getSpinesOnCompartment( 
+				const Eref& e, ObjId compt ) const
+{
+	vector< ObjId > ret;
+	map< Id, unsigned int >::const_iterator pos = 
+			segIndex_.find( compt.id );
+	if ( pos != segIndex_.end() ) {
+		assert( pos->second < allSpinesPerCompt_.size() );
+		const vector< Id >& spines = allSpinesPerCompt_[pos->second];
+		for ( unsigned int i = 0; i < spines.size(); ++i )
+			ret.push_back( spines[i] );
+	}
+	return ret;
+}
+
+ObjId Neuron::getParentCompartmentOfSpine( 
+				const Eref& e, ObjId compt ) const
+{
+	for ( unsigned int comptIndex = 0; comptIndex < allSpinesPerCompt_.size(); ++comptIndex ) {
+		const vector< Id >& v = allSpinesPerCompt_[comptIndex];
+		for ( unsigned int j = 0; j < v.size(); j++ )
+			if ( v[j] == compt.id )
+				return segId_[ comptIndex ];
+	}
+	return ObjId();
 }
 
 void Neuron::buildElist( const Eref& e, 
@@ -1762,6 +1813,15 @@ void Neuron::installSpines( const vector< ObjId >& elist,
 	spineStoich_.resize( spines_.size() );
 	psdStoich_.clear();
 	psdStoich_.resize( spines_.size() );
+
+	/// Now fill in allSpinesPerCompt_ vector. First clear it out.
+	allSpinesPerCompt_.clear();
+   	allSpinesPerCompt_.resize(segId_.size() );
+	for ( unsigned int i = 0; i < spines_.size(); ++i ) {
+		assert( allSpinesPerCompt_.size() > spineParentSegIndex_[i] );
+		vector< Id >& s = allSpinesPerCompt_[ spineParentSegIndex_[i] ];
+		s.insert( s.end(), spines_[i].begin(), spines_[i].end() );
+	}
 }
 ////////////////////////////////////////////////////////////////////////
 // Interface funcs for spines
