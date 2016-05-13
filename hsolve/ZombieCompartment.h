@@ -15,12 +15,10 @@
 
 #include "header.h"
 #include "ElementValueFinfo.h"
-
-#include "../utility/print_function.hpp"
+#include "../external/debug/print_function.hpp"
 #include "../biophysics/CompartmentBase.h"
 #include "../biophysics/Compartment.h"
 #include "../randnum/RNG.h"
-
 #include "HinesMatrix.h"
 #include "HSolveStruct.h"
 #include "HSolvePassive.h"

@@ -67,7 +67,6 @@
 #include "../basecode/Id.h"
 #include "../basecode/ObjId.h"
 #include "../utility/utility.h"
-#include "../utility/print_function.hpp"
 #include "../shell/Shell.h"
 
 #include "moosemodule.h"
