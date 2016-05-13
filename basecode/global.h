@@ -25,7 +25,7 @@
 #endif
 
 #include "randnum/RNG.h"                        /* Use inbuilt rng */
-#include "../external/debug/print_function.hpp"
+#include "../utility/print_function.hpp"
 
 using namespace std;
 
