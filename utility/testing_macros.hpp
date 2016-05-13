@@ -62,8 +62,8 @@ static ostringstream assertStream;
     if( (a) != (b)) { \
         assertStream.str(""); \
         LOCATION(assertStream) \
-        assertStream << "Expected " << a << ", received " << b  << endl; \
-        assertStream << token << endl; \
+        assertStream << "Expected " << b << ", received " << a ; \
+        assertStream << token; \
         __dump__(assertStream.str(), "EXPECT_FAILURE"); \
     }
 
@@ -146,12 +146,12 @@ static ostringstream assertStream;
         throw runtime_error(assertStream.str()); \
     }
 
-#define ASSERT_DOUBLE_EQ(a, b, token)  \
+#define ASSERT_DOUBLE_EQ(token, a, b)  \
     if(! doubleEq(a, b) ) { \
         assertStream.str(""); \
         LOCATION(assertStream); \
-        assertStream << "Expected " << a << ", received " << b  << endl; \
-        assertStream << token << endl; \
+        assertStream << "Expected " << b << ", received " << a  << endl; \
+        assertStream << token; \
         moose::__dump__(assertStream.str(), moose::failed); \
         throw runtime_error( "float equality test failed" ); \
     }
