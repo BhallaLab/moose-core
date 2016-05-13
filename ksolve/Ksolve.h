@@ -11,8 +11,8 @@
 #define _KSOLVE_H
 
 #define _KSOLVE_SEQ 0
-#define _KSOLVE_OPENMP 0
-#define _KSOLVE_PTHREADS 1
+#define _KSOLVE_OPENMP 1
+#define _KSOLVE_PTHREADS 0
 
 #include <pthread.h>
 #include <semaphore.h>

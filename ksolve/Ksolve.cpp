@@ -32,14 +32,13 @@
 #include "Ksolve.h"
 
 const unsigned int OFFNODE = ~0;
-#if _KSOLVE_PTHREADS
 
+#if _KSOLVE_PTHREADS
 extern "C" void* call_func( void* f )
 {
 	   std::auto_ptr< pthreadWrap > w( static_cast< pthreadWrap* >( f ) );
 	   int localId = w->tid;
 	   bool* destroySignal = w->destroySig;
-
 
 	   while(!*destroySignal) 
 	   {
@@ -53,7 +52,7 @@ extern "C" void* call_func( void* f )
 			 int endIndex = startIndex + blz;
 
 		//Perform the advance function 
-          for(int j = startIndex; j < endIndex; j++)
+          for(int j = startIndex; j < endIndex; j++) 
                   lpoolarray_[j].advance(p);
 
 		   sem_post(w->sThread); // Send the signal to the main thread. 
@@ -557,7 +556,6 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 #if _KSOLVE_OPENMP
 	 int poolSize = pools_.size(); //Find out the size of the vector
 	 static int cellsPerThread = 0; // Used for printing...
-	 VoxelPools* poolArray_ = &pools_[0]; //Call the vector as an array
 	 if(!cellsPerThread)
 	 {
 		    cellsPerThread = 2;
@@ -565,9 +563,9 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 		    cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
 	 }
 
-#pragma omp parallel for schedule(guided, cellsPerThread) num_threads(NTHREADS) shared(poolArray_, poolSize) firstprivate(p)
+#pragma omp parallel for schedule(guided, cellsPerThread) num_threads(NTHREADS) shared(poolSize) firstprivate(p)
     for ( int j = 0; j < poolSize; j++ )
-        poolArray_[j].advance( p );
+        pools_[j].advance( p );
 #endif //_KSOLVE_OPENMP
 
 
@@ -592,8 +590,8 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 	for(int i = 0; i < NTHREADS; i++)
 		   sem_post(&mainSemaphor[i]); //Send signal to the threads to start
 
-   for(int j=NTHREADS*pthreadBlock; j < poolSize; j++)
-           poolArray_[j].advance(p);
+   for(int j= NTHREADS*(*pthreadBlock); j < poolSize; j++)
+           pools_[j].advance(p);
 
 	for(int i = 0; i < NTHREADS; i++)
 		   sem_wait(&threadSemaphor[i]); // Wait for threads to finish their work
