@@ -1,3 +1,8 @@
+from __future__ import print_function
+try:
+    from future_builtins import zip
+except ImportError:
+    pass
 from . import moose as _moose
 
 _tick = 8
@@ -230,7 +235,7 @@ def show(
 		if not combine:
 			plt.figure()
 		
-		print(_label( plot ))
+		print(_label(plot))
 		plt.plot( plot.time, plot.values, label = _label( plot ) )
 	
 	plt.legend()

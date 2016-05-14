@@ -1,2 +1,0 @@
-doxygen documentation/cpp/Doxyfile
-make --directory=documentation/python html

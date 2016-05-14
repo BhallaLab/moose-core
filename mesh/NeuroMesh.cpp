@@ -292,7 +292,8 @@ NeuroMesh::NeuroMesh()
 		diffLength_( 1.0e-6 ),
 		separateSpines_( false ),
 		geometryPolicy_( "default" ),
-		surfaceGranularity_( 0.1 )
+		surfaceGranularity_( 0.1 ),
+		parentVoxel_(1, -1)
 {
 	nodes_[0].setLength( diffLength_ );
 	nodes_[0].setDia( diffLength_ );
@@ -737,9 +738,13 @@ vector< int > NeuroMesh::getSpineVoxelOnDendVoxel() const
 vector< unsigned int > NeuroMesh::getDendVoxelsOnCompartment(ObjId compt) const
 {
 	vector< unsigned int > ret;
-	for ( unsigned int i = 0; i < nodeIndex_.size(); ++i ) {
-		if ( nodes_[i].elecCompt() == compt.id )
-			ret.push_back(i);
+	for ( vector< NeuroNode >::const_iterator 
+				i = nodes_.begin(); i != nodes_.end(); ++i ) {
+		if ( !i->isDummyNode() && i->elecCompt() == compt.id ) {
+			for ( unsigned int j = 0; j < i->getNumDivs(); ++j ) {
+				ret.push_back( j + i->startFid() );
+			}
+		}
 	}
 	return ret;
 }

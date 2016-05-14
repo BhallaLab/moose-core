@@ -1,10 +1,16 @@
-# Find Numpy 
 add_definitions(-DPYMOOSE)
+
 include_directories(../basecode ../msg)
-include_directories(${NUMPY_INCLUDE_DIRS})
-add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
-include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
-add_definitions(-DUSE_NUMPY)
+
+execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --includes
+    OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --libs
+    OUTPUT_VARIABLE PYTHON_LIBRARIES
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+message( STATUS "Python include flags: ${PYTHON_INCLUDE_FLAGS}" )
 
 add_library(moosepython 
     vec.cpp
@@ -15,10 +21,6 @@ add_library(moosepython
     PyRun.cpp
     )
 
-#target_link_libraries(moosepython utility basecode biophysics)
-#if(USE_SBML)
-#    target_link_libraries(moosepython moose_sbml)
-#endif(USE_SBML)
-#if(USE_HDF5)
-#    target_link_libraries(moosepython hdf5)
-#endif(USE_HDF5)
+set_target_properties( moosepython 
+    PROPERTIES COMPILE_FLAGS "${PYTHON_INCLUDE_FLAGS}"
+    )

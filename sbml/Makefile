@@ -11,8 +11,8 @@
 TARGET = _sbml.o
 
 OBJ = \
-	SbmlWriter.o \
-	SbmlReader.o \
+	MooseSbmlWriter.o \
+	MooseSbmlReader.o \
 
 HEADERS = \
 	../basecode/header.h
@@ -20,8 +20,8 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-SbmlWriter.o:	SbmlWriter.h
-SbmlReader.o:   SbmlReader.h
+MooseSbmlWriter.o:	MooseSbmlWriter.h
+MooseSbmlReader.o:   MooseSbmlReader.h
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -I. -I../basecode -I../msg $< -c
 

@@ -12,6 +12,7 @@ readNetworkMLFromFile(...) to load a standalone NetworkML file, OR
 readNetworkML(...) to load from an xml.etree xml element (could be part of a larger NeuroML file).
 """
 
+from __future__ import print_function
 from xml.etree import cElementTree as ET
 import string
 import os
@@ -205,7 +206,7 @@ class NetworkML():
             rotationnote = instance.find('./{'+meta_ns+'}notes')
             if rotationnote is not None:
                 ## the text in rotationnote is zrotation=xxxxxxx
-                zrotation = float(string.split(rotationnote.text,'=')[1])
+                zrotation = float(rotationnote.text.split('=')[1])
             else:
                 zrotation = 0
             ## deep copies the library cell to an instance under '/cells' named as <arg3>

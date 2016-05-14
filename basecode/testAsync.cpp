@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "global.h"
 
 #include <stdio.h>
 #include <iomanip>
@@ -23,11 +24,27 @@
 #include "SparseMsg.h"
 #include "SingleMsg.h"
 #include "OneToOneMsg.h"
-#include "../randnum/randnum.h"
 #include "../scheduling/Clock.h"
 
 #include "../shell/Shell.h"
 #include "../mpi/PostMaster.h"
+
+#include "randnum/RNG.h"
+
+int _seed_ = 0;
+
+moose::RNG<double> rng_;
+
+void _mtseed_( unsigned int seed )
+{
+    _seed_ = seed;
+    rng_.setSeed( _seed_ );
+}
+
+double _mtrand_( )
+{
+    return rng_.uniform( );
+}
 
 void showFields()
 {
@@ -777,7 +794,6 @@ void printGrid( Element* e, const string& field, double min, double max )
 	cout << endl;
 }
 
-
 void testSparseMsg()
 {
 	// static const unsigned int NUMSYN = 104576;
@@ -801,7 +817,7 @@ void testSparseMsg()
 
 	string arg;
 
-	mtseed( 5489UL ); // The default value, but better to be explicit.
+	_mtseed_( 5489UL ); // The default value, but better to be explicit.
 
 	Id sshid = Id::nextId();
 	Element* t2 = new GlobalDataElement( sshid, sshc, "test2", size );
@@ -821,7 +837,7 @@ void testSparseMsg()
 
 	vector< double > temp( size, 0.0 );
 	for ( unsigned int i = 0; i < size; ++i )
-		temp[i] = mtrand() * Vmax;
+		temp[i] = _mtrand_() * Vmax;
 
 	bool ret = Field< double >::setVec( cells, "Vm", temp );
 	assert( ret );
@@ -843,8 +859,8 @@ void testSparseMsg()
 				Field< unsigned int >::get( id, "numSynapse" );
 		unsigned int k = i * fieldSize;
 		for ( unsigned int j = 0; j < numSyn; ++j ) {
-			weight[ k + j ] = mtrand() * weightMax;
-			delay[ k + j ] = mtrand() * delayMax;
+			weight[ k + j ] = _mtrand_() * weightMax;
+			delay[ k + j ] = _mtrand_() * delayMax;
 		}
 	}
 	ret = Field< double >::setVec( syns, "weight", weight );
@@ -1526,9 +1542,9 @@ void testCinfoFields()
 	assert( cinfo->getSrcFinfo( 0 + nsf ) == cinfo->findFinfo( "spikeOut" ) );
 
 	unsigned int ndf = neutralCinfo->getNumDestFinfo();
-	assert( ndf == 28 );
+	assert( ndf == 29 );
 	unsigned int sdf = IntFire::initCinfo()->getNumDestFinfo();
-	assert( sdf == 39 );
+	assert( sdf == 40 );
 
 	/*
 	assert( cinfo->getDestFinfo( 0+ndf )->name() == "setNumSynapses" );
@@ -1560,7 +1576,7 @@ void testCinfoFields()
 	assert( cinfo->getValueFinfo( 3 + nvf ) == cinfo->findFinfo( "refractoryPeriod" ) );
 
 	unsigned int nlf = neutralCinfo->getNumLookupFinfo();
-	assert( nlf == 3 ); // Neutral inserts a lookup field for neighbors
+	assert( nlf == 4 ); // Neutral inserts a lookup field for neighbors
 	assert( cinfo->getNumLookupFinfo() == 0 + nlf );
 	assert( cinfo->getLookupFinfo( 0 + nlf )->name() == "dummy");
 

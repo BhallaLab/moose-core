@@ -7,6 +7,10 @@ tags
 *.eps
 *.png
 *.pdf
+*.h.*
+*.cpp.*
+*.cc.*
+*.hh.*
 *.bak
 
 # Compiled Object files
@@ -113,7 +117,12 @@ coverage.xml
 *.pot
 
 # Sphinx documentation
-docs/_build/
+Docs/user/py/_build/
+Docs/user/GUI/_build/
+Docs/user/snippets_tutorial/_build
+
+# doxygen documentation
+Docs/doxygen/cpp
 
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]

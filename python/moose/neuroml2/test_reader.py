@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jul 24 16:02:21 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Jul 26 17:07:22 2013 (+0530)
+# Last-Updated: Sun Apr 17 16:13:01 2016 (-0400)
 #           By: subha
-#     Update #: 111
+#     Update #: 112
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -45,6 +45,7 @@
 
 # Code:
 
+from __future__ import print_function
 import unittest
 import numpy as np
 import moose
@@ -53,7 +54,8 @@ from reader import NML2Reader
 
 class TestFullCell(unittest.TestCase):
     def setUp(self):
-        self.reader = NML2Reader()
+        self.reader = NML2Reader(verbose=True)
+        
         self.lib = moose.Neutral('/library')
         self.filename = 'test_files/NML2_FullCell.nml'
         self.reader.read(self.filename)
@@ -110,7 +112,7 @@ class TestFullCell(unittest.TestCase):
     def test_protochans(self):
         """TODO: verify the prototype cahnnel."""
         for chan_id in moose.wildcardFind('/library/##[ISA=HHChannel]'):
-            print moose.element(chan_id)
+            print(moose.element(chan_id))
     
     def test_HHChannels(self):
         """Verify copied channel in membrane properties."""

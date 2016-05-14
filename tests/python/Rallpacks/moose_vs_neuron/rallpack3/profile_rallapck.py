@@ -5,6 +5,7 @@
 Last modified: Sat Jan 18, 2014  05:01PM
 
 """
+from __future__ import print_function
     
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2013, NCBS Bangalore"
@@ -66,7 +67,7 @@ def plotProfile(results, plots = []):
             yvecs[i].append( r[1][c] )
 
     for i, yvec in enumerate(yvecs):
-        print len(yvec), len(xvec)
+        print(len(yvec), len(xvec))
         p, = pylab.plot(xvec, yvec, 'o')
         plots.append(p)
 

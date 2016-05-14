@@ -26,7 +26,7 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Shell.o:	Shell.h Neutral.h ../scheduling/Clock.h ../sbml/SbmlWriter.h ../sbml/SbmlReader.h
+Shell.o:	Shell.h Neutral.h ../scheduling/Clock.h ../sbml/MooseSbmlWriter.h ../sbml/MooseSbmlReader.h
 ShellCopy.o:	Shell.h Neutral.h ../scheduling/Clock.h
 ShellSetGet.o:	Shell.h
 ShellThreads.o:	Shell.h Neutral.h ../scheduling/Clock.h
@@ -39,7 +39,7 @@ testShell.o:	Wildcard.h Shell.h Neutral.h ../builtins/Arith.h ../basecode/Sparse
 #../kinetics/ReadKkit.h ../biophysics/ReadCell.h
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c
+	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I.. -I../basecode -I../msg $< -c
 
 $(TARGET):		$(OBJ) $(SMOLDYN_OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) $(SMOLDYN_OBJ) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) 

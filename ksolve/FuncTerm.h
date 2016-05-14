@@ -10,7 +10,8 @@
 #ifndef _FUNC_TERM_H
 #define _FUNC_TERM_H
 
-#include "../external/muparser/muParser.h"
+#include "muParser.h"
+
 class FuncTerm
 {
 	public:
@@ -36,12 +37,20 @@ class FuncTerm
 		void setExpr( const string& e );
 		const unsigned int getTarget() const;
 		void setTarget( unsigned int tgt );
+		void setVolScale( double vs );
+		double getVolScale() const;
 	private: 
 		double* args_;
 		// Look up reactants in the S vec.
 		vector< unsigned int > reactantIndex_; 
 		mu::Parser parser_;
 		string expr_;
+		/**
+		 * Scale factor to account for pool volume if we are assigning conc
+		 * rather than N. Note that this conc will not be further updated 
+		 * so this is an undesirable option.
+		 */
+		double volScale_; 
 		unsigned int target_; /// Index of the entity to be updated by Func
 };
 
