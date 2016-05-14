@@ -11,8 +11,6 @@
 #ifndef _HEADER_H
 #define _HEADER_H
 
-#include "../external/debug/print_function.hpp"
-
 #include <math.h>
 #include <algorithm>
 #include <vector>

@@ -50,11 +50,7 @@
 
 #include "header.h"
 #include "Clock.h"
-
-#ifdef NOTIFY_PROGRESS
-#include <ctime>
-#include <cmath>
-#endif
+#include "../utility/numutil.h"
 
 // Declaration of some static variables.
 const unsigned int Clock::numTicks = 32;
@@ -751,7 +747,7 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
                 timeinfo = localtime( &rawtime );
                 strftime(now, 80, "%c", timeinfo);
                 cout << "@ " << now << ": " << 100 * currentTime_ / runTime_ 
-                    << "\% of total " << runTime_ << " is over." << endl;
+                    << "% of total " << runTime_ << " is over." << endl;
             }
         }
     }

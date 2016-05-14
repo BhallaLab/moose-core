@@ -1,5 +1,4 @@
-/*
- * ==============================================================================
+ /* ==============================================================================
  *
  *       Filename:  testing_macros.hpp
  *
@@ -127,7 +126,7 @@ static ostringstream assertStream;
         assertStream.str(""); \
         assertStream.precision( 9 ); \
         assertStream << msg << endl; \
-        throw FatalTestFailure(assertStream.str()); \
+        throw runtime_error(assertStream.str()); \
     }
 
 #define ASSERT_LT( a, b, msg) \
@@ -135,7 +134,7 @@ static ostringstream assertStream;
     assertStream.str(""); \
     assertStream.precision( 9 ); \
     assertStream << msg; \
-    throw FatalTestFailure( assertStream.str() ); \
+    throw runtime_error( assertStream.str() ); \
 
 #define ASSERT_EQ(a, b, token)  \
     if( ! doubleEq((a), (b)) ) { \
@@ -144,7 +143,17 @@ static ostringstream assertStream;
         LOCATION(assertStream) \
         assertStream << "Expected " << a << ", received " << b  << endl; \
         assertStream << token << endl; \
-        throw FatalTestFailure(assertStream.str()); \
+        throw runtime_error(assertStream.str()); \
+    }
+
+#define ASSERT_DOUBLE_EQ(a, b, token)  \
+    if(! doubleEq(a, b) ) { \
+        assertStream.str(""); \
+        LOCATION(assertStream); \
+        assertStream << "Expected " << a << ", received " << b  << endl; \
+        assertStream << token << endl; \
+        moose::__dump__(assertStream.str(), moose::failed); \
+        throw runtime_error( "float equality test failed" ); \
     }
 
 #define ASSERT_NEQ(a, b, token)  \
@@ -153,7 +162,7 @@ static ostringstream assertStream;
         LOCATION(assertStream); \
         assertStream << "Not expected " << a << endl; \
         assertStream << token << endl; \
-        throw FatalTestFailure(assertStream.str()); \
+        throw runtime_error(assertStream.str()); \
     }
 
 
