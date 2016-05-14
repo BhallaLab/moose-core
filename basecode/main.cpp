@@ -45,10 +45,10 @@
 #include <iomanip>
 int testIndex = 0;
 #define MOOSE_TEST(name,  f ) \
-    cout << "[TEST " << setw(2) << testIndex << "]" << name; \
+    cout << "[TEST " << setw(2) << testIndex << "] " << name; \
     testIndex += 1; \
     f; \
-    cout << std::right << "[OK]" << endl; \
+    cout << std::right << "  [DONE]" << endl; \
 
 extern void testSync();
 extern void testAsync();
@@ -329,20 +329,20 @@ void nonMpiTests( Shell* s )
         unsigned int numCores = s->numCores();
         if ( numCores > 0 )
             s->setHardware( 1, 1, 0 );
-        MOOSE_TEST("TestAsync", testAsync());
-        MOOSE_TEST("TestMsg", testMsg());
-        MOOSE_TEST("TestShell", testShell());
-        MOOSE_TEST("TestScheduling", testScheduling());
-        MOOSE_TEST("TestBuiltints", testBuiltins());
-        //MOOSE_TEST("TestKinetics", testKinetics());
-        MOOSE_TEST("TestKsolve", testKsolve());
-        //MOOSE_TEST("TestKsolveProcess", testKsolveProcess());
-        MOOSE_TEST("TestBiophysics", testBiophysics());
-        MOOSE_TEST("TestDiffusion", testDiffusion());
-        MOOSE_TEST("TestHsolve", testHSolve());
-        //MOOSE_TEST("TestGeom", testGeom());
-        MOOSE_TEST("TestMesh", testMesh());
-        MOOSE_TEST( "TestSigneur", testSigNeur());
+        MOOSE_TEST("testAsync", testAsync());
+        MOOSE_TEST("testMsg", testMsg());
+        MOOSE_TEST("testShell", testShell());
+        MOOSE_TEST("testScheduling", testScheduling());
+        MOOSE_TEST("testBuiltints", testBuiltins());
+        //MOOSE_TEST("testKinetics", testKinetics());
+        MOOSE_TEST("testKsolve", testKsolve());
+        //MOOSE_TEST("testKsolveProcess", testKsolveProcess());
+        MOOSE_TEST("testBiophysics", testBiophysics());
+        MOOSE_TEST("testDiffusion", testDiffusion());
+        MOOSE_TEST("testHsolve", testHSolve());
+        //MOOSE_TEST("testGeom", testGeom());
+        MOOSE_TEST("testMesh", testMesh());
+        MOOSE_TEST( "testSigneur", testSigNeur());
 #ifdef USE_SMOLDYN
         //MOOSE_TEST(testSmoldyn());
 #endif
