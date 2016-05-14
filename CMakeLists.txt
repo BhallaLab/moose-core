@@ -144,8 +144,8 @@ endif()
 
 # VERBOSITY OF OUTPUT
 
-option(ENABLE_CUDA "Enable GPU acceleration" ON)
-if(ENABLE_CUDA)
+option(WITH_CUDA "Enable GPU acceleration" ON)
+if(WITH_CUDA)
     FIND_PACKAGE(CUDA)
     IF(CUDA_FOUND)
         MESSAGE(STATUS "Using CUDA ${CUDA_VERSION}")
