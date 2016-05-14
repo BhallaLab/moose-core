@@ -162,7 +162,7 @@ void ZombieCompartment::vProcess( const Eref& e, ProcPtr p )
 
 void ZombieCompartment::vReinit(  const Eref& e, ProcPtr p )
 {
-    ;
+    rng.setSeed( moose::__rng_seed__ );
 }
 
 void ZombieCompartment::vInitProc( const Eref& e, ProcPtr p )
@@ -212,4 +212,9 @@ void ZombieCompartment::vSetSolver( const Eref& e , Id hsolve )
 		return;
 	}
 	hsolve_ = reinterpret_cast< HSolve* >( hsolve.eref().data() );
+}
+
+double ZombieCompartment::mtrand( void )
+{
+    return rng.uniform( );
 }

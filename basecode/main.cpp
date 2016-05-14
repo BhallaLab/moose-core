@@ -8,6 +8,13 @@
 **********************************************************************/
 
 #include "header.h"
+
+#if 0
+#include <boost/log/trivial.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/expressions.hpp>
+#endif
+
 #ifndef WIN32
 	#include <sys/time.h>
 #else
@@ -33,7 +40,7 @@
 #include <sys/sysctl.h>
 #endif // MACOSX
 
-#if __cplusplus >= 201103L
+#if defined(__GXX_EXPERIMENTAL_CXX0X) || __cplusplus >= 201103L
 // Use it to get the number of processors.
 #include <thread>
 #endif
@@ -90,7 +97,7 @@ unsigned int getNumCores()
 {
 	unsigned int numCPU = 0;
 
-#if __cplusplus >= 201103L
+#if defined(__GXX_EXPERIMENTAL_CXX0X) || __cplusplus >= 201103L
         numCPU = std::thread::hardware_concurrency();
 #else  // if c++11 
 
@@ -102,7 +109,7 @@ unsigned int getNumCores()
 
 
 #ifdef LINUX
-	numCPU = sysconf( _SC_NPROCESSORS_ONLN );
+	numCPU = sysconf( _SC_NPROCESSORS_CONF );
 #endif
 
 #ifdef MACOSX
@@ -150,36 +157,57 @@ void checkChildren( Id parent, const string& info )
 	}
 }
 
+/**
+ * @brief Initialize logger.
+ */
+void initLogger( void )
+{
+
+#if 0
+    boost::log::core::get()->set_filter
+        (
+#ifdef DEBUG
+         boost::log::trivial::severity >= boost::log::trivial::debug
+#else
+         boost::log::trivial::severity >= boost::log::trivial::info
+#endif
+        );
+#endif
+
+}
+
 Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests,
 	  unsigned int& benchmark )
 {
-	unsigned int numCores = getNumCores();
-	int numNodes = 1;
-	int myNode = 0;
-	bool isInfinite = 0;
-	int opt;
-	benchmark = 0; // Default, means don't do any benchmarks.
-	Cinfo::rebuildOpIndex();
-#ifdef USE_MPI
-	/*
-	// OpenMPI does not use argc or argv.
-	// unsigned int temp_argc = 1;
-	int provided;
-	MPI_Init_thread( &argc, &argv, MPI_THREAD_SERIALIZED, &provided );
-	*/
-	MPI_Init( &argc, &argv );
+    initLogger( );
 
-	MPI_Comm_size( MPI_COMM_WORLD, &numNodes );
-	MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
-	/*
-	if ( provided < MPI_THREAD_SERIALIZED && myNode == 0 ) {
-		cout << "Warning: This MPI implementation does not like multithreading: " << provided << "\n";
-	}
-	*/
-	// myNode = MPI::COMM_WORLD.Get_rank();
+    unsigned int numCores = getNumCores();
+    int numNodes = 1;
+    int myNode = 0;
+    bool isInfinite = 0;
+    int opt;
+    benchmark = 0; // Default, means don't do any benchmarks.
+    Cinfo::rebuildOpIndex();
+#ifdef USE_MPI
+    /*
+    // OpenMPI does not use argc or argv.
+    // unsigned int temp_argc = 1;
+    int provided;
+    MPI_Init_thread( &argc, &argv, MPI_THREAD_SERIALIZED, &provided );
+    */
+    MPI_Init( &argc, &argv );
+
+    MPI_Comm_size( MPI_COMM_WORLD, &numNodes );
+    MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
+    /*
+       if ( provided < MPI_THREAD_SERIALIZED && myNode == 0 ) {
+       cout << "Warning: This MPI implementation does not like multithreading: " << provided << "\n";
+       }
+       */
+    // myNode = MPI::COMM_WORLD.Get_rank();
 #endif
-	/**
-	 * Here we allow the user to override the automatic identification
+    /**
+     * Here we allow the user to override the automatic identification
 	 * of processor configuration
 	 */
 	while ( ( opt = getopt( argc, argv, "hiqurn:b:B:" ) ) != -1 ) {

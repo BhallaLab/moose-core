@@ -224,6 +224,7 @@ Linear cable, 12 segments.
 
 	assert(	checkAns( &alle[0], numCompts, &y[0], &ones[0] ) < 1e-25 );
 
+#if USE_GSL
 	/////////////////////////////////////////////////////////////////////
 	// Here we do the gsl test.
 	vector< double > temp( &test[0], &test[numCompts*numCompts] );
@@ -245,8 +246,8 @@ Linear cable, 12 segments.
 	assert( checkAns( test, numCompts, &gslAns[0], &ones[0] ) < 1e-25 );
 	gsl_permutation_free( p );
 	gsl_vector_free( x );
-
 	cout << "." << flush;
+#endif
 }
 
 void testSorting()

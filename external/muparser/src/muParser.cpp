@@ -26,15 +26,11 @@
 #include "muParser.h"
 #include "muParserTemplateMagic.h"
 
-#if __cplusplus > 199711L
-#include <random>
-#endif
-
-
 //--- Standard includes ------------------------------------------------------------------------
 #include <cmath>
 #include <algorithm>
 #include <numeric>
+#include <ctime>
 
 /** \brief Pi (what else?). */
 #define PARSER_CONST_PI  3.141592653589793238462643
@@ -54,6 +50,8 @@ using namespace std;
 namespace mu
 {
 
+    // Initialize the RNG with random time.
+    moose::RNG<double> rng;
 
   //---------------------------------------------------------------------------
   // Trigonometric function
@@ -114,59 +112,24 @@ namespace mu
   value_type Parser::Fmod(value_type v1, value_type v2) { return fmod(v1, v2); }
 
   // If no seed is given, 
-  value_type Parser::Rand( value_type seed ) { 
-      static bool isSeedSet = false;
-#if __cplusplus > 199711L
-      static std::mt19937 generator;
-      if(! isSeedSet ) {
-          if ( seed < 0 ) {
-              static std::random_device rd;
-              generator.seed( rd() );
-          }
-          else
-              generator.seed( seed );
+  value_type Parser::Rand( value_type seed ) 
+  {
+      static bool isSeedSet_ = false;
+      if( ! isSeedSet_ )
+      {
+          mu::rng.setSeed( seed );
+          isSeedSet_ = true;
       }
-      isSeedSet = true;
-      static std::uniform_real_distribution< value_type > distribution(0.0, 1.0);
-      return distribution( generator );
-#else
-      if( ! isSeedSet ) {
-          if( seed < 0 )
-              srand( time(NULL) );
-          else
-              srand( seed );
-      }
-      return ((value_type) rand()) / (value_type) RAND_MAX;
-#endif
+      return rng.uniform( );                    /* Between 0 and 1 */
   }
 
   value_type Parser::Rand2(value_type v1, value_type v2, value_type seed = -1 ) {
       static bool isSeedSet = false;
-#if __cplusplus > 199711L
-      static std::mt19937 generator;
       if( ! isSeedSet ) {
-          if( seed < 0 ) {
-              static std::random_device rd;
-              generator.seed( rd() );
-          }
-          else
-              generator.seed( seed );
+          mu::rng.setSeed( seed );
+          isSeedSet = true;
       }
-
-      isSeedSet = true;
-      static std::uniform_real_distribution< value_type > distribution(v1, v2);
-      return distribution( generator );
-#else 
-      if( ! isSeedSet ) {
-          if( seed < 0 )
-              srand( time(NULL) );
-          else
-              srand( seed );
-      }
-      isSeedSet = true;
-      value_type random = ((value_type) rand()) / (value_type) RAND_MAX;
-      return v1 + (random * (v2 - v1));
-#endif 
+      return mu::rng.uniform( v1, v2 );           /* Between a and b */
   }
 
   value_type Parser::Sqrt(value_type v) 

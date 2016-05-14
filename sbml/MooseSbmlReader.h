@@ -70,13 +70,13 @@ private:
     string nameString( string str );
     void printMembers( const ASTNode* p,vector <string> & ruleMembers );
     void addSubPrd(Reaction * reac,Id reaction_,string type);
-    void getKLaw( KineticLaw * klaw,bool rev,vector< double > & rate );
+    void getKLaw( KineticLaw * klaw,bool rev,vector< double > & rate ,string & amt_Conc);
     void pushParmstoVector( const ASTNode* p,vector <string> & parameters );
     void getParameters( const ASTNode* node,vector <string> & parameters );
     void setupMMEnzymeReaction( Reaction * reac,string id ,string name,const map<string, Id> &);
     pair<string, pair<string, string> > getAnnotation_Spe_Reac( XMLNode * annotationSpe_Rec );
     string getAnnotation( Reaction* reaction,map<string,EnzymeInfo> & );
-    void setupEnzymaticReaction( const EnzymeInfo & einfo,string name,const map< string, Id > & ,string name1);
+    void setupEnzymaticReaction( const EnzymeInfo & einfo,string name,const map< string, Id > & ,string name1,string notes);
     void findModelParent( Id cwe, const string& path,Id& parentId, string& modelName );
     void getGlobalParameter();
 };

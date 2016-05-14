@@ -1,5 +1,7 @@
-set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 2.8)
+
+include(CheckIncludeFileCXX)
+set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
@@ -10,7 +12,17 @@ if(COMMAND cmake_policy)
 endif(COMMAND cmake_policy)
 
 project(moose)
-set(MOOSE_VERSION "3.0.2")
+
+# Set moose version
+# Get the latest abbreviated commit hash of the working branch
+execute_process(
+  COMMAND git describe --tags --long
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_VERSION_OUTPUT
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+add_definitions( -DMOOSE_VERSION="${GIT_VERSION_OUTPUT}")
+
 include(FindPkgConfig)
 
 # This snippet is from LLVM project.
@@ -57,18 +69,10 @@ else()
     set(MACOSX FALSE)
 endif()
 
-################################# CMAKE OPTIONS ##################################
+################################ CMAKE OPTIONS ##################################
 
 option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
-
-option(VERBOSITY "SET MOOSE VERBOSITY LEVEL" 0)
-
-# Whether to notify the user after 1 second of simulation.
-option(NOTIFY_PROGRESS "Show progress of simulation" OFF)
-
-# STATS INSIDE MOOSE. TODO: Remove it and add support for gprof
-option(ENABLE_LOGGER  "Enable MOOSE logger [Deprecated]" OFF)
-
+option(VERBOSITY "Set MOOSE verbosity level (deprecated)" 0)
 ## Unit testing and debug mode.
 option(DEBUG "Build with debug support" OFF)
 option(GPROF "Build for profiling using gprof" OFF)
@@ -101,15 +105,24 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 
 ########################### COMPILER MACROS #####################################
 
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG( "-std=c++11" COMPILER_SUPPORTS_CXX11 )
+CHECK_CXX_COMPILER_FLAG( "-std=c++0x" COMPILER_SUPPORTS_CXX0X )
+CHECK_CXX_COMPILER_FLAG( "-Wno-strict-aliasing" COMPILER_WARNS_STRICT_ALIASING )
+
 # Turn warning to error: Not all of the options may be supported on all
 # versions of compilers. be careful here.
 add_definitions(-Wall
     #-Wno-return-type-c-linkage
-    -Wno-unused-variable
+    -Wno-unused-variable      
     -Wno-unused-function
     #-Wno-unused-private-field
     )
 add_definitions(-fPIC)
+if(COMPILER_WARNS_STRICT_ALIASING)
+    add_definitions( -Wno-strict-aliasing )
+endif(COMPILER_WARNS_STRICT_ALIASING)
+
 
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
@@ -117,11 +130,22 @@ CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 if(COMPILER_SUPPORTS_CXX11)
     message(STATUS "Your compiler supports c++11 features. Enabling it")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    add_definitions( -DENABLE_CPP11 )
 elseif(COMPILER_SUPPORTS_CXX0X)
     message(STATUS "Your compiler supports c++0x features. Enabling it")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    add_definitions( -DENABLE_CXX11 )
+    add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS -DBOOST_NO_SCOPED_ENUMS )
 else()
+    add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS -DBOOST_NO_SCOPED_ENUMS )
     message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
+endif()
+
+## DO UNIT TEST
+option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
+if(ENABLE_UNIT_TESTS)
+    MESSAGE("++ Unit testing enabled.")
+    add_definitions(-DDO_UNIT_TESTS)
 endif()
 
 
@@ -152,7 +176,7 @@ elseif(DEBUG)
 else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
-    add_definitions(-UDO_UNIT_TESTS -O3)
+    add_definitions(-UDO_UNIT_TESTS )
 endif()
 
 if(GPROF AND DEBUG)
@@ -178,9 +202,14 @@ add_library(_moose MODULE pymoose/moosemodule.cpp)
 add_library(libmoose SHARED basecode/main.cpp)
 add_executable(moose.bin basecode/main.cpp)
 
-
 ################################### SETUP BUILD ################################
 
+# default include paths.
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
+
+if(WITH_BOOST)
+    set(WITH_GSL OFF)
+endif(WITH_BOOST)
 
 # If this variable is used while packaging; we build this project using another
 # cmake script and pass the location of SBML static library using this variable.
@@ -221,8 +250,8 @@ if(LIBSBML_FOUND)
         target_link_libraries(libmoose PROPERTIES LINK_FLAGS
             "-L${LIBSBML_LIBRARY_DIRS}"
             )
-        target_link_libraries(_moose PROPERTIES LINK_FLAGS
-            "-L${LIBSBML_LIBRARY_DIRS}"
+        target_link_libraries(_moose 
+            PROPERTIES LINK_FLAGS "-L${LIBSBML_LIBRARY_DIRS}"
             )
     endif()
 
@@ -247,43 +276,65 @@ include_directories(msg basecode)
 set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
 
-## GSL
-if(GSL_STATIC_HOME)
-    SET(GSL_INCLUDE_DIRS "${GSL_STATIC_HOME}/include")
-    find_library(GSL_LIBRARY 
-        NAME libgsl.a 
-        PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64
-        NO_DEFAULT_PATH
-        )
-    find_library(GSLCBLAS_LIBRARY
-        NAME libgslcblas.a 
-        PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64 
-        NO_DEFAULT_PATH
-        )
-    SET(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
-    message(STATUS "STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
-    set(GSL_FOUND TRUE)
-ELSE()
-    find_package(GSL 1.16)
-    if(NOT GSL_FOUND)
-        message(FATAL_ERROR 
-            "=====================================================================\n"
-            " FATAL gsl(>1.16) not found.\n\n"
-            " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
-            " Please install the `dev` or `devel` package e.g. \n"
-            "     $ sudo apt-get install libgsl0-dev \n"
-            "     $ sudo yum install libgsl-devel \n"
-            "     $ brew install gsl \n\n"
-            " Or build and install gsl from source code \n"
-            "     https://www.gnu.org/software/gsl/ \n"
-            " After installing gsl, rerun cmake.\n\n"
-            " If you install gsl in non-standard place, set the GSL_HOME environment \n"
-            " variable. CMAKE use this to search for required files. \n"
-            "====================================================================\n"
+if(WITH_GSL)
+    if(GSL_STATIC_HOME)
+        SET(GSL_INCLUDE_DIRS "${GSL_STATIC_HOME}/include")
+        find_library(GSL_LIBRARY 
+            NAME libgsl.a 
+            PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64
+            NO_DEFAULT_PATH
             )
-    endif(NOT GSL_FOUND)
+        find_library(GSLCBLAS_LIBRARY
+            NAME libgslcblas.a 
+            PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64 
+            NO_DEFAULT_PATH
+            )
+        SET(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
+        message(STATUS "STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
+        set(GSL_FOUND TRUE)
+    ELSE()
+        find_package(GSL 1.16)
+        if(NOT GSL_FOUND)
+            message(FATAL_ERROR 
+                "=====================================================================\n"
+                " FATAL gsl(>1.16) not found.\n\n"
+                " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
+                " Please install the `dev` or `devel` package e.g. \n"
+                "     $ sudo apt-get install libgsl0-dev \n"
+                "     $ sudo yum install libgsl-devel \n"
+                "     $ brew install gsl \n\n"
+                " Or build and install gsl from source code \n"
+                "     https://www.gnu.org/software/gsl/ \n"
+                " After installing gsl, rerun cmake.\n\n"
+                " If you install gsl in non-standard place, set the GSL_HOME environment \n"
+                " variable. CMAKE use this to search for required files. \n"
+                "====================================================================\n"
+                )
+        endif(NOT GSL_FOUND)
+    endif()
+    add_definitions(-DUSE_GSL)
+    # GSL is also used in RNG (whenever applicable), therefore include paths are
+    # top level.
+    include_directories( ${GSL_INCLUDE_DIRS} )
+elseif(WITH_BOOST)
+    find_package(Boost 1.44 COMPONENTS filesystem REQUIRED)
+    find_package( LAPACK REQUIRED )
+    add_definitions( -DUSE_BOOST -UUSE_GSL )
+    include_directories( ${Boost_INCLUDE_DIRS} )
+    #    check_include_file_cxx(
+    #        ${Boost_INCLUDE_DIRS}/boost/random/random_device.hpp
+    #        BOOST_RANDOM_DEVICE_EXISTS
+    #        )
+    #    if(BOOST_RANDOM_DEVICE_EXISTS)
+    #        add_definitions(-DBOOST_RANDOM_DEVICE_EXISTS)
+    #    endif(BOOST_RANDOM_DEVICE_EXISTS)
+    #    check_include_file_cxx(
+    #        ${Boost_INCLUDE_DIRS}/boost/filesystem.hpp BOOST_FILESYSTEM_EXISTS
+    #        )
+    #    if(BOOST_FILESYSTEM_EXISTS)
+    #        add_definitions( -DBOOST_FILESYSTEM_EXISTS )
+    #    endif(BOOST_FILESYSTEM_EXISTS)
 endif()
-add_definitions(-DUSE_GSL)
 
 ## Setup hdf5
 if(HDF5_STATIC_HOME)
@@ -308,7 +359,6 @@ ELSE(HDF5_STATIC_HOME)
      endif()
 endif(HDF5_STATIC_HOME)
 
-#message(STATUS "Debug: HDF5_FOUND? = ${HDF5_FOUND}")
 if(NOT HDF5_FOUND)
     message(
         "==================================================================\n"
@@ -323,9 +373,7 @@ if(NOT HDF5_FOUND)
         " variable HDF5_ROOT to the location. Rerun cmake \n"
         "================================================================ \n"
         )
-ELSE(NOT HDF5_FOUND)
-    add_definitions(-DUSE_HDF5)
-    message(STATUS "DBG -- HDF5: ${HDF5_LIBRARIES} ## ${HDF5_CXX_LIBRARIES} ## ${HDF5_HL_LIBRARIES}")
+ELSEIF(HDF5_FOUND AND (NOT HDF5_STATIC_HOME))
     if(HDF5_HL_LIBRARIES)
         set(HDF5_LIBRARIES ${HDF5_HL_LIBRARIES})
     else()
@@ -333,6 +381,11 @@ ELSE(NOT HDF5_FOUND)
     endif()
     include_directories(${HDF5_INCLUDE_DIRS})
 endif(NOT HDF5_FOUND)
+
+if(HDF5_FOUND)
+    add_definitions( -DUSE_HDF5 )
+    include_directories( ${HDF5_INCLUDE_DIRS} )
+endif( HDF5_FOUND )
 
 # This is a fix for new HDF5 package on Debian/Ubuntu which installs hdf5
 # headers in non-standard path. issue #80.
@@ -373,6 +426,13 @@ if(WITH_MPI)
     ##        PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}"
     ##        )
     ##endif(MPI_LINK_FLAGS)
+    find_package(OpenMP REQUIRED)
+    MESSAGE("++ OpenMPI support is ON")
+    add_definitions(-DUSE_OPENMPI -O1)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${-pthread}")
+	
 endif(WITH_MPI)
 
 # Add subdirectroeis
@@ -396,10 +456,16 @@ add_subdirectory(benchmarks)
 add_subdirectory(kinetics)
 add_subdirectory(synapse)
 add_subdirectory(intfire)
-add_subdirectory(examples)
 
 # These are always shared libraries.
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
+<<<<<<< HEAD
+=======
+if(WITH_BOOST)
+    list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES})
+    list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
+endif(WITH_BOOST)
+>>>>>>> 89981e4956d9fe7457b0785b7ba28922711bf2bc
 if(WITH_MPI)
     LIST(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
 endif(WITH_MPI)
@@ -426,19 +492,24 @@ elseif(LIBSBML_FOUND)
     list(APPEND SYSTEM_SHARED_LIBS ${LIBSBML_LIBRARIES})
 endif()
 
-
-if(GSL_STATIC_HOME)
-    message(STATUS "Using STATIC gsl libraries: ${GSL_LIBRARIES}")
-    list(APPEND STATIC_LIBRARIES ${GSL_LIBRARIES})
-else()
-    message(STATUS "Using system gsl : ${GSL_LIBRARIES}")
-    list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIBRARIES})
+if(WITH_GSL)
+    if(GSL_STATIC_HOME)
+        message(STATUS "Using STATIC gsl libraries: ${GSL_LIBRARIES}")
+        list(APPEND STATIC_LIBRARIES ${GSL_LIBRARIES})
+    else()
+        message(STATUS "Using system gsl : ${GSL_LIBRARIES}")
+        list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIBRARIES})
+    endif()
 endif()
 
-if(READLINE_FOUND AND TERMCAP_FOUND)
-    list(APPEND SYSTEM_SHARED_LIBS ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
-endif()
+<<<<<<< HEAD
+=======
+# Deprecated.
+#if(READLINE_FOUND AND TERMCAP_FOUND)
+#    list(APPEND SYSTEM_SHARED_LIBS ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
+#endif()
 
+>>>>>>> 89981e4956d9fe7457b0785b7ba28922711bf2bc
 pkg_check_modules(MUPARSER muparser)
 if(MUPARSER_FOUND)
     message(STATUS "Using system muparser ${MUPARSER_VERSION}")
@@ -523,35 +594,44 @@ endif(WITH_DOC)
 SET(PROJECT_PYTHON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/python)
 if(WITH_PYTHON)
     message(STATUS "Building native python extension of MOOSE")
-
     set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
-
-    find_package(NumPy REQUIRED)
-    find_package(PythonDev REQUIRED)
-    include_directories(${PYTHON_INCLUDE_DIRS})
-    message(STATUS "Python include dir: ${PYTHON_INCLUDE_DIRS}")
-    message(STATUS "Python libraries: ${PYTHON_LIBRARIES}")
-    message(STATUS "Python executable: ${PYTHON_EXECUTABLE}")
-
     EXEC_PROGRAM(${PYTHON_EXECUTABLE}
         ARGS "-c 'try: import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])
 except Exception: pass'"
         OUTPUT_VARIABLE PYTHON_SO_EXTENSION
         )
+    message( STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
 
-    add_subdirectory(pymoose)
-
+    find_package(NumPy REQUIRED)
     include_directories(${NUMPY_INCLUDE_DIRS})
     add_definitions(-DUSE_NUMPY)
 
-    set_target_properties(_moose PROPERTIES COMPILE_DEFINITIONS "PYMOOSE")
+    add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
+
+    execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --includes
+        OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --libs
+        OUTPUT_VARIABLE PYTHON_LIBRARIES
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    message( STATUS "Python include flags: ${PYTHON_INCLUDE_FLAGS}" )
+    add_subdirectory(pymoose)
+
     set_target_properties(_moose PROPERTIES 
+        COMPILE_DEFINITIONS "PYMOOSE"
+        COMPILE_FLAGS "${PYTHON_INCLUDE_FLAGS}"
         LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
-        PREFIX "")
-    if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
-        set_target_properties(_moose PROPERTIES
-        SUFFIX ${PYTHON_SO_EXTENSION})
-    endif()
+        PREFIX ""
+        SUFFIX ".so"
+        )
+
+    #if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
+    #    set_target_properties(_moose PROPERTIES
+    #    SUFFIX ${PYTHON_SO_EXTENSION})
+    #endif()
+
     # see issue #80
     if(HDF5_LIBRARY_DIRS)
         set_target_properties( _moose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )

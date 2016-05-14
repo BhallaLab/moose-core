@@ -11,7 +11,6 @@ OBJ = \
     src/muParserDLL.o \
     src/muParserError.o \
     src/muParserInt.o \
-    src/muParserTest.o \
     src/muParserTokenReader.o \
 
 HEADERS = \
@@ -33,7 +32,7 @@ default: $(TARGET)
 $(OBJ): $(HEADERS)
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -I. -Iinclude $< -c -o $@
+	$(CXX) $(CXXFLAGS) -I. -I../../ -Iinclude $< -c -o $@
 
 $(TARGET):	$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)
