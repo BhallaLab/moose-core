@@ -159,11 +159,7 @@ void GssaVoxelPools::recalcTime( const GssaSystem* g, double currTime )
     refreshAtot( g );
     assert( t_ > currTime );
     t_ = currTime;
-    double r = rng_.uniform();
-    while ( r <= 0.0 )
-    {
-        r = rng_.uniform();
-    }
+    double r = rng_.uniform(std::numeric_limits<double>::min(), 1.0);
     t_ -= ( 1.0 / atot_ ) * log( r );
 }
 

@@ -16,8 +16,8 @@
  */
 
 
-#ifndef  RNG_INC
-#define  RNG_INC
+#ifndef  __RNG_INC
+#define  __RNG_INC
 
 #ifdef  USE_BOOST
 #include <boost/random.hpp>
@@ -54,8 +54,7 @@ template < typename T >
 class RNG
 {
     public:
-        // ====================  LIFECYCLE     =======================================
-        RNG ()                           /* constructor      */
+        RNG ()                                  /* constructor      */
         {
             // Setup a random seed if possible.
 #ifdef  ENABLE_CPP11 
@@ -73,9 +72,7 @@ class RNG
 
         }
 
-        RNG ( const RNG &other ); /* copy constructor */
-
-        ~RNG ()                                     /* destructor       */
+        ~RNG ()                                 /* destructor       */
         {
 
 #if defined(USE_BOOST) || defined(ENABLE_CPP11) 
@@ -110,7 +107,7 @@ class RNG
          * @param a Lower limit (inclusive)
          * @param b Upper limit (exclusive).
          */
-        T uniform( const T& a, const T& b)
+        T uniform( const T a, const T b)
         {
             size_t maxInt = std::numeric_limits<int>::max();
 #if defined(USE_BOOST) || defined(ENABLE_CPP11)
@@ -160,4 +157,4 @@ class RNG
 
 }                                               /* namespace moose ends  */
 
-#endif   /* ----- #ifndef RNG_INC  ----- */
+#endif   /* ----- #ifndef __RNG_INC  ----- */
