@@ -235,7 +235,7 @@ void HSolvePassive::updateMatrix()
         ihs += 4, ++iv;
     }
 #ifdef USE_CUDA
-    for(int i=0;i<inject_.size();i++){
+    for(unsigned int i=0;i<inject_.size();i++){
     	HS_[ 4 * i + 3 ] += inject_[i].injectVarying + inject_[i].injectBasal;
     	inject_[i].injectVarying = 0;
     }

@@ -10,6 +10,8 @@
 #ifndef _HINES_MATRIX_H
 #define _HINES_MATRIX_H
 
+#include "StorageFormats.h"
+
 #ifdef DO_UNIT_TESTS
 # define ASSERT( isOK, message ) \
 	if ( !(isOK) ) { \
@@ -108,9 +110,36 @@ protected:
     double* d_tridiag_data;
     double* d_b;
 
-    int mat_nnz = 0;
-
+    int mat_nnz;
 #endif
+
+    //// Forward flow matrix data structures
+	/*
+	 * ff_system stores the tri-diagonal system as an array of size (4*num_comp)
+	 * Column1 - lower diagonal elements
+	 * Column2 - main diagonal elements
+	 * Column3 - Passive main diagonal elements.
+	 * Column4 - RHS
+	 */
+	double* ff_system;
+	/*
+	 * Stores the row values of lower off-diagonal elements ordered column wise.
+	 */
+	int* ff_offdiag_mapping;
+
+	//// Pervasive flow matrix data structures
+	coosr_matrix full_mat, upper_mat, lower_mat;
+	double* per_rhs;
+	double* per_mainDiag_passive;
+	int* per_mainDiag_map;
+
+	vector<int> ut_lt_upper, ut_lt_lower, ut_ut_upper, ut_ut_lower;
+	int* ut_lt_rowPtr, *ut_ut_rowPtr;
+	double* upper_mat_values_copy;
+	double* lower_mat_values_copy;
+
+	void print_tridiagonal_matrix_system(double* data, int* misplaced_info, int rows);
+	void print_csr_matrix(coosr_matrix &matrix);
 
 private:
     void clear();
@@ -160,6 +189,23 @@ private:
      */
     void makeCsrMatrixGpu();
 #endif
+    /*
+	 * Create forward flow hines matrix
+	 */
+    void makeForwardFlowMatrix();
+    /*
+     * Create pervasive flow hines matrix
+     */
+    void makePervasiveFlowMatrix();
+    void storePervasiveMatrix(vector<vector<int> > &child_list);
+
+    // helpers for pervasive matrix
+    void exclusive_scan(int* data, int rows);
+    void generate_coosr_matrix(int num_comp, const vector<pair<long long int,double> > &full_tri, coosr_matrix &full_mat);
+    void construct_elimination_information(coosr_matrix full_mat, coosr_matrix upper_mat, coosr_matrix lower_mat,
+    			vector<int> &ut_lt_upper, vector<int> &ut_lt_lower, vector<int> &ut_ut_upper, vector<int> &ut_ut_lower ,
+    			int* ut_lt_rowPtr, int* ut_ut_rowPtr);
+
 };
 
 #endif // _HINES_MATRIX_H

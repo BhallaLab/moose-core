@@ -39,9 +39,6 @@ public:
     void setup( Id seed, double dt );
     void step( ProcPtr info );			///< Equivalent to process
     void reinit( ProcPtr info );
-#ifdef USE_CUDA
-    LookupColumn * get_column_d();
-#endif
 protected:
     /**
      * Solver parameters: exposed as fields in MOOSE
@@ -137,22 +134,7 @@ protected:
 		*   channels so that you can send out Calcium concentrations in only
 		*   those compartments. */
 #ifdef USE_CUDA    
-		double total_time[10];
-		int total_count;
-    int                       current_ca_position;
-    vector<ChannelData>		  channel_data_;
-    ChannelData 			  * channel_data_d;
-    void copy_to_device(double ** v_row_array, double * v_row_temp, int size);
-    LookupColumn			  *column_d;
-    int                       is_inited_;
-	void copy_data(std::vector<LookupColumn>& column,
-                             LookupColumn **            column_dd,
-                             int *                      is_inited,
-                             vector<ChannelData>&       channel_data,
-                             ChannelData **             channel_data_dd,
-                             const int                  x,
-                             const int                  y,
-                             const int                  z);
+    int step_num;
 
 	// CUDA Passive Data
 	vector<int> h_gate_expand_indices;
@@ -228,15 +210,15 @@ protected:
 	double* workspaceBuffer;
 
 	/* Get handle to the CUBLAS context */
-	cublasHandle_t cublas_handle = 0;
+	cublasHandle_t cublas_handle;
 	cublasStatus_t cublasStatus;
 
 	/* Get handle to the CUSPARSE context */
-	cusparseHandle_t cusparse_handle = 0;
-	cusparseMatDescr_t cusparse_descr = 0;
+	cusparseHandle_t cusparse_handle;
+	cusparseMatDescr_t cusparse_descr;
 
 	/* Get handle for CUSOLVER context*/
-	cusolverSpHandle_t cusolver_handle = 0;
+	cusolverSpHandle_t cusolver_handle;
 
 	// Compartment related
 
@@ -253,16 +235,11 @@ protected:
 	int* d_temp_keys;
 	double* d_temp_values;
 
-	int num_comps_with_chans = 0; // Stores number of compartments with >=1 channels.
+	int num_comps_with_chans; // Stores number of compartments with >=1 channels.
 
 	// temp code
-	bool is_initialized = false;
+	bool is_initialized;
 #endif
-
-	int num_time_prints = 0;
-	int num_um_prints = 0;
-	int num_profile_prints = 0;
-	int step_num = 0;
 
     static const int INSTANT_X;
     static const int INSTANT_Y;
@@ -302,6 +279,12 @@ private:
     void sendSpikes( ProcPtr info );
     void sendValues( ProcPtr info );
 
+    void updateForwardFlowMatrix();
+    void forwardFlowSolver();
+
+    void updatePervasiveFlowMatrix();
+    void pervasiveFlowSolver();
+
 #ifdef USE_CUDA
     // Hsolve GPU set up kernels
     void allocate_hsolve_memory_cuda();
@@ -322,20 +305,6 @@ private:
 
     void advance_calcium_cuda_wrapper();
 
-	void advanceChannel_gpu(
-    double *                          v_row,
-    vector<double>&                   caRow,
-    LookupColumn                    * column,                                           
-    LookupTable&                     vTable,
-    LookupTable&                     caTable,                       
-    double                          * istate,
-    ChannelData                     * channel,
-    double                          dt,
-    int                             set_size,
-    int                             channel_size,
-    int                             num_of_compartment,
-    float							&kernel_time
-    );
 #endif
 
 };
