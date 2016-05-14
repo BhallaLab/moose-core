@@ -11,8 +11,7 @@ notifications:
         recipients:
             - dilawar.s.rajput@gmail.com
             - bhalla@ncbs.res.in
-            - hrani@ncbs.res.in
-            - ray.subhasis@gmail.com
+            - dharmatv@instem.res.in
         on_success: change
         on_failure: always
 
@@ -31,6 +30,10 @@ before_script:
     - sudo apt-get install -qq  python3-numpy python3-matplotlib python3-dev
     - sudo apt-get install -qq libboost-all-dev
     - sudo apt-get install -qq libgsl0-dev
+    - wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1404/x86_64/cuda-repo-ubuntu1404_7.5-18_amd64.deb
+    - sudo dpkg -i cuda-repo*.deb
+    - sudo apt-get update 
+    - sudo apt-get install -qq cuda-toolkit-7-5
 
 before_install:
     - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
@@ -42,19 +45,6 @@ install:
 
 script:
     - sudo ldconfig /usr/lib64
-    - # First test is normal make scripts. (outdated).
-    - make 
-    - # Now test the cmake with gsl
-    - mkdir -p _GSL_BUILD && cd _GSL_BUILD && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python ..
+    - mkdir -p _CUDA_BUILD && cd _CUDA_BUILD 
+    - cmake -DDEBUG=ON -DWITH_CUDA=ON -DPYTHON_EXECUTABLE=/usr/bin/python ..
     - make && ctest --output-on-failure
-    - cd .. # Build with python3.
-    - mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 ..
-    - make && ctest --output-on-failure
-    - cd .. # Now with boost.
-    - mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python ..
-    - make && ctest --output-on-failure
-    - cd .. # Now with boost and python3.
-    - mkdir -p _BOOST_BUILD2 && cd _BOOST_BUILD2 && cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 ..
-    - make && ctest --output-on-failure
-    - cd ..
-    - echo "All done. Phew"

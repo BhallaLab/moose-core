@@ -27,7 +27,6 @@
 
 #include "CudaGlobal.h"
 #include "RateLookup.h"
-#include "Gpu_timer.h"
 
 class HSolveActive: public HSolvePassive
 {
