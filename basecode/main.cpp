@@ -43,8 +43,10 @@
 
 #ifdef DO_UNIT_TESTS
 #include <iomanip>
+int testIndex = 0;
 #define MOOSE_TEST(name,  f ) \
-    cout << name; \
+    cout << "[TEST " << setw(2) << testIndex << "]" << name; \
+    testIndex += 1; \
     f; \
     cout << std::right << "[OK]" << endl; \
 
@@ -356,13 +358,13 @@ void nonMpiTests( Shell* s )
 void processTests( Shell* s )
 {
 #ifdef DO_UNIT_TESTS
-    testSchedulingProcess();
-    testBuiltinsProcess();
-    // testKineticsProcess();
-    testBiophysicsProcess();
-    // testKineticSolversProcess();
-    // testSimManager();
-    testSigNeurProcess();
+    MOOSE_TEST( "testSchedulingProcess", testSchedulingProcess());
+    MOOSE_TEST( "testBuiltinsProcess", testBuiltinsProcess());
+    // MOOSE_TEST( "testKineticsProcess", testKineticsProcess());
+    MOOSE_TEST( "testBiophysicsProcess", testBiophysicsProcess());
+    // MOOSE_TEST( "testKineticSolversProcess", testKineticSolversProcess());
+    // MOOSE_TEST( "testSimManager", testSimManager());
+    MOOSE_TEST( "testSigNeurProcess", testSigNeurProcess());
 #endif
 }
 
@@ -373,14 +375,10 @@ void processTests( Shell* s )
 void mpiTests()
 {
 #ifdef DO_UNIT_TESTS
-    testMpiMsg();
-    cout << "." << flush;
-    testMpiShell();
-    cout << "." << flush;
-    testMpiBuiltins();
-    cout << "." << flush;
-    testMpiScheduling();
-    cout << "." << flush;
+    MOOSE_TEST( "testMpiMsg", testMpiMsg());
+    MOOSE_TEST( "testMpiShell", testMpiShell());
+    MOOSE_TEST( "testMpiBuiltins", testMpiBuiltins());
+    MOOSE_TEST( "testMpiScheduling", testMpiScheduling());
 #endif
 }
 #if ! defined(PYMOOSE) && ! defined(MOOSE_LIB)

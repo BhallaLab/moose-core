@@ -438,4 +438,5 @@ void testBuiltinsProcess()
 void testMpiBuiltins( )
 {
  	// testMpiFibonacci();
+    cout << "." << flush;
 }
