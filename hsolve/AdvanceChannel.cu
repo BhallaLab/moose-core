@@ -1,3 +1,4 @@
+#ifdef USE_CUDA
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
@@ -8,7 +9,6 @@
 #include "RateLookup.h"
 #include "HSolveActive.h"
 
-#ifdef USE_CUDA
 
 #include "Gpu_timer.h"
 
