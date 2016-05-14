@@ -198,15 +198,8 @@ protected:
 	int* d_chan_rowPtr;
 
 	// Conjugate Gradient based GPU solver
-	double* d_Vmid, *d_p, *d_Ax, *d_r, *d_x;
+	double* d_Vmid;
 
-	// LU based CPU solver
-	csrluInfoHost_t infoA;
-	size_t internalDataInBytes;
-	size_t workspaceInBytes;
-
-	double* internalBuffer;
-	double* workspaceBuffer;
 
 	/* Get handle to the CUBLAS context */
 	cublasHandle_t cublas_handle;
@@ -216,8 +209,6 @@ protected:
 	cusparseHandle_t cusparse_handle;
 	cusparseMatDescr_t cusparse_descr;
 
-	/* Get handle for CUSOLVER context*/
-	cusolverSpHandle_t cusolver_handle;
 
 	// Compartment related
 
@@ -299,8 +290,6 @@ private:
 
     void update_matrix_cuda_wrapper();
     void update_csrmatrix_cuda_wrapper();
-
-    void hinesMatrixSolverWrapper();
 
     void advance_calcium_cuda_wrapper();
 

@@ -1,7 +1,7 @@
 #ifndef __CUDA_GLOBAL_H__
 #define __CUDA_GLOBAL_H__
 
-//#define USE_CUDA
+#define USE_CUDA
 
 #ifdef USE_CUDA
 
@@ -19,8 +19,6 @@
 #include <cusparse_v2.h>
 #include <cublas_v2.h>
 
-#include <cusolverSp.h>
-#include <cusolverSp_LOWLEVEL_PREVIEW.h>
 
 typedef unsigned int u32;
 typedef unsigned long long u64;
