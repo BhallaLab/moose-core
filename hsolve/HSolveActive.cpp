@@ -72,7 +72,6 @@ HSolveActive::HSolveActive()
 	cublas_handle = 0;
 	cusparse_handle = 0;
 	cusparse_descr = 0;
-	cusolver_handle = 0;
 
 	num_comps_with_chans = 0;
 	is_initialized = false;
@@ -135,7 +134,6 @@ void HSolveActive::step( ProcPtr info )
 		cudaMemcpy(d_Vmid, &(VMid_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 		cudaMemcpy(d_V, &(V_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 
-		//hinesMatrixSolverWrapper();
 	solverTimer.Stop();
 	solverTime = solverTimer.Elapsed();
 
@@ -603,36 +601,11 @@ void HSolveActive::advanceChannels( double dt )
 		// Setting up cusparse information
 		cusparseCreate(&cusparse_handle);
 		cublasCreate_v2(&cublas_handle);
-		cusolverSpCreate(&cusolver_handle);
 
 		// create and setup matrix descriptors A, B & C
 		cusparseCreateMatDescr(&cusparse_descr);
 		cusparseSetMatType(cusparse_descr, CUSPARSE_MATRIX_TYPE_GENERAL);
 		cusparseSetMatIndexBase(cusparse_descr, CUSPARSE_INDEX_BASE_ZERO);
-
-		cusolverStatus_t cusolver_status;
-
-		// Analyzing the matrix structure
-	 	cusolver_status =  cusolverSpCreateCsrluInfoHost(&infoA); // Creating info of A
-		cusolver_status = cusolverSpXcsrluAnalysisHost(cusolver_handle,
-														nCompt_,
-														mat_nnz,
-														cusparse_descr,
-														h_mat_rowPtr, h_mat_colIndex,
-														infoA);
-
-		// Getting the memory requirements for LU factorization.
-
-		cusolver_status = cusolverSpDcsrluBufferInfoHost(cusolver_handle,
-														nCompt_,
-														mat_nnz,
-														cusparse_descr,
-														h_mat_values, h_mat_rowPtr, h_mat_colIndex,
-														infoA, &internalDataInBytes, &workspaceInBytes);
-
-		// Allocate memory for CPU solver.
-		internalBuffer = (double*) malloc(internalDataInBytes);
-		workspaceBuffer = (double*) malloc(workspaceInBytes);
 
 		is_initialized = true;
 	}
@@ -818,10 +791,6 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 
 	// Conjugate Gradient related
 	cudaMalloc((void**)&d_Vmid, nCompt_*sizeof(double));
-	cudaMalloc((void**)&d_p, nCompt_*sizeof(double));
-	cudaMalloc((void**)&d_Ax, nCompt_*sizeof(double));
-	cudaMalloc((void**)&d_r, nCompt_*sizeof(double));
-	cudaMalloc((void**)&d_x, nCompt_*sizeof(double));
 
 	// Intermediate data for computation
 	cudaMalloc((void**)&d_V_rows, num_compts*sizeof(int));

@@ -13,7 +13,7 @@ if(ENABLE_CUDA)
     INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS})
     CUDA_COMPILE(HSOLVE_CUDA_OBJS ${CUDA_SRC})
     CUDA_ADD_LIBRARY(hsolve_cuda ${HSOLVE_CUDA_OBJS})
-    TARGET_LINK_LIBRARIES(hsolve_cuda ${CUDA_LIBRARIES} ${CUDA_cusparse_LIBRARY} ${CUDA_cublas_LIBRARY} "/usr/local/cuda-7.5/lib64/libcusolver.so")
+    TARGET_LINK_LIBRARIES(hsolve_cuda ${CUDA_LIBRARIES} ${CUDA_cusparse_LIBRARY} ${CUDA_cublas_LIBRARY})
     MESSAGE( STATUS "TODO: Fix hardcoded path in target_link_libraries" )
 endif(ENABLE_CUDA)
 
