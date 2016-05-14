@@ -773,7 +773,7 @@ void SteadyState::settle( bool forceSetup )
     for( size_t i = 0; i < numVarPools_; ++i )
         init[i] = max( 0.0, sqrt(ss->ri.nVec[i]) );
 
-    ss->initialize<vector<double>>( init );
+    ss->initialize<vector<double> >( init );
 
     // Fill up boundary condition values
     if ( reassignTotal_ )   // The user has defined new conservation values.
@@ -810,7 +810,7 @@ void SteadyState::settle( bool forceSetup )
             ksolve, "nVec", 0, ss->ri.nVec 
             );
         // Check what we set
-        auto t = LookupField< unsigned int, vector< double > >::get(
+        vector<double> t = LookupField< unsigned int, vector< double > >::get(
              ksolve,"nVec", 0 
              );
 

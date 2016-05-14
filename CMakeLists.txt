@@ -125,11 +125,11 @@ if(COMPILER_WARNS_STRICT_ALIASING)
 endif(COMPILER_WARNS_STRICT_ALIASING)
 
 
-if(COMPILER_SUPPORTS_CXX11)
+if(COMPILER_SUPPORTS_CXX11 AND (NOT WITH_CUDA))
     message(STATUS "Your compiler supports c++11 features. Enabling it")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     add_definitions( -DENABLE_CPP11 )
-elseif(COMPILER_SUPPORTS_CXX0X)
+elseif(COMPILER_SUPPORTS_CXX0X AND (NOT WITH_CUDA))
     message(STATUS "Your compiler supports c++0x features. Enabling it")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
     add_definitions( -DENABLE_CXX11 )
@@ -146,38 +146,16 @@ endif()
 
 option(WITH_CUDA "Enable GPU acceleration" ON)
 if(WITH_CUDA)
-    FIND_PACKAGE(CUDA)
-    IF(CUDA_FOUND)
+    find_package(CUDA)
+    if(CUDA_FOUND)
         MESSAGE(STATUS "Using CUDA ${CUDA_VERSION}")
-    ELSE()
+    else(CUDA_FOUND)
         MESSAGE(FATAL_ERROR "I could not locate CUDA!\n"
         "If CUDA is installed in non-standard place use -DCUDA_TOOLKIT_ROOT_DIR"
         " to specify the PATH to CUDA e.g. \n"
         "   $ cmake -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-7.5 .." 
         )
-    ENDIF()
-else()
-    ## Enable/Disable 2011 stupport.
-    ## CUDA DOES NOT SUPPORT IT YET.
-    include(CheckCXXCompilerFlag)
-
-    CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-    CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-
-    if(COMPILER_SUPPORTS_CXX11)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    elseif(COMPILER_SUPPORTS_CXX0X)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-    else()
-        message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-    endif()
-endif()
-
-# STATS INSIDE MOOSE
-option(ENABLE_LOGGER  "Enable MOOSE logger" OFF)
-if(ENABLE_LOGGER)
-    message("++ LOGGER ENABLED")
-    add_definitions(-DENABLE_LOGGER)
+    endif(CUDA_FOUND)
 endif()
 
 # Default macros
