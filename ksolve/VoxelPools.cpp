@@ -368,19 +368,21 @@ cleaner.
      *  file BoostSystem.h), the you may run into troble. Have a look at this 
      *  http://boostw.boost.org/doc/libs/1_56_0/boost/numeric/odeint/integrate/integrate.hpp
      *-----------------------------------------------------------------------------
-     if ( status != GSL_SUCCESS ) {
-     cout << "Error: VoxelPools::advance: GSL integration error at time "
-     << T << "\n";
-     cout << "Error info: " << status << ", " << 
-     gsl_strerror( status ) << endl;
-     if ( status == GSL_EMAXITER ) 
-     cout << "Max number of steps exceeded\n";
-     else if ( status == GSL_ENOPROG ) 
-     cout << "Timestep has gotten too small\n";
-     else if ( status == GSL_EBADFUNC ) 
-     cout << "Internal error\n";
-     assert( 0 );
-     }
+     */
+    if ( status != GSL_SUCCESS ) 
+    {
+        cout << "Error: VoxelPools::advance: GSL integration error at time "
+            << T << "\n";
+        cout << "Error info: " << status << ", " << 
+            gsl_strerror( status ) << endl;
+        if ( status == GSL_EMAXITER ) 
+            cout << "Max number of steps exceeded\n";
+        else if ( status == GSL_ENOPROG ) 
+            cout << "Timestep has gotten too small\n";
+        else if ( status == GSL_EBADFUNC ) 
+            cout << "Internal error\n";
+        assert( 0 );
+    }
 
     //	   int status;
     //	   int GSLSUCCESS = 0;
@@ -393,7 +395,7 @@ cleaner.
     //
     //
     //
-    //    /* Determine integration direction sign */
+        /* Determine integration direction sign */
     //
     //	    while (t1 - T > 0.0)
     //	    {

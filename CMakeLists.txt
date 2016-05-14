@@ -80,6 +80,7 @@ option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" ON)
 option(WITH_CURSES "Enable ncurses support (deprecated)" OFF)
+option(WITH_GSL "Enable GSL library" ON)
 
 # If SBML is available, it will automaticall enable the support. If ON, then
 # libSBML must be present.
@@ -209,7 +210,10 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
 if(WITH_BOOST)
     set(WITH_GSL OFF)
-endif(WITH_BOOST)
+    add_definitions( -DUSE_BOOST )
+elseif(WITH_GSL)
+    add_definitions( -DUSE_GSL )
+endif()
 
 # If this variable is used while packaging; we build this project using another
 # cmake script and pass the location of SBML static library using this variable.
