@@ -459,13 +459,10 @@ add_subdirectory(intfire)
 
 # These are always shared libraries.
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
-<<<<<<< HEAD
-=======
 if(WITH_BOOST)
     list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES})
     list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
 endif(WITH_BOOST)
->>>>>>> 89981e4956d9fe7457b0785b7ba28922711bf2bc
 if(WITH_MPI)
     LIST(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
 endif(WITH_MPI)
@@ -502,14 +499,6 @@ if(WITH_GSL)
     endif()
 endif()
 
-<<<<<<< HEAD
-=======
-# Deprecated.
-#if(READLINE_FOUND AND TERMCAP_FOUND)
-#    list(APPEND SYSTEM_SHARED_LIBS ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
-#endif()
-
->>>>>>> 89981e4956d9fe7457b0785b7ba28922711bf2bc
 pkg_check_modules(MUPARSER muparser)
 if(MUPARSER_FOUND)
     message(STATUS "Using system muparser ${MUPARSER_VERSION}")
