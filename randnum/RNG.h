@@ -110,7 +110,7 @@ class RNG
          * @param a Lower limit (inclusive)
          * @param b Upper limit (exclusive).
          */
-        T uniform( const T a, const T b)
+        T uniform( const T& a, const T& b)
         {
             size_t maxInt = std::numeric_limits<int>::max();
 #if defined(USE_BOOST) || defined(ENABLE_CPP11)
