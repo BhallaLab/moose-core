@@ -58,24 +58,11 @@ public:
 	void row(double x,LookupRow& row );
 
 #ifdef USE_CUDA
-	void row(double x,double& row);
-	void row_gpu(vector<double>::iterator& x, 
-				 double ** row, 
-				 unsigned int size);
-	void row_gpu(vector<double>::iterator& x, 
-						vector<LookupRow>::iterator& row, 
-						unsigned int size);
-    unsigned int get_num_of_points();
     unsigned int get_num_of_columns();
-    vector<double> get_table();	
+    vector<double> get_table();
     double get_min();
     double get_max();
-    double get_dx();		
-    double * get_state_d();
-    double * get_table_d();
-    bool is_set();	
-    bool set_is_set(bool set_val);	
-    void copy_table();
+    double get_dx();
 #endif
 	/// Actually performs the lookup and the linear interpolation
 	void lookup(
@@ -95,13 +82,6 @@ private:
 	double               dx_;			///< This is the smallest difference:
 										///< (max - min) / nDivs
 	unsigned int         nColumns_;		///< (# columns) = 2 * (# species)
-
-#ifdef USE_CUDA
-	double				 *state_d;		///< device array of istate
-	double 				 *table_d;		///< device array of the flattened table
-	bool is_set_;
-#endif	
-
 
 };
 

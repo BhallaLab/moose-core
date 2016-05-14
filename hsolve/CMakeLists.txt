@@ -28,7 +28,7 @@ add_library(hsolve
     HSolvePassive.cpp
     HSolveStruct.cpp
     HSolveUtils.cpp
-    #RateLookup.cpp
+    RateLookup.cpp
     testHSolve.cpp
     ZombieCaConc.cpp
     ZombieCompartment.cpp

@@ -39,9 +39,6 @@ public:
     void setup( Id seed, double dt );
     void step( ProcPtr info );			///< Equivalent to process
     void reinit( ProcPtr info );
-#ifdef USE_CUDA
-    LookupColumn * get_column_d();
-#endif
 protected:
     /**
      * Solver parameters: exposed as fields in MOOSE
@@ -138,22 +135,6 @@ protected:
 		*   those compartments. */
 #ifdef USE_CUDA    
     int step_num;
-	double total_time[10];
-	int total_count;
-    int                       current_ca_position;
-    vector<ChannelData>		  channel_data_;
-    ChannelData 			  * channel_data_d;
-    void copy_to_device(double ** v_row_array, double * v_row_temp, int size);
-    LookupColumn			  *column_d;
-    int                       is_inited_;
-	void copy_data(std::vector<LookupColumn>& column,
-                             LookupColumn **            column_dd,
-                             int *                      is_inited,
-                             vector<ChannelData>&       channel_data,
-                             ChannelData **             channel_data_dd,
-                             const int                  x,
-                             const int                  y,
-                             const int                  z);
 
 	// CUDA Passive Data
 	vector<int> h_gate_expand_indices;
@@ -324,20 +305,6 @@ private:
 
     void advance_calcium_cuda_wrapper();
 
-	void advanceChannel_gpu(
-    double *                          v_row,
-    vector<double>&                   caRow,
-    LookupColumn                    * column,                                           
-    LookupTable&                     vTable,
-    LookupTable&                     caTable,                       
-    double                          * istate,
-    ChannelData                     * channel,
-    double                          dt,
-    int                             set_size,
-    int                             channel_size,
-    int                             num_of_compartment,
-    float							&kernel_time
-    );
 #endif
 
 };

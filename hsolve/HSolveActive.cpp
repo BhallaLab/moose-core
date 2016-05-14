@@ -65,13 +65,6 @@ HSolveActive::HSolveActive()
     caAdvance_ = 1;
     
 #ifdef USE_CUDA    
-	current_ca_position = 0;
-	is_inited_ = 0;
-	for(int i = 0; i < 10; ++i)
-	{
-		total_time[i] = 0;
-	}
-	total_count = 0;
 
 	// Initializing varibales
 	step_num = 0;
@@ -106,7 +99,6 @@ void HSolveActive::step( ProcPtr info )
     }
     
 #ifdef USE_CUDA
-    total_count ++;
     step_num++;
 #endif
     u64 start, end;
@@ -1061,10 +1053,7 @@ void HSolveActive::transfer_memory2cpu_cuda(){
 	cudaSafeCall(cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost));
 }
 
-LookupColumn * HSolveActive::get_column_d()
-{
-	return column_d;
-}
+
 #endif
 
 /**
