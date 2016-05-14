@@ -16,7 +16,6 @@
 #include "Clock.h"
 #include "StreamerBase.h"
 
-
 // Write to numpy arrays.
 #include "../utility/cnpy.hpp"
 
