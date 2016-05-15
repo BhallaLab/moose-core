@@ -732,7 +732,7 @@ endif()
 
 ############################ CTEST ######################################
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_ctest.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/MooseTests.cmake)
 
 ############################ CPACK ######################################
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_cpack.cmake)
