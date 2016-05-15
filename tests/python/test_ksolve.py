@@ -34,7 +34,6 @@ stoich.ksolve = ksolve
 stoich.path = '/compt/##' 
 
 moose.reinit()
-print pools[0].conc, pools[1].conc
 t1 = time.time()
 moose.start( 10 )
 print('[INFO] Time taken %s' % (time.time() - t1 ))
