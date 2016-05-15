@@ -16,6 +16,7 @@ class GssaVoxelPools: public VoxelPoolsBase
 {
 public:
     GssaVoxelPools();
+
     virtual ~GssaVoxelPools();
 
 
@@ -99,7 +100,8 @@ private:
     /**
      * @brief RNG.
      */
-    moose::RNG<double> rng_;
+    moose::RNG<double>* rng_;
+
 };
 
 #endif	// _GSSA_VOXEL_POOLS_H
