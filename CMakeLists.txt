@@ -1,6 +1,5 @@
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
-include(CheckIncludeFileCXX)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
@@ -10,7 +9,11 @@ if(COMMAND cmake_policy)
     endif(POLICY CMP0050)
 endif(COMMAND cmake_policy)
 
-project(moose)
+project(MOOSE)
+
+include(CheckMooseCompiler.cmake)
+include(CheckIncludeFileCXX)
+include(FindPkgConfig)
 
 # Set moose version
 # Get the latest abbreviated commit hash of the working branch
@@ -22,7 +25,6 @@ execute_process(
 )
 add_definitions( -DMOOSE_VERSION="${GIT_VERSION_OUTPUT}")
 
-include(FindPkgConfig)
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -102,42 +104,6 @@ option(HDF5_STATIC_HOME
 ################################# CMKAE MACROS #################################
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
-
-########################### COMPILER MACROS #####################################
-
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG( "-std=c++11" COMPILER_SUPPORTS_CXX11 )
-CHECK_CXX_COMPILER_FLAG( "-std=c++0x" COMPILER_SUPPORTS_CXX0X )
-CHECK_CXX_COMPILER_FLAG( "-Wno-strict-aliasing" COMPILER_WARNS_STRICT_ALIASING )
-
-# Turn warning to error: Not all of the options may be supported on all
-# versions of compilers. be careful here.
-add_definitions(-Wall
-    #-Wno-return-type-c-linkage
-    -Wno-unused-variable      
-    -Wno-unused-function
-    #-Wno-unused-private-field
-    )
-add_definitions(-fPIC)
-if(COMPILER_WARNS_STRICT_ALIASING)
-    add_definitions( -Wno-strict-aliasing )
-endif(COMPILER_WARNS_STRICT_ALIASING)
-
-
-if(COMPILER_SUPPORTS_CXX11)
-    message(STATUS "Your compiler supports c++11 features. Enabling it")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    add_definitions( -DENABLE_CPP11 )
-elseif(COMPILER_SUPPORTS_CXX0X)
-    message(STATUS "Your compiler supports c++0x features. Enabling it")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-    add_definitions( -DENABLE_CXX11 )
-    add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS -DBOOST_NO_SCOPED_ENUMS )
-else()
-    add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS -DBOOST_NO_SCOPED_ENUMS )
-    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
-endif()
-
 
 ############################ BUILD CONFIGURATION #################################
 
