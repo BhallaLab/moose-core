@@ -190,7 +190,7 @@ namespace moose {
                 }
             }
             else if('\n' == msg[i])
-                ss << "\n + ";
+                ss << "\n | ";
             else
                 ss << msg[i];
         }

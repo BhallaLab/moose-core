@@ -163,7 +163,7 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
         assert( retVec.size() == numSynVec[i] );
         for ( unsigned int j = 0; j < numSynVec[i]; ++j )
         {
-            assert( doubleEq( retVec[j], weight[i][j] ) );
+            ASSERT_DOUBLE_EQ("", retVec[j], weight[i][j] );
         }
     }
 
@@ -196,35 +196,35 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
         double retVm902 = Field< double >::get( ObjId( fire, 902 ), "Vm" );
 
         /*
-        assert( doubleEq( retVm100, 0.00734036 ) );
-        assert( doubleEq( retVm101, 0.246818 ) );
-        assert( doubleEq( retVm102, 0.200087 ) );
-        assert( doubleEq( retVm99, 0.0095779083 ) );
-        assert( doubleEq( retVm900, 0.1150573482 ) );
-        assert( doubleEq( retVm901, 0.289321534 ) );
-        assert( doubleEq( retVm902, 0.01011172486 ) );
-        assert( doubleEq( retVm100, 0.008593194687366486 ) );
-        assert( doubleEq( retVm101, 0.24931678857743744 ) );
-        assert( doubleEq( retVm102, 0.19668269662484533 ) );
-        assert( doubleEq( retVm99, 0.00701607616202429 ) );
-        assert( doubleEq( retVm900, 0.12097053045094018 ) );
-        assert( doubleEq( retVm901, 0.2902593120492995 ) );
-        assert( doubleEq( retVm902, 0.00237157280699805 ) );
-        assert( doubleEq( retVm100, 0.015766608829826119 ) );
-        assert( doubleEq( retVm101, 0.24405557875013356 ) );
-        assert( doubleEq( retVm102, 0.20878261213859917 ) );
-        assert( doubleEq( retVm99, 0.0081746848675747306 ) );
-        assert( doubleEq( retVm900, 0.12525297735741736 ) );
-        assert( doubleEq( retVm901, 0.28303358631241327 ) );
-        assert( doubleEq( retVm902, 0.0096374021108587178 ) );
+        ASSERT_DOUBLE_EQ("", retVm100, 0.00734036 );
+        ASSERT_DOUBLE_EQ("", retVm101, 0.246818 );
+        ASSERT_DOUBLE_EQ("", retVm102, 0.200087 );
+        ASSERT_DOUBLE_EQ("", retVm99, 0.0095779083 );
+        ASSERT_DOUBLE_EQ("", retVm900, 0.1150573482 );
+        ASSERT_DOUBLE_EQ("", retVm901, 0.289321534 );
+        ASSERT_DOUBLE_EQ("", retVm902, 0.01011172486 );
+        ASSERT_DOUBLE_EQ("", retVm100, 0.008593194687366486 );
+        ASSERT_DOUBLE_EQ("", retVm101, 0.24931678857743744 );
+        ASSERT_DOUBLE_EQ("", retVm102, 0.19668269662484533 );
+        ASSERT_DOUBLE_EQ("", retVm99, 0.00701607616202429 );
+        ASSERT_DOUBLE_EQ("", retVm900, 0.12097053045094018 );
+        ASSERT_DOUBLE_EQ("", retVm901, 0.2902593120492995 );
+        ASSERT_DOUBLE_EQ("", retVm902, 0.00237157280699805 );
+        ASSERT_DOUBLE_EQ("", retVm100, 0.015766608829826119 );
+        ASSERT_DOUBLE_EQ("", retVm101, 0.24405557875013356 );
+        ASSERT_DOUBLE_EQ("", retVm102, 0.20878261213859917 );
+        ASSERT_DOUBLE_EQ("", retVm99, 0.0081746848675747306 );
+        ASSERT_DOUBLE_EQ("", retVm900, 0.12525297735741736 );
+        ASSERT_DOUBLE_EQ("", retVm901, 0.28303358631241327 );
+        ASSERT_DOUBLE_EQ("", retVm902, 0.0096374021108587178 );
         */
-        assert( doubleEq( retVm100, 0.069517018453329804 ) );
-        assert( doubleEq( retVm101, 0.32823493598699577 ) );
-        assert( doubleEq( retVm102, 0.35036493874475361 ) );
-        assert( doubleEq( retVm99,  0.04087358817787364 ) );
-        assert( doubleEq( retVm900, 0.26414663635984065 ) );
-        assert( doubleEq( retVm901, 0.39864519810259352 ) );
-        assert( doubleEq( retVm902, 0.04818717439429359 ) );
+        ASSERT_DOUBLE_EQ("", retVm100, 0.069517018453329804 );
+        ASSERT_DOUBLE_EQ("", retVm101, 0.32823493598699577 );
+        ASSERT_DOUBLE_EQ("", retVm102, 0.35036493874475361 );
+        ASSERT_DOUBLE_EQ("", retVm99,  0.04087358817787364 );
+        ASSERT_DOUBLE_EQ("", retVm900, 0.26414663635984065 );
+        ASSERT_DOUBLE_EQ("", retVm901, 0.39864519810259352 );
+        ASSERT_DOUBLE_EQ("", retVm902, 0.04818717439429359 );
 
     }
     /*
@@ -418,52 +418,52 @@ void testHHGateLookup()
     assert( gate.A_.size() == 2 );
     assert( gate.B_.size() == 2 );
     assert( gate.getDivs( er, &q ) == 1 );
-    assert( doubleEq( gate.invDx_, 0.25 ) );
+    ASSERT_DOUBLE_EQ("", gate.invDx_, 0.25 );
     gate.A_[0] = 0;
     gate.A_[1] = 4;
     gate.lookupByInterpolation_ = 0;
-    assert( doubleEq( gate.lookupA( -3 ), 0 ) );
-    assert( doubleEq( gate.lookupA( -2 ), 0 ) );
-    assert( doubleEq( gate.lookupA( -1.5 ), 0 ) );
-    assert( doubleEq( gate.lookupA( -1 ), 0 ) );
-    assert( doubleEq( gate.lookupA( -0.5 ), 0 ) );
-    assert( doubleEq( gate.lookupA( 0 ), 0 ) );
-    assert( doubleEq( gate.lookupA( 1 ), 0 ) );
-    assert( doubleEq( gate.lookupA( 2 ), 4 ) );
-    assert( doubleEq( gate.lookupA( 3 ), 4 ) );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( -3 ), 0 );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( -2 ), 0 );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( -1.5 ), 0 );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( -1 ), 0 );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( -0.5 ), 0 );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( 0 ), 0 );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( 1 ), 0 );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( 2 ), 4 );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( 3 ), 4 );
     gate.lookupByInterpolation_ = 1;
-    assert( doubleEq( gate.lookupA( -3 ), 0 ) );
-    assert( doubleEq( gate.lookupA( -2 ), 0 ) );
-    assert( doubleEq( gate.lookupA( -1.5 ), 0.5 ) );
-    assert( doubleEq( gate.lookupA( -1 ), 1 ) );
-    assert( doubleEq( gate.lookupA( -0.5 ), 1.5 ) );
-    assert( doubleEq( gate.lookupA( 0 ), 2 ) );
-    assert( doubleEq( gate.lookupA( 1 ), 3 ) );
-    assert( doubleEq( gate.lookupA( 2 ), 4 ) );
-    assert( doubleEq( gate.lookupA( 3 ), 4 ) );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( -3 ), 0 );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( -2 ), 0 );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( -1.5 ), 0.5 );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( -1 ), 1 );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( -0.5 ), 1.5 );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( 0 ), 2 );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( 1 ), 3 );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( 2 ), 4 );
+    ASSERT_DOUBLE_EQ("", gate.lookupA( 3 ), 4 );
 
     gate.B_[0] = -1;
     gate.B_[1] = 1;
     double x = 0;
     double y = 0;
     gate.lookupBoth( -3 , &x, &y );
-    assert( doubleEq( x, 0 ) );
-    assert( doubleEq( y, -1 ) );
+    ASSERT_DOUBLE_EQ("", x, 0 );
+    ASSERT_DOUBLE_EQ("", y, -1 );
     gate.lookupBoth( -2 , &x, &y );
-    assert( doubleEq( x, 0 ) );
-    assert( doubleEq( y, -1 ) );
+    ASSERT_DOUBLE_EQ("", x, 0 );
+    ASSERT_DOUBLE_EQ("", y, -1 );
     gate.lookupBoth( -0.5, &x, &y );
-    assert( doubleEq( x, 1.5 ) );
-    assert( doubleEq( y, -0.25 ) );
+    ASSERT_DOUBLE_EQ("", x, 1.5 );
+    ASSERT_DOUBLE_EQ("", y, -0.25 );
     gate.lookupBoth( 0, &x, &y );
-    assert( doubleEq( x, 2 ) );
-    assert( doubleEq( y, 0 ) );
+    ASSERT_DOUBLE_EQ("", x, 2 );
+    ASSERT_DOUBLE_EQ("", y, 0 );
     gate.lookupBoth( 1.5, &x, &y );
-    assert( doubleEq( x, 3.5 ) );
-    assert( doubleEq( y, 0.75 ) );
+    ASSERT_DOUBLE_EQ("", x, 3.5 );
+    ASSERT_DOUBLE_EQ("", y, 0.75 );
     gate.lookupBoth( 100000, &x, &y );
-    assert( doubleEq( x, 4 ) );
-    assert( doubleEq( y, 1 ) );
+    ASSERT_DOUBLE_EQ("", x, 4 );
+    ASSERT_DOUBLE_EQ("", y, 1 );
 
     cout << "." << flush;
 }
@@ -510,8 +510,8 @@ void testHHGateSetup()
     {
         double ma = Na_m_A( x );
         double mb = Na_m_B( x );
-        assert( doubleEq( gate.A_[i], ma ) );
-        assert( doubleEq( gate.B_[i], ma + mb ) );
+        ASSERT_DOUBLE_EQ("", gate.A_[i], ma );
+        ASSERT_DOUBLE_EQ("", gate.B_[i], ma + mb );
         x += dx;
     }
 
@@ -631,8 +631,8 @@ Id makeSquid()
     {
         double ha = Na_h_A( x );
         double hb = Na_h_B( x );
-        assert( doubleEq( A[i], ha ) );
-        assert( doubleEq( B[i], ha + hb ) );
+        ASSERT_DOUBLE_EQ("", A[i], ha );
+        ASSERT_DOUBLE_EQ("", B[i], ha + hb );
         x += dx;
     }
 
@@ -675,8 +675,8 @@ Id makeSquid()
         {
             // Annoying near-misses due to different ways of handling
             // singularity. I think the method in the HHGate is better.
-            assert( doubleEq( A[i], na ) );
-            assert( doubleEq( B[i], na + nb ) );
+            ASSERT_DOUBLE_EQ("", A[i], na );
+            ASSERT_DOUBLE_EQ("", B[i], na + nb );
         }
         x += dx;
     }
@@ -900,7 +900,7 @@ void testMarkovGslSolver()
         {
             cout << "testMarkovGslSolver: sample=" << sampleCurrent[i]*1e25 << " calculated=" << vec[i]*1e25 << endl;
         }
-        assert( doubleEq( sampleCurrent[i] * 1e25, vec[i] * 1e25 ) );
+        ASSERT_DOUBLE_EQ("", sampleCurrent[i] * 1e25, vec[i] * 1e25 );
     }
     //Currents involved here are incredibly small. Scaling them up is necessary
     //for the doubleEq function to do its job.
@@ -1343,18 +1343,18 @@ void testSynChan()
 
     double dret;
     dret = Field< double >::get( ObjId( synId, 0, 0 ), "weight" );
-    assert( doubleEq( dret, 1.0 ) );
+    ASSERT_DOUBLE_EQ("", dret, 1.0 );
     dret = Field< double >::get( ObjId( synId, 0, 0 ), "delay" );
-    assert( doubleEq( dret, 0.001 ) );
+    ASSERT_DOUBLE_EQ("", dret, 0.001 );
     dret = Field< double >::get( ObjId( synId, 0, 1 ), "weight" );
-    assert( doubleEq( dret, 1.0 ) );
+    ASSERT_DOUBLE_EQ("", dret, 1.0 );
     dret = Field< double >::get( ObjId( synId, 0, 1 ), "delay" );
-    assert( doubleEq( dret, 0.01 ) );
+    ASSERT_DOUBLE_EQ("", dret, 0.01 );
 
     dret = SetGet1< double >::set( sgId1, "Vm", 2.0 );
     dret = SetGet1< double >::set( sgId2, "Vm", 2.0 );
     dret = Field< double >::get( synChanId, "Gk" );
-    assert( doubleEq( dret, 0.0 ) );
+    ASSERT_DOUBLE_EQ("", dret, 0.0 );
 
     /////////////////////////////////////////////////////////////////////
 
@@ -1460,13 +1460,13 @@ void testNMDAChan()
 
     double dret;
     dret = Field< double >::get( ObjId( synId, DataId( 0 ) ), "weight" );
-    assert( doubleEq( dret, 1.0 ) );
+    ASSERT_DOUBLE_EQ("", dret, 1.0 );
     dret = Field< double >::get( ObjId( synId, DataId( 0 ) ), "delay" );
-    assert( doubleEq( dret, 0.001 ) );
+    ASSERT_DOUBLE_EQ("", dret, 0.001 );
 
     dret = SetGet1< double >::set( sgId1, "Vm", 2.0 );
     dret = Field< double >::get( synChanId, "Gk" );
-    assert( doubleEq( dret, 0.0 ) );
+    ASSERT_DOUBLE_EQ("", dret, 0.0 );
 
     /////////////////////////////////////////////////////////////////////
 
@@ -1577,23 +1577,23 @@ static void testNeuronBuildTree()
     vector< double > p = Field< vector< double > >::get(
                              nid, "pathDistanceFromSoma" );
     assert( e.size() == 4 );
-    assert( doubleEq( e[0], 0.0 ) );
+    ASSERT_DOUBLE_EQ("", e[0], 0.0 );
     double dL = 100e-6 / sqrt( dendDia /4.0 );
-    assert( doubleEq( e[1], dL ) );
+    ASSERT_DOUBLE_EQ("", e[1], dL );
     double bL1 = dL + 200e-6 / sqrt( branchDia /4.0 );
-    assert( doubleEq( e[2], bL1 ) );
+    ASSERT_DOUBLE_EQ("", e[2], bL1 );
     double bL2 = dL + 500e-6 / sqrt( branchDia/4.0 );
-    assert( doubleEq( e[3], bL2 ) );
+    ASSERT_DOUBLE_EQ("", e[3], bL2 );
 
-    assert( doubleEq( p[0], 0.0 ) );
-    assert( doubleEq( p[1], 100.0e-6 ) );
-    assert( doubleEq( p[2], 300.0e-6 ) ); // 100 + 200 microns
-    assert( doubleEq( p[3], 600.0e-6 ) ); // 100 + 500 microns
+    ASSERT_DOUBLE_EQ("", p[0], 0.0 );
+    ASSERT_DOUBLE_EQ("", p[1], 100.0e-6 );
+    ASSERT_DOUBLE_EQ("", p[2], 300.0e-6 ); // 100 + 200 microns
+    ASSERT_DOUBLE_EQ("", p[3], 600.0e-6 ); // 100 + 500 microns
 
-    assert( doubleEq( g[0], 0.0 ) );
-    assert( doubleEq( g[1], 100.0e-6 ) );
-    assert( doubleEq( g[2], sqrt(5.0) * 100.0e-6 ) ); // 100 + 200 microns
-    assert( doubleEq( g[3], sqrt(26.0) * 100.0e-6 ) ); // 100 + 500 microns
+    ASSERT_DOUBLE_EQ("", g[0], 0.0 );
+    ASSERT_DOUBLE_EQ("", g[1], 100.0e-6 );
+    ASSERT_DOUBLE_EQ("", g[2], sqrt(5.0) * 100.0e-6 ); // 100 + 200 microns
+    ASSERT_DOUBLE_EQ("", g[3], sqrt(26.0) * 100.0e-6 ); // 100 + 500 microns
 
     //////////////////////////////////////////////////////////////////
     // Here we test Neuron::evalExprForElist, which uses the muParser
@@ -1601,7 +1601,7 @@ static void testNeuronBuildTree()
     // a compartment. So the indexing of the arrays e, p and g needs care.
     unsigned int nuParserNumVal = 13;
     vector< ObjId > elist;
-    wildcardFind( "/n/#", elist );
+    wildcardFind( "/n/#[ISA=Compartment]", elist );
     Neuron* n = reinterpret_cast< Neuron* >( nid.eref().data() );
     vector< double > val;
     n->evalExprForElist( elist, "p + g + L + len + dia + H(1-L)", val );
@@ -1622,22 +1622,19 @@ static void testNeuronBuildTree()
             continue;
         assert( val[i * nuParserNumVal] ==
                 p[j] + g[j] + e[j] + len[j] + dia[j] + ( 1.0 - e[j] > 0 ) );
-
-        ASSERT_DOUBLE_EQ( val[i * nuParserNumVal + 1], p[j]  , "" );
-        ASSERT_DOUBLE_EQ( val[i * nuParserNumVal + 2], g[j]  , "" );
-        ASSERT_DOUBLE_EQ( val[i * nuParserNumVal + 3], e[j]  , "" );
-        ASSERT_DOUBLE_EQ( val[i * nuParserNumVal + 4], len[j], "" );
-        ASSERT_DOUBLE_EQ( val[i * nuParserNumVal + 5], dia[j], "" );
-        ASSERT_DOUBLE_EQ( val[i * nuParserNumVal + 6], maxP  , "" );
-        ASSERT_DOUBLE_EQ( val[i * nuParserNumVal + 7], maxG  , "" );
-        ASSERT_DOUBLE_EQ( val[i * nuParserNumVal + 8], maxL  , "" );
-        ASSERT_DOUBLE_EQ( val[i * nuParserNumVal + 9], x[j]  , "" );
-        ASSERT_DOUBLE_EQ( val[i * nuParserNumVal + 10], y[j] , "" );
-        ASSERT_DOUBLE_EQ( val[i * nuParserNumVal + 11], z[j] , "" );
-        ASSERT_DOUBLE_EQ( val[i * nuParserNumVal + 12], 0.0  , "" );
-
+        ASSERT_DOUBLE_EQ("", val[i * nuParserNumVal + 1], p[j] );
+        ASSERT_DOUBLE_EQ("", val[i * nuParserNumVal + 2], g[j] );
+        ASSERT_DOUBLE_EQ("", val[i * nuParserNumVal + 3], e[j] );
+        assert( doubleEq( val[i * nuParserNumVal + 4], len[j]  ));
+        ASSERT_DOUBLE_EQ("", val[i * nuParserNumVal + 5], dia[j] );
+        ASSERT_DOUBLE_EQ("", val[i * nuParserNumVal + 6], maxP );
+        ASSERT_DOUBLE_EQ("", val[i * nuParserNumVal + 7], maxG );
+        ASSERT_DOUBLE_EQ("", val[i * nuParserNumVal + 8], maxL );
+        ASSERT_DOUBLE_EQ("", val[i * nuParserNumVal + 9], x[j] );
+        ASSERT_DOUBLE_EQ("", val[i * nuParserNumVal + 10], y[j] );
+        ASSERT_DOUBLE_EQ("", val[i * nuParserNumVal + 11], z[j] );
+        ASSERT_DOUBLE_EQ("", val[i * nuParserNumVal + 12], 0.0 );
         j++;
-
     }
     //////////////////////////////////////////////////////////////////
     // Here we test Neuron::makeSpacingDistrib, which uses the muParser
@@ -1650,12 +1647,12 @@ static void testNeuronBuildTree()
     n->makeSpacingDistrib( elist, val, seglistIndex, elistIndex, pos, line );
     // Can't do this now, it is not determinisitic.
     // assert( pos.size() == ((800 - 100)/5) );
-    // assert( doubleEq( pos[0], 2.5e-6 ) );
-    // assert( doubleEq( pos.back(), 500e-6 - 7.5e-6 ) );
+    // ASSERT_DOUBLE_EQ("", pos[0], 2.5e-6 );
+    // ASSERT_DOUBLE_EQ("", pos.back(), 500e-6 - 7.5e-6 );
     assert( seglistIndex[0] == 2 );
     assert( seglistIndex.back() == 3 );
-    assert( elistIndex[0] == 3 );
-    assert( elistIndex.back() == 4 );
+    assert( elistIndex[0] == 2 );
+    assert( elistIndex.back() == 3 );
 
     shell->doDelete( nid );
 }

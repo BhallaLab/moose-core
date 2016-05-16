@@ -9,7 +9,6 @@
 
 #include "header.h"
 #include "global.h"
-
 #include <fstream>
 
 #include "TableBase.h"

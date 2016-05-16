@@ -35,7 +35,9 @@
 #endif     /* -----  not ENABLE_CPP11  ----- */
 
 #include <string>
+
 #include <stdint.h>
+
 #include "global.h"
 
 #include "../utility/print_function.hpp"
