@@ -40,7 +40,9 @@ install:
     - echo "nothing to do here"
 
 script:
+    - sudo ldconfig /usr/lib64
     - mkdir -p _build && cd _build 
-    - cmake -DDEBUG=ON -DWITH_DOC=OFF -WITH_MPI=ON  .. 
+    - echo "WITH_MPI is off!. Fix me later" 
+    - cmake -DDEBUG=ON -DWITH_DOC=OFF -WITH_MPI=OFF -DPYTHON_EXECUTABLE=/usr/bin/python .. 
     - make
     - ctest --output-on-failure
