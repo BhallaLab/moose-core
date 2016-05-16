@@ -6,7 +6,7 @@ import moose
 print('Using moose from %s' % moose.__file__ )
 
 compt = moose.CubeMesh( '/compt' )
-compt.volume = 1e-21
+compt.volume = 1e-20
 
 pools = []
 for r in range( 10 ):
@@ -32,8 +32,8 @@ stoich = moose.Stoich( '/compt/stoich' )
 stoich.compartment = compt
 stoich.ksolve = ksolve
 stoich.path = '/compt/##' 
-
 moose.reinit()
+print( '[INFO] Using method = %s' % ksolve.method )
 t1 = time.time()
 moose.start( 10 )
 print('[INFO] Time taken %s' % (time.time() - t1 ))
@@ -45,5 +45,8 @@ expected = [ 7.77859 , 2.77858 , 2.27541 , 6.12141 , 7.77858 , 2.77858
         , 2.27541 , 6.12141 , 7.77858 , 2.77858 , 2.27541 , 6.12141 
         ]
 concs = [ p.conc for p in pools ]
-assert np.isclose( concs, expected ).all()
+if(not np.isclose( concs, expected ).all() ):
+    print( " Expected %s" % expected )
+    print( " Got %s" % concs )
+    quit(1)
 print( 'Test passed' )
