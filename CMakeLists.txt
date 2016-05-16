@@ -153,7 +153,6 @@ IF(NOTIFY_PROGRESS)
 ENDIF()
 ################################### TARGETS ####################################
 
-add_library(_moose MODULE pymoose/moosemodule.cpp)
 add_library(libmoose SHARED basecode/main.cpp)
 add_executable(moose.bin basecode/main.cpp)
 
@@ -202,12 +201,7 @@ if(LIBSBML_FOUND)
     endif()
     include_directories(${LibXML2_INCLUDE_DIRS})
     if(${LIBSBML_LIBRARY_DIRS})
-        target_link_libraries(libmoose PROPERTIES LINK_FLAGS
-            "-L${LIBSBML_LIBRARY_DIRS}"
-            )
-        target_link_libraries(_moose 
-            PROPERTIES LINK_FLAGS "-L${LIBSBML_LIBRARY_DIRS}"
-            )
+        target_link_libraries(libmoose PROPERTIES LINK_FLAGS "-L${LIBSBML_LIBRARY_DIRS}")
     endif()
 
 else()
@@ -346,7 +340,6 @@ endif( HDF5_FOUND )
 # headers in non-standard path. issue #80.
 if(HDF5_LIBRARY_DIRS)
     set_target_properties( libmoose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
-    set_target_properties( _moose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
 endif()
 
 find_package(Termcap)
@@ -536,101 +529,8 @@ endif(WITH_DOC)
 
 ######################### BUILD PYMOOSE ########################################
 # Root of all python module.
-SET(PROJECT_PYTHON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/python)
 if(WITH_PYTHON)
-    message(STATUS "Building native python extension of MOOSE")
-    set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
-    EXEC_PROGRAM(${PYTHON_EXECUTABLE}
-        ARGS "-c 'try: import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])
-except Exception: pass'"
-        OUTPUT_VARIABLE PYTHON_SO_EXTENSION
-        )
-    message( STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
-
-    find_package(NumPy REQUIRED)
-    include_directories(${NUMPY_INCLUDE_DIRS})
-    add_definitions(-DUSE_NUMPY)
-
-    add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
-
-    execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --includes
-        OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-    execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --libs
-        OUTPUT_VARIABLE PYTHON_LIBRARIES
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-    message( STATUS "Python include flags: ${PYTHON_INCLUDE_FLAGS}" )
-    add_subdirectory(pymoose)
-
-    set_target_properties(_moose PROPERTIES 
-        COMPILE_DEFINITIONS "PYMOOSE"
-        COMPILE_FLAGS "${PYTHON_INCLUDE_FLAGS}"
-        LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
-        PREFIX ""
-        SUFFIX ".so"
-        )
-
-    #if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
-    #    set_target_properties(_moose PROPERTIES
-    #    SUFFIX ${PYTHON_SO_EXTENSION})
-    #endif()
-
-    # see issue #80
-    if(HDF5_LIBRARY_DIRS)
-        set_target_properties( _moose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
-    endif()
-
-
-if(MACOSX)
-    set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
-    message(STATUS "ADDING some linker flags ${CMAKE_EXE_LINKER_FLAGS}")
-endif(MACOSX)
-
-if(MACOSX)
-    target_link_libraries( _moose 
-        "-Wl,-all_load"
-        moosepython  
-        ${MOOSE_LIBRARIES}
-        ${STATIC_LIBRARIES}
-        )
-    target_link_libraries(_moose
-        ${SYSTEM_SHARED_LIBS}
-        )
-ELSE(MACOSX)
-    target_link_libraries(_moose 
-        "-Wl,--whole-archive"
-        moosepython  
-        ${MOOSE_LIBRARIES}
-        ${STATIC_LIBRARIES}
-        "-Wl,--no-whole-archive"
-        ${PYTHON_LIBRARIES}
-        ${SYSTEM_SHARED_LIBS}
-        )
-endif(MACOSX)
-
-# Make this target dependant on all python files in python folder.
-add_custom_target(copy_python_files ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_SOURCE_DIR}/python
-    ${CMAKE_CURRENT_BINARY_DIR}/python
-    COMMENT "Copying python files to build directory"
-    VERBATIM
-    )
-add_dependencies(_moose copy_python_files)
-
-if(WITH_DOC)
-    # Also generate the documents
-    FIND_PROGRAM(Sphinx REQUIRED)
-    add_custom_command(TARGET _moose
-        POST_BUILD
-        COMMAND make html
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Docs/user/py
-        COMMENT "Building user doc using python-sphinx"
-        VERBATIM
-        )
-endif(WITH_DOC)
+    add_subdirectory( pymoose )
 endif(WITH_PYTHON)
 
 ######################### CYMOOSE #############################################
