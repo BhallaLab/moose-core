@@ -1,6 +1,7 @@
-set(CMAKE_LEGACY_CYGWIN_WIN32 0)
-cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8)
+
 include(CheckIncludeFileCXX)
+set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
@@ -78,8 +79,11 @@ option(GPROF "Build for profiling using gprof" OFF)
 option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
-option(WITH_BOOST "Use boost library instead of GSL" OFF)
-option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
+option(WITH_OPENMP  "Enable Openmp support" ON)
+option(WITH_CURSES "Enable ncurses support (deprecated)" OFF)
+option(WITH_BOOST "Use boost library instead of GSL" ON)
+option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" OFF)
+
 
 # If SBML is available, it will automaticall enable the support. If ON, then
 # libSBML must be present.
@@ -124,6 +128,9 @@ if(COMPILER_WARNS_STRICT_ALIASING)
 endif(COMPILER_WARNS_STRICT_ALIASING)
 
 
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 if(COMPILER_SUPPORTS_CXX11)
     message(STATUS "Your compiler supports c++11 features. Enabling it")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -136,6 +143,13 @@ elseif(COMPILER_SUPPORTS_CXX0X)
 else()
     add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS -DBOOST_NO_SCOPED_ENUMS )
     message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
+endif()
+
+## DO UNIT TEST
+option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
+if(ENABLE_UNIT_TESTS)
+    MESSAGE("++ Unit testing enabled.")
+    add_definitions(-DDO_UNIT_TESTS)
 endif()
 
 
@@ -165,7 +179,7 @@ elseif(ENABLE_UNIT_TESTS)
 else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
-    add_definitions(-UDO_UNIT_TESTS -O3)
+    add_definitions(-UDO_UNIT_TESTS )
 endif()
 
 if(GPROF AND DEBUG)
@@ -391,20 +405,47 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
     include_directories(${Readline_INCLUDE_DIR})
 endif()
 
+if(WITH_OPENMP)
+    find_package(OpenMP REQUIRED)
+    MESSAGE("++ OpenMPI support is ON")
+    add_definitions(-DUSE_OPENMPI -O1)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${-pthread}")
+	
+endif(WITH_OPENMP)
+
 # Openmpi
 if(WITH_MPI)
     find_package(MPI REQUIRED)
-    if(MPI_CXX_FOUND)
-        message(STATUS "Using MPI from ${MPI_CXX_INCLUDE_PATH}")
-        include_directories(${MPI_CXX_INCLUDE_PATH})
-        set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
-        add_definitions(-DUSE_MPI)
-        SET(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
-        SET(CMAKE_C_COMPILER ${MPI_C_COMPILER})
-    else()
-        message(STATUS "Cound not find MPI")
-        add_definitions(-UUSE_MPI)
-    endif()
+    message(STATUS "Using MPI compiler  ${MPI_CXX_COMPILER}")
+    set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+    add_definitions( -DUSE_MPI )
+    set_target_properties( moose.bin libmoose _moose 
+        PROPERTIES 
+        COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} -fopenmp"
+        LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -fopenmp"
+        )
+    ## NOTE: Following does not work
+    ##include_directories(${MPI_CXX_INCLUDE_PATH})
+    ##if(MPI_COMPILE_FLAGS)
+    ##    set_target_properties(libmoose _moose 
+    ##        PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}"
+    ##        )
+    ##endif(MPI_COMPILE_FLAGS)
+
+    ##if(MPI_LINK_FLAGS)
+    ##    set_target_properties(libmoose _moose 
+    ##        PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}"
+    ##        )
+    ##endif(MPI_LINK_FLAGS)
+    find_package(OpenMP REQUIRED)
+    MESSAGE("++ OpenMPI support is ON")
+    add_definitions(-DUSE_OPENMPI -O1)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${-pthread}")
+	
 endif(WITH_MPI)
 
 # Add subdirectroeis
@@ -435,6 +476,9 @@ if(WITH_BOOST)
     list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES})
     list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
 endif(WITH_BOOST)
+if(WITH_MPI)
+    LIST(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
+endif(WITH_MPI)
 
 # These libraries could be static of dynamic.
 # When building packages on OBS or launchpad, we build static library of a
@@ -473,12 +517,6 @@ endif()
 #    list(APPEND SYSTEM_SHARED_LIBS ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
 #endif()
 
-if(WITH_MPI)
-    if(MPI_CXX_FOUND)
-        list(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
-    endif()
-endif(WITH_MPI)
-
 pkg_check_modules(MUPARSER muparser)
 if(MUPARSER_FOUND)
     message(STATUS "Using system muparser ${MUPARSER_VERSION}")
@@ -488,16 +526,6 @@ else()
     add_subdirectory(external/muparser)
     list(APPEND MOOSE_LIBRARIES muparser)
 endif()
-
-#pkg_check_modules(TINYXML tinyxml)
-#if(TINYXML_FOUND)
-    #message(STATUS "Using system tinyxml ${TINYXML_VERSION}")
-    #list(APPEND SYSTEM_SHARED_LIBS ${TINYXML_LIBRARIES})
-#else()
-    #message(STATUS "Using private tinyxml")
-    #add_subdirectory(external/tinyxml)
-    #list(APPEND MOOSE_LIBRARIES tinyxml)
-#endif()
 
 ###################################### LINKING #################################
 list(APPEND MOOSE_LIBRARIES
