@@ -79,6 +79,7 @@ option(DEBUG "Build with debug support" OFF)
 option(GPROF "Build for profiling using gprof" OFF)
 option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
+option(WITH_CYTHON "Build python extension using Cython. (experimental)" OFF)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_BOOST "Use boost library instead of GSL" OFF)
 option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
@@ -531,41 +532,9 @@ endif(WITH_DOC)
 # Root of all python module.
 if(WITH_PYTHON)
     add_subdirectory( pymoose )
+elseif(WITH_CYTHON)
+    add_subdirectory( cymoose )
 endif(WITH_PYTHON)
-
-######################### CYMOOSE #############################################
-option(BUILD_CYMOOSE "Build python extension using Cython. Development version." OFF)
-if(BUILD_CYMOOSE)
-    message(STATUS "Building experimental cython extension of MOOSE.")
-    add_library(cymoose SHARED cymoose/cymoose_methods.cxx)
-    set_target_properties(cymoose PROPERTIES COMPILE_DEFINITIONS "CYMOOSE")
-    if(DEBUG)
-        add_definitions("-g -Wall")
-    endif()
-
-    set_target_properties(cymoose PROPERTIES 
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/cymoose"
-            )
-
-if(MACOSX)
-    target_link_libraries(cymoose 
-        "-Wl,-all_load"
-        ${MOOSE_LIBRARIES}
-        ${LIBRARIES}
-        "-Wl,-noall_load"
-        ${SYSTEM_LIBRARIES}
-        )
-ELSE(MACOSX)
-    target_link_libraries(cymoose 
-        "-Wl,--whole-archive"
-        ${MOOSE_LIBRARIES}
-        ${LIBRARIES}
-        "-Wl,--no-whole-archive"
-        ${SYSTEM_LIBRARIES}
-        )
-endif(MACOSX)
-
-endif(BUILD_CYMOOSE)
 
 ## Moose documentation
 option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
