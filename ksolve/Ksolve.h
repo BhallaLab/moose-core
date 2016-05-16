@@ -21,7 +21,6 @@
 
 class Stoich;
 const char *env_value = getenv("NUM_THREADS");
-//const int NTHREADS  = *env_value - '0';
 const int NTHREADS  = atoi(env_value);
 
 //////////////////////////////////////////////////////////////////

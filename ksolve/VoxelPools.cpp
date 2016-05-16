@@ -150,52 +150,6 @@ cleaner.
         assert( 0 );
     }
 
-    //	   int status;
-    //	   int GSLSUCCESS = 0;
-    //
-    //	   const double t1 = p->currTime;
-    //			 
-    //	   const gsl_odeiv2_system* dydt = driver_->sys;
-    //	   double h0 = driver_->h;
-    //	   int final_step = 0;
-    //
-    //
-    //
-        /* Determine integration direction sign */
-    //
-    //	    while (t1 - T > 0.0)
-    //	    {
-    //			 const gsl_odeiv2_system* dydt = driver_->sys;
-    //			 double h0 = driver_->h;
-    //			 int final_step = 0;
-    //			 double dt = t1 - T;
-    //			
-    //			 if ((dt >= 0.0 && h0 > dt) || (dt < 0.0 && h0 < dt))
-    //			 {
-    //				    h0 = dt;
-    //				    final_step = 1;
-    //			 }
-    //			 else
-    //				    final_step = 0;
-    //					  
-    //			 if (driver_->s->type->can_use_dydt_in)
-    //				    status = rungeKutta45(driver_->s->state, driver_->s->dimension, T, h0, varS(), driver_->e->yerr, driver_->e->dydt_in, driver_->e->dydt_out, dydt);
-    //
-    //			 if (final_step)
-    //				    T = t1;
-    //			 else
-    //				    T = T + h0;
-    //					    
-    //			 /* Suggest step size for next time-step. Change of step size is not  suggested in the final step, because that step can be very small compared to previous step, to reach t1. */
-    //			 if (final_step == 0) driver_->h = h0;
-    //	    }
-    //
-    //	if ( status != GSLSUCCESS ) 
-    //	{
-    //		cout << "Error: VoxelPools::advance: GSL integration error at time " << T << "\n";
-    //		assert( 0 );
-    //	}
-    >>>>>>> c0604f3f51771c9bd775b4ae5240d1dfd2be2025
 #endif
 }
 
