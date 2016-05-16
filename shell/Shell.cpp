@@ -31,6 +31,10 @@ using namespace std;
 #include "../sbml/MooseSbmlReader.h"
 #endif
 
+#ifdef USE_OPENMPI
+#include "omp.h"
+#endif
+
 const unsigned int Shell::OkStatus = ~0;
 const unsigned int Shell::ErrorStatus = ~1;
 
