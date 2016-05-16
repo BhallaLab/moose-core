@@ -62,7 +62,6 @@ endif(MACOSX)
 if(MACOSX)
     target_link_libraries( _moose 
         "-Wl,-all_load"
-        moosepython  
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
         )
@@ -72,7 +71,6 @@ if(MACOSX)
 ELSE(MACOSX)
     target_link_libraries(_moose 
         "-Wl,--whole-archive"
-        moosepython  
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
         "-Wl,--no-whole-archive"
