@@ -14,6 +14,7 @@
 #if  USE_BOOST
 #include <boost/filesystem.hpp>
 #endif     /* -----  USE_BOOST  ----- */
+#include <fstream>
 
 /**
  * Receives and records inputs. Handles plot and spiking data in batch mode.
@@ -79,15 +80,15 @@ private:
     vector<double> data_;
     vector<string> columns_;                    /* Store the name of tables */
 
-    string tablePath_ = "";
-    string tableName_ = "";
+    string tablePath_;
+    string tableName_;
 
     /**
      * @brief If stream is set to true, then stream to outfile_. Default value
      * of outfile_ is table path starting from `pwd`/_tables_ . On table, set
      * streamToFile to true.
      */
-    bool useStreamer_ = false;
+    bool useStreamer_;
 
     /**
      * @brief Table directory into which dump the stream data.
@@ -98,31 +99,30 @@ private:
     // `pwd1/_tables_/table.path().
     string outfile_;
 
-    bool outfileIsSet = false;
+    /**
+     * @brief Wheather or not outfile path is set by user
+     */
+    bool outfileIsSet_;                         
 
     /**
      * @brief format of data. Currently fixed to csv.
      */
-    string format_ = ".csv";
-    const char delimiter_ = ' ';
-    const char newline_ = '\n';
+    string format_;
 
     /**
      * @brief text_ to write.
      */
-    string text_ = "";
+    string text_;
 
     /**
      * @brief dt of its clock. Needed for creating time co-ordinates,
      */
-    double dt_ = 0.0;
-    size_t numLines = 0;
+    double dt_;
 
     /**
      * @brief Output stream.
      */
     std::ofstream of_;
-    ios_base::openmode mode_;
 
 };
 

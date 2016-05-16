@@ -16,7 +16,6 @@
 #include "Clock.h"
 #include "StreamerBase.h"
 
-
 // Write to numpy arrays.
 #include "../utility/cnpy.hpp"
 
@@ -191,10 +190,13 @@ const Cinfo* Table::initCinfo()
 
 static const Cinfo* tableCinfo = Table::initCinfo();
 
-Table::Table() : threshold_( 0.0 ) , lastTime_( 0.0 ) , input_( 0.0 ) 
+Table::Table() : threshold_( 0.0 ) , lastTime_( 0.0 ) , input_( 0.0 )
 {
     // Initialize the directory to which each table should stream.
     rootdir_ = "_tables";
+    useStreamer_ = false;
+    format_ = "csv";
+    outfileIsSet_ = false;
 }
 
 Table::~Table( )
@@ -267,7 +269,7 @@ void Table::reinit( const Eref& e, ProcPtr p )
 
         // If user has not set the filepath, then use the table path prefixed
         // with rootdit as path.
-        if( ! outfileIsSet )
+        if( ! outfileIsSet_ )
             setOutfile( rootdir_ +
                     moose::moosePathToUserPath(tablePath_) + '.' + format_ 
                     );
@@ -276,11 +278,9 @@ void Table::reinit( const Eref& e, ProcPtr p )
     input_ = 0.0;
     vec().resize( 0 );
     lastTime_ = 0;
-
     vector< double > ret;
     requestOut()->send( e, &ret );
     vec().insert( vec().end(), ret.begin(), ret.end() );
-
 
     if( useStreamer_ )
     {
@@ -324,7 +324,13 @@ double Table::getThreshold() const
 // Set the format of table to which its data should be written.
 void Table::setFormat( string format )
 {
-    format_ = format;
+    if( format == "csv" or format == "npy" )
+        format_ = format;
+    else
+        LOG( moose::warning
+                , "Unsupported format " << format 
+                << " only npy and csv are supported"
+           );
 }
 
 // Get the format of table to which it has to be written.
@@ -348,9 +354,10 @@ bool Table::getUseStreamer( void ) const
 void Table::setOutfile( string outpath )
 {
     outfile_ = moose::createPosixPath( outpath );
-    outfile_ = moose::createParentDirs( outfile_ );
+    if( ! moose::createParentDirs( outfile_ ) )
+        outfile_ = moose::toFilename( outfile_ );
 
-    outfileIsSet = true;
+    outfileIsSet_ = true;
     setUseStreamer( true );
 
     // If possible get the format of file as well.
@@ -382,7 +389,7 @@ void Table::zipWithTime( const vector<double>& v
     size_t N = v.size();
     for (size_t i = 0; i < N; i++) 
     {
-        tvec.emplace_back( currTime - (N - i - 1 ) * dt_ );
-        tvec.emplace_back( v[i] );
+        tvec.push_back( currTime - (N - i - 1 ) * dt_ );
+        tvec.push_back( v[i] );
     }
 }

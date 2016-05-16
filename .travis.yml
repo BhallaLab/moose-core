@@ -11,6 +11,7 @@ notifications:
         recipients:
             - dilawar.s.rajput@gmail.com
             - bhalla@ncbs.res.in
+            - rahulkumar.gayatri@wipro.com
         on_success: change
         on_failure: always
 
@@ -26,7 +27,9 @@ before_script:
     - sudo apt-get install -qq libhdf5-serial-dev
     - sudo apt-get install -qq make cmake
     - sudo apt-get install -qq  python-numpy python-matplotlib
+    - sudo apt-get install -qq  python3-numpy python3-matplotlib python3-dev
     - sudo apt-get install -qq libboost-all-dev
+    - sudo apt-get install -qq libgsl0-dev
 
 before_install:
     - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
@@ -37,7 +40,7 @@ install:
     - echo "nothing to do here"
 
 script:
-    - sudo ldconfig /usr/lib64
-    - mkdir -p _BUILD && cd _BUILD && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python ..
-    - make -j`nproc` 
+    - mkdir -p _build && cd _build 
+    - cmake -DDEBUG=ON -DWITH_DOC=OFF -WITH_MPI=ON  .. 
+    - make
     - ctest --output-on-failure

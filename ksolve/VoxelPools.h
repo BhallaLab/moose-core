@@ -1,5 +1,6 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
+#include <boost/numeric/odeint.hpp>
 ** Messaging Object Oriented Simulation Environment.
 **           Copyright (C) 2003-2014 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
@@ -10,10 +11,16 @@
 #ifndef _VOXEL_POOLS_H
 #define _VOXEL_POOLS_H
 
+#include "OdeSystem.h"
+#include "VoxelPoolsBase.h"
+
+#ifdef USE_BOOST
 #include "BoostSys.h"
+#endif
 
-class OdeSystem;
 
+class Stoich;
+class ProcInfo;
 
 /**
  * This is the class for handling reac-diff voxels used for deterministic
@@ -45,10 +52,15 @@ public:
     /// Set initial timestep to use by the solver.
     void setInitDt( double dt );
 
+#ifdef USE_GSL      /* -----  not USE_BOOST  ----- */
+    static int gslFunc( double t, const double* y, double *dydt, void* params);
+#elif  USE_BOOST
     static void evalRates( const vector_type_& y 
-            ,  vector_type_& dydt ,  const double t 
-            , VoxelPools* params
-            );
+                ,  vector_type_& dydt
+                ,  const double t 
+                , VoxelPools* vp
+                );
+#endif     /* -----  not USE_BOOST  ----- */
 
     //////////////////////////////////////////////////////////////////
     // Rate manipulation and calculation functions
@@ -91,7 +103,14 @@ public:
     /// Used for debugging.
     void print() const;
 private:
-    BoostSys* sys_;                             /* The BOOST ode system. */
+
+#ifdef USE_GSL
+    gsl_odeiv2_driver* driver_;
+    gsl_odeiv2_system sys_;
+#elif USE_BOOST
+    BoostSys sys_;
+#endif
+
 };
 
 #endif	// _VOXEL_POOLS_H

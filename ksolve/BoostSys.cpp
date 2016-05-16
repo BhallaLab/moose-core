@@ -16,18 +16,23 @@
 
 #include "BoostSys.h"
 #include <iostream>
+#include "VoxelPools.h"
 
-BoostSys::BoostSys( std::string method )
-{  
-    method_ = method;
-}
+#ifdef  USE_BOOST
 
+BoostSys::BoostSys( ) : vp( NULL )
+{ ; }
 
 BoostSys::~BoostSys()
-{  }
+{ ;  }
 
 
-std::string BoostSys::getMethod( )
+void BoostSys::operator()( const vector_type_ y
+        , vector_type_& dydt, const double t )
 {
-    return method_;
+    assert( vp );
+    VoxelPools::evalRates( y, dydt, t, vp );
 }
+
+#else      /* -----  not USE_BOOST  ----- */
+#endif     /* -----  not USE_BOOST  ----- */

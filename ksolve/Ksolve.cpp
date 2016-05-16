@@ -6,7 +6,14 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+#include <omp.h>
+#include <sys/time.h>
 #include "header.h"
+#ifdef USE_GSL
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_odeiv2.h>
+#endif
 
 #include <boost/numeric/odeint.hpp>
 #include <boost/bind.hpp>
@@ -340,7 +347,26 @@ string Ksolve::getMethod() const
 
 void Ksolve::setMethod( string method )
 {
+#if USE_GSL
+    if ( method == "rk5" || method == "gsl" )
+    {
+        method_ = "rk5";
+    }
+    else if ( method == "rk4"  || method == "rk2" ||
+              method == "rk8" || method == "rkck" )
+    {
+        method_ = method;
+    }
+    else
+    {
+        cout << "Warning: Ksolve::setMethod: '" << method <<
+             "' not known, using rk5\n";
+        method_ = "rk5";
+    }
+#elif USE_BOOST
+    // TODO: Check for boost related methods.
     method_ = method;
+#endif
 }
 
 double Ksolve::getEpsAbs() const
@@ -383,37 +409,64 @@ Id Ksolve::getStoich() const
     return stoich_;
 }
 
+#ifdef USE_GSL
+void innerSetMethod( OdeSystem& ode, const string& method )
+{
+    ode.method = method;
+    if ( method == "rk5" )
+    {
+        ode.gslStep = gsl_odeiv2_step_rkf45;
+    }
+    else if ( method == "rk4" )
+    {
+        ode.gslStep = gsl_odeiv2_step_rk4;
+    }
+    else if ( method == "rk2" )
+    {
+        ode.gslStep = gsl_odeiv2_step_rk2;
+    }
+    else if ( method == "rkck" )
+    {
+        ode.gslStep = gsl_odeiv2_step_rkck;
+    }
+    else if ( method == "rk8" )
+    {
+        ode.gslStep = gsl_odeiv2_step_rk8pd;
+    }
+    else
+    {
+        ode.gslStep = gsl_odeiv2_step_rkf45;
+    }
+}
+#endif
 
 void Ksolve::setStoich( Id stoich )
 {
-    assert( stoich.element()->cinfo()->isA( "Stoich" ) );
-    stoich_ = stoich;
-    stoichPtr_ = reinterpret_cast< Stoich* >( stoich.eref().data() );
-    if ( !isBuilt_ )
-    {
-        OdeSystem ode;
+	assert( stoich.element()->cinfo()->isA( "Stoich" ) );
+	stoich_ = stoich;
+	stoichPtr_ = reinterpret_cast< Stoich* >( stoich.eref().data() );
+	if ( !isBuilt_ ) {
+		OdeSystem ode;
+		ode.epsAbs = epsAbs_;
+		ode.epsRel = epsRel_;
+		ode.initStepSize = 0.01; // This will be overridden at reinit.
 
-        ode.epsAbs = epsAbs_;
-        ode.epsRel = epsRel_;
+#ifdef USE_GSL
+		ode.gslSys.dimension = stoichPtr_->getNumAllPools();
+		if ( ode.gslSys.dimension == 0 )
+			return; // No pools, so don't bother.
+		innerSetMethod( ode, method_ );
+		ode.gslSys.function = &VoxelPools::gslFunc;
+   		ode.gslSys.jacobian = 0;
+		innerSetMethod( ode, method_ );
+		unsigned int numVoxels = pools_.size();
+		for ( unsigned int i = 0 ; i < numVoxels; ++i ) {
+   			ode.gslSys.params = &pools_[i];
+			pools_[i].setStoich( stoichPtr_, &ode );
+		}
+		isBuilt_ = true;
 
-        ode.initStepSize = 0.01; // This will be overridden at reinit.
-
-        unsigned int numVoxels = pools_.size();
-        unsigned int dimension = stoichPtr_->getNumAllPools();
-
-        // We assign the function in VoxelPools.cpp file.
-        if( 0 == dimension )
-            return;
-
-        ode.boostSys = new BoostSys( method_ );
-        ode.boostSys->epsRel_ = epsRel_;
-        ode.boostSys->epsAbs_ = epsAbs_;
-
-        for ( unsigned int i = 0 ; i < numVoxels; ++i )
-        {
-            ode.boostSys->params = &pools_[i];
-            pools_[i].setStoich( stoichPtr_, &ode );
-        }
+#endif
         isBuilt_ = true;
     }
 }
@@ -511,9 +564,11 @@ double Ksolve::getEstimatedDt() const
     return 0.1 / maxVel;
 }
 
+
 //////////////////////////////////////////////////////////////
 // Process operations.
 //////////////////////////////////////////////////////////////
+
 void Ksolve::process( const Eref& e, ProcPtr p )
 {
     if ( isBuilt_ == false )
@@ -632,7 +687,7 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
         cout << "Warning:Ksolve::reinit: Reaction system not initialized\n";
         return;
     }
-
+    // cout << "************************* path = " << e.id().path() << endl;
     for ( unsigned int i = 0; i < xfer_.size(); ++i )
     {
         const XferInfo& xf = xfer_[i];
@@ -742,6 +797,7 @@ unsigned int Ksolve::getVoxelIndex( const Eref& e ) const
         return OFFNODE;
     return ret - startVoxel_;
 }
+
 
 //////////////////////////////////////////////////////////////
 // Zombie Pool Access functions

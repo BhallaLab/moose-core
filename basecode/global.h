@@ -17,13 +17,17 @@
 #include <sstream>
 
 
-using namespace std;
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
+#ifdef  USE_BOOST
+//#ifdef BOOST_FILESYSTEM_EXISTS
 #include <boost/filesystem.hpp>
+//#endif                                          /* BOOST_FILESYSTEM_EXISTS */
+#endif
 
-#include "../external/debug/print_function.hpp"
+#include "randnum/RNG.h"                        /* Use inbuilt rng */
+#include "../utility/print_function.hpp"
+
+using namespace std;
 
 /**
  * @brief Global stringstream for message printing.
@@ -59,11 +63,7 @@ extern unsigned int totalTests;
 namespace moose
 {
 
-    typedef boost::random::mt19937 rng_type_;
-    typedef boost::random::uniform_01<double> distribution_type_;
-
-    extern rng_type_ rng;
-    extern distribution_type_ dist;
+    extern moose::RNG<double> rng;
 
     /**
      * @brief A global seed for all RNGs in moose. When moose.seed( x ) is called,
@@ -123,9 +123,10 @@ namespace moose
      * @brief Create a POSIX compatible path from a given string.
      * Remove/replace bad characters.
      *
-     * @param path
+     * @param path Reutrn path is given path if creation was successful, else
+     * directory is renamed to a filename.
      */
-    string createPosixPath( string path );
+    string createPosixPath( const string& path );
 
     /**
      * @brief Convert a given value to string.
@@ -139,10 +140,19 @@ namespace moose
 
     /**
      * @brief Create directory, recursively.
-     *
-     * @param path
      */
-    string createParentDirs( string path );
+    bool createParentDirs( const string& path );
+
+    /**
+     * @brief Replace all directory sepearator with _. This creates a filepath
+     * which can be created in current directory without any need to create
+     * parent directory.
+     *
+     * @param path string 
+     *
+     * @return  filename without directory separator.
+     */
+    string toFilename( const string& path );
 
     /**
      * @brief Get the extension of a given filepath.

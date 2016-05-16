@@ -17,6 +17,7 @@
  */
 
 #include "cnpy.hpp"
+#include <cstring>
 
 using namespace std;
 
@@ -81,12 +82,24 @@ void split(vector<string>& strs, string& input, const string& pat)
  */
 bool is_valid_numpy_file( const string& npy_file )
 {
-    array<char, 8> buffer;
+    char buffer[__pre__size__];
     FILE* fp = NULL;
     fp = fopen( npy_file.c_str(), "r" );
-    fread( buffer.data(), 1, 8, fp );
-    fclose( fp );
-    return buffer == __pre__;
+    if(!fp)
+    {
+        LOG( moose::warning, "Can't open " << npy_file );
+        return false;
+    }
+    fread( buffer, sizeof(char), __pre__size__, fp );
+    bool equal = true;
+    // Check for equality
+    for(size_t i = 0; i < __pre__size__; i++ )
+        if( buffer[i] != __pre__[i] )
+        {
+            equal = false;
+            break;
+        }
+    return equal;
 }
 
 /**
@@ -97,13 +110,15 @@ bool is_valid_numpy_file( const string& npy_file )
 void parse_header( FILE* fp, string& header )
 {
     // Read header, till we hit newline character.
-    char ch = ' ';
+    char ch;
     header.clear();
-    while( ch != '\n' and ch != EOF )
+    while( ( ch = fgetc( fp )) != EOF )
     {
-        ch = getc( fp );
-        header.push_back( ch ); 
+        if( '\n' == ch )
+            break;
+        header.push_back( ch );
     }
+    assert( header.size() >= __pre__size__ );
 }
 
 /**
@@ -137,7 +152,7 @@ void change_shape_in_header( const string& filename
 
     string newShape = "";
     for (size_t i = 0; i < tokens.size(); i++) 
-        newShape += to_string( stoi( tokens[i] ) + data_len/numcols ) + ",";
+        newShape += moose::toString( atoi( tokens[i].c_str() ) + data_len/numcols ) + ",";
 
     string newHeader = prefixHeader + newShape + postfixHeader;
     if( newHeader.size() < header.size() )
@@ -150,4 +165,5 @@ void change_shape_in_header( const string& filename
     fwrite( newHeader.c_str(), sizeof(char), newHeader.size(), fp );
     fclose( fp );
 }
+
 }                                               /* Namespace cnpy2 ends. */

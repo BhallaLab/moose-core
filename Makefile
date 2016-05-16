@@ -60,10 +60,8 @@
 
 # Default values for flags. The operator ?= assigns the given value only if the
 # variable is not already defined.
-
 USE_SBML?=0
 USE_HDF5?=1
-USE_BOOST?=1
 USE_CUDA?=0
 USE_NEUROKIT?=0
 PYTHON?=2
@@ -303,16 +301,13 @@ ifeq ($(USE_HDF5),1)
 	LIBS+= -lhdf5 -lhdf5_hl -L/usr/local/hdf5/lib -L/usr/lib/x86_64-linux-gnu/hdf5/serial/
 endif
 
-ifeq ($(USE_BOOST),1)
-	CXXFLAGS+= -DUSE_BOOST -std=c++11
-endif
-
 LD = ld
 
 SUBDIR = \
 	basecode \
 	msg \
 	shell \
+	randnum\
 	scheduling\
 	mpi \
 	builtins\
@@ -328,6 +323,7 @@ SUBDIR = \
 	diffusion \
 	device \
 	signeur \
+	benchmarks \
 	$(SMOLDYN_DIR) \
 	$(SBML_DIR) \
 	$(HCUDA_DIR) \
@@ -340,6 +336,7 @@ OBJLIBS =	\
 	basecode/_basecode.o \
 	msg/_msg.o \
 	shell/_shell.o \
+	randnum/_randnum.o \
 	scheduling/_scheduling.o \
 	mpi/_mpi.o \
 	builtins/_builtins.o \
@@ -355,6 +352,7 @@ OBJLIBS =	\
 	diffusion/_diffusion.o \
 	device/_device.o \
 	signeur/_signeur.o \
+	benchmarks/_benchmarks.o \
 	$(SMOLDYN_LIB) \
 	$(SBML_LIB) \
 	$(HCUDA_LIB) \
@@ -434,7 +432,7 @@ endif
 pymoose: python/moose/_moose.so
 pymoose: CXXFLAGS += -DPYMOOSE $(PYTHON_CFLAGS)
 # fix: add include dir for numpy headers required by pymoose/moosemodule.cpp
-pymoose: CXXFLAGS += -I$(shell python -c 'from numpy import get_include; print get_include()')
+pymoose: CXXFLAGS += -I$(shell /usr/bin/python -c 'from numpy import get_include; print get_include()')
 pymoose: OBJLIBS += pymoose/_pymoose.o
 pymoose: LDFLAGS += $(PYTHON_LDFLAGS)
 export CXXFLAGS

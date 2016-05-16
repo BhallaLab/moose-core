@@ -7,6 +7,11 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 #include "header.h"
+#ifdef USE_GSL
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_odeiv2.h>
+#endif
 
 #include "VoxelPoolsBase.h"
 // #include "VoxelPools.h"
@@ -216,11 +221,7 @@ void ZombiePoolInterface::setupCrossSolverReacs( const map< Id, vector< Id > >& 
 	// Establish which molecules will be exchanged.
 	unsigned int numPools = assignProxyPools( xr, myZombiePoolInterface, otherZombiePoolInterface, 
 					otherComptId );
-	if ( numPools == 0 )
-        {
-            cerr << "Warning: no molecules found for cross-compartment exchange." << endl;
-            return;
-        }
+	if ( numPools == 0 ) return;
 
 	// Then, figure out which voxels do the exchange.
 	// Note that vj has a list of pairs of voxels on either side of a 

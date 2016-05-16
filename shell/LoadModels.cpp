@@ -19,6 +19,7 @@
 #include "../biophysics/ReadSwc.h"
 #include "../kinetics/ReadKkit.h"
 #include "../kinetics/ReadCspace.h"
+#include "../utility/print_function.hpp"
 
 ModelType findModelType( string filename, ifstream& fin, string& line )
 {

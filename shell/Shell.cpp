@@ -25,11 +25,14 @@ using namespace std;
 
 // Want to separate out this search path into the Makefile options
 #include "../scheduling/Clock.h"
-#include "../external/debug/simple_logger.hpp"
 
 #ifdef USE_SBML
 #include "../sbml/MooseSbmlWriter.h"
 #include "../sbml/MooseSbmlReader.h"
+#endif
+
+#ifdef USE_OPENMPI
+#include "omp.h"
 #endif
 
 const unsigned int Shell::OkStatus = ~0;

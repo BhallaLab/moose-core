@@ -57,10 +57,8 @@ extensions = [
             , "-DLINUX"
             ]
         , libraries = [
-            "cymoose"
-            , "hdf5"
-            , "lapack"
-            , "sbml"
+            "mpi"
+            , "cymoose"
             , "stdc++"
             ]
         , extra_link_args = ["-L.", "-g"]

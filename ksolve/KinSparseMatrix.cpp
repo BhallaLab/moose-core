@@ -7,18 +7,18 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+
 #include <functional>
 #include <algorithm>
 #include <vector>
 #include <iostream>
 #include <cassert>
-#include <math.h> // used for isnan
-//#include "../utility/utility.h" // isnan is undefined in VC++ and BC5, utility.h contains a workaround macro
-using namespace std;
+#include <cmath> 
 #include "SparseMatrix.h"
 #include "utility/numutil.h"
 #include "KinSparseMatrix.h"
 
+using namespace std;
 
 /** 
  * Returns the dot product of the specified row with the
@@ -27,7 +27,7 @@ using namespace std;
  */
 double KinSparseMatrix::computeRowRate( 
 	unsigned int row, const vector< double >& v
-) const
+        ) const
 {
 	assert( nColumns() == 0 || row < nRows() );
 	assert( v.size() == nColumns() );
@@ -37,28 +37,9 @@ double KinSparseMatrix::computeRowRate(
 	const int* end = entry + numEntries;
 
 	double ret = 0.0;
-	for ( const int* i = entry; i != end; ++i ) 
-        {
-            ret += *i * v[ *colIndex++ ];
+	for ( const int* i = entry; i != end; ++i ) {
+		ret += *i * v[ *colIndex++ ];
 	}
-
-#if 0
-	for ( unsigned int i = 0; i < numEntries; ++i ) {
-		ret += entry[i] * v[ colIndex[i] ];
-
-	}
-
-	vector< int >::const_iterator i;
-	unsigned int rs = rowStart_[ row ];
-	vector< unsigned int >::const_iterator j = colIndex_.begin() + rs;
-	vector< int >::const_iterator end = N_.begin() + rowStart_[ row + 1 ];
-	
-	double ret = 0.0;
-	for ( i = N_.begin() + rs; i != end; i++ )
-		ret += *i * v[ *j++ ];
-
-	assert ( !( ret !<>= 0.0 ) );
-#endif
 
 	assert ( !( std::isnan( ret ) ) );
 	return ret;

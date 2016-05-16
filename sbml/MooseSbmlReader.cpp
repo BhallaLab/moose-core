@@ -8,7 +8,7 @@
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
 ** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2015 Upinder S. Bhalla. and NCBS
+**           copyright (C) 2003-2016 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -18,6 +18,27 @@
 
 * Originally created by Siji for l2v4 for 'trunk ' branch
 * Modified / adapted Harsharani for both l2v4 and l3v1
+
+hasOnlySubstanceUnit : false means if the compartment size is changed then it is assumed that its the concentration that must be updated
+to account for the size change.
+
+When importing SBML Level 2 models species for which the 
+A. initial value is given as initialAmount and hasOnlySubstanceUnits is set to true 
+(or compartment dimension is zero) are treated as amounts. 
+
+B. If hasOnlySubstanceUnits is set to false 
+but the initial value is given as amount the corresponding species are not converted to concentration, rather I substitue amount
+as moose can take nInit. 
+
+C. Species for which the initial value is given as initialConcentration are treated as concentrations by converted to milli
+
+It is then assumed that the value of species appearing in the kinetic rate laws have either amount or concentration units. 
+
+All rules are evaluated as given by the SBML model.
+According to the SBML standard rate laws of reactions are assumed to deliver a rate in amount/time. 
+In the case a species value is defined as concentration the rate law is converted to concentration/time.
+
+In models that have only compartments of a constant size of 1 the distinction between amounts and concentrations is not necessary. 
 ***************/
 
 
@@ -41,7 +62,7 @@
 using namespace std;
 map< string,double > parmValueMap;
 map< string,double> :: iterator pvm_iter;
-
+bool unitsDefined = true;
 /*  Harsha : TODO in
     -Compartment
       --Need to add group
@@ -74,7 +95,7 @@ map< string,double> :: iterator pvm_iter;
  * @return  Id on success. Some expcetion on failure.
  */
 Id moose::SbmlReader::read( string filename, string location, string solverClass) 
-{
+{   stringstream global_warning;
     FILE * fp = fopen( filename.c_str(), "r" );
     if ( fp == NULL) {
         stringstream ss;
@@ -90,7 +111,6 @@ Id moose::SbmlReader::read( string filename, string location, string solverClass
         errorFlag_ = true;
         return baseId;
     }
-
     model_= document_->getModel();
     if ( model_ == 0 ) {
         cout << "SBML: Error: No model present." << endl;
@@ -101,6 +121,7 @@ Id moose::SbmlReader::read( string filename, string location, string solverClass
         getGlobalParameter();
 
     if ( !errorFlag_ ) {
+        
         string modelName;
         Id parentId;
         findModelParent ( Id(), location, parentId, modelName ) ;
@@ -113,11 +134,22 @@ Id moose::SbmlReader::read( string filename, string location, string solverClass
         // Map between Molecule's SBML id to which it belongs compartment Moose Id
         map< string, Id > molSidcmptMIdMap;
 
-        if ( !errorFlag_ )
+        if ( !errorFlag_ ){
+            unitsDefined = true;
             comptSidMIdMap = createCompartment(location, parentId, modelName, base_);
-
-        if ( !errorFlag_ )
+            //comptUnitDefined is set true is checked if warning is set or not, only once its set.
+            if (unitsDefined == false)
+                global_warning << "The default volume unit has not been set in the model. "<<
+                                "Assuming liter as the default volume unit, MOOSE will convert to cubicMeter which is the default units for volume in MOOSE. \n";
+        }
+        if ( !errorFlag_ ){
+            unitsDefined = true;
             molSidcmptMIdMap = createMolecule( comptSidMIdMap);
+            if (unitsDefined == false)
+                //SpeciesUnitDefined is set true is checked if warning is set or not, only once its set.
+                global_warning << "The default substance unit has not been set in the model. "<<
+                                "Assuming mole as the default substance unit, MOOSE will convert to milliMolar which is the default units for Substabce in MOOSE  \n";
+        }
         if ( !errorFlag_ )
             getRules();
 
@@ -308,7 +340,8 @@ map< string,Id > moose::SbmlReader::createCompartment(string location, Id parent
 {
     /* In compartment: pending to add
        -- the group
-       -- outside     -- units of volume
+       -- outside    
+       -- units of volume
     */
     Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
     map< string,Id > comptSidMIdMap;
@@ -355,10 +388,12 @@ map< string,Id > moose::SbmlReader::createCompartment(string location, Id parent
             cout << "\n ###### Spatial Dimension is " << dimension <<" volume should not be converted from liter to cubicmeter which is happening as default check \n";
 
         if(name.empty() && id.empty())
-            cout << "Warn: " << "Compartment name and id are empty" << endl;
-        else if (name.empty()) 
+            cout <<  "Compartment name and id are empty" << endl;
+
+        if (name.empty()) {
             if(! id.empty() )
                 name = id;
+        }
 
         Id compt = s->doCreate( "CubeMesh", base_, name,  1);
         comptSidMIdMap[id] = compt;
@@ -417,30 +452,7 @@ const moose::SbmlReader::sbmlStr_mooseId moose::SbmlReader::createMolecule( map<
             XMLNode tnodec = nodec.getChild(0);
             speciesNotes = tnodec.getCharacters();
         }
-        double initvalue =0.0;
-        if ( spe->isSetInitialConcentration() )
-            initvalue = spe->getInitialConcentration();
-        else if ( spe->isSetInitialAmount() )
-            initvalue = spe->getInitialAmount() ;
-        else {
-            unsigned int nr = model_->getNumRules();
-            bool found = false;
-            for ( unsigned int r = 0; r < nr; r++ ) {
-                Rule * rule = model_->getRule(r);
-                bool assignRule = rule->isAssignment();
-                if ( assignRule ) {
-                    string rule_variable = rule->getVariable();
-                    if (rule_variable.compare(id) == 0) {
-                        found = true;
-                        break;
-                    }
-                }
-            }
-            if (found == false) {
-                cout << "Invalid SBML: Either initialConcentration or initialAmount must be set or it should be found in assignmentRule but non happening for " << spe->getName() <<endl;
-                return molSidcmptMIdMap;
-            }
-        }
+
         Id comptEl = comptSidMIdMap[compt];
         Id meshEntry = Neutral::child( comptEl.eref(), "mesh" );
         string comptPath = Field<string> :: get(comptEl,"path");
@@ -496,26 +508,48 @@ const moose::SbmlReader::sbmlStr_mooseId moose::SbmlReader::createMolecule( map<
 
             UnitDefinition * ud = spe->getDerivedUnitDefinition();
             assert(ud != NULL);
+            double initvalue = 0.0;
             bool hasonlySubUnit = spe->getHasOnlySubstanceUnits();
-
-            //double v = Field< double >::get( comptEl.path(), "volume" );
             transvalue = transformUnits(1,ud,"substance",hasonlySubUnit);
-            if (hasonlySubUnit) {
-                // In Moose, no. of molecules (nInit) and unit is "item"
-                if (spatialDimen > 0 && spe->isSetInitialAmount() ) {
-                    //transvalue *= initvalue;
-                    initvalue *=transvalue;
-                    Field < double> :: set( pool, "nInit", initvalue);
-                }
-            } 
-            else {
-                //transvalue *=initvalue;
-                initvalue *=transvalue;
+            
+            if ( spe->isSetInitialConcentration() ) {
+                initvalue = spe->getInitialConcentration();
+                //transValue will take care of multiplying any units are defined
+                // pow(1e3) will make sure the concentration Unit are converted from mole to milliMolar (Molar = mole/size)
+                initvalue = initvalue * transvalue * pow(1e+3,1);
                 Field <double> :: set(pool, "concInit",initvalue);
             }
-            //poolMap_.insert(make_pair(id,make_tuple(name,transvalue,hasonlySubUnit)));
-        if (!xCord.empty() and !yCord.empty())
-        { 
+            else if ( spe->isSetInitialAmount() ) {
+                initvalue = spe->getInitialAmount();   
+                //If Amount is set then moose is capable of populating number nInit
+                // hasonlySubstanceUnit is not checked, if we populate nInit then
+                //moose automatically calculate the concInit.
+                //transValue will take care of multiplying any units are defined
+                // pow(NA) the avogadro's number to convert to number #
+                initvalue = initvalue * transvalue * pow(NA,1);
+                Field < double> :: set( pool, "nInit", initvalue);     
+            }
+            else {
+                unsigned int nr = model_->getNumRules();
+                bool found = false;
+                for ( unsigned int r = 0; r < nr; r++ ) {
+                    Rule * rule = model_->getRule(r);
+                    bool assignRule = rule->isAssignment();
+                    if ( assignRule ) {
+                        string rule_variable = rule->getVariable();
+                        if (rule_variable.compare(id) == 0) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                if (found == false) {
+                    cout << "Invalid SBML: Either initialConcentration or initialAmount must be set or it should be found in assignmentRule but non happening for " << spe->getName() <<endl;
+                    return molSidcmptMIdMap;
+                }
+            }
+        
+        if (!xCord.empty() and !yCord.empty()) {
             Id poolInfo;
             string poolPath = Field<string> :: get(pool,"path");
             poolInfo = Id( poolPath + "/info");
@@ -526,11 +560,9 @@ const moose::SbmlReader::sbmlStr_mooseId moose::SbmlReader::createMolecule( map<
             double y = atof( yCord.c_str() );
             Field< double >::set( poolInfo, "x", x );
             Field< double >::set( poolInfo, "y", y );
-            
-
-        }
-        if (!speciesNotes.empty())
-        {   Id poolInfo;
+            }
+        if (!speciesNotes.empty()){
+            Id poolInfo;
             string poolPath = Field<string> :: get(pool,"path");
             poolInfo = Id( poolPath + "/info");
             if ( poolInfo == Id() ) 
@@ -539,11 +571,10 @@ const moose::SbmlReader::sbmlStr_mooseId moose::SbmlReader::createMolecule( map<
             speciesNotes.erase(std::remove(speciesNotes.begin(), speciesNotes.end(), '\n'), speciesNotes.end());
             speciesNotes.erase(std::remove(speciesNotes.begin(), speciesNotes.end(), '\t'), speciesNotes.end());
             Field< string >::set( poolInfo, "notes", speciesNotes );
-        }
+            }
         }//Pool_ != Id()
     }
     return molSidcmptMIdMap;
-
 }
 
 /* Assignment Rule */
@@ -770,12 +801,19 @@ void moose::SbmlReader::createReaction(const map< string, Id > &molSidcmptMIdMap
                         //vector< double > rate = getKLaw( klaw,rev );
                         vector< double > rate;
                         rate.clear();
-                        getKLaw( klaw,rev,rate );
+                        string amt_Conc;
+                        getKLaw( klaw,rev,rate,amt_Conc );
                         if ( errorFlag_ )
                             return;
                         else if ( !errorFlag_ ) {
-                            Field < double > :: set( reaction_, "numKf", rate[0] );
-                            Field < double > :: set( reaction_, "numKb", rate[1] );
+                            if (amt_Conc == "amount")
+                            {   Field < double > :: set( reaction_, "numKf", rate[0] );
+                                Field < double > :: set( reaction_, "numKb", rate[1] );
+                            }
+                            else if (amt_Conc == "concentration")
+                            {   Field < double > :: set( reaction_, "Kf", rate[0] );
+                                Field < double > :: set( reaction_, "Kb", rate[1] );
+                            }
                             /*if (numRcts > 1)
                             rate[0] = rate[0]*pow(1e3,1.0);
                                  Field < double > :: set( reaction_, "Kf", rate[0] );
@@ -952,7 +990,8 @@ string moose::SbmlReader::getAnnotation( Reaction* reaction,map<string,EnzymeInf
                     KineticLaw * klaw=reaction->getKineticLaw();
                     vector< double > rate ;
                     rate.clear();
-                    getKLaw( klaw,true,rate );
+                    string amt_Conc;
+                    getKLaw( klaw,true,rate,amt_Conc );
                     if ( errorFlag_ )
                         exit(0);
                     else if ( !errorFlag_ ) {
@@ -969,7 +1008,8 @@ string moose::SbmlReader::getAnnotation( Reaction* reaction,map<string,EnzymeInf
                     KineticLaw * klaw=reaction->getKineticLaw();
                     vector< double > rate;
                     rate.clear();
-                    getKLaw( klaw,false,rate );
+                    string amt_Conc;
+                    getKLaw( klaw,false,rate,amt_Conc);
                     if ( errorFlag_ )
                         exit(0);
                     else if ( !errorFlag_ )
@@ -1049,7 +1089,8 @@ void moose::SbmlReader::setupMMEnzymeReaction( Reaction * reac,string rid,string
             KineticLaw * klaw=reac->getKineticLaw();
             vector< double > rate;
             rate.clear();
-            getKLaw( klaw,true,rate );
+            string amt_Conc;
+            getKLaw( klaw,true,rate,amt_Conc);
             if ( errorFlag_ )
                 return;
             else if ( !errorFlag_ ) {
@@ -1129,8 +1170,9 @@ void moose::SbmlReader::pushParmstoVector(const ASTNode* p,vector <string> & par
 }
 
 /*     get Kinetic Law  */
-void moose::SbmlReader::getKLaw( KineticLaw * klaw,bool rev,vector< double > & rate ) {
+void moose::SbmlReader::getKLaw( KineticLaw * klaw,bool rev,vector< double > & rate,string &amt_Conc) {
     std::string id;
+    amt_Conc = "amount";
     double value = 0.0;
     UnitDefinition * kfud;
     UnitDefinition * kbud;
@@ -1184,20 +1226,27 @@ void moose::SbmlReader::getKLaw( KineticLaw * klaw,bool rev,vector< double > & r
         if ( kfp->isSetUnits() ) {
             kfud = kfp->getDerivedUnitDefinition();
             //cout << "parameter unit :" << UnitDefinition::printUnits(kfp->getDerivedUnitDefinition())<< endl;
+            //cout << " rate law ";
             double transkf = transformUnits( 1,kfud ,"substance",true);
+            //cout << " transkf " << transkf<<endl;
             kf = kfvalue * transkf;
             kb = 0.0;
-        } else if (! kfp->isSetUnits() ) {
+        } 
+        else {
             double lvalue =1.0;
             /* If rate units are not defined then trying to get substanceUnit*/
             if (model_->getNumUnitDefinitions() > 0)
                 lvalue = unitsforRates();
+                //cout << "Substrate units are specified " << lvalue <<endl;
             /* If neither RateUnits nor substanceUnit is defined, then assuming SubstanceUnit are in mole,
                so converting mole to millimole
             */
+            amt_Conc = "concentration";
+            //cout << " rate law ";
             if (noOfsub_ >1)
                 lvalue /= pow(1e+3,(noOfsub_-1));
             kf = kfvalue*lvalue;
+            
         }// !kfp is notset
         if ( ( kbp->isSetUnits() ) && ( rev ) ) {
             kbud = kbp->getDerivedUnitDefinition();
@@ -1282,58 +1331,52 @@ void moose::SbmlReader::addSubPrd(Reaction * reac,Id reaction_,string type) {
 
 double moose::SbmlReader::transformUnits( double mvalue,UnitDefinition * ud,string type, bool hasonlySubUnit ) {
     assert (ud);
-
     double lvalue = mvalue;
-    if (type == "compartment") {
-        for ( unsigned int ut = 0; ut < ud->getNumUnits(); ut++ ) {
+    if (type == "compartment") 
+    {   if(ud->getNumUnits() == 0)
+            unitsDefined = false;
+        else
+        {   for ( unsigned int ut = 0; ut < ud->getNumUnits(); ut++ ) {
             Unit * unit = ud->getUnit(ut);
-            double exponent = unit->getExponent();
-            double multiplier = unit->getMultiplier();
-            int scale = unit->getScale();
-            double offset = unit->getOffset();
-            lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset;
-            // Need to check if spatial dimension is less than 3 then,
-            // then volume conversion e-3 to convert cubicmeter shd not be done.
             if ( unit->isLitre() ) {
-                lvalue *= pow(1e-3,exponent);
-                return lvalue;
-            }
-        }
-    } else if(type == "substance") {
-        for ( unsigned int ut = 0; ut < ud->getNumUnits(); ut++ ) {
-            Unit * unit = ud->getUnit(ut);
-            //cout << " :) " << UnitKind_toString(unit->getKind());
-            if ( unit->isMole() ) {
                 double exponent = unit->getExponent();
                 double multiplier = unit->getMultiplier();
                 int scale = unit->getScale();
                 double offset = unit->getOffset();
                 lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset;
-                if (hasonlySubUnit)
-                    // if hasonlySubstanceUnit is true, then unit is subtance
-                    // In Moose nInit = no. of molecules( unit is items)
-                    // no. of molecules (items) = mole * Avogadro no.
-                    // In SBML if initial Amount is set to mole then convert from mole to items (#)
-                    lvalue *= pow( NA ,exponent);
-                else
-                    // if hasonlySubstanceUnit is false,
-                    //Then convert mole to milli Molar for moose as concentration units are in milliMolar
-                    // Molar = mole/size
-                    lvalue *= pow(1e+3,exponent);
-                return lvalue;
-            } else if(unit->isItem())
-                return lvalue;
-            else if(unit->isSecond())
-                return lvalue;
-            else {
-		 //#harsha : for Time being I have commented plz don't uncomment this like.
-                //cout << "- check this unit type " << UnitKind_toString(unit->getKind()) << endl;
-                return lvalue;
+                // Need to check if spatial dimension is less than 3 then,
+                // then volume conversion e-3 to convert cubicmeter shd not be done.
+                lvalue *= pow(1e-3,exponent);
+                }
             }
         }
-    }
-    return lvalue;
-}
+    } 
+    else if(type == "substance")
+    {   double exponent = 1.0;
+        if(ud->getNumUnits() == 0)
+            unitsDefined = false;
+        else {
+            for ( unsigned int ut = 0; ut < ud->getNumUnits(); ut++ ) {
+                Unit * unit = ud->getUnit(ut);
+                if ( unit->isMole() ) {
+                    exponent = unit->getExponent();
+                    double multiplier = unit->getMultiplier();
+                    int scale = unit->getScale();
+                    double offset = unit->getOffset();
+                    lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset;
+                }//if unit is Mole
+                else if (unit->isItem()){
+                    exponent = unit->getExponent();
+                    double multiplier = unit->getMultiplier();
+                    int scale = unit->getScale();
+                    double offset = unit->getOffset();
+                    lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset;
+                }    
+            }//for
+        } //else
+    } // type="substance"
+return lvalue;
+}//transformUnits
 void moose::SbmlReader::printMembers( const ASTNode* p,vector <string> & ruleMembers ) {
     if ( p->getType() == AST_NAME ) {
         //cout << "_NAME" << " = " << p->getName() << endl;
@@ -1387,7 +1430,7 @@ void moose::SbmlReader ::findModelParent( Id cwe, const string& path, Id& parent
 }
 
 /**
- * @brief Populate parmValueMap; a member variable with keeps all the gloabals
+ * @brief Populate parmValueMap; a member variable with keeps all the globals
  * parameters of SBML model.
  */
 void moose::SbmlReader::getGlobalParameter() {

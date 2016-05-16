@@ -1,19 +1,20 @@
 /**********************************************************************
- ** This program is part of 'MOOSE', the
- ** Messaging Object Oriented Simulation Environment.
- **           Copyright (C) 2003-2013 Upinder S. Bhalla. and NCBS
- ** It is made available under the terms of the
- ** GNU Lesser General Public License version 2.1
- ** See the file COPYING.LIB for the full notice.
- **********************************************************************/
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment.
+**           Copyright (C) 2003-2013 Upinder S. Bhalla. and NCBS
+** It is made available under the terms of the
+** GNU Lesser General Public License version 2.1
+** See the file COPYING.LIB for the full notice.
+**********************************************************************/
 
 
 #include "header.h"
 #include "../shell/Shell.h"
+#include "../randnum/randnum.h"
 #include "CompartmentBase.h"
-#include "Compartment.h"
-#include "testing_macros.hpp"
+#include "../utility/testing_macros.hpp"
 
+#include "Compartment.h"
 /*
 #include "HHGate.h"
 #include "ChanBase.h"
@@ -25,226 +26,212 @@ extern void testMarkovRateTable(); //Defined in MarkovRateTable.cpp
 extern void testVectorTable();	//Defined in VectorTable.cpp
 
 /*
-   extern void testSpikeGen(); // Defined in SpikeGen.cpp
-   extern void testCaConc(); // Defined in CaConc.cpp
-   extern void testNernst(); // Defined in Nernst.cpp
-   extern void testMarkovSolverBase();	//Defined in MarkovSolverBase.cpp
-   extern void testMarkovSolver();		//Defined in MarkovSolver.cpp
-   */
+extern void testSpikeGen(); // Defined in SpikeGen.cpp
+extern void testCaConc(); // Defined in CaConc.cpp
+extern void testNernst(); // Defined in Nernst.cpp
+extern void testMarkovSolverBase();	//Defined in MarkovSolverBase.cpp
+extern void testMarkovSolver();		//Defined in MarkovSolver.cpp
+*/
 
 #ifdef DO_UNIT_TESTS
 
 // Use a larger value of runsteps when benchmarking
 void testIntFireNetwork( unsigned int runsteps = 5 )
 {
-    static const double thresh = 0.8;
-    static const double Vmax = 1.0;
-    static const double refractoryPeriod = 0.4;
-    static const double weightMax = 0.02;
-    static const double timestep = 0.2;
-    static const double delayMax = 4;
-    static const double delayMin = 0;
-    static const double connectionProbability = 0.1;
-    static const unsigned int NUM_TOT_SYN = 104576;
-    unsigned int size = 1024;
-    string arg;
-    Eref sheller( Id().eref() );
-    Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	static const double thresh = 0.8;
+	static const double Vmax = 1.0;
+	static const double refractoryPeriod = 0.4;
+	static const double weightMax = 0.02;
+	static const double timestep = 0.2;
+	static const double delayMax = 4;
+	static const double delayMin = 0;
+	static const double connectionProbability = 0.1;
+	static const unsigned int NUM_TOT_SYN = 104576;
+	unsigned int size = 1024;
+	string arg;
+	Eref sheller( Id().eref() );
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 
-    Id fire = shell->doCreate( "IntFire", Id(), "network", size );
-    assert( fire.element()->getName() == "network" );
+	Id fire = shell->doCreate( "IntFire", Id(), "network", size );
+	assert( fire.element()->getName() == "network" );
 
-    Id i2 = shell->doCreate( "SimpleSynHandler", fire, "syns", size );
-    assert( i2.element()->getName() == "syns" );
+	Id i2 = shell->doCreate( "SimpleSynHandler", fire, "syns", size );
+	assert( i2.element()->getName() == "syns" );
 
-    Id synId( i2.value() + 1 );
-    Element* syn = synId.element();
-    assert( syn->getName() == "synapse" );
+	Id synId( i2.value() + 1 );
+	Element* syn = synId.element();
+	assert( syn->getName() == "synapse" );
 
-    DataId di( 1 ); // DataId( data, field )
-    Eref syne( syn, di );
+	DataId di( 1 ); // DataId( data, field )
+	Eref syne( syn, di );
 
-    ObjId mid = shell->doAddMsg( "Sparse", fire, "spikeOut",
-            ObjId( synId, 0 ), "addSpike" );
+	ObjId mid = shell->doAddMsg( "Sparse", fire, "spikeOut",
+		ObjId( synId, 0 ), "addSpike" );
+	
+	SetGet2< double, long >::set( mid, "setRandomConnectivity", 
+		connectionProbability, 5489UL );
 
-    SetGet2< double, long >::set( mid, "setRandomConnectivity", 
-            connectionProbability, 5489UL );
+	mid = shell->doAddMsg( "OneToOne", i2, "activationOut",
+		fire, "activation" );
+	assert( !mid.bad() );
 
-    mid = shell->doAddMsg( "OneToOne", i2, "activationOut",
-            fire, "activation" );
-    assert( !mid.bad() );
+	unsigned int nd = syn->totNumLocalField();
+	if ( Shell::numNodes() == 1 )
+		assert( nd == NUM_TOT_SYN );
+	else if ( Shell::numNodes() == 2 )
+		assert( nd == 52446 );
+	else if ( Shell::numNodes() == 3 )
+		//assert( nd == 34969 );
+		assert( nd == 35087 );
+	else if ( Shell::numNodes() == 4 )
+		assert( nd == 26381 );
 
-    unsigned int nd = syn->totNumLocalField();
-    if ( Shell::numNodes() == 1 )
-        assert( nd == NUM_TOT_SYN );
-    else if ( Shell::numNodes() == 2 )
-        assert( nd == 52446 );
-    else if ( Shell::numNodes() == 3 )
-        //assert( nd == 34969 );
-        assert( nd == 35087 );
-    else if ( Shell::numNodes() == 4 )
-        assert( nd == 26381 );
+	//////////////////////////////////////////////////////////////////
+	// Checking access to message info through SparseMsg on many nodes.
+	//////////////////////////////////////////////////////////////////
+	vector< ObjId > tgts;
+	vector< string > funcs;
+	ObjId oi( fire, 123 );
+	tgts = LookupField< string, vector< ObjId > >::
+			get( oi, "msgDests", "spikeOut" );
+	funcs = LookupField< string, vector< string > >::
+			get( oi, "msgDestFunctions", "spikeOut" );
+	assert( tgts.size() == funcs.size() );
+	/*
+	assert( tgts.size() == 116  );
+	assert( tgts[0] == ObjId( synId, 20, 11 ) );
+	assert( tgts[1] == ObjId( synId, 27, 15 ) );
+	assert( tgts[2] == ObjId( synId, 57, 14 ) );
+	assert( tgts[90] == ObjId( synId, 788, 15 ) );
+	assert( tgts[91] == ObjId( synId, 792, 12 ) );
+	assert( tgts[92] == ObjId( synId, 801, 17 ) );
+	*/
+	for ( unsigned int i = 0; i < funcs.size(); ++i )
+		assert( funcs[i] == "addSpike" );
 
-    //////////////////////////////////////////////////////////////////
-    // Checking access to message info through SparseMsg on many nodes.
-    //////////////////////////////////////////////////////////////////
-    vector< ObjId > tgts;
-    vector< string > funcs;
-    ObjId oi( fire, 123 );
-    tgts = LookupField< string, vector< ObjId > >::
-        get( oi, "msgDests", "spikeOut" );
-    funcs = LookupField< string, vector< string > >::
-        get( oi, "msgDestFunctions", "spikeOut" );
-    assert( tgts.size() == funcs.size() );
-    /*
-       assert( tgts.size() == 116  );
-       assert( tgts[0] == ObjId( synId, 20, 11 ) );
-       assert( tgts[1] == ObjId( synId, 27, 15 ) );
-       assert( tgts[2] == ObjId( synId, 57, 14 ) );
-       assert( tgts[90] == ObjId( synId, 788, 15 ) );
-       assert( tgts[91] == ObjId( synId, 792, 12 ) );
-       assert( tgts[92] == ObjId( synId, 801, 17 ) );
-       */
-    for ( unsigned int i = 0; i < funcs.size(); ++i )
-        assert( funcs[i] == "addSpike" );
+	//////////////////////////////////////////////////////////////////
+	// Here we have an interesting problem. The mtRand might be called
+	// by multiple threads if the above Set call is not complete.
 
-    //////////////////////////////////////////////////////////////////
-    // Here we have an interesting problem. The mtRand might be called
-    // by multiple threads if the above Set call is not complete.
+	vector< double > origVm( size, 0.0 );
+	for ( unsigned int i = 0; i < size; ++i )
+		origVm[i] = mtrand() * Vmax;
 
-    moose::mtseed( 5489U );
-    vector< double > origVm( size, 0.0 );
-    for ( unsigned int i = 0; i < size; ++i )
-        origVm[i] = moose::mtrand() * Vmax;
+	double origVm100 = origVm[100];
+	double origVm900 = origVm[900];
 
-    double origVm100 = origVm[100];
-    double origVm900 = origVm[900];
+	vector< double > temp;
+	temp.clear();
+	temp.resize( size, thresh );
+	bool ret = Field< double >::setVec( fire, "thresh", temp );
+	assert( ret );
+	temp.clear();
+	temp.resize( size, refractoryPeriod );
+	ret = Field< double >::setVec( fire, "refractoryPeriod", temp );
+	assert( ret );
 
-    vector< double > temp;
-    temp.clear();
-    temp.resize( size, thresh );
-    bool ret = Field< double >::setVec( fire, "thresh", temp );
-    assert( ret );
-    temp.clear();
-    temp.resize( size, refractoryPeriod );
-    ret = Field< double >::setVec( fire, "refractoryPeriod", temp );
-    assert( ret );
+	// cout << Shell::myNode() << ": fieldSize = " << fieldSize << endl;
+	vector< unsigned int > numSynVec;
+	Field< unsigned int >::getVec( i2, "numSynapses", numSynVec );
+	assert ( numSynVec.size() == size );
+	unsigned int numTotSyn = 0;
+	for ( unsigned int i = 0; i < size; ++i )
+		numTotSyn += numSynVec[i];
+	assert( numTotSyn == NUM_TOT_SYN );
 
-    // cout << Shell::myNode() << ": fieldSize = " << fieldSize << endl;
-    vector< unsigned int > numSynVec;
-    Field< unsigned int >::getVec( i2, "numSynapses", numSynVec );
-    assert ( numSynVec.size() == size );
-    unsigned int numTotSyn = 0;
-    for ( unsigned int i = 0; i < size; ++i )
-        numTotSyn += numSynVec[i];
-    assert( numTotSyn == NUM_TOT_SYN );
+	vector< vector< double > > weight( size );
+	for ( unsigned int i = 0; i < size; ++i ) {
+		weight[i].resize( numSynVec[i], 0.0 );
+		vector< double > delay( numSynVec[i], 0.0 );
+		for ( unsigned int j = 0; j < numSynVec[i]; ++j ) {
+			weight[i][ j ] = mtrand() * weightMax;
+			delay[ j ] = delayMin + mtrand() * ( delayMax - delayMin );
+		}
+		ret = Field< double >::
+				setVec( ObjId( synId, i ), "weight", weight[i] );
+		assert( ret );
+		ret = Field< double >::setVec( ObjId( synId, i ), "delay", delay );
+		assert( ret );
+	}
 
-    vector< vector< double > > weight( size );
-    for ( unsigned int i = 0; i < size; ++i ) {
-        weight[i].resize( numSynVec[i], 0.0 );
-        vector< double > delay( numSynVec[i], 0.0 );
-        for ( unsigned int j = 0; j < numSynVec[i]; ++j ) {
-            weight[i][ j ] = moose::mtrand() * weightMax;
-            delay[ j ] = delayMin + moose::mtrand() * ( delayMax - delayMin );
-        }
-        ret = Field< double >::
-            setVec( ObjId( synId, i ), "weight", weight[i] );
-        assert( ret );
-        ret = Field< double >::setVec( ObjId( synId, i ), "delay", delay );
-        assert( ret );
-    }
+	for ( unsigned int i = 0; i < size; ++i ) {
+		vector< double > retVec(0);
+		Field< double >::getVec( ObjId( synId, i ), "weight", retVec );
+		assert( retVec.size() == numSynVec[i] );
+		for ( unsigned int j = 0; j < numSynVec[i]; ++j ) {
+			assert( doubleEq( retVec[j], weight[i][j] ) );
+		}
+	}
 
-    for ( unsigned int i = 0; i < size; ++i ) {
-        vector< double > retVec(0);
-        Field< double >::getVec( ObjId( synId, i ), "weight", retVec );
-        assert( retVec.size() == numSynVec[i] );
-        for ( unsigned int j = 0; j < numSynVec[i]; ++j ) {
-            assert( doubleEq( retVec[j], weight[i][j] ) );
-        }
-    }
+	// We have to have the SynHandlers called before the network of
+	// IntFires since the 'activation' message must be delivered within
+	// the same timestep.
+	shell->doUseClock("/network/syns", "process", 0 );
+	shell->doUseClock("/network", "process", 1 );
+	shell->doSetClock( 0, timestep );
+	shell->doSetClock( 1, timestep );
+	shell->doSetClock( 9, timestep );
+	shell->doReinit();
+	ret = Field< double >::setVec( fire, "Vm", origVm );
+	assert( ret );
 
-    // We have to have the SynHandlers called before the network of
-    // IntFires since the 'activation' message must be delivered within
-    // the same timestep.
-    shell->doUseClock("/network/syns", "process", 0 );
-    shell->doUseClock("/network", "process", 1 );
-    shell->doSetClock( 0, timestep );
-    shell->doSetClock( 1, timestep );
-    shell->doSetClock( 9, timestep );
-    shell->doReinit();
-    ret = Field< double >::setVec( fire, "Vm", origVm );
-    assert( ret );
+	double retVm100 = Field< double >::get( ObjId( fire, 100 ), "Vm" );
+	double retVm900 = Field< double >::get( ObjId( fire, 900 ), "Vm" );
+	assert( fabs( retVm100 - origVm100 ) < 1e-6 );
+	assert( fabs( retVm900 - origVm900 ) < 1e-6 );
 
-    double retVm100 = Field< double >::get( ObjId( fire, 100 ), "Vm" );
-    double retVm900 = Field< double >::get( ObjId( fire, 900 ), "Vm" );
-    assert( fabs( retVm100 - origVm100 ) < 1e-6 );
-    assert( fabs( retVm900 - origVm900 ) < 1e-6 );
+	shell->doStart( static_cast< double >( timestep * runsteps) + 0.0 );
+	if ( runsteps == 5 ) { // default for unit tests, others are benchmarks
+		retVm100 = Field< double >::get( ObjId( fire, 100 ), "Vm" );
+		double retVm101 = Field< double >::get( ObjId( fire, 101 ), "Vm" );
+		double retVm102 = Field< double >::get( ObjId( fire, 102 ), "Vm" );
+		double retVm99 = Field< double >::get( ObjId( fire, 99 ), "Vm" );
+		retVm900 = Field< double >::get( ObjId( fire, 900 ), "Vm" );
+		double retVm901 = Field< double >::get( ObjId( fire, 901 ), "Vm" );
+		double retVm902 = Field< double >::get( ObjId( fire, 902 ), "Vm" );
 
-    shell->doStart( static_cast< double >( timestep * runsteps) + 0.0 );
-    if ( runsteps == 5 ) { // default for unit tests, others are benchmarks
-        retVm100 = Field< double >::get( ObjId( fire, 100 ), "Vm" );
-        double retVm101 = Field< double >::get( ObjId( fire, 101 ), "Vm" );
-        double retVm102 = Field< double >::get( ObjId( fire, 102 ), "Vm" );
-        double retVm99 = Field< double >::get( ObjId( fire, 99 ), "Vm" );
-        retVm900 = Field< double >::get( ObjId( fire, 900 ), "Vm" );
-        double retVm901 = Field< double >::get( ObjId( fire, 901 ), "Vm" );
-        double retVm902 = Field< double >::get( ObjId( fire, 902 ), "Vm" );
+		/*
+		assert( doubleEq( retVm100, 0.00734036 ) );
+		assert( doubleEq( retVm101, 0.246818 ) );
+		assert( doubleEq( retVm102, 0.200087 ) );
+		assert( doubleEq( retVm99, 0.0095779083 ) );
+		assert( doubleEq( retVm900, 0.1150573482 ) );
+		assert( doubleEq( retVm901, 0.289321534 ) );
+		assert( doubleEq( retVm902, 0.01011172486 ) );
+		assert( doubleEq( retVm100, 0.008593194687366486 ) );
+		assert( doubleEq( retVm101, 0.24931678857743744 ) );
+		assert( doubleEq( retVm102, 0.19668269662484533 ) );
+		assert( doubleEq( retVm99, 0.00701607616202429 ) );
+		assert( doubleEq( retVm900, 0.12097053045094018 ) );
+		assert( doubleEq( retVm901, 0.2902593120492995 ) );
+		assert( doubleEq( retVm902, 0.00237157280699805 ) );
+		assert( doubleEq( retVm100, 0.015766608829826119 ) );
+		assert( doubleEq( retVm101, 0.24405557875013356 ) );
+		assert( doubleEq( retVm102, 0.20878261213859917 ) );
+		assert( doubleEq( retVm99, 0.0081746848675747306 ) );
+		assert( doubleEq( retVm900, 0.12525297735741736 ) );
+		assert( doubleEq( retVm901, 0.28303358631241327 ) );
+		assert( doubleEq( retVm902, 0.0096374021108587178 ) );
+		*/
+		assert( doubleEq( retVm100, 0.069517018453329804 ) );
+		assert( doubleEq( retVm101, 0.32823493598699577 ) );
+		assert( doubleEq( retVm102, 0.35036493874475361 ) );
+		assert( doubleEq( retVm99,  0.04087358817787364 ) );
+		assert( doubleEq( retVm900, 0.26414663635984065 ) );
+		assert( doubleEq( retVm901, 0.39864519810259352 ) );
+		assert( doubleEq( retVm902, 0.04818717439429359 ) );
 
-        /*
-           assert( doubleEq( retVm100, 0.00734036 ) );
-           assert( doubleEq( retVm101, 0.246818 ) );
-           assert( doubleEq( retVm102, 0.200087 ) );
-           assert( doubleEq( retVm99, 0.0095779083 ) );
-           assert( doubleEq( retVm900, 0.1150573482 ) );
-           assert( doubleEq( retVm901, 0.289321534 ) );
-           assert( doubleEq( retVm902, 0.01011172486 ) );
-           assert( doubleEq( retVm100, 0.008593194687366486 ) );
-           assert( doubleEq( retVm101, 0.24931678857743744 ) );
-           assert( doubleEq( retVm102, 0.19668269662484533 ) );
-           assert( doubleEq( retVm99, 0.00701607616202429 ) );
-           assert( doubleEq( retVm900, 0.12097053045094018 ) );
-           assert( doubleEq( retVm901, 0.2902593120492995 ) );
-           assert( doubleEq( retVm902, 0.00237157280699805 ) );
-           assert( doubleEq( retVm100, 0.015766608829826119 ) );
-           assert( doubleEq( retVm101, 0.24405557875013356 ) );
-           assert( doubleEq( retVm102, 0.20878261213859917 ) );
-           assert( doubleEq( retVm99, 0.0081746848675747306 ) );
-           assert( doubleEq( retVm900, 0.12525297735741736 ) );
-           assert( doubleEq( retVm901, 0.28303358631241327 ) );
-           assert( doubleEq( retVm902, 0.0096374021108587178 ) );
-           */
+	}
+	/*
+	cout << "testIntFireNetwork: Vm100 = " << retVm100 << ", " <<
+			retVm101 << ", " << retVm102 << ", " << retVm99 <<
+			", " << Vm100 << endl;
+	cout << "Vm900 = " << retVm900 << ", "<< retVm901 << ", " <<
+			retVm902 << ", " << Vm900 << endl;
+			*/
 
-#if 0
-        cout.precision( 12 );
-        cout << retVm100<< endl; 
-        cout << retVm101<< endl;
-        cout << retVm102<< endl;
-        cout << retVm99<< endl;
-        cout << retVm900<< endl;
-        cout << retVm901<< endl;
-        cout << retVm902<< endl;
-#endif
-
-        ASSERT_EQ( retVm100,  0.189304207678  , "" );
-        ASSERT_EQ( retVm101,  0.352776164289  , "" );
-        ASSERT_EQ( retVm102,  0.367242141036  , "" );
-        ASSERT_EQ( retVm99,   0.123552428475  , "" );
-        ASSERT_EQ( retVm900,  0.0714865703958 , "" );
-        ASSERT_EQ( retVm901,  0.35823689362   , "" );
-        ASSERT_EQ( retVm902,  0.0307787676562 , "" );
-
-    }
-
-    /*
-       cout << "testIntFireNetwork: Vm100 = " << retVm100 << ", " <<
-       retVm101 << ", " << retVm102 << ", " << retVm99 <<
-       ", " << Vm100 << endl;
-       cout << "Vm900 = " << retVm900 << ", "<< retVm901 << ", " <<
-       retVm902 << ", " << Vm900 << endl;
-       */
-
-    cout << "." << flush;
-    shell->doDelete( fire );
+	cout << "." << flush;
+	shell->doDelete( fire );
 }
 
 
@@ -260,8 +247,8 @@ void testHHGateCreation()
     Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
     Id comptId = shell->doCreate( "Compartment", nid, "compt", dims );
     Id chanId = shell->doCreate( "HHChannel", nid, "Na", dims );
-    MsgId mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel", 
-            ObjId( chanId ), "channel" );
+    MsgId mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel",
+                                 ObjId( chanId ), "channel" );
     assert( mid != Msg::bad );
 
     // Check gate construction and removal when powers are assigned
@@ -350,25 +337,25 @@ void testHHGateCreation()
 }
 
 
-// AP measured in millivolts wrt EREST, at a sample interval of 
+// AP measured in millivolts wrt EREST, at a sample interval of
 // 100 usec
 static double actionPotl[] = { 0,
-    1.2315, 2.39872, 3.51917, 4.61015, 5.69088, 6.78432, 7.91934, 9.13413,
-    10.482, 12.0417, 13.9374, 16.3785, 19.7462, 24.7909, 33.0981, 47.967,
-    73.3833, 98.7377, 105.652, 104.663, 101.815, 97.9996, 93.5261, 88.6248,
-    83.4831, 78.2458, 73.0175, 67.8684, 62.8405, 57.9549, 53.217, 48.6206,
-    44.1488, 39.772, 35.4416, 31.0812, 26.5764, 21.7708, 16.4853, 10.6048,
-    4.30989, -1.60635, -5.965, -8.34834, -9.3682, -9.72711,
-    -9.81085, -9.78371, -9.71023, -9.61556, -9.50965, -9.39655,
-    -9.27795, -9.15458, -9.02674, -8.89458, -8.75814, -8.61746,
-    -8.47254, -8.32341, -8.17008, -8.01258, -7.85093, -7.68517,
-    -7.51537, -7.34157, -7.16384, -6.98227, -6.79695, -6.60796,
-    -6.41542, -6.21944, -6.02016, -5.81769, -5.61219, -5.40381,
-    -5.19269, -4.979, -4.76291, -4.54459, -4.32422, -4.10197,
-    -3.87804, -3.65259, -3.42582, -3.19791, -2.96904, -2.7394,
-    -2.50915, -2.27848, -2.04755, -1.81652, -1.58556, -1.3548,
-    -1.12439, -0.894457, -0.665128, -0.436511, -0.208708, 0.0181928,
-};
+                               1.2315, 2.39872, 3.51917, 4.61015, 5.69088, 6.78432, 7.91934, 9.13413,
+                               10.482, 12.0417, 13.9374, 16.3785, 19.7462, 24.7909, 33.0981, 47.967,
+                               73.3833, 98.7377, 105.652, 104.663, 101.815, 97.9996, 93.5261, 88.6248,
+                               83.4831, 78.2458, 73.0175, 67.8684, 62.8405, 57.9549, 53.217, 48.6206,
+                               44.1488, 39.772, 35.4416, 31.0812, 26.5764, 21.7708, 16.4853, 10.6048,
+                               4.30989, -1.60635, -5.965, -8.34834, -9.3682, -9.72711,
+                               -9.81085, -9.78371, -9.71023, -9.61556, -9.50965, -9.39655,
+                               -9.27795, -9.15458, -9.02674, -8.89458, -8.75814, -8.61746,
+                               -8.47254, -8.32341, -8.17008, -8.01258, -7.85093, -7.68517,
+                               -7.51537, -7.34157, -7.16384, -6.98227, -6.79695, -6.60796,
+                               -6.41542, -6.21944, -6.02016, -5.81769, -5.61219, -5.40381,
+                               -5.19269, -4.979, -4.76291, -4.54459, -4.32422, -4.10197,
+                               -3.87804, -3.65259, -3.42582, -3.19791, -2.96904, -2.7394,
+                               -2.50915, -2.27848, -2.04755, -1.81652, -1.58556, -1.3548,
+                               -1.12439, -0.894457, -0.665128, -0.436511, -0.208708, 0.0181928,
+                             };
 
 // y(x) = (A + B * x) / (C + exp((x + D) / F))
 // So: A = 0.1e6*(EREST+0.025), B = -0.1e6, C = -1.0, D = -(EREST+0.025)
@@ -485,10 +472,10 @@ void testHHGateSetup()
 
     vector< double > parms;
     // Try out m-gate of NA.
-    // For the alpha:
-    // A = 0.1e6*(EREST*0.025), B = -0.1e6, C= -1, D= -(EREST+0.025), F = -0.01
-    // For the beta: A = 4.0e3, B = 0, C = 0.0, D = -EREST, F = 0.018
-    // xdivs = 100, xmin = -0.1, xmax = 0.05
+// For the alpha:
+// A = 0.1e6*(EREST*0.025), B = -0.1e6, C= -1, D= -(EREST+0.025), F = -0.01
+// For the beta: A = 4.0e3, B = 0, C = 0.0, D = -EREST, F = 0.018
+// xdivs = 100, xmin = -0.1, xmax = 0.05
     unsigned int xdivs = 100;
     double xmin = -0.1;
     double xmax = 0.05;
@@ -514,7 +501,8 @@ void testHHGateSetup()
 
     double x = xmin;
     double dx = (xmax - xmin) / xdivs;
-    for ( unsigned int i = 0; i <= xdivs; ++i ) {
+    for ( unsigned int i = 0; i <= xdivs; ++i )
+    {
         double ma = Na_m_A( x );
         double mb = Na_m_B( x );
         assert( doubleEq( gate.A_[i], ma ) );
@@ -537,12 +525,12 @@ Id makeSquid()
     Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
     Id comptId = shell->doCreate( "Compartment", nid, "compt", dims );
     Id naId = shell->doCreate( "HHChannel", comptId, "Na", dims );
-    MsgId mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel", 
-            ObjId( naId ), "channel" );
+    MsgId mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel",
+                                 ObjId( naId ), "channel" );
     assert( mid != Msg::bad );
     Id kId = shell->doCreate( "HHChannel", comptId, "K", dims );
-    mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel", 
-            ObjId( kId ), "channel" );
+    mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel",
+                           ObjId( kId ), "channel" );
     assert( mid != Msg::bad );
 
     //////////////////////////////////////////////////////////////////////
@@ -578,10 +566,10 @@ Id makeSquid()
     kids = Field< vector< Id > >::get( naId, "children" );
     assert( kids.size() == 3 );
     vector< double > parms;
-    // For the alpha:
-    // A = 0.1e6*(EREST*0.025), B = -0.1e6, C= -1, D= -(EREST+0.025), F = -0.01
-    // For the beta: A = 4.0e3, B = 0, C = 0.0, D = -EREST, F = 0.018
-    // xdivs = 100, xmin = -0.1, xmax = 0.05
+// For the alpha:
+// A = 0.1e6*(EREST*0.025), B = -0.1e6, C= -1, D= -(EREST+0.025), F = -0.01
+// For the beta: A = 4.0e3, B = 0, C = 0.0, D = -EREST, F = 0.018
+// xdivs = 100, xmin = -0.1, xmax = 0.05
     unsigned int xdivs = 150;
     double xmin = -0.1;
     double xmax = 0.05;
@@ -634,7 +622,8 @@ Id makeSquid()
     vector< double > B = Field< vector< double > >::get( kids[1], "tableB");
     double x = xmin;
     double dx = (xmax - xmin) / xdivs;
-    for ( unsigned int i = 0; i <= xdivs; ++i ) {
+    for ( unsigned int i = 0; i <= xdivs; ++i )
+    {
         double ha = Na_h_A( x );
         double hb = Na_h_B( x );
         assert( doubleEq( A[i], ha ) );
@@ -645,7 +634,7 @@ Id makeSquid()
     //////////////////////////////////////////////////////////////////////
     // set up n-gate of K.
     //////////////////////////////////////////////////////////////////////
-    // Alpha rates: A = 1e4 * (0.01 + EREST), B = -1e4, C = -1.0, 
+    // Alpha rates: A = 1e4 * (0.01 + EREST), B = -1e4, C = -1.0,
     //	D = -(EREST + 0.01 ), F = -0.01
     // Beta rates: 	A = 0.125e3, B = 0, C = 0, D = -EREST ), F = 0.08
     kids = Field< vector< Id > >::get( kId, "children" );
@@ -673,10 +662,12 @@ Id makeSquid()
     A = Field< vector< double > >::get( kids[0], "tableA" );
     B = Field< vector< double > >::get( kids[0], "tableB" );
     x = xmin;
-    for ( unsigned int i = 0; i <= xdivs; ++i ) {
+    for ( unsigned int i = 0; i <= xdivs; ++i )
+    {
         double na = K_n_A( x );
         double nb = K_n_B( x );
-        if ( i != 40 && i != 55 ) { 
+        if ( i != 40 && i != 55 )
+        {
             // Annoying near-misses due to different ways of handling
             // singularity. I think the method in the HHGate is better.
             assert( doubleEq( A[i], na ) );
@@ -696,8 +687,8 @@ void testHHChannel()
     Id comptId( "/n/compt" );
 
     Id tabId = shell->doCreate( "Table", nid, "tab", dims );
-    MsgId mid = shell->doAddMsg( "Single", ObjId( tabId, 0 ), 
-            "requestOut", ObjId( comptId, 0 ), "get_Vm" );
+    MsgId mid = shell->doAddMsg( "Single", ObjId( tabId, 0 ),
+                                 "requestOut", ObjId( comptId, 0 ), "get_Vm" );
     assert( mid != Msg::bad );
     //////////////////////////////////////////////////////////////////////
     // Schedule, Reset, and run.
@@ -724,7 +715,8 @@ void testHHChannel()
     vector< double > vec = Field< vector< double > >::get( tabId, "vector" );
     // assert( vec.size() == 101 );
     double delta = 0;
-    for ( unsigned int i = 0; i < 100; ++i ) {
+    for ( unsigned int i = 0; i < 100; ++i )
+    {
         double ref = EREST + actionPotl[i] * 0.001;
         delta += (vec[i] - ref) * (vec[i] - ref);
     }
@@ -745,23 +737,24 @@ void testHHChannel()
 //Sample current obtained from channel in Chapter 20, Sakmann & Neher, Pg. 603.
 //The current is sampled at intervals of 10 usec.
 static double sampleCurrent[] = {0.0, // This is to handle the value sent by ChanBase on reinit
-    0.0000000e+00, 3.0005743e-26, 1.2004594e-25, 2.7015505e-25, 4.8036751e-25, 7.5071776e-25,
-    1.0812402e-24, 1.4719693e-24, 1.9229394e-24, 2.4341850e-24, 3.0057404e-24, 3.6376401e-24,
-    4.3299183e-24, 5.0826095e-24, 5.8957481e-24, 6.7693684e-24, 7.7035046e-24, 8.6981913e-24,
-    9.7534627e-24, 1.0869353e-23, 1.2045897e-23, 1.3283128e-23, 1.4581082e-23, 1.5939791e-23,
-    1.7359292e-23, 1.8839616e-23, 2.0380801e-23, 2.1982878e-23, 2.3645883e-23, 2.5369850e-23,
-    2.7154813e-23, 2.9000806e-23, 3.0907863e-23, 3.2876020e-23, 3.4905309e-23, 3.6995766e-23,
-    3.9147423e-23, 4.1360317e-23, 4.3634480e-23, 4.5969946e-23, 4.8366751e-23, 5.0824928e-23,
-    5.3344511e-23, 5.5925535e-23, 5.8568033e-23, 6.1272040e-23, 6.4037589e-23, 6.6864716e-23,
-    6.9753453e-23, 7.2703835e-23, 7.5715897e-23, 7.8789672e-23, 8.1925194e-23, 8.5122497e-23,
-    8.8381616e-23, 9.1702584e-23, 9.5085435e-23, 9.8530204e-23, 1.0203692e-22, 1.0560563e-22,
-    1.0923636e-22, 1.1292913e-22, 1.1668400e-22, 1.2050099e-22, 1.2438013e-22, 1.2832146e-22,
-    1.3232502e-22, 1.3639083e-22, 1.4051894e-22, 1.4470937e-22, 1.4896215e-22, 1.5327733e-22,
-    1.5765494e-22, 1.6209501e-22, 1.6659757e-22, 1.7116267e-22, 1.7579032e-22, 1.8048057e-22,
-    1.8523345e-22, 1.9004900e-22, 1.9492724e-22, 1.9986821e-22, 2.0487195e-22, 2.0993849e-22,
-    2.1506786e-22, 2.2026010e-22, 2.2551524e-22, 2.3083331e-22, 2.3621436e-22, 2.4165840e-22,
-    2.4716548e-22, 2.5273563e-22, 2.5836888e-22, 2.6406527e-22, 2.6982483e-22, 2.7564760e-22,
-    2.8153360e-22, 2.8748287e-22, 2.9349545e-22, 2.9957137e-22, 3.0571067e-22 };
+                                 0.0000000e+00, 3.0005743e-26, 1.2004594e-25, 2.7015505e-25, 4.8036751e-25, 7.5071776e-25,
+                                 1.0812402e-24, 1.4719693e-24, 1.9229394e-24, 2.4341850e-24, 3.0057404e-24, 3.6376401e-24,
+                                 4.3299183e-24, 5.0826095e-24, 5.8957481e-24, 6.7693684e-24, 7.7035046e-24, 8.6981913e-24,
+                                 9.7534627e-24, 1.0869353e-23, 1.2045897e-23, 1.3283128e-23, 1.4581082e-23, 1.5939791e-23,
+                                 1.7359292e-23, 1.8839616e-23, 2.0380801e-23, 2.1982878e-23, 2.3645883e-23, 2.5369850e-23,
+                                 2.7154813e-23, 2.9000806e-23, 3.0907863e-23, 3.2876020e-23, 3.4905309e-23, 3.6995766e-23,
+                                 3.9147423e-23, 4.1360317e-23, 4.3634480e-23, 4.5969946e-23, 4.8366751e-23, 5.0824928e-23,
+                                 5.3344511e-23, 5.5925535e-23, 5.8568033e-23, 6.1272040e-23, 6.4037589e-23, 6.6864716e-23,
+                                 6.9753453e-23, 7.2703835e-23, 7.5715897e-23, 7.8789672e-23, 8.1925194e-23, 8.5122497e-23,
+                                 8.8381616e-23, 9.1702584e-23, 9.5085435e-23, 9.8530204e-23, 1.0203692e-22, 1.0560563e-22,
+                                 1.0923636e-22, 1.1292913e-22, 1.1668400e-22, 1.2050099e-22, 1.2438013e-22, 1.2832146e-22,
+                                 1.3232502e-22, 1.3639083e-22, 1.4051894e-22, 1.4470937e-22, 1.4896215e-22, 1.5327733e-22,
+                                 1.5765494e-22, 1.6209501e-22, 1.6659757e-22, 1.7116267e-22, 1.7579032e-22, 1.8048057e-22,
+                                 1.8523345e-22, 1.9004900e-22, 1.9492724e-22, 1.9986821e-22, 2.0487195e-22, 2.0993849e-22,
+                                 2.1506786e-22, 2.2026010e-22, 2.2551524e-22, 2.3083331e-22, 2.3621436e-22, 2.4165840e-22,
+                                 2.4716548e-22, 2.5273563e-22, 2.5836888e-22, 2.6406527e-22, 2.6982483e-22, 2.7564760e-22,
+                                 2.8153360e-22, 2.8748287e-22, 2.9349545e-22, 2.9957137e-22, 3.0571067e-22
+                                };
 
 void testMarkovGslSolver()
 {
@@ -770,28 +763,28 @@ void testMarkovGslSolver()
 
     Id nid = shell->doCreate( "Neutral", Id(), "n", size );
     Id comptId = shell->doCreate( "Compartment", nid, "compt", size );
-    Id rateTabId = shell->doCreate( "MarkovRateTable", comptId, "rateTab", size ); 
+    Id rateTabId = shell->doCreate( "MarkovRateTable", comptId, "rateTab", size );
     Id mChanId = shell->doCreate( "MarkovChannel", comptId, "mChan", size );
     Id gslSolverId = shell->doCreate( "MarkovGslSolver", comptId, "gslSolver", size );
 
     Id tabId = shell->doCreate( "Table", nid, "tab", size );
 
-    ObjId mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel", 
-            ObjId( mChanId ), "channel" );
+    ObjId mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel",
+                                 ObjId( mChanId ), "channel" );
     assert( !mid.bad() );
 
     mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel",
-            ObjId( rateTabId ), "channel" );
+                           ObjId( rateTabId ), "channel" );
     assert( !mid.bad() );
-    mid = shell->doAddMsg( "Single", ObjId( gslSolverId ), "stateOut", 
-            ObjId( mChanId ), "handleState" );
+    mid = shell->doAddMsg( "Single", ObjId( gslSolverId ), "stateOut",
+                           ObjId( mChanId ), "handleState" );
     assert( !mid.bad() );
 
     mid = shell->doAddMsg("Single", ObjId( rateTabId ), "instratesOut",
-            ObjId( gslSolverId ), "handleQ" ); 
+                          ObjId( gslSolverId ), "handleQ" );
 
     mid = shell->doAddMsg( "Single", ObjId( tabId, 0 ), "requestOut",
-            ObjId( mChanId, 0 ), "getIk" );
+                           ObjId( mChanId, 0 ), "getIk" );
     assert( !mid.bad() );
 
     //////////////////////////////////////////////////////////////////////
@@ -801,7 +794,7 @@ void testMarkovGslSolver()
     Field< double >::set( comptId, "Cm", 0.007854e-6 );
     Field< double >::set( comptId, "Ra", 7639.44e3 ); // does it matter?
     Field< double >::set( comptId, "Rm", 424.4e3 );
-    Field< double >::set( comptId, "Em", -0.1 );	
+    Field< double >::set( comptId, "Em", -0.1 );
     Field< double >::set( comptId, "inject", 0 );
     Field< double >::set( comptId, "initVm", -0.1 );
 
@@ -809,7 +802,7 @@ void testMarkovGslSolver()
     //
     //Setup of Markov Channel.
     //This is a simple 5-state channel model taken from Chapter 20, "Single-Channel
-    //Recording", Sakmann & Neher.  
+    //Recording", Sakmann & Neher.
     //All the transition rates are constant.
     //
     ////////////////////////////////
@@ -818,7 +811,7 @@ void testMarkovGslSolver()
     Field< unsigned int >::set( mChanId, "numStates", 5 );
     Field< unsigned int >::set( mChanId, "numOpenStates", 2 );
 
-    //Setting initial state of system.  
+    //Setting initial state of system.
     vector< double > initState;
 
     initState.push_back( 0.0 );
@@ -837,7 +830,7 @@ void testMarkovGslSolver()
     stateLabels.push_back( "C2" );
     stateLabels.push_back( "C3" );
 
-    Field< vector< string > >::set( mChanId, "labels", stateLabels );	
+    Field< vector< string > >::set( mChanId, "labels", stateLabels );
 
     vector< double > gBars;
 
@@ -852,35 +845,35 @@ void testMarkovGslSolver()
     //Filling in values into one parameter rate table. Note that all rates here
     //are constant.
     SetGet3< unsigned int, unsigned int, double >::
-        set( rateTabId, "setconst", 1, 2, 0.05 );
+    set( rateTabId, "setconst", 1, 2, 0.05 );
     SetGet3< unsigned int, unsigned int, double >::
-        set( rateTabId, "setconst", 1, 4, 3 );
+    set( rateTabId, "setconst", 1, 4, 3 );
     SetGet3< unsigned int, unsigned int, double >::
-        set( rateTabId, "setconst", 2, 1, 0.00066667 );
+    set( rateTabId, "setconst", 2, 1, 0.00066667 );
     SetGet3< unsigned int, unsigned int, double >::
-        set( rateTabId, "setconst", 2, 3, 0.5 );
+    set( rateTabId, "setconst", 2, 3, 0.5 );
     SetGet3< unsigned int, unsigned int, double >::
-        set( rateTabId, "setconst", 3, 2, 15 );
+    set( rateTabId, "setconst", 3, 2, 15 );
     SetGet3< unsigned int, unsigned int, double >::
-        set( rateTabId, "setconst", 3, 4, 4 );
+    set( rateTabId, "setconst", 3, 4, 4 );
     SetGet3< unsigned int, unsigned int, double >::
-        set( rateTabId, "setconst", 4, 1, 0.015 );
+    set( rateTabId, "setconst", 4, 1, 0.015 );
     SetGet3< unsigned int, unsigned int, double >::
-        set( rateTabId, "setconst", 4, 3, 0.05 );
+    set( rateTabId, "setconst", 4, 3, 0.05 );
     SetGet3< unsigned int, unsigned int, double >::
-        set( rateTabId, "setconst", 4, 5, 2.0 );
+    set( rateTabId, "setconst", 4, 5, 2.0 );
     SetGet3< unsigned int, unsigned int, double >::
-        set( rateTabId, "setconst", 5, 4, 0.01 );
+    set( rateTabId, "setconst", 5, 4, 0.01 );
 
     //Setting initial state of the solver. Once this is set, the solver object
-    //will send out messages containing the updated state to the channel object.  
+    //will send out messages containing the updated state to the channel object.
     SetGet1< vector< double > >::set( gslSolverId, "init", initState );
 
-    shell->doSetClock( 0, 1.0e-5 );	
-    shell->doSetClock( 1, 1.0e-5 );	
-    shell->doSetClock( 2, 1.0e-5 );	
-    shell->doSetClock( 3, 1.0e-5 );	
-    shell->doSetClock( 4, 1.0e-5 );	
+    shell->doSetClock( 0, 1.0e-5 );
+    shell->doSetClock( 1, 1.0e-5 );
+    shell->doSetClock( 2, 1.0e-5 );
+    shell->doSetClock( 3, 1.0e-5 );
+    shell->doSetClock( 4, 1.0e-5 );
 
     //Voltage is clamped to -100 mV in the example. Hence, we skip running the
     //process function.
@@ -896,8 +889,10 @@ void testMarkovGslSolver()
 
     vector< double > vec = Field< vector< double > >::get( tabId, "vector" );
 
-    for ( unsigned i = 0; i < 101; ++i ){
-        if (!doubleEq( sampleCurrent[i] * 1e25, vec[i] * 1e25 )){
+    for ( unsigned i = 0; i < 101; ++i )
+    {
+        if (!doubleEq( sampleCurrent[i] * 1e25, vec[i] * 1e25 ))
+        {
             cout << "testMarkovGslSolver: sample=" << sampleCurrent[i]*1e25 << " calculated=" << vec[i]*1e25 << endl;
         }
         assert( doubleEq( sampleCurrent[i] * 1e25, vec[i] * 1e25 ) );
@@ -911,16 +906,16 @@ void testMarkovGslSolver()
 
 ////////////////
 //The testMarkovGslSolver() function includes the MarkovChannel object, but
-//is a rather trivial case, in that the rates are all constant. 
-//This test simultaneously tests the MarkovChannel, MarkovGslSolver, 
-//MarkovSolverBase and MarkovSolver classes. 
-//This test involves simulating the 4-state NMDA channel model specified 
-//in the following paper : 
+//is a rather trivial case, in that the rates are all constant.
+//This test simultaneously tests the MarkovChannel, MarkovGslSolver,
+//MarkovSolverBase and MarkovSolver classes.
+//This test involves simulating the 4-state NMDA channel model specified
+//in the following paper :
 //"Voltage Dependence of NMDA-Activated Macroscopic Conductances Predicted
 //by Single-Channel Kinetics", Craig E. Jahr and Charles F. Stevens, The Journal
 //of Neuroscience, 1990, 10(9), pp. 3178-3182.
 //It is expected that the MarkovGslSolver and the MarkovSolver objects will
-//give the same answer. 
+//give the same answer.
 //
 //Note that this is different from the NMDAChan test which involves synapses.
 ///////////////
@@ -929,26 +924,26 @@ void testMarkovChannel()
     Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
     unsigned size = 1;
 
-    Id nid = shell->doCreate( "Neutral", Id(), "n", size ); 
+    Id nid = shell->doCreate( "Neutral", Id(), "n", size );
 
     Id gslComptId = shell->doCreate( "Compartment", nid, "gslCompt", size );
-    Id exptlComptId = shell->doCreate( "Compartment", nid, 	
-            "exptlCompt", size );
+    Id exptlComptId = shell->doCreate( "Compartment", nid,
+                                       "exptlCompt", size );
 
-    Id gslRateTableId = shell->doCreate( "MarkovRateTable", gslComptId, 
-            "gslRateTable", size );
-    Id exptlRateTableId = shell->doCreate( "MarkovRateTable", exptlComptId, 
-            "exptlRateTable", size );
+    Id gslRateTableId = shell->doCreate( "MarkovRateTable", gslComptId,
+                                         "gslRateTable", size );
+    Id exptlRateTableId = shell->doCreate( "MarkovRateTable", exptlComptId,
+                                           "exptlRateTable", size );
 
-    Id mChanGslId = shell->doCreate( "MarkovChannel", gslComptId, 
-            "mChanGsl", size );
-    Id mChanExptlId = shell->doCreate( "MarkovChannel", exptlComptId, 
-            "mChanExptl", size );
+    Id mChanGslId = shell->doCreate( "MarkovChannel", gslComptId,
+                                     "mChanGsl", size );
+    Id mChanExptlId = shell->doCreate( "MarkovChannel", exptlComptId,
+                                       "mChanExptl", size );
 
-    Id gslSolverId = shell->doCreate( "MarkovGslSolver", gslComptId, 
-            "gslSolver", size );
-    Id exptlSolverId = shell->doCreate( "MarkovSolver", exptlComptId, 
-            "exptlSolver", size );
+    Id gslSolverId = shell->doCreate( "MarkovGslSolver", gslComptId,
+                                      "gslSolver", size );
+    Id exptlSolverId = shell->doCreate( "MarkovSolver", exptlComptId,
+                                        "exptlSolver", size );
 
     Id gslTableId = shell->doCreate( "Table", nid, "gslTable", size );
     Id exptlTableId = shell->doCreate( "Table", nid, "exptlTable", size );
@@ -963,16 +958,16 @@ void testMarkovChannel()
     //Setting up the messaging.
     //////////////////////////
 
-    //Connecting Compartment and MarkovChannel objects. 
-    //Compartment sends Vm to MarkovChannel object. The MarkovChannel, 
+    //Connecting Compartment and MarkovChannel objects.
+    //Compartment sends Vm to MarkovChannel object. The MarkovChannel,
     //via its ChanBase base class, sends back the conductance and current through
     //it.
-    ObjId mid = shell->doAddMsg( "Single", ObjId( gslComptId ), "channel", 
-            ObjId( mChanGslId ), "channel" );
+    ObjId mid = shell->doAddMsg( "Single", ObjId( gslComptId ), "channel",
+                                 ObjId( mChanGslId ), "channel" );
     assert( !mid.bad() );
 
-    mid = shell->doAddMsg( "Single", ObjId( exptlComptId ), "channel", 
-            ObjId( mChanExptlId ), "channel" );
+    mid = shell->doAddMsg( "Single", ObjId( exptlComptId ), "channel",
+                           ObjId( mChanExptlId ), "channel" );
     assert( !mid.bad() );
 
     ////////
@@ -981,31 +976,31 @@ void testMarkovChannel()
 
     //Connecting Compartment and MarkovRateTable.
     //The MarkovRateTable's job is to send out the instantaneous rate matrix,
-    //Q, to the solver object(s). 
-    //In order to do so, the MarkovRateTable object needs information on 
+    //Q, to the solver object(s).
+    //In order to do so, the MarkovRateTable object needs information on
     //Vm and ligand concentration to look up the rate from the table provided
     //by the user. Hence, the need of the connection to the Compartment object.
     //However, unlike a channel object, the MarkovRateTable object does not
-    //return anything to the Compartment directly, and communicates only with the 
+    //return anything to the Compartment directly, and communicates only with the
     //solvers.
     mid = shell->doAddMsg( "Single", ObjId( gslComptId ), "channel",
-            ObjId( gslRateTableId ), "channel" );
+                           ObjId( gslRateTableId ), "channel" );
     assert( !mid.bad() );
 
     //Connecting the MarkovRateTable with the MarkovGslSolver object.
     //As mentioned earlier, the MarkovRateTable object sends out information
     //about Q to the MarkovGslSolver. The MarkovGslSolver then churns out
-    //the state of the system for the next time step. 
+    //the state of the system for the next time step.
     mid = shell->doAddMsg("Single", ObjId( gslRateTableId ), "instratesOut",
-            ObjId( gslSolverId ), "handleQ" ); 
+                          ObjId( gslSolverId ), "handleQ" );
 
     //Connecting MarkovGslSolver with MarkovChannel.
-    //The MarkovGslSolver object, upon computing the state of the channel, 
+    //The MarkovGslSolver object, upon computing the state of the channel,
     //sends this information to the MarkovChannel object. The MarkovChannel
     //object will compute the expected conductance of the channel and send
-    //this information to the compartment. 
-    mid = shell->doAddMsg( "Single", ObjId( gslSolverId ), "stateOut", 
-            ObjId( mChanGslId ), "handleState" );
+    //this information to the compartment.
+    mid = shell->doAddMsg( "Single", ObjId( gslSolverId ), "stateOut",
+                           ObjId( mChanGslId ), "handleState" );
     assert( !mid.bad() );
 
     //////////
@@ -1014,15 +1009,15 @@ void testMarkovChannel()
 
     //Connecting the MarkovSolver and Compartment.
     //The MarkovSolver derives from the MarkovSolverBase class.
-    //The base class need Vm and ligand concentration information to 
-    //perform lookup and interpolation on the matrix exponential lookup 
+    //The base class need Vm and ligand concentration information to
+    //perform lookup and interpolation on the matrix exponential lookup
     //tables.
-    mid = shell->doAddMsg( "Single", ObjId( exptlComptId ), "channel", 
-            ObjId( exptlSolverId ), "channel" );
-    assert( !mid.bad() );						
+    mid = shell->doAddMsg( "Single", ObjId( exptlComptId ), "channel",
+                           ObjId( exptlSolverId ), "channel" );
+    assert( !mid.bad() );
 
-    mid = shell->doAddMsg( "Single", ObjId( exptlSolverId ), "stateOut", 
-            ObjId( mChanExptlId ), "handleState" );
+    mid = shell->doAddMsg( "Single", ObjId( exptlSolverId ), "stateOut",
+                           ObjId( mChanExptlId ), "handleState" );
     assert( !mid.bad() );
 
     /////////
@@ -1030,13 +1025,13 @@ void testMarkovChannel()
     ////////
 
     //Get the current values from the GSL solver based channel.
-    mid = shell->doAddMsg( "Single", ObjId( gslTableId ), "requestOut", 
-            ObjId( mChanGslId ), "getIk" );
+    mid = shell->doAddMsg( "Single", ObjId( gslTableId ), "requestOut",
+                           ObjId( mChanGslId ), "getIk" );
     assert( !mid.bad() );
 
     //Get the current values from the matrix exponential solver based channel.
-    mid = shell->doAddMsg( "Single", ObjId( exptlTableId ), "requestOut", 
-            ObjId( mChanExptlId ), "getIk" );
+    mid = shell->doAddMsg( "Single", ObjId( exptlTableId ), "requestOut",
+                           ObjId( mChanExptlId ), "getIk" );
     assert( !mid.bad() );
 
     ////////////////////
@@ -1047,14 +1042,14 @@ void testMarkovChannel()
     Field< double >::set( gslComptId, "Cm", 0.007854e-6 );
     Field< double >::set( gslComptId, "Ra", 7639.44e3 ); // does it matter?
     Field< double >::set( gslComptId, "Rm", 424.4e3 );
-    Field< double >::set( gslComptId, "Em", EREST + 0.1 );	
+    Field< double >::set( gslComptId, "Em", EREST + 0.1 );
     Field< double >::set( gslComptId, "inject", 0 );
     Field< double >::set( gslComptId, "initVm", EREST );
 
     Field< double >::set( exptlComptId, "Cm", 0.007854e-6 );
     Field< double >::set( exptlComptId, "Ra", 7639.44e3 ); // does it matter?
     Field< double >::set( exptlComptId, "Rm", 424.4e3 );
-    Field< double >::set( exptlComptId, "Em", EREST + 0.1 );	
+    Field< double >::set( exptlComptId, "Em", EREST + 0.1 );
     Field< double >::set( exptlComptId, "inject", 0 );
     Field< double >::set( exptlComptId, "initVm", EREST );
 
@@ -1065,24 +1060,24 @@ void testMarkovChannel()
     /////////////////
 
     //Number of states and open states.
-    Field< unsigned int >::set( mChanGslId, "numStates", 4 );		
-    Field< unsigned int >::set( mChanExptlId, "numStates", 4 );		
+    Field< unsigned int >::set( mChanGslId, "numStates", 4 );
+    Field< unsigned int >::set( mChanExptlId, "numStates", 4 );
 
-    Field< unsigned int >::set( mChanGslId, "numOpenStates", 1 );		
-    Field< unsigned int >::set( mChanExptlId, "numOpenStates", 1 );		
+    Field< unsigned int >::set( mChanGslId, "numOpenStates", 1 );
+    Field< unsigned int >::set( mChanExptlId, "numOpenStates", 1 );
 
     vector< string > stateLabels;
 
     //In the MarkovChannel class, the opening states are listed first.
-    //This is in line with the convention followed in Chapter 20, Sakmann & 
-    //Neher. 
+    //This is in line with the convention followed in Chapter 20, Sakmann &
+    //Neher.
     stateLabels.push_back( "O" );		//State 1.
     stateLabels.push_back( "B1" );	//State 2.
     stateLabels.push_back( "B2" );	//State 3.
     stateLabels.push_back( "C" ); 	//State 4.
 
-    Field< vector< string > >::set( mChanGslId, "labels", stateLabels );	
-    Field< vector< string > >::set( mChanExptlId, "labels", stateLabels );	
+    Field< vector< string > >::set( mChanGslId, "labels", stateLabels );
+    Field< vector< string > >::set( mChanExptlId, "labels", stateLabels );
 
     //Setting up conductance value for single open state.	Value chosen
     //is quite arbitrary.
@@ -1096,16 +1091,16 @@ void testMarkovChannel()
     //Initial state of the system. This is really an arbitrary choice.
     vector< double > initState;
 
-    initState.push_back( 0.00 ); 
-    initState.push_back( 0.20 ); 
-    initState.push_back( 0.80 ); 
-    initState.push_back( 0.00 ); 
+    initState.push_back( 0.00 );
+    initState.push_back( 0.20 );
+    initState.push_back( 0.80 );
+    initState.push_back( 0.00 );
 
     Field< vector< double > >::set( mChanGslId, "initialState", initState );
     Field< vector< double > >::set( mChanExptlId, "initialState", initState );
 
     //This initializes the GSL solver object.
-    SetGet1< vector< double > >::set( gslSolverId, "init", initState );	
+    SetGet1< vector< double > >::set( gslSolverId, "init", initState );
 
     //Initializing MarkovRateTable object.
     double v;
@@ -1114,8 +1109,8 @@ void testMarkovChannel()
     SetGet1< unsigned int >::set( gslRateTableId, "init", 4 );
     SetGet1< unsigned int >::set( exptlRateTableId, "init", 4 );
 
-    //Setting up lookup tables for the different rates.		
-    //Please note that the rates should be in sec^(-1).  
+    //Setting up lookup tables for the different rates.
+    //Please note that the rates should be in sec^(-1).
 
     //Transition from "O" to "B1" i.e. r12 or a1.
     Field< double >::set( vecTableId, "xmin", -0.10 );
@@ -1123,7 +1118,7 @@ void testMarkovChannel()
     Field< unsigned int >::set( vecTableId, "xdivs", 200 );
 
     v = Field< double >::get( vecTableId, "xmin" );
-    for ( unsigned int i = 0; i < 201; ++i )	
+    for ( unsigned int i = 0; i < 201; ++i )
     {
         table1d.push_back( 1e3 * exp( -16 * v - 2.91 ) );
         v += 0.001;
@@ -1131,10 +1126,10 @@ void testMarkovChannel()
 
     Field< vector< double > >::set( vecTableId, "table", table1d );
 
-    SetGet4< unsigned int, unsigned int, Id, unsigned int >::set( 
-            gslRateTableId, "set1d", 1, 2, vecTableId, 0 );
-    SetGet4< unsigned int, unsigned int, Id, unsigned int >::set( 
-            exptlRateTableId, "set1d", 1, 2, vecTableId, 0 );
+    SetGet4< unsigned int, unsigned int, Id, unsigned int >::set(
+        gslRateTableId, "set1d", 1, 2, vecTableId, 0 );
+    SetGet4< unsigned int, unsigned int, Id, unsigned int >::set(
+        exptlRateTableId, "set1d", 1, 2, vecTableId, 0 );
 
     table1d.erase( table1d.begin(), table1d.end() );
 
@@ -1147,10 +1142,10 @@ void testMarkovChannel()
     }
 
     Field< vector< double > >::set( vecTableId, "table", table1d );
-    SetGet4< unsigned int, unsigned int, Id, unsigned int >::set( 
-            gslRateTableId, "set1d", 2, 1, vecTableId, 0 );
-    SetGet4< unsigned int, unsigned int, Id, unsigned int >::set( 
-            exptlRateTableId, "set1d", 2, 1, vecTableId, 0 );
+    SetGet4< unsigned int, unsigned int, Id, unsigned int >::set(
+        gslRateTableId, "set1d", 2, 1, vecTableId, 0 );
+    SetGet4< unsigned int, unsigned int, Id, unsigned int >::set(
+        exptlRateTableId, "set1d", 2, 1, vecTableId, 0 );
 
     table1d.erase( table1d.begin(), table1d.end() );
 
@@ -1176,24 +1171,24 @@ void testMarkovChannel()
         conc = Field< double >::get( int2dTableId, "ymin" );
         for ( unsigned int j = 0; j < 31; ++j )
         {
-            table2d[i].push_back( 1e3 * conc * exp( -45 * v - 6.97 ) ); 
+            table2d[i].push_back( 1e3 * conc * exp( -45 * v - 6.97 ) );
             conc += 1e-6;
         }
         v += 1e-3;
     }
 
-    Field< vector< vector< double > > >::set( int2dTableId, "tableVector2D", 
+    Field< vector< vector< double > > >::set( int2dTableId, "tableVector2D",
             table2d );
 
-    SetGet3< unsigned int, unsigned int, Id >::set( gslRateTableId, 
-            "set2d", 1, 3, int2dTableId ); 
-    SetGet3< unsigned int, unsigned int, Id >::set( exptlRateTableId, 
-            "set2d", 1, 3, int2dTableId ); 
+    SetGet3< unsigned int, unsigned int, Id >::set( gslRateTableId,
+            "set2d", 1, 3, int2dTableId );
+    SetGet3< unsigned int, unsigned int, Id >::set( exptlRateTableId,
+            "set2d", 1, 3, int2dTableId );
 
     //There is only one 2D rate, so no point manually erasing the elements.
 
     //Transition from "B2" to "O" i.e. r31 or b2
-    v = -0.10;	
+    v = -0.10;
     for ( unsigned int i = 0; i < 201; ++i )
     {
         table1d.push_back( 1e3 * exp( 17 * v + 0.96 ) );
@@ -1201,55 +1196,55 @@ void testMarkovChannel()
     }
 
     Field< vector< double > >::set( vecTableId, "table", table1d );
-    SetGet4< unsigned int, unsigned int, Id, unsigned int >::set( 
-            gslRateTableId, "set1d", 3, 1, vecTableId, 0 );
-    SetGet4< unsigned int, unsigned int, Id, unsigned int >::set( 
-            exptlRateTableId, "set1d", 3, 1, vecTableId, 0 );
+    SetGet4< unsigned int, unsigned int, Id, unsigned int >::set(
+        gslRateTableId, "set1d", 3, 1, vecTableId, 0 );
+    SetGet4< unsigned int, unsigned int, Id, unsigned int >::set(
+        exptlRateTableId, "set1d", 3, 1, vecTableId, 0 );
 
     table1d.erase( table1d.begin(), table1d.end() );
 
-    //Transition from "O" to "C" i.e. r14 
-    SetGet3< unsigned int, unsigned int, double >::set( gslRateTableId,	
-            "setconst", 1, 4, 1e3 * exp( -2.847 ) ); 
-    SetGet3< unsigned int, unsigned int, double >::set( exptlRateTableId,	
-            "setconst", 1, 4, 1e3 * exp( -2.847 ) ); 
+    //Transition from "O" to "C" i.e. r14
+    SetGet3< unsigned int, unsigned int, double >::set( gslRateTableId,
+            "setconst", 1, 4, 1e3 * exp( -2.847 ) );
+    SetGet3< unsigned int, unsigned int, double >::set( exptlRateTableId,
+            "setconst", 1, 4, 1e3 * exp( -2.847 ) );
 
     //Transition from "B1" to "C" i.e. r24
-    SetGet3< unsigned int, unsigned int, double >::set( gslRateTableId, 	
+    SetGet3< unsigned int, unsigned int, double >::set( gslRateTableId,
             "setconst", 2, 4, 1e3 * exp( -0.693 ) );
-    SetGet3< unsigned int, unsigned int, double >::set( exptlRateTableId, 	
+    SetGet3< unsigned int, unsigned int, double >::set( exptlRateTableId,
             "setconst", 2, 4, 1e3 * exp( -0.693 ) );
 
     //Transition from "B2" to "C" i.e. r34
-    SetGet3< unsigned int, unsigned int, double >::set( gslRateTableId, 
+    SetGet3< unsigned int, unsigned int, double >::set( gslRateTableId,
             "setconst", 3, 4, 1e3* exp( -3.101 ) );
-    SetGet3< unsigned int, unsigned int, double >::set( exptlRateTableId, 
+    SetGet3< unsigned int, unsigned int, double >::set( exptlRateTableId,
             "setconst", 3, 4, 1e3* exp( -3.101 ) );
 
-    //Once the rate tables have been set up, we can initialize the 
+    //Once the rate tables have been set up, we can initialize the
     //tables in the MarkovSolver class.
     SetGet2< Id, double >::set( exptlSolverId, "init", exptlRateTableId, 1.0e-3 );
     SetGet1< double >::set( exptlSolverId, "ligandConc", 24e-6 );
-    Field< vector< double > >::set( exptlSolverId, "initialState", 
-            initState );
+    Field< vector< double > >::set( exptlSolverId, "initialState",
+                                    initState );
 
     Field< double >::set( gslSolverId, "relativeAccuracy", 1e-24 );
     Field< double >::set( gslSolverId, "absoluteAccuracy", 1e-24 );
     Field< double >::set( gslSolverId, "internalDt", 1e-24 );
 
-    shell->doSetClock( 0, 1.0e-3 );	
-    shell->doSetClock( 1, 1.0e-3 );	
-    shell->doSetClock( 2, 1.0e-3 );	
-    shell->doSetClock( 3, 1.0e-3 );	
-    shell->doSetClock( 4, 1.0e-3 );	
-    shell->doSetClock( 5, 1.0e-3 );	
+    shell->doSetClock( 0, 1.0e-3 );
+    shell->doSetClock( 1, 1.0e-3 );
+    shell->doSetClock( 2, 1.0e-3 );
+    shell->doSetClock( 3, 1.0e-3 );
+    shell->doSetClock( 4, 1.0e-3 );
+    shell->doSetClock( 5, 1.0e-3 );
 
     shell->doUseClock( "/n/gslCompt,/n/exptlCompt", "init", 0 );
     shell->doUseClock( "/n/gslCompt,/n/exptlCompt", "process", 1 );
-    shell->doUseClock( "/n/gslCompt/gslRateTable,/n/exptlCompt/exptlRateTable", 
-            "process", 2 );
-    shell->doUseClock( "/n/gslCompt/gslSolver,/n/exptlCompt/exptlSolver", 
-            "process", 3 );
+    shell->doUseClock( "/n/gslCompt/gslRateTable,/n/exptlCompt/exptlRateTable",
+                       "process", 2 );
+    shell->doUseClock( "/n/gslCompt/gslSolver,/n/exptlCompt/exptlSolver",
+                       "process", 3 );
     shell->doUseClock( "/n/gslCompt/mChanGsl,/n/gslTable","process", 4 );
     shell->doUseClock( "/n/exptlCompt/mChanExptl,/n/exptlTable", "process", 5 );
 
@@ -1315,14 +1310,14 @@ void testSynChan()
     Element* syne = synId.element();
     assert( syne->totNumLocalField() == 2 );
 
-    ObjId mid = shell->doAddMsg( "single", 
-            ObjId( sgId1, 0 ), "spikeOut", ObjId( synId, 0, 0 ), "addSpike" );
+    ObjId mid = shell->doAddMsg( "single",
+                                 ObjId( sgId1, 0 ), "spikeOut", ObjId( synId, 0, 0 ), "addSpike" );
     assert( mid != Id() );
-    mid = shell->doAddMsg( "single", 
-            ObjId( sgId2, 0 ), "spikeOut", ObjId( synId, 0, 1 ), "addSpike" );
+    mid = shell->doAddMsg( "single",
+                           ObjId( sgId2, 0 ), "spikeOut", ObjId( synId, 0, 1 ), "addSpike" );
     assert( mid != Id() );
-    mid = shell->doAddMsg( "single", 
-            synHandlerId, "activationOut", synChanId, "activation" );
+    mid = shell->doAddMsg( "single",
+                           synHandlerId, "activationOut", synChanId, "activation" );
     assert( mid != Id() );
 
     ret = Field< double >::set( sgId1, "threshold", 0.0 );
@@ -1365,7 +1360,7 @@ void testSynChan()
     // shell->doUseClock( "/n/synChan/syns,/n/sg1,/n/sg2", "process", 0 );
     //It turns out that the order of setting of the spikes (sg1, sg2)
     //does not affect the outcome. The one thing that is critical is that
-    //the 'process' call for the 'syns' should be before that of the 
+    //the 'process' call for the 'syns' should be before that of the
     //synChan. This is because the 'activation' message from the syns to
     //the synChan should proceed within a given timestep otherwise the
     //apparent arrival time of the event is delayed.
@@ -1442,20 +1437,20 @@ void testNMDAChan()
     assert( syne->dataHandler()->numDimensions() == 1 );
     assert( syne->dataHandler()->sizeOfDim( 0 ) == 1 );
 
-    MsgId mid = shell->doAddMsg( "single", 
-            ObjId( sgId1, DataId( 0 ) ), "spikeOut",
-            ObjId( synId, DataId( 0 ) ), "addSpike" );
+    MsgId mid = shell->doAddMsg( "single",
+                                 ObjId( sgId1, DataId( 0 ) ), "spikeOut",
+                                 ObjId( synId, DataId( 0 ) ), "addSpike" );
     assert( mid != Id() );
 
     ret = Field< double >::set( sgId1, "threshold", 0.0 );
     ret = Field< double >::set( sgId1, "refractT", 1.0 );
     ret = Field< bool >::set( sgId1, "edgeTriggered", 0 );
 
-    ret = Field< double >::set( ObjId( synId, DataId( 0 ) ), 
-            "weight", 1.0 );
+    ret = Field< double >::set( ObjId( synId, DataId( 0 ) ),
+                                "weight", 1.0 );
     assert( ret);
-    ret = Field< double >::set( ObjId( synId, DataId( 0 ) ), 
-            "delay", 0.001 );
+    ret = Field< double >::set( ObjId( synId, DataId( 0 ) ),
+                                "delay", 0.001 );
     assert( ret);
 
     double dret;
@@ -1512,18 +1507,19 @@ void testNMDAChan()
 }
 #endif
 
-static Id addCompartment( const string& name, 
-        Id neuron, Id parent, 
-        double dx, double dy, double dz, double dia )
+static Id addCompartment( const string& name,
+                          Id neuron, Id parent,
+                          double dx, double dy, double dz, double dia )
 {
     static Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
     double x0 = 0.0;
     double y0 = 0.0;
     double z0 = 0.0;
     Id compt = shell->doCreate( "Compartment", neuron, name, 1 );
-    if ( parent != Id() ) {
-        ObjId mid = shell->doAddMsg( "single", 
-                parent, "axial", compt, "raxial" );
+    if ( parent != Id() )
+    {
+        ObjId mid = shell->doAddMsg( "single",
+                                     parent, "axial", compt, "raxial" );
         assert( mid != Id() );
         x0 = Field< double >::get( parent, "x" );
         y0 = Field< double >::get( parent, "y" );
@@ -1549,112 +1545,109 @@ static Id addCompartment( const string& name,
 #include "Spine.h"
 #include "Neuron.h"
 #include "../shell/Wildcard.h"
-
 static void testNeuronBuildTree()
 {
-    Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
 
-    Id nid = shell->doCreate( "Neuron", Id(), "n", 1 );
-    double somaDia = 5e-6;
-    double dendDia = 2e-6;
-    double branchDia = 1e-6;
-    static double len[] = { 10e-6, 100e-6, 200e-6, 500e-6 };
-    static double dia[] = { somaDia, dendDia, branchDia, branchDia };
-    Id soma = addCompartment ( "soma", nid, Id(), 10e-6, 0, 0, somaDia );
-    Id dend1 = addCompartment ( "dend1", nid, soma, 100e-6, 0, 0, dendDia);
-    Id branch1 = addCompartment ( "branch1", nid, dend1, 0, 200e-6, 0, branchDia );
-    Id branch2 = addCompartment ( "branch2", nid, dend1, 0, -500e-6, 0, branchDia );
-    static double x[] = { 10e-6, 110e-6, 110e-6, 110e-6 };
-    static double y[] = {0, 0, 200e-6, -500e-6};
-    static double z[] = {0, 0, 0, 0};
+	Id nid = shell->doCreate( "Neuron", Id(), "n", 1 );
+	double somaDia = 5e-6;
+	double dendDia = 2e-6;
+	double branchDia = 1e-6;
+	static double len[] = { 10e-6, 100e-6, 200e-6, 500e-6 };
+	static double dia[] = { somaDia, dendDia, branchDia, branchDia };
+	Id soma = addCompartment ( "soma", nid, Id(), 10e-6, 0, 0, somaDia );
+	Id dend1 = addCompartment ( "dend1", nid, soma, 100e-6, 0, 0, dendDia);
+	Id branch1 = addCompartment ( "branch1", nid, dend1, 0, 200e-6, 0, branchDia );
+	Id branch2 = addCompartment ( "branch2", nid, dend1, 0, -500e-6, 0, branchDia );
+	static double x[] = { 10e-6, 110e-6, 110e-6, 110e-6 };
+	static double y[] = {0, 0, 200e-6, -500e-6};
+	static double z[] = {0, 0, 0, 0};
 
-    SetGet0::set( nid, "buildSegmentTree" );
+	SetGet0::set( nid, "buildSegmentTree" );
 
-    vector< double > e = Field< vector< double > >::get(
-            nid, "electrotonicDistanceFromSoma" );
-    vector< double > g = Field< vector< double > >::get(
-            nid, "geometricalDistanceFromSoma" );
-    vector< double > p = Field< vector< double > >::get(
-            nid, "pathDistanceFromSoma" );
-    assert( e.size() == 4 );
-    assert( doubleEq( e[0], 0.0 ) );
-    double dL = 100e-6 / sqrt( dendDia /4.0 );
-    assert( doubleEq( e[1], dL ) );
-    double bL1 = dL + 200e-6 / sqrt( branchDia /4.0 );
-    assert( doubleEq( e[2], bL1 ) );
-    double bL2 = dL + 500e-6 / sqrt( branchDia/4.0 );
-    assert( doubleEq( e[3], bL2 ) );
+	vector< double > e = Field< vector< double > >::get(
+					nid, "electrotonicDistanceFromSoma" );
+	vector< double > g = Field< vector< double > >::get(
+					nid, "geometricalDistanceFromSoma" );
+	vector< double > p = Field< vector< double > >::get(
+					nid, "pathDistanceFromSoma" );
+	assert( e.size() == 4 );
+	assert( doubleEq( e[0], 0.0 ) );
+	double dL = 100e-6 / sqrt( dendDia /4.0 );
+	assert( doubleEq( e[1], dL ) );
+	double bL1 = dL + 200e-6 / sqrt( branchDia /4.0 );
+	assert( doubleEq( e[2], bL1 ) );
+	double bL2 = dL + 500e-6 / sqrt( branchDia/4.0 );
+	assert( doubleEq( e[3], bL2 ) );
 
-    assert( doubleEq( p[0], 0.0 ) );
-    assert( doubleEq( p[1], 100.0e-6 ) );
-    assert( doubleEq( p[2], 300.0e-6 ) ); // 100 + 200 microns
-    assert( doubleEq( p[3], 600.0e-6 ) ); // 100 + 500 microns
+	assert( doubleEq( p[0], 0.0 ) );
+	assert( doubleEq( p[1], 100.0e-6 ) );
+	assert( doubleEq( p[2], 300.0e-6 ) ); // 100 + 200 microns
+	assert( doubleEq( p[3], 600.0e-6 ) ); // 100 + 500 microns
 
-    assert( doubleEq( g[0], 0.0 ) );
-    assert( doubleEq( g[1], 100.0e-6 ) );
-    assert( doubleEq( g[2], sqrt(5.0) * 100.0e-6 ) ); // 100 + 200 microns
-    assert( doubleEq( g[3], sqrt(26.0) * 100.0e-6 ) ); // 100 + 500 microns
+	assert( doubleEq( g[0], 0.0 ) );
+	assert( doubleEq( g[1], 100.0e-6 ) );
+	assert( doubleEq( g[2], sqrt(5.0) * 100.0e-6 ) ); // 100 + 200 microns
+	assert( doubleEq( g[3], sqrt(26.0) * 100.0e-6 ) ); // 100 + 500 microns
 
-    //////////////////////////////////////////////////////////////////
-    // Here we test Neuron::evalExprForElist, which uses the muParser
-    // Note that the wildcard list starts with the spine which is not
-    // a compartment. So the indexing of the arrays e, p and g needs care.
-    unsigned int nuParserNumVal = 13;
-    vector< ObjId > elist;
-    wildcardFind( "/n/#", elist );
-    Neuron* n = reinterpret_cast< Neuron* >( nid.eref().data() );
-    vector< double > val;
-    n->evalExprForElist( elist, "p + g + L + len + dia + H(1-L)", val );
-    assert( val.size() == nuParserNumVal * elist.size() );
-    double maxP = 0.0;
-    double maxG = 0.0;
-    double maxL = 0.0;
-    for ( unsigned int i = 0; i < elist.size(); ++i ) {
-        if ( maxP < p[i] ) maxP = p[i];
-        if ( maxG < g[i] ) maxG = g[i];
-        if ( maxL < e[i] ) maxL = e[i];
-    }
-    unsigned int j = 0;
-    for ( unsigned int i = 0; i < elist.size(); ++i ) {
-        if ( !elist[i].element()->cinfo()->isA( "CompartmentBase" ) )
-            continue;
-        assert( val[i * nuParserNumVal] == 
-                p[j] + g[j] + e[j] + len[j] + dia[j] + ( 1.0 - e[j] > 0 ) );
-        assert( doubleEq( val[i * nuParserNumVal + 1], p[j] ) );
-        assert( doubleEq( val[i * nuParserNumVal + 2], g[j] ) );
-        assert( doubleEq( val[i * nuParserNumVal + 3], e[j] ) );
-        assert( doubleEq( val[i * nuParserNumVal + 4], len[j]  ));
-        assert( doubleEq( val[i * nuParserNumVal + 5], dia[j] ) );
-        assert( doubleEq( val[i * nuParserNumVal + 6], maxP ) );
-        assert( doubleEq( val[i * nuParserNumVal + 7], maxG ) );
-        assert( doubleEq( val[i * nuParserNumVal + 8], maxL ) );
-        assert( doubleEq( val[i * nuParserNumVal + 9], x[j] ) );
-        assert( doubleEq( val[i * nuParserNumVal + 10], y[j] ) );
-        assert( doubleEq( val[i * nuParserNumVal + 11], z[j] ) );
-        assert( doubleEq( val[i * nuParserNumVal + 12], 0.0 ) );
-        j++;
-    }
-    //////////////////////////////////////////////////////////////////
-    // Here we test Neuron::makeSpacingDistrib, which uses the muParser
-    // n->evalExprForElist( elist, "H(p-50e-6)*5e-6", val );
-    n->evalExprForElist( elist, "H(p-100e-6)*5e-6", val );
-    vector< unsigned int > seglistIndex;
-    vector< unsigned int > elistIndex;
-    vector< double > pos;
-    vector< string > line; // empty, just use the default spacingDistrib=0
-    n->makeSpacingDistrib( elist, val, seglistIndex, elistIndex, pos, line ); 
+	//////////////////////////////////////////////////////////////////
+	// Here we test Neuron::evalExprForElist, which uses the muParser
+	// Note that the wildcard list starts with the spine which is not
+	// a compartment. So the indexing of the arrays e, p and g needs care.
+	unsigned int nuParserNumVal = 13;
+	vector< ObjId > elist;
+	wildcardFind( "/n/#[ISA=Compartment]", elist );
+	Neuron* n = reinterpret_cast< Neuron* >( nid.eref().data() );
+	vector< double > val;
+	n->evalExprForElist( elist, "p + g + L + len + dia + H(1-L)", val );
+	assert( val.size() == nuParserNumVal * elist.size() );
+	double maxP = 0.0;
+	double maxG = 0.0;
+	double maxL = 0.0;
+	for ( unsigned int i = 0; i < elist.size(); ++i ) {
+		if ( maxP < p[i] ) maxP = p[i];
+		if ( maxG < g[i] ) maxG = g[i];
+		if ( maxL < e[i] ) maxL = e[i];
+	}
+	unsigned int j = 0;
+	for ( unsigned int i = 0; i < elist.size(); ++i ) {
+		if ( !elist[i].element()->cinfo()->isA( "CompartmentBase" ) )
+			continue;
+		assert( val[i * nuParserNumVal] == 
+				p[j] + g[j] + e[j] + len[j] + dia[j] + ( 1.0 - e[j] > 0 ) );
+		assert( doubleEq( val[i * nuParserNumVal + 1], p[j] ) );
+		assert( doubleEq( val[i * nuParserNumVal + 2], g[j] ) );
+		assert( doubleEq( val[i * nuParserNumVal + 3], e[j] ) );
+		assert( doubleEq( val[i * nuParserNumVal + 4], len[j]  ));
+		assert( doubleEq( val[i * nuParserNumVal + 5], dia[j] ) );
+		assert( doubleEq( val[i * nuParserNumVal + 6], maxP ) );
+		assert( doubleEq( val[i * nuParserNumVal + 7], maxG ) );
+		assert( doubleEq( val[i * nuParserNumVal + 8], maxL ) );
+		assert( doubleEq( val[i * nuParserNumVal + 9], x[j] ) );
+		assert( doubleEq( val[i * nuParserNumVal + 10], y[j] ) );
+		assert( doubleEq( val[i * nuParserNumVal + 11], z[j] ) );
+		assert( doubleEq( val[i * nuParserNumVal + 12], 0.0 ) );
+		j++;
+	}
+	//////////////////////////////////////////////////////////////////
+	// Here we test Neuron::makeSpacingDistrib, which uses the muParser
+	// n->evalExprForElist( elist, "H(p-50e-6)*5e-6", val );
+	n->evalExprForElist( elist, "H(p-100e-6)*5e-6", val );
+	vector< unsigned int > seglistIndex;
+	vector< unsigned int > elistIndex;
+	vector< double > pos;
+	vector< string > line; // empty, just use the default spacingDistrib=0
+	n->makeSpacingDistrib( elist, val, seglistIndex, elistIndex, pos, line ); 
+	// Can't do this now, it is not determinisitic.
+	// assert( pos.size() == ((800 - 100)/5) );
+	// assert( doubleEq( pos[0], 2.5e-6 ) );
+	// assert( doubleEq( pos.back(), 500e-6 - 7.5e-6 ) );
+	assert( seglistIndex[0] == 2 );
+	assert( seglistIndex.back() == 3 );
+	assert( elistIndex[0] == 2 );
+	assert( elistIndex.back() == 3 );
 
-    // Can't do this now, it is not determinisitic.
-    // assert( pos.size() == ((800 - 100)/5) );
-    // assert( doubleEq( pos[0], 2.5e-6 ) );
-    // assert( doubleEq( pos.back(), 500e-6 - 7.5e-6 ) );
-
-    assert( seglistIndex[0] == 2 );
-    assert( seglistIndex.back() == 3 );
-    assert( elistIndex[0] == 3 );
-    assert( elistIndex.back() == 4 );
-
-    shell->doDelete( nid );
+	shell->doDelete( nid );
 }
 
 
@@ -1691,9 +1684,15 @@ void testBiophysicsProcess()
 
 #else // ifdef DO_UNIT_TESTS
 void testBiophysics()
-{;}
+{
+    ;
+}
 void testBiophysicsProcess()
-{;}
+{
+    ;
+}
 void testIntFireNetwork( unsigned int unsteps = 5 )
-{;}
+{
+    ;
+}
 #endif

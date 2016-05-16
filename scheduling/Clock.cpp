@@ -50,11 +50,7 @@
 
 #include "header.h"
 #include "Clock.h"
-
-#ifdef NOTIFY_PROGRESS
-#include <ctime>
-#include <cmath>
-#endif
+#include "../utility/numutil.h"
 
 // Declaration of some static variables.
 const unsigned int Clock::numTicks = 32;
@@ -419,7 +415,7 @@ const Cinfo* Clock::initCinfo()
         "	Stats				17		0.1\n"
 
         "	Table2				18		1\n"
-        "	Streamer			19		1\n"
+        "	Streamer			29		2\n"
         "	HDF5DataWriter			30		1\n"
         "	HDF5WriterBase			30		1\n"
         "	NSDFWriter			30		1\n"
@@ -750,7 +746,8 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
                 time( &rawtime );
                 timeinfo = localtime( &rawtime );
                 strftime(now, 80, "%c", timeinfo);
-                cout << "@ " << now << ": " << 100 * currentTime_ / runTime_ << "\% of total " << runTime_ << " is over." << endl;
+                cout << "@ " << now << ": " << 100 * currentTime_ / runTime_ 
+                    << "% of total " << runTime_ << " is over." << endl;
             }
         }
     }
@@ -900,7 +897,7 @@ void Clock::buildDefaultTick()
     defaultTick_["Stats"] = 17;
 
     defaultTick_["Table2"] = 18;
-    defaultTick_["Streamer"] = 19;
+    defaultTick_["Streamer"] = 29;
     defaultTick_["HDF5DataWriter"] = 30;
     defaultTick_["HDF5WriterBase"] = 30;
     defaultTick_["NSDFWriter"] = 30;
@@ -976,8 +973,8 @@ void Clock::buildDefaultTick()
     defaultDt_[16] = 0.1;
     defaultDt_[17] = 0.1;
     defaultDt_[18] = 1; // For tables for chemical calculations.
-    defaultDt_[19] = 1; // For Streamer
-    // 20-29 are not assigned.
+    // 19-28 are not assigned.
+    defaultDt_[29] = 10; // For Streamer
     defaultDt_[30] = 1;	// For the HDF writer
     defaultDt_[31] = 0.01; // For the postmaster.
 }

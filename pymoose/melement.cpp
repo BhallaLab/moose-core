@@ -48,7 +48,10 @@
 
 #include <Python.h>
 #include <structmember.h>
+
+#ifdef USE_BOOST
 #include <boost/format.hpp>
+#endif
 
 #include <iostream>
 #include <typeinfo>
@@ -227,11 +230,6 @@ int moose_ObjId_init_from_path(_ObjId * self, PyObject * args,
         // Py_XDECREF(self);
         return -1;
     }
-
-    LOG( moose::debug , boost::format( 
-            "Created %1% path=%2% %|40t|numData=%3% isGlobal=%4% baseType=%5%"
-                ) % new_id % path % numData % isGlobal % basetype_str
-       );
 
     self->oid_ = ObjId(new_id);
     return 0;

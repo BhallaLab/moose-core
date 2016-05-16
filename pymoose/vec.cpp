@@ -50,7 +50,7 @@
 #include <structmember.h> // This defines the type id macros like T_STRING
 // #include "numpy/arrayobject.h"
 
-#include "../external/debug/simple_logger.hpp"
+#include "../utility/simple_logger.hpp"
 
 #include <iostream>
 #include <typeinfo>

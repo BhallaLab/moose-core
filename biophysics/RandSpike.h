@@ -10,47 +10,38 @@
 #ifndef _RANDSPIKE_H
 #define _RANDSPIKE_H
 
-#include "global.h"
-
 class RandSpike
 {
-public:
+  public:
     RandSpike();
 
-    //////////////////////////////////////////////////////////////////
-    // Field functions.
-    //////////////////////////////////////////////////////////////////
-    void setRate( double rate );
-    double getRate() const;
+	//////////////////////////////////////////////////////////////////
+	// Field functions.
+	//////////////////////////////////////////////////////////////////
+		void setRate( double rate );
+		double getRate() const;
 
-    void setRefractT( double val );
-    double getRefractT() const;
+		void setRefractT( double val );
+		double getRefractT() const;
 
-    bool getFired() const;
+        bool getFired() const;
 
-    double mtrand( );
+	//////////////////////////////////////////////////////////////////
+	// Message dest functions.
+	//////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////////
-    // Message dest functions.
-    //////////////////////////////////////////////////////////////////
+		void process( const Eref& e, ProcPtr p );
+		void reinit( const Eref& e, ProcPtr p );
 
-    void process( const Eref& e, ProcPtr p );
-    void reinit( const Eref& e, ProcPtr p );
-
-    //////////////////////////////////////////////////////////////////
-    static const Cinfo* initCinfo();
-
-private:
-    double rate_;
-    double realRate_;
-    double refractT_;
-    double lastEvent_;
-    double threshold_;
-    bool fired_;
-
-    moose::rng_type_ rng;
-    moose::distribution_type_ dist;
-
+	//////////////////////////////////////////////////////////////////
+		static const Cinfo* initCinfo();
+	private:
+		double rate_;
+		double realRate_;
+		double refractT_;
+		double lastEvent_;
+		double threshold_;
+		bool fired_;
 };
 
 #endif // _RANDSPIKE_H

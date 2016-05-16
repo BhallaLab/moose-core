@@ -42,8 +42,8 @@ def test( ):
     r.Kb = 0.01
 
     tabA = moose.Table2( '/compt/a/tabA' )
-    tabA.useStreamer = 1
     tabA.format = 'npy'
+    tabA.useStreamer = 1   # Setting format alone is not good enough
 
     tabB = moose.Table2( '/compt/b/tabB' )
     tabB.outfile = 'table2.npy'
@@ -57,7 +57,10 @@ def test( ):
 
     moose.reinit( )
     [ print_table( x) for x in [tabA, tabB, tabC] ]
-    moose.start( 10000 )
+    runtime = 1000
+    print( 'Starting moose for %s' % runtime )
+    moose.start( runtime, 1 )
+    print( ' MOOSE is done' )
 
     # Now read the numpy and csv and check the results.
     a = np.load( '_tables/compt/a/tabA.npy' )

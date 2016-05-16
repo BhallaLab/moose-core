@@ -29,21 +29,21 @@
 #include "../shell/Shell.h"
 #include "../mpi/PostMaster.h"
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
+#include "randnum/RNG.h"
 
 int _seed_ = 0;
+
+moose::RNG<double> rng_;
 
 void _mtseed_( unsigned int seed )
 {
     _seed_ = seed;
+    rng_.setSeed( _seed_ );
 }
 
 double _mtrand_( )
 {
-    static boost::random::mt19937 rng( _seed_ );
-    static boost::random::uniform_01<double> dist;
-    return dist( rng );
+    return rng_.uniform( );
 }
 
 void showFields()

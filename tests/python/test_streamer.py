@@ -18,15 +18,15 @@ import sys
 import time
 import moose
 import numpy as np
-print( '[INFO] Using moose form %s' % moose.__file__ )
+print(( '[INFO] Using moose form %s' % moose.__file__ ))
 
 def sanity_test( ):
     a = moose.Table( '/t1' )
     b = moose.Table( '/t1/t1' )
     c = moose.Table( '/t1/t1/t1' )
-    print a
-    print b 
-    print c
+    print(a)
+    print(b) 
+    print(c)
 
     st = moose.Streamer( '/s' )
 
@@ -79,7 +79,7 @@ def test( ):
     tabA = moose.Table2( '/compt/a/tab' )
     tabB = moose.Table2( '/compt/tabB' )
     tabC = moose.Table2( '/compt/tabB/tabC' )
-    print tabA, tabB, tabC
+    print(tabA, tabB, tabC)
 
     moose.connect( tabA, 'requestOut', a, 'getConc' )
     moose.connect( tabB, 'requestOut', b, 'getConc' )
@@ -88,7 +88,8 @@ def test( ):
     # Now create a streamer and use it to write to a stream
     st = moose.Streamer( '/compt/streamer' )
     st.outfile = os.path.join( os.getcwd(), 'temp.csv' )
-    assert st.outfile  == os.path.join( os.getcwd(), 'temp.csv' )
+    print(("outfile set to: %s " % st.outfile ))
+    assert st.outfile  == os.path.join( os.getcwd(), 'temp.csv' ), st.outfile
 
     st.addTable( tabA )
     st.addTables( [ tabB, tabC ] )
@@ -98,14 +99,15 @@ def test( ):
     moose.reinit( )
     print( '[INFO] Running for 57 seconds' )
     moose.start( 57 )
+    outfile = st.outfile
+    moose.quit() # Otherwise Streamer won't flush the rest of entries.
 
-    time.sleep( 0.1 )
     # Now read the table and verify that we have written
-    print( '[INFO] Reading file %s' % st.outfile )
-    data = np.genfromtxt(st.outfile, skip_header=1 )
+    print( '[INFO] Reading file %s' % outfile )
+    data = np.loadtxt(outfile, skiprows=1 )
     # Total rows should be 58 (counting zero as well).
-    assert data.shape == (58,4), data.shape
-    print data
+    print(data)
+    assert data.shape >= (58,4), data.shape
     print( '[INFO] Test 2 passed' )
 
 def main( ):

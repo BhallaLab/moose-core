@@ -29,11 +29,6 @@
 //            Decided not to expose any lower level moose API.
 //
 // 2012-04-20 Finalized the C interface
-//
-// 2016-04-25 Using boost::random to genearte random numbers.
-//            extern "C" is removed. 
-//            Old commentry is deleted. 
-//            Disabled old numpy API.
 
 #include <Python.h>
 
@@ -51,15 +46,17 @@
 #include <ctime>
 #include <csignal>
 #include <exception>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
+
+
+#if USE_BOOST
 #include <boost/format.hpp>
+#endif
 
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
 
-#include "../external/debug/print_function.hpp"
+#include "../utility/print_function.hpp"
 #include "../basecode/header.h"
 #include "../basecode/global.h"
 #include "../basecode/Id.h"
@@ -135,15 +132,7 @@ void pymoose_mtseed_( unsigned int seed )
 
 double pymoose_mtrand_( void )
 {
-
-#if 0
-    static moose::rng_type_ rng( moose::global::__rng_seed__ );
-    static moose::distribution_type_ dist;
-    return dist( rng );
-#else
     return moose::mtrand( );
-#endif
-
 }
 
 /**
@@ -183,7 +172,7 @@ void handle_keyboard_interrupts( int signum )
     LOG( moose::info, "Interrupt signal (" << signum << ") received.");
 
     // Get the shell and cleanup.
-    Shell* shell = reinterpret_cast<Shell*>(getShell(0, nullptr).eref().data());
+    Shell* shell = reinterpret_cast<Shell*>(getShell(0, NULL).eref().data());
     shell->cleanSimulation();
     exit( signum );
 }
@@ -2689,15 +2678,6 @@ int defineClass(PyObject * module_dict, const Cinfo * cinfo)
     }
     get_moose_classes().insert(pair<string, PyTypeObject*> (className, new_class));
     Py_INCREF(new_class);
-
-#if 0
-    LOG( debug, boost::format( "%1% %2% %|40t|%3% %4%")
-                % "`Created class " 
-                % new_class->tp_name 
-                % "base=" 
-                % new_class->tp_base->tp_name 
-       );
-#endif
 
 #ifdef PY3K
     PyDict_SetItemString(new_class->tp_dict, "__module__", PyUnicode_InternFromString("moose"));

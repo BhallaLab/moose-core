@@ -70,7 +70,7 @@ private:
     string nameString( string str );
     void printMembers( const ASTNode* p,vector <string> & ruleMembers );
     void addSubPrd(Reaction * reac,Id reaction_,string type);
-    void getKLaw( KineticLaw * klaw,bool rev,vector< double > & rate );
+    void getKLaw( KineticLaw * klaw,bool rev,vector< double > & rate ,string & amt_Conc);
     void pushParmstoVector( const ASTNode* p,vector <string> & parameters );
     void getParameters( const ASTNode* node,vector <string> & parameters );
     void setupMMEnzymeReaction( Reaction * reac,string id ,string name,const map<string, Id> &);

@@ -29,12 +29,14 @@ ReadCell::ReadCell()
 	ELEAK_( -0.065 ),
 	
 #if 0
-	//dendrDiam( 0.0 ),
-	//aveLength( 0.0 ),
-	//spineSurf( 0.0 ),
-	//spineDens( 0.0 ),
-	//spineFreq( 0.0 ),
-	//membFactor( 0.0 ),
+        // Unused privates. Causes error when -Werror is enabled. Uncomment them
+        // appropriately when needed.
+	dendrDiam( 0.0 ),
+	aveLength( 0.0 ),
+	spineSurf( 0.0 ),
+	spineDens( 0.0 ),
+	spineFreq( 0.0 ),
+	membFactor( 0.0 ),
 #endif
 
 	erestFlag_( 0 ),

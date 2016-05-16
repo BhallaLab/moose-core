@@ -1,8 +1,6 @@
 /*
  * =====================================================================================
  *
- *       Filename:  multi_dimensional_root_finding_using_boost.cpp
- *
  *    Description:  Compute root of a multi-dimensional system using boost
  *    libraries.
  *
@@ -40,7 +38,7 @@ using namespace boost::numeric;
 typedef double value_type;
 typedef ublas::vector<value_type> vector_type;
 typedef ublas::matrix<value_type> matrix_type;
-typedef function<value_type( const vector_type&  )> equation_type;
+
 
 class ReacInfo
 {
@@ -101,6 +99,7 @@ public:
         x1.resize( size_, 0);
 
         ri.nVec.resize( size_ );
+        dx_ = sqrt( numeric_limits<double>::epsilon() );  
     }
 
     vector_type compute_at(const vector_type& x)
@@ -269,19 +268,6 @@ public:
         return ublas::norm_2( (x2 - x1)/dx_ );
     }
 
-    /** 
-     * @brief Suggest the direction to step into.  Take the steepest descent
-     * direction.
-     *
-     * @return  Number of dimension (0 to n-1 ).
-     */
-    int which_direction_to_stepinto( )
-    {
-        for( size_t i = 0; i < size_; i++)
-            slopes_[i] = slope(i);
-        auto iter = std::max_element( slopes_.begin(), slopes_.end());
-        return std::distance( slopes_.begin(), iter );
-    }
 
     /**
      * @brief Makes the first guess. After this call the Newton method.
@@ -328,7 +314,7 @@ public:
 public:
     const size_t size_;
 
-    double dx_ = sqrt( numeric_limits<double>::epsilon() ); 
+    double dx_;
 
     vector_type f_;
     vector_type x_;

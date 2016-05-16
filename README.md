@@ -58,28 +58,26 @@ Old [SourceForge repository](https://sourceforge.net/projects/moose/) is no long
 
 ## Core MOOSE
 
-- g++     (>= 4.6.x)  REQUIRED For building the C++ MOOSE core.
-- GSL     (>=1.16.x)  REQUIRED For core moose numerical computation
-- OpenMPI (1.8.x)     OPTIONAL For running moose in parallel on clusters
-- SBML    (5.9.x)     OPTIONAL For reading and writing signalling models in SBML format
-- HDF5    (1.8.x)     OPTIONAL For reading and writing data in HDF5 based formats
+- g++     (>= 4.4.x)  REQUIRED For building the C++ MOOSE core.
+- GSL (>=1.16.x) or Boost (>=1.40)  REQUIRED For core moose numerical computation
+- OpenMPI (1.8.x)  OPTIONAL For running moose in parallel on clusters
+- SBML    (5.9.x)  OPTIONAL For reading and writing signalling models in SBML format
+- HDF5    (1.8.x)  OPTIONAL For reading and writing data in HDF5 based formats
 
-## PyMOOSE                      REQUIRED except on cluster worker nodes
+## PyMOOSE         REQUIRED except on cluster worker nodes
 
 Python interface for core MOOSE API
 
 In addition to core MOOSE requirements:
 
-- Python2    ( >= 2.7.x) REQUIRED For building the MOOSE Python bindings
-- Python-dev ( >= 2.7.x) REQUIRED Python development headers and libraries
-- NumPy      ( >= 1.6.x) REQUIRED For array interface
+- Python2 ( >= 2.6.x) or Python3 REQUIRED For building the MOOSE Python bindings
+- Python-dev ( >= 2.6.x) or python3-dev REQUIRED Python development headers and libraries
+- NumPy ( >= 1.6.x) REQUIRED For array interface
 
 ## Graphical User Interface
 
 - PyQt4         (4.8.x)                 REQUIRED For Python GUI    
 - Matplotlib    ( >= 1.1.x)             REQUIRED For plotting simulation results
-- suds		(0.4)			REQUIRED For accessing models hosted on biomodels database.
-
 
 ### Compartmental Model Visualization       OPTIONAL
 
@@ -101,42 +99,6 @@ In addition to core MOOSE requirements:
 - Aditya Gilra          -   NeuroML reader development, integrate-and-fire neurons/networks, STDP
 - Aviral Goel           -   Moogli/Neurokit Development
 - Dilawar Singh         -   Packaging
-
-
-# Support:
-
-You can join the MOOSE generic mailing list for your queries -
-https://lists.sourceforge.net/lists/listinfo/moose-generic
-
-
-# Bugs:
-
-You can file bug reports and feature requets at the sourceforge tracker -
-http://sourceforge.net/p/moose/bugs/
-
-# Getting started:
-
-# Running MOOSE: the short short guide.
-Moose is usually run within Python. Here is a template Python script that will
-load and run various kinds of predefined model files:
-
-
-    >>> import moose
-    >>> help( moose ) # See what you can do with MOOSE.
-    >>> moose.loadModel( file_path, modelname )	# Load in your model
-    >>> moose.reinit()				# Set initial conditions
-    >>> moose.start( runtime )			# Run the model
-
-Using Matplotlib and a few more lines, one can plot the output of this 
-simulation, which will have been been stored in tables somewhere in the model:
-
-    >>> import pylab
-    >>> import numpy
-    >>> for x in moose.wildcardFind( '/modelname/##[ISA=Table]' ):
-    >>>	t = numpy.arange( 0, x.vector.size, 1, ) * dt
-    >>>	pylab.plot( t, x.vector, label = x.name )
-    >>> pylab.legend()
-    >>> pylab.show()
 
 
 # Examples, tutorials and Demos: 
@@ -175,24 +137,6 @@ MOOSE can also read .swc files from NeuroMorpho.org.
 
 # Documentation
 
-Top level moose documentation can be accessed in the Python interpreter the
-usual way:
-
-    import moose
-    help(moose)
+Complete MOOSE Documentation can be found at -  http://moose.ncbs.res.in/content/view/5/6/
 
 
-MOOSE classes have built-in documentation that can be accessed via
-the `doc()` function -
-
-    moose.doc(classname)
-
-This will give the full documentation for the class including the fields
-available.
-
-    `moose.doc(classname.fieldname)` 
-
-will give you information about a particular field in a class.
-
-Complete MOOSE Documentation can be found at - 
-http://moose.ncbs.res.in/content/view/5/6/
