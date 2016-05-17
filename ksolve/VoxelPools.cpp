@@ -135,20 +135,65 @@ cleaner.
      *  http://boostw.boost.org/doc/libs/1_56_0/boost/numeric/odeint/integrate/integrate.hpp
      *-----------------------------------------------------------------------------
      */
-    if ( status != GSL_SUCCESS ) 
-    {
-        cout << "Error: VoxelPools::advance: GSL integration error at time "
-            << T << "\n";
-        cout << "Error info: " << status << ", " << 
-            gsl_strerror( status ) << endl;
-        if ( status == GSL_EMAXITER ) 
-            cout << "Max number of steps exceeded\n";
-        else if ( status == GSL_ENOPROG ) 
-            cout << "Timestep has gotten too small\n";
-        else if ( status == GSL_EBADFUNC ) 
-            cout << "Internal error\n";
-        assert( 0 );
-    }
+     double absTol = sys_.epsAbs;
+     double relTol = sys_.epsRel;
+     string method = sys_.method;
+
+     if( method == "rk2" )
+             rk_midpoint_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
+     else if( method == "rk4" )
+             rk_karp_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
+     else if( method == "rk5")
+             rk_karp_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
+     else if( method == "rk5a")
+             odeint::integrate_adaptive( 
+                             odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol)
+                             , sys_
+                             , Svec()
+                             , p->currTime - p->dt 
+                             , p->currTime
+                             , p->dt 
+                             );
+     else if ("rk54" == method )
+             rk_karp_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
+     else if ("rk54a" == method )
+             odeint::integrate_adaptive( 
+                             odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol )
+                             , sys_, Svec()
+                             , p->currTime - p->dt 
+                             , p->currTime
+                             , p->dt 
+                             );
+     else if ("rk5" == method )
+             rk_dopri_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
+     else if ("rk5a" == method )
+             odeint::integrate_adaptive( 
+                             odeint::make_controlled<rk_dopri_stepper_type_>( absTol, relTol )
+                             , sys_, Svec()
+                             , p->currTime - p->dt 
+                             , p->currTime
+                             , p->dt 
+                             );
+                                     
+     else if( method == "rk8" ) 
+             rk_felhberg_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
+     else if( method == "rk8a" ) 
+             odeint::integrate_adaptive(
+                             odeint::make_controlled<rk_felhberg_stepper_type_>( absTol, relTol )
+                             , sys_, Svec()
+                             , p->currTime - p->dt 
+                             , p->currTime
+                             , p->dt 
+                             );
+
+     else
+             odeint::integrate_adaptive( 
+                             odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol )
+                             , sys_, Svec()
+                             , p->currTime - p->dt 
+                             , p->currTime
+                             , p->dt 
+                             );
 
 #endif
 }
