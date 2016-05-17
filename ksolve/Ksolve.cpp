@@ -273,7 +273,11 @@ static const Cinfo* ksolveCinfo = Ksolve::initCinfo();
 
 Ksolve::Ksolve()
     :
-    method_( "rk5a" ),                          /* Adpative dt method is default. */
+#if USE_GSL
+    method_( "rk5" ),
+#elif USE_BOOST
+    method_( "rk5a" ),
+#endif
     epsAbs_( 1e-4 ),
     epsRel_( 1e-6 ),
     pools_( 1 ),
@@ -377,13 +381,9 @@ double Ksolve::getEpsAbs() const
 void Ksolve::setEpsAbs( double epsAbs )
 {
     if ( epsAbs < 0 )
-    {
         epsAbs_ = 1.0e-4;
-    }
     else
-    {
         epsAbs_ = epsAbs;
-    }
 }
 
 

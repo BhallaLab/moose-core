@@ -1,7 +1,5 @@
-cmake_minimum_required(VERSION 2.8)
-
-include(CheckIncludeFileCXX)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
@@ -11,7 +9,11 @@ if(COMMAND cmake_policy)
     endif(POLICY CMP0050)
 endif(COMMAND cmake_policy)
 
-project(moose)
+project(MOOSE)
+
+include(CheckMooseCompiler.cmake)
+include(CheckIncludeFileCXX)
+include(FindPkgConfig)
 
 # Set moose version
 # Get the latest abbreviated commit hash of the working branch
@@ -23,7 +25,6 @@ execute_process(
 )
 add_definitions( -DMOOSE_VERSION="${GIT_VERSION_OUTPUT}")
 
-include(FindPkgConfig)
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -78,10 +79,10 @@ option(DEBUG "Build with debug support" OFF)
 option(GPROF "Build for profiling using gprof" OFF)
 option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
+option(WITH_CYTHON "Build python extension using Cython. (experimental)" OFF)
 option(WITH_MPI  "Enable Openmpi support" OFF)
-option(WITH_OPENMP  "Enable OPENMP support" ON)
-option(WITH_CURSES "Enable ncurses support (deprecated)" OFF)
-option(WITH_GSL "Enable GSL library" ON)
+option(WITH_BOOST "Use boost library instead of GSL" OFF)
+option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
 
 # If SBML is available, it will automaticall enable the support. If ON, then
 # libSBML must be present.
@@ -105,52 +106,6 @@ option(HDF5_STATIC_HOME
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 
-########################### COMPILER MACROS #####################################
-
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG( "-std=c++11" COMPILER_SUPPORTS_CXX11 )
-CHECK_CXX_COMPILER_FLAG( "-std=c++0x" COMPILER_SUPPORTS_CXX0X )
-CHECK_CXX_COMPILER_FLAG( "-Wno-strict-aliasing" COMPILER_WARNS_STRICT_ALIASING )
-
-# Turn warning to error: Not all of the options may be supported on all
-# versions of compilers. be careful here.
-add_definitions(-Wall
-    #-Wno-return-type-c-linkage
-    -Wno-unused-variable      
-    -Wno-unused-function
-    #-Wno-unused-private-field
-    )
-add_definitions(-fPIC)
-if(COMPILER_WARNS_STRICT_ALIASING)
-    add_definitions( -Wno-strict-aliasing )
-endif(COMPILER_WARNS_STRICT_ALIASING)
-
-
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX11)
-    message(STATUS "Your compiler supports c++11 features. Enabling it")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    add_definitions( -DENABLE_CPP11 )
-elseif(COMPILER_SUPPORTS_CXX0X)
-    message(STATUS "Your compiler supports c++0x features. Enabling it")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-    add_definitions( -DENABLE_CXX11 )
-    add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS -DBOOST_NO_SCOPED_ENUMS )
-else()
-    add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS -DBOOST_NO_SCOPED_ENUMS )
-    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
-endif()
-
-## DO UNIT TEST
-option(ENABLE_UNIT_TESTS "ENABLE UNIT TESTS IN MOOSE" ON)
-if(ENABLE_UNIT_TESTS)
-    MESSAGE("++ Unit testing enabled.")
-    add_definitions(-DDO_UNIT_TESTS)
-endif()
-
-
 ############################ BUILD CONFIGURATION #################################
 
 # VERBOSITY OF OUTPUT
@@ -166,19 +121,18 @@ endif()
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-if(ENABLE_UNIT_TESTS)
+if(DEBUG)
     message(STATUS "Building for Debug/Unit testing")
     add_definitions(-DDO_UNIT_TESTS)
     set(CMAKE_BUILD_TYPE Debug)
-    add_definitions(-g)
-elseif(DEBUG)
-    MESSAGE(STATUS "Building for debug")
-    add_definitions(-g)
+elseif(ENABLE_UNIT_TESTS)
+    MESSAGE(STATUS "Enabled Unit tests")
+    add_definitions(-DDO_UNIT_TESTS)
     set(CMAKE_BUILD_TYPE Debug)
 else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
-    add_definitions(-UDO_UNIT_TESTS )
+    add_definitions(-UDO_UNIT_TESTS -O3)
 endif()
 
 if(GPROF AND DEBUG)
@@ -200,7 +154,6 @@ IF(NOTIFY_PROGRESS)
 ENDIF()
 ################################### TARGETS ####################################
 
-add_library(_moose MODULE pymoose/moosemodule.cpp)
 add_library(libmoose SHARED basecode/main.cpp)
 add_executable(moose.bin basecode/main.cpp)
 
@@ -212,10 +165,7 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 if(WITH_BOOST)
     message(STATUS "Using the boost libraries ")
     set(WITH_GSL OFF)
-    add_definitions( -DUSE_BOOST )
-elseif(WITH_GSL)
-    add_definitions( -DUSE_GSL )
-endif()
+endif(WITH_BOOST)
 
 # If this variable is used while packaging; we build this project using another
 # cmake script and pass the location of SBML static library using this variable.
@@ -253,12 +203,7 @@ if(LIBSBML_FOUND)
     endif()
     include_directories(${LibXML2_INCLUDE_DIRS})
     if(${LIBSBML_LIBRARY_DIRS})
-        target_link_libraries(libmoose PROPERTIES LINK_FLAGS
-            "-L${LIBSBML_LIBRARY_DIRS}"
-            )
-        target_link_libraries(_moose 
-            PROPERTIES LINK_FLAGS "-L${LIBSBML_LIBRARY_DIRS}"
-            )
+        target_link_libraries(libmoose PROPERTIES LINK_FLAGS "-L${LIBSBML_LIBRARY_DIRS}")
     endif()
 
 else()
@@ -397,7 +342,6 @@ endif( HDF5_FOUND )
 # headers in non-standard path. issue #80.
 if(HDF5_LIBRARY_DIRS)
     set_target_properties( libmoose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
-    set_target_properties( _moose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
 endif()
 
 find_package(Termcap)
@@ -408,49 +352,20 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
     include_directories(${Readline_INCLUDE_DIR})
 endif()
 
-
-if(WITH_OPENMP)
-    find_package(OpenMP REQUIRED)
-    MESSAGE("++ OpenMPI support is ON")
-    add_definitions(-DUSE_OPENMPI -O1)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${-pthread}")
-    set(NUM_THREADS "2")
-	
-endif(WITH_OPENMP)
-
 # Openmpi
 if(WITH_MPI)
     find_package(MPI REQUIRED)
-    message(STATUS "Using MPI compiler  ${MPI_CXX_COMPILER}")
-    set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
-    add_definitions( -DUSE_MPI )
-    set_target_properties( moose.bin libmoose _moose 
-        PROPERTIES 
-        COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} -fopenmp"
-        LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -fopenmp"
-        )
-    ## NOTE: Following does not work
-    ##include_directories(${MPI_CXX_INCLUDE_PATH})
-    ##if(MPI_COMPILE_FLAGS)
-    ##    set_target_properties(libmoose _moose 
-    ##        PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}"
-    ##        )
-    ##endif(MPI_COMPILE_FLAGS)
-
-    ##if(MPI_LINK_FLAGS)
-    ##    set_target_properties(libmoose _moose 
-    ##        PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}"
-    ##        )
-    ##endif(MPI_LINK_FLAGS)
-    find_package(OpenMP REQUIRED)
-    MESSAGE("++ OpenMPI support is ON")
-    add_definitions(-DUSE_OPENMPI -O1)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${-pthread}")
-	
+    if(MPI_CXX_FOUND)
+        message(STATUS "Using MPI from ${MPI_CXX_INCLUDE_PATH}")
+        include_directories(${MPI_CXX_INCLUDE_PATH})
+        set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
+        add_definitions(-DUSE_MPI)
+        SET(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+        SET(CMAKE_C_COMPILER ${MPI_C_COMPILER})
+    else()
+        message(STATUS "Cound not find MPI")
+        add_definitions(-UUSE_MPI)
+    endif()
 endif(WITH_MPI)
 
 # Add subdirectroeis
@@ -481,9 +396,6 @@ if(WITH_BOOST)
     list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES})
     list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
 endif(WITH_BOOST)
-if(WITH_MPI)
-    LIST(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
-endif(WITH_MPI)
 
 # These libraries could be static of dynamic.
 # When building packages on OBS or launchpad, we build static library of a
@@ -517,6 +429,17 @@ if(WITH_GSL)
     endif()
 endif()
 
+# Deprecated.
+#if(READLINE_FOUND AND TERMCAP_FOUND)
+#    list(APPEND SYSTEM_SHARED_LIBS ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
+#endif()
+
+if(WITH_MPI)
+    if(MPI_CXX_FOUND)
+        list(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
+    endif()
+endif(WITH_MPI)
+
 pkg_check_modules(MUPARSER muparser)
 if(MUPARSER_FOUND)
     message(STATUS "Using system muparser ${MUPARSER_VERSION}")
@@ -526,6 +449,16 @@ else()
     add_subdirectory(external/muparser)
     list(APPEND MOOSE_LIBRARIES muparser)
 endif()
+
+#pkg_check_modules(TINYXML tinyxml)
+#if(TINYXML_FOUND)
+    #message(STATUS "Using system tinyxml ${TINYXML_VERSION}")
+    #list(APPEND SYSTEM_SHARED_LIBS ${TINYXML_LIBRARIES})
+#else()
+    #message(STATUS "Using private tinyxml")
+    #add_subdirectory(external/tinyxml)
+    #list(APPEND MOOSE_LIBRARIES tinyxml)
+#endif()
 
 ###################################### LINKING #################################
 list(APPEND MOOSE_LIBRARIES
@@ -598,136 +531,11 @@ endif(WITH_DOC)
 
 ######################### BUILD PYMOOSE ########################################
 # Root of all python module.
-SET(PROJECT_PYTHON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/python)
 if(WITH_PYTHON)
-    message(STATUS "Building native python extension of MOOSE")
-    set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
-    EXEC_PROGRAM(${PYTHON_EXECUTABLE}
-        ARGS "-c 'try: import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])
-except Exception: pass'"
-        OUTPUT_VARIABLE PYTHON_SO_EXTENSION
-        )
-    message( STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
-
-    find_package(NumPy REQUIRED)
-    include_directories(${NUMPY_INCLUDE_DIRS})
-    add_definitions(-DUSE_NUMPY)
-
-    add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
-
-    execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --includes
-        OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-    execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --libs
-        OUTPUT_VARIABLE PYTHON_LIBRARIES
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-    message( STATUS "Python include flags: ${PYTHON_INCLUDE_FLAGS}" )
-    add_subdirectory(pymoose)
-
-    set_target_properties(_moose PROPERTIES 
-        COMPILE_DEFINITIONS "PYMOOSE"
-        COMPILE_FLAGS "${PYTHON_INCLUDE_FLAGS}"
-        LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
-        PREFIX ""
-        SUFFIX ".so"
-        )
-
-    #if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
-    #    set_target_properties(_moose PROPERTIES
-    #    SUFFIX ${PYTHON_SO_EXTENSION})
-    #endif()
-
-    # see issue #80
-    if(HDF5_LIBRARY_DIRS)
-        set_target_properties( _moose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
-    endif()
-
-
-if(MACOSX)
-    set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
-    message(STATUS "ADDING some linker flags ${CMAKE_EXE_LINKER_FLAGS}")
-endif(MACOSX)
-
-if(MACOSX)
-    target_link_libraries( _moose 
-        "-Wl,-all_load"
-        moosepython  
-        ${MOOSE_LIBRARIES}
-        ${STATIC_LIBRARIES}
-        )
-    target_link_libraries(_moose
-        ${SYSTEM_SHARED_LIBS}
-        )
-ELSE(MACOSX)
-    target_link_libraries(_moose 
-        "-Wl,--whole-archive"
-        moosepython  
-        ${MOOSE_LIBRARIES}
-        ${STATIC_LIBRARIES}
-        "-Wl,--no-whole-archive"
-        ${PYTHON_LIBRARIES}
-        ${SYSTEM_SHARED_LIBS}
-        )
-endif(MACOSX)
-
-# Make this target dependant on all python files in python folder.
-add_custom_target(copy_python_files ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_SOURCE_DIR}/python
-    ${CMAKE_CURRENT_BINARY_DIR}/python
-    COMMENT "Copying python files to build directory"
-    VERBATIM
-    )
-add_dependencies(_moose copy_python_files)
-
-if(WITH_DOC)
-    # Also generate the documents
-    FIND_PROGRAM(Sphinx REQUIRED)
-    add_custom_command(TARGET _moose
-        POST_BUILD
-        COMMAND make html
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Docs/user/py
-        COMMENT "Building user doc using python-sphinx"
-        VERBATIM
-        )
-endif(WITH_DOC)
+    add_subdirectory( pymoose )
+elseif(WITH_CYTHON)
+    add_subdirectory( cymoose )
 endif(WITH_PYTHON)
-
-######################### CYMOOSE #############################################
-option(BUILD_CYMOOSE "Build python extension using Cython. Development version." OFF)
-if(BUILD_CYMOOSE)
-    message(STATUS "Building experimental cython extension of MOOSE.")
-    add_library(cymoose SHARED cymoose/cymoose_methods.cxx)
-    set_target_properties(cymoose PROPERTIES COMPILE_DEFINITIONS "CYMOOSE")
-    if(DEBUG)
-        add_definitions("-g -Wall")
-    endif()
-
-    set_target_properties(cymoose PROPERTIES 
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/cymoose"
-            )
-
-if(MACOSX)
-    target_link_libraries(cymoose 
-        "-Wl,-all_load"
-        ${MOOSE_LIBRARIES}
-        ${LIBRARIES}
-        "-Wl,-noall_load"
-        ${SYSTEM_LIBRARIES}
-        )
-ELSE(MACOSX)
-    target_link_libraries(cymoose 
-        "-Wl,--whole-archive"
-        ${MOOSE_LIBRARIES}
-        ${LIBRARIES}
-        "-Wl,--no-whole-archive"
-        ${SYSTEM_LIBRARIES}
-        )
-endif(MACOSX)
-
-endif(BUILD_CYMOOSE)
 
 ## Moose documentation
 option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
@@ -794,7 +602,7 @@ endif()
 
 ############################ CTEST ######################################
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_ctest.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/MooseTests.cmake)
 
 ############################ CPACK ######################################
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_cpack.cmake)

@@ -71,6 +71,14 @@ set_tests_properties(pymoose-nsdf-sanity-test
     PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
     )
 
+# Test Ksolve
+ADD_TEST(NAME pymoose-ksolve-test
+    COMMAND ${TEST_COMMAND} ${PROJECT_SOURCE_DIR}/tests/python/test_ksolve.py
+    )
+set_tests_properties(pymoose-ksolve-test
+    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+    )
+
 # Test basic SBML support.
 ADD_TEST(NAME pymoose-test-basic-sbml-support
     COMMAND ${TEST_COMMAND}

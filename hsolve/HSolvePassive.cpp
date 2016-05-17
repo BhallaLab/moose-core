@@ -981,6 +981,7 @@ void testHSolvePassive()
         // cleanup
         shell->doDelete( n );
     }
+    cout << "." << flush;
 
 //    TEST_END;
 }
