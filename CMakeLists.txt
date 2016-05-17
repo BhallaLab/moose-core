@@ -81,8 +81,8 @@ option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_CYTHON "Build python extension using Cython. (experimental)" OFF)
 option(WITH_MPI  "Enable Openmpi support" OFF)
-option(WITH_BOOST "Use boost library instead of GSL" OFF)
-option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
+option(WITH_BOOST "Use boost library instead of GSL" ON)
+option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" OFF)
 
 # If SBML is available, it will automaticall enable the support. If ON, then
 # libSBML must be present.
