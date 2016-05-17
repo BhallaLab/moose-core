@@ -134,7 +134,7 @@ First fix that issue with SynBase or something in that line.')
         target = vec(target)
         _moose.syncDataHandler(target)
 
-def showfield(el, field='*', showtype=False):
+def showfield(el, field='*', showtype=False, write2xml=False):
     """Show the fields of the element `el`, their data types and
     values in human readable format. Convenience function for GENESIS
     users.
