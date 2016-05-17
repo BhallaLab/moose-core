@@ -149,13 +149,14 @@ bool endswith(const string & full, const string & ending)
 /* Compare two strings. */
 int strncasecmp( const string& a, const string& b, size_t n)
 {
-    int res = 0;
-    if( n < 0 )
-        n = min( a.size(), b.size() );
-    for( size_t i = 0; i <= min( a.size(), b.size() ); ++i )
-        res += std::tolower(a[i]) - std::tolower(b[i]);
-    return res;
+    for( size_t i = 0; i < std::min(n, b.size()); ++i )
+        if( tolower(a[i]) != tolower(b[i]) )
+            return tolower(a[i]) - tolower(b[i]);
 
+    if( b.size() < n )
+        return a.size() - b.size();
+    
+    return 0;
 }
 
 }
