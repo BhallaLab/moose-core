@@ -81,8 +81,9 @@ option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_CYTHON "Build python extension using Cython. (experimental)" OFF)
 option(WITH_MPI  "Enable Openmpi support" OFF)
-option(WITH_BOOST "Use boost library instead of GSL" ON)
-option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" OFF)
+option(WITH_OPENMP  "Enable Openmp support" ON)
+option(WITH_BOOST "Use boost library instead of GSL" OFF)
+option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
 
 # If SBML is available, it will automaticall enable the support. If ON, then
 # libSBML must be present.
@@ -163,7 +164,6 @@ add_executable(moose.bin basecode/main.cpp)
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
 if(WITH_BOOST)
-    message(STATUS "Using the boost libraries ")
     set(WITH_GSL OFF)
 endif(WITH_BOOST)
 
@@ -351,6 +351,16 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
     add_definitions(-DUSE_READLINE)
     include_directories(${Readline_INCLUDE_DIR})
 endif()
+
+if(WITH_OPENMP)
+    find_package(OpenMP REQUIRED)
+    MESSAGE("++ OpenMPI support is ON")
+    add_definitions(-DUSE_OPENMPI -O1)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${-pthread}")
+	
+endif(WITH_OPENMP)
 
 # Openmpi
 if(WITH_MPI)
