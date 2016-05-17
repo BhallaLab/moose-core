@@ -45,6 +45,7 @@
 #ifdef _WIN32
 #include <Winsock2.h>
 #else
+#define _BSD_SOURCE
 #include <sys/time.h>
 #endif
 #include <stdlib.h>
