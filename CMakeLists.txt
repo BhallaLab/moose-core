@@ -210,6 +210,7 @@ add_executable(moose.bin basecode/main.cpp)
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
 if(WITH_BOOST)
+    message(STATUS "Using the boost libraries ")
     set(WITH_GSL OFF)
     add_definitions( -DUSE_BOOST )
 elseif(WITH_GSL)
