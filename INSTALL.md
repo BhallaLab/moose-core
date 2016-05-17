@@ -13,76 +13,64 @@ https://software.opensuse.org/download.html?project=home:moose&package=moose
 If you really want to build `MOOSE` from source, you can either use `cmake` (recommended) 
 or GNU `make` based flow.
 
-
-### Download the latest source code of moose from github or sourceforge.
+Download the latest source code of moose from github or sourceforge.
 
     $ git clone -b master https://github.com/BhallaLab/moose-core
-    $ cd moose
 
 ## Install dependencies
 
 For moose-core:
 
 - gsl-1.16 or higher.
-- libhdf5 
-- libsbml (optional)
-
-    Make sure that `libsml` is installed with `zlib` and `lxml` support.
-    If you are using buildtools, then use the following to install libsbml.
-
-        - wget http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/libSBML-5.9.0-core-src.tar.gz
-        - tar -xzvf libSBML-5.9.0-core-src.tar.gz 
-        - cd libsbml-5.9.0 
-        - ./configure --prefix=/usr --with-zlib --with-bzip2 --with-libxml 
-        - make 
-        - ctest --output-on-failure # optional
-        - sudo make install 
-
-For python module of MOOSE, following additional packages are required:
-
-- Development package of python e.g. libpython-dev 
+- libhdf5-dev (optional) 
+- libsbml-dev (5.9.0, optional)
+- python-dev 
 - python-numpy 
 
-For python-gui, we need some more addtional packages
-    
-- matplotlib
-- setuptools  (cmake uses it to install moose python extension and moogli)
-- suds 
-- Python bindings for Qt4 or higher
-- Python OpenGL
-- Python bindings for Qt's OpenGL module
+__Note on libsbml__
+Make sure that `libsml` is installed with `zlib` and `lxml` support. Following instructions 
+are known to work.
 
-On Ubuntu-120.4 or higher, these can be installed with:
+    - wget http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/libSBML-5.9.0-core-src.tar.gz
+    - tar -xzvf libSBML-5.9.0-core-src.tar.gz 
+    - cd libsbml-5.9.0 
+    - ./configure --prefix=/usr --with-zlib --with-bzip2 --with-libxml 
+    - make 
+    - sudo make install 
+
+On Ubuntu-12.04 or higher, these can be installed with:
     
-    sudo apt-get install python-matplotlib python-qt4 python-qt4-gl 
+    sudo apt-get install python-dev python-numpy libhdf5-dev cmake libgsl0-dev g++ 
+
+__NOTE__ : On Ubuntu 12.04, gsl version is 1.15. You should skip `libgsl0-dev` install gsl-1.16 or higher manually.
 
 ## Use `cmake` to build moose:
-
+    
+    $ cd /path/to/moose-core 
     $ mkdir _build
     $ cd _build 
     $ cmake ..
-    $ make  # make -j4
+    $ make  
     $ ctest --output-on-failure
 
 This will build moose and its python extentions, `ctest` will run few tests to
 check if build process was successful.
 
-To install MOOSE into non-standard directory, pass additional argument
-`-DCMAKE_INSTALL_PREFIX=path/to/install/dir` to cmake.
+To install MOOSE into non-standard directory, pass additional argument `-DCMAKE_INSTALL_PREFIX=path/to/install/dir` to cmake.
 
-After that installation is pretty easy.
+### Python3 
 
-## Install
+You just need to one command in previous set of instructions to following 
+
+    cmake -DPYTHON_EXECUTABLE=/opt/bin/python3 ..
+
+### Install
 
     $ sudo make install
-
 
 ##  Using gnu-make
 
 __This may or may not work (not maintained by packager)__
-
- On Debian based distributions these can be ob  
-
 
 You may need to inform make of C++ include directories and library directories
 if your installed packages are at non-standard location. For example, if your
@@ -91,63 +79,47 @@ have libsbml installed in `/opt/libsbml` and the header files are located in
 set the environment variables `CXXFLAGS` and `LDFLAGS` to include these before
 calling make:
 
-```
-export CXXFLAGS= -I/opt/libsbml/include
-export LDFLAGS= -L/opt/libsbml/lib
-```
+    export CXXFLAGS= -I/opt/libsbml/include
+    export LDFLAGS= -L/opt/libsbml/lib
 
   
-#### Release build:
+## Release build:
 
-```
-cd moose
-make BUILD=release
-```
+    cd moose
+    make BUILD=release
 
-#### Debug build:
+## Debug build:
+    
+    cd moose
+    make BUILD=debug
 
-```
-cd moose
-make BUILD=debug
-```
-
-### Python 3K
+## Python 3K
 
 By default, MOOSE is built for Python 2. In case you want to build MOOSE for
 Python 3K, you need to pass the additional flag:
 
-```
- PYTHON=3
- ```
+    PYTHON=3
 
 like:
      
-```
-make BUILD=release PYTHON=3
-```
+    make BUILD=release PYTHON=3
 
-
-### Installation:
+## Installation:
 
 For system-wide installation you can run:
 
-```
-sudo make install
-```
+    sudo make install
 
 ## Post installation 
 
 Now you can import moose in a Python script or interpreter with the statement:
 
-```
-import moose
-```
+    import moose
      
 If you have installed the GUI dependencies below for running the graphical user
 interface, then you can run the GUI by double-clicking on the desktop icon or
 via the main-menu.  The squid axon tutorial/demo is also accessible via these
 routes.
-
 
 ## Local-installation
 
@@ -166,39 +138,6 @@ and add this to your .bashrc file (if you use bash shell):
 For other shells, look up your shell's manual to find out how to set environment
 variable in it.
 
-To use the GUI, copy the `gui` subdirectory from MOOSE source tree to a
-location of your choice, like this:
+# GUI
 
-    cp -r {moose-source-directory}}/gui ~/lib/python/moosegui
-
-and make the MooseGUI.py executable:
-
-    chmod +x  ~/lib/python/moosegui/MooseGUI.py
-
-and create a link somewhere in your PATH:
-
-    ln -s ~/lib/python/moosegui/MooseGUI.py ~/bin/moosegui
-
-assuming you have ~/bin directory in your PATH environment variable. After this
-you run the MOOSE GUI by the `moosegui` command.
-
-
-# GUI 
-
-To run the moose GUI, you need some additional packages:
-
-- Python bindings for Qt4 or higher
-- matplotlib
-- Python OpenGL
-- Python bindings for Qt's OpenGL module
-
-On Ubuntu 12.04 these can be installed with:
-
-    sudo apt-get install python-matplotlib python-qt4 python-qt4-gl 
-
-If you have installed moose as above 'sudo make install', and above
-dependencies, you can run 'moosegui' in the terminal, or via the desktop / main
-menu shortcuts.  There are also shortcuts for the squid axon tutorial/demo on
-the desktop / main menu.  MOOSE GUI creates a ~/moose/Demos directory (home
-folder) on first run.  File->load models from there. Help is available from the
-GUI menu.
+Follow instructions given at https://github.com/BhallaLab/moose-gui
