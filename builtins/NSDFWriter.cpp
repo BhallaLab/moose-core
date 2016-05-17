@@ -250,7 +250,7 @@ void NSDFWriter::openUniformData(const Eref &eref)
          it != classFieldToSrcIndex_.end();
          ++it){
         vector< string > tokens;
-        tokenize(it->first, "/", tokens);
+        moose::tokenize(it->first, "/", tokens);
         string className = tokens[0];
         string fieldName = tokens[1];
         hid_t container = require_group(uniformGroup_, className);
@@ -276,7 +276,7 @@ void NSDFWriter::createUniformMap()
     for (map< string, vector < unsigned int > >::iterator ii = classFieldToSrcIndex_.begin();
          ii != classFieldToSrcIndex_.end(); ++ii){
         vector < string > pathTokens;
-        tokenize(ii->first, "/", pathTokens);
+        moose::tokenize(ii->first, "/", pathTokens);
         string className = pathTokens[0];
         string fieldName = pathTokens[1];
         hid_t container = require_group(uniformMapContainer, className);
@@ -366,7 +366,7 @@ void NSDFWriter::createEventMap()
          ii != classFieldToEventSrc_.end();
          ++ii){
         vector < string > pathTokens;
-        tokenize(ii->first, "/", pathTokens);
+        moose::tokenize(ii->first, "/", pathTokens);
         string className = pathTokens[0];
         string fieldName = pathTokens[1];
         hid_t classGroup = require_group(eventMapContainer, className);
