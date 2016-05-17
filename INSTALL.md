@@ -8,13 +8,11 @@ Scientific Linux.  Visit the following page and follow the instructions there.
 
 https://software.opensuse.org/download.html?project=home:moose&package=moose
 
-# Building MOOSE from sources
+# Building MOOSE from source
 
-## Using cmake 
+If you really want to build `MOOSE` from source, you can either use `cmake` (recommended) 
+or GNU `make` based flow.
 
-MOOSE can also be built using cmake along with gnu-make. Instructions to build
-MOOSE with gnu-make are described in section below. We recommend that you use
-`cmake`.
 
 ### Download the latest source code of moose from github or sourceforge.
 
