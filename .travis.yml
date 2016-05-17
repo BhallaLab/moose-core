@@ -11,7 +11,8 @@ notifications:
         recipients:
             - dilawar.s.rajput@gmail.com
             - bhalla@ncbs.res.in
-            - rahulkumar.gayatri@wipro.com
+            - hrani@ncbs.res.in
+            - ray.subhasis@gmail.com
         on_success: change
         on_failure: always
 
