@@ -11,7 +11,7 @@ endif(COMMAND cmake_policy)
 
 project(MOOSE)
 
-include(CheckMooseCompiler.cmake)
+include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 include(FindPkgConfig)
 
