@@ -175,7 +175,7 @@ int moose_ObjId_init_from_path(_ObjId * self, PyObject * args,
     string path(parsedPath);
     // Remove one or more instances of '/' by a single '/' e.g. //a -> /a,
     // /a//b -> /a/b etc. 
-    path = fix(path);
+    path = moose::fix(path);
 
     ostringstream err;
     // First see if there is an existing object with at path

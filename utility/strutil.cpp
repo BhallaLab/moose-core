@@ -12,6 +12,8 @@
 
 using namespace std;
 
+namespace moose {
+
 // Adapted from code available on oopweb.com
 void tokenize(
 	const string& str,	
@@ -88,7 +90,6 @@ std::string fix(const std::string userPath, const string& delimiters)
     return fixedPath;
 }
 
-
 int testTrim()
 {
 
@@ -143,4 +144,19 @@ bool endswith(const string & full, const string & ending)
         return false;
     }
     return (0 == full.compare(full.length() - ending.length(), ending.length(), ending));
+}
+
+/* Compare two strings. */
+int strncasecmp( const string& a, const string& b, size_t n)
+{
+    for( size_t i = 0; i < std::min(n, b.size()); ++i )
+        if( tolower(a[i]) != tolower(b[i]) )
+            return tolower(a[i]) - tolower(b[i]);
+
+    if( b.size() < n )
+        return a.size() - b.size();
+    
+    return 0;
+}
+
 }
