@@ -34,7 +34,6 @@ using namespace boost::numeric;
 // Class definitions
 //////////////////////////////////////////////////////////////
 
-//Rahul - adding some random work just to increase the time spent in process function...
 time_t time_taken_voxel = 0;
 
 VoxelPools::VoxelPools()

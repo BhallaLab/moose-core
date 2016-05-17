@@ -6,18 +6,12 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#include <omp.h>
-#include <sys/time.h>
 #include "header.h"
 #ifdef USE_GSL
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
 #endif
-
-#include <boost/numeric/odeint.hpp>
-#include <boost/bind.hpp>
-#include "BoostSys.h"
 
 #include "OdeSystem.h"
 #include "VoxelPoolsBase.h"
@@ -39,6 +33,7 @@
 #include "Ksolve.h"
 
 const unsigned int OFFNODE = ~0;
+
 
 #if _KSOLVE_PTHREADS
 extern "C" void* call_func( void* f )
@@ -97,15 +92,12 @@ const Cinfo* Ksolve::initCinfo()
     static ValueFinfo< Ksolve, string > method (
         "method",
         "Integration method, using GSL. So far only explict. Options are:"
-        "rk5: The default Runge-Kutta-Fehlberg 5th order fixed dt method"
-        "rk5a: The default Runge-Kutta-Fehlberg 5th order adaptive dt method"
+        "rk5: The default Runge-Kutta-Fehlberg 5th order adaptive dt method"
+        "gsl: alias for the above"
         "rk4: The Runge-Kutta 4th order fixed dt method"
-        "rk4a: The Runge-Kutta 4th order adaptive dt method"
         "rk2: The Runge-Kutta 2,3 embedded fixed dt method"
-        "rk54: The Runge-Kutta Cash-Karp (4,5) method (fixed dt)"
-        "rk54a: The Runge-Kutta Cash-Karp (4,5) method (adpative dt)"
-        "rk8: The Runge-Kutta Prince-Dormand (8,9) method (fixed dt)" 
-        "rk8a: The Runge-Kutta Prince-Dormand (8,9) method (adpative dt)" ,
+        "rkck: The Runge-Kutta Cash-Karp (4,5) method"
+        "rk8: The Runge-Kutta Prince-Dormand (8,9) method" ,
         &Ksolve::setMethod,
         &Ksolve::getMethod
     );
@@ -381,9 +373,13 @@ double Ksolve::getEpsAbs() const
 void Ksolve::setEpsAbs( double epsAbs )
 {
     if ( epsAbs < 0 )
+    {
         epsAbs_ = 1.0e-4;
+    }
     else
+    {
         epsAbs_ = epsAbs;
+    }
 }
 
 
@@ -442,30 +438,45 @@ void innerSetMethod( OdeSystem& ode, const string& method )
 
 void Ksolve::setStoich( Id stoich )
 {
-	assert( stoich.element()->cinfo()->isA( "Stoich" ) );
-	stoich_ = stoich;
-	stoichPtr_ = reinterpret_cast< Stoich* >( stoich.eref().data() );
-	if ( !isBuilt_ ) {
-		OdeSystem ode;
-		ode.epsAbs = epsAbs_;
-		ode.epsRel = epsRel_;
-		ode.initStepSize = 0.01; // This will be overridden at reinit.
-
+    assert( stoich.element()->cinfo()->isA( "Stoich" ) );
+    stoich_ = stoich;
+    stoichPtr_ = reinterpret_cast< Stoich* >( stoich.eref().data() );
+    if ( !isBuilt_ )
+    {
+        OdeSystem ode;
+        ode.epsAbs = epsAbs_;
+        ode.epsRel = epsRel_;
+        // ode.initStepSize = getEstimatedDt();
+        ode.initStepSize = 0.01; // This will be overridden at reinit.
+        ode.method = method_;
 #ifdef USE_GSL
-		ode.gslSys.dimension = stoichPtr_->getNumAllPools();
-		if ( ode.gslSys.dimension == 0 )
-			return; // No pools, so don't bother.
-		innerSetMethod( ode, method_ );
-		ode.gslSys.function = &VoxelPools::gslFunc;
-   		ode.gslSys.jacobian = 0;
-		innerSetMethod( ode, method_ );
-		unsigned int numVoxels = pools_.size();
-		for ( unsigned int i = 0 ; i < numVoxels; ++i ) {
-   			ode.gslSys.params = &pools_[i];
-			pools_[i].setStoich( stoichPtr_, &ode );
-		}
-		isBuilt_ = true;
-
+        ode.gslSys.dimension = stoichPtr_->getNumAllPools();
+        if ( ode.gslSys.dimension == 0 )
+            return; // No pools, so don't bother.
+        innerSetMethod( ode, method_ );
+        ode.gslSys.function = &VoxelPools::gslFunc;
+        ode.gslSys.jacobian = 0;
+        innerSetMethod( ode, method_ );
+        unsigned int numVoxels = pools_.size();
+        for ( unsigned int i = 0 ; i < numVoxels; ++i )
+        {
+            ode.gslSys.params = &pools_[i];
+            pools_[i].setStoich( stoichPtr_, &ode );
+            // pools_[i].setIntDt( ode.initStepSize ); // We're setting it up anyway
+        }
+#elif USE_BOOST
+        ode.dimension = stoichPtr_->getNumAllPools();
+        ode.boostSys.epsAbs = epsAbs_;
+        ode.boostSys.epsRel = epsRel_;
+        ode.boostSys.method = method_;
+        if ( ode.dimension == 0 )
+            return; // No pools, so don't bother.
+        unsigned int numVoxels = pools_.size();
+        for ( unsigned int i = 0 ; i < numVoxels; ++i )
+        {
+            ode.boostSys.params = &pools_[i];
+            pools_[i].setStoich( stoichPtr_, &ode );
+        }
 #endif
         isBuilt_ = true;
     }
@@ -564,11 +575,9 @@ double Ksolve::getEstimatedDt() const
     return 0.1 / maxVel;
 }
 
-
 //////////////////////////////////////////////////////////////
 // Process operations.
 //////////////////////////////////////////////////////////////
-
 void Ksolve::process( const Eref& e, ProcPtr p )
 {
     if ( isBuilt_ == false )
@@ -583,6 +592,17 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         dvalues[3] = stoichPtr_->getNumVarPools();
         dsolvePtr_->getBlock( dvalues );
 
+        /*
+        vector< double >::iterator i = dvalues.begin() + 4;
+        for ( ; i != dvalues.end(); ++i )
+        	cout << *i << "	" << round( *i ) << endl;
+        getBlock( kvalues );
+        vector< double >::iterator d = dvalues.begin() + 4;
+        for ( vector< double >::iterator
+        		k = kvalues.begin() + 4; k != kvalues.end(); ++k )
+        		*k++ = ( *k + *d )/2.0
+        setBlock( kvalues );
+        */
         setBlock( dvalues );
     }
     // Second, take the arrived xCompt reac values and update S with them.
@@ -613,7 +633,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 	 static int cellsPerThread = 0; // Used for printing...
 	 if(!cellsPerThread)
 	 {
-		    cellsPerThread = 2;
+		    cellsPerThread = 1;
 		    cout << endl << "OpenMP parallelism: Using parallel-for " << endl;
 		    cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
 	 }
@@ -622,7 +642,6 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     for ( int j = 0; j < poolSize; j++ )
         pools_[j].advance( p );
 #endif //_KSOLVE_OPENMP
-
 
 
 #if _KSOLVE_PTHREADS
@@ -651,16 +670,15 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 	for(int i = 0; i < NTHREADS; i++)
 		   sem_wait(&threadSemaphor[i]); // Wait for threads to finish their work
 
-#endif //_KSOLVE_PTHREADS
+#endif //_KSOLVE_PTHREADS 
 
-//////////////////////////////////////////////////////////////////
-// Original Sequential Code
-//////////////////////////////////////////////////////////////////
 #if _KSOLVE_SEQ
-    for ( vector< VoxelPools >::iterator i = pools_.begin(); i != pools_.end(); ++i )
+    for ( vector< VoxelPools >::iterator
+            i = pools_.begin(); i != pools_.end(); ++i )
+    {
         i->advance( p );
+    }
 #endif //_KSOLVE_SEQ
-
     // Finally, assemble and send the integrated values off for the Dsolve.
     if ( dsolvePtr_ )
     {
@@ -797,7 +815,6 @@ unsigned int Ksolve::getVoxelIndex( const Eref& e ) const
         return OFFNODE;
     return ret - startVoxel_;
 }
-
 
 //////////////////////////////////////////////////////////////
 // Zombie Pool Access functions
