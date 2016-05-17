@@ -1,18 +1,15 @@
 # Getting MOOSE 
 
-We recommend that you use our repositories at Open Build Service. Visit this
-page and follow the instructions there. 
+We recommend that you use our repositories at Open Build Service to get the moose package. 
+Visit this page and follow the instructions there. 
 
 https://software.opensuse.org/download.html?project=home:moose&package=moose
    
-
 # Building MOOSE from sources
 
-## Using cmake 
+If you really wants to build `MOOSE` from source, you can either use `cmake` (recommended) 
+or `make` based flow.
 
-MOOSE can also be built using cmake along with gnu-make. Instructions to build
-MOOSE with gnu-make are described in section below. We recommend that you use
-`cmake`.
 
 ### Download the latest source code of moose from github or sourceforge.
 
