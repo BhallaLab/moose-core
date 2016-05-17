@@ -1,5 +1,3 @@
-# Getting MOOSE 
-
 # Pre-built packages
 
 Use our repositories hosted at [Open Build Service](http://build.opensuse.org).
