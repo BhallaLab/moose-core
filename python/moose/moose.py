@@ -175,6 +175,35 @@ def showfield(el, field='*', showtype=False):
                 # clause causes syntax error in both systems.
                 print(typestr, end=' ')
             print(key.ljust(max_field_len + 4), '=', value)
+    if write2xml:
+        import sys
+        from lxml import builder
+        from lxml import etree
+        import lxml
+        outfile = open("./rdesOut.xml",'w') 
+        sys.stdout = outfile
+        value_field_dict = getFieldDict(el.className, 'valueFinfo')       
+        RML = etree.Element("rml")
+        MODEL = etree.SubElement(RML, "elecmodel")
+        META = etree.SubElement(MODEL, "meta")
+        META.text = "URL, comments, etc or can be user defined or written during output."
+        FIELDVALUES = etree.SubElement(MODEL, "fieldvalues")
+        for key, dtype in value_field_dict.items():
+            if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith('vector') or 'ObjId' in dtype:
+                continue
+            value = el.getField(key)
+            FIELD = etree.SubElement(FIELDVALUES, "field", id=str(key), type=str(dtype))
+            FIELD.text = str(value)  
+        RUNTIME = etree.SubElement(RML, "runtime", status="complete")
+        SIMTIME = etree.SubElement(RUNTIME, "simtime", type="double", units="sec")
+        SIMTIME.text = "2000"                                           #can be changed using time() module
+        RESULTS = etree.SubElement(RUNTIME, "runtime", format="csv")
+        OUTFILE = etree.SubElement(RESULTS, "outfile")
+        OUTFILE.text = "results.csv"
+        runinfo = etree.tostring(RUNTIME, pretty_print=True)
+        doc = etree.tostring(RML, pretty_print=True, xml_declaration=True, encoding="UTF-8")
+        print (doc)
+        outfile.close()
     else:
         try:
             print(field, '=', el.getField(field))
