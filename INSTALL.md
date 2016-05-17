@@ -1,10 +1,12 @@
 # Getting MOOSE 
 
-We recommend that you use our repositories at Open Build Service. Visit this
-page and follow the instructions there. 
+# Pre-built packages
+
+Use our repositories hosted at [Open Build Service](http://build.opensuse.org).
+We have packages for Debian, Ubuntu, CentOS, Fedora, OpenSUSE/SUSE, RHEL,
+Scientific Linux.  Visit the following page and follow the instructions there. 
 
 https://software.opensuse.org/download.html?project=home:moose&package=moose
-   
 
 # Building MOOSE from sources
 
