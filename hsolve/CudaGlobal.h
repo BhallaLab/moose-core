@@ -18,6 +18,7 @@
 #include <cuda_runtime_api.h>
 #include <cusparse_v2.h>
 #include <cublas_v2.h>
+#include <cstdio>
 
 
 typedef unsigned int u32;
