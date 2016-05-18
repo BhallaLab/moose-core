@@ -24,10 +24,7 @@
 //#define TEST_CORRECTNESS
 
 #ifdef USE_CUDA
-#include <thrust/device_ptr.h>
-#include <thrust/reduce.h>
-#include <thrust/detail/static_assert.h>
-using namespace thrust;
+#include "Gpu_timer.h"
 #endif
 using namespace std;
 #include <sys/time.h>

@@ -1,22 +1,16 @@
+#include "CudaGlobal.h"
 #ifdef USE_CUDA
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
 #include <algorithm>
 
-#include "CudaGlobal.h"
 
 #include "RateLookup.h"
 #include "HSolveActive.h"
 
 
 #include "Gpu_timer.h"
-
-#include <thrust/device_vector.h>
-#include <thrust/host_vector.h>
-#include <thrust/system/system_error.h>
-#include <thrust/copy.h>
-
 
 __global__
 void get_lookup_rows_and_fractions_cuda(
