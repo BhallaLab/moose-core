@@ -11,7 +11,7 @@ endif(COMMAND cmake_policy)
 
 project(MOOSE)
 
-include(CheckMooseCompiler.cmake)
+include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 include(FindPkgConfig)
 
@@ -532,8 +532,6 @@ endif(WITH_DOC)
 # Root of all python module.
 if(WITH_PYTHON)
     add_subdirectory( pymoose )
-elseif(WITH_CYTHON)
-    add_subdirectory( cymoose )
 endif(WITH_PYTHON)
 
 ## Moose documentation
