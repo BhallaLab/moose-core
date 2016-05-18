@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<root>
+  <model>
+    <meta>URL, comments, etc or can be user defined or written during output</meta>
+    <parameter id="name             "> soma</parameter>
+    <parameter id="Em               "> -0.0544</parameter>
+    <parameter id="className        "> ZombieCompartment</parameter>
+    <parameter id="diameter         "> 0.0005</parameter>
+    <parameter id="y                "> 0.0</parameter>
+    <parameter id="Ra               "> 7639437.26841</parameter>
+    <parameter id="idValue          "> 478</parameter>
+    <parameter id="dt               "> 0.0</parameter>
+    <parameter id="z0               "> 0.0</parameter>
+    <parameter id="tick             "> -2</parameter>
+    <parameter id="length           "> 0.0005</parameter>
+    <parameter id="y0               "> 0.0</parameter>
+    <parameter id="Vm               "> -0.0228274817352</parameter>
+    <parameter id="path             "> /model[0]/elec[0]/soma[0]</parameter>
+    <parameter id="x0               "> 0.0</parameter>
+    <parameter id="Im               "> 4.01425586144e-08</parameter>
+    <parameter id="numData          "> 1</parameter>
+    <parameter id="z                "> 0.0</parameter>
+    <parameter id="numField         "> 1</parameter>
+    <parameter id="inject           "> -4.0147859045e-08</parameter>
+    <parameter id="index            "> 0</parameter>
+    <parameter id="x                "> 0.0005</parameter>
+    <parameter id="Rm               "> 424413.177334</parameter>
+    <parameter id="fieldIndex       "> 0</parameter>
+    <parameter id="initVm           "> -0.065</parameter>
+    <parameter id="Cm               "> 7.85398163398e-09</parameter>
+  </model>
+  <runtime status="complete">
+    <simtime type="double" units="sec">2000</simtime>
+    <runtime format="csv">
+      <outfile>results.csv</outfile>
+    </runtime>
+  </runtime>
+</root>
+

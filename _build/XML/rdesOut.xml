@@ -1,0 +1,36 @@
+<model>
+  <entry>name              =  soma</entry>
+  <entry>Em                =  -0.0544</entry>
+  <entry>className         =  ZombieCompartment</entry>
+  <entry>diameter          =  0.0005</entry>
+  <entry>y                 =  0.0</entry>
+  <entry>Ra                =  7639437.26841</entry>
+  <entry>idValue           =  478</entry>
+  <entry>dt                =  0.0</entry>
+  <entry>z0                =  0.0</entry>
+  <entry>tick              =  -2</entry>
+  <entry>length            =  0.0005</entry>
+  <entry>y0                =  0.0</entry>
+  <entry>Vm                =  -0.0228274817352</entry>
+  <entry>path              =  /model[0]/elec[0]/soma[0]</entry>
+  <entry>x0                =  0.0</entry>
+  <entry>Im                =  4.01425586144e-08</entry>
+  <entry>numData           =  1</entry>
+  <entry>z                 =  0.0</entry>
+  <entry>numField          =  1</entry>
+  <entry>inject            =  -4.0147859045e-08</entry>
+  <entry>index             =  0</entry>
+  <entry>x                 =  0.0005</entry>
+  <entry>Rm                =  424413.177334</entry>
+  <entry>fieldIndex        =  0</entry>
+  <entry>initVm            =  -0.065</entry>
+  <entry>Cm                =  7.85398163398e-09</entry>
+</model>
+
+<runtime status="complete">
+  <simtime type="double" units="sec">2000</simtime>
+  <runtime format="csv">
+    <outfile>results.csv</outfile>
+  </runtime>
+</runtime>
+
