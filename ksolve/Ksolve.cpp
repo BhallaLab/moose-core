@@ -638,7 +638,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 		    cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
 	 }
 
-#pragma omp parallel for schedule(guided, cellsPerThread) num_threads(NTHREADS) shared(poolSize) firstprivate(p)
+#pragma omp parallel for schedule(guided, cellsPerThread) num_threads(NTHREADS) shared(poolSize) firstprivate(p) if(poolSize > NTHREADS)
     for ( int j = 0; j < poolSize; j++ )
         pools_[j].advance( p );
 #endif //_KSOLVE_OPENMP
