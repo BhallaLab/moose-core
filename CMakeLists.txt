@@ -353,6 +353,17 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
     include_directories(${Readline_INCLUDE_DIR})
 endif()
 
+if(WITH_OPENMP)
+    find_package(OpenMP REQUIRED)
+    MESSAGE("++ OpenMPI support is ON")
+    add_definitions(-DUSE_OPENMPI -O1)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${-pthread}")
+    set(NUM_THREADS "2")
+	
+endif(WITH_OPENMP)
+
 # Openmpi
 if(WITH_MPI)
     find_package(MPI REQUIRED)
