@@ -11,7 +11,7 @@ endif(COMMAND cmake_policy)
 
 project(MOOSE)
 
-include(CheckMooseCompiler.cmake)
+include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 include(FindPkgConfig)
 
@@ -201,10 +201,6 @@ if(LIBSBML_FOUND)
         find_package(LibXML2 REQUIRED)
     endif()
     include_directories(${LibXML2_INCLUDE_DIRS})
-    if(${LIBSBML_LIBRARY_DIRS})
-        target_link_libraries(libmoose PROPERTIES LINK_FLAGS "-L${LIBSBML_LIBRARY_DIRS}")
-    endif()
-
 else()
     message(
         "======================================================================\n"
@@ -513,9 +509,6 @@ if(CMAKE_VERSION VERSION_LESS "2.8.0")
     target_link_libraries(moose.bin PUBLIC moose)
 ELSE()
     target_link_libraries(moose.bin LINK_PUBLIC moose)
-    if(LIBSBML_FOUND)
-        target_link_libraries(moose.bin LINK_PUBLIC ${LIBSBML_LIBRARIES})
-    endif(LIBSBML_FOUND)
 ENDIF()
 
 if(WITH_DOC)
@@ -532,8 +525,6 @@ endif(WITH_DOC)
 # Root of all python module.
 if(WITH_PYTHON)
     add_subdirectory( pymoose )
-elseif(WITH_CYTHON)
-    add_subdirectory( cymoose )
 endif(WITH_PYTHON)
 
 ## Moose documentation
