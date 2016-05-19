@@ -161,3 +161,11 @@ http://sourceforge.net/projects/moose/files/moose/Moose%202.0.0%20Kalakand/
      There are also shortcuts for the squid axon tutorial/demo on the desktop / main menu.
      MOOSE GUI creates a ~/moose/Demos directory (home folder) on first run.
      File->load models from there. Help is available from the GUI menu.
+
+**** Parallel Ksolve:
+     To run Ksolve in parallel, set the NUM_THREADS environment variable to the number of threads
+     you wish to execute with.
+     By default parallel Ksolve uses OpenMP with 2 threads.
+     Run cmake with the flag WITH_OPENMP set to true. 
+     If you want to try Pthread version of Ksolve instead of OpenMP, turn on/off the 
+     appropriate flags in ksolve/Ksolve.h .
