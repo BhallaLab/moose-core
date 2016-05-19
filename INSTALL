@@ -164,7 +164,7 @@ http://sourceforge.net/projects/moose/files/moose/Moose%202.0.0%20Kalakand/
 
 **** Parallel Ksolve:
      To run Ksolve in parallel, set the NUM_THREADS environment variable to the number of threads
-     you wish to execute with.
+     with which you wish to execute the script. 
      By default parallel Ksolve uses OpenMP with 2 threads.
      Run cmake with the flag WITH_OPENMP set to true. 
      If you want to try Pthread version of Ksolve instead of OpenMP, turn on/off the 
