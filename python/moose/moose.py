@@ -175,40 +175,63 @@ def showfield(el, field='*', showtype=False, write2xml=False):
                 # clause causes syntax error in both systems.
                 print(typestr, end=' ')
             print(key.ljust(max_field_len + 4), '=', value)
+    else:
+        try:
+            print(field, '=', el.getField(field))
+        except AttributeError:
+            pass # Genesis silently ignores non existent fields
+
     if write2xml:
         import sys
         from lxml import builder
         from lxml import etree
         import lxml
-        outfile = open("./rdesOut.xml",'w') 
+        print ("Writing details to new.xml")
+        outfile = open("./new.xml",'w') 
         sys.stdout = outfile
-        value_field_dict = getFieldDict(el.className, 'valueFinfo')       
+        el_value_field_dict = getFieldDict(el.className, 'valueFinfo')       
         RML = etree.Element("rml")
         MODEL = etree.SubElement(RML, "elecmodel")
         META = etree.SubElement(MODEL, "meta")
         META.text = "URL, comments, etc or can be user defined or written during output."
         FIELDVALUES = etree.SubElement(MODEL, "fieldvalues")
-        for key, dtype in value_field_dict.items():
+        for key, dtype in el_value_field_dict.items():
+          if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith('vector') or 'ObjId' in dtype:
+                continue
+          value = el.getField(key)
+          FIELD = etree.SubElement(FIELDVALUES, "field", id=str(key), type=str(dtype))
+          FIELD.text = str(value)
+        for ch in el.children:
+          chel = element(str(ch.path))
+          chel_value_field_dict = getFieldDict(chel.className, 'valueFinfo')
+          CHANNELS = etree.SubElement(FIELDVALUES, "channels")
+          for key, dtype in chel_value_field_dict.items():
             if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith('vector') or 'ObjId' in dtype:
                 continue
-            value = el.getField(key)
-            FIELD = etree.SubElement(FIELDVALUES, "field", id=str(key), type=str(dtype))
-            FIELD.text = str(value)  
+            value = chel.getField(key)
+            SUBFIELD = etree.SubElement(CHANNELS, str(chel.getField('name')), id=str(key), type=str(dtype))
+            SUBFIELD.text = str(value)
+          for gch in chel.children:
+            gchel = element(str(gch.path))
+            name = str(gchel.path[-6:-3])
+            if name == 'ion':
+              gch_value_field_dict = getFieldDict(gchel.className, 'valueFinfo')
+              for key, dtype in gch_value_field_dict.items():
+                if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith('vector') or 'ObjId' in dtype:
+                  continue
+                gch_value = gchel.getField(key)
+                ION = etree.SubElement(SUBFIELD, "ion", id=str(key), type=str(dtype))
+                ION.text = str(value)
         RUNTIME = etree.SubElement(RML, "runtime", status="complete")
         SIMTIME = etree.SubElement(RUNTIME, "simtime", type="double", units="sec")
         SIMTIME.text = "2000"                                           #can be changed using time() module
-        RESULTS = etree.SubElement(RUNTIME, "runtime", format="csv")
+        RESULTS = etree.SubElement(RUNTIME, "results", format="csv")
         OUTFILE = etree.SubElement(RESULTS, "outfile")
         OUTFILE.text = "results.csv"
         runinfo = etree.tostring(RUNTIME, pretty_print=True)
         doc = etree.tostring(RML, pretty_print=True, xml_declaration=True, encoding="UTF-8")
         print (doc)
         outfile.close()
-    else:
-        try:
-            print(field, '=', el.getField(field))
-        except AttributeError:
-            pass # Genesis silently ignores non existent fields
 
 def showfields(el, showtype=False):
     """Convenience function. Should be deprecated if nobody uses it.
