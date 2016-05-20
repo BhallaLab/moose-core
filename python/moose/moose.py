@@ -232,6 +232,7 @@ def showfield(el, field='*', showtype=False, write2xml=False):
         doc = etree.tostring(RML, pretty_print=True, xml_declaration=True, encoding="UTF-8")
         print (doc)
         outfile.close()
+	sys.stdout = sys.__stdout__
 
 def showfields(el, showtype=False):
     """Convenience function. Should be deprecated if nobody uses it.
