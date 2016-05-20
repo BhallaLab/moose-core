@@ -186,8 +186,9 @@ def showfield(el, field='*', showtype=False, write2xml=False):
         from lxml import builder
         from lxml import etree
         import lxml
-        print ("Writing details to new.xml")
-        outfile = open("./new.xml",'w') 
+        filename = raw_input("Enter the name of the file to write to.")
+        print ("Writing details to", filename)
+        outfile = open(str(filename+".xml"),'w') 
         sys.stdout = outfile
         el_value_field_dict = getFieldDict(el.className, 'valueFinfo')       
         RML = etree.Element("rml")
@@ -232,7 +233,7 @@ def showfield(el, field='*', showtype=False, write2xml=False):
         doc = etree.tostring(RML, pretty_print=True, xml_declaration=True, encoding="UTF-8")
         print (doc)
         outfile.close()
-	sys.stdout = sys.__stdout__
+        sys.stdout = sys.__stdout__
 
 def showfields(el, showtype=False):
     """Convenience function. Should be deprecated if nobody uses it.
