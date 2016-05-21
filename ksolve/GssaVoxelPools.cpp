@@ -48,8 +48,9 @@ const double SAFETY_FACTOR = 1.0 + 1.0e-9;
 //////////////////////////////////////////////////////////////
 
 GssaVoxelPools::GssaVoxelPools() :
-     VoxelPoolsBase(), t_( 0.0 ), atot_( 0.0 ), rng_( new moose::RNG<double>() )
+     VoxelPoolsBase(), t_( 0.0 ), atot_( 0.0 ) //, rng_( new moose::RNG<double>() )
 {
+    rng_ = new moose::RNG<double>;
 }
 
 GssaVoxelPools::~GssaVoxelPools()
@@ -161,7 +162,9 @@ void GssaVoxelPools::recalcTime( const GssaSystem* g, double currTime )
     refreshAtot( g );
     assert( t_ > currTime );
     t_ = currTime;
-    double r = rng_->uniform(std::numeric_limits<double>::min(), 1.0);
+    double r = rng_->uniform( );
+    while( r == 0.0 )
+        r = rng_->uniform( );
     t_ -= ( 1.0 / atot_ ) * log( r );
 }
 
@@ -217,10 +220,11 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 {
     rng_->setSeed( moose::__rng_seed__ );
     VoxelPoolsBase::reinit(); // Assigns S = Sinit;
+    unsigned int numVarPools = g->stoich->getNumVarPools();
     g->stoich->updateFuncs( varS(), 0 );
 
-    unsigned int numVarPools = g->stoich->getNumVarPools();
     double* n = varS();
+
     if ( g->useRandInit )
     {
         // round up or down probabilistically depending on fractional
@@ -230,7 +234,6 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
             double base = floor( n[i] );
             assert( base >= 0.0 );
             double frac = n[i] - base;
-            // if ( gsl_rng_->uniform( rng ) > frac )
             if ( rng_->uniform() > frac )
                 n[i] = base;
             else

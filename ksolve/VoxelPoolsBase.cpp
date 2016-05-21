@@ -28,7 +28,7 @@ VoxelPoolsBase::VoxelPoolsBase()
 		S_(1),
 		Sinit_(1),
 		volume_(1.0)
-{;}
+{ ; }
 
 VoxelPoolsBase::~VoxelPoolsBase()
 {}
@@ -45,7 +45,7 @@ void VoxelPoolsBase::resizeArrays( unsigned int totNumPools )
 
 void VoxelPoolsBase::reinit()
 {
-	S_ = Sinit_;
+    S_ = Sinit_;
 }
 
 //////////////////////////////////////////////////////////////
