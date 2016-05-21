@@ -39,7 +39,10 @@
 
 #include <limits>
 #include <iostream>
+
+#ifdef ENABLE_CPP11
 #include <random>
+#endif
 
 namespace moose {
 
