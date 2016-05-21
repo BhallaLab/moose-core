@@ -20,26 +20,26 @@
 #define  __RNG_INC
 
 #ifdef  USE_BOOST
+
 #include <boost/random.hpp>
 #include <boost/random/uniform_int.hpp>
 
-#if  BOOST_RANDOM_DEVICE_EXISTS
+#if  defined(BOOST_RANDOM_DEVICE_EXISTS)
 #include <boost/random/random_device.hpp>
-#endif     /* -----  BOOST_RANDOM_DEVICE_EXISTS  ----- */
+#endif  // BOOST_RANDOM_DEVICE_EXISTS
 
 #else      /* -----  not USE_BOOST  ----- */
 
-#ifdef  ENABLE_CPP11
-#include <random>
-#elif USE_GSL      /* -----  not ENABLE_CPP11 and using GSL  ----- */
+#if  USE_GSL
 #include <ctime>
 #include <gsl/gsl_rng.h>
-#endif     /* -----  not ENABLE_CPP11  ----- */
+#endif     /* -----  USE_GSL  ----- */
 
 #endif     /* -----  not USE_BOOST  ----- */
 
 #include <limits>
 #include <iostream>
+#include <random>
 
 namespace moose {
 
@@ -57,13 +57,13 @@ class RNG
         RNG ()                                  /* constructor      */
         {
             // Setup a random seed if possible.
-#ifdef  ENABLE_CPP11 
-            std::random_device rd;
-            setSeed( rd() );
-#elif defined(USE_BOOST) && defined(BOOST_RANDOM_DEVICE_EXISTS)
+#if defined(USE_BOOST) && defined(BOOST_RANDOM_DEVICE_EXISTS)
             boost::random::random_device rd;
             setSeed( rd() );
-#elif USE_GSL
+#elif defined(ENABLE_CPP11)
+            std::random_device rd;
+            setSeed( rd() );
+#elif defined(USE_GSL)
             gsl_r_ = gsl_rng_alloc( gsl_rng_default );
             gsl_rng_set( gsl_r_, time(NULL) );
 #else      /* -----  not ENABLE_CPP11  ----- */
