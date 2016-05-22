@@ -22,7 +22,7 @@
 #ifdef  USE_BOOST
 
 #include <boost/random.hpp>
-#include <boost/random/uniform_real.hpp>
+#include <boost/random/uniform_01.hpp>
 
 #if  defined(BOOST_RANDOM_DEVICE_EXISTS)
 #include <boost/random/random_device.hpp>
@@ -146,7 +146,7 @@ class RNG
 
 #if USE_BOOST
         boost::random::mt19937 rng_;
-        boost::random::uniform_real_distribution<> dist_;
+        boost::random::uniform_01<T> dist_;
 #elif ENABLE_CPP11
         std::mt19937 rng_;
         std::uniform_real_distribution<> dist_(0.0, 1.0);

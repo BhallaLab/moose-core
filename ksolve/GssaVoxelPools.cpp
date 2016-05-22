@@ -48,16 +48,13 @@ const double SAFETY_FACTOR = 1.0 + 1.0e-9;
 //////////////////////////////////////////////////////////////
 
 GssaVoxelPools::GssaVoxelPools() :
-     VoxelPoolsBase(), t_( 0.0 ), atot_( 0.0 ) //, rng_( new moose::RNG<double>() )
-{
-    rng_ = new moose::RNG<double>;
-}
+     VoxelPoolsBase(), t_( 0.0 ), atot_( 0.0 )
+{ ; }
 
 GssaVoxelPools::~GssaVoxelPools()
 {
     for ( unsigned int i = 0; i < rates_.size(); ++i )
         delete( rates_[i] );
-    delete rng_;
 }
 
 //////////////////////////////////////////////////////////////
@@ -102,7 +99,7 @@ void GssaVoxelPools::updateDependentRates(
 
 unsigned int GssaVoxelPools::pickReac() 
 {
-    double r = rng_->uniform( ) * atot_;
+    double r = rng_.uniform( ) * atot_;
     double sum = 0.0;
 
     // This is an inefficient way to do it. Can easily get to
@@ -162,9 +159,9 @@ void GssaVoxelPools::recalcTime( const GssaSystem* g, double currTime )
     refreshAtot( g );
     assert( t_ > currTime );
     t_ = currTime;
-    double r = rng_->uniform( );
+    double r = rng_.uniform( );
     while( r == 0.0 )
-        r = rng_->uniform( );
+        r = rng_.uniform( );
     t_ -= ( 1.0 / atot_ ) * log( r );
 }
 
@@ -204,10 +201,10 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 
         double sign = double(v_[rindex] >= 0) - double(0 > v_[rindex] );
         g->transposeN.fireReac( rindex, Svec(), sign );
-        double r = rng_->uniform();
+        double r = rng_.uniform();
         while ( r <= 0.0 )
         {
-            r = rng_->uniform();
+            r = rng_.uniform();
         }
         t_ -= ( 1.0 / atot_ ) * log( r );
         // g->stoich->updateFuncs( varS(), t_ ); // Handled next line.
@@ -218,7 +215,8 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 
 void GssaVoxelPools::reinit( const GssaSystem* g )
 {
-    rng_->setSeed( moose::__rng_seed__ );
+    rng_.setSeed( moose::__rng_seed__ );
+
     VoxelPoolsBase::reinit(); // Assigns S = Sinit;
     unsigned int numVarPools = g->stoich->getNumVarPools();
     g->stoich->updateFuncs( varS(), 0 );
@@ -234,7 +232,7 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
             double base = floor( n[i] );
             assert( base >= 0.0 );
             double frac = n[i] - base;
-            if ( rng_->uniform() > frac )
+            if ( rng_.uniform() > frac )
                 n[i] = base;
             else
                 n[i] = base + 1.0;
@@ -343,7 +341,7 @@ void GssaVoxelPools::setVolumeAndDependencies( double vol )
 static double integralTransfer( double propensity )
 {
 	double t= floor( propensity );
-	if ( rng_->uniform() < propensity - t )
+	if ( rng_.uniform() < propensity - t )
 		return t + 1;
 	return t;
 }
@@ -365,7 +363,7 @@ void GssaVoxelPools::xferIn( XferInfo& xf,
         // cout << x << "	i = " << *i << *j << "	m = " << *m << endl;
         double dx = *i++ - *j++;
         double base = floor( dx );
-        if ( rng_->uniform() > dx - base )
+        if ( rng_.uniform() > dx - base )
             x += base;
         else
             x += base + 1.0;
@@ -419,7 +417,7 @@ void GssaVoxelPools::xferInOnlyProxies(
         if ( *k >= stoichPtr_->getNumVarPools() && *k < proxyEndIndex )
         {
             double base = floor( *i );
-            if ( rng_->uniform() > *i - base )
+            if ( rng_.uniform() > *i - base )
                 varSinit()[*k] = (varS()[*k] += base );
             else
                 varSinit()[*k] = (varS()[*k] += base + 1.0 );

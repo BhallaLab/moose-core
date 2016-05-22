@@ -39,8 +39,8 @@ VoxelPoolsBase::~VoxelPoolsBase()
 /// Using the computed array sizes, now allocate space for them.
 void VoxelPoolsBase::resizeArrays( unsigned int totNumPools )
 {
-	S_.resize( totNumPools, 0.0 );
-	Sinit_.resize( totNumPools, 0.0);
+    S_.resize( totNumPools, 0.0 );
+    Sinit_.resize( totNumPools, 0.0);
 }
 
 void VoxelPoolsBase::reinit()
