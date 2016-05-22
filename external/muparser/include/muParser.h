@@ -32,6 +32,11 @@
 #include "muParserBase.h"
 #include "muParserTemplateMagic.h"
 
+// Get the random number generator type from here.
+#include "randnum/RNG.h"
+
+extern moose::RNG<double> rng;
+
 /** \file
     \brief Definition of the standard floating point parser.
 */
@@ -95,6 +100,13 @@ namespace mu
     static value_type  Sqrt(value_type);
     static value_type  Rint(value_type);
     static value_type  Sign(value_type);
+    static value_type  Fmod(value_type, value_type);
+
+    // Random between a and b, with fixed seed.
+    static value_type  Rand2(value_type, value_type, value_type); 
+
+     // Random number between 0 and 1, non-deterministic seed.
+    static value_type  Rand( value_type  ); 
 
     // Prefix operators
     // !!! Unary Minus is a MUST if you want to use negative signs !!!

@@ -43,7 +43,7 @@
 #include "../biophysics/Compartment.h"
 #include "../biophysics/HHChannelBase.h"
 #include "../biophysics/HHChannel.h"
-#include "../external/debug/print_function.hpp"
+#include "../utility/print_function.hpp"
 
 class ZombieHHChannel: public HHChannelBase
 {

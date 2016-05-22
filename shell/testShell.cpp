@@ -1852,4 +1852,5 @@ void testMpiShell( )
 	testSyncSynapseSize();
 	// Stuff for doLoadModel
 	testFindModelParent();
+        cout << "." << flush;
 }

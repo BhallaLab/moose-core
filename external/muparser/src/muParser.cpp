@@ -30,6 +30,7 @@
 #include <cmath>
 #include <algorithm>
 #include <numeric>
+#include <ctime>
 
 /** \brief Pi (what else?). */
 #define PARSER_CONST_PI  3.141592653589793238462643
@@ -49,6 +50,8 @@ using namespace std;
 namespace mu
 {
 
+    // Initialize the RNG with random time.
+    moose::RNG<double> rng;
 
   //---------------------------------------------------------------------------
   // Trigonometric function
@@ -106,6 +109,29 @@ namespace mu
   //  misc
   value_type Parser::Exp(value_type v)  { return MathImpl<value_type>::Exp(v);  }
   value_type Parser::Abs(value_type v)  { return MathImpl<value_type>::Abs(v);  }
+  value_type Parser::Fmod(value_type v1, value_type v2) { return fmod(v1, v2); }
+
+  // If no seed is given, 
+  value_type Parser::Rand( value_type seed ) 
+  {
+      static bool isSeedSet_ = false;
+      if( ! isSeedSet_ )
+      {
+          mu::rng.setSeed( seed );
+          isSeedSet_ = true;
+      }
+      return rng.uniform( );                    /* Between 0 and 1 */
+  }
+
+  value_type Parser::Rand2(value_type v1, value_type v2, value_type seed = -1 ) {
+      static bool isSeedSet = false;
+      if( ! isSeedSet ) {
+          mu::rng.setSeed( seed );
+          isSeedSet = true;
+      }
+      return mu::rng.uniform( v1, v2 );           /* Between a and b */
+  }
+
   value_type Parser::Sqrt(value_type v) 
   { 
     #ifdef MUP_MATH_EXCEPTIONS
@@ -302,6 +328,9 @@ namespace mu
       DefineFun(_T("sign"), Sign);
       DefineFun(_T("rint"), Rint);
       DefineFun(_T("abs"), Abs);
+      DefineFun(_T("fmod"), Fmod);
+      DefineFun(_T("rand"), Rand);
+      DefineFun(_T("rand2"), Rand2);
       // Functions with variable number of arguments
       DefineFun(_T("sum"), Sum);
       DefineFun(_T("avg"), Avg);

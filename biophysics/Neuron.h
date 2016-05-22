@@ -46,6 +46,10 @@ class Neuron
 		vector< double > getExprVal( const Eref& e, string line ) const;
 		vector< ObjId > getSpinesFromExpression( 
 							const Eref& e, string line ) const;
+		vector< ObjId > getSpinesOnCompartment( 
+				const Eref& e, ObjId compt ) const;
+		ObjId getParentCompartmentOfSpine( const Eref& e, ObjId compt ) 
+				const;
 		void setChannelDistribution( const Eref& e, vector< string > v );
 		vector< string > getChannelDistribution( const Eref& e ) const;
 		void setPassiveDistribution( const Eref& e, vector< string > v );
@@ -122,6 +126,10 @@ class Neuron
 		/// Look up seg index of parent compartment, from index of spine.
 		vector< unsigned int > spineParentSegIndex_; 
 		vector< vector< Id > > spines_; /// Id of each compt in each spine.
+
+		/// Ids of all spines on each compt, looked up by segIndex of compt.
+		vector< vector< Id > > allSpinesPerCompt_;
+
 		/// Id of stoich associated with each spine. Typically all the same.
 		vector< Id > spineStoich_; 
 		/// Id of stoich associated with each PSD. Typically all the same.
@@ -139,12 +147,12 @@ class Neuron
 		/// Holder for spine operations. Contains pointer to current Neuron.
 		Spine spineEntry_; 
 
-		vector< Id > segId_; /// Id of each Seg entry, below.
+		vector< Id > segId_; /// Id of compartment in each Seg entry, below.
 		vector< SwcSegment > segs_;
 		vector< SwcBranch > branches_;
 
 };
 
-// 
+//
 
 #endif // 

@@ -49,6 +49,8 @@ import os
 
 script_dir = os.path.dirname( os.path.realpath( __file__) )
 
+print( "Using moose from: %s" % moose.__file__ )
+
 def main():
     """ This example illustrates loading, running of an SBML model defined in XML format.\n
 	The model 00001-sbml-l3v1.xml is taken from l3v1 SBML testcase.\n

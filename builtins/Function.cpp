@@ -53,6 +53,9 @@
 #include "Function.h"
 #include "ElementValueFinfo.h"
 
+#define PARSER_MAXVARS 100
+
+
 static const double TriggerThreshold = 0.0;
 
 static SrcFinfo1<double> *valueOut()
@@ -128,8 +131,8 @@ const Cinfo * Function::initCinfo()
     static ElementValueFinfo< Function, string > expr(
         "expr",
         "Mathematical expression defining the function. The underlying parser\n"
-        "is muParser. Hence the available functions and operators are (from\n"
-        "muParser docs):\n"
+        "is muParser. In addition to the available functions and operators  from\n"
+        "muParser, some more functions are added.\n"
         "\nFunctions\n"
         "Name        args    explanation\n"
         "sin         1       sine function\n"
@@ -157,6 +160,11 @@ const Cinfo * Function::initCinfo()
         "max         var.    max of all arguments\n"
         "sum         var.    sum of all arguments\n"
         "avg         var.    mean value of all arguments\n"
+        "rand        1       rand(seed), random float between 0 and 1, \n"
+        "                    if seed = -1, then a 'random' seed is created.\n"
+        "rand2       3       rand(a, b, seed), random float between a and b, \n"
+        "                    if seed = -1, a 'random' seed is created using either\n"
+        "                    by random_device or by reading system clock\n"
         "\nOperators\n"
         "Op  meaning         priority\n"
         "=   assignment     -1\n"
@@ -173,6 +181,7 @@ const Cinfo * Function::initCinfo()
         "*   multiplication  6\n"
         "/   division        6\n"
         "^   raise x to the power of y       7\n"
+        "%   floating point modulo         7\n"
         "\n"
         "?:  if then else operator   C++ style syntax\n",
         &Function::setExpr,
@@ -306,14 +315,13 @@ const Cinfo * Function::initCinfo()
 static const Cinfo * functionCinfo = Function::initCinfo();
 
 Function::Function(): _t(0.0), _valid(false), _numVar(0), _lastValue(0.0),
-                      _value(0.0), _rate(0.0), _mode(1), 
-					  _useTrigger( false ), _stoich(0)
+    _value(0.0), _rate(0.0), _mode(1), 
+    _useTrigger( false ), _stoich(0)
 {
     _parser.SetVarFactory(_functionAddVar, this);
-    // Adding pi and e, the defaults are `_pi` and `_e`
-    _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
-    _parser.DefineConst(_T("e"), (mu::value_type)M_E);
     _independent = "x0";
+    //extendMuParser( );
+
     // Adding this default expression by default to avoid complains from GUI
     try{
         _parser.SetExpr("0");
@@ -325,19 +333,31 @@ Function::Function(): _t(0.0), _valid(false), _numVar(0), _lastValue(0.0),
     _valid = true;
 }
 
-Function::Function(const Function& rhs): _numVar(rhs._numVar),
-                                         _lastValue(rhs._lastValue),
-                                         _value(rhs._value), _rate(rhs._rate),
-                                         _mode(rhs._mode),
-										 _useTrigger( rhs._useTrigger),
-										 _stoich(0)
+#if 0
+void Function::extendMuParser( void )
 {
-	static Eref er;
-    _independent = rhs._independent;
-    _parser.SetVarFactory(_functionAddVar, this);
     // Adding pi and e, the defaults are `_pi` and `_e`
     _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
     _parser.DefineConst(_T("e"), (mu::value_type)M_E);
+    // Add support 
+    _parser.DefineVar( _T("t"),  &this->_t );
+    _parser.DefineOprt( _T("%"), &Function::muCallbackFMod, 7, mu::EOprtAssociativity::oaRIGHT, 0);
+}
+#endif
+
+Function::Function(const Function& rhs): _numVar(rhs._numVar),
+    _lastValue(rhs._lastValue),
+    _value(rhs._value), _rate(rhs._rate),
+    _mode(rhs._mode),
+    _useTrigger( rhs._useTrigger),
+    _stoich(0)
+{
+    static Eref er;
+    _independent = rhs._independent;
+
+    _parser.SetVarFactory(_functionAddVar, this);
+    //extendMuParser( );
+
     // Copy the constants
     mu::valmap_type cmap = rhs._parser.GetConst();
     if (cmap.size()){
@@ -346,6 +366,8 @@ Function::Function(const Function& rhs): _numVar(rhs._numVar),
             _parser.DefineConst(item->first, item->second);
         }
     }
+
+
     setExpr(er, rhs.getExpr( er ));
     // Copy the values from the var pointers in rhs
     assert(_varbuf.size() == rhs._varbuf.size());
@@ -484,6 +506,7 @@ double * _functionAddVar(const char *name, void *data)
              << endl;
         throw mu::ParserError("Undefined constant.");
     }
+
     return ret;
 }
 
@@ -741,7 +764,7 @@ void Function::reinit(const Eref &e, ProcPtr p)
         cout << "Error: Function::reinit() - invalid parser state. Will do nothing." << endl;
         return;
     }
-    if (trim(_parser.GetExpr(), " \t\n\r").length() == 0){
+    if (moose::trim(_parser.GetExpr(), " \t\n\r").length() == 0){
         cout << "Error: no expression set. Will do nothing." << endl;
         setExpr(e, "0.0");
         _valid = false;
@@ -771,5 +794,14 @@ void Function::reinit(const Eref &e, ProcPtr p)
         }
     }
 }
+
+#if 0
+mu::value_type Function::muCallbackFMod( mu::value_type a, mu::value_type b)
+{
+    cerr << "Callback: " << a << " " << b << endl;
+    return fmod(a, b);
+}
+#endif
+
 // 
 // Function.cpp ends here

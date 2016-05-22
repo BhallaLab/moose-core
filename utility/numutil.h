@@ -6,14 +6,14 @@
  * Created:         2007-11-02 11:47:21
  ********************************************************************/
 /**********************************************************************
-** This program is part of 'MOOSE', the
-** Messaging Object Oriented Simulation Environment,
-** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
-** It is made available under the terms of the
-** GNU General Public License version 2
-** See the file COPYING.LIB for the full notice.
-**********************************************************************/
+ ** This program is part of 'MOOSE', the
+ ** Messaging Object Oriented Simulation Environment,
+ ** also known as GENESIS 3 base code.
+ **           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
+ ** It is made available under the terms of the
+ ** GNU General Public License version 2
+ ** See the file COPYING.LIB for the full notice.
+ **********************************************************************/
 
 #ifndef _NUMUTIL_H
 #define _NUMUTIL_H
@@ -29,6 +29,7 @@ const double NATURAL_E = 2.718281828459045;
 
 //extern const double getMachineEpsilon();
 //extern const double EPSILON;
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846             
 #endif
@@ -41,16 +42,16 @@ const double NATURAL_E = 2.718281828459045;
 /**
  * Functions for floating point comparisons
  */
-template<class T>
+    template<class T>
 bool isNaN( T value )
 {
-	return value != value;
+    return value != value;
 }
 
-template< typename T >
+    template< typename T >
 bool isInfinity( T value )
 {
-	return value == std::numeric_limits< T >::infinity();
+    return value == std::numeric_limits< T >::infinity();
 }
 
 /**
@@ -62,22 +63,22 @@ bool isInfinity( T value )
  * In this function, 'e' is computed as:
  * 	    e = tolerance * machine-epsilon
  */
-template< class T >
+    template< class T >
 bool isClose( T a, T b, T tolerance )
 {
     T epsilon = std::numeric_limits< T >::epsilon();
-	
-	if ( a == b )
-		return true;
-	
-	if ( a == 0 || b == 0 )
-		return ( fabs( a - b ) < tolerance * epsilon );
-	
-	return (
-		fabs( ( a - b ) / a ) < tolerance * epsilon
-		&&
-		fabs( ( a - b ) / b ) < tolerance * epsilon
-	);
+
+    if ( a == b )
+        return true;
+
+    if ( a == 0 || b == 0 )
+        return ( fabs( a - b ) < tolerance * epsilon );
+
+    return (
+            fabs( ( a - b ) / a ) < tolerance * epsilon
+            &&
+            fabs( ( a - b ) / b ) < tolerance * epsilon
+           );
 }
 
 bool almostEqual(float x, float y, float epsilon = FLT_EPSILON);
