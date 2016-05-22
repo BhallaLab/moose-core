@@ -1,5 +1,4 @@
 include_directories(../basecode ../synapse ../utility ../)
-add_library(biophysics 
 include_directories(../external/muparser/include)
 
 if(WITH_GSL)
