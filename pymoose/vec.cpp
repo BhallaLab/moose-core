@@ -348,7 +348,7 @@ Id create_Id_from_path(string path, unsigned int numData, unsigned int isGlobal,
     string parent_path;
     string name;
 
-    string trimmed_path = trim( path );
+    string trimmed_path = moose::trim( path );
     size_t pos = trimmed_path.rfind("/");
     if (pos != string::npos)
     {
@@ -441,7 +441,7 @@ int moose_Id_init(_Id * self, PyObject * args, PyObject * kwargs)
         // Parsing args successful, if any error happens now,
         // different argument processing will not help. Return error
         string trimmed_path(path);
-        trimmed_path = trim(trimmed_path);
+        trimmed_path = moose::trim(trimmed_path);
         size_t length = trimmed_path.length();
         if (length <= 0)
         {
@@ -589,7 +589,7 @@ PyObject * moose_Id_getPath(_Id * self)
     }
     string path = self->id_.path();
     string default_end("[0]");
-    if (endswith(path, default_end))
+    if (moose::endswith(path, default_end))
     {
         path.erase(path.length() - default_end.length(), default_end.length());
     }

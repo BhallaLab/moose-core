@@ -1151,7 +1151,7 @@ int parseFinfoType(string className, string finfoType, string fieldName, vector<
     {
         return -1;
     }
-    tokenize(typestring, ",", typeVec);
+    moose::tokenize(typestring, ",", typeVec);
     if ((int)typeVec.size() > maxArgs)
     {
         return -1;

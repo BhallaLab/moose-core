@@ -34,7 +34,7 @@ from distutils.core import setup
 try:
     import importlib.machinery
     suffix = importlib.machinery.EXTENSION_SUFFIXES[0]
-except Exception:
+except Exception as e:
     suffix = '.so'
 
 setup(

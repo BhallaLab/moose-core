@@ -33,7 +33,7 @@ unsigned int chopLine( const string& line, vector< string >& ret )
 	stringstream ss( line );
 	string arg;
 	while ( ss >> arg ) {
-            ret.push_back( trim(arg, "\"") );
+            ret.push_back( moose::trim(arg, "\"") );
 	}
 	return ret.size();
 }
@@ -384,7 +384,7 @@ void ReadKkit::innerRead( ifstream& fin )
 		lineNum_++;
 		if ( clearLine )
 			line = "";
-                temp = trim(temp);
+                temp = moose::trim(temp);
 		if ( temp.length() == 0 )
 				continue;
 		pos = temp.find_last_not_of( "\t " );

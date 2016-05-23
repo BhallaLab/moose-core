@@ -20,26 +20,29 @@
 #define  __RNG_INC
 
 #ifdef  USE_BOOST
-#include <boost/random.hpp>
-#include <boost/random/uniform_int.hpp>
 
-#if  BOOST_RANDOM_DEVICE_EXISTS
+#include <boost/random.hpp>
+#include <boost/random/uniform_01.hpp>
+
+#if  defined(BOOST_RANDOM_DEVICE_EXISTS)
 #include <boost/random/random_device.hpp>
-#endif     /* -----  BOOST_RANDOM_DEVICE_EXISTS  ----- */
+#endif  // BOOST_RANDOM_DEVICE_EXISTS
 
 #else      /* -----  not USE_BOOST  ----- */
 
-#ifdef  ENABLE_CPP11
-#include <random>
-#elif USE_GSL      /* -----  not ENABLE_CPP11 and using GSL  ----- */
+#if  USE_GSL
 #include <ctime>
 #include <gsl/gsl_rng.h>
-#endif     /* -----  not ENABLE_CPP11  ----- */
+#endif     /* -----  USE_GSL  ----- */
 
 #endif     /* -----  not USE_BOOST  ----- */
 
 #include <limits>
 #include <iostream>
+
+#ifdef ENABLE_CPP11
+#include <random>
+#endif
 
 namespace moose {
 
@@ -57,13 +60,13 @@ class RNG
         RNG ()                                  /* constructor      */
         {
             // Setup a random seed if possible.
-#ifdef  ENABLE_CPP11 
-            std::random_device rd;
-            setSeed( rd() );
-#elif defined(USE_BOOST) && defined(BOOST_RANDOM_DEVICE_EXISTS)
+#if defined(USE_BOOST) && defined(BOOST_RANDOM_DEVICE_EXISTS)
             boost::random::random_device rd;
             setSeed( rd() );
-#elif USE_GSL
+#elif defined(ENABLE_CPP11)
+            std::random_device rd;
+            setSeed( rd() );
+#elif defined(USE_GSL)
             gsl_r_ = gsl_rng_alloc( gsl_rng_default );
             gsl_rng_set( gsl_r_, time(NULL) );
 #else      /* -----  not ENABLE_CPP11  ----- */
@@ -105,17 +108,16 @@ class RNG
          * @brief Generate a uniformly distributed random number between a and b.
          *
          * @param a Lower limit (inclusive)
-         * @param b Upper limit (exclusive).
+         * @param b Upper limit (inclusive).
          */
         T uniform( const T a, const T b)
         {
-            size_t maxInt = std::numeric_limits<int>::max();
 #if defined(USE_BOOST) || defined(ENABLE_CPP11)
-            return ( (b - a ) * (T)dist_( rng_ ) / maxInt ) + a;
+            return ( b - a ) * dist_( rng_ ) + a;
 #elif USE_GSL
-            return ( (b -a ) * (T)gsl_rng_get( gsl_r_ ) / gsl_rng_max( gsl_r_ ) + a );
+            return ( b - a ) * gsl_rng_get( gsl_r_ ) + a ;
 #else
-            return (b-a) * (T)rand() / RAND_MAX + a;
+            return (b-a) * (T)rand() / (1 + RAND_MAX) + a;
 #endif
         }
 
@@ -127,12 +129,12 @@ class RNG
          */
         T uniform( void )
         {
-#if defined(USE_BOOST) || defined(ENABLE_CPP11)
-            return (T)dist_( rng_ ) / std::numeric_limits<int>::max();
+#if defined(USE_BOOST) || defined(ENABLE_CPP11) 
+            return dist_( rng_ ); 
 #elif USE_GSL
-            return (T)gsl_rng_uniform( gsl_r_ );
+            return gsl_rng_uniform( gsl_r_ );
 #else
-            return (T)rand( ) / RAND_MAX;
+            return rand( ) / (T)(RAND_MAX + 1);
 #endif
         }
 
@@ -144,10 +146,10 @@ class RNG
 
 #if USE_BOOST
         boost::random::mt19937 rng_;
-        boost::random::uniform_int_distribution<> dist_;
+        boost::random::uniform_01<T> dist_;
 #elif ENABLE_CPP11
         std::mt19937 rng_;
-        std::uniform_int_distribution<> dist_;
+        std::uniform_real_distribution<> dist_;
 #else      /* -----  not ENABLE_CPP11  ----- */
         gsl_rng* gsl_r_;
 #endif     /* -----  not ENABLE_CPP11  ----- */
