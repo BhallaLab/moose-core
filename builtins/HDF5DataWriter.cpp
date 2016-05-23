@@ -241,7 +241,7 @@ hid_t HDF5DataWriter::getDataset(string path)
     // Create the groups corresponding to this path
     string::size_type lastslash = path.find_last_of("/");
     vector<string> pathTokens;
-    tokenize(path, "/", pathTokens);
+    moose::tokenize(path, "/", pathTokens);
     hid_t prev_id = filehandle_;
     hid_t id = -1;
     for ( unsigned int ii = 0; ii < pathTokens.size()-1; ++ii ){

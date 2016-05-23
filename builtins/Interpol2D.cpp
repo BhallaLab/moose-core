@@ -714,7 +714,7 @@ void Interpol2D::load( const string& fname, unsigned int skiplines )
 		for ( i = 0; i < skiplines; i++ ) {
                   if ( fin.good () ){
                     getline( fin, line );
-                    line = trim(line);
+                    line = moose::trim(line);
                   } else {
                     break;
                   }
@@ -729,7 +729,7 @@ void Interpol2D::load( const string& fname, unsigned int skiplines )
 			table_.resize( table_.size() + 1 );
 			
 			getline( fin, line );
-                        line = trim(line);
+                        line = moose::trim(line);
 			istringstream sstream( line );
 			while( sstream >> y )
 				table_.back().push_back( y );
