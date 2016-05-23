@@ -229,6 +229,7 @@ set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
 
 if(WITH_GSL)
+    message(STATUS "USING GSL LIBRARIES")
     if(GSL_STATIC_HOME)
         SET(GSL_INCLUDE_DIRS "${GSL_STATIC_HOME}/include")
         find_library(GSL_LIBRARY 
@@ -355,8 +356,8 @@ endif()
 
 if(WITH_OPENMP)
     find_package(OpenMP REQUIRED)
-    MESSAGE("++ OpenMPI support is ON")
-    add_definitions(-DUSE_OPENMPI -O1)
+    MESSAGE("++ OpenMP support is ON")
+    add_definitions(-DUSE_OPENMPI -O3)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${-pthread}")

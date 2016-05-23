@@ -623,18 +623,25 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
     // Fourth, do the numerical integration for all reactions.
 #if _KSOLVE_OPENMP
-	 int poolSize = pools_.size(); //Find out the size of the vector
+	 
+    int poolSize = pools_.size(); //Find out the size of the vector
+    VoxelPools* poolArray = &pools_[0];
 	 static int cellsPerThread = 0; // Used for printing...
+    int j;
 	 if(!cellsPerThread)
 	 {
-		    cellsPerThread = 1;
+		    cellsPerThread = 2;
 		    cout << endl << "OpenMP parallelism: Using parallel-for " << endl;
 		    cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
 	 }
 
-#pragma omp parallel for schedule(guided, cellsPerThread) num_threads(NTHREADS) shared(poolSize) firstprivate(p) if(poolSize > NTHREADS)
-    for ( int j = 0; j < poolSize; j++ )
-        pools_[j].advance( p );
+//#pragma omp parallel for schedule(guided, cellsPerThread) num_threads(NTHREADS) shared(poolSize) firstprivate(p) if(poolSize > NTHREADS)
+#pragma omp parallel num_threads(NTHREADS) shared(poolSize) if(poolSize > NTHREADS) 
+#pragma omp for schedule(dynamic, cellsPerThread) firstprivate(p) nowait
+    for ( j = 0; j < poolSize; j++ )
+        poolArray[j].advance( p );
+        //pools_[j].advance( p );
+
 #endif //_KSOLVE_OPENMP
 
 
@@ -670,6 +677,13 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 // Original Sequential Code
 //////////////////////////////////////////////////////////////////
 #if _KSOLVE_SEQ
+	 static int useSeq = 0;
+
+	 if(!useSeq)
+	 {
+		    useSeq = NTHREADS;
+		    cout << endl << "Executing Sequential version " << endl;
+	 }
     for ( vector< VoxelPools >::iterator
             i = pools_.begin(); i != pools_.end(); ++i )
     {
