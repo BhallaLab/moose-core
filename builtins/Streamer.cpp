@@ -141,7 +141,6 @@ Streamer::Streamer()
     columns_.push_back( "time" );               /* First column is time. */
     tables_.resize(0);
     tableIds_.resize(0);
-    columns_.resize(0);
     data_.resize(0);
 }
 
