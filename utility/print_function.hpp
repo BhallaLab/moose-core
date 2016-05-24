@@ -201,6 +201,24 @@ namespace moose {
         cout << ss.str() << endl;
     }
 
+    /*
+     * Wrapper function around __dump__
+     */
+    inline void showInfo( string msg )
+    {
+        moose::__dump__( msg, moose::info );
+    }
+
+    inline void showWarn( string msg )
+    {
+        moose::__dump__(msg, moose::warning );
+    }
+
+    inline void showError( string msg )
+    {
+        moose::__dump__( msg, moose::error );
+    }
+
     /**
      * @brief This macro only expands when not compiling for release.
      *
