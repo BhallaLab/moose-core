@@ -204,6 +204,9 @@ namespace moose {
     /*  /a[0]/b[1]/c[0] -> /a/b/c  */
     string moosePathToUserPath( string path )
     {
+        // Just write the moose path. Things becomes messy when indexing is
+        // used.
+#if 0
         size_t p1 = path.find( '[', 0 );
         while( p1 != std::string::npos )
         {
@@ -211,6 +214,7 @@ namespace moose {
             path.erase( p1, p2-p1+1 );
             p1 = path.find( '[', p2 );
         }
+#endif
         return path;
     }
 

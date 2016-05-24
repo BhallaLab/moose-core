@@ -232,9 +232,6 @@ void Streamer::process(const Eref& e, ProcPtr p)
  */
 void Streamer::addTable( Id table )
 {
-    cout << "Debug" 
-         << " Adding table " << table.path() << endl;
-
     // If this table is not already in the vector, add it.
     for( size_t i = 0; i < tableIds_.size(); i++)
         if( table.path() == tableIds_[i].path() )
