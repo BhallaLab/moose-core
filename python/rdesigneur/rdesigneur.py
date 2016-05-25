@@ -27,6 +27,8 @@ import rmoogli
 from rdesigneurProtos import *
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
+import lxml
+from lxml import etree
 
 #EREST_ACT = -70e-3
 
