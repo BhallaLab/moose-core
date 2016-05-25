@@ -616,6 +616,49 @@ class rdesigneur:
         pylab.show()
 
     ################################################################
+    # Here we get the time-series data and write to XML
+    ################################################################        
+            
+    def getTimeSeriesTable( self ):                                 #to get the list with all the details of the simulation
+        for i in self.plotNames:                                    #this function adds flexibility in terms of the details... 
+            rowList = list(i)                                       #...we wish to store.       
+            vtab = moose.vec( i[0] )                                   
+            t = np.arange( 0, vtab[0].vector.size, 1 ) * vtab[0].dt
+            rowList.append(vtab[0].dt)
+            rowList.append(t)
+            rowList.append(vtab[0].vector)
+            self.tabForXML.append(rowList)
+            rowList = []
+        timeSeriesTable = self.tabForXML
+        return timeSeriesTable
+
+    def writeXML( self, filename ):                                 #to write to XML file
+        timeSeriesTable = self.getTimeSeriesTable()                 
+        root = etree.Element("TimeSeriesPlot")
+        parameters = etree.SubElement( root, "parameters" )
+        if self.params == {}:
+            parameters.text = "None"
+        for pkey, pvalue in self.params.items():
+            parameter = etree.SubElement( parameters, str(pkey) )
+            parameter.text = str(pvalue)
+        q = []
+        for plotData in timeSeriesTable:                            #plotData contains all the details of a single plot
+            title = etree.SubElement( root, str(plotData[1]).strip().replace(" ", "_"))
+            title.set( 'path', str(plotData[0]))
+            q.append( etree.SubElement( title, "timeData"))
+            q[-1].set( 'scale', str(plotData[3]))
+            q[-1].set( 'units', str(plotData[4]))
+            q[-1].set( 'dt', str(plotData[5]))
+            p = []
+            for itime in range(len(plotData[6])):
+                p.append( etree.SubElement( q[-1], 'time_stamp' ))
+                p[-1].set( 'time', str( plotData[6][itime] ))
+                p[-1].text = str( plotData[7][itime] )
+
+        tree = etree.ElementTree(root)  
+        tree.write(filename + ".xml") 
+
+    ################################################################
     # Here we set up the stims
     ################################################################
     def _buildStims( self ):

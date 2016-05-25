@@ -134,7 +134,7 @@ First fix that issue with SynBase or something in that line.')
         target = vec(target)
         _moose.syncDataHandler(target)
 
-def showfield(el, field='*', showtype=False, write2xml=False):
+def showfield(el, field='*', showtype=False):
     """Show the fields of the element `el`, their data types and
     values in human readable format. Convenience function for GENESIS
     users.
@@ -180,60 +180,6 @@ def showfield(el, field='*', showtype=False, write2xml=False):
             print(field, '=', el.getField(field))
         except AttributeError:
             pass # Genesis silently ignores non existent fields
-
-    if write2xml:
-        import sys
-        from lxml import builder
-        from lxml import etree
-        import lxml
-        filename = raw_input("Enter the name of the file to write to.")
-        print ("Writing details to", filename)
-        outfile = open(str(filename+".xml"),'w') 
-        sys.stdout = outfile
-        el_value_field_dict = getFieldDict(el.className, 'valueFinfo')       
-        RML = etree.Element("rml")
-        MODEL = etree.SubElement(RML, "elecmodel")
-        META = etree.SubElement(MODEL, "meta")
-        META.text = "URL, comments, etc or can be user defined or written during output."
-        FIELDVALUES = etree.SubElement(MODEL, "fieldvalues")
-        for key, dtype in el_value_field_dict.items():
-          if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith('vector') or 'ObjId' in dtype:
-                continue
-          value = el.getField(key)
-          FIELD = etree.SubElement(FIELDVALUES, "field", id=str(key), type=str(dtype))
-          FIELD.text = str(value)
-        for ch in el.children:
-          chel = element(str(ch.path))
-          chel_value_field_dict = getFieldDict(chel.className, 'valueFinfo')
-          CHANNELS = etree.SubElement(FIELDVALUES, "channels")
-          for key, dtype in chel_value_field_dict.items():
-            if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith('vector') or 'ObjId' in dtype:
-                continue
-            value = chel.getField(key)
-            SUBFIELD = etree.SubElement(CHANNELS, str(chel.getField('name')), id=str(key), type=str(dtype))
-            SUBFIELD.text = str(value)
-          for gch in chel.children:
-            gchel = element(str(gch.path))
-            name = str(gchel.path[-6:-3])
-            if name == 'ion':
-              gch_value_field_dict = getFieldDict(gchel.className, 'valueFinfo')
-              for key, dtype in gch_value_field_dict.items():
-                if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith('vector') or 'ObjId' in dtype:
-                  continue
-                gch_value = gchel.getField(key)
-                ION = etree.SubElement(SUBFIELD, "ion", id=str(key), type=str(dtype))
-                ION.text = str(value)
-        RUNTIME = etree.SubElement(RML, "runtime", status="complete")
-        SIMTIME = etree.SubElement(RUNTIME, "simtime", type="double", units="sec")
-        SIMTIME.text = "2000"                                           #can be changed using time() module
-        RESULTS = etree.SubElement(RUNTIME, "results", format="csv")
-        OUTFILE = etree.SubElement(RESULTS, "outfile")
-        OUTFILE.text = "results.csv"
-        runinfo = etree.tostring(RUNTIME, pretty_print=True)
-        doc = etree.tostring(RML, pretty_print=True, xml_declaration=True, encoding="UTF-8")
-        print (doc)
-        outfile.close()
-        sys.stdout = sys.__stdout__
 
 def showfields(el, showtype=False):
     """Convenience function. Should be deprecated if nobody uses it.
