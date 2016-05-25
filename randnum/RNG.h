@@ -149,7 +149,7 @@ class RNG
         boost::random::uniform_01<T> dist_;
 #elif ENABLE_CPP11
         std::mt19937 rng_;
-        std::uniform_real_distribution<> dist_(0.0, 1.0);
+        std::uniform_real_distribution<> dist_;
 #else      /* -----  not ENABLE_CPP11  ----- */
         gsl_rng* gsl_r_;
 #endif     /* -----  not ENABLE_CPP11  ----- */
