@@ -78,7 +78,8 @@ class rdesigneur:
             adaptorList= [],
             stimList = [],
             plotList = [],
-            moogList = []
+            moogList = [],
+            params = {}
         ):
         """ Constructor of the rdesigner. This just sets up internal fields
             for the model building, it doesn't actually create any objects.
@@ -110,6 +111,8 @@ class rdesigneur:
         self.chanDistrib = chanDistrib
         self.chemDistrib = chemDistrib
 
+        self.params = params
+
         self.adaptorList = adaptorList
         self.stimList = stimList
         self.plotList = plotList
@@ -118,6 +121,7 @@ class rdesigneur:
         self.moogNames = []
         self.cellPortionElist = []
         self.spineComptElist = []
+        self.tabForXML = []
 
         if not moose.exists( '/library' ):
             library = moose.Neutral( '/library' )
@@ -622,15 +626,18 @@ class rdesigneur:
     ################################################################        
             
     def getTimeSeriesTable( self ):                                 #to get the list with all the details of the simulation
-        for i in self.plotNames:                                    #this function adds flexibility in terms of the details... 
-            rowList = list(i)                                       #...we wish to store.       
+        j = 0                                                       #this function adds flexibility in terms of the details... 
+        for i in self.plotNames:                                    #...we wish to store.
+            rowList = list(i)                                       
             vtab = moose.vec( i[0] )                                   
             t = np.arange( 0, vtab[0].vector.size, 1 ) * vtab[0].dt
             rowList.append(vtab[0].dt)
             rowList.append(t)
             rowList.append(vtab[0].vector)
+            rowList.append(self.plotList[j][3])
             self.tabForXML.append(rowList)
             rowList = []
+            j += 1
         timeSeriesTable = self.tabForXML
         return timeSeriesTable
 
@@ -647,15 +654,17 @@ class rdesigneur:
         for plotData in timeSeriesTable:                            #plotData contains all the details of a single plot
             title = etree.SubElement( root, str(plotData[1]).strip().replace(" ", "_"))
             title.set( 'path', str(plotData[0]))
+            title.set( 'field', str(plotData[8]))
             q.append( etree.SubElement( title, "timeData"))
             q[-1].set( 'scale', str(plotData[3]))
             q[-1].set( 'units', str(plotData[4]))
             q[-1].set( 'dt', str(plotData[5]))
-            p = []
-            for itime in range(len(plotData[6])):
-                p.append( etree.SubElement( q[-1], 'time_stamp' ))
-                p[-1].set( 'time', str( plotData[6][itime] ))
-                p[-1].text = str( plotData[7][itime] )
+            # p = []
+            # for itime in range(len(plotData[6])):
+                # p.append( etree.SubElement( q[-1], 'time_stamp' ))
+                # p[-1].set( 'time', str( plotData[6][itime] ))
+                # p[-1].text = str( plotData[7][itime] )
+            q[-1].text = ''.join( str(value) + ' ' for value in plotData[7] )
 
         tree = etree.ElementTree(root)  
         tree.write(filename + ".xml") 
