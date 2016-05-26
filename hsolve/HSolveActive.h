@@ -196,6 +196,9 @@ protected:
 	double* d_chan_x;
 	int* d_chan_colIndex;
 	int* d_chan_rowPtr;
+	int UPDATE_MATRIX_APPROACH;
+	int UPDATE_MATRIX_WPT_APPROACH = 0;
+	int UPDATE_MATRIX_SPMV_APPROACH = 1;
 
 	// Conjugate Gradient based GPU solver
 	double* d_Vmid;
@@ -290,6 +293,7 @@ private:
 
     void update_matrix_cuda_wrapper();
     void update_csrmatrix_cuda_wrapper();
+    int choose_update_matrix_approach();
 
     void advance_calcium_cuda_wrapper();
 

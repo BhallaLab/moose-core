@@ -122,6 +122,22 @@ void populating_expand_indices(int* d_keys, double* d_values, double* d_expand_v
 }
 
 __global__
+void wpt_kernel(double* d_chan_Gk, double* d_chan_GkEk , int* d_chan_rowPtr,
+		double* d_comp_Gksum, double* d_comp_GkEksum, int num_comp){
+	int tid = blockIdx.x*blockDim.x + threadIdx.x;
+	if(tid < num_comp){
+		double sum1=0, sum2=0;
+		int i;
+		for (i = d_chan_rowPtr[tid]; i < d_chan_rowPtr[tid+1]; ++i) {
+			sum1 += d_chan_Gk[i];
+			sum2 += d_chan_GkEk[i];
+		}
+		d_comp_Gksum[tid] = sum1;
+		d_comp_GkEksum[tid] = sum2;
+	}
+}
+
+__global__
 void update_matrix_kernel(double* d_V,
 		double* d_HS_,
 		double* d_comp_Gksum,
@@ -235,9 +251,7 @@ void HSolveActive::advance_channels_cuda_wrapper(double dt){
 	int num_cadep_gates = h_cagate_expand_indices.size();
 
     // Get the Row number and fraction values of Vm's from vTable
-    int BLOCKS;
-	BLOCKS = num_vdep_gates/THREADS_PER_BLOCK;
-	BLOCKS = (num_vdep_gates%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+	int BLOCKS = (num_vdep_gates+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
 
 	// For V dependent gates
 	advance_channels_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
@@ -311,25 +325,36 @@ void HSolveActive::calculate_channel_currents_cuda_wrapper(){
 void HSolveActive::update_matrix_cuda_wrapper(){
 
 	int num_channels = channel_.size();
+	int BLOCKS;
 
 	// Using Cusparse
 	const double alpha = 1.0;
 	const double beta = 0.0;
 
-	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
-		nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
-		d_chan_Gk, d_chan_rowPtr, d_chan_colIndex,
-		d_chan_x , &beta, d_comp_Gksum);
+	if(step_num < 2) {
+		cout << "Number of channels: " << num_channels << endl;
+	}
 
-	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
-		nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
-		d_chan_GkEk, d_chan_rowPtr, d_chan_colIndex,
-		d_chan_x , &beta, d_comp_GkEksum);
+	BLOCKS = (nCompt_+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
+	if(UPDATE_MATRIX_APPROACH == UPDATE_MATRIX_WPT_APPROACH){
+		wpt_kernel<<<BLOCKS,THREADS_PER_BLOCK>>>(d_chan_Gk, d_chan_GkEk , d_chan_rowPtr, d_comp_Gksum, d_comp_GkEksum, nCompt_);
+	}else if(UPDATE_MATRIX_APPROACH == UPDATE_MATRIX_SPMV_APPROACH){
+		cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+			nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
+			d_chan_Gk, d_chan_rowPtr, d_chan_colIndex,
+			d_chan_x , &beta, d_comp_Gksum);
+
+		cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+			nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
+			d_chan_GkEk, d_chan_rowPtr, d_chan_colIndex,
+			d_chan_x , &beta, d_comp_GkEksum);
+	}else{
+		// Future approaches, if any.
+	}
 
 	// -----------------------------------------------CUSPARSE------------------------------------------------
 
-	int BLOCKS = nCompt_/THREADS_PER_BLOCK;
-	BLOCKS = (nCompt_%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+	BLOCKS = (nCompt_+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
 
 	cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
@@ -417,6 +442,65 @@ void HSolveActive::advance_calcium_cuda_wrapper(){
 	advance_calcium_conc_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_caConc_, d_ca, d_caActivation_values, num_ca_pools);
 
 	cudaCheckError(); // Checking for cuda related errors.
+}
+
+
+int HSolveActive::choose_update_matrix_approach(){
+	int num_repeats = 10;
+	float wpt_cum_time = 0;
+	float spmv_cum_time = 0;
+
+	// Setting up cusparse information
+	cusparseHandle_t cusparseH;
+	cusparseCreate(&cusparseH);
+
+	// create and setup matrix descriptors A, B & C
+	cusparseMatDescr_t cuspaseDescr;
+	cusparseCreateMatDescr(&cuspaseDescr);
+	cusparseSetMatType(cuspaseDescr, CUSPARSE_MATRIX_TYPE_GENERAL);
+	cusparseSetMatIndexBase(cuspaseDescr, CUSPARSE_INDEX_BASE_ZERO);
+
+
+	int num_channels = channel_.size();
+	const double alpha = 1.0;
+	const double beta = 0.0;
+
+	for (int i = 0; i < num_repeats; ++i) {
+		GpuTimer timer1, timer2;
+
+		int BLOCKS = (nCompt_+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
+		timer1.Start();
+			wpt_kernel<<<BLOCKS,THREADS_PER_BLOCK>>>(d_chan_Gk, d_chan_GkEk , d_chan_rowPtr, d_comp_Gksum, d_comp_GkEksum, nCompt_);
+			cudaDeviceSynchronize();
+		timer1.Stop();
+
+		double t1 = timer1.Elapsed();
+		if(i>0)	wpt_cum_time += t1;
+
+		timer2.Start();
+			cusparseDcsrmv(cusparseH,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+				nCompt_, nCompt_, num_channels, &alpha, cuspaseDescr,
+				d_chan_Gk, d_chan_rowPtr, d_chan_colIndex,
+				d_chan_x , &beta, d_comp_Gksum);
+
+			cusparseDcsrmv(cusparseH,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+				nCompt_, nCompt_, num_channels, &alpha, cuspaseDescr,
+				d_chan_GkEk, d_chan_rowPtr, d_chan_colIndex,
+				d_chan_x , &beta, d_comp_GkEksum);
+			cudaDeviceSynchronize();
+		timer2.Stop();
+
+		double t2 = timer2.Elapsed();
+		if(i>0)	spmv_cum_time += t2;
+		// cout << t1 << " " << t2 << endl;
+		// cout << "Cumu " <<  wpt_cum_time << " " << spmv_cum_time << endl;
+	}
+
+	if(wpt_cum_time < spmv_cum_time){
+		return UPDATE_MATRIX_WPT_APPROACH;
+	}else{
+		return UPDATE_MATRIX_SPMV_APPROACH;
+	}
 }
 
 #endif

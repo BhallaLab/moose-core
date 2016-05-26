@@ -29,6 +29,9 @@
 using namespace std;
 #include <sys/time.h>
 
+
+#include <fstream>
+
 typedef unsigned long long u64;
 
 /* get microseconds (us) */
@@ -1009,6 +1012,23 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	for(int i=0;i<num_catarget_chans;i++) temp_x[i] = 1;
 	cudaMemcpy(d_capool_onex, temp_x, num_catarget_chans*sizeof(double), cudaMemcpyHostToDevice);
 
+
+	// Writing load to file.
+	ofstream load_file("umat_load.csv");
+	load_file << "load" << endl;
+	for (int i = 0; i < nCompt_; ++i) {
+		load_file << chan_rowPtr[i+1]-chan_rowPtr[i] << endl;
+	}
+
+	UPDATE_MATRIX_APPROACH = choose_update_matrix_approach();
+
+	if(UPDATE_MATRIX_APPROACH == UPDATE_MATRIX_WPT_APPROACH){
+		cout << "UM APPROACH : WPT" << endl;
+	}else if(UPDATE_MATRIX_APPROACH == UPDATE_MATRIX_SPMV_APPROACH){
+		cout << "UM APPROACH : SPMV" << endl;
+	}else{
+		// Future approaches, if any.
+	}
 }
 
 void HSolveActive::transfer_memory2cpu_cuda(){
