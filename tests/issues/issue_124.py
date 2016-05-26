@@ -1,5 +1,5 @@
 import moose
-print( 'Using moose form %s' % moose.__file__ )
+print(( 'Using moose form %s' % moose.__file__ ))
 
 
 def main():
@@ -20,10 +20,11 @@ def main():
     stoich.compartment = compt
     stoich.ksolve = ksolve
     stoich.path = "/model/kinetics/##"
-    print " before reinit"
+    print(" before reinit")
     moose.reinit()
-    print " After reinit"
-    moose.run( 10 )
+    print(" After reinit")
+    moose.start( 10 )
+    print( "Done" )
     
 # Run the 'main' if this script is executed standalone.
 if __name__ == '__main__':
