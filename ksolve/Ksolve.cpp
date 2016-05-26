@@ -587,6 +587,11 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 {
     if ( isBuilt_ == false )
         return;
+
+    int poolSize = pools_.size(); //Find out the size of the vector
+    VoxelPools* poolArray = &pools_[0];
+    int xferSize = xfer_.size();
+
     // First, handle incoming diffusion values, update S with those.
     if ( dsolvePtr_ )
     {
@@ -600,32 +605,18 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         setBlock( dvalues );
     }
     // Second, take the arrived xCompt reac values and update S with them.
-    for ( unsigned int i = 0; i < xfer_.size(); ++i )
-    {
-        const XferInfo& xf = xfer_[i];
-        // cout << xfer_.size() << "	" << xf.xferVoxel.size() << endl;
-        for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j )
-        {
-            pools_[xf.xferVoxel[j]].xferIn(
-                xf.xferPoolIdx, xf.values, xf.lastValues, j );
-        }
-    }
-    // Third, record the current value of pools as the reference for the
-    // next cycle.
-    for ( unsigned int i = 0; i < xfer_.size(); ++i )
+#pragma omp parallel for schedule(guided, 2) shared(poolArray, xferSize) num_threads(NTHREADS) if(xferSize > NTHREADS)
+    for ( int i = 0; i < xferSize; ++i )
     {
         XferInfo& xf = xfer_[i];
         for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j )
         {
-            pools_[xf.xferVoxel[j]].xferOut( j, xf.lastValues, xf.xferPoolIdx );
+            poolArray[xf.xferVoxel[j]].xferIn( xf.xferPoolIdx, xf.values, xf.lastValues, j );
+            poolArray[xf.xferVoxel[j]].xferOut( j, xf.lastValues, xf.xferPoolIdx );
         }
     }
-
-    // Fourth, do the numerical integration for all reactions.
 #if _KSOLVE_OPENMP
 	 
-    int poolSize = pools_.size(); //Find out the size of the vector
-    VoxelPools* poolArray = &pools_[0];
 	 static int cellsPerThread = 0; // Used for printing...
     int j;
 	 if(!cellsPerThread)

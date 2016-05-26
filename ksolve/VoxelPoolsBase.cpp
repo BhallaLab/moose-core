@@ -187,8 +187,7 @@ void VoxelPoolsBase::xferIn(
 	unsigned int offset = voxelIndex * poolIndex.size();
 	vector< double >::const_iterator i = values.begin() + offset;
 	vector< double >::const_iterator j = lastValues.begin() + offset;
-	for ( vector< unsigned int >::const_iterator 
-			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
+	for ( vector< unsigned int >::const_iterator k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
 		S_[*k] += *i++ - *j++;
 	}
 }
