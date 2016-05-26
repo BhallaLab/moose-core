@@ -27,14 +27,9 @@
 #if  defined(BOOST_RANDOM_DEVICE_EXISTS)
 #include <boost/random/random_device.hpp>
 #endif  // BOOST_RANDOM_DEVICE_EXISTS
-
 #else      /* -----  not USE_BOOST  ----- */
-
-#if  USE_GSL
 #include <ctime>
-#include <gsl/gsl_rng.h>
-#endif     /* -----  USE_GSL  ----- */
-
+#include "randnum.h"
 #endif     /* -----  not USE_BOOST  ----- */
 
 #include <limits>
@@ -43,6 +38,8 @@
 #ifdef ENABLE_CPP11
 #include <random>
 #endif
+
+using namespace std;
 
 namespace moose {
 
@@ -66,22 +63,14 @@ class RNG
 #elif defined(ENABLE_CPP11)
             std::random_device rd;
             setSeed( rd() );
-#elif defined(USE_GSL)
-            gsl_r_ = gsl_rng_alloc( gsl_rng_default );
-            gsl_rng_set( gsl_r_, time(NULL) );
-#else      /* -----  not ENABLE_CPP11  ----- */
-
+#else
+            mtseed( time(NULL) );
 #endif     /* -----  not ENABLE_CPP11  ----- */
 
         }
 
         ~RNG ()                                 /* destructor       */
         {
-
-#if defined(USE_BOOST) || defined(ENABLE_CPP11) 
-#else
-            gsl_rng_free( gsl_r_ );
-#endif
 
         }
 
@@ -92,15 +81,13 @@ class RNG
         }
 
         /* ====================  MUTATORS      ======================================= */
-        void setSeed( const T seed )
+        void setSeed( const unsigned long int seed )
         {
-#if defined(USE_BOOST) || defined(ENABLE_CPP11)
             seed_ = seed;
+#if defined(USE_BOOST) || defined(ENABLE_CPP11)
             rng_.seed( seed_ );
-#elif USE_GSL
-            gsl_rng_set(gsl_r_, seed );
-#else 
-            std::srand( seed_ );
+#else
+            mtseed( seed_ );
 #endif
         }
 
@@ -114,10 +101,8 @@ class RNG
         {
 #if defined(USE_BOOST) || defined(ENABLE_CPP11)
             return ( b - a ) * dist_( rng_ ) + a;
-#elif USE_GSL
-            return ( b - a ) * gsl_rng_get( gsl_r_ ) + a ;
 #else
-            return (b-a) * (T)rand() / (1 + RAND_MAX) + a;
+            return (b-a) * mtrand() + a;
 #endif
         }
 
@@ -131,10 +116,8 @@ class RNG
         {
 #if defined(USE_BOOST) || defined(ENABLE_CPP11) 
             return dist_( rng_ ); 
-#elif USE_GSL
-            return gsl_rng_uniform( gsl_r_ );
 #else
-            return rand( ) / (T)(RAND_MAX + 1);
+            return mtrand();
 #endif
         }
 
@@ -150,8 +133,6 @@ class RNG
 #elif ENABLE_CPP11
         std::mt19937 rng_;
         std::uniform_real_distribution<> dist_;
-#else      /* -----  not ENABLE_CPP11  ----- */
-        gsl_rng* gsl_r_;
 #endif     /* -----  not ENABLE_CPP11  ----- */
 
 }; /* -----  end of template class RNG  ----- */
