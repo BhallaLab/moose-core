@@ -49,6 +49,10 @@ def mooseWriteSBML(modelpath,filename):
 	cremodel_.setSubstanceUnits("substance")
 	
 	writeUnits(cremodel_)
+	modelAnno = writeSimulationAnnotation(modelpath)
+	if modelAnno:
+		cremodel_.setAnnotation(modelAnno)
+
 	SBMLok  = validateModel( sbmlDoc )
 	if ( SBMLok ):
 		filepath = '/home/harsha/Trash/python'
@@ -78,6 +82,38 @@ def writeUnits(cremodel_):
 	unit.setMultiplier(1)
 	unit.setExponent(1.0)
 	unit.setScale(0)
+	
+#write Simulation runtime,simdt,plotdt 
+def writeSimulationAnnotation(modelpath):
+	modelAnno = ""
+	if moose.exists(modelpath+'/info'):
+		mooseclock = moose.Clock('/clock')
+		modelAnno ="<moose:ModelAnnotation>\n"
+		modelAnnotation = moose.element(modelpath+'/info')
+		modelAnno = modelAnno+"<moose:ModelTime> "+str(modelAnnotation.runtime)+" </moose:ModelTime>\n"
+		modelAnno = modelAnno+"<moose:ModelSolver> "+modelAnnotation.solver+" </moose:ModelSolver>\n"
+		modelAnno = modelAnno+"<moose:simdt>"+ str(mooseclock.dts[11]) + " </moose:simdt>\n";
+		modelAnno = modelAnno+"<moose:plotdt> " + str(mooseclock.dts[18]) +" </moose:plotdt>\n";
+		plots = "";
+		graphs = moose.wildcardFind(modelpath+"/##[TYPE=Table2]")
+		for gphs in range(0,len(graphs)):
+			gpath = graphs[gphs].neighbors['requestOut']
+			if len(gpath) != 0:
+				q = moose.element(gpath[0])
+				ori = q.path
+				graphSpefound = False
+				while not(isinstance(moose.element(q),moose.CubeMesh)):
+					q = q.parent
+					graphSpefound = True
+				if graphSpefound:
+					if not plots:
+						plots = ori[ori.find(q.name)-1:len(ori)]
+					else:
+						plots = plots + "; "+ori[ori.find(q.name)-1:len(ori)]
+		if plots != " ":
+			modelAnno = modelAnno+ "<moose:plots> "+ plots+ "</moose:plots>\n";
+		modelAnno = modelAnno+"</moose:ModelAnnotation>"
+	return modelAnno
 
 def validateModel( sbmlDoc ):
 	#print " sbmlDoc ",sbmlDoc.toSBML()
