@@ -52,6 +52,8 @@ def mooseWriteSBML(modelpath,filename):
 	modelAnno = writeSimulationAnnotation(modelpath)
 	if modelAnno:
 		cremodel_.setAnnotation(modelAnno)
+	compartexist = writeCompt(modelpath,cremodel_)
+	species = writeSpecies(modelpath,cremodel_,sbmlDoc)
 
 	SBMLok  = validateModel( sbmlDoc )
 	if ( SBMLok ):
@@ -64,25 +66,138 @@ def mooseWriteSBML(modelpath,filename):
 	if ( not SBMLok ):
 		cerr << "Errors encountered " << endl;
 		return -1;
-	
 
-def writeUnits(cremodel_):
-	unitVol = cremodel_.createUnitDefinition()
-	unitVol.setId( "volume")
-	unit = unitVol.createUnit()
-	unit.setKind(UNIT_KIND_LITRE)
-	unit.setMultiplier(1.0)
-	unit.setExponent(1.0)
-	unit.setScale(0)
-
-	unitSub = cremodel_.createUnitDefinition()
-	unitSub.setId("substance")
-	unit = unitSub.createUnit()
-	unit.setKind( UNIT_KIND_ITEM )
-	unit.setMultiplier(1)
-	unit.setExponent(1.0)
-	unit.setScale(0)
+def convertNotesSpecialChar(str1):
+	d = {"&":"_and","<":"_lessthan_",">":"_greaterthan_","BEL":"&#176"}
+	for i,j in d.iteritems():
+		str1 = str1.replace(i,j)
+	return str1
 	
+def getGroupinfo(element):
+	#   Note: At this time I am assuming that if group exist (incase of Genesis)
+	#   1. for 'pool' its between compartment and pool, /modelpath/Compartment/Group/pool 
+	#   2. for 'enzComplx' in case of ExpilcityEnz its would be, /modelpath/Compartment/Group/Pool/Enz/Pool_cplx 
+	#   For these cases I have checked, but subgroup may exist then this bit of code need to cleanup further down
+	#   if /modelpath/Compartment/Group/Group1/Pool, then I check and get Group1
+	#   And /modelpath is also a NeutralObject,I stop till I find Compartment
+
+	while not mooseIsInstance(element, ["Neutral"]) and not mooseIsInstance(element,["CubeMesh","CyclMesh"]):
+		element = element.parent
+	return element
+	
+def mooseIsInstance(element, classNames):
+	return moose.element(element).__class__.__name__ in classNames
+
+def findCompartment(element):
+	while not mooseIsInstance(element,["CubeMesh","CyclMesh"]):
+		element = element.parent
+	return element
+
+def idBeginWith( name ):
+	changedName = name;
+	if name[0].isdigit() :
+		changedName = "_"+name
+	return changedName;
+	
+def convertSpecialChar(str1):
+	d = {"&":"_and","<":"_lessthan_",">":"_greaterthan_","BEL":"&#176","-":"_minus_","'":"_prime_",
+		 "+": "_plus_","*":"_star_","/":"_slash_","(":"_bo_",")":"_bc_",
+		 "[":"_sbo_","]":"_sbc_",".":"_dot_"," ":"_"
+		}
+	for i,j in d.iteritems():
+		str1 = str1.replace(i,j)
+	return str1
+	
+def writeSpecies(modelpath,cremodel_,sbmlDoc):
+	#getting all the species 
+	for spe in wildcardFind(modelpath+'/##[ISA=PoolBase]'):
+		sName = convertSpecialChar(spe.name)
+		comptVec = findCompartment(spe)
+		speciannoexist = False;
+		speciGpname = ""
+
+		if not isinstance(moose.element(comptVec),moose.ChemCompt):
+			return -2
+		else:
+			compt = comptVec.name+"_"+str(comptVec.getId().value)+"_"+str(comptVec.getDataIndex())+"_"
+			s1 = cremodel_.createSpecies()
+			spename = sName+"_"+str(spe.getId().value)+"_"+str(spe.getDataIndex())+"_"
+			spename = str(idBeginWith(spename))
+			s1.setId(spename)
+			
+			if spename.find("cplx") != -1 and isinstance(moose.element(spe.parent),moose.EnzBase):
+				enz = spe.parent
+				if (moose.element(enz.parent),moose.PoolBase):
+					#print " found a cplx name ",spe.parent, moose.element(spe.parent).parent
+					enzname = enz.name
+					enzPool = (enz.parent).name
+					sName = convertSpecialChar(enzPool+"_"+enzname+"_"+sName)
+
+			
+			s1.setName(sName)
+			s1.setInitialAmount(spe.nInit)
+			s1.setCompartment(compt)
+			#  Setting BoundaryCondition and constant as per this rule for BufPool
+			#  -constanst  -boundaryCondition  -has assignment/rate Rule  -can be part of sub/prd
+			#   false           true              yes                       yes   
+			#   true            true               no                       yes
+			if spe.className == "BufPool" or spe.className == "ZombieBufPool" :
+				#BoundaryCondition is made for buff pool
+				s1.setBoundaryCondition(True);
+
+				if moose.exists(spe.path+'/func'):
+					bpf = moose.element(spe.path)
+					for fp in bpf.children:
+						if fp.className =="Function" or fp.className == "ZombieFunction":
+							if len(moose.element(fp.path+'/x').neighbors["input"]) > 0:
+								s1.setConstant(False)
+							else:
+								#if function exist but sumtotal object doesn't exist
+								spe_constTrue.append(spename)
+								s1.setConstant(True)
+				else:
+					spe_constTrue.append(spename)
+					s1.setConstant(True)
+			else:
+				#if not bufpool then Pool, then 
+				s1.setBoundaryCondition(False)
+				s1.setConstant(False)
+			s1.setUnits("substance")
+			s1.setHasOnlySubstanceUnits( True )
+			if moose.exists(spe.path+'/info'):
+				Anno = moose.Annotator(spe.path+'/info')
+				notesS = Anno.notes
+				if notesS != "":
+					cleanNotesS= convertNotesSpecialChar(notesS)
+					notesStringS = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+ cleanNotesS + "\n\t </body>"
+					#s1.setNotes(notesStringS)
+			#FindGroupName
+			element = moose.element(spe)
+			ele = getGroupinfo(element)
+			if ele.className == "Neutral":
+				speciGpname = "<moose:Group>"+ ele.name + "</moose:Group>\n"
+				speciannoexist = True
+			if speciannoexist :
+				speciAnno = "<moose:ModelAnnotation>\n"
+				if speciGpname:
+					speciAnno = speciAnno + speciGpname
+				speciAnno = speciAnno+ "</moose:ModelAnnotation>"
+	
+def writeCompt(modelpath,cremodel_):
+	#getting all the compartments
+	for compt in wildcardFind(modelpath+'/##[ISA=ChemCompt]'):
+		comptName = convertSpecialChar(compt.name)
+		#converting m3 to litre
+		size =compt.volume*pow(10,3)
+		ndim = compt.numDimensions
+		c1 = cremodel_.createCompartment()
+		c1.setId(str(idBeginWith(comptName+"_"+str(compt.getId().value)+"_"+str(compt.getDataIndex())+"_")))
+		c1.setName(comptName)                     
+		c1.setConstant(True)               
+		c1.setSize(size)          
+		c1.setSpatialDimensions(ndim)
+		c1.setUnits('volume')
+
 #write Simulation runtime,simdt,plotdt 
 def writeSimulationAnnotation(modelpath):
 	modelAnno = ""
@@ -114,6 +229,24 @@ def writeSimulationAnnotation(modelpath):
 			modelAnno = modelAnno+ "<moose:plots> "+ plots+ "</moose:plots>\n";
 		modelAnno = modelAnno+"</moose:ModelAnnotation>"
 	return modelAnno
+
+def writeUnits(cremodel_):
+	unitVol = cremodel_.createUnitDefinition()
+	unitVol.setId( "volume")
+	unit = unitVol.createUnit()
+	unit.setKind(UNIT_KIND_LITRE)
+	unit.setMultiplier(1.0)
+	unit.setExponent(1.0)
+	unit.setScale(0)
+
+	unitSub = cremodel_.createUnitDefinition()
+	unitSub.setId("substance")
+	unit = unitSub.createUnit()
+	unit.setKind( UNIT_KIND_ITEM )
+	unit.setMultiplier(1)
+	unit.setExponent(1.0)
+	unit.setScale(0)
+	
 
 def validateModel( sbmlDoc ):
 	#print " sbmlDoc ",sbmlDoc.toSBML()
