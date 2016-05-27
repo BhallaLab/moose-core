@@ -54,6 +54,9 @@ def mooseWriteSBML(modelpath,filename):
 		cremodel_.setAnnotation(modelAnno)
 	compartexist = writeCompt(modelpath,cremodel_)
 	species = writeSpecies(modelpath,cremodel_,sbmlDoc)
+	if species:
+		writeFunc(modelpath,cremodel_)
+	writeReac(modelpath,cremodel_)
 
 	SBMLok  = validateModel( sbmlDoc )
 	if ( SBMLok ):
@@ -67,12 +70,224 @@ def mooseWriteSBML(modelpath,filename):
 		cerr << "Errors encountered " << endl;
 		return -1;
 
+def printParameters( kl, k, kvalue, unit ):
+	para = kl.createParameter()
+	para.setId(str(idBeginWith( k )))
+	para.setValue( kvalue )
+	para.setUnits( unit )
+    
+def parmUnit( rct_order,cremodel_ ):
+	order = rct_order
+	if order == 0:
+		unit_stream = "per_second"
+	elif order == 1:
+		unit_stream = "per_item_per_second"
+	elif order == 2:
+		unit_stream ="per_item_sq_per_second"
+	else:
+		unit_stream = "per_item_"+str(rct_order)+"_per_second";
+
+	lud =cremodel_.getListOfUnitDefinitions();
+	flag = False;
+	for i in range( 0,len(lud)):
+		ud = lud.get(i);
+		if ( ud.getId() == unit_stream ):
+			flag = True;
+			break;
+	if ( not flag ):
+		unitdef = cremodel_.createUnitDefinition()
+		unitdef.setId( unit_stream)
+		#Create individual unit objects that will be put inside the UnitDefinition .
+		if order != 0 :
+			unit = unitdef.createUnit()
+			unit.setKind( UNIT_KIND_ITEM )
+			unit.setExponent( -order )
+			unit.setMultiplier(1)
+			unit.setScale( 0 )
+
+		unit = unitdef.createUnit();
+		unit.setKind( UNIT_KIND_SECOND );
+		unit.setExponent( -1 );
+		unit.setMultiplier( 1 );
+		unit.setScale ( 0 );
+	return unit_stream
+	
+def getSubprd(cremodel_,mobjEnz,type,neighborslist):
+	if type == "sub":
+		reacSub = neighborslist
+		reacSubCou = Counter(reacSub)
+
+		#print " reacSubCou ",reacSubCou,"()",len(reacSubCou)
+		noofSub = len(reacSubCou)
+		rate_law = " "
+		if reacSub:
+			rate_law = processRateLaw(reacSubCou,cremodel_,noofSub,"sub",mobjEnz)
+			return len(reacSub),rate_law
+		else:
+			print reac.className+ " has no substrate"
+			return 0,rate_law
+	elif type == "prd":
+		reacPrd = neighborslist
+		reacPrdCou = Counter(reacPrd)
+		noofPrd = len(reacPrdCou)
+		rate_law = " "
+		if reacPrd:
+			rate_law = processRateLaw(reacPrdCou,cremodel_,noofPrd,"prd",mobjEnz)
+			return len(reacPrd),rate_law
+	elif type == "enz":
+		enzModifier = neighborslist
+		enzModCou = Counter(enzModifier)
+		noofMod = len(enzModCou)
+		rate_law = " "
+		if enzModifier:
+			rate_law = processRateLaw(enzModCou,cremodel_,noofMod,"Modifier",mobjEnz)
+			return len(enzModifier),rate_law
+	
+
+def processRateLaw(objectCount,cremodel,noofObj,type,mobjEnz):
+	rate_law = ""
+	nameList_[:] = []
+	for value,count in objectCount.iteritems():
+		value = moose.element(value)
+		nameIndex = value.name+"_"+str(value.getId().value)+"_"+str(value.getDataIndex())+"_"
+		clean_name = (str(idBeginWith(convertSpecialChar(nameIndex))))
+		if mobjEnz == True:
+			nameList_.append(clean_name)
+		if type == "sub":
+			sbmlRef = cremodel.createReactant()
+		elif type == "prd":
+			sbmlRef = cremodel.createProduct()
+		elif type == "Modifier":
+			sbmlRef = cremodel.createModifier()
+			sbmlRef.setSpecies(clean_name)
+
+		if type == "sub" or type == "prd":
+			sbmlRef.setSpecies(clean_name)
+
+			sbmlRef.setStoichiometry( count)
+			if clean_name in spe_constTrue:
+				sbmlRef.setConstant(True)
+			else:
+				sbmlRef.setConstant(False)
+		if ( count == 1 ):
+			if rate_law == "":
+				rate_law = clean_name
+			else:
+				rate_law = rate_law+"*"+clean_name
+		else:
+			if rate_law == "":
+				rate_law = clean_name+"^"+str(count)
+			else:
+				rate_law = rate_law+"*"+clean_name + "^" + str(count)
+	return(rate_law)
+
+def listofname(reacSub,mobjEnz):
+	objectCount = Counter(reacSub)
+	nameList_[:] = []
+	for value,count in objectCount.iteritems():
+		value = moose.element(value)
+		nameIndex = value.name+"_"+str(value.getId().value)+"_"+str(value.getDataIndex())+"_"
+		clean_name = convertSpecialChar(nameIndex)
+		if mobjEnz == True:
+			nameList_.append(clean_name)
+def writeReac(modelpath,cremodel_):
+	for reac in wildcardFind(modelpath+'/##[ISA=ReacBase]'):
+		reaction = cremodel_.createReaction()
+		reacannoexist = False
+		reacGpname = " "
+		cleanReacname = convertSpecialChar(reac.name) 
+		reaction.setId(str(idBeginWith(cleanReacname+"_"+str(reac.getId().value)+"_"+str(reac.getDataIndex())+"_")))
+		reaction.setName(cleanReacname)
+		Kf = reac.numKf
+		Kb = reac.numKb
+		if Kb == 0.0:
+			reaction.setReversible( False )
+		else:
+			reaction.setReversible( True )
+		
+		reaction.setFast( False )
+		if moose.exists(reac.path+'/info'):
+			Anno = moose.Annotator(reac.path+'/info')
+			notesR = Anno.notes
+			if notesR != "":
+				cleanNotesR= convertNotesSpecialChar(notesR)
+				notesStringR = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+ cleanNotesR + "\n\t </body>"
+				reaction.setNotes(notesStringR)
+			element = moose.element(reac)
+			ele = getGroupinfo(element)
+			if ele.className == "Neutral":
+				reacGpname = "<moose:Group>"+ ele.name + "</moose:Group>\n"
+				reacannoexist = True
+			if reacannoexist :
+				reacAnno = "<moose:ModelAnnotation>\n"
+				if reacGpname:
+					reacAnno = reacAnno + reacGpname
+				reacAnno = reacAnno+ "</moose:ModelAnnotation>"
+				#s1.appendAnnotation(XMLNode.convertStringToXMLNode(speciAnno))
+				reaction.setAnnotation(reacAnno)
+		
+		kl_s = sRL = pRL = ""
+		
+		reacSub = reac.neighbors["sub"]
+		reacPrd = reac.neighbors["prd"]
+		if not reacSub and not reacPrd:
+			print " Reaction ",reac.name, "missing substrate and product"
+		else:
+			kfl = reaction.createKineticLaw()
+			if reacSub:
+				noofSub,sRateLaw = getSubprd(cremodel_,False,"sub",reacSub)
+				if noofSub:
+					cleanReacname = cleanReacname+"_"+str(reac.getId().value)+"_"+str(reac.getDataIndex())+"_"
+					kfparm = idBeginWith(cleanReacname)+"_"+"Kf"
+					sRL = idBeginWith(cleanReacname) + "_Kf * " + sRateLaw
+					unit = parmUnit( noofSub-1 ,cremodel_)
+					printParameters( kfl,kfparm,Kf,unit ); 
+					kl_s = sRL
+				else:
+					print reac.name + " has no substrate"
+					return -2
+			else:
+				print " Substrate missing for reaction ",reac.name
+				
+			if reacPrd:
+				noofPrd,pRateLaw = getSubprd(cremodel_,False,"prd",reacPrd)
+				if  noofPrd:
+					if Kb:
+						kbparm = idBeginWith(cleanReacname)+"_"+"Kb"
+						pRL = idBeginWith(cleanReacname) + "_Kb * " + pRateLaw
+						unit = parmUnit( noofPrd-1 , cremodel_)
+						printParameters( kfl,kbparm,Kb,unit );
+						kl_s = kl_s+ "- "+pRL
+				else:
+					print reac.name + " has no product"
+					return -2
+			else:
+				print " Product missing for reaction ",reac.name
+		kfl.setFormula(kl_s)
+
+def writeFunc(modelpath,cremodel_):
+	funcs = wildcardFind(modelpath+'/##[ISA=Function]')
+	#if func:
+	for func in funcs:
+		if func:
+			fName = idBeginWith( convertSpecialChar(func.parent.name+"_"+str(func.parent.getId().value)+"_"+str(func.parent.getDataIndex())+"_"))
+			item = func.path+'/x[0]'
+			sumtot = moose.element(item).neighbors["input"]
+			expr = moose.element(func).expr
+			for i in range(0,len(sumtot)):
+				v ="x"+str(i)
+				if v in expr:
+					z = str(convertSpecialChar(sumtot[i].name+"_"+str(moose.element(sumtot[i]).getId().value)+"_"+str(moose.element(sumtot[i]).getDataIndex()))+"_")
+					expr = expr.replace(v,z)
+			rule =  cremodel_.createAssignmentRule()
+			rule.setVariable( fName )
+			rule.setFormula( expr )
+			
 def convertNotesSpecialChar(str1):
 	d = {"&":"_and","<":"_lessthan_",">":"_greaterthan_","BEL":"&#176"}
 	for i,j in d.iteritems():
 		str1 = str1.replace(i,j)
 	return str1
-	
 def getGroupinfo(element):
 	#   Note: At this time I am assuming that if group exist (incase of Genesis)
 	#   1. for 'pool' its between compartment and pool, /modelpath/Compartment/Group/pool 
@@ -182,7 +397,8 @@ def writeSpecies(modelpath,cremodel_,sbmlDoc):
 				if speciGpname:
 					speciAnno = speciAnno + speciGpname
 				speciAnno = speciAnno+ "</moose:ModelAnnotation>"
-	
+	return True
+
 def writeCompt(modelpath,cremodel_):
 	#getting all the compartments
 	for compt in wildcardFind(modelpath+'/##[ISA=ChemCompt]'):
