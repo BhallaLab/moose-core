@@ -25,6 +25,7 @@ from moose import *
 import libsbml
 
 def mooseReadSBML(filepath,loadpath):
+	print " filepath ",filepath
 	document = libsbml.readSBML(filepath)
 	if (document.getNumErrors() > 0):
 		print("Encountered the following SBML errors:" )
@@ -34,8 +35,8 @@ def mooseReadSBML(filepath,loadpath):
 		level = document.getLevel();
 		version = document.getVersion();
 		print("\n" + "File: " + filepath + " (Level " + str(level) + ", version " + str(version) + ")" );
-		model = document.getModel();
-	return True
+		#model = document.getModel();
+	return loadpath
 
 
 
@@ -51,8 +52,8 @@ if __name__ == "__main__":
     else:
     	loadpath = path
     
-    written = mooseReadSBML(filepath,loadpath)
-    if written:
-        print " Read to ",written
+    read = mooseReadSBML(filepath,loadpath)
+    if read:
+        print " Read to path",loadpath
     else:
         print " could not read  SBML to MOOSE"
