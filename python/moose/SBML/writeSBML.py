@@ -28,11 +28,14 @@ from collections import Counter
 #	Table should be written
 #	Group's should be added
 #   x and y cordinates shd be added if exist
-#	function need to be checked if expr has mathmatical form
+
 def mooseWriteSBML(modelpath,filename):
 	sbmlDoc = SBMLDocument(3, 1)
 	filepath,filenameExt = os.path.split(filename)
-	filename = filenameExt[:filenameExt.find('.')]
+	if filenameExt.find('.') != -1:
+		filename = filenameExt[:filenameExt.find('.')]
+	else:
+		filename = filenameExt
 	
 	#validatemodel
 	sbmlOk = False
@@ -70,7 +73,8 @@ def mooseWriteSBML(modelpath,filename):
 		gg = filepath+"/"+filename+'.xml'
 
 		writeSBMLToFile( sbmlDoc, gg)
-		return gg
+		print " gg ",gg
+		return True
 	if ( not SBMLok ):
 		cerr << "Errors encountered " << endl;
 		return -1;
