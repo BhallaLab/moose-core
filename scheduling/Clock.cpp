@@ -307,7 +307,7 @@ const Cinfo* Clock::initCinfo()
         "Name", "Clock",
         "Author", "Upinder S. Bhalla, Nov 2013, NCBS",
         "Description",
-        "Clock: Clock class. Handles sequencing of operations in simulations."
+
         "Every object scheduled for operations in MOOSE is connected to one"
         "of the 'Tick' entries on the Clock.\n"
         "The Clock manages 32 'Ticks', each of which has its own dt,"
