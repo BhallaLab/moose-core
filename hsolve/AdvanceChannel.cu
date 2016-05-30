@@ -223,6 +223,7 @@ void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
 
 	int num_comps = V_.size();
 	int num_Ca_pools = ca_.size();
+	int num_cadep_gates = h_cagate_expand_indices.size();
 
 	int BLOCKS = num_comps/THREADS_PER_BLOCK;
 	BLOCKS = (num_comps%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
@@ -234,14 +235,18 @@ void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
     		d_V_rows, d_V_fractions,
     		vTable_.get_num_of_columns(), num_comps);
 
-	// Getting lookup metadata from Ca pools
-	get_lookup_rows_and_fractions_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_ca,
-			d_Ca_table,
-			caTable_.get_min(), caTable_.get_max(), caTable_.get_dx(),
-			d_Ca_rows, d_Ca_fractions,
-			caTable_.get_num_of_columns(), num_Ca_pools);
+	if(num_cadep_gates > 0){
+		// Getting lookup metadata from Ca pools only if there are gates depending on Ca
+		get_lookup_rows_and_fractions_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_ca,
+				d_Ca_table,
+				caTable_.get_min(), caTable_.get_max(), caTable_.get_dx(),
+				d_Ca_rows, d_Ca_fractions,
+				caTable_.get_num_of_columns(), num_Ca_pools);
+	}
 
-	cudaCheckError(); // Checking for cuda related errors.
+	#ifdef PIN_POINT_ERROR
+		cudaCheckError(); // Checking for cuda related errors.
+	#endif
 }
 
 
@@ -284,7 +289,9 @@ void HSolveActive::advance_channels_cuda_wrapper(double dt){
 				dt, num_cadep_gates );
 	}
 
-	cudaCheckError(); // Checking for cuda related errors.
+	#ifdef PIN_POINT_ERROR
+		cudaCheckError(); // Checking for cuda related errors.
+	#endif
 }
 
 
@@ -301,7 +308,9 @@ void HSolveActive::get_compressed_gate_values_wrapper(){
 			d_state_,
 			num_cmprsd_gates);
 
-	cudaCheckError(); // Checking for cuda related errors.
+	#ifdef PIN_POINT_ERROR
+		cudaCheckError(); // Checking for cuda related errors.
+	#endif
 
 }
 

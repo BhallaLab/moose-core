@@ -113,54 +113,54 @@ void HSolveActive::step( ProcPtr info )
 
 #ifdef USE_CUDA
     GpuTimer advChanTimer, calcChanTimer, umTimer, solverTimer, advCalcTimer;
-    advChanTimer.Start();
+    //advChanTimer.Start();
     	advanceChannels( info->dt );
-    advChanTimer.Stop();
-    advanceChannelsTime = advChanTimer.Elapsed();
+    //advChanTimer.Stop();
+    //advanceChannelsTime = advChanTimer.Elapsed();
 
-    calcChanTimer.Start();
+    //calcChanTimer.Start();
     	calculateChannelCurrents();
-	calcChanTimer.Stop();
-	calcChanCurTime = calcChanTimer.Elapsed();
+	//calcChanTimer.Stop();
+	//calcChanCurTime = calcChanTimer.Elapsed();
 
-	umTimer.Start();
+	//umTimer.Start();
 		updateMatrix();
-	umTimer.Stop();
-	updateMatTime = umTimer.Elapsed();
+	//umTimer.Stop();
+	//updateMatTime = umTimer.Elapsed();
 
-	solverTimer.Start();
+	//solverTimer.Start();
 		HSolvePassive::forwardEliminate();
 		HSolvePassive::backwardSubstitute();
 		cudaMemcpy(d_Vmid, &(VMid_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 		cudaMemcpy(d_V, &(V_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 
-	solverTimer.Stop();
-	solverTime = solverTimer.Elapsed();
+	//solverTimer.Stop();
+	//solverTime = solverTimer.Elapsed();
 
-	advCalcTimer.Start();
+	//advCalcTimer.Start();
 		advanceCalcium();
-	advCalcTimer.Stop();
-	advCalcTime = advCalcTimer.Elapsed();
+	//advCalcTimer.Stop();
+	//advCalcTime = advCalcTimer.Elapsed();
 
-	start = getTime();
+	//start = getTime();
 		advanceSynChans( info );
-	end = getTime();
-	advSynchanTime = (end-start)/1000.0f;
+	//end = getTime();
+	//advSynchanTime = (end-start)/1000.0f;
 
-	start = getTime();
+	//start = getTime();
 		sendValues( info );
-	end = getTime();
-	sendValuesTime = (end-start)/1000.0f;
+	//end = getTime();
+	//sendValuesTime = (end-start)/1000.0f;
 
-	start = getTime();
+	//start = getTime();
 		sendSpikes( info );
-	end = getTime();
-	sendSpikesTime = (end-start)/1000.0f;
+	//end = getTime();
+	//sendSpikesTime = (end-start)/1000.0f;
 
-	start = getTime();
+	//start = getTime();
 		//transfer_memory2cpu_cuda();
-	end = getTime();
-	memoryTransferTime = (end-start)/1000.0f;
+	//end = getTime();
+	//memoryTransferTime = (end-start)/1000.0f;
 #else
 
 	start = getTime();
@@ -610,15 +610,51 @@ void HSolveActive::advanceChannels( double dt )
 		is_initialized = true;
 	}
 
-	// Calling the kernels
-	cudaSafeCall(cudaMemcpy(d_V, &(V_.front()), nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
-	cudaSafeCall(cudaMemcpy(d_ca, &(ca_.front()), ca_.size()*sizeof(double), cudaMemcpyHostToDevice));
+	GpuTimer timer0, timer1, timer2, timer3;
+	float time, time1, time2, time3;
 
-	get_lookup_rows_and_fractions_cuda_wrapper(dt); // Gets lookup values for Vm and Ca_.
-	advance_channels_cuda_wrapper(dt); // Advancing fraction values.
-	get_compressed_gate_values_wrapper(); // Getting values of new state
+		// Calling the kernels
+		cudaSafeCall(cudaMemcpy(d_V, &(V_.front()), nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
+		cudaSafeCall(cudaMemcpy(d_ca, &(ca_.front()), ca_.size()*sizeof(double), cudaMemcpyHostToDevice));
 
-	cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
+	timer0.Start();
+		get_lookup_rows_and_fractions_cuda_wrapper(dt); // Gets lookup values for Vm and Ca_.
+		advance_channels_cuda_wrapper(dt); // Advancing fraction values.
+		get_compressed_gate_values_wrapper(); // Getting values of new state
+	timer0.Stop();
+	time = timer0.Elapsed();
+	//cout << "GPU Adv Channel time " << time << endl;
+
+	/*
+	timer1.Start();
+		get_lookup_rows_and_fractions_cuda_wrapper(dt); // Gets lookup values for Vm and Ca_.
+	timer1.Stop();
+	time1 = timer1.Elapsed();
+
+	timer2.Start();
+		advance_channels_cuda_wrapper(dt); // Advancing fraction values.
+	timer2.Stop();
+	time2 = timer2.Elapsed();
+
+	timer3.Start();
+		get_compressed_gate_values_wrapper(); // Getting values of new state
+	timer3.Stop();
+	time3 = timer3.Elapsed();
+
+	time = time1 + time2 + time3;
+
+	cout << "GPU adv chan time split" <<  time << " " << (time1*100.0f)/time <<
+			" " << (time2*100.0f)/time <<
+			" " << (time3*100.0f)/time << endl;
+	*/
+
+		cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
+
+	if(step_num == 1)
+		cout << channel_.size() << " " << num_gates << " " << state_.size() << " extra % " << (state_.size()*100.0f)/num_gates << endl;
+
+	if(step_num < 10)
+		cout << "Adv Channel time " << time << endl;
 
 #else
 
@@ -724,6 +760,7 @@ void HSolveActive::advanceChannels( double dt )
     }
 
     u64 cpu_advchan_end = getTime();
+    cout << "CPU advance chan time " << (cpu_advchan_end-cpu_advchan_start)/1000.0f << endl;
 
 #endif
       
@@ -1012,13 +1049,14 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	for(int i=0;i<num_catarget_chans;i++) temp_x[i] = 1;
 	cudaMemcpy(d_capool_onex, temp_x, num_catarget_chans*sizeof(double), cudaMemcpyHostToDevice);
 
-
+	/*
 	// Writing load to file.
 	ofstream load_file("umat_load.csv");
 	load_file << "load" << endl;
 	for (int i = 0; i < nCompt_; ++i) {
 		load_file << chan_rowPtr[i+1]-chan_rowPtr[i] << endl;
 	}
+	*/
 
 	UPDATE_MATRIX_APPROACH = choose_update_matrix_approach();
 
