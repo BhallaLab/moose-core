@@ -100,11 +100,16 @@ namespace moose {
     }
 
     // Fix the given path.
-    string createPosixPath( const string& path )
+    string createMOOSEPath( const string& path )
     {
         string s = path;                        /* Local copy */
-        string undesired = ":?\"<>|[]";
+        // Remove [0] from paths. They will be annoying for normal users.
+        std::string::size_type n = 0;
+        string zeroIndex("[0]");
+        while( (n = s.find( zeroIndex, n )) != std::string::npos )
+            s.erase( n, zeroIndex.size() );
 
+        string undesired = ":?\"<>|";
         for (size_t i = 0; i < s.size() ; ++i)
         {
             bool found = undesired.find(s[i]) != string::npos;
@@ -206,16 +211,7 @@ namespace moose {
     {
         // Just write the moose path. Things becomes messy when indexing is
         // used.
-#if 0
-        size_t p1 = path.find( '[', 0 );
-        while( p1 != std::string::npos )
-        {
-            size_t p2 = path.find( ']', p1 );
-            path.erase( p1, p2-p1+1 );
-            p1 = path.find( '[', p2 );
-        }
-#endif
-        return path;
+        return createMOOSEPath( path );
     }
 
     /*  Return formatted string 
