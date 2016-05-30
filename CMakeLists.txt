@@ -109,13 +109,19 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 ############################ BUILD CONFIGURATION #################################
 
 # VERBOSITY OF OUTPUT
-if(VERBOSITY)
-    message(STATUS "Verbosity of output is ${VERBOSITY}. This is not implemented
-    yet!")
-    add_definitions(-DVERBOSITY=${VERBOSITY})
-else()
-    message(STATUS "Moose will be quiet")
-    add_definitions(-DQUIET_MODE)
+
+option(WITH_CUDA "Enable GPU acceleration" ON)
+if(WITH_CUDA)
+    find_package(CUDA)
+    if(CUDA_FOUND)
+        MESSAGE(STATUS "Using CUDA ${CUDA_VERSION}")
+    else(CUDA_FOUND)
+        MESSAGE(FATAL_ERROR "I could not locate CUDA!\n"
+        "If CUDA is installed in non-standard place use -DCUDA_TOOLKIT_ROOT_DIR"
+        " to specify the PATH to CUDA e.g. \n"
+        "   $ cmake -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-7.5 .." 
+        )
+    endif(CUDA_FOUND)
 endif()
 
 # Default macros
