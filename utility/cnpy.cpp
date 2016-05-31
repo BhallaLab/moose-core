@@ -36,8 +36,8 @@ char BigEndianTest() {
 char map_type(const std::type_info& t)
 {
     if(t == typeid(float) ) return 'f';
-    if(t == typeid(double) ) return 'f';
-    if(t == typeid(long double) ) return 'f';
+    if(t == typeid(double) ) return 'd';
+    if(t == typeid(long double) ) return 'd';
 
     if(t == typeid(int) ) return 'i';
     if(t == typeid(char) ) return 'i';
@@ -142,6 +142,8 @@ void change_shape_in_header( const string& filename
     size_t shapePos = header.find( "'shape':" );
     size_t lbrac = header.find( '(', shapePos );
     size_t rbrac = header.find( ')', lbrac );
+    assert( lbrac > shapePos );
+    assert( rbrac > lbrac );
 
     string prefixHeader = header.substr( 0, lbrac + 1 );
     string postfixHeader = header.substr( rbrac );
@@ -155,7 +157,7 @@ void change_shape_in_header( const string& filename
     for (size_t i = 0; i < tokens.size(); i++) 
         newShape += moose::toString( atoi( tokens[i].c_str() ) + data_len/numcols ) + ",";
 
-    string newHeader = prefixHeader + newShape + postfixHeader;
+    string newHeader = prefixHeader + newShape + postfixHeader + "\n";
     if( newHeader.size() < header.size() )
     {
         cout << "Warn: Modified header can not be smaller than old header" << endl;

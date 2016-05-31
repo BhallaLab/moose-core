@@ -188,7 +188,6 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
     {
         Id tId = tableIds_[i];
         int tickNum = tId.element()->getTick();
-        cerr << "Tick num " << tickNum << " " << clk->getTickDt( tickNum ) << endl;
         tableDt_.push_back( clk->getTickDt( tickNum ) );
     }
 
