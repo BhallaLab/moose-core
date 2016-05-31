@@ -42,19 +42,8 @@ install:
 
 script:
     - sudo ldconfig /usr/lib64
-    - # First test is normal make scripts. (outdated).
-    - make 
-    - # Now test the cmake with gsl
-    - mkdir -p _GSL_BUILD && cd _GSL_BUILD && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python ..
-    - make && ctest --output-on-failure
-    - cd .. # Build with python3.
-    - mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 ..
-    - make && ctest --output-on-failure
-    - cd .. # Now with boost.
-    - mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python ..
-    - make && ctest --output-on-failure
-    - cd .. # Now with boost and python3.
-    - mkdir -p _BOOST_BUILD2 && cd _BOOST_BUILD2 && cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 ..
-    - make && ctest --output-on-failure
-    - cd ..
-    - echo "All done. Phew"
+    - mkdir -p _build && cd _build 
+    - echo "WITH_MPI is off!. Fix me later" 
+    - cmake -DDEBUG=ON -DWITH_DOC=OFF -WITH_MPI=OFF -DPYTHON_EXECUTABLE=/usr/bin/python .. 
+    - make
+    - ctest --output-on-failure

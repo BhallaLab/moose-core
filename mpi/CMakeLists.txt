@@ -1,9 +1,9 @@
 include_directories(../msg ../basecode)
-IF(USE_MPI) 
+IF(WITH_MPI) 
     find_package(MPI REQUIRED)
     include_directories(MPI_INCLUDE_PATH)
     ADD_DEFINITIONS(-DUSE_MPI)
-ENDIF(USE_MPI)
+ENDIF(WITH_MPI)
 
 add_library(moose_mpi 
     PostMaster.cpp 

@@ -41,6 +41,12 @@
 #include <sys/sysctl.h>
 #endif // MACOSX
 
+#if defined(__GXX_EXPERIMENTAL_CXX0X) || __cplusplus >= 201103L
+// Use it to get the number of processors.
+#include <thread>
+#endif
+
+
 #ifdef DO_UNIT_TESTS
 #include <iomanip>
 int testIndex = 0;
@@ -105,6 +111,7 @@ unsigned int getNumCores()
 
     numCPU = sysinfo.dwNumberOfProcessors;
 #endif
+
 
 #ifdef LINUX
     numCPU = sysconf( _SC_NPROCESSORS_ONLN );

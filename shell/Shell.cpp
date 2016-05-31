@@ -31,6 +31,10 @@ using namespace std;
 #include "../sbml/MooseSbmlReader.h"
 #endif
 
+#ifdef USE_OPENMPI
+#include "omp.h"
+#endif
+
 const unsigned int Shell::OkStatus = ~0;
 const unsigned int Shell::ErrorStatus = ~1;
 
@@ -365,8 +369,15 @@ void Shell::doQuit()
 
 void Shell::doStart( double runtime, bool notify )
 {
+        int tmpN;
     Id clockId( 1 );
+//#pragma omp parallel 
+        {
+//#pragma omp single
+                {
     SetGet2< double, bool >::set( clockId, "start", runtime, notify );
+                }
+        }
 }
 
 bool isDoingReinit()

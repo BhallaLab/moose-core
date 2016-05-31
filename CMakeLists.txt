@@ -81,6 +81,7 @@ option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_CYTHON "Build python extension using Cython. (experimental)" OFF)
 option(WITH_MPI  "Enable Openmpi support" OFF)
+option(WITH_OPENMP  "Enable Openmp support" ON)
 option(WITH_BOOST "Use boost library instead of GSL" OFF)
 option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
 
@@ -164,6 +165,7 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
 if(WITH_BOOST)
     set(WITH_GSL OFF)
+    message(STATUS "USING BOOST LIBRARIES")
 endif(WITH_BOOST)
 
 # If this variable is used while packaging; we build this project using another
@@ -223,6 +225,7 @@ set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
 
 if(WITH_GSL)
+    message(STATUS "USING GSL LIBRARIES")
     if(GSL_STATIC_HOME)
         SET(GSL_INCLUDE_DIRS "${GSL_STATIC_HOME}/include")
         find_library(GSL_LIBRARY 
@@ -340,6 +343,17 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
     add_definitions(-DUSE_READLINE)
     include_directories(${Readline_INCLUDE_DIR})
 endif()
+
+if(WITH_OPENMP)
+    find_package(OpenMP REQUIRED)
+    MESSAGE("++ OpenMP support is ON")
+    add_definitions(-DUSE_OPENMPI -O3)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${-pthread}")
+    set(NUM_THREADS "2")
+	
+endif(WITH_OPENMP)
 
 # Openmpi
 if(WITH_MPI)

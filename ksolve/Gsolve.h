@@ -11,6 +11,13 @@
 #define _GSOLVE_H
 
 class Stoich;
+
+//////////////////////////////////////////////////////////////////
+// NTHREADS = NUM_THREADS
+//////////////////////////////////////////////////////////////////
+const char *env_value1 = getenv("NUM_THREADS");
+const int NTHREADS  = atoi(env_value1);
+
 class Gsolve: public ZombiePoolInterface
 {
 	public: 
