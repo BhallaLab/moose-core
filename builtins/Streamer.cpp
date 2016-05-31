@@ -141,7 +141,6 @@ Streamer::Streamer()
     columns_.push_back( "time" );               /* First column is time. */
     tables_.resize(0);
     tableIds_.resize(0);
-    columns_.resize(0);
     data_.resize(0);
 }
 
@@ -171,9 +170,29 @@ void Streamer::cleanUp( void )
  */
 void Streamer::reinit(const Eref& e, ProcPtr p)
 {
+    if( tables_.size() == 0 )
+    {
+        moose::showWarn( "Zero tables in streamer. Disabling Streamer" );
+        e.element()->setTick( -2 );             /* Disable process */
+        return;
+    }
+
     // Push each table dt_ into vector of dt
     for( size_t i = 0; i < tables_.size(); i++)
         tableDt_.push_back( tables_[i]->getDt() );
+
+    // Make sure all tables have same dt_ else disable the streamer.
+    for (size_t i = 0; i < tableDt_.size() - 1; i++) 
+    {
+        if( tableDt_[i] != tableDt_[i+1] )
+        {
+            moose::showWarn(  
+                    "Table with different step size (dt) found. Disabling Streamer"
+                    );
+            e.element()->setTick( -1 );
+        }
+        break;
+    }
 
     if( ! isOutfilePathSet_ )
     {
@@ -234,8 +253,11 @@ void Streamer::addTable( Id table )
  */
 void Streamer::addTables( vector<Id> tables )
 {
+    if( tables.size() == 0 )
+        return;
     for( vector<Id>::const_iterator it = tables.begin(); it != tables.end(); it++)
         addTable( *it );
+
 }
 
 

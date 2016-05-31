@@ -52,6 +52,7 @@
 
 #include <ctime>
 #include <deque>
+#include <cstdio>
 
 #include "header.h"
 #include "../utility/utility.h"
