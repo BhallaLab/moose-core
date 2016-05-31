@@ -18,6 +18,7 @@
 
 #include "cnpy.hpp"
 #include <cstring>
+#include "print_function.hpp"
 
 using namespace std;
 
@@ -80,16 +81,10 @@ void split(vector<string>& strs, string& input, const string& pat)
  *
  * @return  true if file is sane, else false.
  */
-bool is_valid_numpy_file( const string& npy_file )
+bool is_valid_numpy_file( FILE* fp )
 {
+    assert( fp );
     char buffer[__pre__size__];
-    FILE* fp = NULL;
-    fp = fopen( npy_file.c_str(), "r" );
-    if(!fp)
-    {
-        LOG( moose::warning, "Can't open " << npy_file );
-        return false;
-    }
     fread( buffer, sizeof(char), __pre__size__, fp );
     bool equal = true;
     // Check for equality
@@ -136,6 +131,12 @@ void change_shape_in_header( const string& filename
 
     // Always open file in r+b mode. a+b mode always append at the end.
     FILE* fp = fopen( filename.c_str(), "r+b" );
+    if( ! fp )
+    {
+        moose::showWarn( "Failed to open " + filename );
+        return;
+    }
+
     parse_header( fp, header );
 
     size_t shapePos = header.find( "'shape':" );
