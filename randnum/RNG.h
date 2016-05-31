@@ -57,14 +57,16 @@ class RNG
         RNG ()                                  /* constructor      */
         {
             // Setup a random seed if possible.
-#if defined(USE_BOOST) && defined(BOOST_RANDOM_DEVICE_EXISTS)
+#if defined(USE_BOOST) 
+#if defined(BOOST_RANDOM_DEVICE_EXISTS)
             boost::random::random_device rd;
             setSeed( rd() );
+#endif
 #elif defined(ENABLE_CPP11)
             std::random_device rd;
             setSeed( rd() );
 #else
-            mtseed( time(NULL) );
+            moose::mtseed( time(NULL) );
 #endif     /* -----  not ENABLE_CPP11  ----- */
 
         }
@@ -87,7 +89,7 @@ class RNG
 #if defined(USE_BOOST) || defined(ENABLE_CPP11)
             rng_.seed( seed_ );
 #else
-            mtseed( seed_ );
+            moose::mtseed( seed_ );
 #endif
         }
 
