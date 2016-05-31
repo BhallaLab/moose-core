@@ -66,18 +66,18 @@ def mooseWriteSBML(modelpath,filename):
 	writeReac(modelpath,cremodel_)
 	writeEnz(modelpath,cremodel_)
 
-	SBMLok  = validateModel( sbmlDoc )
+	consistencyMessages = ""
+	SBMLok = validateModel( sbmlDoc )
 	if ( SBMLok ):
-		filepath = '/home/harsha/Trash/python'
-		oo = writeSBMLToString(sbmlDoc)
-		gg = filepath+"/"+filename+'.xml'
+		#filepath = '/home/harsha/Trash/python'
+		#SBMLString = writeSBMLToString(sbmlDoc)
+		writeTofile = filepath+"/"+filename+'.xml'
+		writeSBMLToFile( sbmlDoc, writeTofile)
+		return True,consistencyMessages
 
-		writeSBMLToFile( sbmlDoc, gg)
-		print " gg ",gg
-		return True
 	if ( not SBMLok ):
 		cerr << "Errors encountered " << endl;
-		return -1;
+		return -1,consistencyMessages
 
 def writeEnz(modelpath,cremodel_):
 	for enz in wildcardFind(modelpath+'/##[ISA=EnzBase]'):
@@ -454,6 +454,8 @@ def convertNotesSpecialChar(str1):
 	d = {"&":"_and","<":"_lessthan_",">":"_greaterthan_","BEL":"&#176"}
 	for i,j in d.iteritems():
 		str1 = str1.replace(i,j)
+	#stripping \t \n \r and space from begining and end of string
+	str1 = str1.strip(' \t\n\r')
 	return str1
 def getGroupinfo(element):
 	#   Note: At this time I am assuming that if group exist (incase of Genesis)
@@ -552,7 +554,7 @@ def writeSpecies(modelpath,cremodel_,sbmlDoc):
 				if notesS != "":
 					cleanNotesS= convertNotesSpecialChar(notesS)
 					notesStringS = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+ cleanNotesS + "\n\t </body>"
-					#s1.setNotes(notesStringS)
+					s1.setNotes(notesStringS)
 			#FindGroupName
 			element = moose.element(spe)
 			ele = getGroupinfo(element)
@@ -636,7 +638,6 @@ def validateModel( sbmlDoc ):
 	if ( not sbmlDoc ):
 		print "validateModel: given a null SBML Document"
 		return False
-
 	consistencyMessages    = ""
 	validationMessages     = ""
 	noProblems             = True
@@ -656,7 +657,6 @@ def validateModel( sbmlDoc ):
 				++numConsistencyErrors;
 			else:
 				++numConsistencyWarnings
-
 		constStr = sbmlDoc.printErrors()
 		consistencyMessages = constStr
 	  
@@ -671,33 +671,36 @@ def validateModel( sbmlDoc ):
 		if ( numCheckFailures > 0 ):
 			noProblems = False;
 			for i in range(0, (numCheckFailures ) ):
+				consistencyMessages = sbmlDoc.getErrorLog().toString()
 				sbmlErr = sbmlDoc.getError(i);
-				print " Err ",sbmlErr
 				if ( sbmlErr.isFatal() or sbmlErr.isError() ):
 					++numValidationErrors;
 				else:
 					++numValidationWarnings;
+		warning = sbmlDoc.getErrorLog().toString()
 		oss = sbmlDoc.printErrors()
 		validationMessages = oss
 	if ( noProblems ):
 		return True
 	else:
+		if consistencyMessages != "":
+			print " consistency Warning: "+consistencyMessages
+		
 		if ( numConsistencyErrors > 0 ):
 			if numConsistencyErrors == 1: t = "" 
-			else: t="s"          
+			else: t="s"
 			print "ERROR: encountered " + numConsistencyErrors + " consistency error" +t+ " in model '" + sbmlDoc.getModel().getId() + "'."
 	if ( numConsistencyWarnings > 0 ):
 		if numConsistencyWarnings == 1:
 			t1 = "" 
 		else: t1 ="s"
 		print "Notice: encountered " + numConsistencyWarnings +" consistency warning" + t + " in model '" + sbmlDoc.getModel().getId() + "'."
-	  
+	  	
 	if ( numValidationErrors > 0 ):
 		if numValidationErrors == 1:
 			t2 = "" 
 		else: t2 ="s" 
 		print "ERROR: encountered " + numValidationErrors  + " validation error" + t2 + " in model '" + sbmlDoc.getModel().getId() + "'."
-		
 		if ( numValidationWarnings > 0 ):
 			if numValidationWarnings == 1:
 				t3 = "" 
@@ -706,7 +709,8 @@ def validateModel( sbmlDoc ):
 			print "Notice: encountered " + numValidationWarnings + " validation warning" + t3 + " in model '" + sbmlDoc.getModel().getId() + "'." 
 		
 		print validationMessages;
-	return ( numConsistencyErrors == 0 and numValidationErrors == 0 )
+	return ( numConsistencyErrors == 0 and numValidationErrors == 0)
+	#return ( numConsistencyErrors == 0 and numValidationErrors == 0, consistencyMessages)
 
 if __name__ == "__main__":
 
