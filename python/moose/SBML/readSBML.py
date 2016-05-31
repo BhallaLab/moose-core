@@ -94,10 +94,113 @@ def mooseReadSBML(filepath,loadpath):
 					modelAnnotaInfo = {}
 					mapParameter(model,globparameterIdValue)
 					errorFlag = createCompartment(basePath,model,comptSbmlidMooseIdMap)
+					if errorFlag:
+						specInfoMap = {}
+						errorFlag = createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap)
+					
+					if not errorFlag:
+						print " errorFlag ",errorFlag
+						#Any time in the middle if SBML does not read then I delete everything from model level
+						#This is important as while reading in GUI the model will show up untill built which is not correct
+						print "Deleted rest of the model"
+						moose.delete(basePath)
+				return baseId;
+
 
 	except IOError:
 		print "File " ,filepath ," does not exist."
-		
+
+def pullnotes(sbmlId,mooseId):
+	if sbmlId.getNotes() != None:
+		tnodec = ((sbmlId.getNotes()).getChild(0)).getChild(0)
+		notes = tnodec.getCharacters()
+		notes = notes.strip(' \t\n\r')
+		objPath = mooseId.path+"/info"
+		if not moose.exists(objPath):
+			objInfo = moose.Annotator(mooseId.path+'/info')
+		else:
+			objInfo = moose.element(mooseId.path+'/info')
+		objInfo.notes = notes
+
+def createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap):
+	# ToDo:
+	# - Need to add group name if exist in pool
+	# - Notes
+	# print "species "
+	if not 	(model.getNumSpecies()):
+		return False
+	else:
+		for sindex in range(0,model.getNumSpecies()):
+			spe = model.getSpecies(sindex)
+			sName = None
+			sId = spe.getId()
+
+			if spe.isSetName():
+				sName = spe.getName()
+				sName = sName.replace(" ","_space_")
+
+			if spe.isSetCompartment():
+				comptId = spe.getCompartment()
+
+			if not( sName ):
+				sName = sId
+
+			constant = spe.getConstant()
+			boundaryCondition = spe.getBoundaryCondition()
+			comptEl = comptSbmlidMooseIdMap[comptId]["MooseId"].path
+			hasonlySubUnit = spe.getHasOnlySubstanceUnits();
+			# "false": is {unit of amount}/{unit of size} (i.e., concentration or density). 
+			# "true": then the value is interpreted as having a unit of amount only.
+
+			if (boundaryCondition):
+				poolId = moose.BufPool(comptEl+'/'+sName)
+			else:
+				poolId = moose.Pool(comptEl+'/'+sName)
+			
+			if (spe.isSetNotes):
+				pullnotes(spe,poolId)
+					
+			specInfoMap[sId] = {"Mpath" : poolId, "const" : constant, "bcondition" : boundaryCondition, "hassubunit" : hasonlySubUnit, "comptId" : comptSbmlidMooseIdMap[comptId]["MooseId"]}
+			initvalue = 0.0
+			unitfactor,unitset = transformUnit(spe)
+			if(spe.isSetInitialAmount()):
+				initvalue = spe.getInitialAmount()
+				# moose is capable of populating number nInit so
+				# checking hasonlySubstanceUnit doesn't matter,
+				# populating nInit with this value automatically calculate the concInit.
+				# default unit is mole to convert to number we need to multiply by
+				# pow(NA) the avogadro's number
+				if not (unitset):
+					#unit is not set then pass milli mole which is not true for number
+					# so setting unitfactor to 1
+					unitfactor = 1
+				initvalue = initvalue * unitfactor * pow(6.0221409e23,1);
+				poolId.nInit = initvalue
+			elif ( spe.isSetInitialConcentration() ):
+				#ToDo : check 00976
+
+				initvalue = spe.getInitialConcentration();
+				#transValue will take care of multiplying any units are defined else millimole
+				#print " initvalue ",initvalue, unitfactor
+				unitfactor = 1
+				initvalue = initvalue * unitfactor
+				poolId.concInit = initvalue
+			else:
+				nr = model.getNumRules()
+				found = False
+				for nrItem in range(0,nr):
+					rule = model.getRule(nrItem)
+					assignRule = rule.isAssignment()
+					if ( assignRule ):
+						rule_variable = rule.getVariable()
+						if (rule_variable == sId):
+							found = True
+							break
+				if not (found):
+					print "Invalid SBML: Either initialConcentration or initialAmount must be set or it should be found in assignmentRule but non happening for ",sName
+					return False	
+	return True
+
 def transformUnit(unitForObject):
 	#print "unit ",UnitDefinition.printUnits(unitForObject.getDerivedUnitDefinition())
 	lvalue = 1.0
