@@ -21,6 +21,7 @@
 #include "header.h"
 #include "Streamer.h"
 #include "Clock.h"
+#include "utility/utility.h"
 
 const Cinfo* Streamer::initCinfo()
 {
@@ -243,7 +244,11 @@ void Streamer::addTable( Id table )
 
     // We don't want name of table here as column names since they may not be
     // unique. However, paths of tables are guarenteed to be unique.
-    columns_.push_back( moose::moosePathToUserPath( table.path() ) );
+    //columns_.push_back( moose::moosePathToUserPath( table.path() ) );
+
+    // NOTE: If user can make sure that names are unique in table, using name is
+    // better than using the full path.
+    columns_.push_back( moose::basename( table.path() ) );
 }
 
 /**
