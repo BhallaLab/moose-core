@@ -81,9 +81,107 @@ def mooseReadSBML(filepath,loadpath):
 				print("             events: " + str(model.getNumEvents()) );
 				print("\n");
 
+				if (model.getNumCompartments() == 0):
+					return False
+				else:
+					baseId = moose.Neutral(loadpath)
+					#All the model will be created under model as a thumbrule
+					basePath = moose.Neutral(baseId.path+'/model')
+					#Map Compartment's SBML id as key and value is list of[ Moose ID and SpatialDimensions ]
+					comptSbmlidMooseIdMap = {}
+					print ": ",basePath.path
+					globparameterIdValue = {}
+					modelAnnotaInfo = {}
+					mapParameter(model,globparameterIdValue)
+					errorFlag = createCompartment(basePath,model,comptSbmlidMooseIdMap)
+
 	except IOError:
 		print "File " ,filepath ," does not exist."
+		
+def transformUnit(unitForObject):
+	#print "unit ",UnitDefinition.printUnits(unitForObject.getDerivedUnitDefinition())
+	lvalue = 1.0
+	unitset = False
+	if (unitForObject.getDerivedUnitDefinition()):
+		unit = (unitForObject.getDerivedUnitDefinition())
+		if not (unit.getNumUnits()):
+			#If units are not defined then assume for
+			# -- Compartment litre then m3 for moose
+			# -- species mole then millimole for concentration
+			# since both are needs to multiplied by 10-3 returning lvalue
+			lvalue *= 0.001
+        else:
+			for ui in range(0,unit.getNumUnits()):
+				unitType =  unit.getUnit(ui)
+				if( unitType.isLitre()):
+					exponent = unitType.getExponent()
+					multiplier = unitType.getMultiplier()
+					scale = unitType.getScale()
+					offset = unitType.getOffset()
+					#units for compartment is Litre but MOOSE compartment is m3
+					scale = scale-3
+					lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset;
+					unitset = True			
+				if( unitType.isMole()):
+					exponent = unitType.getExponent()
+					multiplier = unitType.getMultiplier()
+					scale = unitType.getScale()
+					offset = unitType.getOffset()
+					lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset;
+					unitset = True
+	return (lvalue,unitset)
+def createCompartment(basePath,model,comptSbmlidMooseIdMap):
+	#ToDoList : Check what should be done for the spaitialdimension is 2 or 1, area or length
+	if not(model.getNumCompartments()):
+		return False
+	else:
+		for c in range(0,model.getNumCompartments()):
+			compt = model.getCompartment(c)
+			# print("Compartment " + str(c) + ": "+ UnitDefinition.printUnits(compt.getDerivedUnitDefinition()))
+			msize = 0.0
+			unitfactor = 1.0
+			sbmlCmptId = None
+			name = None
 
+			if ( compt.isSetId() ):
+				sbmlCmptId = compt.getId()
+				
+			if ( compt.isSetName() ):
+				name = compt.getName()
+				name = name.replace(" ","_space")
+					
+			if ( compt.isSetOutside() ):
+				outside = compt.getOutside()
+					
+			if ( compt.isSetSize() ):
+				msize = compt.getSize()
+				if msize == 1:
+					print "Compartment size is 1"
+
+			dimension = compt.getSpatialDimensions();
+			if dimension == 3:
+				unitfactor,unitset = transformUnit(compt)
+				
+			else:
+				print " Currently we don't deal with spatial Dimension less than 3 and unit's area or length"
+				return False
+
+			if not( name ):
+				name = sbmlCmptId
+			
+			mooseCmptId = moose.CubeMesh(basePath.path+'/'+name)
+			mooseCmptId.volume = (msize*unitfactor)
+			comptSbmlidMooseIdMap[sbmlCmptId]={"MooseId": mooseCmptId, "spatialDim":dimension, "size" : msize}
+	return True
+def mapParameter(model,globparameterIdValue):
+	for pm in range(0,model.getNumParameters()):
+		prm = model.getParameter( pm );
+		if ( prm.isSetId() ):
+			parid = prm.getId()
+		value = 0.0;
+		if ( prm.isSetValue() ):
+			value = prm.getValue()
+		globparameterIdValue[parid] = value
 
 if __name__ == "__main__":
 	
