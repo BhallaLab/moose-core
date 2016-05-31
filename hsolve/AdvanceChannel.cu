@@ -171,6 +171,7 @@ void calculate_channel_currents_opt(double* d_gate_values,
 		int size){
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	if(tid < size){
+
 		double temp = d_chan_modulation[tid] * d_chan_Gbar[tid];
 		for (int i = rowPtr[tid]; i < rowPtr[tid+1]; ++i) {
 			temp *= pow(d_gate_values[i], d_gate_powers[i]);
@@ -225,6 +226,40 @@ void update_matrix_kernel(double* d_V,
 		d_inject_[tid].injectVarying = 0;
 	}
 }
+
+__global__
+void update_matrix_kernel_opt(
+		double* d_chan_Gk, double* d_chan_GkEk , int* d_chan_rowPtr,
+		double* d_V,
+		double* d_HS_,
+		double* d_comp_Gksum,
+		double* d_comp_GkEksum,
+		CompartmentStruct* d_compartment_,
+		InjectStruct* d_inject_,
+		double*	d_externalCurrent_,
+		int size){
+
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid < size){
+
+		double sum1=0, sum2=0;
+		int i;
+		for (i = d_chan_rowPtr[tid]; i < d_chan_rowPtr[tid+1]; ++i) {
+			sum1 += d_chan_Gk[i];
+			sum2 += d_chan_GkEk[i];
+		}
+		d_comp_Gksum[tid] = sum1;
+		d_comp_GkEksum[tid] = sum2;
+
+		d_HS_[4*tid] = d_HS_[4*tid+2] + sum1 + d_externalCurrent_[2*tid];
+		d_HS_[4*tid+3] = d_V[tid]*d_compartment_[tid].CmByDt + d_compartment_[tid].EmByRm + sum2 +
+				(d_inject_[tid].injectVarying + d_inject_[tid].injectBasal) + d_externalCurrent_[2*tid+1];
+
+		d_inject_[tid].injectVarying = 0;
+	}
+}
+
+
 
 __global__
 void update_csr_matrix_kernel(double* d_V,
@@ -392,9 +427,9 @@ void HSolveActive::get_compressed_gate_values_wrapper(){
 			d_state_,
 			num_cmprsd_gates);
 
-	#ifdef PIN_POINT_ERROR
+#ifdef PIN_POINT_ERROR
 		cudaCheckError(); // Checking for cuda related errors.
-	#endif
+#endif
 
 }
 
@@ -414,8 +449,6 @@ void HSolveActive::calculate_channel_currents_cuda_wrapper(){
 			d_chan_Gk, d_chan_GkEk, num_channels);
 	*/
 
-
-
 	calculate_channel_currents_opt<<<BLOCKS,THREADS_PER_BLOCK>>>(
 				d_state_,
 				d_state_powers,
@@ -425,7 +458,9 @@ void HSolveActive::calculate_channel_currents_cuda_wrapper(){
 				d_current_,
 				d_chan_Gk, d_chan_GkEk, num_channels);
 
+#ifdef PIN_POINT_ERROR
 	cudaCheckError(); // Checking for cuda related errors.
+#endif
 }
 
 void HSolveActive::update_matrix_cuda_wrapper(){
@@ -441,9 +476,26 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 		cout << "Number of channels: " << num_channels << endl;
 	}
 
+	cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
+	//cudaMemcpy(d_HS_, &HS_[0], HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
+
 	BLOCKS = (nCompt_+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
 	if(UPDATE_MATRIX_APPROACH == UPDATE_MATRIX_WPT_APPROACH){
-		wpt_kernel<<<BLOCKS,THREADS_PER_BLOCK>>>(d_chan_Gk, d_chan_GkEk , d_chan_rowPtr, d_comp_Gksum, d_comp_GkEksum, nCompt_);
+		GpuTimer timer;
+		timer.Start();
+		update_matrix_kernel_opt<<<BLOCKS,THREADS_PER_BLOCK>>>(d_chan_Gk, d_chan_GkEk , d_chan_rowPtr,
+				d_V,
+				d_HS_,
+				d_comp_Gksum,
+				d_comp_GkEksum,
+				d_compartment_,
+				d_inject_,
+				d_externalCurrent_,
+				(int)nCompt_);
+		timer.Stop();
+		if(step_num < 10)
+			cout << " UM time " << timer.Elapsed() << endl;
 	}else if(UPDATE_MATRIX_APPROACH == UPDATE_MATRIX_SPMV_APPROACH){
 		cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
 			nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
@@ -459,21 +511,17 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 	}
 
 	// -----------------------------------------------CUSPARSE------------------------------------------------
-
-	BLOCKS = (nCompt_+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
-
-	cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
-	//cudaMemcpy(d_HS_, &HS_[0], HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
-
-	update_matrix_kernel<<<BLOCKS, THREADS_PER_BLOCK>>>(d_V,
-			d_HS_,
-			d_comp_Gksum,
-			d_comp_GkEksum,
-			d_compartment_,
-			d_inject_,
-			d_externalCurrent_,
-			(int)nCompt_);
+	if(UPDATE_MATRIX_APPROACH != UPDATE_MATRIX_WPT_APPROACH){
+		BLOCKS = (nCompt_+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
+		update_matrix_kernel<<<BLOCKS, THREADS_PER_BLOCK>>>(d_V,
+				d_HS_,
+				d_comp_Gksum,
+				d_comp_GkEksum,
+				d_compartment_,
+				d_inject_,
+				d_externalCurrent_,
+				(int)nCompt_);
+	}
 
 	cudaMemcpy(&inject_[0], d_inject_, nCompt_*sizeof(InjectStruct), cudaMemcpyDeviceToHost );
 	cudaMemcpy(&HS_[0], d_HS_, HS_.size()*sizeof(double), cudaMemcpyDeviceToHost );

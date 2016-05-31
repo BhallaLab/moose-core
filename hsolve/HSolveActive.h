@@ -132,8 +132,9 @@ protected:
 		*   Tells you which compartments have external calcium-dependent
 		*   channels so that you can send out Calcium concentrations in only
 		*   those compartments. */
-#ifdef USE_CUDA    
     int step_num;
+#ifdef USE_CUDA    
+    //int step_num;
 
 	// CUDA Passive Data
 	vector<int> h_gate_expand_indices;

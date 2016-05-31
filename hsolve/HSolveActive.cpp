@@ -96,9 +96,9 @@ void HSolveActive::step( ProcPtr info )
     {
         current_.resize( channel_.size() );
     }
-    
-#ifdef USE_CUDA
     step_num++;
+#ifdef USE_CUDA
+    //step_num++;
 #endif
     u64 start, end;
     double advanceChannelsTime;
@@ -221,9 +221,15 @@ void HSolveActive::step( ProcPtr info )
 void HSolveActive::calculateChannelCurrents()
 {
 #ifdef USE_CUDA
-	calculate_channel_currents_cuda_wrapper();
+	GpuTimer timer;
+	timer.Start();
+		calculate_channel_currents_cuda_wrapper();
+	timer.Stop();
+	float time = timer.Elapsed();
+
 	cudaSafeCall(cudaMemcpy(&current_[0], d_current_, current_.size()*sizeof(CurrentStruct), cudaMemcpyDeviceToHost));
 #else
+	u64 startTime = getTime();
     vector< ChannelStruct >::iterator ichan;
     vector< CurrentStruct >::iterator icurrent = current_.begin();
 
@@ -237,6 +243,10 @@ void HSolveActive::calculateChannelCurrents()
             ++icurrent;
         }
     }
+    u64 endTime = getTime();
+
+    //if(step_num < 10)
+    //		cout << ((endTime-startTime)/1000.0f)/time << " Calculate chan currents time " << time << " " << (endTime-startTime)/1000.0f << endl;
 #endif
 }
 
@@ -253,6 +263,7 @@ void HSolveActive::updateMatrix()
 	//update_csrmatrix_cuda_wrapper();
 
 #else
+	u64 startTime = getTime();
 	// CPU PART
 	/*
 	 * Copy contents of HJCopy_ into HJ_. Cannot do a vector assign() because
@@ -321,6 +332,11 @@ void HSolveActive::updateMatrix()
 
         ihs += 4;
     }
+    u64 endTime = getTime();
+
+    if(step_num < 10)
+    	cout << "Update matrix time " << (endTime-startTime)/1000.0f << endl;
+
 #endif
     stage_ = 0;    // Update done.
 }
@@ -651,11 +667,9 @@ void HSolveActive::advanceChannels( double dt )
 
 		cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
 
-	if(step_num == 1)
+	if(step_num == 1){
 		cout << channel_.size() << " " << num_gates << " " << state_.size() << " extra % " << (state_.size()*100.0f)/num_gates << endl;
-
-	if(step_num < 10)
-		cout << "Adv Channel time " << time << endl;
+	}
 
 #else
 
@@ -999,8 +1013,10 @@ void HSolveActive::copy_hsolve_information_cuda(){
 
 	// Converting rowCounts to rowptr
 	int csum = 0, ctemp;
+	int zero_count = 0;
 	for (int i = 0; i < num_channels+1; ++i) {
 		ctemp = h_state_rowPtr[i];
+		if(i < num_channels && h_state_rowPtr[i] == 0) zero_count++;
 		h_state_rowPtr[i] = csum;
 		csum += ctemp;
 	}
@@ -1130,6 +1146,15 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	for (int i = 0; i < nCompt_; ++i) {
 		load_file << chan_rowPtr[i+1]-chan_rowPtr[i] << endl;
 	}
+	*/
+	/*
+	ofstream chan_dist("state_dist.csv");
+	for (int i = 0; i < nCompt_; ++i) {
+		for (int j = chan_rowPtr[i]; j < chan_rowPtr[i+1]; ++j) {
+			chan_dist << h_state_rowPtr[j+1]-h_state_rowPtr[j] << "," << i << endl;
+		}
+	}
+	chan_dist.close();
 	*/
 
 	UPDATE_MATRIX_APPROACH = choose_update_matrix_approach();
