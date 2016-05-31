@@ -266,8 +266,8 @@ if(WITH_GSL)
     # top level.
     include_directories( ${GSL_INCLUDE_DIRS} )
 elseif(WITH_BOOST)
-    find_package(Boost 1.44 COMPONENTS filesystem random REQUIRED)
-    find_package( LAPACK REQUIRED )
+    find_package(Boost 1.44 COMPONENTS system filesystem random REQUIRED)
+    #find_package( LAPACK REQUIRED )
     add_definitions( -DUSE_BOOST -UUSE_GSL )
     include_directories( ${Boost_INCLUDE_DIRS} )
     check_include_file_cxx(
@@ -396,7 +396,7 @@ add_subdirectory(intfire)
 # These are always shared libraries.
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 if(WITH_BOOST)
-    list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES})
+    list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES} -llapack -lblas)
     list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
 endif(WITH_BOOST)
 
