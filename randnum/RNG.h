@@ -66,7 +66,7 @@ class RNG
             std::random_device rd;
             setSeed( rd() );
 #else
-            moose::mtseed( time(NULL) );
+            mtseed( time(NULL) );
 #endif     /* -----  not ENABLE_CPP11  ----- */
 
         }
@@ -89,7 +89,7 @@ class RNG
 #if defined(USE_BOOST) || defined(ENABLE_CPP11)
             rng_.seed( seed_ );
 #else
-            moose::mtseed( seed_ );
+            mtseed( seed_ );
 #endif
         }
 
