@@ -597,6 +597,7 @@ void HSolveActive::advanceChannels( double dt )
 			test_gate_values[h_gate_expand_indices[i]] = state_[i];
 		}
 		cudaMemcpy(d_gate_values, test_gate_values, num_gates*sizeof(double), cudaMemcpyHostToDevice);
+		cudaMemcpy(d_state_, &(state_[0]), state_.size()*sizeof(double), cudaMemcpyHostToDevice);
 
 		// Setting up cusparse information
 		cusparseCreate(&cusparse_handle);
@@ -620,7 +621,7 @@ void HSolveActive::advanceChannels( double dt )
 	timer0.Start();
 		get_lookup_rows_and_fractions_cuda_wrapper(dt); // Gets lookup values for Vm and Ca_.
 		advance_channels_cuda_wrapper(dt); // Advancing fraction values.
-		get_compressed_gate_values_wrapper(); // Getting values of new state
+		//get_compressed_gate_values_wrapper(); // Getting values of new state
 	timer0.Stop();
 	time = timer0.Elapsed();
 	//cout << "GPU Adv Channel time " << time << endl;
@@ -760,7 +761,7 @@ void HSolveActive::advanceChannels( double dt )
     }
 
     u64 cpu_advchan_end = getTime();
-    cout << "CPU advance chan time " << (cpu_advchan_end-cpu_advchan_start)/1000.0f << endl;
+    //cout << "CPU advance chan time " << (cpu_advchan_end-cpu_advchan_start)/1000.0f << endl;
 
 #endif
       
@@ -793,7 +794,7 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	cudaMalloc((void**)&d_gate_columns, num_gates*sizeof(double));
 	cudaMalloc((void**)&d_gate_ca_index, num_gates*sizeof(int));
 
-	cudaMalloc((void**)&d_state_, num_cmprsd_gates*sizeof(double));
+	//cudaMalloc((void**)&d_state_, num_cmprsd_gates*sizeof(double));
 	cudaMalloc((void**)&d_gate_expand_indices, num_cmprsd_gates*sizeof(int));
 
 	// Channel related
@@ -842,6 +843,13 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	// AdvanceCalcium related
 	cudaMalloc((void**)&d_capool_values, h_catarget_channel_indices.size()*sizeof(double));
 	cudaMalloc((void**)&d_capool_onex, h_catarget_channel_indices.size()*sizeof(double));
+
+	// Optimized approach.
+	cudaMalloc((void**)&d_state_, num_cmprsd_gates*sizeof(double));
+	cudaMalloc((void**)&d_state_rowPtr, (num_channels+1)*sizeof(int));
+	cudaMalloc((void**)&d_state_powers, num_cmprsd_gates*sizeof(double));
+	cudaMalloc((void**)&d_state2chanId, num_cmprsd_gates*sizeof(int));
+	cudaMalloc((void**)&d_state2column, num_cmprsd_gates*sizeof(int));
 
 }
 
@@ -914,6 +922,18 @@ void HSolveActive::copy_hsolve_information_cuda(){
 		}
 	}
 
+	// Optimized version
+	double h_state_powers[num_cmprsd_gates];
+	int h_state2chanId[num_cmprsd_gates];
+	int h_state2column[num_cmprsd_gates];
+	int* h_state_rowPtr = new int[num_channels+1]();
+
+	vector<int> h_vgate_indices;
+	vector<int> h_vgate_compIds;
+
+	vector<int> h_cagate_indices;
+	vector<int> h_cagate_capoolIds;
+
 	// Gathering gate information and separating gates (with power < 0) , (with vm dependent) , (with ca dependent)
 	int cmprsd_gate_index = 0; // If the logic is true cmprsd_gate_index value at the end of for loop = # of gates with powers > 0
 	for(unsigned int i=0;i<V_.size();i++){
@@ -927,20 +947,47 @@ void HSolveActive::copy_hsolve_information_cuda(){
 			for(int k=0;k<3;k++){
 				h_gate_ca_index[3*j+k] = -1;
 				if(h_gate_powers[3*j+k] > 0){
+
+					// Collecting power of valid gate
+					switch(k){
+						case 0:
+							h_state_powers[cmprsd_gate_index] = channel_[j].Xpower_;
+							break;
+						case 1:
+							h_state_powers[cmprsd_gate_index] = channel_[j].Ypower_;
+							break;
+						case 2:
+							h_state_powers[cmprsd_gate_index] = channel_[j].Zpower_;
+							break;
+					}
+
+					// Collecting channel and column of valid gate
+					h_state2chanId[cmprsd_gate_index] = j;
+					h_state2column[cmprsd_gate_index] = column_[cmprsd_gate_index].column;
+
+
+
 					// Setting column index and values
 					h_gate_columns[3*j+k] = column_[cmprsd_gate_index].column;
 					h_gate_values[3*j+k] = state_[cmprsd_gate_index];
-					cmprsd_gate_index++; // cmprsd_gate_index is incremented only if power > 0 is found.
 
 					// Partitioning of vm and ca dependent gates.
 					if(k == 2 && caDependIndex_[j] != -1){
 						h_gate_ca_index[3*j+k] = ca_rowPtr[i] + caDependIndex_[j];
 						h_cagate_expand_indices.push_back(3*j+k);
 						h_cagate_capool_indices.push_back(ca_rowPtr[i] + caDependIndex_[j]);
+
+						h_cagate_indices.push_back(cmprsd_gate_index);
+						h_cagate_capoolIds.push_back(ca_rowPtr[i] + caDependIndex_[j]);
 					}else{
 						h_vgate_expand_indices.push_back(3*j+k);
 						h_vgate_compt_indices.push_back((int)chan2compt_[j]);
+
+						h_vgate_compIds.push_back((int)chan2compt_[j]);
+						h_vgate_indices.push_back(cmprsd_gate_index);
 					}
+					h_state_rowPtr[j] += 1;
+					cmprsd_gate_index++; // cmprsd_gate_index is incremented only if power > 0 is found.
 				}else{
 					h_gate_columns[3*j+k] = 0;
 					h_gate_values[3*j+k] = 0;
@@ -949,6 +996,33 @@ void HSolveActive::copy_hsolve_information_cuda(){
 		}
 	}
 	assert(cmprsd_gate_index == num_cmprsd_gates);
+
+	// Converting rowCounts to rowptr
+	int csum = 0, ctemp;
+	for (int i = 0; i < num_channels+1; ++i) {
+		ctemp = h_state_rowPtr[i];
+		h_state_rowPtr[i] = csum;
+		csum += ctemp;
+	}
+
+	// Allocating memory (Optimized approach)
+	cudaMalloc((void**)&d_vgate_indices, h_vgate_indices.size()* sizeof(int));
+	cudaMalloc((void**)&d_vgate_compIds, h_vgate_compIds.size()* sizeof(int));
+
+	cudaMalloc((void**)&d_cagate_indices, h_cagate_indices.size()* sizeof(int));
+	cudaMalloc((void**)&d_cagate_capoolIds, h_cagate_capoolIds.size()* sizeof(int));
+
+	// Transfering memory (Optimized approach)
+	cudaMemcpy(d_state_rowPtr, h_state_rowPtr, (num_channels+1)*sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_state_powers, h_state_powers, num_cmprsd_gates*sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_state2chanId, h_state2chanId, num_cmprsd_gates*sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_state2column, h_state2column, num_cmprsd_gates*sizeof(int), cudaMemcpyHostToDevice);
+
+	cudaMemcpy(d_vgate_indices, &(h_vgate_indices[0]), h_vgate_indices.size()*sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_vgate_compIds, &(h_vgate_compIds[0]), h_vgate_compIds.size()*sizeof(int), cudaMemcpyHostToDevice);
+
+	cudaMemcpy(d_cagate_indices,&(h_cagate_indices[0]), h_cagate_indices.size()*sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_cagate_capoolIds, &(h_cagate_capoolIds[0]), h_cagate_capoolIds.size()*sizeof(int), cudaMemcpyHostToDevice);
 
 
 	// Allocating memory

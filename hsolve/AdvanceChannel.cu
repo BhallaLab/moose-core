@@ -83,6 +83,52 @@ void advance_channels_cuda(
 }
 
 __global__
+void advance_channels_opt_cuda(
+		int* rows,
+		double* fracs,
+		double* table,
+		int* indices,
+		int* gate_to_comp,
+		double* gate_values,
+		int* gate_columns,
+		int* state2chanId,
+		int* chan_instants,
+		unsigned int nColumns,
+		double dt,
+		int size
+		){
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid < size){
+		double a,b,C1,C2;
+		int index, lookup_index, row_start_index, column;
+
+		index = indices[tid];
+		lookup_index = gate_to_comp[tid];
+		row_start_index = rows[lookup_index];
+		column = gate_columns[index];
+
+		a = table[row_start_index + column];
+		b = table[row_start_index + column + nColumns];
+
+		C1 = a + (b-a)*fracs[lookup_index];
+
+		a = table[row_start_index + column + 1];
+		b = table[row_start_index + column + 1 + nColumns];
+
+		C2 = a + (b-a)*fracs[lookup_index];
+
+		if(!chan_instants[state2chanId[tid]]){ // tid/3 bcos #gates = 3*#chans
+			a = 1.0 + dt/2.0 * C2; // reusing a
+			gate_values[index] = ( gate_values[index] * ( 2.0 - a ) + dt * C1 ) / a;
+		}
+		else{
+			gate_values[index] = C1/C2;
+		}
+	}
+}
+
+
+__global__
 void get_compressed_gate_values(double* expanded_array,
 		int* expanded_indices, double* d_cmprsd_state, int size){
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
@@ -106,6 +152,29 @@ void calculate_channel_currents(double* d_gate_values,
 				 pow(d_gate_values[3*tid], d_gate_powers[3*tid]) *
 				 pow(d_gate_values[3*tid+1], d_gate_powers[3*tid+1]) *
 				 pow(d_gate_values[3*tid+2], d_gate_powers[3*tid+2]);
+
+		d_current_[tid].Gk = temp;
+		d_chan_Gk[tid] = temp;
+		d_chan_GkEk[tid] = temp*d_current_[tid].Ek;
+	}
+}
+
+__global__
+void calculate_channel_currents_opt(double* d_gate_values,
+		double* d_gate_powers,
+		int* rowPtr,
+		double* d_chan_modulation,
+		double* d_chan_Gbar,
+		CurrentStruct* d_current_,
+		double* d_chan_Gk,
+		double* d_chan_GkEk,
+		int size){
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid < size){
+		double temp = d_chan_modulation[tid] * d_chan_Gbar[tid];
+		for (int i = rowPtr[tid]; i < rowPtr[tid+1]; ++i) {
+			temp *= pow(d_gate_values[i], d_gate_powers[i]);
+		}
 
 		d_current_[tid].Gk = temp;
 		d_chan_Gk[tid] = temp;
@@ -258,6 +327,20 @@ void HSolveActive::advance_channels_cuda_wrapper(double dt){
     // Get the Row number and fraction values of Vm's from vTable
 	int BLOCKS = (num_vdep_gates+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
 
+	advance_channels_opt_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
+			d_V_rows,
+			d_V_fractions,
+			d_V_table,
+			d_vgate_indices,
+			d_vgate_compIds,
+			d_state_,
+			d_state2column,
+			d_state2chanId,
+			d_chan_instant,
+			vTable_.get_num_of_columns(),
+			dt, num_vdep_gates );
+
+	/*
 	// For V dependent gates
 	advance_channels_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
 			d_V_rows,
@@ -270,6 +353,7 @@ void HSolveActive::advance_channels_cuda_wrapper(double dt){
 			d_chan_instant,
 			vTable_.get_num_of_columns(),
 			dt, num_vdep_gates );
+	*/
 
 	if(num_cadep_gates > 0){
 		BLOCKS = num_cadep_gates/THREADS_PER_BLOCK;
@@ -320,6 +404,7 @@ void HSolveActive::calculate_channel_currents_cuda_wrapper(){
 	int BLOCKS = num_channels/THREADS_PER_BLOCK;
 	BLOCKS = (num_channels%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
+	/*
 	calculate_channel_currents<<<BLOCKS,THREADS_PER_BLOCK>>>(
 			d_gate_values,
 			d_gate_powers,
@@ -327,6 +412,18 @@ void HSolveActive::calculate_channel_currents_cuda_wrapper(){
 			d_chan_Gbar,
 			d_current_,
 			d_chan_Gk, d_chan_GkEk, num_channels);
+	*/
+
+
+
+	calculate_channel_currents_opt<<<BLOCKS,THREADS_PER_BLOCK>>>(
+				d_state_,
+				d_state_powers,
+				d_state_rowPtr,
+				d_chan_modulation,
+				d_chan_Gbar,
+				d_current_,
+				d_chan_Gk, d_chan_GkEk, num_channels);
 
 	cudaCheckError(); // Checking for cuda related errors.
 }

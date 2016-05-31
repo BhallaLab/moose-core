@@ -149,6 +149,19 @@ protected:
 	double* d_V_table;
 	double* d_Ca_table;
 
+	// Optimized version
+	double* d_state_; // state of gate values, such as (m,h,n...)
+	double* d_state_powers; // Powers of gate values, such as (3 for m^3)
+	int* d_state_rowPtr; // RowPtr on valid gates where rows = num_channels
+	int* d_state2chanId; // Channel Id to which this gate belongs to.
+	int* d_state2column; // Corresponding column in lookup table.
+	int* d_vgate_indices; // Set of gates that are voltage dependent
+	int* d_vgate_compIds; // Corresponding compartment id of voltage dependent gate
+
+	int* d_cagate_indices; // Set of gates that are calcium dependent.
+	int* d_cagate_capoolIds; // Corresponding calcium pool id of calcium dependent gate
+
+
 	// Gate related
 	double* d_gate_values; // Values of x,y,x for all channels.
 	double* d_gate_powers; // Powers of x,y,z for all channels.
@@ -171,7 +184,7 @@ protected:
 	double* d_capool_onex;
 
 
-	double* d_state_;
+	//double* d_state_;
   //int* d_gate_to_chan; // Not needed as we store 3 gates(x,y,z) for each channel.
 
 	// Channel related

@@ -168,7 +168,7 @@ class rdesigneur:
             self._configureSolvers()
             self.buildAdaptors()
             self._buildPlots()
-            self._buildMoogli()
+#self._buildMoogli()
             self._buildStims()
             self._configureClocks()
             self._printModelStats()
