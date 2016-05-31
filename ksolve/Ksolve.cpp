@@ -590,7 +590,6 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
     int poolSize = pools_.size(); //Find out the size of the vector
     VoxelPools* poolArray = &pools_[0];
-    int xferSize = xfer_.size();
 
     // First, handle incoming diffusion values, update S with those.
     if ( dsolvePtr_ )
@@ -604,21 +603,24 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
         setBlock( dvalues );
     }
-    // Second, take the arrived xCompt reac values and update S with them.
-#pragma omp parallel for schedule(guided, 2) shared(poolArray, xferSize) num_threads(NTHREADS) if(xferSize > NTHREADS)
-    for ( int i = 0; i < xferSize; ++i )
+    // Loop Fusion 2nd and 3rd step and parallelize it.  take the arrived xCompt reac values and update S with them.
+    for ( unsigned int i = 0; i < xfer_.size(); ++i )
     {
         XferInfo& xf = xfer_[i];
-        for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j )
+        unsigned int xferSize = xf.xferVoxel.size();
+        int xferBlock = xferSize/NTHREADS;
+//#pragma omp for schedule(guided, xferBlock)
+        for ( unsigned int j = 0; j < xferSize; ++j )
         {
             poolArray[xf.xferVoxel[j]].xferIn( xf.xferPoolIdx, xf.values, xf.lastValues, j );
             poolArray[xf.xferVoxel[j]].xferOut( j, xf.lastValues, xf.xferPoolIdx );
         }
     }
+
+    //Integration step
 #if _KSOLVE_OPENMP
 	 
 	 static int cellsPerThread = 0; // Used for printing...
-    int j;
 	 if(!cellsPerThread)
 	 {
 		    cellsPerThread = 2;
@@ -626,15 +628,12 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 		    cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
 	 }
 
-//#pragma omp parallel for schedule(guided, cellsPerThread) num_threads(NTHREADS) shared(poolSize) firstprivate(p) if(poolSize > NTHREADS)
 #pragma omp parallel num_threads(NTHREADS) shared(poolSize) if(poolSize > NTHREADS) 
-#pragma omp for schedule(dynamic, cellsPerThread) firstprivate(p) nowait
-    for ( j = 0; j < poolSize; j++ )
+#pragma omp for schedule(dynamic, 2)
+    for (int j = 0; j < poolSize; j++ )
         poolArray[j].advance( p );
-        //pools_[j].advance( p );
 
 #endif //_KSOLVE_OPENMP
-
 
 #if _KSOLVE_PTHREADS
 	 static int usedThreads = 0;
@@ -675,11 +674,9 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 		    useSeq = NTHREADS;
 		    cout << endl << "Executing Sequential version " << endl;
 	 }
-    for ( vector< VoxelPools >::iterator
-            i = pools_.begin(); i != pools_.end(); ++i )
-    {
+    for ( vector< VoxelPools >::iterator i = pools_.begin(); i != pools_.end(); ++i )
         i->advance( p );
-    }
+
 #endif //_KSOLVE_SEQ
 
     // Finally, assemble and send the integrated values off for the Dsolve.

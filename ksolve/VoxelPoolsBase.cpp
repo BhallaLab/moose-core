@@ -214,17 +214,12 @@ void VoxelPoolsBase::xferInOnlyProxies(
 	}
 }
 
-void VoxelPoolsBase::xferOut( 
-	unsigned int voxelIndex, 
-	vector< double >& values,
-	const vector< unsigned int >& poolIndex)
+void VoxelPoolsBase::xferOut( unsigned int voxelIndex, vector< double >& values, const vector< unsigned int >& poolIndex)
 {
 	unsigned int offset = voxelIndex * poolIndex.size();
 	vector< double >::iterator i = values.begin() + offset;
-	for ( vector< unsigned int >::const_iterator 
-			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
-		*i++ = S_[*k];
-	}
+	for ( vector< unsigned int >::const_iterator k = poolIndex.begin(); k != poolIndex.end(); ++k ) 
+           *i++ = S_[*k];
 }
 
 void VoxelPoolsBase::addProxyVoxy( 

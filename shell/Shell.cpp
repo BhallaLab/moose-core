@@ -370,12 +370,14 @@ void Shell::doQuit()
 void Shell::doStart( double runtime, bool notify )
 {
         int tmpN;
-#pragma omp parallel for num_threads(8)
-        for(int i = 0; i < 8; i++)
-                tmpN += i;
-
     Id clockId( 1 );
+//#pragma omp parallel 
+        {
+//#pragma omp single
+                {
     SetGet2< double, bool >::set( clockId, "start", runtime, notify );
+                }
+        }
 }
 
 bool isDoingReinit()

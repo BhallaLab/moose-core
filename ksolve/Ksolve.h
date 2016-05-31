@@ -10,8 +10,8 @@
 #ifndef _KSOLVE_H
 #define _KSOLVE_H
 
-#define _KSOLVE_SEQ 0
-#define _KSOLVE_OPENMP 1
+#define _KSOLVE_SEQ 1
+#define _KSOLVE_OPENMP 0
 #define _KSOLVE_PTHREADS 0
 
 #include <pthread.h>
@@ -194,9 +194,18 @@ class Ksolve: public ZombiePoolInterface
 
 
 	private:
-		string method_;
 		double epsAbs_;
 		double epsRel_;
+
+		/// Utility ptr used to help Pool Id lookups by the Ksolve.
+		Stoich* stoichPtr_;
+
+		/// Pointer to diffusion solver
+		ZombiePoolInterface* dsolvePtr_;
+
+		/// First voxel indexed on the current node.
+		unsigned int startVoxel_;
+
 		/**
 		 * Each VoxelPools entry handles all the pools in a single voxel.
 		 * Each entry knows how to update itself in order to complete 
@@ -206,19 +215,12 @@ class Ksolve: public ZombiePoolInterface
 		 */
 		vector< VoxelPools > pools_;
 
-		/// First voxel indexed on the current node.
-		unsigned int startVoxel_;
-
-		/// Utility ptr used to help Pool Id lookups by the Ksolve.
-		Stoich* stoichPtr_;
-
 		/**
 		 * Id of diffusion solver, needed for coordinating numerics.
 		 */
 		Id dsolve_;
 
-		/// Pointer to diffusion solver
-		ZombiePoolInterface* dsolvePtr_;
+		string method_;
 
 };
 

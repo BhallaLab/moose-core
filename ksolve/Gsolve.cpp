@@ -411,14 +411,21 @@ void Gsolve::process( const Eref& e, ProcPtr p )
    int j;
    if(!cellsPerThread)
    {
-           cellsPerThread = 4;
+           cellsPerThread = 1;
            cout << endl << "OpenMP parallelism: Using parallel-for in GSOLVE " << endl;
            cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
 	 }
-   cout << "poolSize = " << poolSize << endl;
+
 #pragma omp parallel for schedule(guided, cellsPerThread) num_threads(NTHREADS) shared(poolSize,p) firstprivate(sysPtr) if(poolSize>NTHREADS)
 	for ( int j = 0; j < poolSize; j++ ) 
+   {
+           //clock_t startT = clock();
+
            pools_[j].advance( p, sysPtr );
+
+           //double diff = (clock() - startT) /(double) (CLOCKS_PER_SEC/1000);
+           //cout << "Time taken by a single loop = " << diff << endl;
+   }
 
 //	for ( vector< GssaVoxelPools >::iterator i = pools_.begin(); i != pools_.end(); ++i ) 
 //   {
