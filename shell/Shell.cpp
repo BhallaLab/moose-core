@@ -380,8 +380,10 @@ bool isDoingReinit()
 
 void Shell::doReinit( )
 {
+
     Id clockId( 1 );
     SetGet0::set( clockId, "reinit" );
+
 }
 
 void Shell::doStop( )
