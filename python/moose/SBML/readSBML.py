@@ -32,7 +32,8 @@ import libsbml
       --Need to deal with compartment outside
     -Molecule
       -- Need to add group 
-      -- Func pool and its math calculation need to be added.
+      -- mathML only AssisgmentRule is taken partly I have checked addition and multiplication, 
+       --, need to do for other calculation.
     -Loading Model from SBML
       --Tested 1-30 testcase example model provided by l3v1 and l2v4 std.
         ---These are the models that worked (sbml testcase)1-6,10,14-15,17-21,23-25,34,35,58
@@ -97,7 +98,9 @@ def mooseReadSBML(filepath,loadpath):
 					if errorFlag:
 						specInfoMap = {}
 						errorFlag = createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap)
-					
+						if errorFlag:
+							errorFlag = createRules(model,specInfoMap,globparameterIdValue)
+
 					if not errorFlag:
 						print " errorFlag ",errorFlag
 						#Any time in the middle if SBML does not read then I delete everything from model level
@@ -109,6 +112,78 @@ def mooseReadSBML(filepath,loadpath):
 
 	except IOError:
 		print "File " ,filepath ," does not exist."
+
+def getMembers(node,ruleMemlist):
+	if node.getType() == libsbml.AST_PLUS:
+		if node.getNumChildren() == 0:
+			print ("0")
+			return
+		getMembers(node.getChild(0),ruleMemlist)
+		for i in range(1,node.getNumChildren()):
+			# addition
+			getMembers(node.getChild(i),ruleMemlist)
+	elif node.getType() == libsbml.AST_REAL:
+		#This will be constant
+		pass
+	elif node.getType() == libsbml.AST_NAME:
+		#This will be the ci term"
+		ruleMemlist.append(node.getName())
+
+	elif node.getType() == libsbml.AST_TIMES:
+		if node.getNumChildren() == 0:
+			print ("0")
+			return
+		getMembers(node.getChild(0),ruleMemlist)
+		for i in range(1,node.getNumChildren()):
+			# Multiplication
+			getMembers(node.getChild(i),ruleMemlist)
+	else:
+		print " this case need to be handled"
+
+def createRules(model,specInfoMap,globparameterIdValue):
+	for r in range(0,model.getNumRules()):
+			rule = model.getRule(r)
+			if (rule.isAssignment()):
+				rule_variable = rule.getVariable();
+				poolList = specInfoMap[rule_variable]["Mpath"].path
+				funcId = moose.Function(poolList+'/func')
+				moose.connect( funcId, 'valueOut', poolList ,'setN' )
+				ruleMath = rule.getMath()
+				ruleMemlist = []
+				speFunXterm = {}
+				getMembers(ruleMath,ruleMemlist)
+				for i in ruleMemlist:
+					if (specInfoMap.has_key(i)):
+						specMapList = specInfoMap[i]["Mpath"]
+						numVars = funcId.numVars
+						x = funcId.path+'/x['+str(numVars)+']'
+						speFunXterm[i] = 'x'+str(numVars)
+						moose.connect(specMapList , 'nOut', x, 'input' )
+						funcId.numVars = numVars +1
+					elif not(globparameterIdValue.has_key(i)):
+						print "check the variable type ",i
+
+				exp = rule.getFormula()
+				for mem in ruleMemlist:
+					if ( specInfoMap.has_key(mem)):
+						exp1 = exp.replace(mem,str(speFunXterm[mem]))
+						exp = exp1
+					elif( globparameterIdValue.has_key(mem)):
+						exp1 = exp.replace(mem,str(globparameterIdValue[mem]))
+						exp = exp1
+					else:
+						print "Math expression need to be checked"
+				funcId.expr = exp.strip(" \t\n\r")
+				return True
+
+			elif( rule.isRate() ):
+				print "Warning : For now this \"",rule.getVariable(), "\" rate Rule is not handled in moose "
+				return False
+
+			elif ( rule.isAlgebraic() ):
+				print "Warning: For now this " ,rule.getVariable()," Algebraic Rule is not handled in moose"
+				return False
+	return True
 
 def pullnotes(sbmlId,mooseId):
 	if sbmlId.getNotes() != None:
