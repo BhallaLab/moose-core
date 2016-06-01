@@ -415,7 +415,7 @@ const Cinfo* Clock::initCinfo()
         "	Stats				17		0.1\n"
 
         "	Table2				18		1\n"
-        "	Streamer			29		2\n"
+        "	Streamer			29		10\n"
         "	HDF5DataWriter			30		1\n"
         "	HDF5WriterBase			30		1\n"
         "	NSDFWriter			30		1\n"
