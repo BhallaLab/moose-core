@@ -161,6 +161,7 @@ void HSolveActive::step( ProcPtr info )
 		//transfer_memory2cpu_cuda();
 	//end = getTime();
 	//memoryTransferTime = (end-start)/1000.0f;
+	cudaCheckError();
 #else
 
 	start = getTime();
@@ -173,22 +174,44 @@ void HSolveActive::step( ProcPtr info )
 	end = getTime();
 	calcChanCurTime = (end-start)/1000.0f;
 
+	int solver_choice = 0; // 0-Moose , 1-Forward-flow, 2-Pervasive-flow
+
+	string pPath = getenv("SOLVER_CHOICE");
+	if(pPath.size() != 0){
+		stringstream convert(pPath);
+		convert >> solver_choice;
+	}
+
 	start = getTime();
-		updateMatrix();
-		//updateForwardFlowMatrix();
-		//updatePervasiveFlowMatrix();
+		switch(solver_choice){
+			case 0:
+				updateMatrix();
+				break;
+			case 1:
+				updateForwardFlowMatrix();
+				break;
+			case 2:
+				updatePervasiveFlowMatrix();
+				break;
+		}
 	end = getTime();
 	updateMatTime = (end-start)/1000.0f;
 
 	start = getTime();
-		HSolvePassive::forwardEliminate();
-		HSolvePassive::backwardSubstitute();
-
-		// Using forward flow solution
-		//forwardFlowSolver();
-
-		// Using pervasive flow solution
-		//pervasiveFlowSolver();
+		switch(solver_choice){
+			case 0:
+				HSolvePassive::forwardEliminate();
+				HSolvePassive::backwardSubstitute();
+				break;
+			case 1:
+				// Using forward flow solution
+				forwardFlowSolver();
+				break;
+			case 2:
+				// Using pervasive flow solution
+				pervasiveFlowSolver();
+				break;
+		}
 	end = getTime();
 	solverTime = (end-start)/1000.0f;
 
@@ -211,6 +234,9 @@ void HSolveActive::step( ProcPtr info )
 		sendSpikes( info );
 	end = getTime();
 	sendSpikesTime = (end-start)/1000.0f;
+
+	if(step_num < 10)
+		cout << pPath << " " << updateMatTime << " " << solverTime << endl;
 
 #endif
 
@@ -333,9 +359,6 @@ void HSolveActive::updateMatrix()
         ihs += 4;
     }
     u64 endTime = getTime();
-
-    if(step_num < 10)
-    	cout << "Update matrix time " << (endTime-startTime)/1000.0f << endl;
 
 #endif
     stage_ = 0;    // Update done.
@@ -511,16 +534,24 @@ void HSolveActive::pervasiveFlowSolver(){
 void HSolveActive::advanceCalcium()
 {
 #ifdef USE_CUDA
-	/*
-	 * Disabling it as of now as CPU is faster.
-	cudaMemset(d_caActivation_values, 0, ca_.size()*sizeof(double));
+	GpuTimer timer;
+	// Disabling it as of now as CPU is faster.
 
-	advance_calcium_cuda_wrapper();
+		cudaMemset(d_caActivation_values, 0, ca_.size()*sizeof(double));
+	timer.Start();
+		advance_calcium_cuda_wrapper();
+	timer.Stop();
+		cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost);
+		cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost);
 
-	cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost);
-	cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost);
-	*/
-#endif //#else
+	float time = timer.Elapsed();
+
+	if(step_num < 10)
+		cout << "Advance calcium " << time << endl;
+
+//#endif
+#else
+	u64 startTime = getTime();
 
     vector< double* >::iterator icatarget = caTarget_.begin();
     vector< double >::iterator ivmid = VMid_.begin();
@@ -583,7 +614,12 @@ void HSolveActive::advanceCalcium()
     }
 
     caActivation_.assign( caActivation_.size(), 0.0 );
-//#endif
+
+    u64 endTime = getTime();
+
+    if(step_num < 10)
+    	cout << "Advance calcium " << (endTime-startTime)/1000.0f << endl;
+#endif
 }
 
 void HSolveActive::advanceChannels( double dt )

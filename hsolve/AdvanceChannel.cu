@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <algorithm>
+#include <fstream>
 
 
 #include "RateLookup.h"
@@ -322,6 +323,41 @@ void advance_calcium_conc_cuda(CaConcStruct* d_caConc_, double* d_Ca, double* d_
 	}
 }
 
+__global__
+void advance_calcium_cuda_opt(int* d_catarget_channel_indices,
+			double* d_chan_Gk, double* d_chan_GkEk,
+			double* d_Vmid,
+			double* d_capool_values, int* d_chan_to_comp, int* rowPtr,
+			CaConcStruct* d_caConc_, double* d_Ca, double* d_caActivation_values,
+			int size){
+	int tid = blockIdx.x * blockDim.x + threadIdx.x;
+	if(tid < size){
+		int chan_id;
+		double sum = 0;
+		for (int i = rowPtr[tid]; i < rowPtr[tid+1]; ++i) {
+			chan_id = d_catarget_channel_indices[i];
+			d_capool_values[i] = d_chan_GkEk[chan_id] - d_chan_Gk[chan_id]*d_Vmid[d_chan_to_comp[chan_id]];
+			sum += d_capool_values[i];
+		}
+
+		d_caActivation_values[tid] = sum;
+
+		d_caConc_[tid].c_ = d_caConc_[tid].factor1_ * d_caConc_[tid].c_ + d_caConc_[tid].factor2_ * d_caActivation_values[tid];
+		double new_ca = d_caConc_[tid].CaBasal_ + d_caConc_[tid].c_;
+
+		if(new_ca >  d_caConc_[tid].ceiling_){
+			new_ca = d_caConc_[tid].ceiling_;
+			d_caConc_[tid].c_ = new_ca - d_caConc_[tid].ceiling_;
+		}
+		if(new_ca < d_caConc_[tid].floor_){
+			new_ca = d_caConc_[tid].floor_;
+			d_caConc_[tid].c_ = new_ca - d_caConc_[tid].floor_;
+		}
+		d_Ca[tid] = new_ca;
+	}
+}
+
+
 
 void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
 
@@ -494,8 +530,6 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 				d_externalCurrent_,
 				(int)nCompt_);
 		timer.Stop();
-		if(step_num < 10)
-			cout << " UM time " << timer.Elapsed() << endl;
 	}else if(UPDATE_MATRIX_APPROACH == UPDATE_MATRIX_SPMV_APPROACH){
 		cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
 			nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
@@ -566,7 +600,6 @@ void HSolveActive::update_csrmatrix_cuda_wrapper(){
 
 }
 
-
 void HSolveActive::advance_calcium_cuda_wrapper(){
 
 	int num_ca_pools = caConc_.size();
@@ -574,28 +607,42 @@ void HSolveActive::advance_calcium_cuda_wrapper(){
 	double alpha = 1;
 	double beta = 0;
 
-	int BLOCKS = num_catarget_channels/THREADS_PER_BLOCK;
-	BLOCKS = (num_catarget_channels%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
-
-	advance_calcium_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
-			d_chan_Gk, d_chan_GkEk,
-			d_Vmid,
-			d_capool_values, d_chan_to_comp,
-			num_catarget_channels);
-
-	cusparseDcsrmv(cusparse_handle,
-			CUSPARSE_OPERATION_NON_TRANSPOSE,
-			num_ca_pools, num_catarget_channels, num_catarget_channels ,
-			&alpha, cusparse_descr,
-			d_capool_values, d_capool_rowPtr, d_capool_colIndex, d_capool_onex,
-			&beta, d_caActivation_values);
-
-	BLOCKS = num_ca_pools/THREADS_PER_BLOCK;
+	int BLOCKS = num_ca_pools/THREADS_PER_BLOCK;
 	BLOCKS = (num_ca_pools%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+	advance_calcium_cuda_opt<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
+					d_chan_Gk, d_chan_GkEk,
+					d_Vmid,
+					d_capool_values, d_chan_to_comp,d_capool_rowPtr,
+					d_caConc_, d_ca, d_caActivation_values, num_ca_pools);
+	/*
+	 // TODO choose between WPT or CSRMV
+		int BLOCKS = num_catarget_channels/THREADS_PER_BLOCK;
+		BLOCKS = (num_catarget_channels%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
-	advance_calcium_conc_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_caConc_, d_ca, d_caActivation_values, num_ca_pools);
+		advance_calcium_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
+				d_chan_Gk, d_chan_GkEk,
+				d_Vmid,
+				d_capool_values, d_chan_to_comp,
+				num_catarget_channels);
 
+		cusparseDcsrmv(cusparse_handle,
+				CUSPARSE_OPERATION_NON_TRANSPOSE,
+				num_ca_pools, num_catarget_channels, num_catarget_channels ,
+				&alpha, cusparse_descr,
+				d_capool_values, d_capool_rowPtr, d_capool_colIndex, d_capool_onex,
+				&beta, d_caActivation_values);
+
+		BLOCKS = num_ca_pools/THREADS_PER_BLOCK;
+		BLOCKS = (num_ca_pools%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+
+		advance_calcium_conc_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_caConc_, d_ca, d_caActivation_values, num_ca_pools);
+	*/
+
+
+
+#ifdef PIN_POINT_ERROR
 	cudaCheckError(); // Checking for cuda related errors.
+#endif
 }
 
 
