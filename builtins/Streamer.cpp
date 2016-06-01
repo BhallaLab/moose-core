@@ -21,6 +21,9 @@
 #include "header.h"
 #include "Streamer.h"
 #include "Clock.h"
+#include "utility/utility.h"
+#include "../shell/Shell.h"
+
 
 const Cinfo* Streamer::initCinfo()
 {
@@ -141,6 +144,8 @@ Streamer::Streamer()
     columns_.push_back( "time" );               /* First column is time. */
     tables_.resize(0);
     tableIds_.resize(0);
+    tableTick_.resize(0);
+    tableDt_.resize(0);
     data_.resize(0);
 }
 
@@ -170,6 +175,7 @@ void Streamer::cleanUp( void )
  */
 void Streamer::reinit(const Eref& e, ProcPtr p)
 {
+    Clock* clk = reinterpret_cast<Clock*>( Id(1).eref().data() );
     if( tables_.size() == 0 )
     {
         moose::showWarn( "Zero tables in streamer. Disabling Streamer" );
@@ -179,19 +185,34 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
 
     // Push each table dt_ into vector of dt
     for( size_t i = 0; i < tables_.size(); i++)
-        tableDt_.push_back( tables_[i]->getDt() );
+    {
+        Id tId = tableIds_[i];
+        int tickNum = tId.element()->getTick();
+        tableDt_.push_back( clk->getTickDt( tickNum ) );
+    }
 
     // Make sure all tables have same dt_ else disable the streamer.
-    for (size_t i = 0; i < tableDt_.size() - 1; i++) 
+    vector<unsigned int> invalidTables;
+    for (size_t i = 1; i < tableTick_.size(); i++) 
     {
-        if( tableDt_[i] != tableDt_[i+1] )
+        if( tableTick_[i] != tableTick_[0] )
         {
-            moose::showWarn(  
-                    "Table with different step size (dt) found. Disabling Streamer"
+            LOG( moose::warning
+                    , "Table " << tableIds_[i].path()
+                    << " has tick (dt) which is different than the first table."
+                    << endl 
+                    << " Got " << tableTick_[i] << " expected " << tableTick_[0]
+                    << endl << " Disabling this table."
                     );
-            e.element()->setTick( -1 );
+            invalidTables.push_back( i );
         }
-        break;
+    }
+
+    for (size_t i = 0; i < invalidTables.size(); i++) 
+    {
+        tables_.erase( tables_.begin() + i );
+        tableDt_.erase( tableDt_.begin() + i );
+        tableIds_.erase( tableIds_.begin() + i );
     }
 
     if( ! isOutfilePathSet_ )
@@ -237,13 +258,12 @@ void Streamer::addTable( Id table )
             return;                             /* Already added. */
 
     Table* t = reinterpret_cast<Table*>(table.eref().data());
-
     tableIds_.push_back( table );
     tables_.push_back( t );
-
-    // We don't want name of table here as column names since they may not be
-    // unique. However, paths of tables are guarenteed to be unique.
-    columns_.push_back( moose::moosePathToUserPath( table.path() ) );
+    tableTick_.push_back( table.element()->getTick() );
+    // NOTE: If user can make sure that names are unique in table, using name is
+    // better than using the full path.
+    columns_.push_back( moose::basename( table.path() ) );
 }
 
 /**
