@@ -72,7 +72,6 @@ endif()
 
 ################################ CMAKE OPTIONS ##################################
 
-option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
 option(VERBOSITY "Set MOOSE verbosity level (deprecated)" 0)
 ## Unit testing and debug mode.
 option(DEBUG "Build with debug support" OFF)
@@ -519,36 +518,11 @@ ELSE()
     target_link_libraries(moose.bin LINK_PUBLIC moose)
 ENDIF()
 
-if(WITH_DOC)
-    FIND_PACKAGE(Doxygen REQUIRED)
-    add_custom_command(TARGET libmoose POST_BUILD
-        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.full
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMENT "Building developer documentation"
-        VERBATIM
-        )
-endif(WITH_DOC)
-
 ######################### BUILD PYMOOSE ########################################
 # Root of all python module.
 if(WITH_PYTHON)
     add_subdirectory( pymoose )
 endif(WITH_PYTHON)
-
-## Moose documentation
-option(WITH_DOC "Build documentation using python-sphinx and doxygen" OFF)
-if(WITH_DOC)
-    FIND_PACKAGE(Sphinx REQUIRED)
-    message(STATUS "Build documentation.")
-    set(USER_DOC_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Docs/user/py/_build/html)
-    set(DEVELOPER_DOC_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Docs/developer/html)
-    ADD_CUSTOM_TARGET(docs ALL
-        COMMAND ./docgen
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMENT "Generating html doc using sphinx and doxygen"
-        )
-
-endif(WITH_DOC)
 
 ######################### INSTALL ##############################################
 
@@ -575,17 +549,6 @@ if(WITH_PYTHON)
         )
 
 endif(WITH_PYTHON)
-
-if(WITH_DOC)
-    message(STATUS "Installing moose doc")
-    install(DIRECTORY ${USER_DOC_OUTPUT_DIR}
-        DESTINATION share/doc/moose
-        )
-
-    install(DIRECTORY ${DEVELOPER_DOC_OUTPUT_DIR}
-        DESTINATION share/doc/moose/developer
-        )
-endif()
 
 # Print message to start build process
 if(${CMAKE_BUILD_TOOL} MATCHES "make")

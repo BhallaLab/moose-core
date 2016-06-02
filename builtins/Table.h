@@ -68,6 +68,8 @@ public:
 
     static const Cinfo* initCinfo();
 
+    string getName( void );
+
 private:
     double threshold_;
     double lastTime_;
