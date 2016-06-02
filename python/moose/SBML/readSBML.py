@@ -32,7 +32,8 @@ import libsbml
       --Need to deal with compartment outside
     -Molecule
       -- Need to add group 
-      -- Func pool and its math calculation need to be added.
+      -- mathML only AssisgmentRule is taken partly I have checked addition and multiplication, 
+       --, need to do for other calculation.
     -Loading Model from SBML
       --Tested 1-30 testcase example model provided by l3v1 and l2v4 std.
         ---These are the models that worked (sbml testcase)1-6,10,14-15,17-21,23-25,34,35,58
@@ -97,7 +98,10 @@ def mooseReadSBML(filepath,loadpath):
 					if errorFlag:
 						specInfoMap = {}
 						errorFlag = createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap)
-					
+						if errorFlag:
+							errorFlag = createRules(model,specInfoMap,globparameterIdValue)
+							if errorFlag:
+								errorFlag = createReaction(model,specInfoMap,modelAnnotaInfo)
 					if not errorFlag:
 						print " errorFlag ",errorFlag
 						#Any time in the middle if SBML does not read then I delete everything from model level
@@ -109,6 +113,301 @@ def mooseReadSBML(filepath,loadpath):
 
 	except IOError:
 		print "File " ,filepath ," does not exist."
+def setupEnzymaticReaction(enz,groupName,enzName,specInfoMap,modelAnnotaInfo):
+	enzPool = (modelAnnotaInfo[groupName]["enzyme"])
+	enzParent = specInfoMap[enzPool]["Mpath"]
+	cplx = (modelAnnotaInfo[groupName]["complex"])
+	complx = moose.element(specInfoMap[cplx]["Mpath"].path)
+	
+	enzyme_ = moose.Enz(enzParent.path+'/'+enzName)
+	moose.move(complx,enzyme_)
+	moose.connect(enzyme_,"cplx",complx,"reac")
+	moose.connect(enzyme_,"enz",enzParent,"reac");
+
+	sublist = (modelAnnotaInfo[groupName]["substrate"])
+	prdlist = (modelAnnotaInfo[groupName]["product"])
+
+	for si in range(0,len(sublist)):
+		sl = sublist[si]
+		mSId =specInfoMap[sl]["Mpath"]
+		moose.connect(enzyme_,"sub",mSId,"reac")
+
+	for pi in range(0,len(prdlist)):
+		pl = prdlist[pi]
+		mPId = specInfoMap[pl]["Mpath"]
+		moose.connect(enzyme_,"prd",mPId,"reac")
+	
+	if (enz.isSetNotes):
+		pullnotes(enz,enzyme_)
+		
+def addSubPrd(reac,reName,type,reactSBMLIdMooseId,specInfoMap):
+	rctMapIter = {}
+
+	if (type == "sub"):
+		noplusStoichsub = 0
+		addSubinfo = collections.OrderedDict()
+		for rt in range(0,reac.getNumReactants()):
+			rct = reac.getReactant(rt)
+			sp = rct.getSpecies()
+			rctMapIter[sp] = rct.getStoichiometry()
+			noplusStoichsub = noplusStoichsub+rct.getStoichiometry()
+		for key,value in rctMapIter.items():
+			src = specInfoMap[key]["Mpath"]
+			des = reactSBMLIdMooseId[reName]["MooseId"]
+			for s in range(0,int(value)):
+				moose.connect(des, 'sub', src, 'reac', 'OneToOne')
+		addSubinfo = {"nSub" :noplusStoichsub}
+		reactSBMLIdMooseId[reName].update(addSubinfo)
+
+	else:
+		noplusStoichprd = 0
+		addPrdinfo = collections.OrderedDict()
+		for rt in range(0,reac.getNumProducts()):
+			rct = reac.getProduct(rt)
+			sp = rct.getSpecies()
+			rctMapIter[sp] = rct.getStoichiometry()
+			noplusStoichprd = noplusStoichprd+rct.getStoichiometry()
+		
+		for key,values in rctMapIter.items():
+			#src ReacBase
+			src = reactSBMLIdMooseId[reName]["MooseId"]
+			des = specInfoMap[key]["Mpath"]
+			for i in range(0,int(values)):
+				moose.connect(src, 'prd', des, 'reac', 'OneToOne')
+		addPrdinfo = {"nPrd": noplusStoichprd}
+		reactSBMLIdMooseId[reName].update(addPrdinfo)
+
+def populatedict(annoDict,label,value):
+	if annoDict.has_key(label):
+		annoDict.setdefault(label,[])
+		annoDict[label].update({value})
+	else:
+		annoDict[label]= {value}
+
+def getModelAnnotation(obj,modelAnnotaInfo):
+	name = obj.getId()
+	name = name.replace(" ","_space_")
+	#modelAnnotaInfo= {}
+	annotateMap = {}
+	if (obj.getAnnotation() != None):
+		annoNode = obj.getAnnotation()
+		for ch in range(0,annoNode.getNumChildren()):
+			childNode = annoNode.getChild(ch)
+			if (childNode.getPrefix() == "moose" and childNode.getName() == "EnzymaticReaction"):
+				sublist = []
+				for gch in range(0,childNode.getNumChildren()):
+					grandChildNode = childNode.getChild(gch)
+					nodeName = grandChildNode.getName()
+					nodeValue = ""
+					if (grandChildNode.getNumChildren() == 1):
+						nodeValue = grandChildNode.getChild(0).toXMLString()
+					else:
+						print "Error: expected exactly ONE child of ", nodeName
+					
+					if nodeName == "enzyme":
+						populatedict(annotateMap,"enzyme",nodeValue)
+	
+					elif nodeName == "complex":
+						populatedict(annotateMap,"complex" ,nodeValue)
+					elif ( nodeName == "substrates"):
+						populatedict(annotateMap,"substrates" ,nodeValue)
+					elif ( nodeName == "product" ):
+						populatedict(annotateMap,"product" ,nodeValue)
+					elif ( nodeName == "groupName" ):
+						populatedict(annotateMap,"grpName" ,nodeValue)
+					elif ( nodeName == "stage" ):
+						populatedict(annotateMap,"stage" ,nodeValue)
+					elif ( nodeName == "Group" ):
+						populatedict(annotateMap,"group" ,nodeValue)
+					elif ( nodeName == "xCord" ):
+						populatedict(annotateMap,"xCord" ,nodeValue)
+					elif ( nodeName == "yCord" ):
+						populatedict(annotateMap,"yCord" ,nodeValue)
+	groupName = ""
+	if annotateMap.has_key('grpName'):
+		groupName = list(annotateMap["grpName"])[0]
+		if list(annotateMap["stage"])[0] == '1':
+			if modelAnnotaInfo.has_key(groupName):
+				modelAnnotaInfo[groupName].update	(
+					{"enzyme" : list(annotateMap["enzyme"])[0],
+					"stage" : list(annotateMap["stage"])[0],
+					"substrate" : list(annotateMap["substrates"])
+					}
+				)
+			else:
+				modelAnnotaInfo[groupName]= {
+					"enzyme" : list(annotateMap["enzyme"])[0],
+					"stage" : list(annotateMap["stage"])[0],
+					"substrate" : list(annotateMap["substrates"])
+					#"group" : list(annotateMap["Group"])[0],
+					#"xCord" : list(annotateMap["xCord"])[0],
+					#"yCord" : list(annotateMap["yCord"]) [0]
+					}
+
+		elif list(annotateMap["stage"])[0] == '2':
+			if modelAnnotaInfo.has_key(groupName):
+				stage = int(modelAnnotaInfo[groupName]["stage"])+int(list(annotateMap["stage"])[0])
+				modelAnnotaInfo[groupName].update (
+					{"complex" : list(annotateMap["complex"])[0],
+					"product" : list(annotateMap["product"]),
+					"stage" : [stage]
+					}
+				)
+			else:
+				modelAnnotaInfo[groupName]= {
+					"complex" : list(annotateMap["complex"])[0],
+					"product" : list(annotateMap["product"]),
+					"stage" : [stage]
+					}
+	return(groupName)
+
+
+def createReaction(model,specInfoMap,modelAnnotaInfo):
+	# print " reaction "
+	# Things done for reaction
+	# --Reaction is not created, if substrate and product is missing
+	# --Reaction is created under first substrate's compartment if substrate not found then product
+	# --Reaction is created if substrate or product is missing, but while run time in GUI atleast I have stopped
+	#ToDo
+	# -- I need to check here if any substance/product is if ( constant == true && bcondition == false)
+    # cout <<"The species "<< name << " should not appear in reactant or product as per sbml Rules"<< endl;
+
+	errorFlag = True
+	reactSBMLIdMooseId = {}
+
+	for ritem in range(0,model.getNumReactions()):
+		reactionCreated = False
+		groupName = ""
+		reac = model.getReaction( ritem )
+		if ( reac.isSetId() ):
+			rId = reac.getId()
+		if ( reac.isSetName() ):
+			rName = reac.getName()
+			rName = rName.replace(" ","_space_")
+		if not( rName ):
+			rName = rId
+		rev = reac.getReversible()
+		fast = reac.getFast()
+		if ( fast ):
+			print " warning: for now fast attribute is not handled \"", rName,"\""
+		if (reac.getAnnotation() != None):
+			groupName = getModelAnnotation(reac,modelAnnotaInfo)
+			
+		if (groupName != "" and list(modelAnnotaInfo[groupName]["stage"])[0] == 3):
+			setupEnzymaticReaction(reac,groupName,rName,specInfoMap,modelAnnotaInfo)
+
+		elif(groupName == ""):
+			numRcts = reac.getNumReactants()
+			numPdts = reac.getNumProducts()
+			nummodifiers = reac.getNumModifiers()
+			
+			if not (numRcts and numPdts):
+				print rName," : Substrate and Product is missing, we will be skiping creating this reaction in MOOSE"
+			
+			elif (reac.getNumModifiers() > 0):
+				reactionCreated = setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId)
+				print " reactionCreated after enz ",reactionCreated
+
+			elif (numRcts):
+				# In moose, reactions compartment are decided from first Substrate compartment info
+				# substrate is missing then check for product
+				if (reac.getNumReactants()):
+					react = reac.getReactant(0)
+					sp = react.getSpecies()
+					speCompt = specInfoMap[sp]["comptId"].path
+					reaction_ = moose.Reac(speCompt+'/'+rName)
+					reactionCreated = True
+					reactSBMLIdMooseId[rName] = {"MooseId" : reaction_ , "className ": "reaction"}
+			elif (numPdts):
+				# In moose, reactions compartment are decided from first Substrate compartment info
+				# substrate is missing then check for product
+				if (reac.getNumProducts()):
+					react = reac.getProducts(0)
+					sp = react.getSpecies()
+					speCompt = specInfoMap[sp]["comptId"].path
+					reaction_ = moose.Reac(speCompt+'/'+rName)
+					reactionCreated = True
+					reactSBMLIdMooseId[rName] = {"MooseId":reaction_}
+
+			if reactionCreated:
+				if (reac.isSetNotes):
+					pullnotes(reac,reaction_)
+				addSubPrd(reac,rName,"sub",reactSBMLIdMooseId,specInfoMap)
+				addSubPrd(reac,rName,"prd",reactSBMLIdMooseId,specInfoMap)
+	# print "react ",reactSBMLIdMooseId
+	return errorFlag
+
+def getMembers(node,ruleMemlist):
+	if node.getType() == libsbml.AST_PLUS:
+		if node.getNumChildren() == 0:
+			print ("0")
+			return
+		getMembers(node.getChild(0),ruleMemlist)
+		for i in range(1,node.getNumChildren()):
+			# addition
+			getMembers(node.getChild(i),ruleMemlist)
+	elif node.getType() == libsbml.AST_REAL:
+		#This will be constant
+		pass
+	elif node.getType() == libsbml.AST_NAME:
+		#This will be the ci term"
+		ruleMemlist.append(node.getName())
+
+	elif node.getType() == libsbml.AST_TIMES:
+		if node.getNumChildren() == 0:
+			print ("0")
+			return
+		getMembers(node.getChild(0),ruleMemlist)
+		for i in range(1,node.getNumChildren()):
+			# Multiplication
+			getMembers(node.getChild(i),ruleMemlist)
+	else:
+		print " this case need to be handled"
+
+def createRules(model,specInfoMap,globparameterIdValue):
+	for r in range(0,model.getNumRules()):
+			rule = model.getRule(r)
+			if (rule.isAssignment()):
+				rule_variable = rule.getVariable();
+				poolList = specInfoMap[rule_variable]["Mpath"].path
+				funcId = moose.Function(poolList+'/func')
+				moose.connect( funcId, 'valueOut', poolList ,'setN' )
+				ruleMath = rule.getMath()
+				ruleMemlist = []
+				speFunXterm = {}
+				getMembers(ruleMath,ruleMemlist)
+				for i in ruleMemlist:
+					if (specInfoMap.has_key(i)):
+						specMapList = specInfoMap[i]["Mpath"]
+						numVars = funcId.numVars
+						x = funcId.path+'/x['+str(numVars)+']'
+						speFunXterm[i] = 'x'+str(numVars)
+						moose.connect(specMapList , 'nOut', x, 'input' )
+						funcId.numVars = numVars +1
+					elif not(globparameterIdValue.has_key(i)):
+						print "check the variable type ",i
+
+				exp = rule.getFormula()
+				for mem in ruleMemlist:
+					if ( specInfoMap.has_key(mem)):
+						exp1 = exp.replace(mem,str(speFunXterm[mem]))
+						exp = exp1
+					elif( globparameterIdValue.has_key(mem)):
+						exp1 = exp.replace(mem,str(globparameterIdValue[mem]))
+						exp = exp1
+					else:
+						print "Math expression need to be checked"
+				funcId.expr = exp.strip(" \t\n\r")
+				return True
+
+			elif( rule.isRate() ):
+				print "Warning : For now this \"",rule.getVariable(), "\" rate Rule is not handled in moose "
+				return False
+
+			elif ( rule.isAlgebraic() ):
+				print "Warning: For now this " ,rule.getVariable()," Algebraic Rule is not handled in moose"
+				return False
+	return True
 
 def pullnotes(sbmlId,mooseId):
 	if sbmlId.getNotes() != None:
