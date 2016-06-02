@@ -60,15 +60,11 @@ namespace moose {
      * @brief Enumerate type for debug and log.
      */
     enum serverity_level_ { 
-        trace, debug, info
-            , warning, fixme
-            , error, fatal, failed 
+        trace, debug, info , warning, fixme , error, fatal, failed 
     };
 
     static string levels_[9] = { 
-        "TRACE", "DEBUG", "INFO", "LOG"
-            , "WARNING", "FIXME"
-            , "ERROR", "FATAL", "FAILED" 
+        "TRACE", "DEBUG", "INFO", "WARNING", "FIXME" , "ERROR", "FATAL", "FAILED" 
     };
 
     /* 

@@ -9,15 +9,20 @@
 #include <omp.h>
 #include <sys/time.h>
 #include "header.h"
+
 #ifdef USE_GSL
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
-#endif
+
+#else                           // USE_BOOST
 
 #include <boost/numeric/odeint.hpp>
 #include <boost/bind.hpp>
 #include "BoostSys.h"
+
+#endif
 
 #include "OdeSystem.h"
 #include "VoxelPoolsBase.h"
