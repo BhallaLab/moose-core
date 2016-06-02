@@ -395,7 +395,10 @@ add_subdirectory(intfire)
 # These are always shared libraries.
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 if(WITH_BOOST)
-    list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES} -llapack -lblas)
+    find_package( LAPACK REQUIRED )
+    # NOTE: On nargis, find LAPACK does not work, one has to specify lapack and
+    # blas library manually.
+    list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES} ) #-llapack -lblas)
     list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
 endif(WITH_BOOST)
 
