@@ -263,7 +263,7 @@ void Streamer::addTable( Id table )
     tableTick_.push_back( table.element()->getTick() );
     // NOTE: If user can make sure that names are unique in table, using name is
     // better than using the full path.
-    columns_.push_back( moose::basename( table.path() ) );
+    columns_.push_back( moose::moosePathToUserPath( table.path() ) );
 }
 
 /**

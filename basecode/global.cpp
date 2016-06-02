@@ -99,7 +99,9 @@ namespace moose {
         return moose::rng.uniform( );
     }
 
-    // Fix the given path.
+    // MOOSE suffixes [0] to all elements to path. Remove [0] with null
+    // character whenever possible. For n > 0, [n] should not be touched. Its
+    // the user job to take the pain and write the correct path.
     string createMOOSEPath( const string& path )
     {
         string s = path;                        /* Local copy */
@@ -108,13 +110,6 @@ namespace moose {
         string zeroIndex("[0]");
         while( (n = s.find( zeroIndex, n )) != std::string::npos )
             s.erase( n, zeroIndex.size() );
-
-        string undesired = ":?\"<>|";
-        for (size_t i = 0; i < s.size() ; ++i)
-        {
-            bool found = undesired.find(s[i]) != string::npos;
-            if(found) s[i] = '_';
-        }
         return s;
     }
 
