@@ -665,7 +665,6 @@ class rdesigneur:
                     save_tabs = moose.Table2( save_tabname, numPlots )
                 else:
                     save_tabs = moose.Table( save_tabname, numPlots )
-                print ("tabs: ", save_tabs)
                 save_vtabs = moose.vec( save_tabs )
                 q = 0
                 for p in [ x for x in plotObj3 if x != dummy ]:
@@ -698,7 +697,7 @@ class rdesigneur:
             pair = self.saveList[i][0] + " " + self.saveList[i][1]
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
             spineCompts = self.elecid.spinesFromExpression[ pair ]
-            # Here we get the object details from plotList
+            # Here we get the object details from saveList
             plotObj, plotField = self._parseComptField( dendCompts, self.saveList[i], knownFields )
             plotObj2, plotField2 = self._parseComptField( spineCompts, self.saveList[i], knownFields )
             plotObj3 = plotObj + plotObj2
@@ -711,7 +710,8 @@ class rdesigneur:
             rowList.append([jvec.vector * ind[3] for jvec in save_vtab])            #populates the simulation table
             rowList.append(self.saveList[i][3])
             rowList.append(filter(lambda obj: obj.path != '/', plotObj3))           #this filters out dummy elements
-            rowList.append(self.saveList[i][5])
+            if len(self.saveList[i])>5:
+                rowList.append(self.saveList[i][5])
             self.tabForXML.append(rowList)
             rowList = []
         timeSeriesTable = self.tabForXML                                            # the list with all the details of plot
@@ -749,7 +749,10 @@ class rdesigneur:
             q[-1].set( 'dt', str(plotData[5]) )
             p = []
             assert( len(plotData[7]) == len(plotData[9]) )
-            res = plotData[10]
+            if len(plotData)>10:
+                res = plotData[10]
+            else:
+                res = 12
             for ind, jvec in enumerate(plotData[7]):
                 p.append( etree.SubElement( title, "comptData"))
                 p[-1].set( 'comptPath', str(plotData[9][ind].path))
