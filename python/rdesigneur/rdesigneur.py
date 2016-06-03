@@ -78,8 +78,10 @@ class rdesigneur:
             adaptorList= [],
             stimList = [],
             plotList = [],
+            saveList = [],
+            saveAs = [],
             moogList = [],
-            params = {}
+            params = None
         ):
         """ Constructor of the rdesigner. This just sets up internal fields
             for the model building, it doesn't actually create any objects.
@@ -116,8 +118,11 @@ class rdesigneur:
         self.adaptorList = adaptorList
         self.stimList = stimList
         self.plotList = plotList
+        self.saveList = saveList                    
+        self.saveAs = saveAs
         self.moogList = moogList
         self.plotNames = []
+        self.saveNames = []
         self.moogNames = []
         self.cellPortionElist = []
         self.spineComptElist = []
@@ -178,6 +183,7 @@ class rdesigneur:
             self._buildStims()
             self._configureClocks()
             self._printModelStats()
+            self._savePlots()
 
         except BuildError as msg:
             print("Error: rdesigneur: model build failed:", msg)
@@ -624,50 +630,149 @@ class rdesigneur:
     ################################################################
     # Here we get the time-series data and write to XML
     ################################################################        
+    
+    def _savePlots( self ):
+        knownFields = {
+            'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)' ),
+            'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)' ),
+            'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)' ),
+            'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)' ),
+            'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)' ),
+            'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)' ),
+            'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)' ),
+            'n':('PoolBase', 'getN', 1, '# of molecules'),
+            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' )
+        }
+        save_graphs = moose.Neutral( self.modelPath + '/save_graphs' )
+        dummy = moose.element( '/' )
+        k = 0
+        for i in self.saveList:
+            pair = i[0] + " " + i[1]
+            dendCompts = self.elecid.compartmentsFromExpression[ pair ]
+            spineCompts = self.elecid.spinesFromExpression[ pair ]
+            plotObj, plotField = self._parseComptField( dendCompts, i, knownFields )
+            plotObj2, plotField2 = self._parseComptField( spineCompts, i, knownFields )
+            assert( plotField == plotField2 )
+            plotObj3 = plotObj + plotObj2
+            numPlots = sum( i != dummy for i in plotObj3 )
+            if numPlots > 0:
+                save_tabname = save_graphs.path + '/save_plot' + str(k)
+                scale = knownFields[i[3]][2]
+                units = knownFields[i[3]][3]
+                self.saveNames.append( ( save_tabname, i[4], k, scale, units ) )
+                k += 1
+                if i[3] == 'n' or i[3] == 'conc':
+                    save_tabs = moose.Table2( save_tabname, numPlots )
+                else:
+                    save_tabs = moose.Table( save_tabname, numPlots )
+                print ("tabs: ", save_tabs)
+                save_vtabs = moose.vec( save_tabs )
+                q = 0
+                for p in [ x for x in plotObj3 if x != dummy ]:
+                    moose.connect( save_vtabs[q], 'requestOut', p, plotField )
+                    q += 1
+
+
+    def getTimeSeriesTable( self ):                                 
+                                                               
+        '''This function gets the list with all the details of the simulation
+            required for plotting.
+            This function adds flexibility in terms of the details 
+            we wish to store.'''
             
-    def getTimeSeriesTable( self ):                                 #to get the list with all the details of the simulation
-        j = 0                                                       #this function adds flexibility in terms of the details... 
-        for i in self.plotNames:                                    #...we wish to store.
-            rowList = list(i)                                       
-            vtab = moose.vec( i[0] )                                   
-            t = np.arange( 0, vtab[0].vector.size, 1 ) * vtab[0].dt
-            rowList.append(vtab[0].dt)
+                                                               
+        knownFields = {
+            'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)' ),
+            'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)' ),
+            'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)' ),
+            'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)' ),
+            'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)' ),
+            'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)' ),
+            'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)' ),
+            'n':('PoolBase', 'getN', 1, '# of molecules'),
+            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' )
+        }    
+        
+        
+        for i,ind in enumerate(self.saveNames):
+            pair = self.saveList[i][0] + " " + self.saveList[i][1]
+            dendCompts = self.elecid.compartmentsFromExpression[ pair ]
+            spineCompts = self.elecid.spinesFromExpression[ pair ]
+            # Here we get the object details from plotList
+            plotObj, plotField = self._parseComptField( dendCompts, self.saveList[i], knownFields )
+            plotObj2, plotField2 = self._parseComptField( spineCompts, self.saveList[i], knownFields )
+            plotObj3 = plotObj + plotObj2
+                                                
+            rowList = list(ind)                                       
+            save_vtab = moose.vec( ind[0] )                                   
+            t = np.arange( 0, save_vtab[0].vector.size, 1 ) * save_vtab[0].dt
+            rowList.append(save_vtab[0].dt)
             rowList.append(t)
-            rowList.append(vtab[0].vector)
-            rowList.append(self.plotList[j][3])
+            rowList.append([jvec.vector * ind[3] for jvec in save_vtab])            #populates the simulation table
+            rowList.append(self.saveList[i][3])
+            rowList.append(filter(lambda obj: obj.path != '/', plotObj3))           #this filters out dummy elements
+            rowList.append(self.saveList[i][5])
             self.tabForXML.append(rowList)
             rowList = []
-            j += 1
-        timeSeriesTable = self.tabForXML
+        timeSeriesTable = self.tabForXML                                            # the list with all the details of plot
         return timeSeriesTable
 
-    def writeXML( self, filename ):                                 #to write to XML file
-        timeSeriesTable = self.getTimeSeriesTable()                 
+    def writeXML( self, filename ):                                                 #to write to XML file 
+        timeSeriesTable = self.getTimeSeriesTable()
+        print("Note: In '%s.xml', all illegal characters will be replaced by '_'. The legal characters are: '_', '-', '.', 'a-z', 'A-Z'." % filename)
+        print("[CAUTION] The '%s.xml' file might be very large if all the compartments are to be saved." % filename)                 
         root = etree.Element("TimeSeriesPlot")
         parameters = etree.SubElement( root, "parameters" )
-        if self.params == {}:
+        if self.params == None:
             parameters.text = "None"
-        for pkey, pvalue in self.params.items():
-            parameter = etree.SubElement( parameters, str(pkey) )
-            parameter.text = str(pvalue)
+        else:
+            assert(isinstance(self.params, dict)), "'params' should be a dictionary."
+            for pkey, pvalue in self.params.items():
+                parameter = etree.SubElement( parameters, str(pkey) )
+                parameter.text = str(pvalue)
         q = []
         for plotData in timeSeriesTable:                            #plotData contains all the details of a single plot
-            title = etree.SubElement( root, str(plotData[1]).strip().replace(" ", "_"))
-            title.set( 'path', str(plotData[0]))
-            title.set( 'field', str(plotData[8]))
-            q.append( etree.SubElement( title, "timeData"))
-            q[-1].set( 'scale', str(plotData[3]))
-            q[-1].set( 'units', str(plotData[4]))
-            q[-1].set( 'dt', str(plotData[5]))
-            # p = []
-            # for itime in range(len(plotData[6])):
-                # p.append( etree.SubElement( q[-1], 'time_stamp' ))
-                # p[-1].set( 'time', str( plotData[6][itime] ))
-                # p[-1].text = str( plotData[7][itime] )
-            q[-1].text = ''.join( str(value) + ' ' for value in plotData[7] )
+            newString = ""
+            for char in str(plotData[1]):
+                if not (ord(char) in range(65, 91) or ord(char) in range(97, 123) or char in ['_', '-','.']):
+                    char = "_"
+                    newString = newString + char
+                else:
+                    newString = newString + char
+            print("'%s' replaced with '%s'" %(str(plotData[1]), newString))
+            title = etree.SubElement( root, str(newString) )
+            title.set( 'path', str(plotData[0]) )
+            title.set( 'field', str(plotData[8]) )
+            q.append( etree.SubElement( title, "timeData") )
+            q[-1].set( 'scale', str(plotData[3]) )
+            q[-1].set( 'units', str(plotData[4]) )
+            q[-1].set( 'dt', str(plotData[5]) )
+            p = []
+            assert( len(plotData[7]) == len(plotData[9]) )
+            res = plotData[10]
+            for ind, jvec in enumerate(plotData[7]):
+                p.append( etree.SubElement( title, "comptData"))
+                p[-1].set( 'comptPath', str(plotData[9][ind].path))
+                p[-1].text = ''.join( str(round(value,res)) + ' ' for value in jvec )            
+        tree = etree.ElementTree(root)
+        tree.write(filename + ".xml")
 
-        tree = etree.ElementTree(root)  
-        tree.write(filename + ".xml") 
+    def save(self, filename):
+        '''This takes data from 'saveList' instead.
+            'saveList' is exactly like 'plotList' but with 1 additional argument: 
+            It will have a resolution option.
+            There is a list of "saveAs" formats
+            With saveList, the user will be able to set what all details he wishes to be saved.'''
+        #[TO DO] The future versions will have capability to write to different formats
+        if self.saveAs == []:
+            print("[saveAs error]: No saving format specified")
+            return
+        else:
+            for i in self.saveAs:
+                if i == "xml":
+                    return self.writeXML(filename)
+                else:
+                    pass  
 
     ################################################################
     # Here we set up the stims
