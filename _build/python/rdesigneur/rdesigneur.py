@@ -497,7 +497,7 @@ class rdesigneur:
         kf = knownFields[field] # Find the field to decide type.
         if ( kf[0] == 'CaConcBase' or kf[0] == 'ChanBase' ):
             objList = self._collapseElistToPathAndClass( comptList, plotSpec[2], kf[0] )
-            print ("objList: ", len(objList), kf[1])
+            # print ("objList: ", len(objList), kf[1])
             return objList, kf[1]
         elif (field == 'n' or field == 'conc'  ):
             path = plotSpec[2]
@@ -561,9 +561,9 @@ class rdesigneur:
             plotObj, plotField = self._parseComptField( dendCompts, i, knownFields )
             plotObj2, plotField2 = self._parseComptField( spineCompts, i, knownFields )
             # print("plotObj: ", [obj.path for obj in plotObj])
-            print("length: ", len(plotObj))
+            # print("length: ", len(plotObj))
             # print("plotObj2: ", [obj2.path for obj2 in plotObj2])
-            print("length2: ", len(plotObj2))
+            # print("length2: ", len(plotObj2))
             assert( plotField == plotField2 )
             plotObj3 = plotObj + plotObj2
             numPlots = sum( i != dummy for i in plotObj3 )
@@ -577,7 +577,7 @@ class rdesigneur:
                     tabs = moose.Table2( tabname, numPlots )
                 else:
                     tabs = moose.Table( tabname, numPlots )
-                print ("tabs: ", tabs)
+                # print ("tabs: ", tabs)
                 vtabs = moose.vec( tabs )
                 q = 0
                 for p in [ x for x in plotObj3 if x != dummy ]:
@@ -632,7 +632,7 @@ class rdesigneur:
             pylab.ylabel( i[4] )
             vtab = moose.vec( i[0] )
             t = np.arange( 0, vtab[0].vector.size, 1 ) * vtab[0].dt
-            print(vtab[0].vector.size)
+            # print(vtab[0].vector.size)
             # n = 0
             for j in vtab:
                 pylab.plot( t, j.vector * i[3] )
@@ -674,9 +674,9 @@ class rdesigneur:
             plotObj, plotField = self._parseComptField( dendCompts, i, knownFields )
             plotObj2, plotField2 = self._parseComptField( spineCompts, i, knownFields )
             # print("plotObj: ", [obj.path for obj in plotObj])
-            print("length: ", len(plotObj))
+            # print("length: ", len(plotObj))
             # print("plotObj2: ", [obj2.path for obj2 in plotObj2])
-            print("length2: ", len(plotObj2))
+            # print("length2: ", len(plotObj2))
             assert( plotField == plotField2 )
             plotObj3 = plotObj + plotObj2
             numPlots = sum( i != dummy for i in plotObj3 )
@@ -690,7 +690,7 @@ class rdesigneur:
                     save_tabs = moose.Table2( save_tabname, numPlots )
                 else:
                     save_tabs = moose.Table( save_tabname, numPlots )
-                print ("tabs: ", save_tabs)
+                # print ("tabs: ", save_tabs)
                 save_vtabs = moose.vec( save_tabs )
                 q = 0
                 for p in [ x for x in plotObj3 if x != dummy ]:
@@ -764,7 +764,7 @@ class rdesigneur:
     def writeXML( self, filename ):                                #to write to XML file 
         # import pickle
         timeSeriesTable = self.getTimeSeriesTable()
-        print("Note: In '%s.xml', all illegal characters will be replaced by '_'. The legal characters are: '_', '-', '.', 'a-z', 'A-Z'." % filename)
+        # print("Note: In '%s.xml', all illegal characters will be replaced by '_'. The legal characters are: '_', '-', '.', 'a-z', 'A-Z'." % filename)
         print("[CAUTION] The '%s.xml' file might be very large if all the compartments are to be saved." % filename)                 
         root = etree.Element("TimeSeriesPlot")
         parameters = etree.SubElement( root, "parameters" )
@@ -775,26 +775,30 @@ class rdesigneur:
             for pkey, pvalue in self.params.items():
                 parameter = etree.SubElement( parameters, str(pkey) )
                 parameter.text = str(pvalue)
-        q = []
+        # q = []
         for plotData in timeSeriesTable:                            #plotData contains all the details of a single plot
-            newString = ""
-            for char in str(plotData[1]):
-                if not (ord(char) in range(65, 91) or ord(char) in range(97, 123) or char in ['_', '-','.']):
-                    # newString = plotData[1].replace(char, "_")
-                    # print("order: ", ord(char))
-                    char = "_"
-                    newString = newString + char
-                else:
-                    newString = newString + char
-            print("'%s' replaced with '%s'" %(str(plotData[1]), newString))
+            # newString = ""
+            # for char in str(plotData[1]):
+            #     if not (ord(char) in range(65, 91) or ord(char) in range(97, 123) or char in ['_', '-','.']):
+            #         # newString = plotData[1].replace(char, "_")
+            #         # print("order: ", ord(char))
+            #         char = "_"
+            #         newString = newString + char
+            #     else:
+            #         newString = newString + char
+            # print("'%s' replaced with '%s'" %(str(plotData[1]), newString))
             # title = etree.SubElement( root, str(plotData[1]).strip().replace(" ", "_"))
-            title = etree.SubElement( root, str(newString).strip().replace(" ", "_"))
-            title.set( 'path', str(plotData[0]))
+            title = etree.SubElement( root, "timeSeries" )
+            # title.set( 'path', str(plotData[0]))
+            title.set( 'title', str(plotData[1]))
             title.set( 'field', str(plotData[8]))
-            q.append( etree.SubElement( title, "timeData"))
-            q[-1].set( 'scale', str(plotData[3]))
-            q[-1].set( 'units', str(plotData[4]))
-            q[-1].set( 'dt', str(plotData[5]))
+            # q.append( etree.SubElement( title, "timeData"))
+            # q[-1].set( 'scale', str(plotData[3]))
+            # q[-1].set( 'units', str(plotData[4]))
+            # q[-1].set( 'dt', str(plotData[5]))
+            title.set( 'scale', str(plotData[3]))
+            title.set( 'units', str(plotData[4]))
+            title.set( 'dt', str(plotData[5]))
             p = []
             assert(len(plotData[7]) == len(plotData[9]))
             # print(len(plotData[7]))
@@ -805,8 +809,8 @@ class rdesigneur:
                 res = 12
             for ind, jvec in enumerate(plotData[7]):
                 # print (jvec)
-                p.append( etree.SubElement( title, "comptData"))
-                p[-1].set( 'comptPath', str(plotData[9][ind].path))
+                p.append( etree.SubElement( title, "data"))
+                p[-1].set( 'path', str(plotData[9][ind].path))
                 p[-1].text = ''.join( str(round(value,res)) + ' ' for value in jvec )
 
 
