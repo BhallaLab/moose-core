@@ -128,8 +128,6 @@ class rdesigneur:
         self.spineComptElist = []
         self.tabForXML = []
 
-        self.pathList = []                          # ADDED BY ME. TO BE REMOVED
-
         if not moose.exists( '/library' ):
             library = moose.Neutral( '/library' )
         try:
@@ -484,10 +482,6 @@ class rdesigneur:
                 if obj.isA[ className ]:
                     ret[j] = obj
             j += 1
-        print ("return: ", len(ret))
-        self.pathList = [obj.path for obj in ret]
-        # print("path list: ", self.pathList)
-        print ("path length: ", len(self.pathList))
         return ret
 
     # Returns vector of source objects, and the field to use.
@@ -669,7 +663,7 @@ class rdesigneur:
         save_graphs = moose.Neutral( self.modelPath + '/save_graphs' )
         dummy = moose.element( '/' )
         k = 0
-        for i in self.saveList[:4]:
+        for i in self.saveList:
             pair = i[0] + " " + i[1]
             # print ("pair: ", pair)
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
@@ -758,7 +752,8 @@ class rdesigneur:
             rowList.append([jvec.vector * ind[3] for jvec in save_vtab])             #power of list comprehension
             rowList.append(self.saveList[i][3])
             rowList.append(filter(lambda obj: obj.path != '/', plotObj3))       #this filters out dummy elements
-            rowList.append(self.saveList[i][5])
+            if len(self.saveList[i])>5:
+                rowList.append(self.saveList[i][5])
             # rowList.append(plotObj3)
             self.tabForXML.append(rowList)
             rowList = []
@@ -804,7 +799,10 @@ class rdesigneur:
             assert(len(plotData[7]) == len(plotData[9]))
             # print(len(plotData[7]))
             # print(len(plotData[9]))
-            res = plotData[10]
+            if len(plotData)>10:
+                res = plotData[10]
+            else:
+                res = 12
             for ind, jvec in enumerate(plotData[7]):
                 # print (jvec)
                 p.append( etree.SubElement( title, "comptData"))
