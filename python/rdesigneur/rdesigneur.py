@@ -719,7 +719,7 @@ class rdesigneur:
 
     def writeXML( self, filename ):                                                 #to write to XML file 
         timeSeriesTable = self.getTimeSeriesTable()
-        print("Note: In '%s.xml', all illegal characters will be replaced by '_'. The legal characters are: '_', '-', '.', 'a-z', 'A-Z'." % filename)
+        # print("Note: In '%s.xml', all illegal characters will be replaced by '_'. The legal characters are: '_', '-', '.', 'a-z', 'A-Z'." % filename)
         print("[CAUTION] The '%s.xml' file might be very large if all the compartments are to be saved." % filename)                 
         root = etree.Element("TimeSeriesPlot")
         parameters = etree.SubElement( root, "parameters" )
@@ -730,23 +730,26 @@ class rdesigneur:
             for pkey, pvalue in self.params.items():
                 parameter = etree.SubElement( parameters, str(pkey) )
                 parameter.text = str(pvalue)
-        q = []
+        # q = []
         for plotData in timeSeriesTable:                            #plotData contains all the details of a single plot
-            newString = ""
-            for char in str(plotData[1]):
-                if not (ord(char) in range(65, 91) or ord(char) in range(97, 123) or char in ['_', '-','.']):
-                    char = "_"
-                    newString = newString + char
-                else:
-                    newString = newString + char
-            print("'%s' replaced with '%s'" %(str(plotData[1]), newString))
-            title = etree.SubElement( root, str(newString) )
+            # newString = ""
+            # for char in str(plotData[1]):
+            #     if not (ord(char) in range(65, 91) or ord(char) in range(97, 123) or char in ['_', '-','.']):
+            #         char = "_"
+            #         newString = newString + char
+            #     else:
+            #         newString = newString + char
+            # print("'%s' replaced with '%s'" %(str(plotData[1]), newString))
+            title = etree.SubElement( root, "timeSeries" )
             title.set( 'path', str(plotData[0]) )
             title.set( 'field', str(plotData[8]) )
-            q.append( etree.SubElement( title, "timeData") )
-            q[-1].set( 'scale', str(plotData[3]) )
-            q[-1].set( 'units', str(plotData[4]) )
-            q[-1].set( 'dt', str(plotData[5]) )
+            # q.append( etree.SubElement( title, "timeData") )
+            # q[-1].set( 'scale', str(plotData[3]) )
+            # q[-1].set( 'units', str(plotData[4]) )
+            # q[-1].set( 'dt', str(plotData[5]) )
+            title.set( 'scale', str(plotData[3]) )
+            title.set( 'units', str(plotData[4]) )
+            title.set( 'dt', str(plotData[5]) )
             p = []
             assert( len(plotData[7]) == len(plotData[9]) )
             if len(plotData)>10:
@@ -755,7 +758,7 @@ class rdesigneur:
                 res = 12
             for ind, jvec in enumerate(plotData[7]):
                 p.append( etree.SubElement( title, "comptData"))
-                p[-1].set( 'comptPath', str(plotData[9][ind].path))
+                p[-1].set( 'comptPath', str(plotData[9][ind].path) )
                 p[-1].text = ''.join( str(round(value,res)) + ' ' for value in jvec )            
         tree = etree.ElementTree(root)
         tree.write(filename + ".xml")
