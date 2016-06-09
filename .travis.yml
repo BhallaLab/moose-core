@@ -3,7 +3,6 @@ dist: trusty
 language: cpp
 compiler:
     - gcc
-    - clang
 os:
     - linux
 notifications:
