@@ -29,6 +29,27 @@
 
 const unsigned int OFFNODE = ~0;
 
+#if _GSOLVE_PTHREADS
+extern "C" void* call_func(void* f)
+{
+        std::auto_ptr<pthreadGsolveWrap> w(static_cast < pthreadGsolveWrap* >(f));
+
+        int localId = w->tid;
+        int blockSize = (w->blockSize);
+        ProcPtr p = *(w->P);
+        GssaSystem* sysP = (w->sysPtr);
+        int startIndex = localId * blockSize;
+        int endIndex = startIndex + blockSize;
+
+        GssaVoxelPools* lpoolArray = *(w->poolsIndex);
+
+        for(int j = startIndex; j < endIndex; j++)
+                lpoolArray[j].advance(p, sysP);
+
+   return NULL;
+}
+#endif //_GSOLVE_PTHREADS
+
 // static function
 SrcFinfo2< Id, vector< double > >* Gsolve::xComptOut() {
 	static SrcFinfo2< Id, vector< double > > xComptOut( "xComptOut",
@@ -402,35 +423,76 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 	}
 	// Fifth, update the mol #s.
 	// First we advance the simulation.
-///////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Parallel GSOLVE::Advance with OpenMP 
-///////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#if _GSOLVE_PTHREADS
    int poolSize = pools_.size();
    GssaSystem* sysPtr = &sys_;
-   static int cellsPerThread = 0; // Used for printing...
+   GssaVoxelPools* poolsArray = &pools_[0];
+
+   int blz = poolSize/NTHREADS;
+
+   static int PThread = 0;
+   if(!PThread)
+   {
+           PThread = 1;
+           cout << endl << "PTHREAD PARALLELISM FOR  GSOLVE USING " << NTHREADS << " THREADS. " << endl;
+   }
+
+   pthread_attr_t attr;
+   pthread_attr_init(&attr);
+   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+
+   for(long i = 0; i < NTHREADS; i++)
+   {
+           pthreadGsolveWrap* w = new pthreadGsolveWrap(i, &p, sysPtr, &poolsArray, blz);
+           int rc = pthread_create(&threads[i], &attr, call_func, (void*) w);
+   }
+
+   for(int j = NTHREADS*blz; j < poolSize; j++)
+           poolsArray[j].advance( p, sysPtr);
+
+   for(long i = 0; i < NTHREADS; i++)
+           pthread_join(threads[i], NULL);
+
+#endif //_GSOLVE_PTHREADS
+
+#if _GSOLVE_OPENMP
+
+   int poolSize = pools_.size();
+   GssaSystem* sysPtr = &sys_;
+   static int cellsPerThread = 0;
    int j;
+
    if(!cellsPerThread)
    {
            cellsPerThread = 1;
            cout << endl << "OpenMP parallelism: Using parallel-for in GSOLVE " << endl;
            cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
-	 }
-
+   }
+	 
 #pragma omp parallel for schedule(guided, cellsPerThread) num_threads(NTHREADS) shared(poolSize,p) firstprivate(sysPtr) if(poolSize>NTHREADS)
 	for ( int j = 0; j < poolSize; j++ ) 
-   {
-           //clock_t startT = clock();
-
            pools_[j].advance( p, sysPtr );
 
-           //double diff = (clock() - startT) /(double) (CLOCKS_PER_SEC/1000);
-           //cout << "Time taken by a single loop = " << diff << endl;
-   }
+#endif //_GSOLVE_OPENMP
 
-//	for ( vector< GssaVoxelPools >::iterator i = pools_.begin(); i != pools_.end(); ++i ) 
-//   {
-//           i->advance( p, &sys_ );
-//	}
+#if _GSOLVE_SEQ
+   static int SeqThread = 0;
+   int j;
+   if(!SeqThread)
+   {
+           SeqThread = 1;
+           cout << endl << "Sequential execution of GSOLVE " << endl;
+	 }
+	for ( vector< GssaVoxelPools >::iterator i = pools_.begin(); i != pools_.end(); ++i ) 
+   {
+           i->advance( p, &sys_ );
+	}
+#endif //_GSOLVE_SEQ
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	if ( useClockedUpdate_ ) { // Check if a clocked stim is to be updated
 		for ( vector< GssaVoxelPools >::iterator 

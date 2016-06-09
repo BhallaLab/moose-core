@@ -18,6 +18,28 @@ class Stoich;
 const char *env_value1 = getenv("NUM_THREADS");
 const int NTHREADS  = atoi(env_value1);
 
+#define _GSOLVE_SEQ 0
+#define _GSOLVE_OPENMP 0
+#define _GSOLVE_PTHREADS 1
+
+#if _GSOLVE_PTHREADS
+#include <pthread.h>
+
+struct pthreadGsolveWrap
+{
+        long tid;
+        ProcPtr *P;
+        GssaSystem* sysPtr;
+        GssaVoxelPools** poolsIndex;
+        int blockSize;
+
+        pthreadGsolveWrap(long Id, ProcPtr* ptr, GssaSystem* sptr, GssaVoxelPools** pI, int blz) : tid(Id), P(ptr), sysPtr(sptr), poolsIndex(pI), blockSize(blz) {} ;
+};
+
+pthread_t threads[8];
+
+#endif //_GSOLVE_PTHREADS
+
 class Gsolve: public ZombiePoolInterface
 {
 	public: 
