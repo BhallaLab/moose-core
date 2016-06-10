@@ -78,8 +78,6 @@ class rdesigneur:
             adaptorList= [],
             stimList = [],
             plotList = [],
-            saveList = [],
-            saveAs = [],
             moogList = [],
             params = None
         ):
@@ -118,8 +116,8 @@ class rdesigneur:
         self.adaptorList = adaptorList
         self.stimList = stimList
         self.plotList = plotList
-        self.saveList = saveList                    #ADDED BY ME
-        self.saveAs = saveAs
+        self.saveList = plotList                    #ADDED BY ME
+        self.saveAs = []
         self.moogList = moogList
         self.plotNames = []
         self.saveNames = []
@@ -697,7 +695,7 @@ class rdesigneur:
                     moose.connect( save_vtabs[q], 'requestOut', p, plotField )
                     q += 1
 
-    def getTimeSeriesTable( self ):                                 
+    def _getTimeSeriesTable( self ):                                 
                                                                
         '''This function gets the list with all the details of the simulation
             required for plotting.
@@ -752,66 +750,75 @@ class rdesigneur:
             rowList.append([jvec.vector * ind[3] for jvec in save_vtab])             #power of list comprehension
             rowList.append(self.saveList[i][3])
             rowList.append(filter(lambda obj: obj.path != '/', plotObj3))       #this filters out dummy elements
-            if len(self.saveList[i])>5:
-                rowList.append(self.saveList[i][5])
-            # rowList.append(plotObj3)
+            
+            if (type(self.saveList[i][-1])==int):
+                rowList.append(self.saveList[i][-1])
+            else:
+                rowList.append(12)
+
             self.tabForXML.append(rowList)
             rowList = []
             # j += 1
         timeSeriesTable = self.tabForXML                # the list with all the details of plot
         return timeSeriesTable
 
-    def writeXML( self, filename ):                                #to write to XML file 
+    def _writeXML( self, filename, timeSeriesData ):                                #to write to XML file 
         # import pickle
-        timeSeriesTable = self.getTimeSeriesTable()
+        # timeSeriesTable = self._getTimeSeriesTable()
+        plotData = timeSeriesData
         # print("Note: In '%s.xml', all illegal characters will be replaced by '_'. The legal characters are: '_', '-', '.', 'a-z', 'A-Z'." % filename)
-        print("[CAUTION] The '%s.xml' file might be very large if all the compartments are to be saved." % filename)                 
-        root = etree.Element("TimeSeriesPlot")
-        parameters = etree.SubElement( root, "parameters" )
-        if self.params == None:
-            parameters.text = "None"
-        else:
-            assert(isinstance(self.params, dict)), "'params' should be a dictionary."
-            for pkey, pvalue in self.params.items():
-                parameter = etree.SubElement( parameters, str(pkey) )
-                parameter.text = str(pvalue)
-        # q = []
-        for plotData in timeSeriesTable:                            #plotData contains all the details of a single plot
-            # newString = ""
-            # for char in str(plotData[1]):
-            #     if not (ord(char) in range(65, 91) or ord(char) in range(97, 123) or char in ['_', '-','.']):
-            #         # newString = plotData[1].replace(char, "_")
-            #         # print("order: ", ord(char))
-            #         char = "_"
-            #         newString = newString + char
-            #     else:
-            #         newString = newString + char
-            # print("'%s' replaced with '%s'" %(str(plotData[1]), newString))
-            # title = etree.SubElement( root, str(plotData[1]).strip().replace(" ", "_"))
-            title = etree.SubElement( root, "timeSeries" )
-            # title.set( 'path', str(plotData[0]))
-            title.set( 'title', str(plotData[1]))
-            title.set( 'field', str(plotData[8]))
-            # q.append( etree.SubElement( title, "timeData"))
-            # q[-1].set( 'scale', str(plotData[3]))
-            # q[-1].set( 'units', str(plotData[4]))
-            # q[-1].set( 'dt', str(plotData[5]))
-            title.set( 'scale', str(plotData[3]))
-            title.set( 'units', str(plotData[4]))
-            title.set( 'dt', str(plotData[5]))
-            p = []
-            assert(len(plotData[7]) == len(plotData[9]))
-            # print(len(plotData[7]))
-            # print(len(plotData[9]))
-            if len(plotData)>10:
-                res = plotData[10]
+        print("[CAUTION] The '%s' file might be very large if all the compartments are to be saved." % filename)
+        import os.path
+        if os.path.isfile(filename):
+            # etree.find
+            tree = etree.parse(filename)
+            root = tree.getroot()
+            # print("root: ", root)
+        else:    
+            root = etree.Element("TimeSeriesPlot")
+            parameters = etree.SubElement( root, "parameters" )
+            if self.params == None:
+                parameters.text = "None"
             else:
-                res = 12
-            for ind, jvec in enumerate(plotData[7]):
-                # print (jvec)
-                p.append( etree.SubElement( title, "data"))
-                p[-1].set( 'path', str(plotData[9][ind].path))
-                p[-1].text = ''.join( str(round(value,res)) + ' ' for value in jvec )
+                assert(isinstance(self.params, dict)), "'params' should be a dictionary."
+                for pkey, pvalue in self.params.items():
+                    parameter = etree.SubElement( parameters, str(pkey) )
+                    parameter.text = str(pvalue)
+        # q = []
+        # for plotData in timeSeriesTable:                            #plotData contains all the details of a single plot
+        # newString = ""
+        # for char in str(plotData[1]):
+        #     if not (ord(char) in range(65, 91) or ord(char) in range(97, 123) or char in ['_', '-','.']):
+        #         # newString = plotData[1].replace(char, "_")
+        #         # print("order: ", ord(char))
+        #         char = "_"
+        #         newString = newString + char
+        #     else:
+        #         newString = newString + char
+        # print("'%s' replaced with '%s'" %(str(plotData[1]), newString))
+        # title = etree.SubElement( root, str(plotData[1]).strip().replace(" ", "_"))
+        title = etree.SubElement( root, "timeSeries" )
+        # title.set( 'path', str(plotData[0]))
+        title.set( 'title', str(plotData[1]))
+        title.set( 'field', str(plotData[8]))
+        # q.append( etree.SubElement( title, "timeData"))
+        # q[-1].set( 'scale', str(plotData[3]))
+        # q[-1].set( 'units', str(plotData[4]))
+        # q[-1].set( 'dt', str(plotData[5]))
+        title.set( 'scale', str(plotData[3]))
+        title.set( 'units', str(plotData[4]))
+        title.set( 'dt', str(plotData[5]))
+        p = []
+        assert(len(plotData[7]) == len(plotData[9]))
+        # print(len(plotData[7]))
+        # print(len(plotData[9]))
+        
+        res = plotData[10]
+        for ind, jvec in enumerate(plotData[7]):
+            # print (jvec)
+            p.append( etree.SubElement( title, "data"))
+            p[-1].set( 'path', str(plotData[9][ind].path))
+            p[-1].text = ''.join( str(round(value,res)) + ' ' for value in jvec )
 
 
             # q[-1].text = ''.join( str(value) + ' ' for value in plotData[7] )
@@ -823,21 +830,83 @@ class rdesigneur:
                 # p[-1].text = str( plotData[7][itime] )
             
         tree = etree.ElementTree(root)
-        tree.write(filename + ".xml")
+        tree.write(filename)
         # doc = etree.tostring(root, pretty_print=True, xml_declaration=True, encoding="UTF-8")
         # print(doc, file=filename + ".xml")
         # pickle.dump(doc, open(filename+".p", "wb"))
 
-    def save(self, filename):
-        if self.saveAs == []:
-            print("[saveAs error]: No saving format specified")
-            return
+    # def save(self, filename):
+        
+    #     for svlst in self.saveList:
+    #         saveAs = []
+    #         if (len(svlst)>6) and (type(svlst[-1])==int):
+    #             saveAs.extend(svlst[5:-1])
+    #         else:
+    #             saveAs.append('xml')
+    #         for ind,fmt in enumerate(saveAs):
+    #             if fmt == "xml":
+    #                 return self._writeXML(filename+str(ind))
+    #             else:
+    #                 pass
+    # if self.saveAs == []:
+    #         print("[saveAs error]: No saving format specified")
+    #         return
+    #     saveAs = []
+    #     for i in self.saveList:
+    #         if (len(self.saveList[i])>6) and (type(self.saveList[i][-1])==int):
+    #             saveAs.extend(self.saveList[i][5:-1])
+    #         else:
+    #             self.append('xml')
+    #         for i in saveAs:
+    #             if i == "xml":
+    #                 return self.writeXML(filename)
+    #             else:
+    #                 pass
+
+    # def save(self, filename, *args):
+    #     if len(args) == 0:
+    #         return self._writeXML(filename)
+    #     else:
+    #         for ar in args:
+    #             if ar == 'xml':
+    #                 return self._writeXML(filename)
+    #             else:
+    #                 pass
+    ##########TEMPORARY###############
+    def _save(self, timeSeriesData, *filenames):
+        # if ( len(self.plotList[i]) >= 6 ) and (type(self.plotList[i][5])!=int):
+        #         self._savePlots()
+
+        if filenames:
+            for filename in filenames:
+                # print (filenames)
+                for name in filename:
+                    print (name)
+                    if name[-4:] == '.xml':
+                        # print(name[-4])
+                        self._writeXML(name, timeSeriesData)
+                    else:
+                        # print(name[-4:])
+                        print("not possible")
+                        pass
         else:
-            for i in self.saveAs:
-                if i == "xml":
-                    return self.writeXML(filename)
-                else:
-                    pass 
+            pass
+
+    def save( self ):
+        timeSeriesTable = self._getTimeSeriesTable()
+        for i,sList in enumerate(self.saveList):
+
+            if (len(sList) >= 6) and (type(sList[5]) != int):
+                    # self.saveAs.append[fmt if type(fmt)!=int for fmt in self.saveList[5:]]
+                    self.saveAs.extend(filter(lambda fmt: type(fmt)!=int, sList[5:]))
+                    # print (saveAs)
+                    timeSeriesData = timeSeriesTable[i]
+                    self._save(timeSeriesData, self.saveAs)
+                    self.saveAs=[]
+            else:
+                pass
+        else:
+            pass
 
     ################################################################
     # Here we set up the stims
