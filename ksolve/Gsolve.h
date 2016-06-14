@@ -24,19 +24,22 @@ const int NTHREADS  = atoi(env_value1);
 
 #if _GSOLVE_PTHREADS
 #include <pthread.h>
+#include <semaphore.h>
 
 struct pthreadGsolveWrap
 {
         long tid;
         ProcPtr *P;
-        GssaSystem* sysPtr;
+        GssaSystem** sysPtr;
         GssaVoxelPools** poolsIndex;
-        int blockSize;
+        int *blockSize;
+        bool* destroySig; 
+        sem_t *sThread, *sMain;
 
-        pthreadGsolveWrap(long Id, ProcPtr* ptr, GssaSystem* sptr, GssaVoxelPools** pI, int blz) : tid(Id), P(ptr), sysPtr(sptr), poolsIndex(pI), blockSize(blz) {} ;
+        pthreadGsolveWrap(sem_t* S1, sem_t* S2, long Id, ProcPtr* ptr, GssaSystem** sptr, GssaVoxelPools** pI, int* blz, bool* destroySignal) : sThread(S1), sMain(S2), tid(Id), P(ptr), sysPtr(sptr), poolsIndex(pI), blockSize(blz), destroySig(destroySignal) {} ;
 };
 
-pthread_t threads[8];
+//      pthread_t threads[8];
 
 #endif //_GSOLVE_PTHREADS
 
@@ -45,6 +48,19 @@ class Gsolve: public ZombiePoolInterface
 	public: 
 		Gsolve();
 		~Gsolve();
+
+#if _GSOLVE_PTHREADS
+
+      pthread_t* threads;
+      GssaSystem** sPtr;
+		bool* destroySignal; 
+		ProcPtr *pthreadP; 
+		GssaVoxelPools** poolArray_; 
+		int *pthreadBlock; 
+		sem_t* mainSemaphor; 
+		sem_t* threadSemaphor; 
+
+#endif
 
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff

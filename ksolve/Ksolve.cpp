@@ -72,7 +72,6 @@ extern "C" void* call_func( void* f )
 
 	   pthread_exit(NULL);
 	   return NULL;
-
 }
 #endif // _KSOLVE_PTHREADS
 
@@ -294,8 +293,16 @@ Ksolve::Ksolve()
       
       //Assign memory to each of the pointers
       threads = (pthread_t*) malloc(NTHREADS*sizeof(pthread_t));
+      if(threads == NULL)
+              cout << "Error in allocating memory to threads in KSOLVE" << endl;
+   
       mainSemaphor = (sem_t*) malloc(NTHREADS*sizeof(sem_t));
+      if(mainSemaphor == NULL)
+              cout << "Error in allocating memory to mainSemaphor" << endl;
+   
       threadSemaphor = (sem_t*) malloc(NTHREADS*sizeof(sem_t));
+      if(threads == NULL)
+              cout << "Error in allocating memory to threadSemaphor" << endl;
 
 	   destroySignal = new bool;
 	   *destroySignal = false;
@@ -315,7 +322,10 @@ Ksolve::Ksolve()
           //Create threads
 			 int rc = pthread_create(&threads[i], &attr, call_func, (void*) w);
 			 if(rc)
-				    printf("thread creation problem\n");
+          {
+                  cout << "ERROR : return code from pthread_create() is " << rc << endl;
+                  exit(-1); 
+          }
 	   }
 #endif
     ;

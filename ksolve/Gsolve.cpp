@@ -32,19 +32,28 @@ const unsigned int OFFNODE = ~0;
 #if _GSOLVE_PTHREADS
 extern "C" void* call_func(void* f)
 {
+                
         std::auto_ptr<pthreadGsolveWrap> w(static_cast < pthreadGsolveWrap* >(f));
 
         int localId = w->tid;
-        int blockSize = (w->blockSize);
-        ProcPtr p = *(w->P);
-        GssaSystem* sysP = (w->sysPtr);
-        int startIndex = localId * blockSize;
-        int endIndex = startIndex + blockSize;
+        bool* destroySignal = w->destroySig;
 
-        GssaVoxelPools* lpoolArray = *(w->poolsIndex);
+        while(!*destroySignal)
+        {
+                sem_wait(w->sMain);
 
-        for(int j = startIndex; j < endIndex; j++)
-                lpoolArray[j].advance(p, sysP);
+                int blockSize = *(w->blockSize);
+                ProcPtr p = *(w->P);
+                GssaSystem* sysP = *(w->sysPtr);
+                int startIndex = localId * blockSize;
+                int endIndex = startIndex + blockSize;
+                GssaVoxelPools* lpoolArray = *(w->poolsIndex);
+
+                for(int j = startIndex; j < endIndex; j++)
+                        lpoolArray[j].advance(p, sysP);
+
+                sem_post(w->sThread);
+        }
 
    return NULL;
 }
@@ -246,10 +255,70 @@ Gsolve::Gsolve()
 		dsolve_(),
 		dsolvePtr_( 0 ),
 		useClockedUpdate_( false )
-{;}
+{
+#if _GSOLVE_PTHREADS
+   pthread_attr_t attr;
+   pthread_attr_init(&attr);
+   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+
+   threads = (pthread_t*) malloc(NTHREADS*sizeof(pthread_t));
+   if(threads == NULL)
+           cout << "Error in allocating memory to threads in GSOLVE" << endl;
+      
+   mainSemaphor = (sem_t*) malloc(NTHREADS*sizeof(sem_t));
+   if(mainSemaphor == NULL)
+           cout << "Error in allocating memory to mainSemaphor" << endl;
+      
+   threadSemaphor = (sem_t*) malloc(NTHREADS*sizeof(sem_t));
+   if(threads == NULL)
+           cout << "Error in allocating memory to threadSemaphor" << endl;
+
+   destroySignal = new bool;
+   *destroySignal = false;
+        
+   pthreadBlock = new int;
+   poolArray_ = new GssaVoxelPools*;
+   sPtr = new GssaSystem*;
+   pthreadP = new ProcPtr;
+
+   for(long i = 0; i < NTHREADS; i++)
+   {
+			sem_init(&threadSemaphor[i],0,0);
+			sem_init(&mainSemaphor[i],0,0);
+
+         pthreadGsolveWrap* w = new pthreadGsolveWrap(&threadSemaphor[i], &mainSemaphor[i], i, pthreadP, sPtr, poolArray_, pthreadBlock, destroySignal);
+           
+         int rc = pthread_create(&threads[i], &attr, call_func, (void*) w);
+         if (rc)
+         {
+                 cout << "ERROR : return code from pthread_create() is " << rc << endl;
+                 exit(-1); 
+         }
+   }
+
+#endif
+        ;
+}
 
 Gsolve::~Gsolve()
-{;}
+{
+#if _GSOLVE_PTHREADS
+        *destroySignal = true;
+
+        for(int i = 0; i < NTHREADS; i++)
+                sem_post(&mainSemaphor[i]);
+
+      //Join the threads
+	   for(int i = 0; i < NTHREADS; i++)
+			 pthread_join(threads[i], NULL);
+
+      free(destroySignal);
+      free(mainSemaphor);
+      free(threadSemaphor);
+      free(threads);
+#endif
+        ;
+}
 
 //////////////////////////////////////////////////////////////
 // Field Access functions
@@ -427,11 +496,6 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 // Parallel GSOLVE::Advance with OpenMP 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if _GSOLVE_PTHREADS
-   int poolSize = pools_.size();
-   GssaSystem* sysPtr = &sys_;
-   GssaVoxelPools* poolsArray = &pools_[0];
-
-   int blz = poolSize/NTHREADS;
 
    static int PThread = 0;
    if(!PThread)
@@ -440,21 +504,22 @@ void Gsolve::process( const Eref& e, ProcPtr p )
            cout << endl << "PTHREAD PARALLELISM FOR  GSOLVE USING " << NTHREADS << " THREADS. " << endl;
    }
 
-   pthread_attr_t attr;
-   pthread_attr_init(&attr);
-   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+   int poolSize = pools_.size();
+   GssaSystem* sysPtr = &sys_;
+   GssaVoxelPools* poolsArray = &pools_[0];
 
-   for(long i = 0; i < NTHREADS; i++)
-   {
-           pthreadGsolveWrap* w = new pthreadGsolveWrap(i, &p, sysPtr, &poolsArray, blz);
-           int rc = pthread_create(&threads[i], &attr, call_func, (void*) w);
-   }
+   int blz = poolSize/NTHREADS;
+
+	for(int i = 0; i < NTHREADS; i++)
+		   sem_post(&mainSemaphor[i]); //Send signal to the threads to start
 
    for(int j = NTHREADS*blz; j < poolSize; j++)
            poolsArray[j].advance( p, sysPtr);
 
-   for(long i = 0; i < NTHREADS; i++)
-           pthread_join(threads[i], NULL);
+  // cout << "After sem_wait from process " << endl;
+
+	for(int i = 0; i < NTHREADS; i++)
+		   sem_wait(&threadSemaphor[i]); // Wait for threads to finish their work
 
 #endif //_GSOLVE_PTHREADS
 

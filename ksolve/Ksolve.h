@@ -32,7 +32,7 @@ const int NTHREADS  = atoi(env_value);
 struct pthreadWrap
 {
 	   long tid;
-	   sem_t* sThread, *sMain;
+	   sem_t *sThread, *sMain;
 	   bool* destroySig;
 	   ProcPtr *p;
 	   VoxelPools** poolsArr_;
