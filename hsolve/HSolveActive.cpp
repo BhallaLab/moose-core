@@ -112,7 +112,7 @@ void HSolveActive::step( ProcPtr info )
     double memoryTransferTime;
 
 #ifdef USE_CUDA
-    GpuTimer advChanTimer, calcChanTimer, umTimer, solverTimer, advCalcTimer;
+    //GpuTimer advChanTimer, calcChanTimer, umTimer, solverTimer, advCalcTimer;
     //advChanTimer.Start();
     	advanceChannels( info->dt );
     //advChanTimer.Stop();
@@ -247,13 +247,19 @@ void HSolveActive::step( ProcPtr info )
 void HSolveActive::calculateChannelCurrents()
 {
 #ifdef USE_CUDA
+	/*
 	GpuTimer timer;
 	timer.Start();
 		calculate_channel_currents_cuda_wrapper();
 	timer.Stop();
 	float time = timer.Elapsed();
+	if(step_num < 20)
+		cout << time << endl;
+	*/
 
-	cudaSafeCall(cudaMemcpy(&current_[0], d_current_, current_.size()*sizeof(CurrentStruct), cudaMemcpyDeviceToHost));
+	calculate_channel_currents_cuda_wrapper();
+
+	//cudaSafeCall(cudaMemcpy(&current_[0], d_current_, current_.size()*sizeof(CurrentStruct), cudaMemcpyDeviceToHost));
 #else
 	u64 startTime = getTime();
     vector< ChannelStruct >::iterator ichan;
@@ -663,45 +669,15 @@ void HSolveActive::advanceChannels( double dt )
 		is_initialized = true;
 	}
 
-	GpuTimer timer0, timer1, timer2, timer3;
-	float time, time1, time2, time3;
+	// Calling the kernels
+	//cudaSafeCall(cudaMemcpy(d_V, &(V_.front()), nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
+	//cudaSafeCall(cudaMemcpy(d_ca, &(ca_.front()), ca_.size()*sizeof(double), cudaMemcpyHostToDevice));
 
-		// Calling the kernels
-		cudaSafeCall(cudaMemcpy(d_V, &(V_.front()), nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
-		cudaSafeCall(cudaMemcpy(d_ca, &(ca_.front()), ca_.size()*sizeof(double), cudaMemcpyHostToDevice));
+	get_lookup_rows_and_fractions_cuda_wrapper(dt); // Gets lookup values for Vm and Ca_.
+	advance_channels_cuda_wrapper(dt); // Advancing fraction values.
+	//get_compressed_gate_values_wrapper(); // Getting values of new state
 
-	timer0.Start();
-		get_lookup_rows_and_fractions_cuda_wrapper(dt); // Gets lookup values for Vm and Ca_.
-		advance_channels_cuda_wrapper(dt); // Advancing fraction values.
-		//get_compressed_gate_values_wrapper(); // Getting values of new state
-	timer0.Stop();
-	time = timer0.Elapsed();
-	//cout << "GPU Adv Channel time " << time << endl;
-
-	/*
-	timer1.Start();
-		get_lookup_rows_and_fractions_cuda_wrapper(dt); // Gets lookup values for Vm and Ca_.
-	timer1.Stop();
-	time1 = timer1.Elapsed();
-
-	timer2.Start();
-		advance_channels_cuda_wrapper(dt); // Advancing fraction values.
-	timer2.Stop();
-	time2 = timer2.Elapsed();
-
-	timer3.Start();
-		get_compressed_gate_values_wrapper(); // Getting values of new state
-	timer3.Stop();
-	time3 = timer3.Elapsed();
-
-	time = time1 + time2 + time3;
-
-	cout << "GPU adv chan time split" <<  time << " " << (time1*100.0f)/time <<
-			" " << (time2*100.0f)/time <<
-			" " << (time3*100.0f)/time << endl;
-	*/
-
-		cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
+	//cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
 
 	if(step_num == 1){
 		cout << channel_.size() << " " << num_gates << " " << state_.size() << " extra % " << (state_.size()*100.0f)/num_gates << endl;
@@ -854,6 +830,7 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	cudaMalloc((void**)&d_chan_Gbar, num_channels*sizeof(double));
 	cudaMalloc((void**)&d_chan_to_comp, num_channels*sizeof(double));
 	cudaMalloc((void**)&d_chan_Gk, num_channels*sizeof(double));
+	cudaMalloc((void**)&d_chan_Ek, num_channels*sizeof(double));
 	cudaMalloc((void**)&d_chan_GkEk, num_channels*sizeof(double));
 
 	cudaMalloc((void**)&d_comp_Gksum, num_compts*sizeof(double));
@@ -1109,6 +1086,11 @@ void HSolveActive::copy_hsolve_information_cuda(){
 
 
 	// Current Data
+	double h_Ek_temp[num_channels];
+	for (int i = 0; i < num_channels; ++i) {
+		h_Ek_temp[i] = current_[i].Ek;
+	}
+	cudaMemcpy(d_chan_Ek, h_Ek_temp, current_.size()*sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * num_compts * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_current_, &(current_.front()), current_.size()*sizeof(CurrentStruct), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_inject_, &(inject_.front()), inject_.size()*sizeof(InjectStruct), cudaMemcpyHostToDevice);

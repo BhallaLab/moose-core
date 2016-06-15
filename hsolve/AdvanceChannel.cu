@@ -166,7 +166,8 @@ void calculate_channel_currents_opt(double* d_gate_values,
 		int* rowPtr,
 		double* d_chan_modulation,
 		double* d_chan_Gbar,
-		CurrentStruct* d_current_,
+		//CurrentStruct* d_current_,
+		double* d_chan_Ek,
 		double* d_chan_Gk,
 		double* d_chan_GkEk,
 		int size){
@@ -178,9 +179,12 @@ void calculate_channel_currents_opt(double* d_gate_values,
 			temp *= pow(d_gate_values[i], d_gate_powers[i]);
 		}
 
-		d_current_[tid].Gk = temp;
+		//d_current_[tid].Gk = temp;
+		//d_chan_Gk[tid] = temp;
+		//d_chan_GkEk[tid] = temp*d_current_[tid].Ek;
+
 		d_chan_Gk[tid] = temp;
-		d_chan_GkEk[tid] = temp*d_current_[tid].Ek;
+		d_chan_GkEk[tid] = temp*d_chan_Ek[tid];
 	}
 }
 
@@ -491,7 +495,8 @@ void HSolveActive::calculate_channel_currents_cuda_wrapper(){
 				d_state_rowPtr,
 				d_chan_modulation,
 				d_chan_Gbar,
-				d_current_,
+				//d_current_,
+				d_chan_Ek,
 				d_chan_Gk, d_chan_GkEk, num_channels);
 
 #ifdef PIN_POINT_ERROR
