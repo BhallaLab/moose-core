@@ -74,6 +74,13 @@ const Cinfo* Table::initCinfo()
         , &Table::getFormat
     );
 
+    static ValueFinfo< Table, string > name(
+        "name"
+        , "Name of the table."
+        , &Table::setName
+        , &Table::getName
+    );
+
     //////////////////////////////////////////////////////////////
     // MsgDest Definitions
     //////////////////////////////////////////////////////////////
@@ -119,6 +126,7 @@ const Cinfo* Table::initCinfo()
     {
         &threshold,		// Value
         &format,                // Value
+        &name,                  // Value
         &outfile,               // Value 
         &useStreamer,           // Value
         handleInput(),		// DestFinfo
@@ -339,6 +347,17 @@ string Table::getFormat( void ) const
     return format_;
 }
 
+/*  User defined name  */
+string Table::getName( void ) const
+{
+    return tableName_;
+}
+
+void Table::setName( const string name )
+{
+    tableName_ = name ;
+}
+
 /* Enable/disable streamer support. */
 void Table::setUseStreamer( bool useStreamer )
 {
@@ -392,10 +411,4 @@ void Table::zipWithTime( const vector<double>& v
         tvec.push_back( currTime - (N - i - 1 ) * dt_ );
         tvec.push_back( v[i] );
     }
-}
-
-
-string Table::getName( void )
-{
-    return tableName_;
 }
