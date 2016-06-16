@@ -548,7 +548,7 @@ void HSolveActive::advanceCalcium()
 	//if(step_num < 10)	cout << "Advance calcium " << time << endl;
 
 	cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost);
-	cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost);
+	//cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost);
 
 //#endif
 #else
@@ -840,7 +840,13 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	cudaMalloc((void**)&d_compartment_, compartment_.size()*sizeof(CompartmentStruct));
 	cudaMalloc((void**)&d_caConc_, caConc_.size()*sizeof(CaConcStruct));
 
-	// Compartment related
+	// caConc_ Array of structures to structure of arrays related.
+	cudaMalloc((void**)&d_CaConcStruct_c_, caConc_.size()*sizeof(double));
+	cudaMalloc((void**)&d_CaConcStruct_CaBasal_, caConc_.size()*sizeof(double));
+	cudaMalloc((void**)&d_CaConcStruct_factor1_, caConc_.size()*sizeof(double));
+	cudaMalloc((void**)&d_CaConcStruct_factor2_, caConc_.size()*sizeof(double));
+	cudaMalloc((void**)&d_CaConcStruct_ceiling_, caConc_.size()*sizeof(double));
+	cudaMalloc((void**)&d_CaConcStruct_floor_, caConc_.size()*sizeof(double));
 
 	// Hines Matrix related
 	cudaMalloc((void**)&d_HS_, HS_.size()*sizeof(double));
@@ -1151,6 +1157,38 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	double temp_x[num_catarget_chans];
 	for(int i=0;i<num_catarget_chans;i++) temp_x[i] = 1;
 	cudaMemcpy(d_capool_onex, temp_x, num_catarget_chans*sizeof(double), cudaMemcpyHostToDevice);
+
+	// caConc_ Array of structures to structure of arrays.
+	double* temp_caconc = new double[caConc_.size()]();
+	for (int i = 0; i < caConc_.size(); ++i) {
+		temp_caconc[i] = caConc_[i].c_;
+		cudaMemcpy(d_CaConcStruct_c_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice);
+	}
+
+	for (int i = 0; i < caConc_.size(); ++i) {
+		temp_caconc[i] = caConc_[i].CaBasal_;
+		cudaMemcpy(d_CaConcStruct_CaBasal_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice);
+	}
+
+	for (int i = 0; i < caConc_.size(); ++i) {
+		temp_caconc[i] = caConc_[i].factor1_;
+		cudaMemcpy(d_CaConcStruct_factor1_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice);
+	}
+
+	for (int i = 0; i < caConc_.size(); ++i) {
+		temp_caconc[i] = caConc_[i].factor2_;
+		cudaMemcpy(d_CaConcStruct_factor2_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice);
+	}
+
+	for (int i = 0; i < caConc_.size(); ++i) {
+		temp_caconc[i] = caConc_[i].ceiling_;
+		cudaMemcpy(d_CaConcStruct_ceiling_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice);
+	}
+
+	for (int i = 0; i < caConc_.size(); ++i) {
+		temp_caconc[i] = caConc_[i].floor_;
+		cudaMemcpy(d_CaConcStruct_floor_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice);
+	}
 
 	/*
 	// Writing load to file.

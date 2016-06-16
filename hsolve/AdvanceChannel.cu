@@ -333,7 +333,10 @@ void advance_calcium_cuda_opt(int* d_catarget_channel_indices,
 			double* d_Vmid,
 			//double* d_capool_values,
 			int* d_chan_to_comp, int* rowPtr,
-			CaConcStruct* d_caConc_, double* d_Ca,
+			//CaConcStruct* d_caConc_,
+			double* d_Ca,
+			double* d_CaConcStruct_c_, // Dynamic array
+			double* d_CaConcStruct_CaBasal_, double* d_CaConcStruct_factor1_, double* d_CaConcStruct_factor2_, double* d_CaConcStruct_ceiling_, double* d_CaConcStruct_floor_, // Static array
 			//double* d_caActivation_values,
 			int size){
 	int tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -350,7 +353,7 @@ void advance_calcium_cuda_opt(int* d_catarget_channel_indices,
 		}
 
 		//d_caActivation_values[tid] = sum;
-
+		/*
 		//d_caConc_[tid].c_ = d_caConc_[tid].factor1_ * d_caConc_[tid].c_ + d_caConc_[tid].factor2_ * d_caActivation_values[tid];
 		d_caConc_[tid].c_ = d_caConc_[tid].factor1_ * d_caConc_[tid].c_ + d_caConc_[tid].factor2_ * sum;
 		double new_ca = d_caConc_[tid].CaBasal_ + d_caConc_[tid].c_;
@@ -362,6 +365,21 @@ void advance_calcium_cuda_opt(int* d_catarget_channel_indices,
 		if(new_ca < d_caConc_[tid].floor_){
 			new_ca = d_caConc_[tid].floor_;
 			d_caConc_[tid].c_ = new_ca - d_caConc_[tid].CaBasal_;
+		}
+		d_Ca[tid] = new_ca;
+		*/
+
+		d_CaConcStruct_c_[tid] = d_CaConcStruct_factor1_[tid]*d_CaConcStruct_c_[tid] + d_CaConcStruct_factor2_[tid]*sum;
+		double new_ca = d_CaConcStruct_CaBasal_[tid] + d_CaConcStruct_c_[tid];
+
+		if(d_CaConcStruct_ceiling_[tid] >0 && new_ca > d_CaConcStruct_ceiling_[tid]){
+			new_ca = d_CaConcStruct_ceiling_[tid];
+			d_CaConcStruct_c_[tid] = new_ca - d_CaConcStruct_CaBasal_[tid];
+		}
+
+		if(new_ca < d_CaConcStruct_floor_[tid]){
+			new_ca = d_CaConcStruct_floor_[tid];
+			d_CaConcStruct_c_[tid] = new_ca - d_CaConcStruct_CaBasal_[tid];
 		}
 		d_Ca[tid] = new_ca;
 	}
@@ -625,7 +643,10 @@ void HSolveActive::advance_calcium_cuda_wrapper(){
 					d_Vmid,
 					//d_capool_values,
 					d_chan_to_comp,d_capool_rowPtr,
-					d_caConc_, d_ca,
+					//d_caConc_,
+					d_ca,
+					d_CaConcStruct_c_, // Dynamic array
+					d_CaConcStruct_CaBasal_, d_CaConcStruct_factor1_, d_CaConcStruct_factor2_, d_CaConcStruct_ceiling_, d_CaConcStruct_floor_, // Static array
 					//d_caActivation_values,
 					num_ca_pools);
 	/*

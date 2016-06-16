@@ -227,8 +227,9 @@ protected:
 	cusparseHandle_t cusparse_handle;
 	cusparseMatDescr_t cusparse_descr;
 
-
-	// Compartment related
+	// caConc_ Array of structures to structure of arrays.
+	double* d_CaConcStruct_c_; // Dynamic array
+	double* d_CaConcStruct_CaBasal_, *d_CaConcStruct_factor1_, *d_CaConcStruct_factor2_, *d_CaConcStruct_ceiling_, *d_CaConcStruct_floor_; // Static array
 
 	// CUDA Active Permanent data
 	double* d_V;
