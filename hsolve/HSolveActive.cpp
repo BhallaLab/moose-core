@@ -132,7 +132,8 @@ void HSolveActive::step( ProcPtr info )
 		HSolvePassive::forwardEliminate();
 		HSolvePassive::backwardSubstitute();
 		cudaMemcpy(d_Vmid, &(VMid_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
-		cudaMemcpy(d_V, &(V_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+		//cudaMemcpy(d_V, &(V_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+		calculate_V_from_Vmid_wrapper();
 
 	//solverTimer.Stop();
 	//solverTime = solverTimer.Elapsed();

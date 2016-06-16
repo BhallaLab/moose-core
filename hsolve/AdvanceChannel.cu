@@ -739,4 +739,9 @@ int HSolveActive::choose_update_matrix_approach(){
 	}
 }
 
+void HSolveActive::calculate_V_from_Vmid_wrapper(){
+	int BLOCKS = (nCompt_+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
+	calculate_V_from_Vmid<<<BLOCKS, THREADS_PER_BLOCK>>>(d_Vmid, d_V, nCompt_);
+}
+
 #endif

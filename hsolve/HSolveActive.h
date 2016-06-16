@@ -311,6 +311,8 @@ private:
     void update_csrmatrix_cuda_wrapper();
     int choose_update_matrix_approach();
 
+    void calculate_V_from_Vmid_wrapper();
+
     void advance_calcium_cuda_wrapper();
 
 #endif
