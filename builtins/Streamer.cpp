@@ -261,9 +261,13 @@ void Streamer::addTable( Id table )
     tableIds_.push_back( table );
     tables_.push_back( t );
     tableTick_.push_back( table.element()->getTick() );
+
     // NOTE: If user can make sure that names are unique in table, using name is
     // better than using the full path.
-    columns_.push_back( moose::moosePathToUserPath( table.path() ) );
+    if( t->getName().size() > 0 )
+        columns_.push_back( t->getName( ) );
+    else
+        columns_.push_back( moose::moosePathToUserPath( table.path() ) );
 }
 
 /**
@@ -277,7 +281,6 @@ void Streamer::addTables( vector<Id> tables )
         return;
     for( vector<Id>::const_iterator it = tables.begin(); it != tables.end(); it++)
         addTable( *it );
-
 }
 
 
