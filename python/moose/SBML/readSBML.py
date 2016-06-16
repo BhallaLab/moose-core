@@ -34,6 +34,8 @@ import libsbml
       -- Need to add group 
       -- mathML only AssisgmentRule is taken partly I have checked addition and multiplication, 
        --, need to do for other calculation.
+       -- In Assisgment rule one of the variable is a function, in moose since assignment is done using function,
+          function can't get input from another function (model 000740 in l3v1)
     -Loading Model from SBML
       --Tested 1-30 testcase example model provided by l3v1 and l2v4 std.
         ---These are the models that worked (sbml testcase)1-6,10,14-15,17-21,23-25,34,35,58
@@ -57,7 +59,7 @@ def mooseReadSBML(filepath,loadpath):
 		if ( num_errors > 0 ):
 			print("Encountered the following SBML errors:" );
 			document.printErrors();
-			return False;
+			return moose.element('/');
 		else:
 			level = document.getLevel();
 			version = document.getVersion();
@@ -65,7 +67,7 @@ def mooseReadSBML(filepath,loadpath):
 			model = document.getModel();
 			if (model == None):
 				print("No model present." );
-				return False;
+				return moose.element('/');
 			else:
 				print " model ",model
 				print("functionDefinitions: " + str(model.getNumFunctionDefinitions()) );
@@ -83,7 +85,7 @@ def mooseReadSBML(filepath,loadpath):
 				print("\n");
 
 				if (model.getNumCompartments() == 0):
-					return False
+					return moose.element('/')
 				else:
 					baseId = moose.Neutral(loadpath)
 					#All the model will be created under model as a thumbrule
@@ -113,6 +115,7 @@ def mooseReadSBML(filepath,loadpath):
 
 	except IOError:
 		print "File " ,filepath ," does not exist."
+		return moose.element('/')
 def setupEnzymaticReaction(enz,groupName,enzName,specInfoMap,modelAnnotaInfo):
 	enzPool = (modelAnnotaInfo[groupName]["enzyme"])
 	enzParent = specInfoMap[enzPool]["Mpath"]
@@ -139,7 +142,7 @@ def setupEnzymaticReaction(enz,groupName,enzName,specInfoMap,modelAnnotaInfo):
 	
 	if (enz.isSetNotes):
 		pullnotes(enz,enzyme_)
-		
+
 def addSubPrd(reac,reName,type,reactSBMLIdMooseId,specInfoMap):
 	rctMapIter = {}
 
@@ -461,27 +464,36 @@ def createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap):
 					
 			specInfoMap[sId] = {"Mpath" : poolId, "const" : constant, "bcondition" : boundaryCondition, "hassubunit" : hasonlySubUnit, "comptId" : comptSbmlidMooseIdMap[comptId]["MooseId"]}
 			initvalue = 0.0
-			unitfactor,unitset = transformUnit(spe)
-			if(spe.isSetInitialAmount()):
-				initvalue = spe.getInitialAmount()
-				# moose is capable of populating number nInit so
-				# checking hasonlySubstanceUnit doesn't matter,
-				# populating nInit with this value automatically calculate the concInit.
-				# default unit is mole to convert to number we need to multiply by
-				# pow(NA) the avogadro's number
-				if not (unitset):
-					#unit is not set then pass milli mole which is not true for number
-					# so setting unitfactor to 1
-					unitfactor = 1
-				initvalue = initvalue * unitfactor * pow(6.0221409e23,1);
-				poolId.nInit = initvalue
-			elif ( spe.isSetInitialConcentration() ):
-				#ToDo : check 00976
+			unitfactor,unitset,unittype = transformUnit(spe,hasonlySubUnit)
+			if hasonlySubUnit == True:
+				if spe.isSetInitialAmount():
+					initvalue = spe.getInitialAmount()
+					# populating nInit, will automatically calculate the concInit.
+					if not (unitset):
+						# if unit is not set,
+						# default unit is assumed as Mole in SBML
+						unitfactor = pow(6.0221409e23,1)
+						unittype = "Mole"
 
-				initvalue = spe.getInitialConcentration();
-				#transValue will take care of multiplying any units are defined else millimole
-				#print " initvalue ",initvalue, unitfactor
-				unitfactor = 1
+					initvalue = initvalue * unitfactor
+				elif spe.isSetInitialConcentration():
+					initvalue = spe.getInitialConcentration()
+					print " Since hasonlySubUnit is true and concentration is set units are not checked"
+				poolId.nInit = initvalue
+
+			elif hasonlySubUnit == False:
+				#ToDo : check 00976
+				if spe.isSetInitialAmount():
+					initvalue = spe.getInitialAmount()
+					#initAmount is set we need to convert to concentration
+					initvalue = initvalue / comptSbmlidMooseIdMap[comptId]["size"]
+
+				elif spe.isSetInitialConcentration():
+					initvalue = spe.getInitialConcentration()
+				if not unitset:
+					#print " unit is not set"
+					unitfactor  = power(10,-3)
+
 				initvalue = initvalue * unitfactor
 				poolId.concInit = initvalue
 			else:
@@ -500,20 +512,16 @@ def createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap):
 					return False	
 	return True
 
-def transformUnit(unitForObject):
+def transformUnit(unitForObject,hasonlySubUnit=False):
 	#print "unit ",UnitDefinition.printUnits(unitForObject.getDerivedUnitDefinition())
-	lvalue = 1.0
 	unitset = False
+	unittype = None
 	if (unitForObject.getDerivedUnitDefinition()):
 		unit = (unitForObject.getDerivedUnitDefinition())
-		if not (unit.getNumUnits()):
-			#If units are not defined then assume for
-			# -- Compartment litre then m3 for moose
-			# -- species mole then millimole for concentration
-			# since both are needs to multiplied by 10-3 returning lvalue
-			lvalue *= 0.001
-        else:
+		unitnumber = int(unit.getNumUnits())
+		if unitnumber > 0:
 			for ui in range(0,unit.getNumUnits()):
+				lvalue = 1.0			
 				unitType =  unit.getUnit(ui)
 				if( unitType.isLitre()):
 					exponent = unitType.getExponent()
@@ -523,15 +531,46 @@ def transformUnit(unitForObject):
 					#units for compartment is Litre but MOOSE compartment is m3
 					scale = scale-3
 					lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset;
-					unitset = True			
-				if( unitType.isMole()):
+					unitset = True
+					unittype = "Litre"
+
+				elif( unitType.isMole()):
 					exponent = unitType.getExponent()
 					multiplier = unitType.getMultiplier()
 					scale = unitType.getScale()
 					offset = unitType.getOffset()
-					lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset;
+					#if hasOnlySubstanceUnit = True, then assuming Amount
+					if hasonlySubUnit == True:
+						lvalue *= pow(multiplier * pow(10.0,scale),exponent) + offset
+						#If SBML units are in mole then convert to number by multiplying with avogadro's number
+						lvalue = lvalue * pow(6.0221409e23,1)
+
+					elif hasonlySubUnit == False: 
+						#Pool units are in mM, so to scale adding +3 to convert to m
+						lvalue *= pow( multiplier * pow(10.0,scale+3), exponent ) + offset;
 					unitset = True
-	return (lvalue,unitset)
+					unittype = "Mole"
+		
+				elif( unitType.isItem()):
+					exponent = unitType.getExponent()
+					multiplier = unitType.getMultiplier()
+					scale = unitType.getScale()
+					offset = unitType.getOffset()
+					#if hasOnlySubstanceUnit = True, then assuming Amount
+					if hasonlySubUnit == True:
+						#If SBML units are in Item then amount is populate as its
+						lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset;
+					if hasonlySubUnit == False:
+						# hasonlySubUnit is False, which is assumed concentration, 
+						# Here Item is converted to mole by dividing by avogadro and at initiavalue divided by volume"
+						lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset;
+						lvalue = lvalue/pow(6.0221409e23,1)
+					unitset = True
+					unittype = "Item"
+		else:
+			lvalue = 1.0
+		print " end of the func lvaue ",lvalue
+	return (lvalue,unitset,unittype)
 def createCompartment(basePath,model,comptSbmlidMooseIdMap):
 	#ToDoList : Check what should be done for the spaitialdimension is 2 or 1, area or length
 	if not(model.getNumCompartments()):
@@ -562,7 +601,7 @@ def createCompartment(basePath,model,comptSbmlidMooseIdMap):
 
 			dimension = compt.getSpatialDimensions();
 			if dimension == 3:
-				unitfactor,unitset = transformUnit(compt)
+				unitfactor,unitset, unittype = transformUnit(compt)
 				
 			else:
 				print " Currently we don't deal with spatial Dimension less than 3 and unit's area or length"
