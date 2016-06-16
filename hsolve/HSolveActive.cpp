@@ -540,20 +540,15 @@ void HSolveActive::pervasiveFlowSolver(){
 void HSolveActive::advanceCalcium()
 {
 #ifdef USE_CUDA
-	GpuTimer timer;
-	// Disabling it as of now as CPU is faster.
-
-		cudaMemset(d_caActivation_values, 0, ca_.size()*sizeof(double));
-	timer.Start();
+	//GpuTimer timer;
+	//timer.Start();
 		advance_calcium_cuda_wrapper();
-	timer.Stop();
-		cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost);
-		cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost);
+	//timer.Stop();
+	//float time = timer.Elapsed();
+	//if(step_num < 10)	cout << "Advance calcium " << time << endl;
 
-	float time = timer.Elapsed();
-
-	if(step_num < 10)
-		cout << "Advance calcium " << time << endl;
+	cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost);
+	cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost);
 
 //#endif
 #else

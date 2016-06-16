@@ -331,8 +331,10 @@ __global__
 void advance_calcium_cuda_opt(int* d_catarget_channel_indices,
 			double* d_chan_Gk, double* d_chan_GkEk,
 			double* d_Vmid,
-			double* d_capool_values, int* d_chan_to_comp, int* rowPtr,
-			CaConcStruct* d_caConc_, double* d_Ca, double* d_caActivation_values,
+			//double* d_capool_values,
+			int* d_chan_to_comp, int* rowPtr,
+			CaConcStruct* d_caConc_, double* d_Ca,
+			//double* d_caActivation_values,
 			int size){
 	int tid = blockIdx.x * blockDim.x + threadIdx.x;
 	if(tid < size){
@@ -340,22 +342,26 @@ void advance_calcium_cuda_opt(int* d_catarget_channel_indices,
 		double sum = 0;
 		for (int i = rowPtr[tid]; i < rowPtr[tid+1]; ++i) {
 			chan_id = d_catarget_channel_indices[i];
+			/*
 			d_capool_values[i] = d_chan_GkEk[chan_id] - d_chan_Gk[chan_id]*d_Vmid[d_chan_to_comp[chan_id]];
 			sum += d_capool_values[i];
+			*/
+			sum += d_chan_GkEk[chan_id] - d_chan_Gk[chan_id]*d_Vmid[d_chan_to_comp[chan_id]];
 		}
 
-		d_caActivation_values[tid] = sum;
+		//d_caActivation_values[tid] = sum;
 
-		d_caConc_[tid].c_ = d_caConc_[tid].factor1_ * d_caConc_[tid].c_ + d_caConc_[tid].factor2_ * d_caActivation_values[tid];
+		//d_caConc_[tid].c_ = d_caConc_[tid].factor1_ * d_caConc_[tid].c_ + d_caConc_[tid].factor2_ * d_caActivation_values[tid];
+		d_caConc_[tid].c_ = d_caConc_[tid].factor1_ * d_caConc_[tid].c_ + d_caConc_[tid].factor2_ * sum;
 		double new_ca = d_caConc_[tid].CaBasal_ + d_caConc_[tid].c_;
 
-		if(new_ca >  d_caConc_[tid].ceiling_){
+		if(d_caConc_[tid].ceiling_ > 0 && new_ca >  d_caConc_[tid].ceiling_){
 			new_ca = d_caConc_[tid].ceiling_;
-			d_caConc_[tid].c_ = new_ca - d_caConc_[tid].ceiling_;
+			d_caConc_[tid].c_ = new_ca - d_caConc_[tid].CaBasal_;
 		}
 		if(new_ca < d_caConc_[tid].floor_){
 			new_ca = d_caConc_[tid].floor_;
-			d_caConc_[tid].c_ = new_ca - d_caConc_[tid].floor_;
+			d_caConc_[tid].c_ = new_ca - d_caConc_[tid].CaBasal_;
 		}
 		d_Ca[tid] = new_ca;
 	}
@@ -617,8 +623,11 @@ void HSolveActive::advance_calcium_cuda_wrapper(){
 	advance_calcium_cuda_opt<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
 					d_chan_Gk, d_chan_GkEk,
 					d_Vmid,
-					d_capool_values, d_chan_to_comp,d_capool_rowPtr,
-					d_caConc_, d_ca, d_caActivation_values, num_ca_pools);
+					//d_capool_values,
+					d_chan_to_comp,d_capool_rowPtr,
+					d_caConc_, d_ca,
+					//d_caActivation_values,
+					num_ca_pools);
 	/*
 	 // TODO choose between WPT or CSRMV
 		int BLOCKS = num_catarget_channels/THREADS_PER_BLOCK;
