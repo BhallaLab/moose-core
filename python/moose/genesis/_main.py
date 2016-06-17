@@ -592,12 +592,20 @@ def writeGui( f ):
         "simundump xtext /file/notes 0 1\n")
 def writeNotes(modelpath,f):
     notes = ""
-    items = wildcardFind(modelpath+"/##[ISA=ChemCompt],/##[ISA=ReacBase],/##[ISA=PoolBase],/##[ISA=EnzBase],/##[ISA=Function],/##[ISA=StimulusTable]")
+    items = []
+    items = wildcardFind(modelpath+"/##[ISA=ChemCompt]") +\
+            wildcardFind(modelpath+"/##[ISA=PoolBase]") +\
+            wildcardFind(modelpath+"/##[ISA=ReacBase]") +\
+            wildcardFind(modelpath+"/##[ISA=EnzBase]") +\
+            wildcardFind(modelpath+"/##[ISA=Function]") +\
+            wildcardFind(modelpath+"/##[ISA=StimulusTable]")
     for item in items:
-        info = item.path+'/info'
-        notes = Annotator(info).getField('notes')
-        if (notes):
-            f.write("call /kinetics/"+ trimPath(item)+"/notes LOAD \ \n\""+Annotator(info).getField('notes')+"\"\n")
+        if exists(item.path+'/info'):
+            info = item.path+'/info'
+            notes = Annotator(info).getField('notes')
+            if (notes):
+                f.write("call /kinetics/"+ trimPath(item)+"/notes LOAD \ \n\""+Annotator(info).getField('notes')+"\"\n")
+    
 def writeFooter1(f):
     f.write("\nenddump\n // End of dump\n")
 def writeFooter2(f):
