@@ -45,36 +45,6 @@
 
 const unsigned int OFFNODE = ~0;
 
-#if _KSOLVE_PTHREADS
-extern "C" void* call_func( void* f )
-{
-	   std::auto_ptr< pthreadWrap > w( static_cast< pthreadWrap* >( f ) );
-	   int localId = w->tid;
-	   bool* destroySignal = w->destroySig;
-
-	   while(!*destroySignal) 
-	   {
-			 sem_wait(w->sMain); // Wait for a signal from main thread
-
-	   //Assigning the addresses as set by the process function
-			 ProcPtr p = *(w->p);
-			 VoxelPools *lpoolarray_ = *w->poolsArr_;
-			 int blz = *(w->pthreadBlock);
-			 int startIndex = localId * blz;
-			 int endIndex = startIndex + blz;
-
-		//Perform the advance function 
-          for(int j = startIndex; j < endIndex; j++) 
-                  lpoolarray_[j].advance(p);
-
-		   sem_post(w->sThread); // Send the signal to the main thread. 
-	   }
-
-	   pthread_exit(NULL);
-	   return NULL;
-}
-#endif // _KSOLVE_PTHREADS
-
 // static function
 SrcFinfo2< Id, vector< double > >* Ksolve::xComptOut()
 {
@@ -286,69 +256,11 @@ Ksolve::Ksolve()
     dsolve_(),
     dsolvePtr_( 0 )
 {
-#if _KSOLVE_PTHREADS
-	   pthread_attr_t attr;
-	   pthread_attr_init(&attr);
-	   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-      
-      //Assign memory to each of the pointers
-      threads = (pthread_t*) malloc(NTHREADS*sizeof(pthread_t));
-      if(threads == NULL)
-              cout << "Error in allocating memory to threads in KSOLVE" << endl;
-   
-      mainSemaphor = (sem_t*) malloc(NTHREADS*sizeof(sem_t));
-      if(mainSemaphor == NULL)
-              cout << "Error in allocating memory to mainSemaphor" << endl;
-   
-      threadSemaphor = (sem_t*) malloc(NTHREADS*sizeof(sem_t));
-      if(threads == NULL)
-              cout << "Error in allocating memory to threadSemaphor" << endl;
-
-	   destroySignal = new bool;
-	   *destroySignal = false;
-
-	   pthreadP = new ProcPtr;
-	   poolArray_ = new VoxelPools*;
-	   pthreadBlock = new int;
-	   
-	   for(long i = 0; i < NTHREADS; i++)
-	   {
-			sem_init(&threadSemaphor[i],0,0);
-			sem_init(&mainSemaphor[i],0,0);
-
-         //Wrap the data needed by pthread into a structure
-			 pthreadWrap* w = new pthreadWrap(i, &threadSemaphor[i], &mainSemaphor[i], destroySignal, pthreadP, poolArray_, pthreadBlock);
-
-          //Create threads
-			 int rc = pthread_create(&threads[i], &attr, call_func, (void*) w);
-			 if(rc)
-          {
-                  cout << "ERROR : return code from pthread_create() is " << rc << endl;
-                  exit(-1); 
-          }
-	   }
-#endif
     ;
 }
 
 Ksolve::~Ksolve()
 {
-#if _KSOLVE_PTHREADS
-       //Tell Worker threads, its time to die...
-	   *destroySignal = true;
-
-	   for(int i = 0; i < NTHREADS; i++)
-			 sem_post(&mainSemaphor[i]);
-
-      //Join the threads
-	   for(int i = 0; i < NTHREADS; i++)
-			 pthread_join(threads[i], NULL);
-
-      //Free the memory
-      free(mainSemaphor);
-      free(threadSemaphor);
-      free(threads);
-#endif
     ;
 }
 
@@ -650,33 +562,6 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
 #endif //_KSOLVE_OPENMP
 
-#if _KSOLVE_PTHREADS
-	 static int usedThreads = 0;
-
-	 clock_t startPthreadTimer = clock();
-
-	 if(!usedThreads)
-	 {
-		    usedThreads = NTHREADS;
-		    cout << endl << "Pthread Parallelism " << endl;
-		    cout << "NUMBER OF THREADS USED = " << usedThreads << endl;
-	 }
-
-	*poolArray_ = &pools_[0];
-	int poolSize = pools_.size(); //Find out the size of the vector
-	*pthreadBlock = poolSize/NTHREADS;
-	*pthreadP = p;
-
-	for(int i = 0; i < NTHREADS; i++)
-		   sem_post(&mainSemaphor[i]); //Send signal to the threads to start
-
-   for(int j= NTHREADS*(*pthreadBlock); j < poolSize; j++)
-           pools_[j].advance(p);
-
-	for(int i = 0; i < NTHREADS; i++)
-		   sem_wait(&threadSemaphor[i]); // Wait for threads to finish their work
-
-#endif //_KSOLVE_PTHREADS 
 
 //////////////////////////////////////////////////////////////////
 // Original Sequential Code

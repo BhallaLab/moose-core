@@ -12,7 +12,6 @@
 
 #define _KSOLVE_SEQ 1
 #define _KSOLVE_OPENMP 0
-#define _KSOLVE_PTHREADS 0
 
 #include <pthread.h>
 #include <semaphore.h>
@@ -26,46 +25,12 @@ const int NTHREADS  = atoi(env_value);
 //////////////////////////////////////////////////////////////////
 //For Pthread Parallelism by Rahul
 //////////////////////////////////////////////////////////////////
-#if _KSOLVE_PTHREADS
-
-//Structure that is passed as a parameter to pthread_create at the time of object initialization
-struct pthreadWrap
-{
-	   long tid;
-	   sem_t *sThread, *sMain;
-	   bool* destroySig;
-	   ProcPtr *p;
-	   VoxelPools** poolsArr_;
-	   int *pthreadBlock;
-
-	   pthreadWrap (long Id, sem_t* S1, sem_t* S2, bool* destroySignal, ProcPtr *ptr, VoxelPools** PA, int* block) : tid(Id), sThread(S1), sMain(S2), destroySig(destroySignal), p(ptr), poolsArr_(PA), pthreadBlock(block) {}
-};
-
-extern "C" void* call_func( void* f );
-
-#endif // _KSOLVE_PTHREADS
 
 class Ksolve: public ZombiePoolInterface
 {
 	public: 
 		Ksolve();
 		~Ksolve();
-
-#if _KSOLVE_PTHREADS
-
-//////////////////////////////////////////////////////////////////
-//For Pthread Parallelism  - data needed by each thread
-//////////////////////////////////////////////////////////////////
-		pthread_t* threads; //pthread_t for each thread in the loop
-		bool* destroySignal; //signal to indicate the worker thread that it is time to die
-		ProcPtr *pthreadP; // ProcPtr which each of the thread uses
-		VoxelPools** poolArray_; //portion of the VoxelPools that is updated by each thread
-		int *pthreadBlock; //blockSize for each thread
-		sem_t* mainSemaphor; //set of semaphores used by the main-thread to interact with worker-threads
-		sem_t* threadSemaphor; //set of semaphores used by the worker-threads to interact with main-thread
-
-#endif
-
 
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
