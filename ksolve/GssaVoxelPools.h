@@ -24,15 +24,15 @@ public:
     // Solver interface functions
     //////////////////////////////////////////////////////////////////
     void advance( const ProcInfo* p );
-    void recalcTime( const GssaSystem* g, double currTime );
+    void recalcTime( GssaSystem* g, double currTime );
     void updateDependentMathExpn(
-        const GssaSystem* g, unsigned int rindex, double time );
+        GssaSystem* g, unsigned int rindex, double time);
     void updateDependentRates(
         const vector< unsigned int >& deps, const Stoich* stoich );
     unsigned int pickReac();
     void setNumReac( unsigned int n );
 
-    void advance( const ProcInfo* p, const GssaSystem* g );
+    void advance( const ProcInfo* p, GssaSystem* g );
 
     /**
     * Cleans out all reac rates and recalculates atot. Needed whenever a

@@ -64,7 +64,7 @@ GssaVoxelPools::~GssaVoxelPools()
 //////////////////////////////////////////////////////////////
 
 void GssaVoxelPools::updateDependentMathExpn(
-    const GssaSystem* g, unsigned int rindex, double time )
+    GssaSystem* g, unsigned int rindex, double time)
 {
     // The issue is that if the expression depends on t, we really need
     // to update it every timestep. But then a cascading set of reacs
@@ -73,13 +73,8 @@ void GssaVoxelPools::updateDependentMathExpn(
     // but this too
     // doesn't update the cascading reacs. So this is now handled by the
     // useClockedUpdate flag, and we use the upper block here instead.
-    /*
-    const vector< unsigned int >& deps = g->dependentMathExpn[ rindex ];
-    for( vector< unsigned int >::const_iterator
-    		i = deps.begin(); i != deps.end(); ++i ) {
-    		g->stoich->funcs( *i )->evalPool( varS(), time );
-    }
-    */
+
+
     unsigned int numFuncs = g->stoich->getNumFuncs();
     for( unsigned int i = 0; i < numFuncs; ++i )
     {
@@ -94,7 +89,6 @@ void GssaVoxelPools::updateDependentRates(
             i = deps.begin(); i != deps.end(); ++i )
     {
         atot_ -= fabs( v_[ *i ] );
-        // atot_ += ( v[ *i ] = ( *rates_[ *i ] )( S() );
         atot_ += fabs( v_[ *i ] = getReacVelocity( *i, S() ) );
     }
 }
@@ -155,9 +149,9 @@ bool GssaVoxelPools::refreshAtot( const GssaSystem* g )
  * update of rates due to timed functions. In such cases the propensities
  * may change invisibly, so we need to update time estimates
  */
-void GssaVoxelPools::recalcTime( const GssaSystem* g, double currTime )
+void GssaVoxelPools::recalcTime( GssaSystem* g, double currTime )
 {
-    updateDependentMathExpn( g, 0, currTime );
+    updateDependentMathExpn( g, 0, currTime);
     refreshAtot( g );
     assert( t_ > currTime );
     t_ = currTime;
@@ -167,15 +161,16 @@ void GssaVoxelPools::recalcTime( const GssaSystem* g, double currTime )
     t_ -= ( 1.0 / atot_ ) * log( r );
 }
 
-void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
+void GssaVoxelPools::advance( const ProcInfo* p, GssaSystem* g )
 {
+
     double nextt = p->currTime;
     while ( t_ < nextt )
     {
         if ( atot_ <= 0.0 )   // reac system is stuck, will not advance.
         {
             t_ = nextt;
-            return;
+//            return;
         }
         unsigned int rindex = pickReac();
         assert( g->stoich->getNumRates() == v_.size() );
@@ -186,7 +181,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
             if ( !refreshAtot( g ) )   // Stuck state.
             {
                 t_ = nextt;
-                return;
+  //              return;
             }
             // We had a roundoff error, fixed it, but now need to be sure
             // we only fire a reaction where this is permissible.
@@ -195,7 +190,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
                 if ( fabs( v_[i-1] ) > 0.0 )
                 {
                     rindex = i - 1;
-                    break;
+    //                break;
                 }
             }
             assert( rindex < v_.size() );
@@ -213,13 +208,6 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
         updateDependentMathExpn( g, rindex, t_ );
         updateDependentRates( g->dependency[ rindex ], g->stoich );
     }
-
-//        struct timespec ts;
-//        ts.tv_sec = 0;
-//        ts.tv_nsec = 1;
-//        nanosleep(&ts, NULL);
-//        usleep(0.001);
-
 }
 
 void GssaVoxelPools::reinit( const GssaSystem* g )

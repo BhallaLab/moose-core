@@ -38,10 +38,9 @@ extern "C" void* call_func(void* f)
         int localId = w->tid;
         bool* destroySignal = w->destroySig;
 
+        sem_wait(w->sMain);
         while(!*destroySignal)
         {
-                sem_wait(w->sMain);
-
                 int blockSize = *(w->blockSize);
                 ProcPtr p = *(w->P);
                 GssaSystem* sysP = *(w->sysPtr);
@@ -53,6 +52,7 @@ extern "C" void* call_func(void* f)
                         lpoolArray[j].advance(p, sysP);
 
                 sem_post(w->sThread);
+                sem_wait(w->sMain);
         }
 
    return NULL;
@@ -516,8 +516,6 @@ void Gsolve::process( const Eref& e, ProcPtr p )
    for(int j = NTHREADS*blz; j < poolSize; j++)
            poolsArray[j].advance( p, sysPtr);
 
-  // cout << "After sem_wait from process " << endl;
-
 	for(int i = 0; i < NTHREADS; i++)
 		   sem_wait(&threadSemaphor[i]); // Wait for threads to finish their work
 
@@ -528,6 +526,7 @@ void Gsolve::process( const Eref& e, ProcPtr p )
    int poolSize = pools_.size();
    GssaSystem* sysPtr = &sys_;
    static int cellsPerThread = 0;
+   double* VARS;
    int j;
 
    if(!cellsPerThread)
@@ -537,24 +536,29 @@ void Gsolve::process( const Eref& e, ProcPtr p )
            cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
    }
 	 
-#pragma omp parallel for schedule(guided, cellsPerThread) num_threads(NTHREADS) shared(poolSize,p) firstprivate(sysPtr) if(poolSize>NTHREADS)
-	for ( int j = 0; j < poolSize; j++ ) 
-           pools_[j].advance( p, sysPtr );
+//#pragma omp parallel for schedule(guided, cellsPerThread) firstprivate(p, sysPtr)
+//	for ( int j = 0; j < poolSize; j++ ) 
+//           pools_[j].advance( p, sysPtr );
+#pragma omp parallel 
+ #pragma omp for 
+	for ( vector< GssaVoxelPools >::iterator i = pools_.begin(); i < pools_.end(); ++i ) 
+           i->advance( p, sysPtr );
+
 
 #endif //_GSOLVE_OPENMP
 
 #if _GSOLVE_SEQ
    static int SeqThread = 0;
    int j;
+   double* VARS;
    if(!SeqThread)
    {
            SeqThread = 1;
            cout << endl << "Sequential execution of GSOLVE " << endl;
 	 }
 	for ( vector< GssaVoxelPools >::iterator i = pools_.begin(); i != pools_.end(); ++i ) 
-   {
            i->advance( p, &sys_ );
-	}
+
 #endif //_GSOLVE_SEQ
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
