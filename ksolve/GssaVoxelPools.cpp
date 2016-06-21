@@ -213,13 +213,6 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
         updateDependentMathExpn( g, rindex, t_ );
         updateDependentRates( g->dependency[ rindex ], g->stoich );
     }
-
-//        struct timespec ts;
-//        ts.tv_sec = 0;
-//        ts.tv_nsec = 1;
-//        nanosleep(&ts, NULL);
-//        usleep(0.001);
-
 }
 
 void GssaVoxelPools::reinit( const GssaSystem* g )

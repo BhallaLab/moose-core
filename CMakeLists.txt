@@ -194,7 +194,7 @@ else(SBML_STATIC_HOME)
     endif()
 endif(SBML_STATIC_HOME)
 
-if(LIBSBML_FOUND)
+if(LIBSBML_FOUND AND WITH_SBML)
     message(STATUS "LIBSBML found ${LIBSBML_LIBRARIES}")
     include_directories(${LIBSBML_INCLUDE_DIRS})
     pkg_check_modules(LibXML2 libxml-2.0)
@@ -395,11 +395,10 @@ add_subdirectory(intfire)
 # These are always shared libraries.
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 if(WITH_BOOST)
-    #find_package( LAPACK REQUIRED )
+    find_package( LAPACK REQUIRED )
     # NOTE: On nargis, find LAPACK does not work, one has to specify lapack and
     # blas library manually.
-    #list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES} ) #-llapack -lblas)
-    list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES} -llapack -lblas)
+    list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES} ) #-llapack -lblas)
     list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
 endif(WITH_BOOST)
 
