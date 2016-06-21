@@ -369,15 +369,9 @@ void Shell::doQuit()
 
 void Shell::doStart( double runtime, bool notify )
 {
-        int tmpN;
+        //simStart = true;
     Id clockId( 1 );
-//#pragma omp parallel 
-        {
-//#pragma omp single
-                {
     SetGet2< double, bool >::set( clockId, "start", runtime, notify );
-                }
-        }
 }
 
 bool isDoingReinit()

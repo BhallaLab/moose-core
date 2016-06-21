@@ -65,6 +65,8 @@ extern const double NA; // Defined in consts.cpp
 extern const double FaradayConst; // Defined in consts.cpp
 extern const double GasConst; // Defined in consts.cpp
 
+//bool simStart = false;
+
 class Element;
 class Eref;
 class OpFunc;

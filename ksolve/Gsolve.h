@@ -16,10 +16,10 @@ class Stoich;
 // NTHREADS = NUM_THREADS
 //////////////////////////////////////////////////////////////////
 const char *env_value1 = getenv("NUM_THREADS");
-const int NTHREADS  = atoi(env_value1);
+int NTHREADS  = atoi(env_value1);
 
-#define _GSOLVE_SEQ 1
-#define _GSOLVE_OPENMP 0
+#define _GSOLVE_SEQ 0
+#define _GSOLVE_OPENMP 1
 #define _GSOLVE_PTHREADS 0
 
 #if _GSOLVE_PTHREADS
@@ -38,8 +38,6 @@ struct pthreadGsolveWrap
 
         pthreadGsolveWrap(sem_t* S1, sem_t* S2, long Id, ProcPtr* ptr, GssaSystem** sptr, GssaVoxelPools** pI, int* blz, bool* destroySignal) : sThread(S1), sMain(S2), tid(Id), P(ptr), sysPtr(sptr), poolsIndex(pI), blockSize(blz), destroySig(destroySignal) {} ;
 };
-
-//      pthread_t threads[8];
 
 #endif //_GSOLVE_PTHREADS
 

@@ -12,6 +12,7 @@
 
 #include "muParser.h"
 
+
 class FuncTerm
 {
 	public:
