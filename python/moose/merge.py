@@ -12,8 +12,8 @@
 #**           copyright (C) 2003-2016 Upinder S. Bhalla. and NCBS
 #Created : Friday June 13 12:19:00 2016(+0530)
 #Version 
-#Last-Updated:Tuesday June 21 12.22.37
-#		  By:
+#Last-Updated:Tuesday June 21 17.48.37
+#		  By: Harsha
 #**********************************************************************/
 
 # This program is used to merge models
@@ -40,6 +40,7 @@
 #									and warn the user the same reaction name with different sub or product
 #							-- No
 #								copy the reaction
+
 import sys
 from . import _moose as moose
 
@@ -50,7 +51,6 @@ def merge(A,B):
 
 	comptAdict = comptList(apath)
 	comptBdict = comptList(bpath)
-	
 
 	for key in comptBdict.keys():
 
@@ -69,8 +69,8 @@ def merge(A,B):
 			#Merging Pool
 			poolName_a = []
 			poolListina = moose.wildcardFind(comptAdict[key].path+'/##[ISA=PoolBase]') 
-			
-			neutral_compartment = findgroup_compartment(poolListina[0])
+			if poolListina:
+				neutral_compartment = findgroup_compartment(poolListina[0])
 			for pl in poolListina:
 				poolName_a.append(pl.name)
 			
@@ -86,10 +86,37 @@ def merge(A,B):
 					else:
 						print " Check this pool, parent which doesn't have ChemCompt or Enz",
 			
+			#Mergering StimulusTable
+			stimName_a = []
+			stimListina = moose.wildcardFind(comptAdict[key].path+'/##[ISA=StimulusTable]') 
+			if stimListina:
+				neutral_compartment = findgroup_compartment(stimListina[0])
+			for st in stimListina:
+				stimName_a.append(st.name)
+			for stb in moose.wildcardFind(comptBdict[key].path+'/##[ISA=StimulusTable]'):
+				if stb.name in stimName_a:
+					sA = comptAdict[key].path+'/'+stb.name
+					sB = comptBdict[key].path+'/'+stb.name
+					stAOutput = subprdList(sA,"output")
+					stBOutput = subprdList(sB,"output")
+					sas = set(stAOutput)
+					sbs = set(stBOutput)
+					uniq = (sas.union(sbs) - sas.intersection(sbs))
+					for u in uniq:
+						if u not in stAOutput:
+							src = moose.element(sA)
+							des = moose.element(comptAdict[key].path+'/'+u)
+							moose.connect(src,'output',des,'setConcInit')
+				else:
+					st1 = moose.StimulusTable(comptAdict[key].path+'/'+stb.name)
+					for sb in sbs:
+						des = moose.element(comptAdict[key].path+'/'+sb)
+						moose.connect(st1,'output',des,'setConcInit')	
 			#Mergering Reaction
 			reacName_a = []
 			reacListina = moose.wildcardFind(comptAdict[key].path+'/##[ISA=ReacBase]') 
-			neutral_compartment = findgroup_compartment(poolListina[0])
+			if reacListina:
+				neutral_compartment = findgroup_compartment(poolListina[0])
 			
 			for re in reacListina:
 				reacName_a.append(re.name)
@@ -109,20 +136,23 @@ def merge(A,B):
 					bS = set(rBsubname)
 					aP = set(rAprdname)
 					bP = set(rBprdname)
-					hasSameSub = True
-					hasSamePrd = True
-					if len (aS.union(bS) - aS.intersection(bS)):
-						hasSameSub = False
-						
-					if len(aP.union(bP) - aP.intersection(bP)):
-						hasSamePrd = False
-						
-					if not all((hasSameSub,hasSamePrd)):
+					
+					hasSameSub,hasSamePrd = True,True
+					hassameSlen,hassamePlen = False,False
+					
+					hasSameSub = not (len (aS.union(bS) - aS.intersection(bS)))
+					hasSamePrd = not (len(aP.union(bP) - aP.intersection(bP)))
+					
+					hassameSlen = ( len(rAsubname) == len(rBsubname))
+					hassamePlen = ( len(rAprdname) == len(rBprdname))
+					
+					
+					if not all((hasSameSub,hasSamePrd,hassameSlen,hassamePlen)):
 						war_msg = war_msg +"Reaction \""+reac.name+ "\" also contains in modelA but with different"
-						if not hasSameSub:
+						if not all((hasSameSub,hassameSlen)):
 							war_msg = war_msg+ " substrate "
 
-						if not hasSamePrd:
+						if not all((hasSamePrd, hassamePlen)):
 							war_msg = war_msg+ " product"	
 						war_msg = war_msg +", reaction is duplicated in modelA. \nModeler should decide to keep or remove this reaction"
 						
@@ -143,7 +173,9 @@ def merge(A,B):
 						rBprdname = subprdList(reac,"prd")
 						mooseConnect(comptAdict[key].path,reac,rBsubname,"sub")
 						mooseConnect(comptAdict[key].path,reac,rBprdname,"prd")
-	print "c ", copied, "\n warning ",war_msg, "\nDuplicated ",duplicated
+	print "\ncopied: ", copied, \
+		 "\n\nDuplicated: ",duplicated, \
+		  "\n\nwarning: ",war_msg
 	return copied,duplicated,war_msg
 def loadModels(filename):
 	apath = '/'
@@ -187,24 +219,6 @@ def subprdList(reac,subprd):
 	for rs in rtype:
 		rname.append(rs.name)
 	return rname
-def mergeAtoB(a,b):
-
-	ca = moose.wildcardFind(m1path+'/##[ISA=PoolBase]')
-	cb = moose.wildcardFind(m2path+'/##[ISA=PoolBase]')
-
-	cca = {}
-	ccb = {}
-	for c in ca:
-		cca[c.name] = c
-	for c in cb:
-		ccb[c.name] = c
-	avalue = cca.keys()
-	bvalue = ccb.keys()
-	#print cca,ccb
-	print " bvalue ",len(bvalue), " avalue ",len(avalue)
-	myset = list(set(cca.keys()).union(set(ccb.keys())))
-	print " insder ",myset, len(myset)
-	return model1
 
 def findCompartment(element):
 	while not mooseIsInstance(element,["CubeMesh","CyclMesh"]):
