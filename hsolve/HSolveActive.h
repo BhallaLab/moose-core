@@ -303,7 +303,6 @@ private:
 
     void get_lookup_rows_and_fractions_cuda_wrapper(double dt);
     void advance_channels_cuda_wrapper(double dt);
-    void get_compressed_gate_values_wrapper();
 
     void calculate_channel_currents_cuda_wrapper();
 

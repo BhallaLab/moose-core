@@ -112,56 +112,22 @@ void HSolveActive::step( ProcPtr info )
     double memoryTransferTime;
 
 #ifdef USE_CUDA
-    //GpuTimer advChanTimer, calcChanTimer, umTimer, solverTimer, advCalcTimer;
-    //advChanTimer.Start();
-    	advanceChannels( info->dt );
-    //advChanTimer.Stop();
-    //advanceChannelsTime = advChanTimer.Elapsed();
+   	advanceChannels( info->dt );
+   	calculateChannelCurrents();
+	updateMatrix();
 
-    //calcChanTimer.Start();
-    	calculateChannelCurrents();
-	//calcChanTimer.Stop();
-	//calcChanCurTime = calcChanTimer.Elapsed();
+	HSolvePassive::forwardEliminate();
+	HSolvePassive::backwardSubstitute();
+	cudaMemcpy(d_Vmid, &(VMid_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+	calculate_V_from_Vmid_wrapper(); // Avoing Vm memory transfer and using CUDA kernel
 
-	//umTimer.Start();
-		updateMatrix();
-	//umTimer.Stop();
-	//updateMatTime = umTimer.Elapsed();
+	advanceCalcium();
+	advanceSynChans( info );
+	sendValues( info );
+	sendSpikes( info );
+	//transfer_memory2cpu_cuda();
 
-	//solverTimer.Start();
-		HSolvePassive::forwardEliminate();
-		HSolvePassive::backwardSubstitute();
-		cudaMemcpy(d_Vmid, &(VMid_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
-		//cudaMemcpy(d_V, &(V_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
-		calculate_V_from_Vmid_wrapper();
-
-	//solverTimer.Stop();
-	//solverTime = solverTimer.Elapsed();
-
-	//advCalcTimer.Start();
-		advanceCalcium();
-	//advCalcTimer.Stop();
-	//advCalcTime = advCalcTimer.Elapsed();
-
-	//start = getTime();
-		advanceSynChans( info );
-	//end = getTime();
-	//advSynchanTime = (end-start)/1000.0f;
-
-	//start = getTime();
-		sendValues( info );
-	//end = getTime();
-	//sendValuesTime = (end-start)/1000.0f;
-
-	//start = getTime();
-		sendSpikes( info );
-	//end = getTime();
-	//sendSpikesTime = (end-start)/1000.0f;
-
-	//start = getTime();
-		//transfer_memory2cpu_cuda();
-	//end = getTime();
-	//memoryTransferTime = (end-start)/1000.0f;
+	// Checking for error after each time-step
 	cudaCheckError();
 #else
 
@@ -249,6 +215,7 @@ void HSolveActive::calculateChannelCurrents()
 {
 #ifdef USE_CUDA
 	/*
+	// TEMPORARY CODE
 	GpuTimer timer;
 	timer.Start();
 		calculate_channel_currents_cuda_wrapper();
@@ -259,7 +226,6 @@ void HSolveActive::calculateChannelCurrents()
 	*/
 
 	calculate_channel_currents_cuda_wrapper();
-
 	//cudaSafeCall(cudaMemcpy(&current_[0], d_current_, current_.size()*sizeof(CurrentStruct), cudaMemcpyDeviceToHost));
 #else
 	u64 startTime = getTime();
@@ -541,15 +507,16 @@ void HSolveActive::pervasiveFlowSolver(){
 void HSolveActive::advanceCalcium()
 {
 #ifdef USE_CUDA
-	//GpuTimer timer;
-	//timer.Start();
+	/* TEMPORARY CODE FOR Timings
+	GpuTimer timer;
+	timer.Start();
 		advance_calcium_cuda_wrapper();
-	//timer.Stop();
-	//float time = timer.Elapsed();
-	//if(step_num < 10)	cout << "Advance calcium " << time << endl;
+	timer.Stop();
+	float time = timer.Elapsed();
+	if(step_num < 10)	cout << "Advance calcium " << time << endl;
+	*/
 
-	cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost);
-	//cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost);
+	advance_calcium_cuda_wrapper();
 
 //#endif
 #else
@@ -671,7 +638,6 @@ void HSolveActive::advanceChannels( double dt )
 
 	get_lookup_rows_and_fractions_cuda_wrapper(dt); // Gets lookup values for Vm and Ca_.
 	advance_channels_cuda_wrapper(dt); // Advancing fraction values.
-	//get_compressed_gate_values_wrapper(); // Getting values of new state
 
 	//cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
 
@@ -1221,11 +1187,9 @@ void HSolveActive::copy_hsolve_information_cuda(){
 }
 
 void HSolveActive::transfer_memory2cpu_cuda(){
-	cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
-	cudaSafeCall(cudaMemcpy(&current_[0], d_current_, current_.size()*sizeof(CurrentStruct), cudaMemcpyDeviceToHost));
-	cudaSafeCall(cudaMemcpy(&(V_[0]), d_V, nCompt_*sizeof(double), cudaMemcpyDeviceToHost));
+	//cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
+	//cudaSafeCall(cudaMemcpy(&current_[0], d_current_, current_.size()*sizeof(CurrentStruct), cudaMemcpyDeviceToHost));
 	cudaSafeCall(cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost));
-	cudaSafeCall(cudaMemcpy(&(caConc_[0]), d_caConc_, caConc_.size()*sizeof(CaConcStruct), cudaMemcpyDeviceToHost));
 }
 
 

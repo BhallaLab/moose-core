@@ -13,6 +13,14 @@
 
 #include "Gpu_timer.h"
 
+/*
+ * Given a lookup , it lookups the elements in the lookup table and
+ * stores row and fraction values in the memory.
+ *
+ * The reason it is separated because, each compartment most likely
+ * have more than one channel. Once lookup is done for a given compartment,
+ * it can be used for all channels of that compartment.
+ */
 __global__
 void get_lookup_rows_and_fractions_cuda(
 		double* lookups,
@@ -39,50 +47,12 @@ void get_lookup_rows_and_fractions_cuda(
 	}
 }
 
-__global__
-void advance_channels_cuda(
-		int* rows,
-		double* fracs,
-		double* table,
-		int* expand_indices,
-		int* gate_to_comp,
-		double* gate_values,
-		int* gate_columns,
-		int* chan_instants,
-		unsigned int nColumns,
-		double dt,
-		int size
-		){
-	int tid = threadIdx.x + blockIdx.x * blockDim.x;
-	if(tid < size){
-		double a,b,C1,C2;
-		int index, lookup_index, row_start_index, column;
-
-		index = expand_indices[tid];
-		lookup_index = gate_to_comp[tid];
-		row_start_index = rows[lookup_index];
-		column = gate_columns[index];
-
-		a = table[row_start_index + column];
-		b = table[row_start_index + column + nColumns];
-
-		C1 = a + (b-a)*fracs[lookup_index];
-
-		a = table[row_start_index + column + 1];
-		b = table[row_start_index + column + 1 + nColumns];
-
-		C2 = a + (b-a)*fracs[lookup_index];
-
-		if(!chan_instants[index/3]){ // tid/3 bcos #gates = 3*#chans
-			a = 1.0 + dt/2.0 * C2; // reusing a
-			gate_values[index] = ( gate_values[index] * ( 2.0 - a ) + dt * C1 ) / a;
-		}
-		else{
-			gate_values[index] = C1/C2;
-		}
-	}
-}
-
+/*
+ * Based on the near lookup value and fraction value, the function
+ * interpolates the value and uses it to update appropriate state variables
+ * "indices" array is a subset which either represents
+ * voltage dependent gate indices or Calcium dependent gate indices
+ */
 __global__
 void advance_channels_opt_cuda(
 		int* rows,
@@ -118,7 +88,7 @@ void advance_channels_opt_cuda(
 
 		C2 = a + (b-a)*fracs[lookup_index];
 
-		if(!chan_instants[state2chanId[tid]]){ // tid/3 bcos #gates = 3*#chans
+		if(!chan_instants[state2chanId[tid]]){
 			a = 1.0 + dt/2.0 * C2; // reusing a
 			gate_values[index] = ( gate_values[index] * ( 2.0 - a ) + dt * C1 ) / a;
 		}
@@ -129,44 +99,16 @@ void advance_channels_opt_cuda(
 }
 
 
+/*
+ * Gbar*(x1^p1)*(x2^p2) ... (xn^pn) is computed for each channel
+ */
 __global__
-void get_compressed_gate_values(double* expanded_array,
-		int* expanded_indices, double* d_cmprsd_state, int size){
-	int tid = threadIdx.x + blockIdx.x * blockDim.x;
-	if(tid < size)
-		d_cmprsd_state[tid] = expanded_array[expanded_indices[tid]];
-}
-
-__global__
-void calculate_channel_currents(double* d_gate_values,
-		double* d_gate_powers,
-		double* d_chan_modulation,
-		double* d_chan_Gbar,
-		CurrentStruct* d_current_,
-		double* d_chan_Gk,
-		double* d_chan_GkEk,
-		int size){
-	int tid = threadIdx.x + blockIdx.x * blockDim.x;
-	if(tid < size){
-		double temp = d_chan_modulation[tid] *
-				 d_chan_Gbar[tid] *
-				 pow(d_gate_values[3*tid], d_gate_powers[3*tid]) *
-				 pow(d_gate_values[3*tid+1], d_gate_powers[3*tid+1]) *
-				 pow(d_gate_values[3*tid+2], d_gate_powers[3*tid+2]);
-
-		d_current_[tid].Gk = temp;
-		d_chan_Gk[tid] = temp;
-		d_chan_GkEk[tid] = temp*d_current_[tid].Ek;
-	}
-}
-
-__global__
-void calculate_channel_currents_opt(double* d_gate_values,
+void calculate_channel_currents_opt_cuda(double* d_gate_values,
 		double* d_gate_powers,
 		int* rowPtr,
 		double* d_chan_modulation,
 		double* d_chan_Gbar,
-		//CurrentStruct* d_current_,
+		//CurrentStruct* d_current_, // This structure corresponds to current_ DS in CPU.
 		double* d_chan_Ek,
 		double* d_chan_Gk,
 		double* d_chan_GkEk,
@@ -188,14 +130,11 @@ void calculate_channel_currents_opt(double* d_gate_values,
 	}
 }
 
-__global__
-void populating_expand_indices(int* d_keys, double* d_values, double* d_expand_values, int size){
-	int tid = threadIdx.x + blockIdx.x * blockDim.x;
-	if(tid < size){
-		d_expand_values[d_keys[tid]] = d_values[tid];
-	}
-}
-
+/*
+ * Work Per Thread Kernel. If there are N independent works to do, each thread does it in parallel.
+ * It turns out that if work is small and less load balance, this is faster compared to
+ * SPMV (Sparse Matrix Vector Multiplication)
+ */
 __global__
 void wpt_kernel(double* d_chan_Gk, double* d_chan_GkEk , int* d_chan_rowPtr,
 		double* d_comp_Gksum, double* d_comp_GkEksum, int num_comp){
@@ -212,6 +151,10 @@ void wpt_kernel(double* d_chan_Gk, double* d_chan_GkEk , int* d_chan_rowPtr,
 	}
 }
 
+/*
+ * Updates the matrix data structure d_HS_.
+ * SPMV approach
+ */
 __global__
 void update_matrix_kernel(double* d_V,
 		double* d_HS_,
@@ -232,6 +175,10 @@ void update_matrix_kernel(double* d_V,
 	}
 }
 
+/*
+ * Updates the matrix data structure d_HS_.
+ * WPT approach
+ */
 __global__
 void update_matrix_kernel_opt(
 		double* d_chan_Gk, double* d_chan_GkEk , int* d_chan_rowPtr,
@@ -264,8 +211,10 @@ void update_matrix_kernel_opt(
 	}
 }
 
-
-
+/*
+ * EXPERIMENTAL . Updates CSR matrix
+ * SPMV approach
+ */
 __global__
 void update_csr_matrix_kernel(double* d_V,
 				double* d_mat_values, double* d_main_diag_passive, int* d_main_diag_map, double* d_tridiag_data, double* d_b,
@@ -287,6 +236,9 @@ void update_csr_matrix_kernel(double* d_V,
 	}
 }
 
+/*
+ * Kernel for calculating V(t+1) using Vmid(t) and V(t)
+ */
 __global__
 void calculate_V_from_Vmid(double* d_Vmid, double* d_V, int size){
 	int tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -394,7 +346,7 @@ void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
 	int num_cadep_gates = h_cagate_expand_indices.size();
 
 	int BLOCKS = num_comps/THREADS_PER_BLOCK;
-	BLOCKS = (num_comps%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+	BLOCKS = (num_comps + THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
 
 	// Getting lookup metadata for Vm
 	get_lookup_rows_and_fractions_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_V,
@@ -403,8 +355,10 @@ void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
     		d_V_rows, d_V_fractions,
     		vTable_.get_num_of_columns(), num_comps);
 
+	// Execute this block only if there are gates that are Ca dependent.
 	if(num_cadep_gates > 0){
-		// Getting lookup metadata from Ca pools only if there are gates depending on Ca
+		// Getting lookup metadata for Ca
+		BLOCKS = (num_Ca_pools + THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
 		get_lookup_rows_and_fractions_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_ca,
 				d_Ca_table,
 				caTable_.get_min(), caTable_.get_max(), caTable_.get_dx(),
@@ -423,9 +377,8 @@ void HSolveActive::advance_channels_cuda_wrapper(double dt){
 	int num_vdep_gates = h_vgate_expand_indices.size();
 	int num_cadep_gates = h_cagate_expand_indices.size();
 
-    // Get the Row number and fraction values of Vm's from vTable
 	int BLOCKS = (num_vdep_gates+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
-
+	// For Vm dependent gates
 	advance_channels_opt_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
 			d_V_rows,
 			d_V_fractions,
@@ -439,34 +392,19 @@ void HSolveActive::advance_channels_cuda_wrapper(double dt){
 			vTable_.get_num_of_columns(),
 			dt, num_vdep_gates );
 
-	/*
-	// For V dependent gates
-	advance_channels_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
-			d_V_rows,
-			d_V_fractions,
-			d_V_table,
-			d_vgate_expand_indices,
-			d_vgate_compt_indices,
-			d_gate_values,
-			d_gate_columns,
-			d_chan_instant,
-			vTable_.get_num_of_columns(),
-			dt, num_vdep_gates );
-	*/
-
+	// Execute this block only if there are gates that are Ca dependent.
 	if(num_cadep_gates > 0){
-		BLOCKS = num_cadep_gates/THREADS_PER_BLOCK;
-		BLOCKS = (num_cadep_gates%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
-
+		BLOCKS = (num_cadep_gates+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
 		// For Ca dependent gates.
-		advance_channels_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
+		advance_channels_opt_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
 				d_Ca_rows,
 				d_Ca_fractions,
 				d_Ca_table,
-				d_cagate_expand_indices,
-				d_cagate_capool_indices,
-				d_gate_values,
-				d_gate_columns,
+				d_cagate_indices,
+				d_cagate_capoolIds,
+				d_state_,
+				d_state2column,
+				d_state2chanId,
 				d_chan_instant,
 				caTable_.get_num_of_columns(),
 				dt, num_cadep_gates );
@@ -478,42 +416,13 @@ void HSolveActive::advance_channels_cuda_wrapper(double dt){
 }
 
 
-void HSolveActive::get_compressed_gate_values_wrapper(){
-
-	int num_cmprsd_gates = state_.size();
-
-	int BLOCKS = num_cmprsd_gates/THREADS_PER_BLOCK;
-	BLOCKS = (num_cmprsd_gates%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
-
-	get_compressed_gate_values<<<BLOCKS,THREADS_PER_BLOCK>>>(
-			d_gate_values,
-			d_gate_expand_indices,
-			d_state_,
-			num_cmprsd_gates);
-
-#ifdef PIN_POINT_ERROR
-		cudaCheckError(); // Checking for cuda related errors.
-#endif
-
-}
-
 void HSolveActive::calculate_channel_currents_cuda_wrapper(){
 	int num_channels = channel_.size();
 
 	int BLOCKS = num_channels/THREADS_PER_BLOCK;
 	BLOCKS = (num_channels%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
-	/*
-	calculate_channel_currents<<<BLOCKS,THREADS_PER_BLOCK>>>(
-			d_gate_values,
-			d_gate_powers,
-			d_chan_modulation,
-			d_chan_Gbar,
-			d_current_,
-			d_chan_Gk, d_chan_GkEk, num_channels);
-	*/
-
-	calculate_channel_currents_opt<<<BLOCKS,THREADS_PER_BLOCK>>>(
+	calculate_channel_currents_opt_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
 				d_state_,
 				d_state_powers,
 				d_state_rowPtr,
@@ -537,18 +446,14 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 	const double alpha = 1.0;
 	const double beta = 0.0;
 
-	if(step_num < 2) {
-		cout << "Number of channels: " << num_channels << endl;
-	}
-
+	// As inject_ and externalCurrent_ data structures are updated by messages,
+	// they have to be updated on the device too. Hence the transfer
 	cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
-	//cudaMemcpy(d_HS_, &HS_[0], HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
 
 	BLOCKS = (nCompt_+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
 	if(UPDATE_MATRIX_APPROACH == UPDATE_MATRIX_WPT_APPROACH){
-		GpuTimer timer;
-		timer.Start();
+		// WPT approach for update matrix
 		update_matrix_kernel_opt<<<BLOCKS,THREADS_PER_BLOCK>>>(d_chan_Gk, d_chan_GkEk , d_chan_rowPtr,
 				d_V,
 				d_HS_,
@@ -558,8 +463,8 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 				d_inject_,
 				d_externalCurrent_,
 				(int)nCompt_);
-		timer.Stop();
 	}else if(UPDATE_MATRIX_APPROACH == UPDATE_MATRIX_SPMV_APPROACH){
+		// SPMV approach for update matrix
 		cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
 			nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
 			d_chan_Gk, d_chan_rowPtr, d_chan_colIndex,
@@ -569,27 +474,27 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 			nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
 			d_chan_GkEk, d_chan_rowPtr, d_chan_colIndex,
 			d_chan_x , &beta, d_comp_GkEksum);
+
+		update_matrix_kernel<<<BLOCKS, THREADS_PER_BLOCK>>>(d_V,
+						d_HS_,
+						d_comp_Gksum,
+						d_comp_GkEksum,
+						d_compartment_,
+						d_inject_,
+						d_externalCurrent_,
+						(int)nCompt_);
 	}else{
 		// Future approaches, if any.
-	}
-
-	// -----------------------------------------------CUSPARSE------------------------------------------------
-	if(UPDATE_MATRIX_APPROACH != UPDATE_MATRIX_WPT_APPROACH){
-		BLOCKS = (nCompt_+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
-		update_matrix_kernel<<<BLOCKS, THREADS_PER_BLOCK>>>(d_V,
-				d_HS_,
-				d_comp_Gksum,
-				d_comp_GkEksum,
-				d_compartment_,
-				d_inject_,
-				d_externalCurrent_,
-				(int)nCompt_);
 	}
 
 	cudaMemcpy(&inject_[0], d_inject_, nCompt_*sizeof(InjectStruct), cudaMemcpyDeviceToHost );
 	cudaMemcpy(&HS_[0], d_HS_, HS_.size()*sizeof(double), cudaMemcpyDeviceToHost );
 
 }
+
+/*
+ * EXPERIMENTAL. Update matrix where data structure is in CSR format.
+ */
 
 void HSolveActive::update_csrmatrix_cuda_wrapper(){
 	// ---------------------------- GKSum & GkEkSum ---------------------------------------
@@ -651,9 +556,11 @@ void HSolveActive::advance_calcium_cuda_wrapper(){
 					num_ca_pools);
 	/*
 	 // TODO choose between WPT or CSRMV
+	 	 // CSRMV approach
 		int BLOCKS = num_catarget_channels/THREADS_PER_BLOCK;
 		BLOCKS = (num_catarget_channels%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
+		// Find indivudual values and use CSRMV to find caActivation Values
 		advance_calcium_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
 				d_chan_Gk, d_chan_GkEk,
 				d_Vmid,
@@ -673,7 +580,8 @@ void HSolveActive::advance_calcium_cuda_wrapper(){
 		advance_calcium_conc_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_caConc_, d_ca, d_caActivation_values, num_ca_pools);
 	*/
 
-
+	// Sending calcium data to host
+	cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost);
 
 #ifdef PIN_POINT_ERROR
 	cudaCheckError(); // Checking for cuda related errors.
