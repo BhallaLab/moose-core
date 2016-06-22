@@ -191,6 +191,7 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
         tableDt_.push_back( clk->getTickDt( tickNum ) );
     }
 
+
     // Make sure all tables have same dt_ else disable the streamer.
     vector<unsigned int> invalidTables;
     for (size_t i = 1; i < tableTick_.size(); i++) 
@@ -238,10 +239,9 @@ void Streamer::process(const Eref& e, ProcPtr p)
     // Prepare data.
     zipWithTime( data_, currTime_ );
     StreamerBase::writeToOutFile( outfilePath_, format_, "a", data_, columns_ );
+
     // clean the arrays
     data_.clear();
-    for(size_t i = 0; i < tables_.size(); i++ )
-        tables_[i]->clearVec();
 }
 
 
@@ -252,6 +252,15 @@ void Streamer::process(const Eref& e, ProcPtr p)
  */
 void Streamer::addTable( Id table )
 {
+    Clock* clk = reinterpret_cast<Clock*>( Id(1).eref().data() );
+    int tickNum = table.element()->getTick();
+    double tick = clk->getTickDt( tickNum );
+    tableDt_.push_back( tick );
+
+    // Set tick of stramer to 100 times of table tick or 10 seconds whichever is
+    // higher.
+    clk->setTickDt( 19, max( 10.0, 100 *  tick ) );
+
     // If this table is not already in the vector, add it.
     for( size_t i = 0; i < tableIds_.size(); i++)
         if( table.path() == tableIds_[i].path() )
@@ -371,4 +380,8 @@ void Streamer::zipWithTime( vector<double>& data, double currTime)
         for( size_t i = 0; i < tables_.size(); i++)
             data.push_back( tables_[i]->getVec()[i] );
     }
+
+    // clear the data from tables now.
+    for(size_t i = 0; i < tables_.size(); i++ )
+        tables_[i]->clearVec();
 }
