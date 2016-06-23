@@ -128,80 +128,41 @@ void HSolveActive::step( ProcPtr info )
 	// Checking for error after each time-step
 	cudaCheckError();
 #else
-
-	start = getTime();
-		advanceChannels( info->dt );
-	end = getTime();
-	advanceChannelsTime = (end-start)/1000.0f;
-
-	start = getTime();
-		calculateChannelCurrents();
-	end = getTime();
-	calcChanCurTime = (end-start)/1000.0f;
-
+	advanceChannels( info->dt );
+	calculateChannelCurrents();
 	int solver_choice = 0; // 0-Moose , 1-Forward-flow, 2-Pervasive-flow
 
+	/*
 	string pPath = getenv("SOLVER_CHOICE");
 	if(pPath.size() != 0){
 		stringstream convert(pPath);
 		convert >> solver_choice;
 	}
+	*/
 
-	start = getTime();
-		switch(solver_choice){
-			case 0:
-				updateMatrix();
-				break;
-			case 1:
-				updateForwardFlowMatrix();
-				break;
-			case 2:
-				updatePervasiveFlowMatrix();
-				break;
-		}
-	end = getTime();
-	updateMatTime = (end-start)/1000.0f;
+	switch(solver_choice){
+		case 0:
+			updateMatrix();
+			HSolvePassive::forwardEliminate();
+			HSolvePassive::backwardSubstitute();
+			break;
+			break;
+		case 1:
+			// Using forward flow solution
+			updateForwardFlowMatrix();
+			forwardFlowSolver();
+			break;
+		case 2:
+			// Using pervasive flow solution
+			updatePervasiveFlowMatrix();
+			pervasiveFlowSolver();
+			break;
+	}
 
-	start = getTime();
-		switch(solver_choice){
-			case 0:
-				HSolvePassive::forwardEliminate();
-				HSolvePassive::backwardSubstitute();
-				break;
-			case 1:
-				// Using forward flow solution
-				forwardFlowSolver();
-				break;
-			case 2:
-				// Using pervasive flow solution
-				pervasiveFlowSolver();
-				break;
-		}
-	end = getTime();
-	solverTime = (end-start)/1000.0f;
-
-	start = getTime();
-		advanceCalcium();
-	end = getTime();
-	advCalcTime = (end-start)/1000.0f;
-
-	start = getTime();
-		advanceSynChans( info );
-	end = getTime();
-	advSynchanTime = (end-start)/1000.0f;
-
-	start = getTime();
-		sendValues( info );
-	end = getTime();
-	sendValuesTime = (end-start)/1000.0f;
-
-	start = getTime();
-		sendSpikes( info );
-	end = getTime();
-	sendSpikesTime = (end-start)/1000.0f;
-
-	if(step_num < 10)
-		cout << pPath << " " << updateMatTime << " " << solverTime << endl;
+	advanceCalcium();
+	advanceSynChans( info );
+	sendValues( info );
+	sendSpikes( info );
 
 #endif
 
@@ -518,7 +479,6 @@ void HSolveActive::advanceCalcium()
 
 //#endif
 #else
-	u64 startTime = getTime();
 
     vector< double* >::iterator icatarget = caTarget_.begin();
     vector< double >::iterator ivmid = VMid_.begin();
@@ -582,10 +542,6 @@ void HSolveActive::advanceCalcium()
 
     caActivation_.assign( caActivation_.size(), 0.0 );
 
-    u64 endTime = getTime();
-
-    if(step_num < 10)
-    	cout << "Advance calcium " << (endTime-startTime)/1000.0f << endl;
 #endif
 }
 
@@ -644,8 +600,6 @@ void HSolveActive::advanceChannels( double dt )
     vector< LookupRow* >::iterator icarow = caRow_.begin();
 
     LookupRow vRow;
-
-	u64 cpu_advchan_start = getTime();
 
     double C1, C2;
 
@@ -731,9 +685,6 @@ void HSolveActive::advanceChannels( double dt )
 
         ++ichannelcount, ++icacount;
     }
-
-    u64 cpu_advchan_end = getTime();
-    //cout << "CPU advance chan time " << (cpu_advchan_end-cpu_advchan_start)/1000.0f << endl;
 
 #endif
       
