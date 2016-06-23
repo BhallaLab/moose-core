@@ -136,12 +136,12 @@ protected:
 #ifdef USE_CUDA    
     //int step_num;
 
-	// CUDA Passive Data
-	vector<int> h_gate_expand_indices;
-	vector<int> h_vgate_expand_indices;
-	vector<int> h_vgate_compt_indices;
-	vector<int> h_cagate_expand_indices;
-	vector<int> h_cagate_capool_indices;
+    // Optimized data
+	vector<int> h_vgate_indices;
+	vector<int> h_vgate_compIds;
+
+	vector<int> h_cagate_indices;
+	vector<int> h_cagate_capoolIds;
 
 	vector<int> h_catarget_channel_indices; // Stores the indices of channel which are ca targets in order
 	vector<int> h_catarget_capool_indices; // Store the index of calcium pool
@@ -162,21 +162,8 @@ protected:
 	int* d_cagate_indices; // Set of gates that are calcium dependent.
 	int* d_cagate_capoolIds; // Corresponding calcium pool id of calcium dependent gate
 
-
-	// Gate related
-	double* d_gate_values; // Values of x,y,x for all channels.
-	double* d_gate_powers; // Powers of x,y,z for all channels.
-	int* d_gate_columns; // Corresponding columns of lookup tables
-	int* d_gate_ca_index; // -1 -> V_lookup , (>0) -> Ca_lookup
-
-	int* d_gate_expand_indices; // Srotes the indices of gates for which power is > 0
-	int* d_vgate_expand_indices; // Stores the indices of gates using vmtable in gates array.
-	int* d_vgate_compt_indices; // Stores the compartment index for this gate.
-	int* d_cagate_expand_indices; // Stores the indices of gates using cmtable in gates array.
-	int* d_cagate_capool_indices; // Stores the indices of calcium pools in ca_ array.
-
+	// advanceCalcium related.
 	int* d_catarget_channel_indices;
-	int* d_catarget_capool_indices;
 	double* d_caActivation_values; // Stores ca currents for that pool.
 
 	int* d_capool_rowPtr;
@@ -184,9 +171,6 @@ protected:
 	double* d_capool_values;
 	double* d_capool_onex;
 
-
-	//double* d_state_;
-  //int* d_gate_to_chan; // Not needed as we store 3 gates(x,y,z) for each channel.
 
 	// Channel related
 	int* d_chan_instant;
@@ -218,11 +202,6 @@ protected:
 	// Conjugate Gradient based GPU solver
 	double* d_Vmid;
 
-
-	/* Get handle to the CUBLAS context */
-	cublasHandle_t cublas_handle;
-	cublasStatus_t cublasStatus;
-
 	/* Get handle to the CUSPARSE context */
 	cusparseHandle_t cusparse_handle;
 	cusparseMatDescr_t cusparse_descr;
@@ -241,13 +220,8 @@ protected:
 	double* d_V_fractions;
 	int* d_Ca_rows;
 	double* d_Ca_fractions;
-	int* d_temp_keys;
-	double* d_temp_values;
 
-	int num_comps_with_chans; // Stores number of compartments with >=1 channels.
-
-	// temp code
-	bool is_initialized;
+	bool is_initialized; // Initializing device memory data
 #endif
 
     static const int INSTANT_X;

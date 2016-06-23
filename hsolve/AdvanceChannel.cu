@@ -343,7 +343,7 @@ void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
 
 	int num_comps = V_.size();
 	int num_Ca_pools = ca_.size();
-	int num_cadep_gates = h_cagate_expand_indices.size();
+	int num_cadep_gates = h_cagate_indices.size();
 
 	int BLOCKS = num_comps/THREADS_PER_BLOCK;
 	BLOCKS = (num_comps + THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
@@ -374,8 +374,8 @@ void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
 
 void HSolveActive::advance_channels_cuda_wrapper(double dt){
 
-	int num_vdep_gates = h_vgate_expand_indices.size();
-	int num_cadep_gates = h_cagate_expand_indices.size();
+	int num_vdep_gates = h_vgate_indices.size();
+	int num_cadep_gates = h_cagate_indices.size();
 
 	int BLOCKS = (num_vdep_gates+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
 	// For Vm dependent gates
