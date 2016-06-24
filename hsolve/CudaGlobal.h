@@ -6,13 +6,14 @@
 #ifdef USE_CUDA
 
 #define BLOCK_WIDTH 64
-#define THREADS_PER_BLOCK 128
+#define THREADS_PER_BLOCK 256
 
 #ifndef DEBUG_
 #define DEBUG_
 #endif
 
 #define CUDA_ERROR_CHECK
+//#define PIN_POINT_ERROR
 
 #include <cuda.h>
 #include <cuda_runtime_api.h>
