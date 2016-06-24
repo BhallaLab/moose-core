@@ -207,7 +207,7 @@ void update_matrix_kernel_opt(
 		d_HS_[4*tid+3] = d_V[tid]*d_compartment_[tid].CmByDt + d_compartment_[tid].EmByRm + sum2 +
 				(d_inject_[tid].injectVarying + d_inject_[tid].injectBasal) + d_externalCurrent_[2*tid+1];
 
-		d_inject_[tid].injectVarying = 0;
+		//d_inject_[tid].injectVarying = 0;
 	}
 }
 
@@ -448,6 +448,12 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 		cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
 
 	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
+
+	// As inject data is already on device, injectVarying can be set to zero.
+	for (int i = 0; i < inject_.size(); ++i) {
+		inject_[i].injectVarying = 0;
+	}
+
 	// Sending external current to GPU
 
 	BLOCKS = (nCompt_+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
@@ -489,8 +495,6 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 	}else{
 		// Future approaches, if any.
 	}
-	if(step_num%20 == 1)
-		cudaMemcpy(&inject_[0], d_inject_, nCompt_*sizeof(InjectStruct), cudaMemcpyDeviceToHost );
 
 	cudaMemcpy(&HS_[0], d_HS_, HS_.size()*sizeof(double), cudaMemcpyDeviceToHost );
 }
