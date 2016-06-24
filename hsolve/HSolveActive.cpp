@@ -112,6 +112,14 @@ void HSolveActive::step( ProcPtr info )
 #ifdef USE_CUDA
    	advanceChannels( info->dt );
    	calculateChannelCurrents();
+
+   	/*
+	if(step_num == 1) remove("current.csv");
+	// Dealing with current
+	ofstream currentFile("current.csv",ios::app);
+	currentFile << inject_[3580].injectBasal << endl;
+	*/
+
 	updateMatrix();
 
 	HSolvePassive::forwardEliminate();

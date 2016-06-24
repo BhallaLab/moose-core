@@ -442,14 +442,13 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 	int num_channels = channel_.size();
 	int BLOCKS;
 
-	// Using Cusparse
-	const double alpha = 1.0;
-	const double beta = 0.0;
-
 	// As inject_ and externalCurrent_ data structures are updated by messages,
 	// they have to be updated on the device too. Hence the transfer
-	cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
+	if(step_num%20 == 1)
+		cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
+
 	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
+	// Sending external current to GPU
 
 	BLOCKS = (nCompt_+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
 	if(UPDATE_MATRIX_APPROACH == UPDATE_MATRIX_WPT_APPROACH){
@@ -464,6 +463,10 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 				d_externalCurrent_,
 				(int)nCompt_);
 	}else if(UPDATE_MATRIX_APPROACH == UPDATE_MATRIX_SPMV_APPROACH){
+		// Using Cusparse
+		const double alpha = 1.0;
+		const double beta = 0.0;
+
 		// SPMV approach for update matrix
 		cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
 			nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
@@ -486,10 +489,10 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 	}else{
 		// Future approaches, if any.
 	}
+	if(step_num%20 == 1)
+		cudaMemcpy(&inject_[0], d_inject_, nCompt_*sizeof(InjectStruct), cudaMemcpyDeviceToHost );
 
-	cudaMemcpy(&inject_[0], d_inject_, nCompt_*sizeof(InjectStruct), cudaMemcpyDeviceToHost );
 	cudaMemcpy(&HS_[0], d_HS_, HS_.size()*sizeof(double), cudaMemcpyDeviceToHost );
-
 }
 
 /*
