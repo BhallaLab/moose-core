@@ -8,13 +8,12 @@ endif()
 
 if(WITH_CUDA)
     #SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_30,code=sm_30)
-    #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )
     FILE(GLOB CUDA_SRC *.cu)
     INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS})
     CUDA_COMPILE(HSOLVE_CUDA_OBJS ${CUDA_SRC})
     CUDA_ADD_LIBRARY(hsolve_cuda ${HSOLVE_CUDA_OBJS})
     TARGET_LINK_LIBRARIES(hsolve_cuda ${CUDA_LIBRARIES} ${CUDA_cusparse_LIBRARY} ${CUDA_cublas_LIBRARY} )
-    MESSAGE( STATUS "TODO: Fix hardcoded path in target_link_libraries" )
 endif()
 
 

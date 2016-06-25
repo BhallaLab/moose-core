@@ -1,26 +1,26 @@
 #ifndef __CUDA_GLOBAL_H__
 #define __CUDA_GLOBAL_H__
 
-//#define USE_CUDA
+#define USE_CUDA
 
 #ifdef USE_CUDA
 
 #define BLOCK_WIDTH 64
-#define THREADS_PER_BLOCK 128
+#define THREADS_PER_BLOCK 256
 
 #ifndef DEBUG_
 #define DEBUG_
 #endif
 
 #define CUDA_ERROR_CHECK
+//#define PIN_POINT_ERROR
 
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <cusparse_v2.h>
 #include <cublas_v2.h>
+#include <cstdio>
 
-#include <cusolverSp.h>
-#include <cusolverSp_LOWLEVEL_PREVIEW.h>
 
 typedef unsigned int u32;
 typedef unsigned long long u64;

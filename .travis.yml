@@ -33,7 +33,7 @@ before_script:
     - wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1404/x86_64/cuda-repo-ubuntu1404_7.5-18_amd64.deb
     - sudo dpkg -i cuda-repo*.deb
     - sudo apt-get update 
-    - sudo apt-get install cuda-toolkit-7-5
+    - sudo apt-get install -qq cuda-toolkit-7-5
 
 before_install:
     - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
