@@ -98,7 +98,7 @@ void StreamerBase::writeToCSVFile( const string& filepath, const string& openmod
         string headerText = "";
         for( vector<string>::const_iterator it = columns.begin(); 
             it != columns.end(); it++ )
-            headerText += "\"" + *it + "\"" + delimiter_;
+            headerText += ( *it + delimiter_ );
         headerText += eol;
         fprintf( fp, "%s", headerText.c_str() ); 
     }
