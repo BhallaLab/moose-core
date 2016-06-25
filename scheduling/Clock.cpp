@@ -307,7 +307,7 @@ const Cinfo* Clock::initCinfo()
         "Name", "Clock",
         "Author", "Upinder S. Bhalla, Nov 2013, NCBS",
         "Description",
-        "Clock: Clock class. Handles sequencing of operations in simulations."
+
         "Every object scheduled for operations in MOOSE is connected to one"
         "of the 'Tick' entries on the Clock.\n"
         "The Clock manages 32 'Ticks', each of which has its own dt,"
@@ -415,7 +415,7 @@ const Cinfo* Clock::initCinfo()
         "	Stats				17		0.1\n"
 
         "	Table2				18		1\n"
-        "	Streamer			29		2\n"
+        "	Streamer			29		10\n"
         "	HDF5DataWriter			30		1\n"
         "	HDF5WriterBase			30		1\n"
         "	NSDFWriter			30		1\n"

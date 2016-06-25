@@ -161,7 +161,7 @@ bool ReadCell::innerRead( ifstream& fin )
 	string::size_type pos;
 	
 	while ( getline( fin, line ) ) {
-		line = trim( line );
+		line = moose::trim( line );
 		lineNum_++;
 		
 		if ( line.length() == 0 )
@@ -222,7 +222,7 @@ bool ReadCell::readScript( const string& line )
 {
 	vector< string > argv;
 	string delimiters( "\t " );
-	tokenize( line, delimiters, argv ); 
+        moose::tokenize( line, delimiters, argv ); 
 	
 	if ( argv[ 0 ] == "*cartesian" ) {
 		polarFlag_ = 0;
@@ -310,7 +310,7 @@ bool ReadCell::readData( const string& line )
 {
 	vector< string > argv;
 	string delimiters( "\t " );
-	tokenize( line, delimiters, argv ); 
+        moose::tokenize( line, delimiters, argv ); 
 	
 	if ( argv.size() < 6 ) {
 		cerr <<	"Error: ReadCell: Too few arguments in line: " << argv.size() <<
@@ -1003,7 +1003,7 @@ void ReadCell::addChannelMessage( Id chan )
 
 		string s = Field< string >::get( *i, "value" );
 		vector< string > token;
-		tokenize( s, " 	", token );
+                moose::tokenize( s, " 	", token );
 		assert( token.size() == 4 );
 		ObjId src = shell->doFind( token[0] );
 		ObjId dest = shell->doFind( token[2] );

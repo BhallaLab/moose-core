@@ -381,17 +381,9 @@ bool isDoingReinit()
 void Shell::doReinit( )
 {
 
-#ifdef ENABLE_LOGGER
-    clock_t t = clock();
-    cout << logger.dumpStats(0);
-#endif
     Id clockId( 1 );
     SetGet0::set( clockId, "reinit" );
 
-#ifdef ENABLE_LOGGER
-    float time = (float(clock() - t)/CLOCKS_PER_SEC);
-    logger.initializationTime.push_back(time);
-#endif
 }
 
 void Shell::doStop( )
