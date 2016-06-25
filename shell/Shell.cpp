@@ -8,6 +8,8 @@
 **********************************************************************/
 
 #include <string>
+#include <algorithm>
+
 using namespace std;
 
 
@@ -396,6 +398,14 @@ void Shell::doStop( )
 void Shell::doSetClock( unsigned int tickNum, double dt )
 {
     LookupField< unsigned int, double >::set( ObjId( 1 ), "tickDt", tickNum, dt );
+
+    // FIXME:
+    // HACK: If clock 18 is being updated, make sure that clock 19 (streamer is also
+    // updated with correct dt (10 or 100*dt). This is bit hacky.
+    if( tickNum == 18 )
+        LookupField< unsigned int, double >::set( ObjId( 1 ), "tickDt"
+                , tickNum + 1, max( 100 * dt, 10.0 )
+                );
 }
 
 void Shell::doUseClock( string path, string field, unsigned int tick )

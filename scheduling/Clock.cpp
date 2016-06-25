@@ -591,6 +591,7 @@ void Clock::setTickDt( unsigned int i, double v )
     }
     for ( unsigned int j = 0; j < numTicks; ++j )
         numUsed += ( ticks_[j] != 0 );
+
     if ( numUsed == 0 )
     {
         dt_ = v;

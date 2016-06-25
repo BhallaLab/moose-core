@@ -175,13 +175,34 @@ void Streamer::cleanUp( void )
  */
 void Streamer::reinit(const Eref& e, ProcPtr p)
 {
-    Clock* clk = reinterpret_cast<Clock*>( Id(1).eref().data() );
+
     if( tables_.size() == 0 )
     {
         moose::showWarn( "Zero tables in streamer. Disabling Streamer" );
         e.element()->setTick( -2 );             /* Disable process */
         return;
     }
+
+    Clock* clk = reinterpret_cast<Clock*>( Id(1).eref().data() );
+    for (size_t i = 0; i < tableIds_.size(); i++) 
+    {
+        int tickNum = tableIds_[i].element()->getTick();
+        double tick = clk->getTickDt( tickNum );
+        tableDt_.push_back( tick );
+        // Make sure that all tables have the same tick.
+        if( i > 0 )
+        {
+            if( tick != tableDt_[0] )
+            {
+                moose::showWarn( "Table " + tableIds_[i].path() + " has "
+                        " different clock dt. "
+                        " Make sure all tables added to Streamer have the same "
+                        " dt value."
+                        );
+            }
+        }
+    }
+
 
     // Push each table dt_ into vector of dt
     for( size_t i = 0; i < tables_.size(); i++)
@@ -252,15 +273,6 @@ void Streamer::process(const Eref& e, ProcPtr p)
  */
 void Streamer::addTable( Id table )
 {
-    Clock* clk = reinterpret_cast<Clock*>( Id(1).eref().data() );
-    int tickNum = table.element()->getTick();
-    double tick = clk->getTickDt( tickNum );
-    tableDt_.push_back( tick );
-
-    // Set tick of stramer to 100 times of table tick or 10 seconds whichever is
-    // higher.
-    clk->setTickDt( 19, max( 10.0, 100 *  tick ) );
-
     // If this table is not already in the vector, add it.
     for( size_t i = 0; i < tableIds_.size(); i++)
         if( table.path() == tableIds_[i].path() )
