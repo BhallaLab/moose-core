@@ -24,6 +24,7 @@
 using namespace std;
 
 #include "muParser.h"
+//#include "Gsolve.h"
 #include "FuncTerm.h"
 #include "../utility/numutil.h"
 #include "../basecode/header.h"
@@ -165,12 +166,11 @@ void FuncTerm::evalPool( double* S, double t ) const
 	args_[i] = t;
         try 
         {
-#pragma omp critical
-            S[ target_] = parser_.Eval() * volScale_;
+#pragma omp critical 
+                S[ target_] = parser_.Eval() * volScale_;
         }
        catch ( mu::Parser::exception_type & e )
        {
            showError( e );
        }
-//       cout << "varS from the thread " << S << endl;
 }

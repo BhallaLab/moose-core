@@ -12,6 +12,8 @@
 
 class Stoich;
 
+#include<omp.h>
+
 class GssaVoxelPools: public VoxelPoolsBase
 {
 public:
@@ -32,7 +34,7 @@ public:
     unsigned int pickReac();
     void setNumReac( unsigned int n );
 
-    void advance( const ProcInfo* p, GssaSystem* g );
+    void advance( const ProcInfo* p, GssaSystem* g);
 
     /**
     * Cleans out all reac rates and recalculates atot. Needed whenever a

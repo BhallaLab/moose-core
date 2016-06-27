@@ -151,6 +151,7 @@ bool GssaVoxelPools::refreshAtot( const GssaSystem* g )
  */
 void GssaVoxelPools::recalcTime( GssaSystem* g, double currTime )
 {
+        omp_lock_t lock;
     updateDependentMathExpn( g, 0, currTime);
     refreshAtot( g );
     assert( t_ > currTime );

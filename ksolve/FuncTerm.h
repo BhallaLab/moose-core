@@ -11,7 +11,7 @@
 #define _FUNC_TERM_H
 
 #include "muParser.h"
-
+#include <omp.h>
 
 class FuncTerm
 {

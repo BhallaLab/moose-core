@@ -526,23 +526,27 @@ void Gsolve::process( const Eref& e, ProcPtr p )
    int poolSize = pools_.size();
    GssaSystem* sysPtr = &sys_;
    static int cellsPerThread = 0;
-   double* VARS;
-   int j;
+   int blockSize = poolSize/NTHREADS;
 
    if(!cellsPerThread)
    {
            cellsPerThread = 1;
            cout << endl << "OpenMP parallelism: Using parallel-for in GSOLVE " << endl;
            cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
+
    }
 	 
-//#pragma omp parallel for schedule(guided, cellsPerThread) firstprivate(p, sysPtr)
-//	for ( int j = 0; j < poolSize; j++ ) 
-//           pools_[j].advance( p, sysPtr );
+           
 #pragma omp parallel 
- #pragma omp for 
-	for ( vector< GssaVoxelPools >::iterator i = pools_.begin(); i < pools_.end(); ++i ) 
-           i->advance( p, sysPtr );
+#pragma omp for schedule(guided, cellsPerThread) firstprivate(p, sysPtr)
+   for(int i = 0; i < NTHREADS; i++)
+   {
+           for(int j = i*blockSize; j < (i*blockSize)+blockSize; j++)
+                   pools_[j].advance( p, sysPtr );
+
+   }
+   for(int j = blockSize*NTHREADS; j < poolSize; j++)
+           pools_[j].advance( p, sysPtr );
 
 
 #endif //_GSOLVE_OPENMP
@@ -550,7 +554,6 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 #if _GSOLVE_SEQ
    static int SeqThread = 0;
    int j;
-   double* VARS;
    if(!SeqThread)
    {
            SeqThread = 1;

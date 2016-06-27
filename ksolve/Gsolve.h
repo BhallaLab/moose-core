@@ -9,6 +9,7 @@
 
 #ifndef _GSOLVE_H
 #define _GSOLVE_H
+#include <omp.h>
 
 class Stoich;
 
@@ -25,6 +26,8 @@ int NTHREADS  = atoi(env_value1);
 #if _GSOLVE_PTHREADS
 #include <pthread.h>
 #include <semaphore.h>
+
+omp_lock_t gsolveUpdate;
 
 struct pthreadGsolveWrap
 {
