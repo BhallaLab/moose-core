@@ -171,7 +171,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, GssaSystem* g )
         if ( atot_ <= 0.0 )   // reac system is stuck, will not advance.
         {
             t_ = nextt;
-//            return;
+            return;
         }
         unsigned int rindex = pickReac();
         assert( g->stoich->getNumRates() == v_.size() );
@@ -182,7 +182,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, GssaSystem* g )
             if ( !refreshAtot( g ) )   // Stuck state.
             {
                 t_ = nextt;
-  //              return;
+                return;
             }
             // We had a roundoff error, fixed it, but now need to be sure
             // we only fire a reaction where this is permissible.
@@ -191,7 +191,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, GssaSystem* g )
                 if ( fabs( v_[i-1] ) > 0.0 )
                 {
                     rindex = i - 1;
-    //                break;
+                    break;
                 }
             }
             assert( rindex < v_.size() );
