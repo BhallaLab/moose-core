@@ -16,7 +16,6 @@
 #include "Clock.h"
 #include "StreamerBase.h"
 
-
 // Write to numpy arrays.
 #include "../utility/cnpy.hpp"
 
@@ -191,7 +190,7 @@ const Cinfo* Table::initCinfo()
 
 static const Cinfo* tableCinfo = Table::initCinfo();
 
-Table::Table() : threshold_( 0.0 ) , lastTime_( 0.0 ) , input_( 0.0 )
+Table::Table() : threshold_( 0.0 ) , lastTime_( 0.0 ) , input_( 0.0 ), dt_( 0.0 )
 {
     // Initialize the directory to which each table should stream.
     rootdir_ = "_tables";
@@ -354,7 +353,7 @@ bool Table::getUseStreamer( void ) const
 /*  set/get outfile_ */
 void Table::setOutfile( string outpath )
 {
-    outfile_ = moose::createPosixPath( outpath );
+    outfile_ = moose::createMOOSEPath( outpath );
     if( ! moose::createParentDirs( outfile_ ) )
         outfile_ = moose::toFilename( outfile_ );
 
@@ -393,4 +392,10 @@ void Table::zipWithTime( const vector<double>& v
         tvec.push_back( currTime - (N - i - 1 ) * dt_ );
         tvec.push_back( v[i] );
     }
+}
+
+
+string Table::getName( void )
+{
+    return tableName_;
 }

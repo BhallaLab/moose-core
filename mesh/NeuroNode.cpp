@@ -16,6 +16,7 @@
 #include "MeshCompt.h"
 #include "CubeMesh.h"
 #include "../utility/Vec.h"
+#include "../utility/strutil.h"
 #include "CylBase.h"
 #include "NeuroNode.h"
 
@@ -272,7 +273,7 @@ unsigned int NeuroNode::findStartNode( const vector< NeuroNode >& nodes )
 	unsigned int somaIndex = ~0;
 	for ( unsigned int i = 0; i < nodes.size(); ++i ) {
 		const char* name = nodes[i].elecCompt_.element()->getName().c_str();
-		if ( strncasecmp( name, "soma", 4 ) == 0 ) {
+		if ( moose::strncasecmp( name, "soma", 4 ) == 0 ) {
 			if ( maxDia < nodes[i].getDia() ) {
 				maxDia = nodes[i].getDia();
 				somaIndex = i;

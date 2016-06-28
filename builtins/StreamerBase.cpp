@@ -62,8 +62,6 @@ void StreamerBase::writeToOutFile( const string& filepath
         , const vector<string>& columns
         )
 {
-    //cout << "Format " << outputFormat << " size is " << data.size() << endl;
-
     if( data.size() == 0 )
         return;
 
@@ -123,7 +121,6 @@ void StreamerBase::writeToCSVFile( const string& filepath, const string& openmod
 void StreamerBase::writeToNPYFile( const string& filepath, const string& openmode
         , const vector<double>& data, const vector<string>& columns )
 {
-    string format = moose::getExtension( filepath, true );
     cnpy2::save_numpy<double>( filepath, data, columns, openmode );
 }
 
