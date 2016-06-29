@@ -331,7 +331,6 @@ def writePool(modelpath,f,volIndex,sceneitems):
             if exists(pinfo):
                 color = Annotator(pinfo).getField('color')
                 color = getColorCheck(color,GENESIS_COLOR_SEQUENCE)
-
                 textcolor = Annotator(pinfo).getField('textColor')
                 textcolor = getColorCheck(textcolor,GENESIS_COLOR_SEQUENCE)
             
@@ -358,12 +357,13 @@ def getColorCheck(color,GENESIS_COLOR_SEQUENCE):
                                 , int(color[5:7], 16)
                                 )
             index = nearestColorIndex(color, GENESIS_COLOR_SEQUENCE)
+            index = index/2
             return index
         elif color.startswith("("):
-            #print " color ",color
             color = eval(color)[0:3]
             index = nearestColorIndex(color, GENESIS_COLOR_SEQUENCE)
-            #print " color @ main ",color, " i ",index
+            #This is because in genesis file index of the color is half
+            index = index/2
             return index
         else:
             index = color
@@ -377,106 +377,6 @@ def getColorCheck(color,GENESIS_COLOR_SEQUENCE):
         return index
     else:
         raise Exception("Invalid Color Value!")
-
-def getxyCord(xcord,ycord,list1,sceneitems):
-    for item in list1:
-        if not ( isinstance(item,Function) and isinstance(item,ZombieFunction) and isinstance(item.parent.className,Enz) and isinstance(item.parent.className,ZombieEnz) ):
-            if sceneitems == None:
-                objInfo = item.path+'/info'
-                xpos = xyPosition(objInfo,'x')
-                ypos = xyPosition(objInfo,'y')
-            else:
-                co = sceneitems[item]
-                xpos = co['x']
-                ypos = co['y']
-            cord[item] ={ 'x': xpos,'y':ypos}
-            xcord.append(xpos)
-            ycord.append(ypos)
-
-def xyPosition(objInfo,xory):
-    try:
-        return(float(element(objInfo).getField(xory)))
-    except ValueError:
-        return (float(0))
-
-def getCor(modelRoot,sceneitems):
-    xmin = ymin = 0.0
-    xmax = ymax = 1.0
-    positionInfoExist = False
-    xcord = []
-    ycord = []
-    mollist = realist = enzlist = cplxlist = tablist = funclist = []
-    meshEntryWildcard = '/##[ISA=ChemCompt]'
-    if modelRoot != '/':
-            meshEntryWildcard = modelRoot+meshEntryWildcard
-    for meshEnt in wildcardFind(meshEntryWildcard):
-        mol_cpl  = wildcardFind(meshEnt.path+'/##[ISA=PoolBase]')
-        realist  = wildcardFind(meshEnt.path+'/##[ISA=ReacBase]')
-        enzlist  = wildcardFind(meshEnt.path+'/##[ISA=EnzBase]')
-        funclist = wildcardFind(meshEnt.path+'/##[ISA=Function]')
-        tablist  = wildcardFind(meshEnt.path+'/##[ISA=StimulusTable]')
-        #mol_cpl  = wildcardFind(meshEnt.path+'/##[ISA=PoolBase]')
-        getxyCord(xcord,ycord,mol_cpl,sceneitems)
-        getxyCord(xcord,ycord,realist,sceneitems)
-        getxyCord(xcord,ycord,enzlist,sceneitems)
-        getxyCord(xcord,ycord,funclist,sceneitems)
-        getxyCord(xcord,ycord,tablist,sceneitems)
-    xmin = min(xcord)
-    xmax = max(xcord)
-    ymin = min(ycord)
-    ymax = max(ycord)
-    positionInfoExist = not(len(np.nonzero(xcord)[0]) == 0 \
-            and len(np.nonzero(ycord)[0]) == 0)
-
-    return(xmin,ymin,xmax,ymax,positionInfoExist)
-def getCor1(modelRoot,sceneitems):
-    xmin = ymin = 0.0
-    xmax = ymax = 1.0
-    positionInfoExist = False
-    xcord = []
-    ycord = []
-    mollist = realist = enzlist = cplxlist = tablist = funclist = []
-    meshEntryWildcard = '/##[ISA=ChemCompt]'
-    if modelRoot != '/':
-        meshEntryWildcard = modelRoot+meshEntryWildcard
-    for meshEnt in wildcardFind(meshEntryWildcard):
-        mol_cpl  = wildcardFind(meshEnt.path+'/##[ISA=PoolBase]')
-        realist  = wildcardFind(meshEnt.path+'/##[ISA=ReacBase]')
-        enzlist  = wildcardFind(meshEnt.path+'/##[ISA=EnzBase]')
-        funclist = wildcardFind(meshEnt.path+'/##[ISA=Function]')
-        tablist  = wildcardFind(meshEnt.path+'/##[ISA=StimulusTable]')
-        if mol_cpl or funclist or enzlist or realist or tablist:
-            for m in mol_cpl:
-                if isinstance(element(m.parent),CplxEnzBase):
-                    cplxlist.append(m)
-                    objInfo = m.parent.path+'/info'
-                elif isinstance(element(m),PoolBase):
-                    mollist.append(m)
-                    objInfo =m.path+'/info'
-                    xx = xyPosition(objInfo,'x')
-                    yy = xyPosition(objInfo,'y')
-                    if sceneitems == None:
-                        objInfo = item.path+'/info'
-                        xpos = xyPosition(objInfo,'x')
-                        ypos = xyPosition(objInfo,'y')
-                    else:
-                        co = sceneitems[item]
-                        xpos = co['x']
-                        ypos = co['y']
-                        
-                cord[m] ={ 'x': xx,'y':yy}
-        getxyCord(xcord,ycord,realist,sceneitems)
-        getxyCord(xcord,ycord,enzlist,sceneitems)
-        getxyCord(xcord,ycord,funclist,sceneitems)
-        getxyCord(xcord,ycord,tablist,sceneitems)
-    xmin = min(xcord)
-    xmax = max(xcord)
-    ymin = min(ycord)
-    ymax = max(ycord)
-    positionInfoExist = not(len(np.nonzero(xcord)[0]) == 0 \
-            and len(np.nonzero(ycord)[0]) == 0)
-
-    return(xmin,ymin,xmax,ymax,positionInfoExist)
 
 def writeCompartment(modelpath,compts,f):
     index = 0
@@ -594,6 +494,7 @@ def writeGui( f ):
     "simundump xtree /edit/draw/tree 0 \\\n"
     "  /kinetics/#[],/kinetics/#[]/#[],/kinetics/#[]/#[]/#[][TYPE!=proto],/kinetics/#[]/#[]/#[][TYPE!=linkinfo]/##[] \"edit_elm.D <v>; drag_from_edit.w <d> <S> <x> <y> <z>\" auto 0.6\n"
     "simundump xtext /file/notes 0 1\n")
+
 def writeNotes(modelpath,f):
     notes = ""
     #items = wildcardFind(modelpath+"/##[ISA=ChemCompt],/##[ISA=ReacBase],/##[ISA=PoolBase],/##[ISA=EnzBase],/##[ISA=Function],/##[ISA=StimulusTable]")
@@ -613,6 +514,7 @@ def writeNotes(modelpath,f):
 
 def writeFooter1(f):
     f.write("\nenddump\n // End of dump\n")
+
 def writeFooter2(f):
     f.write("complete_loading\n")
 
