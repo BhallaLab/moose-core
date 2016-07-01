@@ -28,7 +28,7 @@ VoxelPoolsBase::VoxelPoolsBase()
 		S_(1),
 		Sinit_(1),
 		volume_(1.0)
-{;}
+{ ; }
 
 VoxelPoolsBase::~VoxelPoolsBase()
 {}
@@ -39,13 +39,13 @@ VoxelPoolsBase::~VoxelPoolsBase()
 /// Using the computed array sizes, now allocate space for them.
 void VoxelPoolsBase::resizeArrays( unsigned int totNumPools )
 {
-	S_.resize( totNumPools, 0.0 );
-	Sinit_.resize( totNumPools, 0.0);
+    S_.resize( totNumPools, 0.0 );
+    Sinit_.resize( totNumPools, 0.0);
 }
 
 void VoxelPoolsBase::reinit()
 {
-	S_ = Sinit_;
+    S_ = Sinit_;
 }
 
 //////////////////////////////////////////////////////////////
@@ -187,8 +187,7 @@ void VoxelPoolsBase::xferIn(
 	unsigned int offset = voxelIndex * poolIndex.size();
 	vector< double >::const_iterator i = values.begin() + offset;
 	vector< double >::const_iterator j = lastValues.begin() + offset;
-	for ( vector< unsigned int >::const_iterator 
-			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
+	for ( vector< unsigned int >::const_iterator k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
 		S_[*k] += *i++ - *j++;
 	}
 }
@@ -215,17 +214,12 @@ void VoxelPoolsBase::xferInOnlyProxies(
 	}
 }
 
-void VoxelPoolsBase::xferOut( 
-	unsigned int voxelIndex, 
-	vector< double >& values,
-	const vector< unsigned int >& poolIndex)
+void VoxelPoolsBase::xferOut( unsigned int voxelIndex, vector< double >& values, const vector< unsigned int >& poolIndex)
 {
 	unsigned int offset = voxelIndex * poolIndex.size();
 	vector< double >::iterator i = values.begin() + offset;
-	for ( vector< unsigned int >::const_iterator 
-			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
-		*i++ = S_[*k];
-	}
+	for ( vector< unsigned int >::const_iterator k = poolIndex.begin(); k != poolIndex.end(); ++k ) 
+           *i++ = S_[*k];
 }
 
 void VoxelPoolsBase::addProxyVoxy( 

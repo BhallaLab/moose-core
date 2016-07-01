@@ -14,6 +14,7 @@
 #if  USE_BOOST
 #include <boost/filesystem.hpp>
 #endif     /* -----  USE_BOOST  ----- */
+#include <fstream>
 
 /**
  * Receives and records inputs. Handles plot and spiking data in batch mode.
@@ -66,6 +67,8 @@ public:
     //////////////////////////////////////////////////////////////////
 
     static const Cinfo* initCinfo();
+
+    string getName( void );
 
 private:
     double threshold_;

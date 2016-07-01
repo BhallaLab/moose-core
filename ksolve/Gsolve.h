@@ -9,13 +9,59 @@
 
 #ifndef _GSOLVE_H
 #define _GSOLVE_H
+#include <omp.h>
 
 class Stoich;
+
+//////////////////////////////////////////////////////////////////
+// NTHREADS = NUM_THREADS
+//////////////////////////////////////////////////////////////////
+const char *env_value1 = getenv("NUM_THREADS");
+int NTHREADS  = atoi(env_value1);
+
+#define _GSOLVE_SEQ 0
+#define _GSOLVE_OPENMP 1
+#define _GSOLVE_PTHREADS 0
+
+#if _GSOLVE_PTHREADS
+#include <pthread.h>
+#include <semaphore.h>
+
+omp_lock_t gsolveUpdate;
+
+struct pthreadGsolveWrap
+{
+        long tid;
+        ProcPtr *P;
+        GssaSystem** sysPtr;
+        GssaVoxelPools** poolsIndex;
+        int *blockSize;
+        bool* destroySig; 
+        sem_t *sThread, *sMain;
+
+        pthreadGsolveWrap(sem_t* S1, sem_t* S2, long Id, ProcPtr* ptr, GssaSystem** sptr, GssaVoxelPools** pI, int* blz, bool* destroySignal) : sThread(S1), sMain(S2), tid(Id), P(ptr), sysPtr(sptr), poolsIndex(pI), blockSize(blz), destroySig(destroySignal) {} ;
+};
+
+#endif //_GSOLVE_PTHREADS
+
 class Gsolve: public ZombiePoolInterface
 {
 	public: 
 		Gsolve();
 		~Gsolve();
+
+#if _GSOLVE_PTHREADS
+
+      pthread_t* threads;
+      GssaSystem** sPtr;
+		bool* destroySignal; 
+		ProcPtr *pthreadP; 
+		GssaVoxelPools** poolArray_; 
+		int *pthreadBlock; 
+		sem_t* mainSemaphor; 
+		sem_t* threadSemaphor; 
+
+#endif
 
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff

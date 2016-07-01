@@ -19,6 +19,7 @@
 #include "../biophysics/ReadSwc.h"
 #include "../kinetics/ReadKkit.h"
 #include "../kinetics/ReadCspace.h"
+#include "../utility/print_function.hpp"
 
 ModelType findModelType( string filename, ifstream& fin, string& line )
 {
@@ -29,11 +30,11 @@ ModelType findModelType( string filename, ifstream& fin, string& line )
         return SWC;
 
     getline( fin, line );
-    line = trim(line);
+    line = moose::trim(line);
     if ( line == "//genesis" )
     {
         getline( fin, line );
-        line = trim(line);
+        line = moose::trim(line);
         if ( line.substr( 0, 7 ) == "// kkit" )
             return KKIT;
     }
@@ -41,7 +42,7 @@ ModelType findModelType( string filename, ifstream& fin, string& line )
     {
         while ( getline( fin, line ) )
         {
-            line = trim(line);
+            line = moose::trim(line);
             if ( line.substr( 0, 7 ) == "// kkit" )
                 return KKIT;
         }

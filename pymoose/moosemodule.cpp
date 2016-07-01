@@ -56,7 +56,7 @@
 #include <mpi.h>
 #endif
 
-#include "../external/debug/print_function.hpp"
+#include "../utility/print_function.hpp"
 #include "../basecode/header.h"
 #include "../basecode/global.h"
 #include "../basecode/Id.h"
@@ -907,7 +907,7 @@ const map<string, string>& get_field_alias()
 */
 vector <string> setup_runtime_env()
 {
-    const map<string, string>& argmap = getArgMap();
+    const map<string, string>& argmap = moose::getArgMap();
     vector<string> args;
     args.push_back("moose");
     map<string, string>::const_iterator it;
@@ -1151,7 +1151,7 @@ int parseFinfoType(string className, string finfoType, string fieldName, vector<
     {
         return -1;
     }
-    tokenize(typestring, ",", typeVec);
+    moose::tokenize(typestring, ",", typeVec);
     if ((int)typeVec.size() > maxArgs)
     {
         return -1;

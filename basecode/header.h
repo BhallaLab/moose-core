@@ -11,8 +11,6 @@
 #ifndef _HEADER_H
 #define _HEADER_H
 
-#include "../external/debug/print_function.hpp"
-
 #include <math.h>
 #include <algorithm>
 #include <vector>
@@ -66,6 +64,8 @@ extern const double PI;	// Defined in consts.cpp
 extern const double NA; // Defined in consts.cpp
 extern const double FaradayConst; // Defined in consts.cpp
 extern const double GasConst; // Defined in consts.cpp
+
+//bool simStart = false;
 
 class Element;
 class Eref;

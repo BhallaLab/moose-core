@@ -6,11 +6,22 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+#include <omp.h>
+#include <sys/time.h>
 #include "header.h"
+
 #ifdef USE_GSL
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
+
+#else                           // USE_BOOST
+
+#include <boost/numeric/odeint.hpp>
+#include <boost/bind.hpp>
+#include "BoostSys.h"
+
 #endif
 
 #include "OdeSystem.h"
@@ -233,7 +244,11 @@ static const Cinfo* ksolveCinfo = Ksolve::initCinfo();
 
 Ksolve::Ksolve()
     :
+#if USE_GSL
     method_( "rk5" ),
+#elif USE_BOOST
+    method_( "rk5a" ),
+#endif
     epsAbs_( 1e-4 ),
     epsRel_( 1e-6 ),
     pools_( 1 ),
@@ -499,6 +514,10 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 {
     if ( isBuilt_ == false )
         return;
+
+    int poolSize = pools_.size(); //Find out the size of the vector
+    VoxelPools* poolArray = &pools_[0];
+
     // First, handle incoming diffusion values, update S with those.
     if ( dsolvePtr_ )
     {
@@ -509,47 +528,57 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         dvalues[3] = stoichPtr_->getNumVarPools();
         dsolvePtr_->getBlock( dvalues );
 
-        /*
-        vector< double >::iterator i = dvalues.begin() + 4;
-        for ( ; i != dvalues.end(); ++i )
-        	cout << *i << "	" << round( *i ) << endl;
-        getBlock( kvalues );
-        vector< double >::iterator d = dvalues.begin() + 4;
-        for ( vector< double >::iterator
-        		k = kvalues.begin() + 4; k != kvalues.end(); ++k )
-        		*k++ = ( *k + *d )/2.0
-        setBlock( kvalues );
-        */
         setBlock( dvalues );
     }
-    // Second, take the arrived xCompt reac values and update S with them.
-    for ( unsigned int i = 0; i < xfer_.size(); ++i )
-    {
-        const XferInfo& xf = xfer_[i];
-        // cout << xfer_.size() << "	" << xf.xferVoxel.size() << endl;
-        for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j )
-        {
-            pools_[xf.xferVoxel[j]].xferIn(
-                xf.xferPoolIdx, xf.values, xf.lastValues, j );
-        }
-    }
-    // Third, record the current value of pools as the reference for the
-    // next cycle.
+    // Loop Fusion 2nd and 3rd step and parallelize it.  take the arrived xCompt reac values and update S with them.
     for ( unsigned int i = 0; i < xfer_.size(); ++i )
     {
         XferInfo& xf = xfer_[i];
-        for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j )
+        unsigned int xferSize = xf.xferVoxel.size();
+        int xferBlock = xferSize/NTHREADS;
+//#pragma omp for schedule(guided, xferBlock)
+        for ( unsigned int j = 0; j < xferSize; ++j )
         {
-            pools_[xf.xferVoxel[j]].xferOut( j, xf.lastValues, xf.xferPoolIdx );
+            poolArray[xf.xferVoxel[j]].xferIn( xf.xferPoolIdx, xf.values, xf.lastValues, j );
+            poolArray[xf.xferVoxel[j]].xferOut( j, xf.lastValues, xf.xferPoolIdx );
         }
     }
 
-    // Fourth, do the numerical integration for all reactions.
-    for ( vector< VoxelPools >::iterator
-            i = pools_.begin(); i != pools_.end(); ++i )
-    {
+    //Integration step
+#if _KSOLVE_OPENMP
+	 
+	 static int cellsPerThread = 0; // Used for printing...
+	 if(!cellsPerThread)
+	 {
+		    cellsPerThread = 2;
+		    cout << endl << "OpenMP parallelism: Using parallel-for " << endl;
+		    cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
+	 }
+
+#pragma omp parallel num_threads(NTHREADS) shared(poolSize) if(poolSize > NTHREADS) 
+#pragma omp for schedule(dynamic, 2)
+    for (int j = 0; j < poolSize; j++ )
+        poolArray[j].advance( p );
+
+#endif //_KSOLVE_OPENMP
+
+
+//////////////////////////////////////////////////////////////////
+// Original Sequential Code
+//////////////////////////////////////////////////////////////////
+#if _KSOLVE_SEQ
+	 static int useSeq = 0;
+
+	 if(!useSeq)
+	 {
+		    useSeq = NTHREADS;
+		    cout << endl << "Executing Sequential version " << endl;
+	 }
+    for ( vector< VoxelPools >::iterator i = pools_.begin(); i != pools_.end(); ++i )
         i->advance( p );
-    }
+
+#endif //_KSOLVE_SEQ
+
     // Finally, assemble and send the integrated values off for the Dsolve.
     if ( dsolvePtr_ )
     {
@@ -686,6 +715,7 @@ unsigned int Ksolve::getVoxelIndex( const Eref& e ) const
         return OFFNODE;
     return ret - startVoxel_;
 }
+
 
 //////////////////////////////////////////////////////////////
 // Zombie Pool Access functions

@@ -29,6 +29,7 @@ const double NATURAL_E = 2.718281828459045;
 
 //extern const double getMachineEpsilon();
 //extern const double EPSILON;
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846             
 #endif

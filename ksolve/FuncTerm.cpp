@@ -24,8 +24,10 @@
 using namespace std;
 
 #include "muParser.h"
+//#include "Gsolve.h"
 #include "FuncTerm.h"
 #include "../utility/numutil.h"
+#include "../basecode/header.h"
 
 FuncTerm::FuncTerm()
 	: reactantIndex_( 1, 0 ),
@@ -160,14 +162,15 @@ void FuncTerm::evalPool( double* S, double t ) const
 	unsigned int i;
 	for ( i = 0; i < reactantIndex_.size(); ++i )
 		args_[i] = S[reactantIndex_[i]];
+
 	args_[i] = t;
         try 
         {
-            S[ target_] = parser_.Eval() * volScale_;
+#pragma omp critical 
+                S[ target_] = parser_.Eval() * volScale_;
         }
-        catch ( mu::Parser::exception_type & e )
-        {
-            showError( e );
-            //throw e;
-        }
+       catch ( mu::Parser::exception_type & e )
+       {
+           showError( e );
+       }
 }

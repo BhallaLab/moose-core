@@ -222,9 +222,9 @@ endif
 
 # To use GSL, pass USE_GSL=true ( anything on the right will do) in make command line
 ifdef USE_GSL
-#LIBS+= $(shell gsl-config --libs)
+LIBS+= $(shell gsl-config --libs)
 #LIBS+= -L/usr/lib -Wl,--no-as-needed -lgsl -lgslcblas -lm
-LIBS+= -L/usr/lib -lgsl -lgslcblas -lm
+#LIBS+= -L/usr/lib -lgsl -lgslcblas -lm
 CXXFLAGS+= -DUSE_GSL
 else
 LIBS+= -lm
@@ -432,7 +432,7 @@ endif
 pymoose: python/moose/_moose.so
 pymoose: CXXFLAGS += -DPYMOOSE $(PYTHON_CFLAGS)
 # fix: add include dir for numpy headers required by pymoose/moosemodule.cpp
-pymoose: CXXFLAGS += -I$(shell python -c 'from numpy import get_include; print get_include()')
+pymoose: CXXFLAGS += -I$(shell /usr/bin/python -c 'from numpy import get_include; print get_include()')
 pymoose: OBJLIBS += pymoose/_pymoose.o
 pymoose: LDFLAGS += $(PYTHON_LDFLAGS)
 export CXXFLAGS
