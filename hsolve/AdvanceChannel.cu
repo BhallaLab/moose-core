@@ -212,6 +212,42 @@ void update_matrix_kernel_opt(
 }
 
 /*
+ * Updates the matrix data structure d_perv_dynamic.
+ * WPT approach
+ */
+__global__
+void update_perv_matrix_kernel_opt(
+		double* d_chan_Gk, double* d_chan_GkEk , int* d_chan_rowPtr,
+		double* d_V,
+		double* d_perv_dynamic, double* d_perv_static,
+		double* d_comp_Gksum,
+		double* d_comp_GkEksum,
+		CompartmentStruct* d_compartment_,
+		InjectStruct* d_inject_,
+		double*	d_externalCurrent_,
+		int size){
+
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid < size){
+
+		double sum1=0, sum2=0;
+		int i;
+		for (i = d_chan_rowPtr[tid]; i < d_chan_rowPtr[tid+1]; ++i) {
+			sum1 += d_chan_Gk[i];
+			sum2 += d_chan_GkEk[i];
+		}
+		d_comp_Gksum[tid] = sum1;
+		d_comp_GkEksum[tid] = sum2;
+
+		d_perv_dynamic[tid] = d_perv_static[tid] + sum1 + d_externalCurrent_[2*tid];
+		d_perv_dynamic[size+tid] = d_V[tid]*d_compartment_[tid].CmByDt + d_compartment_[tid].EmByRm + sum2 +
+				(d_inject_[tid].injectVarying + d_inject_[tid].injectBasal) + d_externalCurrent_[2*tid+1];
+
+		//d_inject_[tid].injectVarying = 0;
+	}
+}
+
+/*
  * EXPERIMENTAL . Updates CSR matrix
  * SPMV approach
  */
@@ -498,6 +534,70 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 
 	cudaMemcpy(&HS_[0], d_HS_, HS_.size()*sizeof(double), cudaMemcpyDeviceToHost );
 }
+
+void HSolveActive::update_perv_matrix_cuda_wrapper(){
+
+	int num_channels = channel_.size();
+	int BLOCKS;
+
+	// As inject_ and externalCurrent_ data structures are updated by messages,
+	// they have to be updated on the device too. Hence the transfer
+	if(step_num%20 == 1)
+		cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
+
+	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
+
+	// As inject data is already on device, injectVarying can be set to zero.
+	for (int i = 0; i < inject_.size(); ++i) {
+		inject_[i].injectVarying = 0;
+	}
+
+	// Sending external current to GPU
+
+	BLOCKS = (nCompt_+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
+	if(UPDATE_MATRIX_APPROACH == UPDATE_MATRIX_WPT_APPROACH){
+		// WPT approach for update matrix
+		update_perv_matrix_kernel_opt<<<BLOCKS,THREADS_PER_BLOCK>>>(d_chan_Gk, d_chan_GkEk , d_chan_rowPtr,
+				d_V,
+				d_perv_dynamic, d_perv_static,
+				d_comp_Gksum,
+				d_comp_GkEksum,
+				d_compartment_,
+				d_inject_,
+				d_externalCurrent_,
+				(int)nCompt_);
+	}else if(UPDATE_MATRIX_APPROACH == UPDATE_MATRIX_SPMV_APPROACH){
+		// Using Cusparse
+		const double alpha = 1.0;
+		const double beta = 0.0;
+
+		// SPMV approach for update matrix
+		cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+			nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
+			d_chan_Gk, d_chan_rowPtr, d_chan_colIndex,
+			d_chan_x , &beta, d_comp_Gksum);
+
+		cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+			nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
+			d_chan_GkEk, d_chan_rowPtr, d_chan_colIndex,
+			d_chan_x , &beta, d_comp_GkEksum);
+
+		update_matrix_kernel<<<BLOCKS, THREADS_PER_BLOCK>>>(d_V,
+						d_HS_,
+						d_comp_Gksum,
+						d_comp_GkEksum,
+						d_compartment_,
+						d_inject_,
+						d_externalCurrent_,
+						(int)nCompt_);
+	}else{
+		// Future approaches, if any.
+	}
+
+	cudaMemcpy(&perv_dynamic[0], d_perv_dynamic, 2*nCompt_*sizeof(double), cudaMemcpyDeviceToHost );
+}
+
+
 
 /*
  * EXPERIMENTAL. Update matrix where data structure is in CSR format.

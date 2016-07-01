@@ -191,6 +191,8 @@ protected:
 
 	// Hines Matrix related
 	double* d_HS_;
+	double* d_perv_dynamic;
+	double* d_perv_static;
 
 	double* d_chan_x;
 	int* d_chan_colIndex;
@@ -284,6 +286,7 @@ private:
     void calculate_channel_currents_cuda_wrapper();
 
     void update_matrix_cuda_wrapper();
+    void update_perv_matrix_cuda_wrapper();
     void update_csrmatrix_cuda_wrapper();
     int choose_update_matrix_approach();
 

@@ -1,7 +1,7 @@
 #ifndef __CUDA_GLOBAL_H__
 #define __CUDA_GLOBAL_H__
 
-//#define USE_CUDA
+#define USE_CUDA
 
 #ifdef USE_CUDA
 

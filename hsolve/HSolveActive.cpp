@@ -122,8 +122,11 @@ void HSolveActive::step( ProcPtr info )
 
 	updateMatrix();
 
-	HSolvePassive::forwardEliminate();
-	HSolvePassive::backwardSubstitute();
+	//HSolvePassive::forwardEliminate();
+	//HSolvePassive::backwardSubstitute();
+
+	pervasiveFlowSolverOpt();
+
 	cudaMemcpy(d_Vmid, &(VMid_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 	calculate_V_from_Vmid_wrapper(); // Avoing Vm memory transfer and using CUDA kernel
 
@@ -222,10 +225,16 @@ void HSolveActive::updateMatrix()
 {
 
 #ifdef USE_CUDA
+	/*
 	// Updates HS matrix and sends it to CPU
 	if ( HJ_.size() != 0 )
 		memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
 	update_matrix_cuda_wrapper();
+	*/
+
+	// Copying initial matrix
+	memcpy(qfull_mat.values, perv_mat_values_copy, qfull_mat.nnz*sizeof(double));
+	update_perv_matrix_cuda_wrapper();
 
 	// Updates CSR matrix and sends it to CPU.
 	//update_csrmatrix_cuda_wrapper();
@@ -514,8 +523,6 @@ void HSolveActive::pervasiveFlowSolverOpt(){
 		}
 	}
 
-	if(step_num < 10)
-		cout << elim_index << " " << qfull_mat.nnz/2 << endl;
 
 	// Backward substitution
 	bool is_upper_triang;
@@ -860,6 +867,8 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 
 	// Hines Matrix related
 	cudaMalloc((void**)&d_HS_, HS_.size()*sizeof(double));
+	cudaMalloc((void**)&d_perv_dynamic, 2*nCompt_*sizeof(double));
+	cudaMalloc((void**)&d_perv_static, nCompt_*sizeof(double));
 
 	cudaMalloc((void**)&d_chan_colIndex, num_channels*sizeof(int));
 	cudaMalloc((void**)&d_chan_rowPtr, (nCompt_+1)*sizeof(int));
@@ -1056,6 +1065,7 @@ void HSolveActive::copy_hsolve_information_cuda(){
 
 	// Hines Matrix related
 	cudaMemcpy(d_HS_, &(HS_.front()), HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_perv_static, per_mainDiag_passive, nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 
 	int* chan_colIndex = new int[num_channels]();
 	double* chan_x = new double[nCompt_];
