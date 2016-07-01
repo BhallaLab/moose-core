@@ -138,6 +138,16 @@ protected:
 	double* upper_mat_values_copy;
 	double* lower_mat_values_copy;
 
+	// Optimized Pervasive flow matrix data structures.
+	//coosr_matrix full_mat;
+	coosr_matrix qfull_mat;
+	//double* per_rhs, *per_mainDiag_passive;
+	vector<int> eliminfo_r1, eliminfo_r2;
+	int* eliminfo_diag;
+	int* elim_rowPtr;
+	double* perv_mat_values_copy;
+	double* perv_dynamic; // Array of size 2*nCompt. First part is main diagonal, second part is right hand side.
+
 	void print_tridiagonal_matrix_system(double* data, int* misplaced_info, int rows);
 	void print_csr_matrix(coosr_matrix &matrix);
 
@@ -205,6 +215,8 @@ private:
     void construct_elimination_information(coosr_matrix full_mat, coosr_matrix upper_mat, coosr_matrix lower_mat,
     			vector<int> &ut_lt_upper, vector<int> &ut_lt_lower, vector<int> &ut_ut_upper, vector<int> &ut_ut_lower ,
     			int* ut_lt_rowPtr, int* ut_ut_rowPtr);
+    void construct_elimination_information_opt(coosr_matrix qfull_mat, vector<int> &eliminfo_r1, vector<int> &eliminfo_r2,
+    		int* eliminfo_diag,	int* elim_rowPtr, int num_elims);
 
 };
 

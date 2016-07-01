@@ -666,6 +666,108 @@ void HinesMatrix::construct_elimination_information(coosr_matrix full_mat, coosr
 
 }
 
+void HinesMatrix::construct_elimination_information_opt(coosr_matrix qfull_mat, vector<int> &eliminfo_r1, vector<int> &eliminfo_r2,
+		int* eliminfo_diag,	int* elim_rowPtr, int num_elims){
+
+	bool DEBUG = false;
+
+	// Initializing diagonal info
+	for (int i = 0; i < num_elims; ++i) {
+		eliminfo_diag[i] = -1;
+	}
+
+	// TODO construct elimination information.
+	int elim_index = 0;
+	for (int i = 0; i < qfull_mat.rows; ++i) {
+		for (int j = qfull_mat.rowPtr[i]; j < qfull_mat.rowPtr[i+1]; ++j) {
+
+			// Element should strictly belong to lower triangle
+			if(qfull_mat.colIndex[j] < i){
+				int r1 = qfull_mat.colIndex[j];
+
+				// Finding the index of first non-zero after maindiagonal element in row r1
+				int index_1 = qfull_mat.rowPtr[r1];
+				int index_2 = j;
+				int count = 0;
+				while(qfull_mat.colIndex[index_1] < r1 && index_1 < qfull_mat.rowPtr[r1+1]){
+					index_1++;
+				}
+
+				if(DEBUG)
+					cout << "row " << i << " " << r1 << " " << index_1 << endl;
+
+
+				// Getting elimination information of quasi matrix.
+				while(index_1 < qfull_mat.rowPtr[r1+1] && index_2 < qfull_mat.rowPtr[i+1]){
+
+					// Diagonal case
+					if(qfull_mat.colIndex[index_1] == i){
+						eliminfo_diag[elim_index] = index_1;
+						index_1++;
+					}else{
+						if(qfull_mat.colIndex[index_1] < qfull_mat.colIndex[index_2]){
+							index_1++;
+						}else if(qfull_mat.colIndex[index_1] > qfull_mat.colIndex[index_2]){
+							index_2++;
+						}else{
+							eliminfo_r1.push_back(index_1);
+							eliminfo_r2.push_back(index_2);
+							index_1++;
+							index_2++;
+							count++;
+						}
+					}
+				}
+
+				// Incase we run rout of element in row 2
+				while(index_1 < qfull_mat.rowPtr[r1+1]){
+					if(qfull_mat.colIndex[index_1] == i){
+						eliminfo_diag[elim_index] = index_1;
+						index_1 = qfull_mat.rowPtr[r1+1];
+					}else{
+						index_1++;
+					}
+				}
+
+				elim_rowPtr[elim_index] = count;
+				elim_index++;
+
+			}
+		}
+	}
+
+	// Constructing rowPtr from rowCounts
+	exclusive_scan(elim_rowPtr, num_elims);
+
+	bool minus1_found = false;
+	int index = -1;
+	for (int i = 0; i < num_elims; ++i) {
+		if(eliminfo_diag[i] == -1){
+			minus1_found = true;
+			index = i;
+		}
+	}
+	cout << "Should be -1 " <<  index << endl;
+
+	if(DEBUG){
+		// Debug information
+		cout << "elimnation index " << elim_index << " " << num_elims << endl;
+		for (int i = 0; i < num_elims; ++i) {
+			for (int j = elim_rowPtr[i]; j < elim_rowPtr[i+1]; ++j) {
+				cout << "(" << eliminfo_r1[j] << "," << eliminfo_r2[j] << ") , ";
+			}
+			cout << endl;
+		}
+
+		for (int i = 0; i < num_elims; ++i) {
+			cout << eliminfo_diag[i] << endl;
+		}
+
+	}
+
+}
+
+
 void HinesMatrix::storePervasiveMatrix(vector<vector<int> > &child_list){
 
 	int node1,node2;
@@ -673,6 +775,7 @@ void HinesMatrix::storePervasiveMatrix(vector<vector<int> > &child_list){
 	vector<pair<long long int,double> > full_mat_flat;
 	vector<pair<long long int,double> > lower_mat_flat; // Does not include main diagonal elements
 	vector<pair<long long int,double> > upper_mat_flat; // Includes main diagonal elements
+	vector<pair<long long int,double> > quasi_full_mat_flat; // Includes all except main diagonal elements.
 
 	// Setting up passive part of main diagonal
 	for(unsigned int i=0;i<nCompt_;i++){
@@ -709,6 +812,12 @@ void HinesMatrix::storePervasiveMatrix(vector<vector<int> > &child_list){
 				full_mat_flat.push_back(make_pair(node1*nCompt_+node2, -1*gij));
 				full_mat_flat.push_back(make_pair(node2*nCompt_+node1, -1*gij));
 
+				// Quasi doesn't have main diagonal.
+				if(node1 != node2){
+					quasi_full_mat_flat.push_back(make_pair(node2*nCompt_+node1, -1*gij));
+					quasi_full_mat_flat.push_back(make_pair(node1*nCompt_+node2, -1*gij));
+				}
+
 				if(node1 > node2){
 					lower_mat_flat.push_back(make_pair(node1*nCompt_+node2, -1*gij));
 					upper_mat_flat.push_back(make_pair(node2*nCompt_+node1, -1*gij));
@@ -731,10 +840,12 @@ void HinesMatrix::storePervasiveMatrix(vector<vector<int> > &child_list){
 	sort(full_mat_flat.begin(), full_mat_flat.end());
 	sort(upper_mat_flat.begin(), upper_mat_flat.end());
 	sort(lower_mat_flat.begin(), lower_mat_flat.end());
+	sort(quasi_full_mat_flat.begin(), quasi_full_mat_flat.end());
 
 	generate_coosr_matrix(nCompt_, full_mat_flat, full_mat);
 	generate_coosr_matrix(nCompt_, upper_mat_flat, upper_mat);
 	generate_coosr_matrix(nCompt_, lower_mat_flat, lower_mat);
+	generate_coosr_matrix(nCompt_, quasi_full_mat_flat, qfull_mat);
 
 	// Storing indices of main diagonal elements in upper matrix.
 	for (unsigned int i = 0; i < nCompt_; ++i) {
@@ -749,12 +860,23 @@ void HinesMatrix::storePervasiveMatrix(vector<vector<int> > &child_list){
 				ut_lt_upper, ut_lt_lower, ut_ut_upper, ut_ut_lower ,
 				ut_lt_rowPtr, ut_ut_rowPtr);
 
+	// Construct elimination information for optimized pervasive matrix solver.
+	int num_elims = quasi_full_mat_flat.size()/2;
+	elim_rowPtr = new int[num_elims+1]();
+	eliminfo_diag = new int[num_elims]();
+
+	construct_elimination_information_opt(qfull_mat, eliminfo_r1, eliminfo_r2, eliminfo_diag,
+			elim_rowPtr, num_elims);
+
+
 }
 
 void HinesMatrix::makePervasiveFlowMatrix(){
 	per_rhs = new double[nCompt_]();
 	per_mainDiag_passive = new double[nCompt_]();
 	per_mainDiag_map = new int[nCompt_]();
+
+	perv_dynamic = new double[2*nCompt_]();
 
 	vector< vector<int> > child_list(nCompt_);
 
@@ -792,9 +914,11 @@ void HinesMatrix::makePervasiveFlowMatrix(){
 	// Making copy of values.
 	upper_mat_values_copy = new double[upper_mat.nnz]();
 	lower_mat_values_copy = new double[lower_mat.nnz]();
+	perv_mat_values_copy = new double[qfull_mat.nnz]();
 
 	memcpy(upper_mat_values_copy, upper_mat.values, upper_mat.nnz*sizeof(double));
 	memcpy(lower_mat_values_copy, lower_mat.values, lower_mat.nnz*sizeof(double));
+	memcpy(perv_mat_values_copy, qfull_mat.values, qfull_mat.nnz*sizeof(double));
 
 	// Verification
 	double error = 0;
@@ -816,8 +940,8 @@ void HinesMatrix::makePervasiveFlowMatrix(){
 	}
 	cout << "Initial matrix error " <<  error << endl;
 
-
 	/*
+	print_csr_matrix(qfull_mat);
 	print_csr_matrix(full_mat);
 	print_csr_matrix(lower_mat);
 	print_csr_matrix(upper_mat);

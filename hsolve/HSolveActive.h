@@ -132,7 +132,7 @@ protected:
 		*   Tells you which compartments have external calcium-dependent
 		*   channels so that you can send out Calcium concentrations in only
 		*   those compartments. */
-    int step_num;
+    int step_num = 0;
 #ifdef USE_CUDA    
     //int step_num;
 
@@ -267,6 +267,9 @@ private:
 
     void updatePervasiveFlowMatrix();
     void pervasiveFlowSolver();
+
+    void updatePervasiveFlowMatrixOpt();
+    void pervasiveFlowSolverOpt();
 
 #ifdef USE_CUDA
     // Hsolve GPU set up kernels

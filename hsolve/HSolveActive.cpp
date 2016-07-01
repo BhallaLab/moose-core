@@ -138,7 +138,7 @@ void HSolveActive::step( ProcPtr info )
 #else
 	advanceChannels( info->dt );
 	calculateChannelCurrents();
-	int solver_choice = 0; // 0-Moose , 1-Forward-flow, 2-Pervasive-flow
+	int solver_choice = 2; // 0-Moose , 1-Forward-flow, 2-Pervasive-flow
 
 	/*
 	string pPath = getenv("SOLVER_CHOICE");
@@ -162,8 +162,10 @@ void HSolveActive::step( ProcPtr info )
 			break;
 		case 2:
 			// Using pervasive flow solution
-			updatePervasiveFlowMatrix();
-			pervasiveFlowSolver();
+			//updatePervasiveFlowMatrix();
+			//pervasiveFlowSolver();
+			updatePervasiveFlowMatrixOpt();
+			pervasiveFlowSolverOpt();
 			break;
 	}
 
@@ -433,8 +435,113 @@ void HSolveActive::updatePervasiveFlowMatrix(){
     stage_ = 0;
 }
 
+void HSolveActive::updatePervasiveFlowMatrixOpt(){
+
+	// Copying initial matrix
+	memcpy(qfull_mat.values, perv_mat_values_copy, qfull_mat.nnz*sizeof(double));
+
+	double GkSum, GkEkSum; vector< CurrentStruct >::iterator icurrent = current_.begin();
+	vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
+	for (unsigned int i = 0; i < compartment_.size(); ++i)
+	{
+		GkSum   = 0.0;
+		GkEkSum = 0.0;
+		for ( ; icurrent < *iboundary; ++icurrent )
+		{
+			GkSum   += icurrent->Gk;
+			GkEkSum += icurrent->Gk * icurrent->Ek;
+		}
+
+		perv_dynamic[i] = per_mainDiag_passive[i] + GkSum;
+		perv_dynamic[nCompt_+i] = V_[i] * compartment_[i].CmByDt + compartment_[i].EmByRm + GkEkSum;
+
+		++iboundary;
+	}
+
+	#ifdef USE_CUDA
+		for(unsigned int i=0;i<inject_.size();i++){
+			per_rhs[i] += inject_[i].injectVarying + inject_[i].injectBasal;
+			inject_[i].injectVarying = 0;
+		}
+	#else
+	    map< unsigned int, InjectStruct >::iterator inject;
+	    for ( inject = inject_.begin(); inject != inject_.end(); ++inject )
+	    {
+	        unsigned int ic = inject->first;
+	        InjectStruct& value = inject->second;
+
+	        perv_dynamic[nCompt_+ic] += (value.injectVarying + value.injectBasal);
+	        value.injectVarying = 0.0;
+	    }
+	#endif
+
+    vector< double >::iterator iec;
+    for (unsigned int i = 0; i < nCompt_; i++)
+    {
+    	perv_dynamic[i] += externalCurrent_[2*i];
+    	perv_dynamic[nCompt_+i] += externalCurrent_[2*i+1];
+    }
+
+    stage_ = 0;
+}
+void HSolveActive::pervasiveFlowSolverOpt(){
+	//// Optimized pervasive flow solver
+	bool is_lower_triang;
+	int elim_index = 0;
+	for (int i = 0; i < nCompt_; ++i) {
+		is_lower_triang = true;
+		for (int j = qfull_mat.rowPtr[i]; j < qfull_mat.rowPtr[i+1] && is_lower_triang; ++j) {
+			// Eliminating an element
+			if(qfull_mat.colIndex[j] < i){
+				int r1 = qfull_mat.colIndex[j];
+				double scaling = qfull_mat.values[j]/perv_dynamic[r1];
+
+				// Dealing with non-main diagonal
+				for (int k = elim_rowPtr[elim_index]; k < elim_rowPtr[elim_index+1]; ++k){
+					qfull_mat.values[eliminfo_r2[k]] -= (qfull_mat.values[eliminfo_r1[k]]* scaling);
+				}
+
+				// Dealing with main diagonal
+				perv_dynamic[i] -= (qfull_mat.values[eliminfo_diag[elim_index]]*scaling);
+
+				//Dealing with rhs
+				perv_dynamic[nCompt_+i] -= (perv_dynamic[nCompt_+r1]*scaling);
+
+				elim_index++;
+			}else{
+				is_lower_triang = false;
+			}
+		}
+	}
+
+	if(step_num < 10)
+		cout << elim_index << " " << qfull_mat.nnz/2 << endl;
+
+	// Backward substitution
+	bool is_upper_triang;
+	double sum;
+	for (int i = nCompt_-1; i >=0; --i) {
+		sum = 0;
+		is_upper_triang = true;
+		for (int j = qfull_mat.rowPtr[i+1]-1; j >= qfull_mat.rowPtr[i] && is_upper_triang ; --j) {
+			if(qfull_mat.colIndex[j] > i){
+				sum += (qfull_mat.values[j]*VMid_[qfull_mat.colIndex[j]]);
+			}else{
+				is_upper_triang = false;
+			}
+		}
+
+		VMid_[i] = (perv_dynamic[nCompt_+i]-sum)/perv_dynamic[i];
+	}
+
+	for (unsigned int i = 0; i < nCompt_; ++i) {
+		V_[i] = 2*VMid_[i] - V_[i];
+	}
+	stage_ = 2;
+}
+
+
 void HSolveActive::pervasiveFlowSolver(){
-   	// TODO
 	// Gauss elimination
 	for(int i=0;i<lower_mat.nnz;i++){
 		double scaling = lower_mat.values[i]/upper_mat.values[upper_mat.rowPtr[lower_mat.colIndex[i]]];
