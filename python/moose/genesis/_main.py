@@ -14,6 +14,8 @@ import random
 from moose import wildcardFind, element, loadModel, ChemCompt, exists, Annotator, Pool, ZombiePool,PoolBase,CplxEnzBase,Function,ZombieFunction
 import numpy as np
 import re
+from collections import Counter
+import networkx as nx
 
 GENESIS_COLOR_SEQUENCE = ((248, 0, 255), (240, 0, 255), (232, 0, 255), (224, 0, 255), (216, 0, 255), (208, 0, 255),
  (200, 0, 255), (192, 0, 255), (184, 0, 255), (176, 0, 255), (168, 0, 255), (160, 0, 255), (152, 0, 255), (144, 0, 255),
@@ -43,31 +45,52 @@ def write( modelpath, filename,sceneitems=None):
     filename = filename+'.g'
     global NA
     NA = 6.0221415e23
-    global xmin,xmax,ymin,ymax
-    global cord
-    global multi
-    xmin = ymin = 0
-    xmax = ymax = 1
-    multi = 50
-    cord = {}
-    #print " \n main ", sceneitems
+    global cmin,cmax
+    
     compt = wildcardFind(modelpath+'/##[ISA=ChemCompt]')
     maxVol = estimateDefaultVol(compt)
     f = open(filename, 'w')
+
+    if sceneitems == None:
+        srcdesConnection = {}
+        setupItem(modelpath,srcdesConnection)
+        meshEntry = setupMeshObj(modelpath)
+        cmin,cmax,sceneitems = autoCoordinates(meshEntry,srcdesConnection)
+    else:
+        cs = []
+        for k,v in sceneitems.items():
+            cs.append(v['x'])
+            cs.append(v['y'])
+        cmin = min(cs)
+        cmax = max(cs)
     writeHeader (f,maxVol)
+    
     if (compt > 0):
         gtId_vol = writeCompartment(modelpath,compt,f)
         writePool(modelpath,f,gtId_vol,sceneitems)
         reacList = writeReac(modelpath,f,sceneitems)
         enzList = writeEnz(modelpath,f,sceneitems)
         writeSumtotal(modelpath,f)
+        f.write("simundump xgraph /graphs/conc1 0 0 99 0.001 0.999 0\n"
+                "simundump xgraph /graphs/conc2 0 0 100 0 1 0\n")
+        tgraphs = wildcardFind(modelpath+'/##[ISA=Table2]')
+        first, second = " ", " "
+        if tgraphs:
+            first,second = writeplot(tgraphs,f)
+        if first:
+            f.write(first)
+        f.write("simundump xgraph /moregraphs/conc3 0 0 100 0 1 0\n"
+                "simundump xgraph /moregraphs/conc4 0 0 100 0 1 0\n")
+        if second:
+            f.write(second)
+        f.write("simundump xcoredraw /edit/draw 0 -6 4 -2 6\n"
+                "simundump xtree /edit/draw/tree 0 \\\n"
+                "  /kinetics/#[],/kinetics/#[]/#[],/kinetics/#[]/#[]/#[][TYPE!=proto],/kinetics/#[]/#[]/#[][TYPE!=linkinfo]/##[] \"edit_elm.D <v>; drag_from_edit.w <d> <S> <x> <y> <z>\" auto 0.6\n"
+                "simundump xtext /file/notes 0 1\n")
         storeReacMsg(reacList,f)
         storeEnzMsg(enzList,f)
-        writeGui(f)
-        tgraphs = wildcardFind(modelpath+'/##[ISA=Table2]')
         if tgraphs:
-                writeplot(tgraphs,f)
-                storePlotMsgs(tgraphs,f)
+            storePlotMsgs(tgraphs,f)
         writeFooter1(f)
         writeNotes(modelpath,f)
         writeFooter2(f)
@@ -75,6 +98,178 @@ def write( modelpath, filename,sceneitems=None):
     else:
         print("Warning: writeKkit:: No model found on " , modelpath)
         return False
+
+def calPrime(x):
+    prime = int((20*(float(x-cmin)/float(cmax-cmin)))-10)
+    return prime
+
+def setupItem(modelPath,cntDict):
+    '''This function collects information of what is connected to what. \
+    eg. substrate and product connectivity to reaction's and enzyme's \
+    sumtotal connectivity to its pool are collected '''
+    #print " setupItem"
+    sublist = []
+    prdlist = []
+    zombieType = ['ReacBase','EnzBase','Function','StimulusTable']
+    for baseObj in zombieType:
+        path = '/##[ISA='+baseObj+']'
+        if modelPath != '/':
+            path = modelPath+path
+        if ( (baseObj == 'ReacBase') or (baseObj == 'EnzBase')):
+            for items in wildcardFind(path):
+                sublist = []
+                prdlist = []
+                uniqItem,countuniqItem = countitems(items,'subOut')
+                subNo = uniqItem
+                for sub in uniqItem: 
+                    sublist.append((element(sub),'s',countuniqItem[sub]))
+
+                uniqItem,countuniqItem = countitems(items,'prd')
+                prdNo = uniqItem
+                if (len(subNo) == 0 or len(prdNo) == 0):
+                    print "Substrate Product is empty ",path, " ",items
+                    
+                for prd in uniqItem:
+                    prdlist.append((element(prd),'p',countuniqItem[prd]))
+                
+                if (baseObj == 'CplxEnzBase') :
+                    uniqItem,countuniqItem = countitems(items,'toEnz')
+                    for enzpar in uniqItem:
+                        sublist.append((element(enzpar),'t',countuniqItem[enzpar]))
+                    
+                    uniqItem,countuniqItem = countitems(items,'cplxDest')
+                    for cplx in uniqItem:
+                        prdlist.append((element(cplx),'cplx',countuniqItem[cplx]))
+
+                if (baseObj == 'EnzBase'):
+                    uniqItem,countuniqItem = countitems(items,'enzDest')
+                    for enzpar in uniqItem:
+                        sublist.append((element(enzpar),'t',countuniqItem[enzpar]))
+                cntDict[items] = sublist,prdlist
+        elif baseObj == 'Function':
+            for items in wildcardFind(path):
+                sublist = []
+                prdlist = []
+                item = items.path+'/x[0]'
+                uniqItem,countuniqItem = countitems(item,'input')
+                for funcpar in uniqItem:
+                    sublist.append((element(funcpar),'sts',countuniqItem[funcpar]))
+                
+                uniqItem,countuniqItem = countitems(items,'valueOut')
+                for funcpar in uniqItem:
+                    prdlist.append((element(funcpar),'stp',countuniqItem[funcpar]))
+                cntDict[items] = sublist,prdlist
+        else:
+            for tab in wildcardFind(path):
+                tablist = []
+                uniqItem,countuniqItem = countitems(tab,'output')
+                for tabconnect in uniqItem:
+                    tablist.append((element(tabconnect),'tab',countuniqItem[tabconnect]))
+                cntDict[tab] = tablist
+def countitems(mitems,objtype):
+    items = []
+    #print "mitems in countitems ",mitems,objtype
+    items = element(mitems).neighbors[objtype]
+    uniqItems = set(items)
+    countuniqItems = Counter(items)
+    return(uniqItems,countuniqItems)
+
+def setupMeshObj(modelRoot):
+    ''' Setup compartment and its members pool,reaction,enz cplx under self.meshEntry dictionaries \ 
+    self.meshEntry with "key" as compartment, 
+    value is key2:list where key2 represents moose object type,list of objects of a perticular type
+    e.g self.meshEntry[meshEnt] = { 'reaction': reaction_list,'enzyme':enzyme_list,'pool':poollist,'cplx': cplxlist }
+    '''
+    meshEntry = {}
+    if meshEntry:
+        meshEntry.clear()
+    else:
+        meshEntry = {}
+    meshEntryWildcard = '/##[ISA=ChemCompt]'
+    if modelRoot != '/':
+        meshEntryWildcard = modelRoot+meshEntryWildcard
+    for meshEnt in wildcardFind(meshEntryWildcard):
+        mollist = []
+        cplxlist = []
+        mol_cpl  = wildcardFind(meshEnt.path+'/##[ISA=PoolBase]')
+        funclist = wildcardFind(meshEnt.path+'/##[ISA=Function]')
+        enzlist  = wildcardFind(meshEnt.path+'/##[ISA=EnzBase]')
+        realist  = wildcardFind(meshEnt.path+'/##[ISA=ReacBase]')
+        tablist  = wildcardFind(meshEnt.path+'/##[ISA=StimulusTable]')
+        if mol_cpl or funclist or enzlist or realist or tablist:
+            for m in mol_cpl:
+                if isinstance(element(m.parent),CplxEnzBase):
+                    cplxlist.append(m)
+                elif isinstance(element(m),PoolBase):
+                    mollist.append(m)
+                    
+            meshEntry[meshEnt] = {'enzyme':enzlist,
+                                  'reaction':realist,
+                                  'pool':mollist,
+                                  'cplx':cplxlist,
+                                  'table':tablist,
+                                  'function':funclist
+                                  }
+    return(meshEntry)
+def autoCoordinates(meshEntry,srcdesConnection):
+    
+    G = nx.Graph()
+    for cmpt,memb in meshEntry.items():
+        for enzObj in find_index(memb,'enzyme'):
+            G.add_node(enzObj.path)
+    for cmpt,memb in meshEntry.items():
+        for poolObj in find_index(memb,'pool'):
+            G.add_node(poolObj.path)
+        for cplxObj in find_index(memb,'cplx'):
+            G.add_node(cplxObj.path)
+            G.add_edge((cplxObj.parent).path,cplxObj.path)
+        for reaObj in find_index(memb,'reaction'):
+            G.add_node(reaObj.path)
+        
+    for inn,out in srcdesConnection.items():
+        if (inn.className =='ZombieReac'): arrowcolor = 'green'
+        elif(inn.className =='ZombieEnz'): arrowcolor = 'red'
+        else: arrowcolor = 'blue'
+        if isinstance(out,tuple):
+            if len(out[0])== 0:
+                print inn.className + ':' +inn.name + "  doesn't have input message"
+            else:
+                for items in (items for items in out[0] ):
+                    G.add_edge(element(items[0]).path,inn.path)
+            if len(out[1]) == 0:
+                print inn.className + ':' + inn.name + "doesn't have output mssg"
+            else:
+                for items in (items for items in out[1] ):
+                    G.add_edge(inn.path,element(items[0]).path)
+        elif isinstance(out,list):
+            if len(out) == 0:
+                print "Func pool doesn't have sumtotal"
+            else:
+                for items in (items for items in out ):
+                    G.add_edge(element(items[0]).path,inn.path)
+    
+    nx.draw(G,pos=nx.spring_layout(G))
+    #plt.savefig('/home/harsha/Desktop/netwrokXtest.png')
+    
+    position = nx.spring_layout(G)
+    sceneitems = {}
+    xycord = []
+
+    for key,value in position.items():
+        xycord.append(value[0])
+        xycord.append(value[1])
+        sceneitems[element(key)] = {'x':value[0],'y':value[1]}
+    cmin = min(xycord)
+    cmax = max(xycord)
+    
+    return cmin,cmax,sceneitems
+
+def find_index(value, key):
+    """ Value.get(key) to avoid expection which would raise if empty value in dictionary for a given key """
+    if value.get(key) != None:
+        return value.get(key)
+    else:
+        raise ValueError('no dict with the key found')
 
 def storeCplxEnzMsgs( enz, f ):
     for sub in enz.neighbors["subOut"]:
@@ -148,10 +343,11 @@ def writeEnz( modelpath,f,sceneitems):
                 k3 = enz.k3
                 cplx = enz.neighbors['cplx'][0]
                 nInit = cplx.nInit[0];
-
-            value = sceneitems[enz]
-            x = value['x']
-            y = value['y']
+            if sceneitems != None:
+                value = sceneitems[enz]
+                x = calPrime(value['x'])
+                y = calPrime(value['y'])
+            
             einfo = enz.path+'/info'
             if exists(einfo):
                 color = Annotator(einfo).getField('color')
@@ -210,10 +406,11 @@ def writeReac(modelpath,f,sceneitems):
         textcolor = "red"
         kf = reac.numKf
         kb = reac.numKb
-
-        value = sceneitems[reac]
-        x = value['x']
-        y = value['y']
+        if sceneitems != None:
+            value = sceneitems[reac]
+            x = calPrime(value['x'])
+            y = calPrime(value['y'])
+        
         rinfo = reac.path+'/info'
         if exists(rinfo):
             color = Annotator(rinfo).getField('color')
@@ -284,9 +481,10 @@ def storePlotMsgs( tgraphs,f):
                     tabPath = re.sub("\[[0-9]+\]", "", tabPath)
                     s = s+"addmsg /kinetics/" + trimPath( poolEle ) + " " + tabPath + \
                             " PLOT Co *" + poolName + " *" + str(bg) +"\n";
-                    f.write(s)
+    f.write(s)
 
 def writeplot( tgraphs,f ):
+    first, second = " ", " "
     if tgraphs:
         for graphs in tgraphs:
             slash = graphs.path.find('graphs')
@@ -299,7 +497,6 @@ def writeplot( tgraphs,f ):
                 else:
                     slash1 = graphs.path.find('/',slash)
                     tabPath = "/graphs/conc1" +graphs.path[slash1:len(graphs.path)]
-
                 if len(element(graphs).msgOut):
                     poolPath = (element(graphs).msgOut)[0].e2.path
                     poolEle = element(poolPath)
@@ -307,7 +504,11 @@ def writeplot( tgraphs,f ):
                     fg = Annotator(poolAnno).textColor
                     fg = getColorCheck(fg,GENESIS_COLOR_SEQUENCE)
                     tabPath = re.sub("\[[0-9]+\]", "", tabPath)
-                    f.write("simundump xplot " + tabPath + " 3 524288 \\\n" + "\"delete_plot.w <s> <d>; edit_plot.D <w>\" " + fg + " 0 0 1\n")
+                    if tabPath.find("conc1") >= 0 or tabPath.find("conc2") >= 0:
+                        first = first + "simundump xplot " + tabPath + " 3 524288 \\\n" + "\"delete_plot.w <s> <d>; edit_plot.D <w>\" " + fg + " 0 0 1\n"
+                    if tabPath.find("conc3") >= 0 or tabPath.find("conc4") >= 0:
+                        second = second + "simundump xplot " + tabPath + " 3 524288 \\\n" + "\"delete_plot.w <s> <d>; edit_plot.D <w>\" " + fg + " 0 0 1\n"
+    return first,second
 
 def writePool(modelpath,f,volIndex,sceneitems):
     for p in wildcardFind(modelpath+'/##[ISA=PoolBase]'):
@@ -324,9 +525,12 @@ def writePool(modelpath,f,volIndex,sceneitems):
                         slave_enable = 0
                         break
         if (p.parent.className != "Enz" and p.parent.className !='ZombieEnz'):
-            value = sceneitems[p]
-            x = value['x']
-            y = value['y']
+
+            if sceneitems != None:
+                value = sceneitems[p]
+                x = calPrime(value['x'])
+                y = calPrime(value['y'])
+                
             pinfo = p.path+'/info'
             if exists(pinfo):
                 color = Annotator(pinfo).getField('color')
@@ -383,11 +587,8 @@ def writeCompartment(modelpath,compts,f):
     volIndex = {}
     for compt in compts:
         if compt.name != "kinetics":
-            xgrp = xmax -random.randrange(1,10)
-            ygrp = ymin +random.randrange(1,10)
-            x = ((xgrp-xmin)/(xmax-xmin))*multi
-            #y = ((ymax-ygrp)/(ymax-ymin))*multi
-            y = ((ygrp-ymin)/(ymax-ymin))*multi
+            x = random.randrange(-10,9)
+            y = random.randrange(-10,9)
             f.write("simundump group /kinetics/" + compt.name + " 0 " + "blue" + " " + "green"       + " x 0 0 \"\" defaultfile \\\n" )
             f.write( "  defaultfile.g 0 0 0 " + str(int(x)) + " " + str(int(y)) + " 0\n")
     i = 0
@@ -399,11 +600,8 @@ def writeCompartment(modelpath,compts,f):
         vecIndex = l-i-1
         #print vecIndex
         i = i+1
-        xgeo = xmax -random.randrange(1,10)
-        ygeo = ymin +random.randrange(1,10)
-        x = ((xgeo-xmin)/(xmax-xmin))*multi
-        #y = ((ymax-ygeo)/(ymax-ymin))*multi
-        y = ((ygeo-ymin)/(ymax-ymin))*multi
+        x = random.randrange(-10,9)
+        y = random.randrange(-10,9)
         if vecIndex > 0:
             geometry = geometry+"simundump geometry /kinetics" +  "/geometry[" + str(vecIndex) +"] 0 " + str(size) + " " + str(ndim) + " sphere " +" \"\" white black "+ str(int(x)) + " " +str(int(y)) +" 0\n";
             volIndex[size] = "/geometry["+str(vecIndex)+"]"
@@ -411,19 +609,16 @@ def writeCompartment(modelpath,compts,f):
             geometry = geometry+"simundump geometry /kinetics"  +  "/geometry 0 " + str(size) + " " + str(ndim) + " sphere " +" \"\" white black " + str(int(x)) + " "+str(int(y))+ " 0\n";
             volIndex[size] = "/geometry"
         f.write(geometry)
-    writeGroup(modelpath,f,xmax,ymax)
+    writeGroup(modelpath,f)
     return volIndex
 
-def writeGroup(modelpath,f,xmax,ymax):
+def writeGroup(modelpath,f):
     ignore = ["graphs","moregraphs","geometry","groups","conc1","conc2","conc3","conc4","model","data","graph_0","graph_1","graph_2","graph_3","graph_4","graph_5"]
     for g in wildcardFind(modelpath+'/##[TYPE=Neutral]'):
         if not g.name in ignore:
             if trimPath(g) != None:
-                xgrp1 = xmax - random.randrange(1,10)
-                ygrp1 = ymin + random.randrange(1,10)
-                x = ((xgrp1-xmin)/(xmax-xmin))*multi
-                #y = ((ymax-ygrp1)/(ymax-ymin))*multi
-                y = ((ygrp1-ymin)/(ymax-ymin))*multi
+                x = random.randrange(-10,9)
+                y = random.randrange(-10,9)
                 f.write("simundump group /kinetics/" + trimPath(g) + " 0 " +    "blue" + " " + "green"   + " x 0 0 \"\" defaultfile \\\n")
                 f.write("  defaultfile.g 0 0 0 " + str(int(x)) + " " + str(int(y)) + " 0\n")
 
@@ -469,7 +664,7 @@ def writeHeader(f,maxVol):
                     "  trig_mode notes xtree_fg_req xtree_textfg_req is_running x y z\n"
             "simobjdump xtab input output alloced step_mode stepsize notes editfunc \\\n"
                     "  xtree_fg_req xtree_textfg_req baselevel last_x last_y is_running x y z\n"
-            "simobjdump kchan perm gmax Vm is_active use_nernst notewriteReacs xtree_fg_req \\\n"
+            "simobjdump kchan perm gmax Vm is_active use_nernst notes xtree_fg_req \\\n"
                     "  xtree_textfg_req x y z\n"
             "simobjdump transport input output alloced step_mode stepsize dt delay clock \\\n"
                     "  kf xtree_fg_req xtree_textfg_req x y z\n"
@@ -484,16 +679,6 @@ def estimateDefaultVol(compts):
     if len(vol) > 0:
         return max(vol)
     return maxVol
-
-def writeGui( f ):
-    f.write("simundump xgraph /graphs/conc1 0 0 99 0.001 0.999 0\n"
-    "simundump xgraph /graphs/conc2 0 0 100 0 1 0\n"
-    "simundump xgraph /moregraphs/conc3 0 0 100 0 1 0\n"
-    "simundump xgraph /moregraphs/conc4 0 0 100 0 1 0\n"
-    "simundump xcoredraw /edit/draw 0 -6 4 -2 6\n"
-    "simundump xtree /edit/draw/tree 0 \\\n"
-    "  /kinetics/#[],/kinetics/#[]/#[],/kinetics/#[]/#[]/#[][TYPE!=proto],/kinetics/#[]/#[]/#[][TYPE!=linkinfo]/##[] \"edit_elm.D <v>; drag_from_edit.w <d> <S> <x> <y> <z>\" auto 0.6\n"
-    "simundump xtext /file/notes 0 1\n")
 
 def writeNotes(modelpath,f):
     notes = ""
