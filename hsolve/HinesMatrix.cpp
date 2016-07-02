@@ -667,7 +667,7 @@ void HinesMatrix::construct_elimination_information(coosr_matrix full_mat, coosr
 }
 
 void HinesMatrix::construct_elimination_information_opt(coosr_matrix qfull_mat, vector<int> &eliminfo_r1, vector<int> &eliminfo_r2,
-		int* eliminfo_diag,	int* elim_rowPtr, int num_elims){
+		int* eliminfo_diag,	int* elim_rowPtr, int* upper_triang_offsets, int num_elims){
 
 	bool DEBUG = false;
 
@@ -692,10 +692,6 @@ void HinesMatrix::construct_elimination_information_opt(coosr_matrix qfull_mat, 
 				while(qfull_mat.colIndex[index_1] < r1 && index_1 < qfull_mat.rowPtr[r1+1]){
 					index_1++;
 				}
-
-				if(DEBUG)
-					cout << "row " << i << " " << r1 << " " << index_1 << endl;
-
 
 				// Getting elimination information of quasi matrix.
 				while(index_1 < qfull_mat.rowPtr[r1+1] && index_2 < qfull_mat.rowPtr[i+1]){
@@ -736,8 +732,18 @@ void HinesMatrix::construct_elimination_information_opt(coosr_matrix qfull_mat, 
 		}
 	}
 
+
 	// Constructing rowPtr from rowCounts
 	exclusive_scan(elim_rowPtr, num_elims);
+
+	// Setting offset in a row, where upper triangular elements start.
+	for (int i = 0; i < qfull_mat.rows; ++i) {
+		int index = qfull_mat.rowPtr[i];
+		while(qfull_mat.colIndex[index] < i && index < qfull_mat.rowPtr[i+1]){
+			index++;
+		}
+		upper_triang_offsets[i] = index;
+	}
 
 	bool minus1_found = false;
 	int index = -1;
@@ -750,6 +756,12 @@ void HinesMatrix::construct_elimination_information_opt(coosr_matrix qfull_mat, 
 	cout << "Should be -1 " <<  index << endl;
 
 	if(DEBUG){
+		print_csr_matrix(qfull_mat);
+		cout << "Upper triangular offsets " << endl;
+		for (int i = 0; i < nCompt_; ++i) {
+			cout << upper_triang_offsets[i] << endl;
+		}
+
 		// Debug information
 		cout << "elimnation index " << elim_index << " " << num_elims << endl;
 		for (int i = 0; i < num_elims; ++i) {
@@ -864,9 +876,10 @@ void HinesMatrix::storePervasiveMatrix(vector<vector<int> > &child_list){
 	int num_elims = quasi_full_mat_flat.size()/2;
 	elim_rowPtr = new int[num_elims+1]();
 	eliminfo_diag = new int[num_elims]();
+	upper_triang_offsets = new int[nCompt_]();
 
 	construct_elimination_information_opt(qfull_mat, eliminfo_r1, eliminfo_r2, eliminfo_diag,
-			elim_rowPtr, num_elims);
+			elim_rowPtr, upper_triang_offsets, num_elims);
 
 
 }
@@ -876,7 +889,13 @@ void HinesMatrix::makePervasiveFlowMatrix(){
 	per_mainDiag_passive = new double[nCompt_]();
 	per_mainDiag_map = new int[nCompt_]();
 
+#ifdef USE_CUDA
+	cudaMallocHost((void**)&perv_dynamic, 2*nCompt_*sizeof(double));
+#else
 	perv_dynamic = new double[2*nCompt_]();
+#endif
+
+
 
 	vector< vector<int> > child_list(nCompt_);
 

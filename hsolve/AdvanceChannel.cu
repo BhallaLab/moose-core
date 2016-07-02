@@ -239,8 +239,8 @@ void update_perv_matrix_kernel_opt(
 		d_comp_Gksum[tid] = sum1;
 		d_comp_GkEksum[tid] = sum2;
 
-		d_perv_dynamic[tid] = d_perv_static[tid] + sum1 + d_externalCurrent_[2*tid];
-		d_perv_dynamic[size+tid] = d_V[tid]*d_compartment_[tid].CmByDt + d_compartment_[tid].EmByRm + sum2 +
+		d_perv_dynamic[2*tid] = d_perv_static[tid] + sum1 + d_externalCurrent_[2*tid];
+		d_perv_dynamic[2*tid+1] = d_V[tid]*d_compartment_[tid].CmByDt + d_compartment_[tid].EmByRm + sum2 +
 				(d_inject_[tid].injectVarying + d_inject_[tid].injectBasal) + d_externalCurrent_[2*tid+1];
 
 		//d_inject_[tid].injectVarying = 0;
@@ -594,7 +594,7 @@ void HSolveActive::update_perv_matrix_cuda_wrapper(){
 		// Future approaches, if any.
 	}
 
-	cudaMemcpy(&perv_dynamic[0], d_perv_dynamic, 2*nCompt_*sizeof(double), cudaMemcpyDeviceToHost );
+	cudaMemcpy(perv_dynamic, d_perv_dynamic, 2*nCompt_*sizeof(double), cudaMemcpyDeviceToHost );
 }
 
 

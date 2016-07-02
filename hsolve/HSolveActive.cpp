@@ -495,50 +495,39 @@ void HSolveActive::updatePervasiveFlowMatrixOpt(){
 }
 void HSolveActive::pervasiveFlowSolverOpt(){
 	//// Optimized pervasive flow solver
-	bool is_lower_triang;
+	//bool is_lower_triang;
 	int elim_index = 0;
 	for (int i = 0; i < nCompt_; ++i) {
-		is_lower_triang = true;
-		for (int j = qfull_mat.rowPtr[i]; j < qfull_mat.rowPtr[i+1] && is_lower_triang; ++j) {
+		for (int j = qfull_mat.rowPtr[i]; j < upper_triang_offsets[i]; ++j) {
 			// Eliminating an element
-			if(qfull_mat.colIndex[j] < i){
-				int r1 = qfull_mat.colIndex[j];
-				double scaling = qfull_mat.values[j]/perv_dynamic[r1];
+			int r1 = qfull_mat.colIndex[j];
+			double scaling = qfull_mat.values[j]/perv_dynamic[2*r1];
 
-				// Dealing with non-main diagonal
-				for (int k = elim_rowPtr[elim_index]; k < elim_rowPtr[elim_index+1]; ++k){
-					qfull_mat.values[eliminfo_r2[k]] -= (qfull_mat.values[eliminfo_r1[k]]* scaling);
-				}
-
-				// Dealing with main diagonal
-				perv_dynamic[i] -= (qfull_mat.values[eliminfo_diag[elim_index]]*scaling);
-
-				//Dealing with rhs
-				perv_dynamic[nCompt_+i] -= (perv_dynamic[nCompt_+r1]*scaling);
-
-				elim_index++;
-			}else{
-				is_lower_triang = false;
+			// Dealing with non-main diagonal
+			for (int k = elim_rowPtr[elim_index]; k < elim_rowPtr[elim_index+1]; ++k){
+				qfull_mat.values[eliminfo_r2[k]] -= (qfull_mat.values[eliminfo_r1[k]]* scaling);
 			}
+
+			// Dealing with main diagonal
+			perv_dynamic[2*i] -= (qfull_mat.values[eliminfo_diag[elim_index]]*scaling);
+
+			//Dealing with rhs
+			perv_dynamic[2*i+1] -= (perv_dynamic[2*r1+1]*scaling);
+
+			elim_index++;
 		}
 	}
-
 
 	// Backward substitution
 	bool is_upper_triang;
 	double sum;
 	for (int i = nCompt_-1; i >=0; --i) {
 		sum = 0;
-		is_upper_triang = true;
-		for (int j = qfull_mat.rowPtr[i+1]-1; j >= qfull_mat.rowPtr[i] && is_upper_triang ; --j) {
-			if(qfull_mat.colIndex[j] > i){
-				sum += (qfull_mat.values[j]*VMid_[qfull_mat.colIndex[j]]);
-			}else{
-				is_upper_triang = false;
-			}
+		for (int j = qfull_mat.rowPtr[i+1]-1; j >= upper_triang_offsets[i] ; --j) {
+			sum += (qfull_mat.values[j]*VMid_[qfull_mat.colIndex[j]]);
 		}
 
-		VMid_[i] = (perv_dynamic[nCompt_+i]-sum)/perv_dynamic[i];
+		VMid_[i] = (perv_dynamic[2*i+1]-sum)/perv_dynamic[2*i];
 	}
 
 	for (unsigned int i = 0; i < nCompt_; ++i) {

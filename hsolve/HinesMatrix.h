@@ -142,9 +142,10 @@ protected:
 	//coosr_matrix full_mat;
 	coosr_matrix qfull_mat;
 	//double* per_rhs, *per_mainDiag_passive;
-	vector<int> eliminfo_r1, eliminfo_r2;
+	vector<int> eliminfo_r1, eliminfo_r2; // For a given elimination e(r,c), we store overlapping elements in row c and row r
 	int* eliminfo_diag;
 	int* elim_rowPtr;
+	int* upper_triang_offsets;
 	double* perv_mat_values_copy;
 	double* perv_dynamic; // Array of size 2*nCompt. First part is main diagonal, second part is right hand side.
 
@@ -216,7 +217,7 @@ private:
     			vector<int> &ut_lt_upper, vector<int> &ut_lt_lower, vector<int> &ut_ut_upper, vector<int> &ut_ut_lower ,
     			int* ut_lt_rowPtr, int* ut_ut_rowPtr);
     void construct_elimination_information_opt(coosr_matrix qfull_mat, vector<int> &eliminfo_r1, vector<int> &eliminfo_r2,
-    		int* eliminfo_diag,	int* elim_rowPtr, int num_elims);
+    		int* eliminfo_diag,	int* elim_rowPtr, int* upper_triang_offsets, int num_elims);
 
 };
 
