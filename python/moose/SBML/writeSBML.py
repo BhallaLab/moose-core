@@ -28,8 +28,9 @@ from collections import Counter
 #	Table should be written
 #	Group's should be added
 #   x and y cordinates shd be added if exist
-
-def mooseWriteSBML(modelpath,filename):
+#	boundary condition for buffer pool having assignment statment constant shd be false
+def mooseWriteSBML(modelpath,filename,sceneitems=None):
+	print ' write ',sceneitems
 	sbmlDoc = SBMLDocument(3, 1)
 	filepath,filenameExt = os.path.split(filename)
 	if filenameExt.find('.') != -1:
@@ -60,11 +61,11 @@ def mooseWriteSBML(modelpath,filename):
 	if modelAnno:
 		cremodel_.setAnnotation(modelAnno)
 	compartexist = writeCompt(modelpath,cremodel_)
-	species = writeSpecies(modelpath,cremodel_,sbmlDoc)
+	species = writeSpecies(modelpath,cremodel_,sbmlDoc,sceneitems)
 	if species:
 		writeFunc(modelpath,cremodel_)
-	writeReac(modelpath,cremodel_)
-	writeEnz(modelpath,cremodel_)
+	writeReac(modelpath,cremodel_,sceneitems)
+	writeEnz(modelpath,cremodel_,sceneitems)
 
 	consistencyMessages = ""
 	SBMLok = validateModel( sbmlDoc )
@@ -79,10 +80,10 @@ def mooseWriteSBML(modelpath,filename):
 		cerr << "Errors encountered " << endl;
 		return -1,consistencyMessages
 
-def writeEnz(modelpath,cremodel_):
+def writeEnz(modelpath,cremodel_,sceneitems):
 	for enz in wildcardFind(modelpath+'/##[ISA=EnzBase]'):
 		enzannoexist = False
-		enzGpname = " "
+		enzGpnCorCol = " "
 		cleanEnzname = convertSpecialChar(enz.name) 
 		enzSubt = ()        
 
@@ -91,10 +92,20 @@ def writeEnz(modelpath,cremodel_):
 			notesE = Anno.notes
 			element = moose.element(enz)
 			ele = getGroupinfo(element)
-			if ele.className == "Neutral":
-				enzGpname = "<moose:Group> "+ ele.name + " </moose:Group>\n"
+			if ele.className == "Neutral" or sceneitems[element] or Anno.color or Anno.textColor:
 				enzannoexist = True
 
+			if enzannoexist :
+				if ele.className == "Neutral":
+					enzGpnCorCol = "<moose:Group> "+ ele.name + " </moose:Group>\n"
+				if sceneitems[element]:
+					v = sceneitems[element]
+					enzGpnCorCol = enzGpnCorCol+"<moose:xCord>"+str(v['x'])+"</moose:xCord>\n"+"<moose:yCord>"+str(v['y'])+"</moose:yCord>\n"
+				if Anno.color:
+					enzGpnCorCol = enzGpnCorCol+"<moose:bgColor>"+Anno.color+"</moose:bgColor>\n"
+				if Anno.textColor:
+					enzGpnCorCol = enzGpnCorCol+"<moose:textColor>"+Anno.textColor+"</moose:textColor>\n"
+				
 		if (enz.className == "Enz" or enz.className == "ZombieEnz"):
 			enzyme = cremodel_.createReaction()
 			if notesE != "":
@@ -108,10 +119,9 @@ def writeEnz(modelpath,cremodel_):
 			k1 = enz.k1
 			k2 = enz.k2
 			k3 = enz.k3
-
+			enzAnno = " "
 			enzAnno ="<moose:EnzymaticReaction>\n"
-			if enzannoexist:
-				enzAnno=enzAnno + enzGpname
+			
 			enzOut = enz.neighbors["enzOut"]
 			
 			if not enzOut:
@@ -156,6 +166,8 @@ def writeEnz(modelpath,cremodel_):
 			prd_order = noofPrd
 			enzAnno = enzAnno + "<moose:groupName>" + cleanEnzname + "_" + str(enz.getId().value) + "_" + str(enz.getDataIndex()) + "_" + "</moose:groupName>\n"
 			enzAnno = enzAnno+"<moose:stage>1</moose:stage>\n"
+			if enzannoexist:
+				enzAnno=enzAnno + enzGpnCorCol
 			enzAnno = enzAnno+ "</moose:EnzymaticReaction>"
 			enzyme.setAnnotation(enzAnno)
 			kl = enzyme.createKineticLaw()
@@ -196,6 +208,8 @@ def writeEnz(modelpath,cremodel_):
 				enzAnno2 = enzAnno2+"<moose:product>"+nameList_[i]+"</moose:product>\n"
 			enzAnno2 += "<moose:groupName>"+ cleanEnzname + "_" + str(enz.getId().value) + "_" + str(enz.getDataIndex())+"_" +"</moose:groupName>\n";
 			enzAnno2 += "<moose:stage>2</moose:stage> \n";
+			if enzannoexist:
+				enzAnno2 = enzAnno2 + enzGpnCorCol
 			enzAnno2 += "</moose:EnzymaticReaction>";
 			enzyme.setAnnotation( enzAnno2 );
 
@@ -207,7 +221,7 @@ def writeEnz(modelpath,cremodel_):
 			
 		elif(enz.className == "MMenz" or enz.className == "ZombieMMenz"):
 			enzyme = cremodel_.createReaction()
-			
+			enzAnno = " "
 			if notesE != "":
 				cleanNotesE= convertNotesSpecialChar(notesE)
 				notesStringE = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+ cleanNotesE + "\n\t </body>"
@@ -217,7 +231,8 @@ def writeEnz(modelpath,cremodel_):
 			enzyme.setFast ( False )
 			enzyme.setReversible( True)
 			if enzannoexist:
-				enzAnno = "<moose:EnzymaticReaction>\n" + enzGpname + "</moose:EnzymaticReaction>";
+				enzAnno = enzAnno + enzGpnCorCol
+				enzAnno = "<moose:EnzymaticReaction>\n" + enzGpnCorCol + "</moose:EnzymaticReaction>";
 				enzyme.setAnnotation(enzAnno)
 			Km = enz.numKm
 			kcat = enz.kcat
@@ -357,7 +372,7 @@ def listofname(reacSub,mobjEnz):
 		clean_name = convertSpecialChar(nameIndex)
 		if mobjEnz == True:
 			nameList_.append(clean_name)
-def writeReac(modelpath,cremodel_):
+def writeReac(modelpath,cremodel_,sceneitems):
 	for reac in wildcardFind(modelpath+'/##[ISA=ReacBase]'):
 		reaction = cremodel_.createReaction()
 		reacannoexist = False
@@ -375,24 +390,28 @@ def writeReac(modelpath,cremodel_):
 		reaction.setFast( False )
 		if moose.exists(reac.path+'/info'):
 			Anno = moose.Annotator(reac.path+'/info')
-			notesR = Anno.notes
-			if notesR != "":
-				cleanNotesR= convertNotesSpecialChar(notesR)
+			if Anno.notes != "":
+				cleanNotesR= convertNotesSpecialChar(Anno.notes)
 				notesStringR = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+ cleanNotesR + "\n\t </body>"
 				reaction.setNotes(notesStringR)
 			element = moose.element(reac)
 			ele = getGroupinfo(element)
-			if ele.className == "Neutral":
-				reacGpname = "<moose:Group>"+ ele.name + "</moose:Group>\n"
+			if ele.className == "Neutral" or sceneitems[element] or Anno.color or Anno.textColor:
 				reacannoexist = True
 			if reacannoexist :
 				reacAnno = "<moose:ModelAnnotation>\n"
-				if reacGpname:
-					reacAnno = reacAnno + reacGpname
+				if ele.className == "Neutral":
+					reacAnno = reacAnno + "<moose:Group>"+ ele.name + "</moose:Group>\n"
+				if sceneitems[element]:
+					v = sceneitems[element]
+					reacAnno = reacAnno+"<moose:xCord>"+str(v['x'])+"</moose:xCord>\n"+"<moose:yCord>"+str(v['y'])+"</moose:yCord>\n"
+				if Anno.color:
+					reacAnno = reacAnno+"<moose:bgColor>"+Anno.color+"</moose:bgColor>\n"
+				if Anno.textColor:
+					reacAnno = reacAnno+"<moose:textColor>"+Anno.textColor+"</moose:textColor>\n"
 				reacAnno = reacAnno+ "</moose:ModelAnnotation>"
 				#s1.appendAnnotation(XMLNode.convertStringToXMLNode(speciAnno))
 				reaction.setAnnotation(reacAnno)
-		
 		kl_s = sRL = pRL = ""
 		
 		reacSub = reac.neighbors["sub"]
@@ -492,7 +511,7 @@ def convertSpecialChar(str1):
 		str1 = str1.replace(i,j)
 	return str1
 	
-def writeSpecies(modelpath,cremodel_,sbmlDoc):
+def writeSpecies(modelpath,cremodel_,sbmlDoc,sceneitems):
 	#getting all the species 
 	for spe in wildcardFind(modelpath+'/##[ISA=PoolBase]'):
 		sName = convertSpecialChar(spe.name)
@@ -550,22 +569,29 @@ def writeSpecies(modelpath,cremodel_,sbmlDoc):
 			s1.setHasOnlySubstanceUnits( True )
 			if moose.exists(spe.path+'/info'):
 				Anno = moose.Annotator(spe.path+'/info')
-				notesS = Anno.notes
-				if notesS != "":
-					cleanNotesS= convertNotesSpecialChar(notesS)
+				if Anno.notes != "":
+					cleanNotesS= convertNotesSpecialChar(Anno.notes)
 					notesStringS = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+ cleanNotesS + "\n\t </body>"
 					s1.setNotes(notesStringS)
-			#FindGroupName
-			element = moose.element(spe)
-			ele = getGroupinfo(element)
-			if ele.className == "Neutral":
-				speciGpname = "<moose:Group>"+ ele.name + "</moose:Group>\n"
-				speciannoexist = True
-			if speciannoexist :
-				speciAnno = "<moose:ModelAnnotation>\n"
-				if speciGpname:
-					speciAnno = speciAnno + speciGpname
-				speciAnno = speciAnno+ "</moose:ModelAnnotation>"
+				
+				element = moose.element(spe)
+				ele = getGroupinfo(element)
+				if ele.className == "Neutral" or sceneitems[element] or Anno.color or Anno.textColor:
+					speciannoexist = True
+			
+				if speciannoexist :
+					speciAnno = "<moose:ModelAnnotation>\n"
+					if ele.className == "Neutral":
+						speciAnno = speciAnno + "<moose:Group>"+ ele.name + "</moose:Group>\n"
+					if sceneitems[element]:
+						v = sceneitems[element]
+						speciAnno = speciAnno+"<moose:xCord>"+str(v['x'])+"</moose:xCord>\n"+"<moose:yCord>"+str(v['y'])+"</moose:yCord>\n"
+					if Anno.color:
+						speciAnno = speciAnno+"<moose:bgColor>"+Anno.color+"</moose:bgColor>\n"
+					if Anno.textColor:
+						speciAnno = speciAnno+"<moose:textColor>"+Anno.textColor+"</moose:textColor>\n"
+					speciAnno = speciAnno+ "</moose:ModelAnnotation>"
+					s1.setAnnotation(speciAnno)
 	return True
 
 def writeCompt(modelpath,cremodel_):
