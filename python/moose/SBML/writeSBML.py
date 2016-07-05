@@ -57,7 +57,7 @@ def mooseWriteSBML(modelpath,filename,sceneitems=None):
 	cremodel_.setExtentUnits("substance")
 	cremodel_.setSubstanceUnits("substance")
 
-	if sceneitems == None:
+	if len(sceneitems):
 		srcdesConnection = {}
         setupItem(modelpath,srcdesConnection)
         meshEntry = setupMeshObj(modelpath)
