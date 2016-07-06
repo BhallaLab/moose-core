@@ -61,16 +61,17 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
     makeOperands();
 
 #ifdef USE_CUDA
-    allocateMemoryGpu();
     makeCsrMatrixGpu();
 #endif
-    // Forward flow matrix
+    // Forward flow matrix creation
     makeForwardFlowMatrix();
 
-    // Pervasive flow matrix
+    // Pervasive flow matrix creation
     makePervasiveFlowMatrix();
 
-    // Printing swc file of MOOSE numbering.
+   /*
+   // Printing swc file of MOOSE numbering.
+   // MOOSE does not honor numbering in SWC file.
    printf("Num of compts : %d\n",nCompt_);
    // SWC file
    vector<pair<int,int> > edges;
@@ -96,14 +97,15 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
 	sort(edges.begin(), edges.end());
 	edges.insert(edges.begin(), make_pair(nCompt_,-1));
 
-   ofstream swc_file("neuron.swc");
-   for(unsigned int i=0;i<edges.size();i++){
+
+    // Printing MOOSE numbered neuron.
+    ofstream swc_file("neuron.swc");
+	for(unsigned int i=0;i<edges.size();i++){
 	   //printf("%d %d\n",edges[i].first, edges[i].second);
 	   swc_file << edges[i].first << " " << edges[i].second << endl;
-   }
-   swc_file.close();
+	}
+	swc_file.close();
 
-   /*
     // Printing stuff
     for ( unsigned int i = 0; i < nCompt_; ++i )
     {
@@ -134,27 +136,16 @@ void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
     	printf("%d,%d \n", groupNo_iter->first, groupNo_iter->second);
     }
 
-
-    // Printing Ga values
-    for (int i = 0; i < nCompt_; ++i) {
-		printf("%lf, ", Ga_[i]*100000);
-	}
-    printf("\n");
-
     cout << nCompt_ << " " << HJ_.size() << " " << mat_nnz << endl;
     cout << operandBase_.size() << endl;
     */
 
 }
 #ifdef USE_CUDA
-void HinesMatrix::allocateMemoryGpu(){
-
-}
 
 void HinesMatrix::makeCsrMatrixGpu(){
 	// Allocating memory for matrix data
 	h_main_diag_passive = new double[nCompt_]();
-	h_tridiag_data = new double[3*nCompt_]();
 
 	// Adding passive data to main diagonal
 	for(unsigned int i=0;i<nCompt_;i++){
@@ -233,18 +224,6 @@ void HinesMatrix::makeCsrMatrixGpu(){
 			h_main_diag_map[r] = i;
 		}
 
-		switch(c-r){
-			case -1:
-				h_tridiag_data[r] = value;
-				break;
-			case 0:
-				h_tridiag_data[nCompt_+r] = value;
-				break;
-			case 1:
-				h_tridiag_data[2*nCompt_+r] = value;
-				break;
-		}
-
 		h_mat_rowPtr[r]++;
 		h_mat_colIndex[i] = c;
 		h_mat_values[i] = value;
@@ -267,7 +246,6 @@ void HinesMatrix::makeCsrMatrixGpu(){
 	cudaMalloc((void**)&d_mat_rowPtr, (nCompt_+1)*sizeof(int));
 	cudaMalloc((void**)&d_main_diag_map, nCompt_*sizeof(int));
 	cudaMalloc((void**)&d_main_diag_passive, nCompt_*sizeof(double));
-	cudaMalloc((void**)&d_tridiag_data, 3*nCompt_*sizeof(double));
 	cudaMalloc((void**)&d_b, nCompt_*sizeof(double));
 
 	cudaMemcpy(d_mat_values, h_mat_values, mat_nnz*sizeof(double), cudaMemcpyHostToDevice);
@@ -275,7 +253,6 @@ void HinesMatrix::makeCsrMatrixGpu(){
 	cudaMemcpy(d_mat_rowPtr, h_mat_rowPtr, (nCompt_+1)*sizeof(int), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_main_diag_map, h_main_diag_map, nCompt_*sizeof(int), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_main_diag_passive, h_main_diag_passive, nCompt_*sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_tridiag_data, h_tridiag_data, 3*nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 
 
 	// Compare two CSR matrices, one from HS_,HJ_ and other from direct method.
@@ -291,7 +268,6 @@ void HinesMatrix::makeCsrMatrixGpu(){
 		}
 
 	}
-
 
 	// Read off diagonal elements from HJ_
 	int comp_num;
@@ -315,7 +291,7 @@ void HinesMatrix::makeCsrMatrixGpu(){
 
 	}
 
-	cout << non_zeros.size() << " recovered " << mat_nnz << " exists" << endl;
+	//cout << non_zeros.size() << " recovered " << mat_nnz << " exists" << endl;
 
 	sort(non_zeros.begin(), non_zeros.end());
 
@@ -331,80 +307,10 @@ void HinesMatrix::makeCsrMatrixGpu(){
 		}
 	}
 
-	printf("%lf is error\n",error*pow(10,12));
-
-
-	/*
-	// Print passive data
-	double main_error = 0;
-	double passive_error = 0;
-	double right_error = 0;
-	int count = 0;
-	for(int i=0;i<nCompt_;i++){
-		main_error += (HS_[4*i] - h_tridiag_data[nCompt_+i]);
-		right_error += (HS_[4*i+1] - h_tridiag_data[2*nCompt_+i]);
-		passive_error += (HS_[4*i+2] - h_main_diag_passive[i]);
-		//printf("%lf %lf |", HS_[4*i]*100000, h_tridiag_data[nCompt_+i]*100000);
-		//printf("%lf %lf |", HS_[4*i+2]*100000, h_main_diag_passive[i]*100000);
-		if((HS_[4*i+1] - h_tridiag_data[2*nCompt_+i]) != 0)
-			printf("%d %lf %lf |\n", i, HS_[4*i+1]*100000, h_tridiag_data[2*nCompt_+i]*100000);
-		if(HS_[4*i+1] != 0)
-			count++;
-
-
-	}
-	printf("Errors | %lf | %lf | %lf |\n",right_error*1000000, main_error*1000000, passive_error*1000000);
-	printf("count %d \n",count);
-	*/
-
+	//printf("%lf is error\n",error*pow(10,12));
 
 }
 #endif
-
-// Printing tri-diagonal system in octave format.
-void HinesMatrix::print_tridiagonal_matrix_system(double* data, int* misplaced_info, int rows){
-
-	double full[rows][rows];
-
-	for (int i = 0; i < rows; ++i)
-	{
-		for (int j = 0; j < rows; ++j)
-		{
-			full[i][j] = 0;
-		}
-	}
-
-	for (int i = 0; i < rows; ++i)
-	{
-		full[i][i] = data[rows+i];
-	}
-
-	for (int i = 0; i < rows-1; ++i)
-	{
-		full[i][misplaced_info[i]] = data[i+1];
-		full[misplaced_info[i]][i] = data[i+1];
-	}
-
-	cout << "A = [" << endl;
-	for (int i = 0; i < rows; ++i)
-	{
-		for (int j = 0; j < rows; ++j)
-		{
-			cout << full[i][j] << ",";
-		}
-		cout << ";" << endl;
-	}
-	cout << "]" << endl;
-
-	/*
-	cout << "B = [" << endl;
-	for (int i = 0; i < rows; ++i)
-	{
-		cout << rhs[i] << endl;
-	}
-	cout << "]" << endl;
-	*/
-}
 
 void HinesMatrix::print_csr_matrix(coosr_matrix &matrix){
 	int startIndex, endIndex, runningIndex;
@@ -465,12 +371,6 @@ void HinesMatrix::makeForwardFlowMatrix(){
 			   ff_offdiag_mapping[children[0]] = i;
 		}
 	}
-
-   /*
-   // Temporary code
-   for(int i=0;i<nCompt_;i++)
-	   Ga_[i] = rand()%10+2;
-    */
 
    //// MATRIX construction
 	int node1, node2;
@@ -769,8 +669,6 @@ void HinesMatrix::makePervasiveFlowMatrix(){
 #else
 	perv_dynamic = new double[2*nCompt_]();
 #endif
-
-
 
 	vector< vector<int> > child_list(nCompt_);
 

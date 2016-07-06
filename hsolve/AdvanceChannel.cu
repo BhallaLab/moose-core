@@ -260,7 +260,7 @@ void update_perv_matrix_kernel_opt(
  */
 __global__
 void update_csr_matrix_kernel(double* d_V,
-				double* d_mat_values, double* d_main_diag_passive, int* d_main_diag_map, double* d_tridiag_data, double* d_b,
+				double* d_mat_values, double* d_main_diag_passive, int* d_main_diag_map, double* d_b,
 				double* d_comp_Gksum,
 				double* d_comp_GkEksum,
 				CompartmentStruct* d_compartment_,
@@ -271,7 +271,6 @@ void update_csr_matrix_kernel(double* d_V,
 	if(tid < size){
 		double main_val = d_main_diag_passive[tid] + d_comp_Gksum[tid] + d_externalCurrent_[2*tid];
 		d_mat_values[d_main_diag_map[tid]] = main_val;
-		d_tridiag_data[size + tid] = main_val;
 		d_b[tid] = d_V[tid]*d_compartment_[tid].CmByDt + d_compartment_[tid].EmByRm + d_comp_GkEksum[tid] +
 				(d_inject_[tid].injectVarying + d_inject_[tid].injectBasal) + d_externalCurrent_[2*tid+1];
 
@@ -646,7 +645,7 @@ void HSolveActive::update_csrmatrix_cuda_wrapper(){
 	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
 
 	update_csr_matrix_kernel<<<BLOCKS, THREADS_PER_BLOCK>>>(d_V,
-			d_mat_values, d_main_diag_passive, d_main_diag_map, d_tridiag_data, d_b,
+			d_mat_values, d_main_diag_passive, d_main_diag_map, d_b,
 			d_comp_Gksum,
 			d_comp_GkEksum,
 			d_compartment_,
