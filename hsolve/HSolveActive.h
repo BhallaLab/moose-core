@@ -275,9 +275,6 @@ private:
     void updateForwardFlowMatrix();
     void forwardFlowSolver();
 
-    void updatePervasiveFlowMatrix();
-    void pervasiveFlowSolver();
-
     void updatePervasiveFlowMatrixOpt();
     void pervasiveFlowSolverOpt();
 

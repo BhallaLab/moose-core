@@ -127,21 +127,10 @@ protected:
 	 */
 	int* ff_offdiag_mapping;
 
-	//// Pervasive flow matrix data structures
-	coosr_matrix full_mat, upper_mat, lower_mat;
-	double* per_rhs;
-	double* per_mainDiag_passive;
-	int* per_mainDiag_map;
-
-	vector<int> ut_lt_upper, ut_lt_lower, ut_ut_upper, ut_ut_lower;
-	int* ut_lt_rowPtr, *ut_ut_rowPtr;
-	double* upper_mat_values_copy;
-	double* lower_mat_values_copy;
-
 	// Optimized Pervasive flow matrix data structures.
 	//coosr_matrix full_mat;
 	coosr_matrix qfull_mat;
-	//double* per_rhs, *per_mainDiag_passive;
+	double* per_rhs, *per_mainDiag_passive;
 	vector<int> eliminfo_r1, eliminfo_r2; // For a given elimination e(r,c), we store overlapping elements in row c and row r
 	int* eliminfo_diag;
 	int* elim_rowPtr;

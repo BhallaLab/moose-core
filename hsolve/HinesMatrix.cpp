@@ -583,89 +583,6 @@ void HinesMatrix::generate_coosr_matrix(int num_comp, const vector<pair<long lon
 	exclusive_scan(full_mat.rowPtr, num_comp);
 }
 
-void HinesMatrix::construct_elimination_information(coosr_matrix full_mat, coosr_matrix upper_mat, coosr_matrix lower_mat,
-			vector<int> &ut_lt_upper, vector<int> &ut_lt_lower, vector<int> &ut_ut_upper, vector<int> &ut_ut_lower ,
-			int* ut_lt_rowPtr, int* ut_ut_rowPtr){
-
-	int r,c;
-	for(int i=0;i<lower_mat.nnz;i++){
-		r = lower_mat.rowIndex[i];
-		c = lower_mat.colIndex[i];
-
-		// Setting counts to zero
-		ut_lt_rowPtr[i] = 0;
-		ut_ut_rowPtr[i] = 0;
-
-		// UT LT paris
-		int u_ul_curId = upper_mat.rowPtr[c]+1; // No need to add the elimination element
-		int l_ul_curId = lower_mat.rowPtr[r];
-
-		while(l_ul_curId < lower_mat.rowPtr[r+1] and u_ul_curId < upper_mat.rowPtr[c+1]){
-			if(upper_mat.colIndex[u_ul_curId] ==  lower_mat.colIndex[l_ul_curId]){
-				ut_lt_upper.push_back(u_ul_curId);
-				ut_lt_lower.push_back(l_ul_curId);
-				ut_lt_rowPtr[i] += 1;
-				// Advancing positions
-				u_ul_curId++;
-				l_ul_curId++;
-			}else{
-				if(upper_mat.colIndex[u_ul_curId] <  lower_mat.colIndex[l_ul_curId]){
-					u_ul_curId++;
-				}else{
-					l_ul_curId++;
-				}
-			}
-		}
-
-		// UT UT pairs
-		int u_uu_curId = upper_mat.rowPtr[c];
-		int l_uu_curId = upper_mat.rowPtr[r];
-
-		// Ignoring row c until column r-1
-		while(upper_mat.colIndex[u_uu_curId] < r and u_uu_curId < upper_mat.rowPtr[c+1]){
-			u_uu_curId++;
-		}
-
-		while(l_uu_curId < upper_mat.rowPtr[r+1] and u_uu_curId < upper_mat.rowPtr[c+1]){
-			if(upper_mat.colIndex[u_uu_curId] == upper_mat.colIndex[l_uu_curId]){
-				ut_ut_upper.push_back(u_uu_curId);
-				ut_ut_lower.push_back(l_uu_curId);
-				ut_ut_rowPtr[i] += 1;
-				// Advancing positions
-				u_uu_curId++;
-				l_uu_curId++;
-			}else{
-				if(upper_mat.colIndex[u_uu_curId] < upper_mat.colIndex[l_uu_curId]){
-					u_uu_curId++;
-				}else{
-					l_uu_curId++;
-				}
-			}
-		}
-	}
-
-	exclusive_scan(ut_lt_rowPtr, lower_mat.nnz);
-	exclusive_scan(ut_ut_rowPtr, lower_mat.nnz);
-
-	/*
-	print_csr_matrix(full_mat);
-	// Debug information
-	for(int i=0;i<lower_mat.nnz;i++){
-		cout << "Elimination Info (" << lower_mat.rowIndex[i] << "," << lower_mat.colIndex[i] << ")" << lower_mat.values[i] << endl;
-		cout << "UT-LT" << endl;
-		for(int j=ut_lt_rowPtr[i];j < ut_lt_rowPtr[i+1]; j++){
-			cout << "(" << upper_mat.values[ut_lt_upper[j]] << "," << lower_mat.values[ut_lt_lower[j]] << ")" << endl;
-		}
-
-		cout << "UT-UT" << endl;
-		for(int j=ut_ut_rowPtr[i]; j < ut_ut_rowPtr[i+1]; j++){
-			cout << "(" << upper_mat.values[ut_ut_upper[j]] << "," << upper_mat.values[ut_ut_lower[j]] << ")" << endl;
-		}
-	}
-	*/
-
-}
-
 void HinesMatrix::construct_elimination_information_opt(coosr_matrix qfull_mat, vector<int> &eliminfo_r1, vector<int> &eliminfo_r2,
 		int* eliminfo_diag,	int* elim_rowPtr, int* upper_triang_offsets, int num_elims){
 
@@ -784,9 +701,6 @@ void HinesMatrix::storePervasiveMatrix(vector<vector<int> > &child_list){
 
 	int node1,node2;
 	double gi,gj,gij,junction_sum;
-	vector<pair<long long int,double> > full_mat_flat;
-	vector<pair<long long int,double> > lower_mat_flat; // Does not include main diagonal elements
-	vector<pair<long long int,double> > upper_mat_flat; // Includes main diagonal elements
 	vector<pair<long long int,double> > quasi_full_mat_flat; // Includes all except main diagonal elements.
 
 	// Setting up passive part of main diagonal
@@ -820,57 +734,19 @@ void HinesMatrix::storePervasiveMatrix(vector<vector<int> > &child_list){
 
 				//cout << junction_sum << " " << gi[node1] << " " << gi[node2] << " " << admittance << endl;
 
-				// Pushing element and its symmetry.
-				full_mat_flat.push_back(make_pair(node1*nCompt_+node2, -1*gij));
-				full_mat_flat.push_back(make_pair(node2*nCompt_+node1, -1*gij));
-
-				// Quasi doesn't have main diagonal.
+				// quasi_full_mat should not store main diagonal.
 				if(node1 != node2){
+					// Pushing element and its symmetry.
 					quasi_full_mat_flat.push_back(make_pair(node2*nCompt_+node1, -1*gij));
 					quasi_full_mat_flat.push_back(make_pair(node1*nCompt_+node2, -1*gij));
 				}
-
-				if(node1 > node2){
-					lower_mat_flat.push_back(make_pair(node1*nCompt_+node2, -1*gij));
-					upper_mat_flat.push_back(make_pair(node2*nCompt_+node1, -1*gij));
-				}else{
-					lower_mat_flat.push_back(make_pair(node2*nCompt_+node1, -1*gij));
-					upper_mat_flat.push_back(make_pair(node1*nCompt_+node2, -1*gij));
-				}
-
 			}
 		}
 	}
 
-	// Add main diagonal to non_zero_elements.
-	for (unsigned int i = 0; i < nCompt_; ++i){
-		full_mat_flat.push_back(make_pair(i*nCompt_+i, per_mainDiag_passive[i]));
-		upper_mat_flat.push_back(make_pair(i*nCompt_+i, per_mainDiag_passive[i]));
-	}
-
 	// Sorting arranges elements in a row order fashion
-	sort(full_mat_flat.begin(), full_mat_flat.end());
-	sort(upper_mat_flat.begin(), upper_mat_flat.end());
-	sort(lower_mat_flat.begin(), lower_mat_flat.end());
 	sort(quasi_full_mat_flat.begin(), quasi_full_mat_flat.end());
-
-	generate_coosr_matrix(nCompt_, full_mat_flat, full_mat);
-	generate_coosr_matrix(nCompt_, upper_mat_flat, upper_mat);
-	generate_coosr_matrix(nCompt_, lower_mat_flat, lower_mat);
 	generate_coosr_matrix(nCompt_, quasi_full_mat_flat, qfull_mat);
-
-	// Storing indices of main diagonal elements in upper matrix.
-	for (unsigned int i = 0; i < nCompt_; ++i) {
-		per_mainDiag_map[i] = upper_mat.rowPtr[i];
-	}
-
-	// Allocating size for ut_lt rowPtr and ut_ut_rowPtr
-	ut_lt_rowPtr = new int[lower_mat.nnz+1]();
-	ut_ut_rowPtr = new int[lower_mat.nnz+1]();
-
-	construct_elimination_information(full_mat, upper_mat, lower_mat,
-				ut_lt_upper, ut_lt_lower, ut_ut_upper, ut_ut_lower ,
-				ut_lt_rowPtr, ut_ut_rowPtr);
 
 	// Construct elimination information for optimized pervasive matrix solver.
 	int num_elims = quasi_full_mat_flat.size()/2;
@@ -887,7 +763,6 @@ void HinesMatrix::storePervasiveMatrix(vector<vector<int> > &child_list){
 void HinesMatrix::makePervasiveFlowMatrix(){
 	per_rhs = new double[nCompt_]();
 	per_mainDiag_passive = new double[nCompt_]();
-	per_mainDiag_map = new int[nCompt_]();
 
 #ifdef USE_CUDA
 	cudaMallocHost((void**)&perv_dynamic, 2*nCompt_*sizeof(double));
@@ -931,26 +806,18 @@ void HinesMatrix::makePervasiveFlowMatrix(){
 	storePervasiveMatrix(child_list);
 
 	// Making copy of values.
-	upper_mat_values_copy = new double[upper_mat.nnz]();
-	lower_mat_values_copy = new double[lower_mat.nnz]();
 	perv_mat_values_copy = new double[qfull_mat.nnz]();
-
-	memcpy(upper_mat_values_copy, upper_mat.values, upper_mat.nnz*sizeof(double));
-	memcpy(lower_mat_values_copy, lower_mat.values, lower_mat.nnz*sizeof(double));
 	memcpy(perv_mat_values_copy, qfull_mat.values, qfull_mat.nnz*sizeof(double));
 
 	// Verification
 	double error = 0;
 	double* row_sums = new double[nCompt_]();
-	for(int i=0;i<upper_mat.rows;i++){
-		for(int j=upper_mat.rowPtr[i];j<upper_mat.rowPtr[i+1];j++){
-			row_sums[upper_mat.rowIndex[j]] += upper_mat.values[j];
+
+	for (int i = 0; i < nCompt_; ++i) {
+		for (int j = qfull_mat.rowPtr[i]; j < qfull_mat.rowPtr[i+1]; ++j) {
+			row_sums[i] += qfull_mat.values[j];
 		}
-	}
-	for(int i=0;i<lower_mat.rows;i++){
-		for(int j=lower_mat.rowPtr[i];j<lower_mat.rowPtr[i+1];j++){
-			row_sums[lower_mat.rowIndex[j]] += lower_mat.values[j];
-		}
+		row_sums[i] += per_mainDiag_passive[i];
 	}
 
 	for(unsigned int  i=0;i<nCompt_;i++){
