@@ -40,15 +40,13 @@ def getComptParent( obj ):
 def prelude( view ):
     view.home()
     view.pitch( math.pi / 2.0 )
-    view.zoom( 0.3 )
+    view.zoom( 0.05 )
     #network.groups["soma"].set( "color", moogli.colors.RED )
 
 # This func is used for the first viewer, it has to handle advancing time.
 def interlude( view ):
     moose.start( moogliDt )
     val = [ moose.getField( i, view.mooField, "double" ) * view.mooScale for i in view.mooObj ]
-    #print "LEN = ", len( val ), "field = ", view.mooField
-    
     view.mooGroup.set("color", val, view.mapper)
     view.yaw( rotation )
     #print moogliDt, len( val ), runtime
@@ -132,6 +130,7 @@ def makeMoogli( rd, mooObj, moogliEntry, fieldInfo ):
                                  scalar_range=moogli.geometry.Vec2f(
                                      moogliEntry[5],
                                      moogliEntry[6]))
+    cb.set_num_labels(3)
     view.attach_color_bar(cb)
     view.rd = rd
     view.mooObj = displayObj
