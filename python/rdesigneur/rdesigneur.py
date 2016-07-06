@@ -29,7 +29,6 @@ from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
 import lxml
 from lxml import etree
-import h5py as h5
 import csv
 
 #EREST_ACT = -70e-3
