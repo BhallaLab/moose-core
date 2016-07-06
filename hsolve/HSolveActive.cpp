@@ -87,6 +87,10 @@ HSolveActive::HSolveActive()
 
 void HSolveActive::step( ProcPtr info )
 {	
+
+	if(step_num == 0)
+		cout << "SIMULATION STARTED" << endl;
+
     if ( nCompt_ <= 0 )
         return;
 
@@ -119,7 +123,6 @@ void HSolveActive::step( ProcPtr info )
 	ofstream currentFile("current.csv",ios::app);
 	currentFile << inject_[3580].injectBasal << endl;
 	*/
-
 	updateMatrix();
 
 	//HSolvePassive::forwardEliminate();
@@ -803,6 +806,20 @@ void HSolveActive::advanceChannels( double dt )
 
 #ifdef USE_CUDA
 
+void HSolveActive::allocate_cpu_memory(){
+	hits = new int[nCompt_]();
+	stim_basal_values = new double[nCompt_](); // nCompt+1, because for non-stimulated compartments map id is zero.
+	stim_comp_indices = new int[nCompt_](); // nCompt+1, because for non-stimulated compartments map id is zero.
+	stim_map = new int[nCompt_]();
+	num_stim_comp = 0;
+
+	// Initializing elements in map to -1
+	for (int i = 0; i < nCompt_; ++i) {
+		stim_map[i] = -1;
+	}
+
+}
+
 /* Used to allocate device memory on GPU for Hsolve variables */
 void HSolveActive::allocate_hsolve_memory_cuda(){
 
@@ -883,6 +900,11 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	cudaMalloc((void**)&d_state_powers, num_cmprsd_gates*sizeof(double));
 	cudaMalloc((void**)&d_state2chanId, num_cmprsd_gates*sizeof(int));
 	cudaMalloc((void**)&d_state2column, num_cmprsd_gates*sizeof(int));
+
+	//// Memory allocation for Variables of event based optimization for update_matrix method.
+	cudaMalloc((void**)&d_stim_basal_values, nCompt_*sizeof(double));
+	cudaMalloc((void**)&d_stim_comp_indices, nCompt_*sizeof(int));
+	cudaMalloc((void**)&d_stim_map, nCompt_*sizeof(int));
 
 }
 
@@ -1135,6 +1157,12 @@ void HSolveActive::copy_hsolve_information_cuda(){
 		temp_caconc[i] = caConc_[i].floor_;
 		cudaMemcpy(d_CaConcStruct_floor_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice);
 	}
+
+
+	//// Memory transfer for Variables of event based optimization for update_matrix method.
+	cudaMemcpy(d_stim_basal_values, stim_basal_values, nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_stim_comp_indices, stim_comp_indices, nCompt_*sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_stim_map, stim_map, nCompt_*sizeof(int), cudaMemcpyHostToDevice);
 
 	/*
 	// Writing load to file.

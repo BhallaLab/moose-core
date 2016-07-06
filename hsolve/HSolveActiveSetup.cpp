@@ -19,6 +19,11 @@ void HSolveActive::setup( Id seed, double dt )
 
     this->HSolvePassive::setup( seed, dt );
 
+#ifdef USE_CUDA
+    // CPU related setup for CUDA
+    allocate_cpu_memory();
+#endif
+
     readHHChannels();
     readGates();
     readCalcium();
@@ -32,7 +37,6 @@ void HSolveActive::setup( Id seed, double dt )
     allocate_hsolve_memory_cuda();
     copy_table_data_cuda();
     copy_hsolve_information_cuda();
-
 #endif
 
 

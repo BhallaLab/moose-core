@@ -224,6 +224,14 @@ protected:
 	double* d_Ca_fractions;
 
 	bool is_initialized; // Initializing device memory data
+
+	//// Variables for event based optimization for update_matrix method.
+	int* hits; // Number of times setInject method is called in zero time-step.
+	double* stim_basal_values, *d_stim_basal_values; // Basal value for stimulated compartments.
+	int* stim_comp_indices, *d_stim_comp_indices; // Compartment id's which have an injectCurrent stimulation;
+	int* stim_map, *d_stim_map; // An array of size nCompt, which stores the id in stim_comp_indices array if it is a stem, else -1.
+	int num_stim_comp; // Number of compartment with an injectCurrent stimlation.
+
 #endif
 
     static const int INSTANT_X;
@@ -274,6 +282,8 @@ private:
     void pervasiveFlowSolverOpt();
 
 #ifdef USE_CUDA
+    // Allocate buffer memory required for optimizations.
+    void allocate_cpu_memory();
     // Hsolve GPU set up kernels
     void allocate_hsolve_memory_cuda();
     void copy_table_data_cuda();

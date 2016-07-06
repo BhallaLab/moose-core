@@ -223,7 +223,8 @@ void update_perv_matrix_kernel_opt(
 		double* d_comp_Gksum,
 		double* d_comp_GkEksum,
 		CompartmentStruct* d_compartment_,
-		InjectStruct* d_inject_,
+		//InjectStruct* d_inject_,
+		double* d_stim_basal_values, int*  d_stim_map,
 		double*	d_externalCurrent_,
 		int size){
 
@@ -240,10 +241,16 @@ void update_perv_matrix_kernel_opt(
 		d_comp_GkEksum[tid] = sum2;
 
 		d_perv_dynamic[2*tid] = d_perv_static[tid] + sum1 + d_externalCurrent_[2*tid];
-		d_perv_dynamic[2*tid+1] = d_V[tid]*d_compartment_[tid].CmByDt + d_compartment_[tid].EmByRm + sum2 +
-				(d_inject_[tid].injectVarying + d_inject_[tid].injectBasal) + d_externalCurrent_[2*tid+1];
+		//d_perv_dynamic[2*tid+1] = d_V[tid]*d_compartment_[tid].CmByDt + d_compartment_[tid].EmByRm + sum2 +
+		//		(d_inject_[tid].injectVarying + d_inject_[tid].injectBasal) + d_externalCurrent_[2*tid+1];
 
-		//d_inject_[tid].injectVarying = 0;
+		if(d_stim_map[tid] != -1)
+			sum2 += d_stim_basal_values[d_stim_map[tid]]; // Adding currents of stimulated compartments.
+
+		d_perv_dynamic[2*tid+1] = d_V[tid]*d_compartment_[tid].CmByDt + d_compartment_[tid].EmByRm + sum2 +
+						// (d_inject_[tid].injectVarying + d_inject_[tid].injectBasal) +
+						d_externalCurrent_[2*tid+1];
+
 	}
 }
 
@@ -542,9 +549,13 @@ void HSolveActive::update_perv_matrix_cuda_wrapper(){
 
 	// As inject_ and externalCurrent_ data structures are updated by messages,
 	// they have to be updated on the device too. Hence the transfer
-	if(step_num%20 == 1)
+	if(step_num == 19){
+		cudaMemcpy(d_stim_map, stim_map, nCompt_*sizeof(int), cudaMemcpyHostToDevice); // Initializing map.
+	}
+	if(step_num%20 == 1){
 		cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
-
+		cudaMemcpy(d_stim_basal_values, stim_basal_values, num_stim_comp*sizeof(double), cudaMemcpyHostToDevice);
+	}
 	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
 
 	// As inject data is already on device, injectVarying can be set to zero.
@@ -563,7 +574,8 @@ void HSolveActive::update_perv_matrix_cuda_wrapper(){
 				d_comp_Gksum,
 				d_comp_GkEksum,
 				d_compartment_,
-				d_inject_,
+				//d_inject_,
+				d_stim_basal_values, d_stim_map,
 				d_externalCurrent_,
 				(int)nCompt_);
 	}else if(UPDATE_MATRIX_APPROACH == UPDATE_MATRIX_SPMV_APPROACH){
@@ -595,6 +607,11 @@ void HSolveActive::update_perv_matrix_cuda_wrapper(){
 	}
 
 	cudaMemcpy(perv_dynamic, d_perv_dynamic, 2*nCompt_*sizeof(double), cudaMemcpyDeviceToHost );
+
+#ifdef PIN_POINT_ERROR
+	cudaCheckError(); // Checking for cuda related errors.
+#endif
+
 }
 
 
