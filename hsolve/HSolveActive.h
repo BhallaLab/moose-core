@@ -211,6 +211,9 @@ protected:
 	// caConc_ Array of structures to structure of arrays.
 	double* d_CaConcStruct_c_; // Dynamic array
 	double* d_CaConcStruct_CaBasal_, *d_CaConcStruct_factor1_, *d_CaConcStruct_factor2_, *d_CaConcStruct_ceiling_, *d_CaConcStruct_floor_; // Static array
+	int ADVANCE_CALCIUM_APPROACH;
+	int ADVANCE_CALCIUM_WPT_APPROACH = 0;
+	int ADVANCE_CALCIUM_SPMV_APPROACH = 1;
 
 	// CUDA Active Permanent data
 	double* d_V;
@@ -296,6 +299,7 @@ private:
     void update_perv_matrix_cuda_wrapper();
     void update_csrmatrix_cuda_wrapper();
     int choose_update_matrix_approach();
+    int choose_advance_calcium_approach();
 
     void calculate_V_from_Vmid_wrapper();
 

@@ -1093,7 +1093,7 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	}
 	chan_dist.close();
 	*/
-
+	// Choosing approach in update matrix
 	UPDATE_MATRIX_APPROACH = choose_update_matrix_approach();
 
 	if(UPDATE_MATRIX_APPROACH == UPDATE_MATRIX_WPT_APPROACH){
@@ -1103,6 +1103,19 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	}else{
 		// Future approaches, if any.
 	}
+
+	// Choosing approach in advance calcium
+	ADVANCE_CALCIUM_APPROACH = choose_advance_calcium_approach();
+	if(ADVANCE_CALCIUM_APPROACH == ADVANCE_CALCIUM_WPT_APPROACH){
+		cout << "AC APPROACH : WPT " << endl;
+	}else if(ADVANCE_CALCIUM_APPROACH == ADVANCE_CALCIUM_SPMV_APPROACH){
+		cout << "AC APPROACH : SPMV" << endl;
+	}else{
+		// Future approaches, if any.
+	}
+
+
+
 }
 
 void HSolveActive::transfer_memory2cpu_cuda(){

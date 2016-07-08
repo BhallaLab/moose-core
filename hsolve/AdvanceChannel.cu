@@ -49,8 +49,8 @@ void get_lookup_rows_and_fractions_cuda(
 
 /*
  * Based on the near lookup value and fraction value, the function
- * interpolates the value and uses it to update appropriate state variables
- * "indices" array is a subset which either represents
+ * interpolates the value and uses it to update appropriate state variables.
+ * "indices" array is a subset of compartment id's which are
  * voltage dependent gate indices or Calcium dependent gate indices
  */
 __global__
@@ -115,7 +115,6 @@ void calculate_channel_currents_opt_cuda(double* d_gate_values,
 		int size){
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	if(tid < size){
-
 		double temp = d_chan_modulation[tid] * d_chan_Gbar[tid];
 		for (int i = rowPtr[tid]; i < rowPtr[tid+1]; ++i) {
 			temp *= pow(d_gate_values[i], d_gate_powers[i]);
@@ -131,9 +130,8 @@ void calculate_channel_currents_opt_cuda(double* d_gate_values,
 }
 
 /*
- * Work Per Thread Kernel. If there are N independent works to do, each thread does it in parallel.
- * It turns out that if work is small and less load balance, this is faster compared to
- * SPMV (Sparse Matrix Vector Multiplication)
+ * Work Per Thread Kernel. If there are N independent things to do, each thread does it in parallel.
+ * It turns out that if work is small and load balance is great, this it is faster.
  */
 __global__
 void wpt_kernel(double* d_chan_Gk, double* d_chan_GkEk , int* d_chan_rowPtr,
@@ -153,7 +151,7 @@ void wpt_kernel(double* d_chan_Gk, double* d_chan_GkEk , int* d_chan_rowPtr,
 
 /*
  * Updates the matrix data structure d_HS_.
- * SPMV approach
+ * Case : MOOSE solver on CPU
  */
 __global__
 void update_matrix_kernel(double* d_V,
@@ -177,7 +175,7 @@ void update_matrix_kernel(double* d_V,
 
 /*
  * Updates the matrix data structure d_HS_.
- * WPT approach
+ * Case : WPT approach + MOOSE Solver on CPU
  */
 __global__
 void update_matrix_kernel_opt(
@@ -213,7 +211,7 @@ void update_matrix_kernel_opt(
 
 /*
  * Updates the matrix data structure d_perv_dynamic.
- * WPT approach
+ * Case : WPT approach + Pervasive Solver on CPU.
  */
 __global__
 void update_perv_matrix_kernel_opt(
@@ -256,7 +254,6 @@ void update_perv_matrix_kernel_opt(
 
 /*
  * EXPERIMENTAL . Updates CSR matrix
- * SPMV approach
  */
 __global__
 void update_csr_matrix_kernel(double* d_V,
@@ -289,6 +286,10 @@ void calculate_V_from_Vmid(double* d_Vmid, double* d_V, int size){
 	}
 }
 
+/*
+ * Calculating calcium currents.
+ * Case : SPMV approach
+ */
 __global__
 void advance_calcium_cuda(int* d_catarget_channel_indices,
 			double* d_chan_Gk, double* d_chan_GkEk,
@@ -302,6 +303,10 @@ void advance_calcium_cuda(int* d_catarget_channel_indices,
 	}
 }
 
+/*
+ * Advancing calcium pool in each time-step and clipping if necessary.
+ * Case : SPMV approach
+ */
 __global__
 void advance_calcium_conc_cuda(CaConcStruct* d_caConc_, double* d_Ca, double* d_caActivation_values, int size ){
 	int tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -321,6 +326,10 @@ void advance_calcium_conc_cuda(CaConcStruct* d_caConc_, double* d_Ca, double* d_
 	}
 }
 
+/* Calculating calcium currents.
+ * Advancing calcium pool in each time-step and clipping if necessary.
+ * Case : WPT approach.
+ */
 __global__
 void advance_calcium_cuda_opt(int* d_catarget_channel_indices,
 			double* d_chan_Gk, double* d_chan_GkEk,
@@ -379,8 +388,8 @@ void advance_calcium_cuda_opt(int* d_catarget_channel_indices,
 	}
 }
 
-
-
+//// CUDA Wrappers
+// As GPU kernel cannot be called from CPP file, we have a wrapper function which does that.
 void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
 
 	int num_comps = V_.size();
@@ -661,25 +670,28 @@ void HSolveActive::advance_calcium_cuda_wrapper(){
 
 	int num_ca_pools = caConc_.size();
 	int num_catarget_channels = h_catarget_channel_indices.size();
-	double alpha = 1;
-	double beta = 0;
 
-	int BLOCKS = num_ca_pools/THREADS_PER_BLOCK;
-	BLOCKS = (num_ca_pools%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
-	advance_calcium_cuda_opt<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
-					d_chan_Gk, d_chan_GkEk,
-					d_Vmid,
-					//d_capool_values,
-					d_chan_to_comp,d_capool_rowPtr,
-					//d_caConc_,
-					d_ca,
-					d_CaConcStruct_c_, // Dynamic array
-					d_CaConcStruct_CaBasal_, d_CaConcStruct_factor1_, d_CaConcStruct_factor2_, d_CaConcStruct_ceiling_, d_CaConcStruct_floor_, // Static array
-					//d_caActivation_values,
-					num_ca_pools);
-	/*
-	 // TODO choose between WPT or CSRMV
-	 	 // CSRMV approach
+	if(ADVANCE_CALCIUM_APPROACH == ADVANCE_CALCIUM_WPT_APPROACH){
+		// WPT APPROACH
+		int BLOCKS = num_ca_pools/THREADS_PER_BLOCK;
+		BLOCKS = (num_ca_pools%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+		advance_calcium_cuda_opt<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
+						d_chan_Gk, d_chan_GkEk,
+						d_Vmid,
+						//d_capool_values,
+						d_chan_to_comp,d_capool_rowPtr,
+						//d_caConc_,
+						d_ca,
+						d_CaConcStruct_c_, // Dynamic array
+						d_CaConcStruct_CaBasal_, d_CaConcStruct_factor1_, d_CaConcStruct_factor2_, d_CaConcStruct_ceiling_, d_CaConcStruct_floor_, // Static array
+						//d_caActivation_values,
+						num_ca_pools);
+	//}else if(ADVANCE_CALCIUM_APPROACH == ADVANCE_CALCIUM_SPMV_APPROACH){
+	}else{
+		// SPMV APPROACH
+		double alpha = 1;
+		double beta = 0;
+
 		int BLOCKS = num_catarget_channels/THREADS_PER_BLOCK;
 		BLOCKS = (num_catarget_channels%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
@@ -701,7 +713,7 @@ void HSolveActive::advance_calcium_cuda_wrapper(){
 		BLOCKS = (num_ca_pools%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
 		advance_calcium_conc_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_caConc_, d_ca, d_caActivation_values, num_ca_pools);
-	*/
+	}
 
 	// Sending calcium data to host
 	cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost);
@@ -711,7 +723,16 @@ void HSolveActive::advance_calcium_cuda_wrapper(){
 #endif
 }
 
+void HSolveActive::calculate_V_from_Vmid_wrapper(){
+	int BLOCKS = (nCompt_+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
+	calculate_V_from_Vmid<<<BLOCKS, THREADS_PER_BLOCK>>>(d_Vmid, d_V, nCompt_);
+}
 
+
+/*
+ * Chooses whether to use WPT(Work per thread) approach or SPMV(Sparse matrix vector multiplication)
+ * approach based on their averged execution time in updateMatrix module.
+ */
 int HSolveActive::choose_update_matrix_approach(){
 	int num_repeats = 10;
 	float wpt_cum_time = 0;
@@ -770,9 +791,101 @@ int HSolveActive::choose_update_matrix_approach(){
 	}
 }
 
-void HSolveActive::calculate_V_from_Vmid_wrapper(){
-	int BLOCKS = (nCompt_+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
-	calculate_V_from_Vmid<<<BLOCKS, THREADS_PER_BLOCK>>>(d_Vmid, d_V, nCompt_);
+int HSolveActive::choose_advance_calcium_approach(){
+	int num_repeats = 10;
+	float wpt_cum_time = 0;
+	float spmv_cum_time = 0;
+
+	// Setting up cusparse information
+	cusparseHandle_t cusparseH;
+	cusparseCreate(&cusparseH);
+
+	// create and setup matrix descriptors A, B & C
+	cusparseMatDescr_t cuspaseDescr;
+	cusparseCreateMatDescr(&cuspaseDescr);
+	cusparseSetMatType(cuspaseDescr, CUSPARSE_MATRIX_TYPE_GENERAL);
+	cusparseSetMatIndexBase(cuspaseDescr, CUSPARSE_INDEX_BASE_ZERO);
+
+
+	int num_ca_pools = caConc_.size();
+	int num_catarget_channels = h_catarget_channel_indices.size();
+	double alpha = 1;
+	double beta = 0;
+
+	// Taking backup and modifying
+	double* d_ca_backup, *d_CaConcStruct_c_backup;
+	CaConcStruct* d_caConc_backup;
+
+	cudaMalloc((void**)&d_ca_backup, sizeof(double)*num_ca_pools);
+	cudaMalloc((void**)&d_CaConcStruct_c_backup, sizeof(double)*num_ca_pools);
+	cudaMalloc((void**)&d_caConc_backup, sizeof(CaConcStruct)*num_ca_pools);
+
+	cudaMemcpy(d_ca_backup, d_ca, num_ca_pools*sizeof(double), cudaMemcpyDeviceToDevice);
+	cudaMemcpy(d_CaConcStruct_c_backup, d_CaConcStruct_c_, num_ca_pools*sizeof(double), cudaMemcpyDeviceToDevice);
+	cudaMemcpy(d_caConc_backup, d_caConc_, sizeof(CaConcStruct)*num_ca_pools, cudaMemcpyDeviceToDevice);
+
+	for (int i = 0; i < num_repeats; ++i) {
+		GpuTimer timer1, timer2;
+
+		// WPT approach
+		int BLOCKS = num_ca_pools/THREADS_PER_BLOCK;
+		BLOCKS = (num_ca_pools%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+		timer1.Start();
+			advance_calcium_cuda_opt<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
+							d_chan_Gk, d_chan_GkEk,
+							d_Vmid,
+							//d_capool_values,
+							d_chan_to_comp,d_capool_rowPtr,
+							//d_caConc_,
+							d_ca,
+							d_CaConcStruct_c_, // Dynamic array
+							d_CaConcStruct_CaBasal_, d_CaConcStruct_factor1_, d_CaConcStruct_factor2_, d_CaConcStruct_ceiling_, d_CaConcStruct_floor_, // Static array
+							//d_caActivation_values,
+							num_ca_pools);
+		timer1.Stop();
+		cudaDeviceSynchronize();
+		wpt_cum_time += timer1.Elapsed();
+
+		// SPMV approach.
+		BLOCKS = num_catarget_channels/THREADS_PER_BLOCK;
+		BLOCKS = (num_catarget_channels%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+
+		timer2.Start();
+			// Find indivudual values and use CSRMV to find caActivation Values
+			advance_calcium_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
+					d_chan_Gk, d_chan_GkEk,
+					d_Vmid,
+					d_capool_values, d_chan_to_comp,
+					num_catarget_channels);
+
+			cusparseDcsrmv(cusparse_handle,
+					CUSPARSE_OPERATION_NON_TRANSPOSE,
+					num_ca_pools, num_catarget_channels, num_catarget_channels ,
+					&alpha, cusparse_descr,
+					d_capool_values, d_capool_rowPtr, d_capool_colIndex, d_capool_onex,
+					&beta, d_caActivation_values);
+
+			BLOCKS = num_ca_pools/THREADS_PER_BLOCK;
+			BLOCKS = (num_ca_pools%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+
+			advance_calcium_conc_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_caConc_, d_ca, d_caActivation_values, num_ca_pools);
+		timer2.Stop();
+		cudaDeviceSynchronize();
+
+		spmv_cum_time += timer2.Elapsed();
+	}
+
+	// Restoring glory
+	cudaMemcpy(d_ca, d_ca_backup, num_ca_pools*sizeof(double), cudaMemcpyDeviceToDevice);
+	cudaMemcpy(d_CaConcStruct_c_, d_CaConcStruct_c_backup, num_ca_pools*sizeof(double), cudaMemcpyDeviceToDevice);
+	cudaMemcpy(d_caConc_, d_caConc_backup, sizeof(CaConcStruct)*num_ca_pools, cudaMemcpyDeviceToDevice);
+
+	if(wpt_cum_time < spmv_cum_time){
+		return ADVANCE_CALCIUM_WPT_APPROACH;
+	}else{
+		return ADVANCE_CALCIUM_SPMV_APPROACH;
+	}
+
 }
 
 #endif
