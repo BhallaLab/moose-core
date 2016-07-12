@@ -23,13 +23,15 @@ from libsbml import *
 import re
 from collections import Counter
 #from moose import wildcardFind, element, loadModel, ChemCompt, exists, Annotator, Pool, ZombiePool,PoolBase,CplxEnzBase,Function,ZombieFunction
+import networkx as nx
+#import matplotlib.pyplot as plt
 
 #ToDo:
 #	Table should be written
 #	Group's should be added
 #   x and y cordinates shd be added if exist
-
-def mooseWriteSBML(modelpath,filename):
+#	boundary condition for buffer pool having assignment statment constant shd be false
+def mooseWriteSBML(modelpath,filename,sceneitems=None):
 	sbmlDoc = SBMLDocument(3, 1)
 	filepath,filenameExt = os.path.split(filename)
 	if filenameExt.find('.') != -1:
@@ -54,17 +56,23 @@ def mooseWriteSBML(modelpath,filename):
 	cremodel_.setTimeUnits("second")
 	cremodel_.setExtentUnits("substance")
 	cremodel_.setSubstanceUnits("substance")
-	
+
+	if len(sceneitems):
+		srcdesConnection = {}
+        setupItem(modelpath,srcdesConnection)
+        meshEntry = setupMeshObj(modelpath)
+        cmin,cmax,sceneitems = autoCoordinates(meshEntry,srcdesConnection)
+
 	writeUnits(cremodel_)
 	modelAnno = writeSimulationAnnotation(modelpath)
 	if modelAnno:
 		cremodel_.setAnnotation(modelAnno)
 	compartexist = writeCompt(modelpath,cremodel_)
-	species = writeSpecies(modelpath,cremodel_,sbmlDoc)
+	species = writeSpecies(modelpath,cremodel_,sbmlDoc,sceneitems)
 	if species:
 		writeFunc(modelpath,cremodel_)
-	writeReac(modelpath,cremodel_)
-	writeEnz(modelpath,cremodel_)
+	writeReac(modelpath,cremodel_,sceneitems)
+	writeEnz(modelpath,cremodel_,sceneitems)
 
 	consistencyMessages = ""
 	SBMLok = validateModel( sbmlDoc )
@@ -79,10 +87,10 @@ def mooseWriteSBML(modelpath,filename):
 		cerr << "Errors encountered " << endl;
 		return -1,consistencyMessages
 
-def writeEnz(modelpath,cremodel_):
+def writeEnz(modelpath,cremodel_,sceneitems):
 	for enz in wildcardFind(modelpath+'/##[ISA=EnzBase]'):
 		enzannoexist = False
-		enzGpname = " "
+		enzGpnCorCol = " "
 		cleanEnzname = convertSpecialChar(enz.name) 
 		enzSubt = ()        
 
@@ -91,10 +99,20 @@ def writeEnz(modelpath,cremodel_):
 			notesE = Anno.notes
 			element = moose.element(enz)
 			ele = getGroupinfo(element)
-			if ele.className == "Neutral":
-				enzGpname = "<moose:Group> "+ ele.name + " </moose:Group>\n"
+			if ele.className == "Neutral" or sceneitems[element] or Anno.color or Anno.textColor:
 				enzannoexist = True
 
+			if enzannoexist :
+				if ele.className == "Neutral":
+					enzGpnCorCol = "<moose:Group> "+ ele.name + " </moose:Group>\n"
+				if sceneitems[element]:
+					v = sceneitems[element]
+					enzGpnCorCol = enzGpnCorCol+"<moose:xCord>"+str(v['x'])+"</moose:xCord>\n"+"<moose:yCord>"+str(v['y'])+"</moose:yCord>\n"
+				if Anno.color:
+					enzGpnCorCol = enzGpnCorCol+"<moose:bgColor>"+Anno.color+"</moose:bgColor>\n"
+				if Anno.textColor:
+					enzGpnCorCol = enzGpnCorCol+"<moose:textColor>"+Anno.textColor+"</moose:textColor>\n"
+				
 		if (enz.className == "Enz" or enz.className == "ZombieEnz"):
 			enzyme = cremodel_.createReaction()
 			if notesE != "":
@@ -108,10 +126,9 @@ def writeEnz(modelpath,cremodel_):
 			k1 = enz.k1
 			k2 = enz.k2
 			k3 = enz.k3
-
+			enzAnno = " "
 			enzAnno ="<moose:EnzymaticReaction>\n"
-			if enzannoexist:
-				enzAnno=enzAnno + enzGpname
+			
 			enzOut = enz.neighbors["enzOut"]
 			
 			if not enzOut:
@@ -141,8 +158,6 @@ def writeEnz(modelpath,cremodel_):
 				#rec_order = rec_order + noofSub
 				rec_order = noofSub
 				rate_law = rate_law +"*"+sRateLaw
-				
-		   
 
 			enzPrd = enz.neighbors["cplxDest"]
 			if not enzPrd:
@@ -156,6 +171,8 @@ def writeEnz(modelpath,cremodel_):
 			prd_order = noofPrd
 			enzAnno = enzAnno + "<moose:groupName>" + cleanEnzname + "_" + str(enz.getId().value) + "_" + str(enz.getDataIndex()) + "_" + "</moose:groupName>\n"
 			enzAnno = enzAnno+"<moose:stage>1</moose:stage>\n"
+			if enzannoexist:
+				enzAnno=enzAnno + enzGpnCorCol
 			enzAnno = enzAnno+ "</moose:EnzymaticReaction>"
 			enzyme.setAnnotation(enzAnno)
 			kl = enzyme.createKineticLaw()
@@ -196,6 +213,8 @@ def writeEnz(modelpath,cremodel_):
 				enzAnno2 = enzAnno2+"<moose:product>"+nameList_[i]+"</moose:product>\n"
 			enzAnno2 += "<moose:groupName>"+ cleanEnzname + "_" + str(enz.getId().value) + "_" + str(enz.getDataIndex())+"_" +"</moose:groupName>\n";
 			enzAnno2 += "<moose:stage>2</moose:stage> \n";
+			if enzannoexist:
+				enzAnno2 = enzAnno2 + enzGpnCorCol
 			enzAnno2 += "</moose:EnzymaticReaction>";
 			enzyme.setAnnotation( enzAnno2 );
 
@@ -207,7 +226,7 @@ def writeEnz(modelpath,cremodel_):
 			
 		elif(enz.className == "MMenz" or enz.className == "ZombieMMenz"):
 			enzyme = cremodel_.createReaction()
-			
+			enzAnno = " "
 			if notesE != "":
 				cleanNotesE= convertNotesSpecialChar(notesE)
 				notesStringE = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+ cleanNotesE + "\n\t </body>"
@@ -217,7 +236,8 @@ def writeEnz(modelpath,cremodel_):
 			enzyme.setFast ( False )
 			enzyme.setReversible( True)
 			if enzannoexist:
-				enzAnno = "<moose:EnzymaticReaction>\n" + enzGpname + "</moose:EnzymaticReaction>";
+				enzAnno = enzAnno + enzGpnCorCol
+				enzAnno = "<moose:EnzymaticReaction>\n" + enzGpnCorCol + "</moose:EnzymaticReaction>";
 				enzyme.setAnnotation(enzAnno)
 			Km = enz.numKm
 			kcat = enz.kcat
@@ -357,7 +377,7 @@ def listofname(reacSub,mobjEnz):
 		clean_name = convertSpecialChar(nameIndex)
 		if mobjEnz == True:
 			nameList_.append(clean_name)
-def writeReac(modelpath,cremodel_):
+def writeReac(modelpath,cremodel_,sceneitems):
 	for reac in wildcardFind(modelpath+'/##[ISA=ReacBase]'):
 		reaction = cremodel_.createReaction()
 		reacannoexist = False
@@ -375,24 +395,28 @@ def writeReac(modelpath,cremodel_):
 		reaction.setFast( False )
 		if moose.exists(reac.path+'/info'):
 			Anno = moose.Annotator(reac.path+'/info')
-			notesR = Anno.notes
-			if notesR != "":
-				cleanNotesR= convertNotesSpecialChar(notesR)
+			if Anno.notes != "":
+				cleanNotesR= convertNotesSpecialChar(Anno.notes)
 				notesStringR = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+ cleanNotesR + "\n\t </body>"
 				reaction.setNotes(notesStringR)
 			element = moose.element(reac)
 			ele = getGroupinfo(element)
-			if ele.className == "Neutral":
-				reacGpname = "<moose:Group>"+ ele.name + "</moose:Group>\n"
+			if ele.className == "Neutral" or sceneitems[element] or Anno.color or Anno.textColor:
 				reacannoexist = True
 			if reacannoexist :
 				reacAnno = "<moose:ModelAnnotation>\n"
-				if reacGpname:
-					reacAnno = reacAnno + reacGpname
+				if ele.className == "Neutral":
+					reacAnno = reacAnno + "<moose:Group>"+ ele.name + "</moose:Group>\n"
+				if sceneitems[element]:
+					v = sceneitems[element]
+					reacAnno = reacAnno+"<moose:xCord>"+str(v['x'])+"</moose:xCord>\n"+"<moose:yCord>"+str(v['y'])+"</moose:yCord>\n"
+				if Anno.color:
+					reacAnno = reacAnno+"<moose:bgColor>"+Anno.color+"</moose:bgColor>\n"
+				if Anno.textColor:
+					reacAnno = reacAnno+"<moose:textColor>"+Anno.textColor+"</moose:textColor>\n"
 				reacAnno = reacAnno+ "</moose:ModelAnnotation>"
 				#s1.appendAnnotation(XMLNode.convertStringToXMLNode(speciAnno))
 				reaction.setAnnotation(reacAnno)
-		
 		kl_s = sRL = pRL = ""
 		
 		reacSub = reac.neighbors["sub"]
@@ -492,7 +516,7 @@ def convertSpecialChar(str1):
 		str1 = str1.replace(i,j)
 	return str1
 	
-def writeSpecies(modelpath,cremodel_,sbmlDoc):
+def writeSpecies(modelpath,cremodel_,sbmlDoc,sceneitems):
 	#getting all the species 
 	for spe in wildcardFind(modelpath+'/##[ISA=PoolBase]'):
 		sName = convertSpecialChar(spe.name)
@@ -550,22 +574,29 @@ def writeSpecies(modelpath,cremodel_,sbmlDoc):
 			s1.setHasOnlySubstanceUnits( True )
 			if moose.exists(spe.path+'/info'):
 				Anno = moose.Annotator(spe.path+'/info')
-				notesS = Anno.notes
-				if notesS != "":
-					cleanNotesS= convertNotesSpecialChar(notesS)
+				if Anno.notes != "":
+					cleanNotesS= convertNotesSpecialChar(Anno.notes)
 					notesStringS = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+ cleanNotesS + "\n\t </body>"
 					s1.setNotes(notesStringS)
-			#FindGroupName
-			element = moose.element(spe)
-			ele = getGroupinfo(element)
-			if ele.className == "Neutral":
-				speciGpname = "<moose:Group>"+ ele.name + "</moose:Group>\n"
-				speciannoexist = True
-			if speciannoexist :
-				speciAnno = "<moose:ModelAnnotation>\n"
-				if speciGpname:
-					speciAnno = speciAnno + speciGpname
-				speciAnno = speciAnno+ "</moose:ModelAnnotation>"
+				
+				element = moose.element(spe)
+				ele = getGroupinfo(element)
+				if ele.className == "Neutral" or sceneitems[element] or Anno.color or Anno.textColor:
+					speciannoexist = True
+			
+				if speciannoexist :
+					speciAnno = "<moose:ModelAnnotation>\n"
+					if ele.className == "Neutral":
+						speciAnno = speciAnno + "<moose:Group>"+ ele.name + "</moose:Group>\n"
+					if sceneitems[element]:
+						v = sceneitems[element]
+						speciAnno = speciAnno+"<moose:xCord>"+str(v['x'])+"</moose:xCord>\n"+"<moose:yCord>"+str(v['y'])+"</moose:yCord>\n"
+					if Anno.color:
+						speciAnno = speciAnno+"<moose:bgColor>"+Anno.color+"</moose:bgColor>\n"
+					if Anno.textColor:
+						speciAnno = speciAnno+"<moose:textColor>"+Anno.textColor+"</moose:textColor>\n"
+					speciAnno = speciAnno+ "</moose:ModelAnnotation>"
+					s1.setAnnotation(speciAnno)
 	return True
 
 def writeCompt(modelpath,cremodel_):
@@ -711,7 +742,174 @@ def validateModel( sbmlDoc ):
 		print validationMessages;
 	return ( numConsistencyErrors == 0 and numValidationErrors == 0)
 	#return ( numConsistencyErrors == 0 and numValidationErrors == 0, consistencyMessages)
+def setupItem(modelPath,cntDict):
+    '''This function collects information of what is connected to what. \
+    eg. substrate and product connectivity to reaction's and enzyme's \
+    sumtotal connectivity to its pool are collected '''
+    #print " setupItem"
+    sublist = []
+    prdlist = []
+    zombieType = ['ReacBase','EnzBase','Function','StimulusTable']
+    for baseObj in zombieType:
+        path = '/##[ISA='+baseObj+']'
+        if modelPath != '/':
+            path = modelPath+path
+        if ( (baseObj == 'ReacBase') or (baseObj == 'EnzBase')):
+            for items in wildcardFind(path):
+                sublist = []
+                prdlist = []
+                uniqItem,countuniqItem = countitems(items,'subOut')
+                subNo = uniqItem
+                for sub in uniqItem: 
+                    sublist.append((element(sub),'s',countuniqItem[sub]))
 
+                uniqItem,countuniqItem = countitems(items,'prd')
+                prdNo = uniqItem
+                if (len(subNo) == 0 or len(prdNo) == 0):
+                    print "Substrate Product is empty ",path, " ",items
+                    
+                for prd in uniqItem:
+                    prdlist.append((element(prd),'p',countuniqItem[prd]))
+                
+                if (baseObj == 'CplxEnzBase') :
+                    uniqItem,countuniqItem = countitems(items,'toEnz')
+                    for enzpar in uniqItem:
+                        sublist.append((element(enzpar),'t',countuniqItem[enzpar]))
+                    
+                    uniqItem,countuniqItem = countitems(items,'cplxDest')
+                    for cplx in uniqItem:
+                        prdlist.append((element(cplx),'cplx',countuniqItem[cplx]))
+
+                if (baseObj == 'EnzBase'):
+                    uniqItem,countuniqItem = countitems(items,'enzDest')
+                    for enzpar in uniqItem:
+                        sublist.append((element(enzpar),'t',countuniqItem[enzpar]))
+                cntDict[items] = sublist,prdlist
+        elif baseObj == 'Function':
+            for items in wildcardFind(path):
+                sublist = []
+                prdlist = []
+                item = items.path+'/x[0]'
+                uniqItem,countuniqItem = countitems(item,'input')
+                for funcpar in uniqItem:
+                    sublist.append((element(funcpar),'sts',countuniqItem[funcpar]))
+                
+                uniqItem,countuniqItem = countitems(items,'valueOut')
+                for funcpar in uniqItem:
+                    prdlist.append((element(funcpar),'stp',countuniqItem[funcpar]))
+                cntDict[items] = sublist,prdlist
+        else:
+            for tab in wildcardFind(path):
+                tablist = []
+                uniqItem,countuniqItem = countitems(tab,'output')
+                for tabconnect in uniqItem:
+                    tablist.append((element(tabconnect),'tab',countuniqItem[tabconnect]))
+                cntDict[tab] = tablist
+def countitems(mitems,objtype):
+    items = []
+    #print "mitems in countitems ",mitems,objtype
+    items = element(mitems).neighbors[objtype]
+    uniqItems = set(items)
+    countuniqItems = Counter(items)
+    return(uniqItems,countuniqItems)
+
+def setupMeshObj(modelRoot):
+    ''' Setup compartment and its members pool,reaction,enz cplx under self.meshEntry dictionaries \ 
+    self.meshEntry with "key" as compartment, 
+    value is key2:list where key2 represents moose object type,list of objects of a perticular type
+    e.g self.meshEntry[meshEnt] = { 'reaction': reaction_list,'enzyme':enzyme_list,'pool':poollist,'cplx': cplxlist }
+    '''
+    meshEntry = {}
+    if meshEntry:
+        meshEntry.clear()
+    else:
+        meshEntry = {}
+    meshEntryWildcard = '/##[ISA=ChemCompt]'
+    if modelRoot != '/':
+        meshEntryWildcard = modelRoot+meshEntryWildcard
+    for meshEnt in wildcardFind(meshEntryWildcard):
+        mollist = []
+        cplxlist = []
+        mol_cpl  = wildcardFind(meshEnt.path+'/##[ISA=PoolBase]')
+        funclist = wildcardFind(meshEnt.path+'/##[ISA=Function]')
+        enzlist  = wildcardFind(meshEnt.path+'/##[ISA=EnzBase]')
+        realist  = wildcardFind(meshEnt.path+'/##[ISA=ReacBase]')
+        tablist  = wildcardFind(meshEnt.path+'/##[ISA=StimulusTable]')
+        if mol_cpl or funclist or enzlist or realist or tablist:
+            for m in mol_cpl:
+                if isinstance(element(m.parent),CplxEnzBase):
+                    cplxlist.append(m)
+                elif isinstance(element(m),PoolBase):
+                    mollist.append(m)
+                    
+            meshEntry[meshEnt] = {'enzyme':enzlist,
+                                  'reaction':realist,
+                                  'pool':mollist,
+                                  'cplx':cplxlist,
+                                  'table':tablist,
+                                  'function':funclist
+                                  }
+    return(meshEntry)
+def autoCoordinates(meshEntry,srcdesConnection):
+    
+    G = nx.Graph()
+    for cmpt,memb in meshEntry.items():
+        for enzObj in find_index(memb,'enzyme'):
+            G.add_node(enzObj.path)
+    for cmpt,memb in meshEntry.items():
+        for poolObj in find_index(memb,'pool'):
+            G.add_node(poolObj.path)
+        for cplxObj in find_index(memb,'cplx'):
+            G.add_node(cplxObj.path)
+            G.add_edge((cplxObj.parent).path,cplxObj.path)
+        for reaObj in find_index(memb,'reaction'):
+            G.add_node(reaObj.path)
+        
+    for inn,out in srcdesConnection.items():
+        if (inn.className =='ZombieReac'): arrowcolor = 'green'
+        elif(inn.className =='ZombieEnz'): arrowcolor = 'red'
+        else: arrowcolor = 'blue'
+        if isinstance(out,tuple):
+            if len(out[0])== 0:
+                print inn.className + ':' +inn.name + "  doesn't have input message"
+            else:
+                for items in (items for items in out[0] ):
+                    G.add_edge(element(items[0]).path,inn.path)
+            if len(out[1]) == 0:
+                print inn.className + ':' + inn.name + "doesn't have output mssg"
+            else:
+                for items in (items for items in out[1] ):
+                    G.add_edge(inn.path,element(items[0]).path)
+        elif isinstance(out,list):
+            if len(out) == 0:
+                print "Func pool doesn't have sumtotal"
+            else:
+                for items in (items for items in out ):
+                    G.add_edge(element(items[0]).path,inn.path)
+    
+    nx.draw(G,pos=nx.spring_layout(G))
+
+    #plt.savefig('/home/harsha/Trash/netwrokXtest.png')
+    
+    position = nx.spring_layout(G)
+    sceneitems = {}
+    xycord = []
+
+    for key,value in position.items():
+        xycord.append(value[0])
+        xycord.append(value[1])
+        sceneitems[element(key)] = {'x':value[0],'y':value[1]}
+    cmin = min(xycord)
+    cmax = max(xycord)
+    
+    return cmin,cmax,sceneitems
+
+def find_index(value, key):
+    """ Value.get(key) to avoid expection which would raise if empty value in dictionary for a given key """
+    if value.get(key) != None:
+        return value.get(key)
+    else:
+        raise ValueError('no dict with the key found')
 if __name__ == "__main__":
 
 	filepath = sys.argv[1]
