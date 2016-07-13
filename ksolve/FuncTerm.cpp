@@ -167,7 +167,7 @@ void FuncTerm::evalPool( double* S, double t ) const
         try 
         {
 //#pragma omp critical 
-#pragma omp atomic write
+//#pragma omp atomic write
                 S[ target_] = parser_.Eval() * volScale_;
         }
        catch ( mu::Parser::exception_type & e )

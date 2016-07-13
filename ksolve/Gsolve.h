@@ -27,8 +27,6 @@ int NTHREADS  = atoi(env_value1);
 #include <pthread.h>
 #include <semaphore.h>
 
-omp_lock_t gsolveUpdate;
-
 struct pthreadGsolveWrap
 {
         long tid;

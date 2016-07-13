@@ -537,8 +537,7 @@ void Gsolve::process( const Eref& e, ProcPtr p )
    }
 	 
            
-#pragma omp parallel 
-#pragma omp for schedule(guided, cellsPerThread) firstprivate(p, sysPtr)
+#pragma omp parallel for schedule(guided, cellsPerThread) num_threads(NTHREADS)
    for(int i = 0; i < NTHREADS; i++)
    {
            for(int j = i*blockSize; j < (i*blockSize)+blockSize; j++)
@@ -547,7 +546,11 @@ void Gsolve::process( const Eref& e, ProcPtr p )
    }
    for(int j = blockSize*NTHREADS; j < poolSize; j++)
            pools_[j].advance( p, sysPtr );
-
+//
+// Divide the iterations regularly 
+//#pragma omp parallel for schedule(static) num_threads(NTHREADS)
+//   for(int j = 0; j < poolSize; j++)
+//           pools_[j].advance( p, sysPtr );
 
 #endif //_GSOLVE_OPENMP
 

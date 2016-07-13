@@ -18,8 +18,8 @@ __status__           = "Development"
 
 run_time = 1 * 24 * 60 * 60
 
-N_CaMK = 4  # range 4 - 20 (this is ring) a holoenzyme = 2 rings
-N_PP1 =  4  # N_CaMK
+N_CaMK = 10  # range 4 - 20 (this is ring) a holoenzyme = 2 rings
+N_PP1 =  10  # N_CaMK
 
 #volume = 5e-19  # m^3
 volume = 1e-20  # m^3
