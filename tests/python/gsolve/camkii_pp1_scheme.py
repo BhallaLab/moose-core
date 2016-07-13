@@ -55,9 +55,9 @@ def init( ):
     global args
     moose.Neutral( model_path_ )
     compt_ = moose.CubeMesh( compt_path_ )
-    compt_.nx = 20
-    compt_.ny = 20
-    compt_.nz = 20
+    compt_.nx = 10
+    compt_.ny = 10
+    compt_.nz = 10
     print('[INFO] Volume of PSD: %s' % args['volume'])
     compt_.volume = float( args['volume'] )
     for st in range(7):
