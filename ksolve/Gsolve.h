@@ -19,9 +19,9 @@ class Stoich;
 const char *env_value1 = getenv("NUM_THREADS");
 int NTHREADS  = atoi(env_value1);
 
-#define _GSOLVE_SEQ 1
+#define _GSOLVE_SEQ 0
 #define _GSOLVE_OPENMP 0
-#define _GSOLVE_PTHREADS 0
+#define _GSOLVE_PTHREADS 1
 
 #if _GSOLVE_PTHREADS
 #include <pthread.h>
