@@ -99,16 +99,17 @@ def mooseReadSBML(filepath,loadpath):
 					errorFlag = createCompartment(basePath,model,comptSbmlidMooseIdMap)
 					if errorFlag:
 						specInfoMap = {}
-						errorFlag = createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap)
+						errorFlag = createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap,modelAnnotaInfo)
 						if errorFlag:
 							errorFlag = createRules(model,specInfoMap,globparameterIdValue)
 							if errorFlag:
-								errorFlag = createReaction(model,specInfoMap,modelAnnotaInfo)
+								errorFlag,msg = createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue)
+								
 					if not errorFlag:
-						print " errorFlag ",errorFlag
+						print msg
 						#Any time in the middle if SBML does not read then I delete everything from model level
 						#This is important as while reading in GUI the model will show up untill built which is not correct
-						print "Deleted rest of the model"
+						#print "Deleted rest of the model"
 						moose.delete(basePath)
 				return baseId;
 
@@ -187,6 +188,35 @@ def populatedict(annoDict,label,value):
 	else:
 		annoDict[label]= {value}
 
+def getObjAnnotation(obj,modelAnnotationInfo):
+	name = obj.getId()
+	name = name.replace(" ","_space_")
+	#modelAnnotaInfo= {}
+	annotateMap = {}
+	if (obj.getAnnotation() != None):
+		annoNode = obj.getAnnotation()
+		for ch in range(0,annoNode.getNumChildren()):
+			childNode = annoNode.getChild(ch)
+			if (childNode.getPrefix() == "moose" and childNode.getName() == "ModelAnnotation"):
+				sublist = []
+				for gch in range(0,childNode.getNumChildren()):
+					grandChildNode = childNode.getChild(gch)
+					nodeName = grandChildNode.getName()
+					nodeValue = ""
+					if (grandChildNode.getNumChildren() == 1):
+						nodeValue = grandChildNode.getChild(0).toXMLString()
+					else:
+						print "Error: expected exactly ONE child of ", nodeName
+					
+					if nodeName == "xCord":
+						annotateMap[nodeName] = nodeValue
+					if nodeName == "yCord":
+						annotateMap[nodeName] = nodeValue
+					if nodeName == "bgColor":
+						annotateMap[nodeName] = nodeValue
+					if nodeName == "textColor":
+						annotateMap[nodeName] = nodeValue
+	return annotateMap
 def getModelAnnotation(obj,modelAnnotaInfo):
 	name = obj.getId()
 	name = name.replace(" ","_space_")
@@ -265,7 +295,7 @@ def getModelAnnotation(obj,modelAnnotaInfo):
 	return(groupName)
 
 
-def createReaction(model,specInfoMap,modelAnnotaInfo):
+def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 	# print " reaction "
 	# Things done for reaction
 	# --Reaction is not created, if substrate and product is missing
@@ -277,7 +307,7 @@ def createReaction(model,specInfoMap,modelAnnotaInfo):
 
 	errorFlag = True
 	reactSBMLIdMooseId = {}
-
+	msg = ""	
 	for ritem in range(0,model.getNumReactions()):
 		reactionCreated = False
 		groupName = ""
@@ -309,7 +339,7 @@ def createReaction(model,specInfoMap,modelAnnotaInfo):
 			
 			elif (reac.getNumModifiers() > 0):
 				reactionCreated = setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId)
-				print " reactionCreated after enz ",reactionCreated
+				#print " reactionCreated after enz ",reactionCreated
 
 			elif (numRcts):
 				# In moose, reactions compartment are decided from first Substrate compartment info
@@ -335,16 +365,96 @@ def createReaction(model,specInfoMap,modelAnnotaInfo):
 			if reactionCreated:
 				if (reac.isSetNotes):
 					pullnotes(reac,reaction_)
+					reacAnnoInfo = {}
+				reacAnnoInfo = getObjAnnotation(reac,modelAnnotaInfo)
+				if reacAnnoInfo:
+					if not moose.exists(reaction_.path+'/info'):
+						reacInfo = moose.Annotator(reaction_.path+'/info')
+					else:
+						reacInfo = moose.element(reaction_.path+'/info')
+					for k,v in reacAnnoInfo.items():
+						if k == 'xCord':
+							reacInfo.x = float(v)
+						elif k == 'yCord':
+							reacInfo.y = float(v)
+						elif k == 'bgColor':
+							reacInfo.color = v
+						else:
+							reacInfo.textColor = v
+
 				addSubPrd(reac,rName,"sub",reactSBMLIdMooseId,specInfoMap)
 				addSubPrd(reac,rName,"prd",reactSBMLIdMooseId,specInfoMap)
-	# print "react ",reactSBMLIdMooseId
-	return errorFlag
+				if reac.isSetKineticLaw():
+					klaw=reac.getKineticLaw();
+					mmsg = ""
+					errorFlag, mmsg = getKLaw(model,klaw,rev,globparameterIdValue,specInfoMap)
+					if not errorFlag:
+						msg = "Error while importing reaction \""+rName+"\"\n Error in kinetics law "
+						if mmsg != "":
+							msg = msg+mmsg
+						return(errorFlag,msg)
+	return (errorFlag,msg)
+
+def getKLaw( model, klaw, rev,globparameterIdValue,specMapList):
+    parmValueMap = {}
+    amt_Conc = "amount";
+    value = 0.0
+    np = klaw. getNumParameters();
+    
+    for pi in range(0, np):
+        p = klaw.getParameter(pi)
+        if ( p.isSetId() ):
+            ids = p.getId()
+        if ( p.isSetValue() ):
+            value = p.getValue()
+        parmValueMap[ids] = value
+    ruleMemlist = []
+    flag = getMembers(klaw.getMath(),ruleMemlist)
+    index = 0 
+    kfparm = ""
+    kbparm = ""
+    kfvalue = 0
+    kbvalue = 0 
+    kfp = ""
+    kbp = ""
+    mssgstr =  ""
+    for i in ruleMemlist:
+    	if parmValueMap.has_key(i) or globparameterIdValue.has_key(i):
+    		if index == 0:
+    			kfparm = i
+    			if parmValueMap.has_key(i):
+    				kfvalue = parmValueMap[i]
+    				kfp = klaw.getParameter(kfparm)
+    			else:
+    				kfvalue = globparameterIdValue[i]
+    				kfp = model.getParameter(kfparm)
+    		elif index == 1:
+    			kbparm = i
+    			if parmValueMap.has_key(i):
+    				kbvalue = parmValueMap[i]
+    				kbp = klaw.getParameter(kbparm)
+    			else:
+    				kbvalue = globparameterIdValue[i]
+    				kbp = model.getParameter(kbparm)
+    		index += 1
+    	elif not specMapList.has_key(i):
+    		mssgstr = "\""+i+ "\" is not defined "
+    		return ( False, mssgstr)
+    if kfp != "":
+    	print " unit set for rate law kfp ",kfparm, " ",kfp.isSetUnits()
+    	if kfp.isSetUnits():
+    		kfud = kfp.getDerivedUnitDefinition();
+    		print " kfud ",kfud
+    if kbp != "":
+    	print " unit set for rate law kbp ",kbparm, " ",kbp.isSetUnits()
+
+    return (True,mssgstr)
 
 def getMembers(node,ruleMemlist):
 	if node.getType() == libsbml.AST_PLUS:
 		if node.getNumChildren() == 0:
 			print ("0")
-			return
+			return False
 		getMembers(node.getChild(0),ruleMemlist)
 		for i in range(1,node.getNumChildren()):
 			# addition
@@ -355,17 +465,29 @@ def getMembers(node,ruleMemlist):
 	elif node.getType() == libsbml.AST_NAME:
 		#This will be the ci term"
 		ruleMemlist.append(node.getName())
-
+	elif node.getType() == libsbml.AST_MINUS:
+		if node.getNumChildren() == 0:
+			print("0")
+			return False
+		else:
+			lchild = node.getLeftChild();
+			getMembers(lchild,ruleMemlist)
+			rchild = node.getRightChild();
+			getMembers(rchild,ruleMemlist)
+	
 	elif node.getType() == libsbml.AST_TIMES:
 		if node.getNumChildren() == 0:
 			print ("0")
-			return
+			return False
 		getMembers(node.getChild(0),ruleMemlist)
 		for i in range(1,node.getNumChildren()):
 			# Multiplication
 			getMembers(node.getChild(i),ruleMemlist)
 	else:
 		print " this case need to be handled"
+	# if len(ruleMemlist) > 2:
+	# 	print "Sorry! for now MOOSE cannot handle more than 2 parameters"
+ #        return True
 
 def createRules(model,specInfoMap,globparameterIdValue):
 	for r in range(0,model.getNumRules()):
@@ -424,11 +546,12 @@ def pullnotes(sbmlId,mooseId):
 			objInfo = moose.element(mooseId.path+'/info')
 		objInfo.notes = notes
 
-def createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap):
+def createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap,modelAnnotaInfo):
 	# ToDo:
 	# - Need to add group name if exist in pool
 	# - Notes
 	# print "species "
+
 	if not 	(model.getNumSpecies()):
 		return False
 	else:
@@ -436,7 +559,6 @@ def createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap):
 			spe = model.getSpecies(sindex)
 			sName = None
 			sId = spe.getId()
-
 			if spe.isSetName():
 				sName = spe.getName()
 				sName = sName.replace(" ","_space_")
@@ -453,7 +575,7 @@ def createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap):
 			hasonlySubUnit = spe.getHasOnlySubstanceUnits();
 			# "false": is {unit of amount}/{unit of size} (i.e., concentration or density). 
 			# "true": then the value is interpreted as having a unit of amount only.
-
+			
 			if (boundaryCondition):
 				poolId = moose.BufPool(comptEl+'/'+sName)
 			else:
@@ -461,7 +583,23 @@ def createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap):
 			
 			if (spe.isSetNotes):
 				pullnotes(spe,poolId)
-					
+			specAnnoInfo = {}
+			specAnnoInfo = getObjAnnotation(spe,modelAnnotaInfo)
+			if specAnnoInfo:
+				if not moose.exists(poolId.path+'/info'):
+					poolInfo = moose.Annotator(poolId.path+'/info')
+				else:
+					poolInfo = moose.element(poolId.path+'/info')
+				for k,v in specAnnoInfo.items():
+					if k == 'xCord':
+						poolInfo.x = float(v)
+					elif k == 'yCord':
+						poolInfo.y = float(v)
+					elif k == 'bgColor':
+						poolInfo.color = v
+					else:
+						poolInfo.textColor = v
+
 			specInfoMap[sId] = {"Mpath" : poolId, "const" : constant, "bcondition" : boundaryCondition, "hassubunit" : hasonlySubUnit, "comptId" : comptSbmlidMooseIdMap[comptId]["MooseId"]}
 			initvalue = 0.0
 			unitfactor,unitset,unittype = transformUnit(spe,hasonlySubUnit)
@@ -509,7 +647,9 @@ def createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap):
 							break
 				if not (found):
 					print "Invalid SBML: Either initialConcentration or initialAmount must be set or it should be found in assignmentRule but non happening for ",sName
-					return False	
+					return False
+
+
 	return True
 
 def transformUnit(unitForObject,hasonlySubUnit=False):
@@ -569,7 +709,7 @@ def transformUnit(unitForObject,hasonlySubUnit=False):
 					unittype = "Item"
 		else:
 			lvalue = 1.0
-		print " end of the func lvaue ",lvalue
+		#print " end of the func lvaue ",lvalue
 	return (lvalue,unitset,unittype)
 def createCompartment(basePath,model,comptSbmlidMooseIdMap):
 	#ToDoList : Check what should be done for the spaitialdimension is 2 or 1, area or length
