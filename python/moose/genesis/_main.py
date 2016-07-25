@@ -212,19 +212,25 @@ def setupMeshObj(modelRoot):
                                   }
     return(meshEntry)
 def autoCoordinates(meshEntry,srcdesConnection):
-    
     G = nx.Graph()
     for cmpt,memb in meshEntry.items():
         for enzObj in find_index(memb,'enzyme'):
-            G.add_node(enzObj.path)
+            #G.add_node(enzObj.path)
+            G.add_node(enzObj.path,label=enzObj.name,shape='ellipse',color='',style='filled',fontname='Helvetica',fontsize=12,fontcolor='blue')
     for cmpt,memb in meshEntry.items():
         for poolObj in find_index(memb,'pool'):
-            G.add_node(poolObj.path)
+            #G.add_node(poolObj.path)
+            G.add_node(poolObj.path,label = poolObj.name,shape = 'box',color = '',style = 'filled',fontname = 'Helvetica',fontsize = 12,fontcolor = 'blue')
         for cplxObj in find_index(memb,'cplx'):
-            G.add_node(cplxObj.path)
-            G.add_edge((cplxObj.parent).path,cplxObj.path)
+            pass
+            #G.add_node(cplxObj.path)
+            #G.add_edge((cplxObj.parent).path,cplxObj.path)
         for reaObj in find_index(memb,'reaction'):
-            G.add_node(reaObj.path)
+            #G.add_node(reaObj.path)
+            G.add_node(reaObj.path,label=reaObj.name,shape='record',color='')
+        for funcObj in find_index(memb,'function'):
+            G.add_node(poolObj.path,label = funcObj.name,shape = 'box',color = 'red',style = 'filled',fontname = 'Helvetica',fontsize = 12,fontcolor = 'blue')
+
         
     for inn,out in srcdesConnection.items():
         if (inn.className =='ZombieReac'): arrowcolor = 'green'
@@ -248,10 +254,9 @@ def autoCoordinates(meshEntry,srcdesConnection):
                 for items in (items for items in out ):
                     G.add_edge(element(items[0]).path,inn.path)
     
-    nx.draw(G,pos=nx.spring_layout(G))
-    #plt.savefig('/home/harsha/Desktop/netwrokXtest.png')
-    
-    position = nx.spring_layout(G)
+    position = nx.pygraphviz_layout(G, prog = 'dot')
+    #agraph = nx.to_agraph(G)
+    #agraph.draw("/home/harsha/Trash/writetogenesis.png", format = 'png', prog = 'dot')
     sceneitems = {}
     xycord = []
 
