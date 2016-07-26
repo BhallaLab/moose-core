@@ -901,9 +901,7 @@ def setupMeshObj(modelRoot):
     return(meshEntry)
 
 def autoCoordinates(meshEntry,srcdesConnection):
-    import pygraphviz as pgv
     G = nx.Graph()
-    #G = pgv.AGraph(fontname='Helvetica',fontsize=9,strict=False,directed=True)
     for cmpt,memb in meshEntry.items():
         for enzObj in find_index(memb,'enzyme'):
             G.add_node(enzObj.path,label='',shape='ellipse',color='',style='filled',fontname='Helvetica',fontsize=12,fontcolor='blue')
@@ -925,19 +923,25 @@ def autoCoordinates(meshEntry,srcdesConnection):
                 print inn.className + ':' +inn.name + "  doesn't have input message"
             else:
                 for items in (items for items in out[0] ):
-                    G.add_edge(element(items[0]).path,inn.path)
+                	G.add_edge(element(items[0]).path,inn.path)
+                	
             if len(out[1]) == 0:
                 print inn.className + ':' + inn.name + "doesn't have output mssg"
             else:
                 for items in (items for items in out[1] ):
-                    G.add_edge(inn.path,element(items[0]).path)
+                	G.add_edge(inn.path,element(items[0]).path)
+                	
         elif isinstance(out,list):
             if len(out) == 0:
                 print "Func pool doesn't have sumtotal"
             else:
                 for items in (items for items in out ):
-                    G.add_edge(element(items[0]).path,inn.path)
-    position = nx.pygraphviz_layout(G, prog = 'dot')
+                	G.add_edge(element(items[0]).path,inn.path)
+
+    position = nx.graphviz_layout(G,prog='dot')
+
+    #position = nx.pygraphviz_layout(G, prog = 'dot')
+    #position = nx.spring_layout(G)
     #agraph = nx.to_agraph(G)
     #agraph.draw("~/out.png", format = 'png', prog = 'dot')
 
