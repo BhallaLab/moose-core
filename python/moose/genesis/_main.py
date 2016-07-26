@@ -254,9 +254,9 @@ def autoCoordinates(meshEntry,srcdesConnection):
                 for items in (items for items in out ):
                     G.add_edge(element(items[0]).path,inn.path)
     
-    position = nx.pygraphviz_layout(G, prog = 'dot')
+    position = nx.graphviz_layout(G, prog = 'dot')
     #agraph = nx.to_agraph(G)
-    #agraph.draw("/home/harsha/Trash/writetogenesis.png", format = 'png', prog = 'dot')
+    #agraph.draw("writetogenesis.png", format = 'png', prog = 'dot')
     sceneitems = {}
     xycord = []
 
@@ -266,7 +266,6 @@ def autoCoordinates(meshEntry,srcdesConnection):
         sceneitems[element(key)] = {'x':value[0],'y':value[1]}
     cmin = min(xycord)
     cmax = max(xycord)
-    
     return cmin,cmax,sceneitems
 
 def find_index(value, key):
