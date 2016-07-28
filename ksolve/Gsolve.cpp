@@ -26,6 +26,8 @@
 #include "Gsolve.h"
 
 #define SIMPLE_ROUNDING 0
+    
+//            cout << "lpoolArray = " << lpoolArray << "\t startIndex = " << startIndex << "\t endIndex = " << endIndex << "\t blockSize = " << blockSize << "\t sysP = " << sysP << endl;
 
 const unsigned int OFFNODE = ~0;
 
@@ -38,9 +40,9 @@ extern "C" void* call_func(void* f)
         int localId = w->tid;
         bool* destroySignal = w->destroySig;
 
-        sem_wait(w->sMain);
         while(!*destroySignal)
         {
+                sem_wait(w->sMain);
                 int blockSize = *(w->blockSize);
                 ProcPtr p = *(w->P);
                 GssaSystem* sysP = *(w->sysPtr);
@@ -48,12 +50,14 @@ extern "C" void* call_func(void* f)
                 int endIndex = startIndex + blockSize;
                 GssaVoxelPools* lpoolArray = *(w->poolsIndex);
 
+
                 for(int j = startIndex; j < endIndex; j++)
                         lpoolArray[j].advance(p, sysP);
 
                 sem_post(w->sThread);
-                sem_wait(w->sMain);
         }
+
+        pthread_exit(NULL);
 
    return NULL;
 }
@@ -277,9 +281,13 @@ Gsolve::Gsolve()
    *destroySignal = false;
         
    pthreadBlock = new int;
-   poolArray_ = new GssaVoxelPools*;
-   sPtr = new GssaSystem*;
    pthreadP = new ProcPtr;
+   
+   poolArray_ = new GssaVoxelPools*;
+   *poolArray_ = new GssaVoxelPools;
+
+   sPtr = new GssaSystem*;
+   *sPtr = new GssaSystem;
 
    for(long i = 0; i < NTHREADS; i++)
    {
@@ -505,16 +513,18 @@ void Gsolve::process( const Eref& e, ProcPtr p )
    }
 
    int poolSize = pools_.size();
-   GssaSystem* sysPtr = &sys_;
-   GssaVoxelPools* poolsArray = &pools_[0];
-
+   *sPtr = &sys_;
+   *poolArray_ = &pools_[0];
+                
    int blz = poolSize/NTHREADS;
+   *pthreadBlock = blz;
+   *pthreadP = p;
 
 	for(int i = 0; i < NTHREADS; i++)
 		   sem_post(&mainSemaphor[i]); //Send signal to the threads to start
 
    for(int j = NTHREADS*blz; j < poolSize; j++)
-           poolsArray[j].advance( p, sysPtr);
+           pools_[j].advance( p, &sys_);
 
 	for(int i = 0; i < NTHREADS; i++)
 		   sem_wait(&threadSemaphor[i]); // Wait for threads to finish their work
@@ -533,21 +543,22 @@ void Gsolve::process( const Eref& e, ProcPtr p )
            cellsPerThread = 1;
            cout << endl << "OpenMP parallelism: Using parallel-for in GSOLVE " << endl;
            cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
-
    }
 	 
-           
-#pragma omp parallel 
-#pragma omp for schedule(guided, cellsPerThread) firstprivate(p, sysPtr)
-   for(int i = 0; i < NTHREADS; i++)
-   {
-           for(int j = i*blockSize; j < (i*blockSize)+blockSize; j++)
-                   pools_[j].advance( p, sysPtr );
+//#pragma omp parallel for schedule(static) num_threads(NTHREADS)
+//   for(int i = 0; i < NTHREADS; i++)
+//   {
+//           for(int j = i*blockSize; j < (i*blockSize)+blockSize; j++)
+//                   pools_[j].advance( p, sysPtr );
+//
+//   }
+//   for(int j = blockSize*NTHREADS; j < poolSize; j++)
+//           pools_[j].advance( p, sysPtr );
 
-   }
-   for(int j = blockSize*NTHREADS; j < poolSize; j++)
+//#pragma omp parallel for schedule(static) num_threads(NTHREADS)
+#pragma omp for
+   for(int j = 0; j < poolSize; j++)
            pools_[j].advance( p, sysPtr );
-
 
 #endif //_GSOLVE_OPENMP
 

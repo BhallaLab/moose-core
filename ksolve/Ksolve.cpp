@@ -516,6 +516,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         return;
 
     int poolSize = pools_.size(); //Find out the size of the vector
+    int blockSize = poolSize/NTHREADS;
     VoxelPools* poolArray = &pools_[0];
 
     // First, handle incoming diffusion values, update S with those.
@@ -550,16 +551,36 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 	 static int cellsPerThread = 0; // Used for printing...
 	 if(!cellsPerThread)
 	 {
-		    cellsPerThread = 2;
+		    cellsPerThread = 1;
 		    cout << endl << "OpenMP parallelism: Using parallel-for " << endl;
 		    cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
 	 }
 
-#pragma omp parallel num_threads(NTHREADS) shared(poolSize) if(poolSize > NTHREADS) 
-#pragma omp for schedule(dynamic, 2)
+    omp_set_dynamic(0);
+    omp_set_num_threads(NTHREADS);
+//#pragma omp parallel for schedule(static, cellsPerThread) num_threads(NTHREADS) default(shared)
+#pragma omp parallel num_threads(NTHREADS) default(shared)
+#pragma omp for 
     for (int j = 0; j < poolSize; j++ )
+    {
         poolArray[j].advance( p );
+    }
 
+//#pragma omp parallel for schedule(static, 1) num_threads(NTHREADS) default(shared)
+//   for(int i = 0; i < NTHREADS; i++)
+//   {
+//           for(int j = i*blockSize; j < (i*blockSize)+blockSize; j++)
+//                   pools_[j].advance( p );
+//
+//   }
+//
+//   for(int j = blockSize*NTHREADS; j < poolSize; j++)
+//           pools_[j].advance( p );
+
+    auto cpu = sched_getcpu();
+    std::ostringstream os;
+    os<<"\nThread "<<omp_get_thread_num()<<" on cpu "<<sched_getcpu()<<std::endl;
+    std::cout<<os.str()<<std::flush;
 #endif //_KSOLVE_OPENMP
 
 

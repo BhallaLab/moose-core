@@ -19,15 +19,13 @@ class Stoich;
 const char *env_value1 = getenv("NUM_THREADS");
 int NTHREADS  = atoi(env_value1);
 
-#define _GSOLVE_SEQ 0
-#define _GSOLVE_OPENMP 1
+#define _GSOLVE_SEQ 1
+#define _GSOLVE_OPENMP 0
 #define _GSOLVE_PTHREADS 0
 
 #if _GSOLVE_PTHREADS
 #include <pthread.h>
 #include <semaphore.h>
-
-omp_lock_t gsolveUpdate;
 
 struct pthreadGsolveWrap
 {
