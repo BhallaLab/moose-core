@@ -346,12 +346,18 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
 endif()
 
 if(WITH_OPENMP)
-    find_package(OpenMP REQUIRED)
-    MESSAGE("++ OpenMPI support is ON")
-    add_definitions(-DUSE_OPENMPI -O1)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${-pthread}")
+        #    find_package(OpenMP REQUIRED)
+        #    MESSAGE("++ OpenMPI support is ON")
+        #    add_definitions(-DUSE_OPENMPI -O1)
+        #    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+        #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+
+    find_package(OpenMP)
+    if (OPENMP_FOUND)
+            message(STATUS "FOUND OPENMP PACKAGE USING the flags ${OpenMP_C_FLAGS} and ${OpenMP_CXX_FLAGS}")
+            set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+            set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    endif()
 	
 endif(WITH_OPENMP)
 
@@ -567,6 +573,9 @@ if(${CMAKE_BUILD_TOOL} MATCHES "make")
         "=======================================\n"
         )
 endif()
+
+#SET(CMAKE_CXX_FLAGS "-O0")
+#SET(CMAKE_C_FLAGS "-O0")
 
 
 ############################ CTEST ######################################

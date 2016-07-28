@@ -555,7 +555,8 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 //   for(int j = blockSize*NTHREADS; j < poolSize; j++)
 //           pools_[j].advance( p, sysPtr );
 
-#pragma omp parallel for schedule(static) num_threads(NTHREADS)
+//#pragma omp parallel for schedule(static) num_threads(NTHREADS)
+#pragma omp for
    for(int j = 0; j < poolSize; j++)
            pools_[j].advance( p, sysPtr );
 
