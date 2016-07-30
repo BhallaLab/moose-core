@@ -16,6 +16,8 @@ import numpy as np
 import re
 from collections import Counter
 import networkx as nx
+from PyQt4.QtGui import QColor
+import matplotlib 
 
 GENESIS_COLOR_SEQUENCE = ((248, 0, 255), (240, 0, 255), (232, 0, 255), (224, 0, 255), (216, 0, 255), (208, 0, 255),
  (200, 0, 255), (192, 0, 255), (184, 0, 255), (176, 0, 255), (168, 0, 255), (160, 0, 255), (152, 0, 255), (144, 0, 255),
@@ -336,8 +338,8 @@ def writeEnz( modelpath,f,sceneitems):
     for enz in enzList:
         x = random.randrange(0,10)
         y = random.randrange(0,10)
-        textcolor = "green"
-        color = "red"
+        textcolor = ""
+        color = ""
         k1 = 0;
         k2 = 0;
         k3 = 0;
@@ -380,6 +382,11 @@ def writeEnz( modelpath,f,sceneitems):
 
                 textcolor = Annotator(einfo).getField('textColor')
                 textcolor = getColorCheck(textcolor,GENESIS_COLOR_SEQUENCE)
+
+            if color == "" or color == " ":
+                color = getRandColor()
+            if textcolor == ""  or textcolor == " ":
+                textcolor = getRandColor()
 
             f.write("simundump kenz /kinetics/" + trimPath(enz) + " " + str(0)+  " " +
                 str(concInit) + " " +
@@ -427,8 +434,8 @@ def storeReacMsg(reacList,f):
 def writeReac(modelpath,f,sceneitems):
     reacList = wildcardFind(modelpath+'/##[ISA=ReacBase]')
     for reac in reacList :
-        color = "blue"
-        textcolor = "red"
+        color = ""
+        textcolor = ""
         kf = reac.numKf
         kb = reac.numKb
         # if sceneitems != None:
@@ -440,17 +447,15 @@ def writeReac(modelpath,f,sceneitems):
         rinfo = reac.path+'/info'
         if exists(rinfo):
             color = Annotator(rinfo).getField('color')
-            if color == "":
-                color = "blue"
-            else:
-                color = getColorCheck(color,GENESIS_COLOR_SEQUENCE)
+            color = getColorCheck(color,GENESIS_COLOR_SEQUENCE)
 
             textcolor = Annotator(rinfo).getField('textColor')
-            if textcolor == "":
-                textcolor = "red"    
-            else:
-                textcolor = getColorCheck(textcolor,GENESIS_COLOR_SEQUENCE)
+            textcolor = getColorCheck(textcolor,GENESIS_COLOR_SEQUENCE)
         
+        if color == "" or color == " ":
+            color = getRandColor()
+        if textcolor == ""  or textcolor == " ":
+            textcolor = getRandColor()
         f.write("simundump kreac /kinetics/" + trimPath(reac) + " " +str(0) +" "+ str(kf) + " " + str(kb) + " \"\" " +
                 str(color) + " " + str(textcolor) + " " + str(int(x)) + " " + str(int(y)) + " 0\n")
     return reacList
@@ -543,6 +548,8 @@ def writeplot( tgraphs,f ):
     return first,second
 
 def writePool(modelpath,f,volIndex,sceneitems):
+    color = ""
+    textcolor = ""
     for p in wildcardFind(modelpath+'/##[ISA=PoolBase]'):
         slave_enable = 0
         if (p.className == "BufPool" or p.className == "ZombieBufPool"):
@@ -574,7 +581,10 @@ def writePool(modelpath,f,volIndex,sceneitems):
             
             geometryName = volIndex[p.volume]
             volume = p.volume * NA * 1e-3
-
+            if color == "" or color == " ":
+                color = getRandColor()
+            if textcolor == ""  or textcolor == " ":
+                textcolor = getRandColor()
             f.write("simundump kpool /kinetics/" + trimPath(p) + " 0 " +
                     str(p.diffConst) + " " +
                     str(0) + " " +
@@ -616,6 +626,17 @@ def getColorCheck(color,GENESIS_COLOR_SEQUENCE):
     else:
         raise Exception("Invalid Color Value!")
 
+ignoreColor= ["mistyrose","antiquewhite","aliceblue","azure","bisque","black","blanchedalmond","blue","cornsilk","darkolivegreen","darkslategray","dimgray","floralwhite","gainsboro","ghostwhite","honeydew","ivory","lavender","lavenderblush","lemonchiffon","lightcyan","lightgoldenrodyellow","lightgray","lightyellow","linen","mediumblue","mintcream","navy","oldlace","papayawhip","saddlebrown","seashell","snow","wheat","white","whitesmoke"]
+matplotcolor = {}
+for name,hexno in matplotlib.colors.cnames.iteritems():
+    matplotcolor[name]=hexno
+
+def getRandColor():
+    k = random.choice(matplotcolor.keys())
+    if k in ignoreColor:
+        return getRandColor()
+    else:
+        return k
 def writeCompartment(modelpath,compts,f):
     index = 0
     volIndex = {}
