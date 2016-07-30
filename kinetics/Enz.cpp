@@ -61,7 +61,7 @@ static const SrcFinfo2< double, double >* cplxOut =
 // Enz internal functions
 //////////////////////////////////////////////////////////////
 Enz::Enz( )
-	: k1_( 0.1 ), k2_( 0.4 ), k3_( 0.1 )
+	: Km_(5.0e-3), k1_( 0.1 ), k2_( 0.4 ), k3_( 0.1 )
 {
 	;
 }
@@ -125,6 +125,8 @@ void Enz::vSetK1( const Eref& e, double v )
 
 double Enz::vGetK1( const Eref& e ) const
 {
+	Enz* temp = const_cast< Enz* >( this );
+	temp->vSetKm( e, Km_ );
 	return k1_;
 }
 
