@@ -16,6 +16,8 @@ import numpy as np
 import re
 from collections import Counter
 import networkx as nx
+from PyQt4.QtGui import QColor
+import matplotlib 
 
 GENESIS_COLOR_SEQUENCE = ((248, 0, 255), (240, 0, 255), (232, 0, 255), (224, 0, 255), (216, 0, 255), (208, 0, 255),
  (200, 0, 255), (192, 0, 255), (184, 0, 255), (176, 0, 255), (168, 0, 255), (160, 0, 255), (152, 0, 255), (144, 0, 255),
@@ -45,8 +47,14 @@ def write( modelpath, filename,sceneitems=None):
     filename = filename+'.g'
     global NA
     NA = 6.0221415e23
-    global cmin,cmax
-    
+    global cmin,cmax,xmin,xmax,ymin,ymax
+    cmin = 0 
+    cmax = 1
+    xmin = 0
+    xmax = 1
+    ymin = 0
+    ymax = 1
+
     compt = wildcardFind(modelpath+'/##[ISA=ChemCompt]')
     maxVol = estimateDefaultVol(compt)
     f = open(filename, 'w')
@@ -56,11 +64,24 @@ def write( modelpath, filename,sceneitems=None):
         setupItem(modelpath,srcdesConnection)
         meshEntry = setupMeshObj(modelpath)
         cmin,cmax,sceneitems = autoCoordinates(meshEntry,srcdesConnection)
-    else:
-        cs = []
         for k,v in sceneitems.items():
+            v = sceneitems[k]
+            x1 = calPrime(v['x'])
+            y1 = calPrime(v['y'])
+            sceneitems[k]['x'] = x1
+            sceneitems[k]['y'] = y1
+    else:
+        cs, xcord, ycord = [], [] ,[]
+        for k,v in sceneitems.items():
+            xcord.append(v['x'])
             cs.append(v['x'])
+            ycord.append(v['y'])
             cs.append(v['y'])
+        xmin = min(xcord)
+        xmax = max(xcord)
+        ymin = min(ycord)
+        ymax = max(ycord)
+
         cmin = min(cs)
         cmax = max(cs)
     writeHeader (f,maxVol)
@@ -212,19 +233,25 @@ def setupMeshObj(modelRoot):
                                   }
     return(meshEntry)
 def autoCoordinates(meshEntry,srcdesConnection):
-    
     G = nx.Graph()
     for cmpt,memb in meshEntry.items():
         for enzObj in find_index(memb,'enzyme'):
-            G.add_node(enzObj.path)
+            #G.add_node(enzObj.path)
+            G.add_node(enzObj.path,label=enzObj.name,shape='ellipse',color='',style='filled',fontname='Helvetica',fontsize=12,fontcolor='blue')
     for cmpt,memb in meshEntry.items():
         for poolObj in find_index(memb,'pool'):
-            G.add_node(poolObj.path)
+            #G.add_node(poolObj.path)
+            G.add_node(poolObj.path,label = poolObj.name,shape = 'box',color = '',style = 'filled',fontname = 'Helvetica',fontsize = 12,fontcolor = 'blue')
         for cplxObj in find_index(memb,'cplx'):
-            G.add_node(cplxObj.path)
-            G.add_edge((cplxObj.parent).path,cplxObj.path)
+            pass
+            #G.add_node(cplxObj.path)
+            #G.add_edge((cplxObj.parent).path,cplxObj.path)
         for reaObj in find_index(memb,'reaction'):
-            G.add_node(reaObj.path)
+            #G.add_node(reaObj.path)
+            G.add_node(reaObj.path,label=reaObj.name,shape='record',color='')
+        for funcObj in find_index(memb,'function'):
+            G.add_node(poolObj.path,label = funcObj.name,shape = 'box',color = 'red',style = 'filled',fontname = 'Helvetica',fontsize = 12,fontcolor = 'blue')
+
         
     for inn,out in srcdesConnection.items():
         if (inn.className =='ZombieReac'): arrowcolor = 'green'
@@ -248,10 +275,9 @@ def autoCoordinates(meshEntry,srcdesConnection):
                 for items in (items for items in out ):
                     G.add_edge(element(items[0]).path,inn.path)
     
-    nx.draw(G,pos=nx.spring_layout(G))
-    #plt.savefig('/home/harsha/Desktop/netwrokXtest.png')
-    
-    position = nx.spring_layout(G)
+    position = nx.graphviz_layout(G, prog = 'dot')
+    #agraph = nx.to_agraph(G)
+    #agraph.draw("writetogenesis.png", format = 'png', prog = 'dot')
     sceneitems = {}
     xycord = []
 
@@ -261,7 +287,6 @@ def autoCoordinates(meshEntry,srcdesConnection):
         sceneitems[element(key)] = {'x':value[0],'y':value[1]}
     cmin = min(xycord)
     cmax = max(xycord)
-    
     return cmin,cmax,sceneitems
 
 def find_index(value, key):
@@ -313,8 +338,8 @@ def writeEnz( modelpath,f,sceneitems):
     for enz in enzList:
         x = random.randrange(0,10)
         y = random.randrange(0,10)
-        textcolor = "green"
-        color = "red"
+        textcolor = ""
+        color = ""
         k1 = 0;
         k2 = 0;
         k3 = 0;
@@ -344,10 +369,12 @@ def writeEnz( modelpath,f,sceneitems):
                 cplx = enz.neighbors['cplx'][0]
                 nInit = cplx.nInit[0];
             if sceneitems != None:
-                value = sceneitems[enz]
-                x = calPrime(value['x'])
-                y = calPrime(value['y'])
-            
+                # value = sceneitems[enz]
+                # x = calPrime(value['x'])
+                # y = calPrime(value['y'])
+                x = sceneitems[enz]['x']
+                y = sceneitems[enz]['y']
+
             einfo = enz.path+'/info'
             if exists(einfo):
                 color = Annotator(einfo).getField('color')
@@ -355,6 +382,11 @@ def writeEnz( modelpath,f,sceneitems):
 
                 textcolor = Annotator(einfo).getField('textColor')
                 textcolor = getColorCheck(textcolor,GENESIS_COLOR_SEQUENCE)
+
+            if color == "" or color == " ":
+                color = getRandColor()
+            if textcolor == ""  or textcolor == " ":
+                textcolor = getRandColor()
 
             f.write("simundump kenz /kinetics/" + trimPath(enz) + " " + str(0)+  " " +
                 str(concInit) + " " +
@@ -368,7 +400,7 @@ def writeEnz( modelpath,f,sceneitems):
                 str(0) + " " +
                 str(isMichaelisMenten) + " " +
                 "\"\"" + " " +
-                str(color) + " " + str(textcolor) + " \"\"" +
+                str(textcolor) + " " + str(color) + " \"\"" +
                 " " + str(int(x)) + " " + str(int(y)) + " "+str(0)+"\n")
     return enzList
 
@@ -402,15 +434,16 @@ def storeReacMsg(reacList,f):
 def writeReac(modelpath,f,sceneitems):
     reacList = wildcardFind(modelpath+'/##[ISA=ReacBase]')
     for reac in reacList :
-        color = "blue"
-        textcolor = "red"
+        color = ""
+        textcolor = ""
         kf = reac.numKf
         kb = reac.numKb
-        if sceneitems != None:
-            value = sceneitems[reac]
-            x = calPrime(value['x'])
-            y = calPrime(value['y'])
-        
+        # if sceneitems != None:
+        #     value = sceneitems[reac]
+        #     x = calPrime(value['x'])
+        #     y = calPrime(value['y'])
+        x = sceneitems[reac]['x']
+        y = sceneitems[reac]['y']
         rinfo = reac.path+'/info'
         if exists(rinfo):
             color = Annotator(rinfo).getField('color')
@@ -418,7 +451,11 @@ def writeReac(modelpath,f,sceneitems):
 
             textcolor = Annotator(rinfo).getField('textColor')
             textcolor = getColorCheck(textcolor,GENESIS_COLOR_SEQUENCE)
-
+        
+        if color == "" or color == " ":
+            color = getRandColor()
+        if textcolor == ""  or textcolor == " ":
+            textcolor = getRandColor()
         f.write("simundump kreac /kinetics/" + trimPath(reac) + " " +str(0) +" "+ str(kf) + " " + str(kb) + " \"\" " +
                 str(color) + " " + str(textcolor) + " " + str(int(x)) + " " + str(int(y)) + " 0\n")
     return reacList
@@ -511,6 +548,8 @@ def writeplot( tgraphs,f ):
     return first,second
 
 def writePool(modelpath,f,volIndex,sceneitems):
+    color = ""
+    textcolor = ""
     for p in wildcardFind(modelpath+'/##[ISA=PoolBase]'):
         slave_enable = 0
         if (p.className == "BufPool" or p.className == "ZombieBufPool"):
@@ -525,11 +564,13 @@ def writePool(modelpath,f,volIndex,sceneitems):
                         slave_enable = 0
                         break
         if (p.parent.className != "Enz" and p.parent.className !='ZombieEnz'):
-
-            if sceneitems != None:
-                value = sceneitems[p]
-                x = calPrime(value['x'])
-                y = calPrime(value['y'])
+            #Assuming "p.parent.className !=Enzyme is cplx which is not written to genesis"
+            x = sceneitems[p]['x']
+            y = sceneitems[p]['y']
+            # if sceneitems != None:
+            #     value = sceneitems[p]
+            #     x = calPrime(value['x'])
+            #     y = calPrime(value['y'])
                 
             pinfo = p.path+'/info'
             if exists(pinfo):
@@ -540,7 +581,10 @@ def writePool(modelpath,f,volIndex,sceneitems):
             
             geometryName = volIndex[p.volume]
             volume = p.volume * NA * 1e-3
-
+            if color == "" or color == " ":
+                color = getRandColor()
+            if textcolor == ""  or textcolor == " ":
+                textcolor = getRandColor()
             f.write("simundump kpool /kinetics/" + trimPath(p) + " 0 " +
                     str(p.diffConst) + " " +
                     str(0) + " " +
@@ -582,13 +626,24 @@ def getColorCheck(color,GENESIS_COLOR_SEQUENCE):
     else:
         raise Exception("Invalid Color Value!")
 
+ignoreColor= ["mistyrose","antiquewhite","aliceblue","azure","bisque","black","blanchedalmond","blue","cornsilk","darkolivegreen","darkslategray","dimgray","floralwhite","gainsboro","ghostwhite","honeydew","ivory","lavender","lavenderblush","lemonchiffon","lightcyan","lightgoldenrodyellow","lightgray","lightyellow","linen","mediumblue","mintcream","navy","oldlace","papayawhip","saddlebrown","seashell","snow","wheat","white","whitesmoke","aquamarine","lightsalmon","moccasin","limegreen","snow","sienna","beige","dimgrey","lightsage"]
+matplotcolor = {}
+for name,hexno in matplotlib.colors.cnames.iteritems():
+    matplotcolor[name]=hexno
+
+def getRandColor():
+    k = random.choice(matplotcolor.keys())
+    if k in ignoreColor:
+        return getRandColor()
+    else:
+        return k
 def writeCompartment(modelpath,compts,f):
     index = 0
     volIndex = {}
     for compt in compts:
         if compt.name != "kinetics":
-            x = random.randrange(-10,9)
-            y = random.randrange(-10,9)
+            x = xmin+6
+            y = ymax+1
             f.write("simundump group /kinetics/" + compt.name + " 0 " + "blue" + " " + "green"       + " x 0 0 \"\" defaultfile \\\n" )
             f.write( "  defaultfile.g 0 0 0 " + str(int(x)) + " " + str(int(y)) + " 0\n")
     i = 0
@@ -598,10 +653,9 @@ def writeCompartment(modelpath,compts,f):
         size = compt.volume
         ndim = compt.numDimensions
         vecIndex = l-i-1
-        #print vecIndex
         i = i+1
-        x = random.randrange(-10,9)
-        y = random.randrange(-10,9)
+        x = xmin+4
+        y = ymax+1
         if vecIndex > 0:
             geometry = geometry+"simundump geometry /kinetics" +  "/geometry[" + str(vecIndex) +"] 0 " + str(size) + " " + str(ndim) + " sphere " +" \"\" white black "+ str(int(x)) + " " +str(int(y)) +" 0\n";
             volIndex[size] = "/geometry["+str(vecIndex)+"]"
@@ -617,8 +671,8 @@ def writeGroup(modelpath,f):
     for g in wildcardFind(modelpath+'/##[TYPE=Neutral]'):
         if not g.name in ignore:
             if trimPath(g) != None:
-                x = random.randrange(-10,9)
-                y = random.randrange(-10,9)
+                x = xmin+1
+                y = ymax+1
                 f.write("simundump group /kinetics/" + trimPath(g) + " 0 " +    "blue" + " " + "green"   + " x 0 0 \"\" defaultfile \\\n")
                 f.write("  defaultfile.g 0 0 0 " + str(int(x)) + " " + str(int(y)) + " 0\n")
 
@@ -709,7 +763,7 @@ if __name__ == "__main__":
     filename = sys.argv[1]
     modelpath = filename[0:filename.find('.')]
     loadModel(filename,'/'+modelpath,"gsl")
-    output = filename.g
+    output = modelpath+"_4mmoose.g"
     written = write('/'+modelpath,output)
     if written:
             print(" file written to ",output)
