@@ -85,7 +85,7 @@ option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
 
 # If SBML is available, it will automaticall enable the support. If ON, then
 # libSBML must be present.
-option(WITH_SBML  "Enable SBML support. Automatically detected." OFF)
+option(WITH_SBML  "Enable SBML support. Automatically detected." ON)
 
 # If GSL_STATIC_HOME is set, we use it to search for static gsl libs.
 option(GSL_STATIC_HOME 
@@ -185,10 +185,12 @@ if(SBML_STATIC_HOME)
     endif()
     set(LIBSBML_FOUND ON)
 else(SBML_STATIC_HOME)
-    pkg_check_modules(LIBSBML libsbml)
-    if(NOT LIBSBML_FOUND)
-        message(STATUS "pkg-config could not find sbml. Fallback to default")
-        find_package(LIBSBML)
+    if(WITH_SBML)
+        pkg_check_modules(LIBSBML libsbml)
+        if(NOT LIBSBML_FOUND)
+            message(STATUS "pkg-config could not find sbml. Fallback to default")
+            find_package(LIBSBML)
+        endif()
     endif()
 endif(SBML_STATIC_HOME)
 
