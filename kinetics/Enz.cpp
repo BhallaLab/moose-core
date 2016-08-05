@@ -23,15 +23,27 @@ const Cinfo* Enz::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
+		static DestFinfo setKmK1Dest( "setKmK1",
+			"Low-level function used when you wish to explicitly set "
+			"Km and k1, without doing any of the volume calculations."
+			"Needed by ReadKkit and other situations where the numbers "
+			"must be set before all the messaging is in place."
+			"Not relevant for zombie enzymes.",
+			new OpFunc2< Enz, double, double >( &Enz::setKmK1 )
+		);
 		//////////////////////////////////////////////////////////////
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
 	static Dinfo< Enz > dinfo;
+	static Finfo* enzFinfos[] = {
+		&setKmK1Dest,	// DestFinfo
+	};
+
 	static Cinfo enzCinfo (
 		"Enz",
 		CplxEnzBase::initCinfo(),
-		0,
-		0,
+		enzFinfos,
+		sizeof( enzFinfos ) / sizeof ( Finfo* ),
 		&dinfo
 	);
 
@@ -72,6 +84,12 @@ Enz::~Enz()
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
+
+void Enz::setKmK1( double Km, double k1 )
+{
+	r1_ = k1_ = k1;
+	Km_ = Km;
+}
 
 void Enz::vSub( double n )
 {
@@ -118,8 +136,7 @@ void Enz::vRemesh( const Eref& e )
 void Enz::vSetK1( const Eref& e, double v )
 {
 	r1_ = k1_ = v;
-	double volScale = 
-		convertConcToNumRateUsingMesh( e, subOut, 1 );
+	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
 	Km_ = ( k2_ + k3_ ) / ( k1_ * volScale );
 }
 
