@@ -7,6 +7,10 @@ tags
 *.eps
 *.png
 *.pdf
+*.h.*
+*.cpp.*
+*.cc.*
+*.hh.*
 *.bak
 
 # Compiled Object files

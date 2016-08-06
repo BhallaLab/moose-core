@@ -32,6 +32,11 @@
 #include "muParserBase.h"
 #include "muParserTemplateMagic.h"
 
+// Get the random number generator type from here.
+#include "randnum/RNG.h"
+
+extern moose::RNG<double> rng;
+
 /** \file
     \brief Definition of the standard floating point parser.
 */

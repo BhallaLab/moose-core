@@ -121,17 +121,22 @@ double VectorTable::lookupByValue( double x ) const
 
 double VectorTable::lookupByIndex( unsigned int index ) const
 {
-	if ( tableIsEmpty() )
-		return 0;
+    if ( tableIsEmpty() )
+        return 0;
 
-	//Applying similar wrapping as is done in lookupByValue.
-	if ( index < 0 )
-		index = 0;
+    /*  NOTE: Why commented out?
+     *  index is unsigned int, can't be less than zero.
+    */
+#if 0
+    //Applying similar wrapping as is done in lookupByValue. 
+    if ( index < 0 )
+        index = 0;
+#endif
 
-	if ( index >= table_.size() )
-		index = table_.size() - 1;
+    if ( index >= table_.size() )
+        index = table_.size() - 1;
 
-	return table_[index];
+    return table_[index];
 }
 
 vector< double > VectorTable::getTable() const

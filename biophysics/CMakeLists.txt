@@ -1,6 +1,11 @@
 include_directories(../basecode ../synapse ../utility ../)
-include_directories(../external/muparser/include ${GSL_INCLUDE_DIRS})
-add_library(biophysics 
+include_directories(../external/muparser/include)
+
+if(WITH_GSL)
+    include_directories(${GSL_INCLUDE_DIRS})
+endif(WITH_GSL)
+
+set(BIOPHYSICS_SRCS
 	IntFire.cpp	
 	SpikeGen.cpp	
         RandSpike.cpp
@@ -34,10 +39,15 @@ add_library(biophysics
 	VectorTable.cpp	
 	MarkovRateTable.cpp	
 	MarkovChannel.cpp	
-	MarkovGslSolver.cpp	
 	MatrixOps.cpp	
 	MarkovSolverBase.cpp	
 	MarkovSolver.cpp	
 	VClamp.cpp	
         Spine.cpp
     )
+
+if(WITH_GSL)
+    list(APPEND BIOPHYSICS_SRCS MarkovGslSolver.cpp)
+endif(WITH_GSL)
+
+add_library( biophysics ${BIOPHYSICS_SRCS} )
