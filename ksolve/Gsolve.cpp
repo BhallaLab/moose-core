@@ -265,6 +265,10 @@ void Gsolve::setStoich( Id stoich )
 	assert( stoich.element()->cinfo()->isA( "Stoich" ) );
 	stoich_ = stoich;
 	stoichPtr_ = reinterpret_cast< Stoich* >( stoich.eref().data() );
+    if ( stoichPtr_->getNumAllPools() == 0 ) {
+		stoichPtr_ = 0;
+		return;
+	}
 	sys_.stoich = stoichPtr_;
 	sys_.isReady = false;
 	for ( unsigned int i = 0; i < pools_.size(); ++i )
@@ -467,6 +471,8 @@ void Gsolve::reinit( const Eref& e, ProcPtr p )
 //////////////////////////////////////////////////////////////
 void Gsolve::initProc( const Eref& e, ProcPtr p )
 {
+	if ( !stoichPtr_ )
+		return;
 	// vector< vector< double > > values( xfer_.size() );
 	for ( unsigned int i = 0; i < xfer_.size(); ++i ) {
 		XferInfo& xf = xfer_[i];
@@ -483,6 +489,8 @@ void Gsolve::initProc( const Eref& e, ProcPtr p )
 
 void Gsolve::initReinit( const Eref& e, ProcPtr p )
 {
+	if ( !stoichPtr_ )
+		return;
 	for ( unsigned int i = 0 ; i < pools_.size(); ++i ) {
 		pools_[i].reinit( &sys_ );
 	}

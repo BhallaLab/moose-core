@@ -927,7 +927,12 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		// to do this assignments in raw #/cell units.
 		Field< double >::set( enz, "k3", k3 );
 		Field< double >::set( enz, "k2", k2 );
-		Field< double >::set( enz, "k1", k1 );
+		// Here we explicitly calculate Km because the substrates are
+		// not set up till later, and without them the volume calculations
+		// are confused.
+		double volScale = lookupVolumeFromMesh(pa.eref());
+		double Km = (k2+k3)/(k1 * 1e3 ); // Scaling for uM to mM.
+		SetGet2< double, double >::set( enz, "setKmK1", Km, k1 );
 
 		string cplxName = tail + "_cplx";
 		string cplxPath = enzPath + "/" + cplxName;
@@ -945,6 +950,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 			ObjId( enz, 0 ), "cplx",
 			ObjId( cplx, 0 ), "reac" ); 
 		assert( ret != ObjId() );
+
 
 		// cplx()->showFields();
 		// enz()->showFields();
