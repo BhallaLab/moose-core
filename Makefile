@@ -325,7 +325,7 @@ SUBDIR = \
 	signeur \
 	benchmarks \
 	$(SMOLDYN_DIR) \
-	#$(SBML_DIR) \
+	$(SBML_DIR) \
 	$(HCUDA_DIR) \
 	$(EXAMPLES_DIR) \
 
@@ -354,7 +354,7 @@ OBJLIBS =	\
 	signeur/_signeur.o \
 	benchmarks/_benchmarks.o \
 	$(SMOLDYN_LIB) \
-	#$(SBML_LIB) \
+	$(SBML_LIB) \
 	$(HCUDA_LIB) \
 	$(EXAMPLES_LIB) \
 
