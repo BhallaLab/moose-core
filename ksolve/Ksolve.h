@@ -10,6 +10,9 @@
 #ifndef _KSOLVE_H
 #define _KSOLVE_H
 
+//////////////////////////////////////////////////////////////////
+// Flags that define the type of parallel execution environment.
+//////////////////////////////////////////////////////////////////
 #define _KSOLVE_SEQ 0
 #define _KSOLVE_OPENMP 1
 
@@ -19,6 +22,11 @@
 #include <sys/syscall.h>
 
 class Stoich;
+
+//////////////////////////////////////////////////////////////////
+// NTHREADS = NUM_THREADS
+//It represents the number of threads one wants to run the application with. 
+//////////////////////////////////////////////////////////////////
 const char *env_value = getenv("NUM_THREADS");
 const int NTHREADS  = atoi(env_value);
 
