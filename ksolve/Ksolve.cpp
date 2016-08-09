@@ -537,7 +537,6 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         XferInfo& xf = xfer_[i];
         unsigned int xferSize = xf.xferVoxel.size();
         int xferBlock = xferSize/NTHREADS;
-//#pragma omp for schedule(guided, xferBlock)
         for ( unsigned int j = 0; j < xferSize; ++j )
         {
             poolArray[xf.xferVoxel[j]].xferIn( xf.xferPoolIdx, xf.values, xf.lastValues, j );
@@ -546,8 +545,11 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     }
 
     //Integration step
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// OpenMP parallelization
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if _KSOLVE_OPENMP
-	 
+	//! Using a static variable to print the type of parallelization used. 
 	 static int cellsPerThread = 0; // Used for printing...
 	 if(!cellsPerThread)
 	 {
@@ -556,36 +558,31 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 		    cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
 	 }
 
-    omp_set_dynamic(0);
-    omp_set_num_threads(NTHREADS);
-//#pragma omp parallel for schedule(static, cellsPerThread) num_threads(NTHREADS) default(shared)
-#pragma omp parallel num_threads(NTHREADS) default(shared)
-#pragma omp for 
+    omp_set_dynamic(0); //!Set the dynamic openmp feature off. It may conflict with our parameters.
+    omp_set_num_threads(NTHREADS); //! Set the number of threads to the parameter set.
+    
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// parallelize the loop which performs the integration step.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma omp parallel for default(shared) 
     for (int j = 0; j < poolSize; j++ )
-    {
         poolArray[j].advance( p );
-    }
 
-//#pragma omp parallel for schedule(static, 1) num_threads(NTHREADS) default(shared)
-//   for(int i = 0; i < NTHREADS; i++)
-//   {
-//           for(int j = i*blockSize; j < (i*blockSize)+blockSize; j++)
-//                   pools_[j].advance( p );
-//
-//   }
-//
-//   for(int j = blockSize*NTHREADS; j < poolSize; j++)
-//           pools_[j].advance( p );
+/*
+    //To debug print the thread that takes over the master control after the parallelization
+    //This can be used to check if all the threads are running.
 
     auto cpu = sched_getcpu();
     std::ostringstream os;
     os<<"\nThread "<<omp_get_thread_num()<<" on cpu "<<sched_getcpu()<<std::endl;
     std::cout<<os.str()<<std::flush;
+*/
+
 #endif //_KSOLVE_OPENMP
 
 
 //////////////////////////////////////////////////////////////////
-// Original Sequential Code
+// Sequential Code
 //////////////////////////////////////////////////////////////////
 #if _KSOLVE_SEQ
 	 static int useSeq = 0;
