@@ -12,15 +12,30 @@ import math
 import matplotlib
 import sys
 import moose
+import os
+
+# Check if DISPLAY environment variable is properly set. If not, warn the user
+# and continue.
+hasDisplay = True
+display = os.environ.get('DISPLAY',  '' )
+if not display:
+    hasDisplay = False
+    print( "Warning: Environment variable DISPLAY is not set."
+            " Did you forget to pass -X or -Y switch to ssh command?\n" 
+            "Anyway, MOOSE will continue without graphics.\n"
+            )
+
 hasMoogli = True
-try: 
-    from PyQt4 import QtGui
-    import moogli
-    import moogli.extensions.moose
-    app = QtGui.QApplication(sys.argv)
-except Exception as e:
-    print( 'Warning: Moogli not found. All moogli calls will use dummy functions' )
-    hasMoogli = False
+
+if hasDisplay:
+    try: 
+        from PyQt4 import QtGui
+        import moogli
+        import moogli.extensions.moose
+        app = QtGui.QApplication(sys.argv)
+    except Exception as e:
+        print( 'Warning: Moogli not found. All moogli calls will use dummy functions' )
+        hasMoogli = False
 
 
 runtime = 0.0
