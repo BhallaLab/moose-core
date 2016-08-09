@@ -19,7 +19,6 @@ Last-Updated:
 
 '''
 from moose import *
-from libsbml import *
 import re
 from collections import Counter
 import networkx as nx
@@ -31,73 +30,78 @@ import sys
 #	Group's should be added
 #	boundary condition for buffer pool having assignment statment constant shd be false
 
-def mooseWriteSBML(modelpath,filename,sceneitems={}):
+try: 
+    from libsbml import *
+except ImportError: 
+    def mooseWriteSBML(modelpath,filename,sceneitems={}):
+    	return (-2,"\n WriteSBML : python-libsbml module not installed",None)
+else:
+	def mooseWriteSBML(modelpath,filename,sceneitems={}):
+			sbmlDoc = SBMLDocument(3, 1)
+			filepath,filenameExt = os.path.split(filename)
+			if filenameExt.find('.') != -1:
+				filename = filenameExt[:filenameExt.find('.')]
+			else:
+				filename = filenameExt
+			
+			#validatemodel
+			sbmlOk = False
+			global spe_constTrue,cmin,cmax
+			spe_constTrue = []
+			global nameList_
+			nameList_ = []
 
-	sbmlDoc = SBMLDocument(3, 1)
-	filepath,filenameExt = os.path.split(filename)
-	if filenameExt.find('.') != -1:
-		filename = filenameExt[:filenameExt.find('.')]
-	else:
-		filename = filenameExt
-	
-	#validatemodel
-	sbmlOk = False
-	global spe_constTrue,cmin,cmax
-	spe_constTrue = []
-	global nameList_
-	nameList_ = []
+			autoCoordinateslayout = False
+			xmlns = XMLNamespaces()
+			xmlns.add("http://www.sbml.org/sbml/level3/version1")
+			xmlns.add("http://www.moose.ncbs.res.in","moose")
+			xmlns.add("http://www.w3.org/1999/xhtml","xhtml")
+			sbmlDoc.setNamespaces(xmlns)
+			cremodel_ = sbmlDoc.createModel()
+			cremodel_.setId(filename)
+			cremodel_.setTimeUnits("second")
+			cremodel_.setExtentUnits("substance")
+			cremodel_.setSubstanceUnits("substance")
+			neutralNotes = ""
+			specieslist = wildcardFind(modelpath+'/##[ISA=PoolBase]')
+			neutralPath = getGroupinfo(specieslist[0])
+			if moose.exists(neutralPath.path+'/info'):
+				neutralInfo = moose.element(neutralPath.path+'/info')
+				neutralNotes = neutralInfo.notes
+			if neutralNotes != "":
+				cleanNotes= convertNotesSpecialChar(neutralNotes)
+				notesString = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+ neutralNotes + "\n\t </body>"
+				cremodel_.setNotes(notesString)
+			srcdesConnection = {}
+			cmin,cmax = 0,1
 
-	autoCoordinateslayout = False
-	xmlns = XMLNamespaces()
-	xmlns.add("http://www.sbml.org/sbml/level3/version1")
-	xmlns.add("http://www.moose.ncbs.res.in","moose")
-	xmlns.add("http://www.w3.org/1999/xhtml","xhtml")
-	sbmlDoc.setNamespaces(xmlns)
-	cremodel_ = sbmlDoc.createModel()
-	cremodel_.setId(filename)
-	cremodel_.setTimeUnits("second")
-	cremodel_.setExtentUnits("substance")
-	cremodel_.setSubstanceUnits("substance")
-	neutralNotes = ""
-	specieslist = wildcardFind(modelpath+'/##[ISA=PoolBase]')
-	neutralPath = getGroupinfo(specieslist[0])
-	if moose.exists(neutralPath.path+'/info'):
-		neutralInfo = moose.element(neutralPath.path+'/info')
-		neutralNotes = neutralInfo.notes
-	if neutralNotes != "":
-		cleanNotes= convertNotesSpecialChar(neutralNotes)
-		notesString = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+ neutralNotes + "\n\t </body>"
-		cremodel_.setNotes(notesString)
-	srcdesConnection = {}
-	cmin,cmax = 0,1
+			if not bool(sceneitems):
+				autoCoordinateslayout = True
+				srcdesConnection = setupItem(modelpath)
+				meshEntry = setupMeshObj(modelpath)
+				cmin,cmax,sceneitems = autoCoordinates(meshEntry,srcdesConnection)
+			
+			writeUnits(cremodel_)
+			modelAnno = writeSimulationAnnotation(modelpath)
+			if modelAnno:
+				cremodel_.setAnnotation(modelAnno)
+			compartexist = writeCompt(modelpath,cremodel_)
+			species = writeSpecies(modelpath,cremodel_,sbmlDoc,sceneitems,autoCoordinateslayout)
+			if species:
+				writeFunc(modelpath,cremodel_)
+			writeReac(modelpath,cremodel_,sceneitems,autoCoordinateslayout)
+			writeEnz(modelpath,cremodel_,sceneitems,autoCoordinateslayout)
 
-	if not bool(sceneitems):
-		autoCoordinateslayout = True
-		srcdesConnection = setupItem(modelpath)
-		meshEntry = setupMeshObj(modelpath)
-		cmin,cmax,sceneitems = autoCoordinates(meshEntry,srcdesConnection)
-	
-	writeUnits(cremodel_)
-	modelAnno = writeSimulationAnnotation(modelpath)
-	if modelAnno:
-		cremodel_.setAnnotation(modelAnno)
-	compartexist = writeCompt(modelpath,cremodel_)
-	species = writeSpecies(modelpath,cremodel_,sbmlDoc,sceneitems,autoCoordinateslayout)
-	if species:
-		writeFunc(modelpath,cremodel_)
-	writeReac(modelpath,cremodel_,sceneitems,autoCoordinateslayout)
-	writeEnz(modelpath,cremodel_,sceneitems,autoCoordinateslayout)
+			consistencyMessages = ""
+			SBMLok = validateModel( sbmlDoc )
+			if ( SBMLok ):
+				writeTofile = filepath+"/"+filename+'.xml'
+				writeSBMLToFile( sbmlDoc, writeTofile)
+				return True,consistencyMessages,writeTofile
 
-	consistencyMessages = ""
-	SBMLok = validateModel( sbmlDoc )
-	if ( SBMLok ):
-		writeTofile = filepath+"/"+filename+'.xml'
-		writeSBMLToFile( sbmlDoc, writeTofile)
-		return True,consistencyMessages,writeTofile
-
-	if ( not SBMLok ):
-		cerr << "Errors encountered " << endl;
-		return -1,consistencyMessages
+			if ( not SBMLok ):
+				cerr << "Errors encountered " << endl;
+				return -1,consistencyMessages
 
 def writeEnz(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 	for enz in wildcardFind(modelpath+'/##[ISA=EnzBase]'):

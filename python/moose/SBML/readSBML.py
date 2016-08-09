@@ -23,7 +23,7 @@ import sys
 import os.path
 import collections
 from moose import *
-import libsbml
+#import libsbml
 
 '''
    TODO in
@@ -49,74 +49,79 @@ import libsbml
         	 ----when stoichiometry is rational number 22
 	 	---- For Michaelis Menten kinetics km is not defined which is most of the case need to calculate
 '''
-
-def mooseReadSBML(filepath,loadpath):
-	print " filepath ",filepath
-	try:
-		filep = open(filepath, "r")
-		document = libsbml.readSBML(filepath)
-		num_errors = document.getNumErrors()
-		if ( num_errors > 0 ):
-			print("Encountered the following SBML errors:" );
-			document.printErrors();
-			return moose.element('/');
-		else:
-			level = document.getLevel();
-			version = document.getVersion();
-			print("\n" + "File: " + filepath + " (Level " + str(level) + ", version " + str(version) + ")" );
-			model = document.getModel();
-			if (model == None):
-				print("No model present." );
+try: 
+    from libsbml import *
+except ImportError: 
+    def mooseReadSBML(filepath,loadpath):
+    	return (-2,"\n ReadSBML : python-libsbml module not installed",None)
+else:
+	def mooseReadSBML(filepath,loadpath):
+		print " filepath ",filepath
+		try:
+			filep = open(filepath, "r")
+			document = libsbml.readSBML(filepath)
+			num_errors = document.getNumErrors()
+			if ( num_errors > 0 ):
+				print("Encountered the following SBML errors:" );
+				document.printErrors();
 				return moose.element('/');
 			else:
-				print " model ",model
-				print("functionDefinitions: " + str(model.getNumFunctionDefinitions()) );
-				print("    unitDefinitions: " + str(model.getNumUnitDefinitions()) );
-				print("   compartmentTypes: " + str(model.getNumCompartmentTypes()) );
-				print("        specieTypes: " + str(model.getNumSpeciesTypes()) );
-				print("       compartments: " + str(model.getNumCompartments()) );
-				print("            species: " + str(model.getNumSpecies()) );
-				print("         parameters: " + str(model.getNumParameters()) );
-				print(" initialAssignments: " + str(model.getNumInitialAssignments()) );
-				print("              rules: " + str(model.getNumRules()) );
-				print("        constraints: " + str(model.getNumConstraints()) );
-				print("          reactions: " + str(model.getNumReactions()) );
-				print("             events: " + str(model.getNumEvents()) );
-				print("\n");
-
-				if (model.getNumCompartments() == 0):
-					return moose.element('/')
+				level = document.getLevel();
+				version = document.getVersion();
+				print("\n" + "File: " + filepath + " (Level " + str(level) + ", version " + str(version) + ")" );
+				model = document.getModel();
+				if (model == None):
+					print("No model present." );
+					return moose.element('/');
 				else:
-					baseId = moose.Neutral(loadpath)
-					#All the model will be created under model as a thumbrule
-					basePath = moose.Neutral(baseId.path+'/model')
-					#Map Compartment's SBML id as key and value is list of[ Moose ID and SpatialDimensions ]
-					comptSbmlidMooseIdMap = {}
-					print ": ",basePath.path
-					globparameterIdValue = {}
-					modelAnnotaInfo = {}
-					mapParameter(model,globparameterIdValue)
-					errorFlag = createCompartment(basePath,model,comptSbmlidMooseIdMap)
-					if errorFlag:
-						specInfoMap = {}
-						errorFlag = createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap,modelAnnotaInfo)
+					print " model ",model
+					print("functionDefinitions: " + str(model.getNumFunctionDefinitions()) );
+					print("    unitDefinitions: " + str(model.getNumUnitDefinitions()) );
+					print("   compartmentTypes: " + str(model.getNumCompartmentTypes()) );
+					print("        specieTypes: " + str(model.getNumSpeciesTypes()) );
+					print("       compartments: " + str(model.getNumCompartments()) );
+					print("            species: " + str(model.getNumSpecies()) );
+					print("         parameters: " + str(model.getNumParameters()) );
+					print(" initialAssignments: " + str(model.getNumInitialAssignments()) );
+					print("              rules: " + str(model.getNumRules()) );
+					print("        constraints: " + str(model.getNumConstraints()) );
+					print("          reactions: " + str(model.getNumReactions()) );
+					print("             events: " + str(model.getNumEvents()) );
+					print("\n");
+
+					if (model.getNumCompartments() == 0):
+						return moose.element('/')
+					else:
+						baseId = moose.Neutral(loadpath)
+						#All the model will be created under model as a thumbrule
+						basePath = moose.Neutral(baseId.path+'/model')
+						#Map Compartment's SBML id as key and value is list of[ Moose ID and SpatialDimensions ]
+						comptSbmlidMooseIdMap = {}
+						print ": ",basePath.path
+						globparameterIdValue = {}
+						modelAnnotaInfo = {}
+						mapParameter(model,globparameterIdValue)
+						errorFlag = createCompartment(basePath,model,comptSbmlidMooseIdMap)
 						if errorFlag:
-							errorFlag = createRules(model,specInfoMap,globparameterIdValue)
+							specInfoMap = {}
+							errorFlag = createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap,modelAnnotaInfo)
 							if errorFlag:
-								errorFlag,msg = createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue)
-								
-					if not errorFlag:
-						print msg
-						#Any time in the middle if SBML does not read then I delete everything from model level
-						#This is important as while reading in GUI the model will show up untill built which is not correct
-						#print "Deleted rest of the model"
-						moose.delete(basePath)
-				return baseId;
+								errorFlag = createRules(model,specInfoMap,globparameterIdValue)
+								if errorFlag:
+									errorFlag,msg = createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue)
+									
+						if not errorFlag:
+							print msg
+							#Any time in the middle if SBML does not read then I delete everything from model level
+							#This is important as while reading in GUI the model will show up untill built which is not correct
+							#print "Deleted rest of the model"
+							moose.delete(basePath)
+					return baseId;
 
 
-	except IOError:
-		print "File " ,filepath ," does not exist."
-		return moose.element('/')
+		except IOError:
+			print "File " ,filepath ," does not exist."
+			return moose.element('/')
 def setupEnzymaticReaction(enz,groupName,enzName,specInfoMap,modelAnnotaInfo):
 	enzPool = (modelAnnotaInfo[groupName]["enzyme"])
 	enzParent = specInfoMap[enzPool]["Mpath"]
