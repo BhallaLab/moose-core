@@ -359,11 +359,33 @@ void Dsolve::calcJunction( const DiffJunction& jn, double dt )
 
 void Dsolve::process( const Eref& e, ProcPtr p )
 {
+
+#if _DSOLVE_SEQ
 	for ( vector< DiffPoolVec >::iterator 
 					i = pools_.begin(); i != pools_.end(); ++i ) {
 		i->advance( p->dt );
 	}
+#endif
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Parallel Dsolve::Advance with OpenMP  and Pthreads
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#if _DSOLVE_OPENMP
+	 static int cellsPerThread = 0; // Used for printing...
+	 if(!cellsPerThread)
+	 {
+		    cellsPerThread = 1;
+		    cout << endl << "OpenMP parallelism in Dsolve: Using parallel-for " << endl;
+	 }
+        DiffPoolVec* poolArray = &pools_[0];
+        int poolSize = pools_.size();
+
+#pragma omp parallel for default(shared) num_threads(NTHREADS)
+        for(int j = 0; j < poolSize; j++)
+                poolArray[j].advance(p->dt);
+#endif
+
+        
 	for ( vector< DiffJunction >::const_iterator
 			i = junctions_.begin(); i != junctions_.end(); ++i ) {
 		calcJunction( *i, p->dt );

@@ -10,6 +10,19 @@
 #ifndef _DSOLVE_H
 #define _DSOLVE_H
 
+//////////////////////////////////////////////////////////////////
+// Flags that define the type of parallel execution environment.
+//////////////////////////////////////////////////////////////////
+#define _DSOLVE_SEQ 1
+#define _DSOLVE_OPENMP 0
+
+//////////////////////////////////////////////////////////////////
+// NTHREADS = NUM_THREADS
+//It represents the number of threads one wants to run the application with. 
+//////////////////////////////////////////////////////////////////
+//const char *env_value1 = getenv("NUM_THREADS");
+//int NTHREADS  = atoi(env_value1);
+
 /**
  * The Dsolve manages a large number of pools, each inhabiting a large
  * number of voxels that are shared for all the pools. 
