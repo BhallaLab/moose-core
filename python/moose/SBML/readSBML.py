@@ -50,7 +50,8 @@ from moose import *
 	 	---- For Michaelis Menten kinetics km is not defined which is most of the case need to calculate
 '''
 try: 
-    from libsbml import *
+    #from libsbml import *
+    import libsbml
 except ImportError: 
     def mooseReadSBML(filepath,loadpath):
     	return (-2,"\n ReadSBML : python-libsbml module not installed",None)
@@ -96,6 +97,7 @@ else:
 						#All the model will be created under model as a thumbrule
 						basePath = moose.Neutral(baseId.path+'/model')
 						#Map Compartment's SBML id as key and value is list of[ Moose ID and SpatialDimensions ]
+						global comptSbmlidMooseIdMap
 						comptSbmlidMooseIdMap = {}
 						print ": ",basePath.path
 						globparameterIdValue = {}
@@ -312,7 +314,8 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 
 	errorFlag = True
 	reactSBMLIdMooseId = {}
-	msg = ""	
+	msg = ""
+	rName = ""
 	for ritem in range(0,model.getNumReactions()):
 		reactionCreated = False
 		groupName = ""
@@ -442,16 +445,18 @@ def getKLaw( model, klaw, rev,globparameterIdValue,specMapList):
     				kbvalue = globparameterIdValue[i]
     				kbp = model.getParameter(kbparm)
     		index += 1
-    	elif not specMapList.has_key(i):
+
+    	elif not (specMapList.has_key(i) or comptSbmlidMooseIdMap.has_key(i)):
     		mssgstr = "\""+i+ "\" is not defined "
     		return ( False, mssgstr)
     if kfp != "":
-    	print " unit set for rate law kfp ",kfparm, " ",kfp.isSetUnits()
+    	#print " unit set for rate law kfp ",kfparm, " ",kfp.isSetUnits()
     	if kfp.isSetUnits():
     		kfud = kfp.getDerivedUnitDefinition();
-    		print " kfud ",kfud
+    		#print " kfud ",kfud
     if kbp != "":
-    	print " unit set for rate law kbp ",kbparm, " ",kbp.isSetUnits()
+    	pass
+    	#print " unit set for rate law kbp ",kbparm, " ",kbp.isSetUnits()
 
     return (True,mssgstr)
 
@@ -489,7 +494,8 @@ def getMembers(node,ruleMemlist):
 			# Multiplication
 			getMembers(node.getChild(i),ruleMemlist)
 	else:
-		print " this case need to be handled"
+
+		print " this case need to be handled",node.getType()
 	# if len(ruleMemlist) > 2:
 	# 	print "Sorry! for now MOOSE cannot handle more than 2 parameters"
  #        return True
@@ -759,6 +765,8 @@ def createCompartment(basePath,model,comptSbmlidMooseIdMap):
 			mooseCmptId.volume = (msize*unitfactor)
 			comptSbmlidMooseIdMap[sbmlCmptId]={"MooseId": mooseCmptId, "spatialDim":dimension, "size" : msize}
 	return True
+def setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId):
+	pass
 def mapParameter(model,globparameterIdValue):
 	for pm in range(0,model.getNumParameters()):
 		prm = model.getParameter( pm );

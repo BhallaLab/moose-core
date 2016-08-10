@@ -941,8 +941,8 @@ def autoCoordinates(meshEntry,srcdesConnection):
             else:
                 for items in (items for items in out ):
                 	G.add_edge(element(items[0]).path,inn.path)
-
-    position = nx.graphviz_layout(G,prog='dot')
+    from networkx.drawing.nx_agraph import graphviz_layout
+    position = graphviz_layout(G,prog='dot')
 
     #position = nx.pygraphviz_layout(G, prog = 'dot')
     #position = nx.spring_layout(G)
