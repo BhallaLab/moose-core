@@ -63,7 +63,7 @@ def main():
     runtime = 20.0
         
     # Loading the sbml file into MOOSE, models are loaded in path/model
-    sbmlId = moose.readSBML(mfile,'sbml')
+    sbmlId = moose.loadModel(mfile,'sbml')
     
 
     s1 = moose.element('/sbml/model/compartment/S1')
