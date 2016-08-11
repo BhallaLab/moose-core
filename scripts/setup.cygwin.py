@@ -6,9 +6,9 @@
 # Maintainer:
 # Created: Sun Dec  7 20:32:02 2014 (+0530)
 # Version:
-# Last-Updated: Wed Mar  2 12:23:55 2016 (-0500)
+# Last-Updated: Thu May 19 13:17:48 2016 (-0400)
 #           By: Subhasis Ray
-#     Update #: 32
+#     Update #: 35
 # URL:
 # Keywords:
 # Compatibility:
@@ -175,6 +175,8 @@ SOURCES=['external/muparser/src/muParser.cpp',
          'builtins/HDF5WriterBase.cpp',
          'builtins/HDF5DataWriter.cpp',
          'builtins/NSDFWriter.cpp',
+         'builtins/Streamer.cpp',
+         'builtins/StreamerBase.cpp',
          'builtins/testNSDF.cpp',
          'builtins/testBuiltins.cpp',
          'device/PulseGen.cpp',
@@ -236,7 +238,8 @@ SOURCES=['external/muparser/src/muParser.cpp',
          'ksolve/FuncTerm.cpp',
          'ksolve/Stoich.cpp',
          'ksolve/Ksolve.cpp',
-         'ksolve/SteadyState.cpp',
+         # 'ksolve/SteadyStateBoost.cpp',
+         'ksolve/SteadyStateGsl.cpp',
          'ksolve/Gsolve.cpp',
          'ksolve/testKsolve.cpp',
          'mesh/ChemCompt.cpp',
@@ -288,6 +291,7 @@ SOURCES=['external/muparser/src/muParser.cpp',
          'synapse/STDPSynapse.cpp',
          'synapse/testSynapse.cpp',
          'utility/strutil.cpp',
+         'utility/cnpy.cpp',
          'utility/types.cpp',
          'utility/setupenv.cpp',
          'utility/numutil.cpp',
