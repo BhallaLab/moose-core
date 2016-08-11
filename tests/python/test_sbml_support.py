@@ -63,13 +63,13 @@ def main():
     moose.loadModel(mfile,'/acc27')
     writeerror,message,sbmlId = moose.SBML.mooseWriteSBML('/acc27',writefile)
     if writeerror == -2:
-        print 'Could not save the Model'
+        print ( "Could not save the Model" )
     elif writeerror == -1:
-        print '\n This model is not valid SBML Model, failed in the consistency check'
+        print ( "\n This model is not valid SBML Model, failed in the consistency check ")
     elif writeerror == 0:
-        print 'Could not save the Model'
+        print ("Could not save the Model ")
     elif writeerror == 1:
-        print " Model is loaded using \'loadModel\' function to moose and using \'moose.SBML.mooseWriteSBML\' converted to SBML. \n Ran for 20 Sec"        
+        print ( "Model is loaded using \'loadModel\' function to moose and using \'moose.SBML.mooseWriteSBML\' converted to SBML. \n Ran for 20 Sec" )
         # Reset and Run
         moose.reinit()
         moose.start(runtime)
