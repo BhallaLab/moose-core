@@ -13,15 +13,16 @@
 //////////////////////////////////////////////////////////////////
 // Flags that define the type of parallel execution environment.
 //////////////////////////////////////////////////////////////////
-#define _DSOLVE_SEQ 1
-#define _DSOLVE_OPENMP 0
+#define _DSOLVE_SEQ 0
+#define _DSOLVE_OPENMP 1
+
+#include <omp.h>
 
 //////////////////////////////////////////////////////////////////
-// NTHREADS = NUM_THREADS
 //It represents the number of threads one wants to run the application with. 
 //////////////////////////////////////////////////////////////////
-//const char *env_value1 = getenv("NUM_THREADS");
-//int NTHREADS  = atoi(env_value1);
+const char *env_value2 = getenv("NUM_THREADS");
+int NTHREADSDsolve  = atoi(env_value2);
 
 /**
  * The Dsolve manages a large number of pools, each inhabiting a large

@@ -13,8 +13,8 @@
 //////////////////////////////////////////////////////////////////
 // Flags that define the type of parallel execution environment.
 //////////////////////////////////////////////////////////////////
-#define _KSOLVE_SEQ 1
-#define _KSOLVE_OPENMP 0
+#define _KSOLVE_SEQ 0
+#define _KSOLVE_OPENMP 1
 
 #include <pthread.h>
 #include <semaphore.h>

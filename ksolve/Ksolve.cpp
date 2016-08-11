@@ -554,7 +554,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 	 if(!cellsPerThread)
 	 {
 		    cellsPerThread = 1;
-		    cout << endl << "OpenMP parallelism: Using parallel-for " << endl;
+		    cout << endl << "KSOLVE:: OpenMP parallelism: Using parallel-for " << endl;
 		    cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
 	 }
 
@@ -590,7 +590,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 	 if(!useSeq)
 	 {
 		    useSeq = NTHREADS;
-		    cout << endl << "Executing Sequential version " << endl;
+		    cout << endl << "Executing Sequential version of Ksolve " << endl;
 	 }
     for ( vector< VoxelPools >::iterator i = pools_.begin(); i != pools_.end(); ++i )
         i->advance( p );
