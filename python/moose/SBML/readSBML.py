@@ -348,6 +348,7 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 	reactSBMLIdMooseId = {}
 	msg = ""
 	rName = ""
+	reaction_ = ""
 	for ritem in range(0,model.getNumReactions()):
 		reactionCreated = False
 		groupName = ""
@@ -378,7 +379,7 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 				print rName," : Substrate and Product is missing, we will be skiping creating this reaction in MOOSE"
 			
 			elif (reac.getNumModifiers() > 0):
-				reactionCreated = setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId)
+				reactionCreated = setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId,modelAnnotaInfo,model,globparameterIdValue)
 				#print " reactionCreated after enz ",reactionCreated
 
 			elif (numRcts):
@@ -797,8 +798,41 @@ def createCompartment(basePath,model,comptSbmlidMooseIdMap):
 			mooseCmptId.volume = (msize*unitfactor)
 			comptSbmlidMooseIdMap[sbmlCmptId]={"MooseId": mooseCmptId, "spatialDim":dimension, "size" : msize}
 	return True
-def setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId):
-	pass
+def setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId,modelAnnotaInfo,model,globparameterIdValue):
+	msg = ""
+	errorFlag = ""
+	numRcts = reac.getNumReactants()
+	numPdts = reac.getNumProducts()
+	nummodifiers = reac.getNumModifiers()
+	if (nummodifiers):
+		parent = reac.getModifier(0)
+		parentSp = parent.getSpecies()
+		enzParent = specInfoMap[parentSp]["Mpath"]
+		MMEnz = moose.MMenz(enzParent.path+'/'+rName)
+		moose.connect(enzParent,"nOut",MMEnz,"enzDest");
+		reactionCreated = True
+		reactSBMLIdMooseId[rName] = { "MooseId":MMEnz, "className":"MMEnz"}
+		if reactionCreated:
+			if (reac.isSetNotes):
+				pullnotes(reac,MMEnz)
+				reacAnnoInfo = {}
+				reacAnnoInfo = getObjAnnotation(reac,modelAnnotaInfo)
+				if reacAnnoInfo:
+					if not moose.exists(reaction_.path+'/info'):
+						reacInfo = moose.Annotator(reaction_.path+'/info')
+					else:
+						reacInfo = moose.element(reaction_.path+'/info')
+					for k,v in reacAnnoInfo.items():
+						if k == 'xCord':
+							reacInfo.x = float(v)
+						elif k == 'yCord':
+							reacInfo.y = float(v)
+						elif k == 'bgColor':
+							reacInfo.color = v
+						else:
+							reacInfo.textColor = v
+			return(errorFlag,msg)
+
 def mapParameter(model,globparameterIdValue):
 	for pm in range(0,model.getNumParameters()):
 		prm = model.getParameter( pm );
