@@ -111,6 +111,7 @@ else:
 								errorFlag = createRules(model,specInfoMap,globparameterIdValue)
 								if errorFlag:
 									errorFlag,msg = createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue)
+							getModelAnnotation(model,baseId,basePath)
 									
 						if not errorFlag:
 							print msg
@@ -195,6 +196,37 @@ def populatedict(annoDict,label,value):
 	else:
 		annoDict[label]= {value}
 
+def getModelAnnotation(obj,baseId,basepath):
+	annotationNode = obj.getAnnotation()
+	if annotationNode != None:
+		numchild = annotationNode.getNumChildren()
+		for child_no in range(0,numchild):
+			childNode = annotationNode.getChild( child_no )
+			if ( childNode.getPrefix() == "moose" and childNode.getName() == "ModelAnnotation" ):
+				num_gchildren = childNode.getNumChildren()
+				for gchild_no in range(0,num_gchildren):
+					grandChildNode = childNode.getChild(gchild_no)
+					nodeName = grandChildNode.getName()
+					if (grandChildNode.getNumChildren() == 1 ):
+						if(nodeName == "plots"):
+							plotValue = (grandChildNode.getChild(0).toXMLString())
+							p = moose.element(baseId)
+							datapath = moose.element(baseId).path +"/data"
+							if not moose.exists(datapath):
+								datapath = moose.Neutral(baseId.path+"/data")
+								graph = moose.Neutral(datapath.path+"/graph_0")
+								plotlist= plotValue.split(";")
+								for plots in plotlist:
+									plotorg = plots
+									tt = basepath.path+plotorg.replace(" ","")
+									plotSId = moose.element(tt)
+									plot2 = plots.replace('/','_')
+									plot3 = plot2.replace('[','_')
+									plotClean = plot3.replace(']','_')
+									plotName =  plotClean + ".conc"
+									tab = moose.Table2(graph.path+'/'+plotName.replace(" ",""))
+									moose.connect(tab,"requestOut",plotSId,"getConc")
+
 def getObjAnnotation(obj,modelAnnotationInfo):
 	name = obj.getId()
 	name = name.replace(" ","_space_")
@@ -224,7 +256,7 @@ def getObjAnnotation(obj,modelAnnotationInfo):
 					if nodeName == "textColor":
 						annotateMap[nodeName] = nodeValue
 	return annotateMap
-def getModelAnnotation(obj,modelAnnotaInfo):
+def getEnzAnnotation(obj,modelAnnotaInfo):
 	name = obj.getId()
 	name = name.replace(" ","_space_")
 	#modelAnnotaInfo= {}
@@ -332,7 +364,7 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 		if ( fast ):
 			print " warning: for now fast attribute is not handled \"", rName,"\""
 		if (reac.getAnnotation() != None):
-			groupName = getModelAnnotation(reac,modelAnnotaInfo)
+			groupName = getEnzAnnotation(reac,modelAnnotaInfo)
 			
 		if (groupName != "" and list(modelAnnotaInfo[groupName]["stage"])[0] == 3):
 			setupEnzymaticReaction(reac,groupName,rName,specInfoMap,modelAnnotaInfo)
