@@ -35,7 +35,7 @@ before_script:
 before_install:
     - echo "SBML support from c++ is deprecated"
     - echo "deprecated" || sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
-    - echo "deprecated" || wget "$sbmlurl" -O libsbml.deb && sudo dpkg -i libsbml.deb 
+    - echo "deprecated" || ( wget "$sbmlurl" -O libsbml.deb && sudo dpkg -i libsbml.deb )
     - echo "deprecated" || sudo apt-get install -f
 
 install:
