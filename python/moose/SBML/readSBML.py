@@ -434,6 +434,9 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 						if mmsg != "":
 							msg = msg+mmsg
 						return(errorFlag,msg)
+					else:
+						pass
+						#print " globparameterIdValue in reaction ",globparameterIdValue
 	return (errorFlag,msg)
 
 def getKLaw( model, klaw, rev,globparameterIdValue,specMapList):
@@ -717,7 +720,7 @@ def transformUnit(unitForObject,hasonlySubUnit=False):
 					lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset;
 					unitset = True
 					unittype = "Litre"
-
+					return (lvalue,unitset,unittype)
 				elif( unitType.isMole()):
 					exponent = unitType.getExponent()
 					multiplier = unitType.getMultiplier()
@@ -728,12 +731,15 @@ def transformUnit(unitForObject,hasonlySubUnit=False):
 						lvalue *= pow(multiplier * pow(10.0,scale),exponent) + offset
 						#If SBML units are in mole then convert to number by multiplying with avogadro's number
 						lvalue = lvalue * pow(6.0221409e23,1)
-
 					elif hasonlySubUnit == False: 
-						#Pool units are in mM, so to scale adding +3 to convert to m
-						lvalue *= pow( multiplier * pow(10.0,scale+3), exponent ) + offset;
+						#Pool units in moose is mM
+						if scale >= 0:
+							lvalue *= pow( multiplier * pow(10.0,scale-3), exponent ) + offset;
+						elif scale < 0:
+							lvalue *= pow( multiplier * pow(10.0,scale+3), exponent ) + offset;
 					unitset = True
 					unittype = "Mole"
+					return (lvalue,unitset,unittype)
 		
 				elif( unitType.isItem()):
 					exponent = unitType.getExponent()
@@ -751,9 +757,9 @@ def transformUnit(unitForObject,hasonlySubUnit=False):
 						lvalue = lvalue/pow(6.0221409e23,1)
 					unitset = True
 					unittype = "Item"
+					return (lvalue,unitset,unittype)
 		else:
 			lvalue = 1.0
-		#print " end of the func lvaue ",lvalue
 	return (lvalue,unitset,unittype)
 def createCompartment(basePath,model,comptSbmlidMooseIdMap):
 	#ToDoList : Check what should be done for the spaitialdimension is 2 or 1, area or length
