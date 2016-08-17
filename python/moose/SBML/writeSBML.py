@@ -266,7 +266,7 @@ def writeEnz(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 				enzAnno = enzAnno + enzGpnCorCol
 				enzAnno = "<moose:EnzymaticReaction>\n" + enzGpnCorCol + "</moose:EnzymaticReaction>";
 				enzyme.setAnnotation(enzAnno)
-			Km = enz.numKm
+			Km = enz.Km
 			kcat = enz.kcat
 			enzSub = enz.neighbors["sub"] 
 			noofSub,sRateLawS = getSubprd(cremodel_,False,"sub",enzSub)

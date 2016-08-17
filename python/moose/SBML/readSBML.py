@@ -349,6 +349,7 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 	msg = ""
 	rName = ""
 	reaction_ = ""
+	reactionType = "reaction"
 	for ritem in range(0,model.getNumReactions()):
 		reactionCreated = False
 		groupName = ""
@@ -380,8 +381,8 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 			
 			elif (reac.getNumModifiers() > 0):
 				reactionCreated = setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId,modelAnnotaInfo,model,globparameterIdValue)
-				#print " reactionCreated after enz ",reactionCreated
-
+				reaction_ = reactSBMLIdMooseId['classical']['MooseId']
+				reactionType = "MMEnz"
 			elif (numRcts):
 				# In moose, reactions compartment are decided from first Substrate compartment info
 				# substrate is missing then check for product
@@ -402,7 +403,6 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 					reaction_ = moose.Reac(speCompt+'/'+rName)
 					reactionCreated = True
 					reactSBMLIdMooseId[rName] = {"MooseId":reaction_}
-
 			if reactionCreated:
 				if (reac.isSetNotes):
 					pullnotes(reac,reaction_)
@@ -428,15 +428,19 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 				if reac.isSetKineticLaw():
 					klaw=reac.getKineticLaw();
 					mmsg = ""
-					errorFlag, mmsg = getKLaw(model,klaw,rev,globparameterIdValue,specInfoMap)
+					errorFlag, mmsg,kfvalue,kbvalue = getKLaw(model,klaw,rev,globparameterIdValue,specInfoMap)
 					if not errorFlag:
 						msg = "Error while importing reaction \""+rName+"\"\n Error in kinetics law "
 						if mmsg != "":
 							msg = msg+mmsg
 						return(errorFlag,msg)
 					else:
-						pass
-						#print " globparameterIdValue in reaction ",globparameterIdValue
+						if reactionType == "reaction":
+							reaction_.Kf = kfvalue
+							reaction_.Kb = kbvalue
+						elif reactionType == "MMEnz":
+							reaction_.kcat  = kfvalue
+							reaction_.Km = kbvalue
 	return (errorFlag,msg)
 
 def getKLaw( model, klaw, rev,globparameterIdValue,specMapList):
@@ -444,7 +448,6 @@ def getKLaw( model, klaw, rev,globparameterIdValue,specMapList):
     amt_Conc = "amount";
     value = 0.0
     np = klaw. getNumParameters();
-    
     for pi in range(0, np):
         p = klaw.getParameter(pi)
         if ( p.isSetId() ):
@@ -494,7 +497,7 @@ def getKLaw( model, klaw, rev,globparameterIdValue,specMapList):
     	pass
     	#print " unit set for rate law kbp ",kbparm, " ",kbp.isSetUnits()
 
-    return (True,mssgstr)
+    return (True,mssgstr,kfvalue,kbvalue)
 
 def getMembers(node,ruleMemlist):
 	if node.getType() == libsbml.AST_PLUS:
@@ -520,7 +523,16 @@ def getMembers(node,ruleMemlist):
 			getMembers(lchild,ruleMemlist)
 			rchild = node.getRightChild();
 			getMembers(rchild,ruleMemlist)
-	
+	elif node.getType() == libsbml.AST_DIVIDE:
+		
+		if node.getNumChildren() == 0:
+			print("0")
+			return False
+		else:
+			lchild = node.getLeftChild();
+			getMembers(lchild,ruleMemlist)
+			rchild = node.getRightChild();
+			getMembers(rchild,ruleMemlist)
 	elif node.getType() == libsbml.AST_TIMES:
 		if node.getNumChildren() == 0:
 			print ("0")
@@ -733,9 +745,9 @@ def transformUnit(unitForObject,hasonlySubUnit=False):
 						lvalue = lvalue * pow(6.0221409e23,1)
 					elif hasonlySubUnit == False: 
 						#Pool units in moose is mM
-						if scale >= 0:
+						if scale > 0:
 							lvalue *= pow( multiplier * pow(10.0,scale-3), exponent ) + offset;
-						elif scale < 0:
+						elif scale <= 0:
 							lvalue *= pow( multiplier * pow(10.0,scale+3), exponent ) + offset;
 					unitset = True
 					unittype = "Mole"
