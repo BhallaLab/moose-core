@@ -27,8 +27,28 @@ import rmoogli
 from rdesigneurProtos import *
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
-import lxml
-from lxml import etree
+
+try:
+  from lxml import etree
+except ImportError:
+  try:
+    # Python 2.5
+    import xml.etree.cElementTree as etree
+  except ImportError:
+    try:
+      # Python 2.5
+      import xml.etree.ElementTree as etree
+    except ImportError:
+      try:
+        # normal cElementTree install
+        import cElementTree as etree
+      except ImportError:
+        try:
+          # normal ElementTree install
+          import elementtree.ElementTree as etree
+        except ImportError:
+          print("Failed to import ElementTree from any known place")
+
 import csv
 
 #EREST_ACT = -70e-3
