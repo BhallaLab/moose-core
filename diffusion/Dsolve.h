@@ -13,8 +13,8 @@
 //////////////////////////////////////////////////////////////////
 // Flags that define the type of parallel execution environment.
 //////////////////////////////////////////////////////////////////
-#define _DSOLVE_SEQ 0
-#define _DSOLVE_OPENMP 1
+#define _DSOLVE_SEQ 1
+#define _DSOLVE_OPENMP 0
 
 #include <omp.h>
 

@@ -521,6 +521,7 @@ int wildcardRelativeFind( ObjId start, const vector< string >& path,
 
 void wildcardTestFunc( ObjId* elist, unsigned int ne, const string& path )
 {
+        cout << "In wildcardTestFunc*******************" << endl;
 	vector< ObjId > ret;
 	simpleWildcardFind( path, ret );
 	if ( ne != ret.size() ) {

@@ -163,6 +163,7 @@ namespace mu
   //---------------------------------------------------------------------------
   ParserTokenReader::token_type& ParserTokenReader::SaveBeforeReturn(const token_type &tok)
   {
+//#pragma omp critical
     m_lastTok = tok;
     return m_lastTok;
   }

@@ -268,7 +268,7 @@ if(WITH_GSL)
     include_directories( ${GSL_INCLUDE_DIRS} )
 elseif(WITH_BOOST)
     find_package(Boost 1.44 COMPONENTS system filesystem random REQUIRED)
-    #find_package( LAPACK REQUIRED )
+    find_package( LAPACK REQUIRED )
     add_definitions( -DUSE_BOOST -UUSE_GSL )
     include_directories( ${Boost_INCLUDE_DIRS} )
     check_include_file_cxx(
@@ -422,7 +422,7 @@ if(WITH_BOOST)
         #find_package( LAPACK REQUIRED )
     # NOTE: On nargis, find LAPACK does not work, one has to specify lapack and
     # blas library manually.
-    list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES} -llapack -lblas)
+    list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES})# -llapack -lblas)
     list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
 endif(WITH_BOOST)
 if(WITH_MPI)

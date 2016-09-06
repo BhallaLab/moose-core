@@ -558,7 +558,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 		    cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
 	 }
 
-    omp_set_dynamic(0); //!Set the dynamic openmp feature off. It may conflict with our parameters.
+//    omp_set_dynamic(0); //!Set the dynamic openmp feature off. It may conflict with our parameters.
     omp_set_num_threads(NTHREADS); //! Set the number of threads to the parameter set.
     
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -567,7 +567,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 #pragma omp parallel for default(shared) 
     for (int j = 0; j < poolSize; j++ )
         poolArray[j].advance( p );
-
+//#pragma omp barier newline
 /*
     //To debug print the thread that takes over the master control after the parallelization
     //This can be used to check if all the threads are running.
