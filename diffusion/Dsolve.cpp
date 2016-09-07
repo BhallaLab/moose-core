@@ -360,41 +360,45 @@ void Dsolve::calcJunction( const DiffJunction& jn, double dt )
 void Dsolve::process( const Eref& e, ProcPtr p )
 {
 
-#if _DSOLVE_SEQ
-	 static int useSeq = 0;
-
-	 if(!useSeq)
-	 {
-		    useSeq = NTHREADSDsolve;
-		    cout << endl << "Executing Sequential version of Dsolve " << endl;
-	 }
-	for ( vector< DiffPoolVec >::iterator 
-					i = pools_.begin(); i != pools_.end(); ++i ) {
-		i->advance( p->dt );
-	}
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Parallel Dsolve::Advance with OpenMP  and Pthreads
+///if the environment variable NUM_THREADS is greater than one execute parallel version, else execute sequential version
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#if _DSOLVE_OPENMP
-	 static int cellsPerThread = 0; // Used for printing...
-	 if(!cellsPerThread)
-	 {
-		    cellsPerThread = 2;
-		    cout << endl << "DSOLVE:: OpenMP parallelism: Using parallel-for " << endl;
-		    cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADSDsolve << endl;
-	 }
-        DiffPoolVec* poolArray = &pools_[0];
-        int poolSize = pools_.size();
+   if(NTHREADSDsolve > 1) 
+   {
+            static int cellsPerThread = 0; // Used for printing...
+            if(!cellsPerThread)
+            {
+                  cellsPerThread = 2;
+                  cout << endl << "DSOLVE:: OpenMP parallelism: Using parallel-for " << endl;
+                  cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADSDsolve << endl;
+            }
+                DiffPoolVec* poolArray = &pools_[0];
+                int poolSize = pools_.size();
 
-    omp_set_dynamic(0); //!Set the dynamic openmp feature off. It may conflict with our parameters.
-    omp_set_num_threads(NTHREADSDsolve); //! Set the number of threads to the parameter set.
+            omp_set_dynamic(0); //!Set the dynamic openmp feature off. It may conflict with our parameters.
+            omp_set_num_threads(NTHREADSDsolve); //! Set the number of threads to the parameter set.
 #pragma omp parallel for default(shared) 
-        for(int j = 0; j < poolSize; j++)
-                poolArray[j].advance(p->dt);
-#endif
+                for(int j = 0; j < poolSize; j++)
+                        poolArray[j].advance(p->dt);
 
+   }
+   else
+   {
+            static int useSeq = 0;
+
+            if(!useSeq)
+            {
+                  useSeq = NTHREADSDsolve;
+                  cout << endl << "Executing Sequential version of Dsolve " << endl;
+            }
+           for ( vector< DiffPoolVec >::iterator 
+                       i = pools_.begin(); i != pools_.end(); ++i ) {
+              i->advance( p->dt );
+           }
+
+   }
         
 	for ( vector< DiffJunction >::const_iterator
 			i = junctions_.begin(); i != junctions_.end(); ++i ) {

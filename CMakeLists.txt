@@ -346,12 +346,6 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
 endif()
 
 if(WITH_OPENMP)
-        #    find_package(OpenMP REQUIRED)
-        #    MESSAGE("++ OpenMPI support is ON")
-        #    add_definitions(-DUSE_OPENMPI -O1)
-        #    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-        #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-
     find_package(OpenMP)
     if (OPENMP_FOUND)
             message(STATUS "FOUND OPENMP PACKAGE USING the flags ${OpenMP_C_FLAGS} and ${OpenMP_CXX_FLAGS}")
@@ -372,19 +366,6 @@ if(WITH_MPI)
         COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} -fopenmp"
         LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -fopenmp"
         )
-    ## NOTE: Following does not work
-    ##include_directories(${MPI_CXX_INCLUDE_PATH})
-    ##if(MPI_COMPILE_FLAGS)
-    ##    set_target_properties(libmoose _moose 
-    ##        PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}"
-    ##        )
-    ##endif(MPI_COMPILE_FLAGS)
-
-    ##if(MPI_LINK_FLAGS)
-    ##    set_target_properties(libmoose _moose 
-    ##        PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}"
-    ##        )
-    ##endif(MPI_LINK_FLAGS)
     find_package(OpenMP REQUIRED)
     MESSAGE("++ OpenMPI support is ON")
     add_definitions(-DUSE_OPENMPI -O1)

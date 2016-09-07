@@ -29,45 +29,6 @@
     
 const unsigned int OFFNODE = ~0;
 
-
-#if _GSOLVE_PTHREADS
-//////////////////////////////////////////////////////////////////////////////////////////
-// The function called by each of the pthreads at the start.
-/////////////////////////////////////////////////////////////////////////////////////////
-extern "C" void* call_func(void* f)
-{
-        //! unwrap the parameter passed to the function.
-        std::auto_ptr<pthreadGsolveWrap> w(static_cast < pthreadGsolveWrap* >(f));
-
-        int localId = w->tid; //! find its thread-id
-
-        //! This signal is set to true by the constructor and to false by the destructor.
-        //! This keeps the thread running for the lifetime of the object.
-        bool* destroySignal = w->destroySig; 
-
-        while(!*destroySignal)
-        {
-                sem_wait(w->sMain); //! wait for the signal from the main-thread
-                int blockSize = *(w->blockSize); //! calculate the blocksize.
-                ProcPtr p = *(w->P); //! ProcPtr parameter
-                GssaSystem* sysP = *(w->sysPtr); //! GssaSystem parameter.
-                int startIndex = localId * blockSize; //! start of vector index for this thread.
-                int endIndex = startIndex + blockSize; 
-                GssaVoxelPools* lpoolArray = *(w->poolsIndex); //! Address of the GssaVoxelPools vector.
-
-                //! Perform the integration step on the block of vector pertaining to this thread.
-                for(int j = startIndex; j < endIndex; j++)
-                        lpoolArray[j].advance(p, sysP);
-
-                sem_post(w->sThread); //! wait for the signal from the main-thread for the next timestep.
-        }
-
-        pthread_exit(NULL); //! Exit the particular pthread.
-
-   return NULL;
-}
-#endif //_GSOLVE_PTHREADS
-
 // static function
 SrcFinfo2< Id, vector< double > >* Gsolve::xComptOut() {
 	static SrcFinfo2< Id, vector< double > > xComptOut( "xComptOut",
@@ -265,85 +226,11 @@ Gsolve::Gsolve()
 		dsolvePtr_( 0 ),
 		useClockedUpdate_( false )
 {
-#if _GSOLVE_PTHREADS
-/////////////////////////////////////////////////////////////////
-// Initialize the pthread attributes for this particular object.
-/////////////////////////////////////////////////////////////////
-   pthread_attr_t attr;
-   pthread_attr_init(&attr);
-   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-
- 
-/////////////////////////////////////////////////////////////////
-// Allocate space for the pointers used by the threads
-/////////////////////////////////////////////////////////////////
-   threads = (pthread_t*) malloc(NTHREADS*sizeof(pthread_t));
-   if(threads == NULL)
-           cout << "Error in allocating memory to threads in GSOLVE" << endl;
-      
-   mainSemaphor = (sem_t*) malloc(NTHREADS*sizeof(sem_t));
-   if(mainSemaphor == NULL)
-           cout << "Error in allocating memory to mainSemaphor" << endl;
-      
-   threadSemaphor = (sem_t*) malloc(NTHREADS*sizeof(sem_t));
-   if(threads == NULL)
-           cout << "Error in allocating memory to threadSemaphor" << endl;
-
-   destroySignal = new bool;
-   *destroySignal = false;
-        
-   pthreadBlock = new int;
-   pthreadP = new ProcPtr;
-   
-   poolArray_ = new GssaVoxelPools*;
-   *poolArray_ = new GssaVoxelPools;
-
-   sPtr = new GssaSystem*;
-   *sPtr = new GssaSystem;
-
-/////////////////////////////////////////////////////////////////
-// Create parameter and the threads. 
-/////////////////////////////////////////////////////////////////
-   for(long i = 0; i < NTHREADS; i++)
-   {
-			sem_init(&threadSemaphor[i],0,0);
-			sem_init(&mainSemaphor[i],0,0);
-
-         pthreadGsolveWrap* w = new pthreadGsolveWrap(&threadSemaphor[i], &mainSemaphor[i], i, pthreadP, sPtr, poolArray_, pthreadBlock, destroySignal);
-           
-         int rc = pthread_create(&threads[i], &attr, call_func, (void*) w);
-         if (rc)
-         {
-                 cout << "ERROR : return code from pthread_create() is " << rc << endl;
-                 exit(-1); 
-         }
-   }
-
-#endif
         ;
 }
 
 Gsolve::~Gsolve()
 {
-#if _GSOLVE_PTHREADS
-        *destroySignal = true; //! To exit the working of pthread in 
-
-        //! signal the worker-threads which will then exit its work.
-        for(int i = 0; i < NTHREADS; i++)
-                sem_post(&mainSemaphor[i]);
-
-      //! Join the threads
-	   for(int i = 0; i < NTHREADS; i++)
-			 pthread_join(threads[i], NULL);
-
-/////////////////////////////////////////////////////////////////
-// Free the memory allocated. 
-/////////////////////////////////////////////////////////////////
-      free(destroySignal);
-      free(mainSemaphor);
-      free(threadSemaphor);
-      free(threads);
-#endif
         ;
 }
 
@@ -519,74 +406,34 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 	}
 	// Fifth, update the mol #s.
 	// First we advance the simulation.
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Parallel GSOLVE::Advance with OpenMP  and Pthreads
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#if _GSOLVE_PTHREADS
-
-   static int PThread = 0; //! static variable to print the type of parallelism.
-   if(!PThread)
-   {
-           PThread = 1;
-           cout << endl << "PTHREAD PARALLELISM FOR  GSOLVE USING " << NTHREADS << " THREADS. " << endl;
-   }
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Assign the pointers to the relevant memory addresses.
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-   
-   int poolSize = pools_.size();
-   *sPtr = &sys_;
-   *poolArray_ = &pools_[0];
-                
-   int blz = poolSize/NTHREADS;
-   *pthreadBlock = blz;
-   *pthreadP = p;
-
-   //! Send signal to the threads to start
-	for(int i = 0; i < NTHREADS; i++)
-		   sem_post(&mainSemaphor[i]); 
-
-   //! Integration on the leftover GssaVoxels.
-   for(int j = NTHREADS*blz; j < poolSize; j++)
-           pools_[j].advance( p, &sys_);
-
-   //! Wait for the threads to finish their work.
-	for(int i = 0; i < NTHREADS; i++)
-		   sem_wait(&threadSemaphor[i]); 
-
-#endif //_GSOLVE_PTHREADS
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // OpenMP parallelization
+///if the environment variable NUM_THREADS is greater than one execute parallel version, else execute sequential version
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#if _GSOLVE_OPENMP
-
-   int poolSize = pools_.size();
-   GssaSystem* sysPtr = &sys_;
-   static int cellsPerThread = 0;
-   int blockSize = poolSize/NTHREADS;
-
-   if(!cellsPerThread)
+   if (NTHREADS > 1) 
    {
-           cellsPerThread = 1;
-           cout << endl << "OpenMP parallelism: Using parallel-for in GSOLVE " << endl;
-           cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
-   }
+           int poolSize = pools_.size();
+           GssaSystem* sysPtr = &sys_;
+           static int cellsPerThread = 0;
+           int blockSize = poolSize/NTHREADS;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// parallelize the loop which performs the integration step.
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+           if(!cellsPerThread)
+           {
+                   cellsPerThread = 1;
+                   cout << endl << "OpenMP parallelism: Using parallel-for in GSOLVE " << endl;
+                   cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
+           }
+
 #pragma omp parallel for schedule(static) num_threads(NTHREADS) default(shared)
-   for(int j = 0; j < poolSize; j++)
-           pools_[j].advance( p, sysPtr );
-
-#endif //_GSOLVE_OPENMP
-
+           for(int j = 0; j < poolSize; j++)
+                   pools_[j].advance( p, sysPtr );
+   }
+   else
+   {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Sequential version
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#if _GSOLVE_SEQ
    static int SeqThread = 0;
    int j;
    if(!SeqThread)
@@ -596,8 +443,7 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 	 }
 	for ( vector< GssaVoxelPools >::iterator i = pools_.begin(); i != pools_.end(); ++i ) 
            i->advance( p, &sys_ );
-
-#endif //_GSOLVE_SEQ
+   }
 
 	if ( useClockedUpdate_ ) { // Check if a clocked stim is to be updated
 		for ( vector< GssaVoxelPools >::iterator 

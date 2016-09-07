@@ -10,18 +10,15 @@
 #ifndef _KSOLVE_H
 #define _KSOLVE_H
 
+
 //////////////////////////////////////////////////////////////////
 // Flags that define the type of parallel execution environment.
 //////////////////////////////////////////////////////////////////
-#define _KSOLVE_SEQ 0
-#define _KSOLVE_OPENMP 1
-
 #include <pthread.h>
 #include <semaphore.h>
 #include <signal.h>
 #include <sys/syscall.h>
 
-class Stoich;
 
 //////////////////////////////////////////////////////////////////
 // NTHREADS = NUM_THREADS
@@ -30,9 +27,7 @@ class Stoich;
 const char *env_value = getenv("NUM_THREADS");
 const int NTHREADS  = atoi(env_value);
 
-//////////////////////////////////////////////////////////////////
-//For Pthread Parallelism by Rahul
-//////////////////////////////////////////////////////////////////
+class Stoich;
 
 class Ksolve: public ZombiePoolInterface
 {
