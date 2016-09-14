@@ -20,56 +20,12 @@ class Stoich;
 const char *env_value1 = getenv("NUM_THREADS");
 int NTHREADS  = atoi(env_value1);
 
-//////////////////////////////////////////////////////////////////
-// Flags that define the type of parallel execution environment.
-//////////////////////////////////////////////////////////////////
-#define _GSOLVE_SEQ 1
-#define _GSOLVE_OPENMP 0
-#define _GSOLVE_PTHREADS 0
-
-#if _GSOLVE_PTHREADS
-#include <pthread.h>
-#include <semaphore.h>
-
-/// The structure that we pass to the pthread as a parameter
-struct pthreadGsolveWrap
-{
-        long tid; /// Thread-id 
-        ProcPtr *P; /// ProcPtr passed to the advance function
-        GssaSystem** sysPtr; /// GssaSystem passed to the advance function
-        GssaVoxelPools** poolsIndex; /// GssaVoxelPools vector passed to the advance function
-        int *blockSize; /// Block size of the vector executed by each thread
-        bool* destroySig; /// Signal to indicate the execution is being terminated
-        sem_t *sThread, *sMain; /// Semaphores to maintain contact between the main and worker threads
-
-
-        /// This wrapper will pack all the necessary parameters for the pthread function into a single structure which can be passed to the pthread as a parameter.
-        pthreadGsolveWrap(sem_t* S1, sem_t* S2, long Id, ProcPtr* ptr, GssaSystem** sptr, GssaVoxelPools** pI, int* blz, bool* destroySignal) : sThread(S1), sMain(S2), tid(Id), P(ptr), sysPtr(sptr), poolsIndex(pI), blockSize(blz), destroySig(destroySignal) {} ;
-};
-
-#endif //_GSOLVE_PTHREADS
 
 class Gsolve: public ZombiePoolInterface
 {
 	public: 
 		Gsolve();
 		~Gsolve();
-
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Additional Prameters used to pass information between the main and the worker threads
-		/////////////////////////////////////////////////////////////////////////////////////////
-#if _GSOLVE_PTHREADS
-
-      pthread_t* threads; 
-      GssaSystem** sPtr;
-		bool* destroySignal; 
-		ProcPtr *pthreadP; 
-		GssaVoxelPools** poolArray_; 
-		int *pthreadBlock; 
-		sem_t* mainSemaphor; 
-		sem_t* threadSemaphor; 
-
-#endif
 
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff

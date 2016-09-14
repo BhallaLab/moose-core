@@ -344,6 +344,7 @@ void Func::_clearBuffer()
 void Func::_showError(mu::Parser::exception_type &e) const
 {
     cout << "Error occurred in parser.\n"
+         << "In Builtins" << "\n"
          << "Message:  " << e.GetMsg() << "\n"
          << "Formula:  " << e.GetExpr() << "\n"
          << "Token:    " << e.GetToken() << "\n"

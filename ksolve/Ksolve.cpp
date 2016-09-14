@@ -544,58 +544,45 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         }
     }
 
-    //Integration step
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// OpenMP parallelization
+// OpenMP parallelization for the Integration step 
+///if the environment variable NUM_THREADS is greater than one execute parallel version, else execute sequential version
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#if _KSOLVE_OPENMP
-	//! Using a static variable to print the type of parallelization used. 
-	 static int cellsPerThread = 0; // Used for printing...
-	 if(!cellsPerThread)
-	 {
-		    cellsPerThread = 1;
-		    cout << endl << "OpenMP parallelism: Using parallel-for " << endl;
-		    cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
-	 }
+    if (NTHREADS > 1) 
+    {
+           //! Using a static variable to print the type of parallelization used. 
+            static int cellsPerThread = 0; // Used for printing...
+            if(!cellsPerThread)
+            {
+                  cellsPerThread = 1;
+                  cout << endl << "KSOLVE:: OpenMP parallelism: Using parallel-for " << endl;
+                  cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
+            }
 
-    omp_set_dynamic(0); //!Set the dynamic openmp feature off. It may conflict with our parameters.
-    omp_set_num_threads(NTHREADS); //! Set the number of threads to the parameter set.
-    
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// parallelize the loop which performs the integration step.
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            omp_set_dynamic(0); //!Set the dynamic openmp feature off. It may conflict with our parameters.
+            omp_set_num_threads(NTHREADS); //! Set the number of threads to the parameter set.
+            
 #pragma omp parallel for default(shared) 
-    for (int j = 0; j < poolSize; j++ )
-        poolArray[j].advance( p );
+            for (int j = 0; j < poolSize; j++ )
+                poolArray[j].advance( p );
 
-/*
-    //To debug print the thread that takes over the master control after the parallelization
-    //This can be used to check if all the threads are running.
-
-    auto cpu = sched_getcpu();
-    std::ostringstream os;
-    os<<"\nThread "<<omp_get_thread_num()<<" on cpu "<<sched_getcpu()<<std::endl;
-    std::cout<<os.str()<<std::flush;
-*/
-
-#endif //_KSOLVE_OPENMP
-
-
+    }
+    else 
+    {
 //////////////////////////////////////////////////////////////////
 // Sequential Code
 //////////////////////////////////////////////////////////////////
-#if _KSOLVE_SEQ
-	 static int useSeq = 0;
+            static int useSeq = 0;
 
-	 if(!useSeq)
-	 {
-		    useSeq = NTHREADS;
-		    cout << endl << "Executing Sequential version " << endl;
-	 }
-    for ( vector< VoxelPools >::iterator i = pools_.begin(); i != pools_.end(); ++i )
-        i->advance( p );
+            if(!useSeq)
+            {
+                  useSeq = NTHREADS;
+                  cout << endl << "Executing Sequential version of Ksolve " << endl;
+            }
+            for ( vector< VoxelPools >::iterator i = pools_.begin(); i != pools_.end(); ++i )
+                i->advance( p );
 
-#endif //_KSOLVE_SEQ
+    }
 
     // Finally, assemble and send the integrated values off for the Dsolve.
     if ( dsolvePtr_ )
