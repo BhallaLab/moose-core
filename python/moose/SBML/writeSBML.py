@@ -159,7 +159,7 @@ def writeEnz(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 			enzOut = enz.neighbors["enzOut"]
 			
 			if not enzOut:
-				print " Enzyme parent missing for ",enz.name
+				print(" Enzyme parent missing for ",enz.name)
 			else:
 				listofname(enzOut,True)
 				enzSubt = enzOut
@@ -173,7 +173,7 @@ def writeEnz(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 			
 			enzSub = enz.neighbors["sub"]
 			if not enzSub:
-				print "Enzyme \"",enz.name,"\" substrate missing"
+				print("Enzyme \"",enz.name,"\" substrate missing")
 			else:
 				listofname(enzSub,True)
 				enzSubt += enzSub
@@ -188,7 +188,7 @@ def writeEnz(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 
 			enzPrd = enz.neighbors["cplxDest"]
 			if not enzPrd:
-				print "Enzyme \"",enz.name,"\"product missing"
+				print("Enzyme \"",enz.name,"\"product missing")
 			else:
 				noofPrd,sRateLaw = getSubprd(cremodel_,True,"prd",enzPrd)
 				for i in range(0,len(nameList_)):
@@ -218,7 +218,7 @@ def writeEnz(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 			
 			enzSub = enz.neighbors["cplxDest"]
 			if not enzSub:
-				print " complex missing from ",enz.name
+				print(" complex missing from ",enz.name)
 			else:
 				noofSub,sRateLaw = getSubprd(cremodel_,True,"sub",enzSub)
 				for i in range(0,len(nameList_)):
@@ -226,7 +226,7 @@ def writeEnz(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 
 			enzEnz = enz.neighbors["enzOut"]
 			if not enzEnz:
-				print "Enzyme parent missing for ",enz.name
+				print("Enzyme parent missing for ",enz.name)
 			else:
 				noofEnz,sRateLaw1 = getSubprd(cremodel_,True,"prd",enzEnz)
 				for i in range(0,len(nameList_)):
@@ -235,7 +235,7 @@ def writeEnz(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 			if enzPrd:
 				noofprd,sRateLaw2 = getSubprd(cremodel_,True,"prd",enzPrd)
 			else:
-				print "Enzyme \"",enz.name, "\" product missing" 
+				print("Enzyme \"",enz.name, "\" product missing") 
 			for i in range(0,len(nameList_)):
 				enzAnno2 = enzAnno2+"<moose:product>"+nameList_[i]+"</moose:product>\n"
 			enzAnno2 += "<moose:groupName>"+ cleanEnzname + "_" + str(enz.getId().value) + "_" + str(enz.getDataIndex())+"_" +"</moose:groupName>\n";
@@ -338,7 +338,7 @@ def getSubprd(cremodel_,mobjEnz,type,neighborslist):
 			rate_law = processRateLaw(reacSubCou,cremodel_,noofSub,"sub",mobjEnz)
 			return len(reacSub),rate_law
 		else:
-			print reac.className+ " has no substrate"
+			print(reac.className+ " has no substrate")
 			return 0,rate_law
 	elif type == "prd":
 		reacPrd = neighborslist
@@ -361,7 +361,7 @@ def getSubprd(cremodel_,mobjEnz,type,neighborslist):
 def processRateLaw(objectCount,cremodel,noofObj,type,mobjEnz):
 	rate_law = ""
 	nameList_[:] = []
-	for value,count in objectCount.iteritems():
+	for value,count in objectCount.items():
 		value = moose.element(value)
 		nameIndex = value.name+"_"+str(value.getId().value)+"_"+str(value.getDataIndex())+"_"
 		clean_name = (str(idBeginWith(convertSpecialChar(nameIndex))))
@@ -398,7 +398,7 @@ def processRateLaw(objectCount,cremodel,noofObj,type,mobjEnz):
 def listofname(reacSub,mobjEnz):
 	objectCount = Counter(reacSub)
 	nameList_[:] = []
-	for value,count in objectCount.iteritems():
+	for value,count in objectCount.items():
 		value = moose.element(value)
 		nameIndex = value.name+"_"+str(value.getId().value)+"_"+str(value.getDataIndex())+"_"
 		clean_name = convertSpecialChar(nameIndex)
@@ -457,7 +457,7 @@ def writeReac(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 		reacSub = reac.neighbors["sub"]
 		reacPrd = reac.neighbors["prd"]
 		if not reacSub and not reacPrd:
-			print " Reaction ",reac.name, "missing substrate and product"
+			print(" Reaction ",reac.name, "missing substrate and product")
 		else:
 			kfl = reaction.createKineticLaw()
 			if reacSub:
@@ -476,10 +476,10 @@ def writeReac(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 					#kl_s = compt+"(" +sRL
 					kl_s = sRL
 				else:
-					print reac.name + " has no substrate"
+					print(reac.name + " has no substrate")
 					return -2
 			else:
-				print " Substrate missing for reaction ",reac.name
+				print(" Substrate missing for reaction ",reac.name)
 				
 			if reacPrd:
 				noofPrd,pRateLaw = getSubprd(cremodel_,False,"prd",reacPrd)
@@ -492,10 +492,10 @@ def writeReac(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 						#kl_s = kl_s+ "- "+pRL+")"
 						kl_s = kl_s + "-"+pRL
 				else:
-					print reac.name + " has no product"
+					print(reac.name + " has no product")
 					return -2
 			else:
-				print " Product missing for reaction ",reac.name
+				print(" Product missing for reaction ",reac.name)
 		kfl.setFormula(kl_s)
 
 def writeFunc(modelpath,cremodel_):
@@ -518,7 +518,7 @@ def writeFunc(modelpath,cremodel_):
 			
 def convertNotesSpecialChar(str1):
 	d = {"&":"_and","<":"_lessthan_",">":"_greaterthan_","BEL":"&#176"}
-	for i,j in d.iteritems():
+	for i,j in d.items():
 		str1 = str1.replace(i,j)
 	#stripping \t \n \r and space from begining and end of string
 	str1 = str1.strip(' \t\n\r')
@@ -554,7 +554,7 @@ def convertSpecialChar(str1):
 		 "+": "_plus_","*":"_star_","/":"_slash_","(":"_bo_",")":"_bc_",
 		 "[":"_sbo_","]":"_sbc_",".":"_dot_"," ":"_"
 		}
-	for i,j in d.iteritems():
+	for i,j in d.items():
 		str1 = str1.replace(i,j)
 	return str1
 	
@@ -714,7 +714,7 @@ def writeUnits(cremodel_):
 def validateModel( sbmlDoc ):
 	#print " sbmlDoc ",sbmlDoc.toSBML()
 	if ( not sbmlDoc ):
-		print "validateModel: given a null SBML Document"
+		print("validateModel: given a null SBML Document")
 		return False
 	consistencyMessages    = ""
 	validationMessages     = ""
@@ -764,31 +764,31 @@ def validateModel( sbmlDoc ):
 		if consistencyMessages == None:
 			consistencyMessages = ""
 		if consistencyMessages != "":
-			print " consistency Warning: "+consistencyMessages
+			print(" consistency Warning: "+consistencyMessages)
 		
 		if ( numConsistencyErrors > 0 ):
 			if numConsistencyErrors == 1: t = "" 
 			else: t="s"
-			print "ERROR: encountered " + numConsistencyErrors + " consistency error" +t+ " in model '" + sbmlDoc.getModel().getId() + "'."
+			print("ERROR: encountered " + numConsistencyErrors + " consistency error" +t+ " in model '" + sbmlDoc.getModel().getId() + "'.")
 	if ( numConsistencyWarnings > 0 ):
 		if numConsistencyWarnings == 1:
 			t1 = "" 
 		else: t1 ="s"
-		print "Notice: encountered " + numConsistencyWarnings +" consistency warning" + t + " in model '" + sbmlDoc.getModel().getId() + "'."
+		print("Notice: encountered " + numConsistencyWarnings +" consistency warning" + t + " in model '" + sbmlDoc.getModel().getId() + "'.")
 	  	
 	if ( numValidationErrors > 0 ):
 		if numValidationErrors == 1:
 			t2 = "" 
 		else: t2 ="s" 
-		print "ERROR: encountered " + numValidationErrors  + " validation error" + t2 + " in model '" + sbmlDoc.getModel().getId() + "'."
+		print("ERROR: encountered " + numValidationErrors  + " validation error" + t2 + " in model '" + sbmlDoc.getModel().getId() + "'.")
 		if ( numValidationWarnings > 0 ):
 			if numValidationWarnings == 1:
 				t3 = "" 
 			else: t3 = "s"
 
-			print "Notice: encountered " + numValidationWarnings + " validation warning" + t3 + " in model '" + sbmlDoc.getModel().getId() + "'." 
+			print("Notice: encountered " + numValidationWarnings + " validation warning" + t3 + " in model '" + sbmlDoc.getModel().getId() + "'.") 
 		
-		print validationMessages;
+		print(validationMessages);
 	return ( numConsistencyErrors == 0 and numValidationErrors == 0)
 	#return ( numConsistencyErrors == 0 and numValidationErrors == 0, consistencyMessages)
 
@@ -817,7 +817,7 @@ def setupItem(modelPath):
                 uniqItem,countuniqItem = countitems(items,'prd')
                 prdNo = uniqItem
                 if (len(subNo) == 0 or len(prdNo) == 0):
-                    print "Substrate Product is empty ",path, " ",items
+                    print("Substrate Product is empty ",path, " ",items)
                     
                 for prd in uniqItem:
                     prdlist.append((element(prd),'p',countuniqItem[prd]))
@@ -906,10 +906,10 @@ def setupMeshObj(modelRoot):
 
 def autoCoordinates(meshEntry,srcdesConnection):
     G = nx.Graph()
-    for cmpt,memb in meshEntry.items():
+    for cmpt,memb in list(meshEntry.items()):
         for enzObj in find_index(memb,'enzyme'):
             G.add_node(enzObj.path,label='',shape='ellipse',color='',style='filled',fontname='Helvetica',fontsize=12,fontcolor='blue')
-    for cmpt,memb in meshEntry.items():
+    for cmpt,memb in list(meshEntry.items()):
         for poolObj in find_index(memb,'pool'):
             poolinfo = moose.element(poolObj.path+'/info')
             G.add_node(poolObj.path,label = poolObj.name,shape = 'box',color = '',style = 'filled',fontname = 'Helvetica',fontsize = 12,fontcolor = 'blue')
@@ -918,26 +918,26 @@ def autoCoordinates(meshEntry,srcdesConnection):
         for reaObj in find_index(memb,'reaction'):
             G.add_node(reaObj.path,label='',shape='record',color='')
         
-    for inn,out in srcdesConnection.items():
+    for inn,out in list(srcdesConnection.items()):
         if (inn.className =='ZombieReac'): arrowcolor = 'green'
         elif(inn.className =='ZombieEnz'): arrowcolor = 'red'
         else: arrowcolor = 'blue'
         if isinstance(out,tuple):
             if len(out[0])== 0:
-                print inn.className + ':' +inn.name + "  doesn't have input message"
+                print(inn.className + ':' +inn.name + "  doesn't have input message")
             else:
                 for items in (items for items in out[0] ):
                 	G.add_edge(element(items[0]).path,inn.path)
                 	
             if len(out[1]) == 0:
-                print inn.className + ':' + inn.name + "doesn't have output mssg"
+                print(inn.className + ':' + inn.name + "doesn't have output mssg")
             else:
                 for items in (items for items in out[1] ):
                 	G.add_edge(inn.path,element(items[0]).path)
                 	
         elif isinstance(out,list):
             if len(out) == 0:
-                print "Func pool doesn't have sumtotal"
+                print("Func pool doesn't have sumtotal")
             else:
                 for items in (items for items in out ):
                 	G.add_edge(element(items[0]).path,inn.path)
@@ -953,7 +953,7 @@ def autoCoordinates(meshEntry,srcdesConnection):
     xycord = []
     cmin = 0
     cmax = 0
-    for key,value in position.items():
+    for key,value in list(position.items()):
         xycord.append(value[0])
         xycord.append(value[1])
         sceneitems[element(key)] = {'x':value[0],'y':value[1]}
@@ -988,7 +988,7 @@ if __name__ == "__main__":
 	
 	written,c,writtentofile = mooseWriteSBML(loadpath,filepath)
 	if written:
-		print " File written to ",writtentofile
+		print(" File written to ",writtentofile)
 	else:
-		print " could not write model to SBML file"
+		print(" could not write model to SBML file")
 	
