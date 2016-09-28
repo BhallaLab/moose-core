@@ -110,6 +110,7 @@ def writeEnz(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 		cleanEnzname = convertSpecialChar(enz.name) 
 		enzSubt = ()        
 		compt = ""
+		notesE = ""
 		if moose.exists(enz.path+'/info'):
 			Anno = moose.Annotator(enz.path+'/info')
 			notesE = Anno.notes
@@ -150,7 +151,7 @@ def writeEnz(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 			enzyme.setName(cleanEnzname)
 			enzyme.setFast ( False )
 			enzyme.setReversible( True)
-			k1 = enz.k1
+			k1 = enz.concK1
 			k2 = enz.k2
 			k3 = enz.k3
 			enzAnno = " "
@@ -204,6 +205,7 @@ def writeEnz(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 			enzyme.setAnnotation(enzAnno)
 			kl = enzyme.createKineticLaw()
 			kl.setFormula( rate_law )
+			kl.setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" + rate_law + "\n \t </body>")
 			punit = parmUnit( prd_order-1, cremodel_ )
 			printParameters( kl,"k2",k2,punit ) 
 			
@@ -248,10 +250,16 @@ def writeEnz(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 			enzrate_law = compt +" * k3" + '*'+sRateLaw;
 			kl = enzyme.createKineticLaw();
 			kl.setFormula( enzrate_law );
+			kl.setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" + enzrate_law + "\n \t </body>")
 			unit = parmUnit(noofPrd-1 ,cremodel_)
 			printParameters( kl,"k3",k3,unit ); 
 			
 		elif(enz.className == "MMenz" or enz.className == "ZombieMMenz"):
+			enzCompt= findCompartment(enz)
+			if not isinstance(moose.element(enzCompt),moose.ChemCompt):
+				return -2
+			else:
+				compt = enzCompt.name+"_"+str(enzCompt.getId().value)+"_"+str(enzCompt.getDataIndex())+"_"
 			enzyme = cremodel_.createReaction()
 			enzAnno = " "
 			if notesE != "":
@@ -277,7 +285,7 @@ def writeEnz(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 			enzPrd = enz.neighbors["prd"]
 			noofPrd,sRateLawP = getSubprd(cremodel_,False,"prd",enzPrd)
 			kl = enzyme.createKineticLaw()
-			fRate_law ="kcat *" + sRateLawS + "*" + sRateLawM + "/" + "(" + "Km" + "+" +sRateLawS +")"
+			fRate_law = "kcat *" + sRateLawS + "*" + sRateLawM + "/(" + compt +" * "+ "Km" + "+" +sRateLawS +")"
 			kl.setFormula(fRate_law)
 			kl.setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" + fRate_law + "\n \t </body>")
 			printParameters( kl,"Km",Km,"substance" )
@@ -295,11 +303,11 @@ def parmUnit( rct_order,cremodel_ ):
 	if order == 0:
 		unit_stream = "per_second"
 	elif order == 1:
-		unit_stream = "per_mmole_per_second"
+		unit_stream = "litre_per_mmole_per_second"
 	elif order == 2:
-		unit_stream ="per_mmole_sq_per_second"
+		unit_stream ="litre_per_mmole_sq_per_second"
 	else:
-		unit_stream = "per_mmole_"+str(rct_order)+"_per_second";
+		unit_stream = "litre_per_mmole_"+str(rct_order)+"_per_second";
 
 	lud =cremodel_.getListOfUnitDefinitions();
 	flag = False;
@@ -313,6 +321,11 @@ def parmUnit( rct_order,cremodel_ ):
 		unitdef.setId( unit_stream)
 		#Create individual unit objects that will be put inside the UnitDefinition .
 		if order != 0 :
+			unit = unitdef.createUnit()
+			unit.setKind( UNIT_KIND_LITRE )
+			unit.setExponent( 1 )
+			unit.setMultiplier(1)
+			unit.setScale( 0 )
 			unit = unitdef.createUnit()
 			unit.setKind( UNIT_KIND_MOLE )
 			unit.setExponent( -order )
@@ -407,96 +420,102 @@ def listofname(reacSub,mobjEnz):
 
 def writeReac(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 	for reac in wildcardFind(modelpath+'/##[ISA=ReacBase]'):
-		reaction = cremodel_.createReaction()
-		reacannoexist = False
-		reacGpname = " "
-		cleanReacname = convertSpecialChar(reac.name) 
-		reaction.setId(str(idBeginWith(cleanReacname+"_"+str(reac.getId().value)+"_"+str(reac.getDataIndex())+"_")))
-		reaction.setName(cleanReacname)
-		#Kf = reac.numKf
-		#Kb = reac.numKb
-		Kf = reac.Kf
-		Kb = reac.Kb
-		if Kb == 0.0:
-			reaction.setReversible( False )
-		else:
-			reaction.setReversible( True )
-		
-		reaction.setFast( False )
-		if moose.exists(reac.path+'/info'):
-			Anno = moose.Annotator(reac.path+'/info')
-			if Anno.notes != "":
-				cleanNotesR= convertNotesSpecialChar(Anno.notes)
-				notesStringR = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+ cleanNotesR + "\n\t </body>"
-				reaction.setNotes(notesStringR)
-			element = moose.element(reac)
-			ele = getGroupinfo(element)
-			if ele.className == "Neutral" or sceneitems[element] or Anno.color or Anno.textColor:
-				reacannoexist = True
-			if reacannoexist :
-				reacAnno = "<moose:ModelAnnotation>\n"
-				if ele.className == "Neutral":
-					reacAnno = reacAnno + "<moose:Group>"+ ele.name + "</moose:Group>\n"
-				if sceneitems[element]:
-					v = sceneitems[element]
-					if autoCoordinateslayout == False:
-						reacAnno = reacAnno+"<moose:xCord>"+str(v['x'])+"</moose:xCord>\n"+"<moose:yCord>"+str(v['y'])+"</moose:yCord>\n"
-					elif autoCoordinateslayout == True:
-						x = calPrime(v['x'])
-						y = calPrime(v['y'])
-						reacAnno = reacAnno+"<moose:xCord>"+str(x)+"</moose:xCord>\n"+"<moose:yCord>"+str(y)+"</moose:yCord>\n"
-				if Anno.color:
-					reacAnno = reacAnno+"<moose:bgColor>"+Anno.color+"</moose:bgColor>\n"
-				if Anno.textColor:
-					reacAnno = reacAnno+"<moose:textColor>"+Anno.textColor+"</moose:textColor>\n"
-				reacAnno = reacAnno+ "</moose:ModelAnnotation>"
-				#s1.appendAnnotation(XMLNode.convertStringToXMLNode(speciAnno))
-				reaction.setAnnotation(reacAnno)
-		kl_s , sRL, pRL ,compt= "", "", "",""
-		
 		reacSub = reac.neighbors["sub"]
 		reacPrd = reac.neighbors["prd"]
-		if not reacSub and not reacPrd:
-			print(" Reaction ",reac.name, "missing substrate and product")
-		else:
-			kfl = reaction.createKineticLaw()
-			if reacSub:
-				noofSub,sRateLaw = getSubprd(cremodel_,False,"sub",reacSub)
-				if noofSub:
-					comptVec = findCompartment(moose.element(reacSub[0]))
-					if not isinstance(moose.element(comptVec),moose.ChemCompt):
-						return -2
+		if (len(reacSub) != 0  and len(reacPrd) != 0 ):
+
+			reaction = cremodel_.createReaction()
+			reacannoexist = False
+			reacGpname = " "
+			cleanReacname = convertSpecialChar(reac.name) 
+			reaction.setId(str(idBeginWith(cleanReacname+"_"+str(reac.getId().value)+"_"+str(reac.getDataIndex())+"_")))
+			reaction.setName(cleanReacname)
+			#Kf = reac.numKf
+			#Kb = reac.numKb
+			Kf = reac.Kf
+			Kb = reac.Kb
+			if Kb == 0.0:
+				reaction.setReversible( False )
+			else:
+				reaction.setReversible( True )
+			
+			reaction.setFast( False )
+			if moose.exists(reac.path+'/info'):
+				Anno = moose.Annotator(reac.path+'/info')
+				if Anno.notes != "":
+					cleanNotesR = convertNotesSpecialChar(Anno.notes)
+					notesStringR = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+ cleanNotesR + "\n\t </body>"
+					reaction.setNotes(notesStringR)
+				element = moose.element(reac)
+				ele = getGroupinfo(element)
+				if ele.className == "Neutral" or sceneitems[element] or Anno.color or Anno.textColor:
+					reacannoexist = True
+				if reacannoexist :
+					reacAnno = "<moose:ModelAnnotation>\n"
+					if ele.className == "Neutral":
+						reacAnno = reacAnno + "<moose:Group>"+ ele.name + "</moose:Group>\n"
+					if sceneitems[element]:
+						v = sceneitems[element]
+						if autoCoordinateslayout == False:
+							reacAnno = reacAnno+"<moose:xCord>"+str(v['x'])+"</moose:xCord>\n"+"<moose:yCord>"+str(v['y'])+"</moose:yCord>\n"
+						elif autoCoordinateslayout == True:
+							x = calPrime(v['x'])
+							y = calPrime(v['y'])
+							reacAnno = reacAnno+"<moose:xCord>"+str(x)+"</moose:xCord>\n"+"<moose:yCord>"+str(y)+"</moose:yCord>\n"
+					if Anno.color:
+						reacAnno = reacAnno+"<moose:bgColor>"+Anno.color+"</moose:bgColor>\n"
+					if Anno.textColor:
+						reacAnno = reacAnno+"<moose:textColor>"+Anno.textColor+"</moose:textColor>\n"
+					reacAnno = reacAnno+ "</moose:ModelAnnotation>"
+					#s1.appendAnnotation(XMLNode.convertStringToXMLNode(speciAnno))
+					reaction.setAnnotation(reacAnno)
+			kl_s , sRL, pRL ,compt= "", "", "",""
+		
+			if not reacSub and not reacPrd:
+				print(" Reaction ",reac.name, "missing substrate and product")
+			else:
+				kfl = reaction.createKineticLaw()
+				if reacSub:
+					noofSub,sRateLaw = getSubprd(cremodel_,False,"sub",reacSub)
+					if noofSub:
+						comptVec = findCompartment(moose.element(reacSub[0]))
+						if not isinstance(moose.element(comptVec),moose.ChemCompt):
+							return -2
+						else:
+							compt = comptVec.name+"_"+str(comptVec.getId().value)+"_"+str(comptVec.getDataIndex())+"_"
+						cleanReacname = cleanReacname+"_"+str(reac.getId().value)+"_"+str(reac.getDataIndex())+"_"
+						kfparm = idBeginWith(cleanReacname)+"_"+"Kf"
+						sRL = compt +" * " +idBeginWith(cleanReacname) + "_Kf * " + sRateLaw
+						unit = parmUnit( noofSub-1 ,cremodel_)
+						printParameters( kfl,kfparm,Kf,unit ); 
+						#kl_s = compt+"(" +sRL
+						kl_s = sRL
 					else:
-						compt = comptVec.name+"_"+str(comptVec.getId().value)+"_"+str(comptVec.getDataIndex())+"_"
-					cleanReacname = cleanReacname+"_"+str(reac.getId().value)+"_"+str(reac.getDataIndex())+"_"
-					kfparm = idBeginWith(cleanReacname)+"_"+"Kf"
-					sRL = compt +" * " +idBeginWith(cleanReacname) + "_Kf * " + sRateLaw
-					unit = parmUnit( noofSub-1 ,cremodel_)
-					printParameters( kfl,kfparm,Kf,unit ); 
-					#kl_s = compt+"(" +sRL
-					kl_s = sRL
+						print(reac.name + " has no substrate")
+						return -2
 				else:
-					print(reac.name + " has no substrate")
-					return -2
-			else:
-				print(" Substrate missing for reaction ",reac.name)
-				
-			if reacPrd:
-				noofPrd,pRateLaw = getSubprd(cremodel_,False,"prd",reacPrd)
-				if  noofPrd:
-					if Kb:
-						kbparm = idBeginWith(cleanReacname)+"_"+"Kb"
-						pRL = compt +" * " +idBeginWith(cleanReacname) + "_Kb * " + pRateLaw
-						unit = parmUnit( noofPrd-1 , cremodel_)
-						printParameters( kfl,kbparm,Kb,unit );
-						#kl_s = kl_s+ "- "+pRL+")"
-						kl_s = kl_s + "-"+pRL
+					print(" Substrate missing for reaction ",reac.name)
+					
+				if reacPrd:
+					noofPrd,pRateLaw = getSubprd(cremodel_,False,"prd",reacPrd)
+					if  noofPrd:
+						if Kb:
+							kbparm = idBeginWith(cleanReacname)+"_"+"Kb"
+							pRL = compt +" * " +idBeginWith(cleanReacname) + "_Kb * " + pRateLaw
+							unit = parmUnit( noofPrd-1 , cremodel_)
+							printParameters( kfl,kbparm,Kb,unit );
+							#kl_s = kl_s+ "- "+pRL+")"
+							kl_s = kl_s + "-"+pRL
+					else:
+						print(reac.name + " has no product")
+						return -2
 				else:
-					print(reac.name + " has no product")
-					return -2
-			else:
-				print(" Product missing for reaction ",reac.name)
-		kfl.setFormula(kl_s)
+					print(" Product missing for reaction ",reac.name)
+			kfl.setFormula(kl_s)
+			kfl.setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" + kl_s + "\n \t </body>")
+			kfl.setFormula(kl_s)
+		else:
+			print(" Reaction ",reac.name, "missing substrate and product")
 
 def writeFunc(modelpath,cremodel_):
 	funcs = wildcardFind(modelpath+'/##[ISA=Function]')
@@ -664,6 +683,7 @@ def writeCompt(modelpath,cremodel_):
 #write Simulation runtime,simdt,plotdt 
 def writeSimulationAnnotation(modelpath):
 	modelAnno = ""
+	plots = ""
 	if moose.exists(modelpath+'/info'):
 		mooseclock = moose.Clock('/clock')
 		modelAnno ="<moose:ModelAnnotation>\n"
@@ -679,15 +699,19 @@ def writeSimulationAnnotation(modelpath):
 			if len(gpath) != 0:
 				q = moose.element(gpath[0])
 				ori = q.path
+				name = convertSpecialChar(q.name)
 				graphSpefound = False
 				while not(isinstance(moose.element(q),moose.CubeMesh)):
 					q = q.parent
 					graphSpefound = True
 				if graphSpefound:
 					if not plots:
-						plots = ori[ori.find(q.name)-1:len(ori)]
+						#plots = ori[ori.find(q.name)-1:len(ori)]
+						plots = '/'+q.name+'/'+name
+
 					else:
-						plots = plots + "; "+ori[ori.find(q.name)-1:len(ori)]
+						#plots = plots + "; "+ori[ori.find(q.name)-1:len(ori)]
+						plots = plots + "; /"+q.name+'/'+name
 		if plots != " ":
 			modelAnno = modelAnno+ "<moose:plots> "+ plots+ "</moose:plots>\n";
 		modelAnno = modelAnno+"</moose:ModelAnnotation>"
@@ -911,7 +935,7 @@ def autoCoordinates(meshEntry,srcdesConnection):
             G.add_node(enzObj.path,label='',shape='ellipse',color='',style='filled',fontname='Helvetica',fontsize=12,fontcolor='blue')
     for cmpt,memb in list(meshEntry.items()):
         for poolObj in find_index(memb,'pool'):
-            poolinfo = moose.element(poolObj.path+'/info')
+            #poolinfo = moose.element(poolObj.path+'/info')
             G.add_node(poolObj.path,label = poolObj.name,shape = 'box',color = '',style = 'filled',fontname = 'Helvetica',fontsize = 12,fontcolor = 'blue')
         for cplxObj in find_index(memb,'cplx'):
             pass
