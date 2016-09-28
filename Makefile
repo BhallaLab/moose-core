@@ -230,16 +230,6 @@ else
 LIBS+= -lm
 endif
 
-#harsha
-# To use SBML, pass USE_SBML=1 in make command line
-#ifeq ($(USE_SBML),1)
-#LIBS+= -lsbml
-#CXXFLAGS+=-DUSE_SBML
-#LDFLAGS += -L/usr/lib64 -Wl,--rpath='/usr/lib64'
-#SBML_DIR = sbml
-#SBML_LIB = sbml/_sbml.o
-#endif
-
 #Saeed
 # To use CUDA, pass USE_CUDA=1 in make command line
 ifeq ($(USE_CUDA),1)

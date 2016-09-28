@@ -57,7 +57,7 @@ except ImportError:
     	return (-2,"\n ReadSBML : python-libsbml module not installed",None)
 else:
 	def mooseReadSBML(filepath,loadpath):
-		print " filepath ",filepath
+		print(" filepath ",filepath)
 		try:
 			filep = open(filepath, "r")
 			document = libsbml.readSBML(filepath)
@@ -69,25 +69,25 @@ else:
 			else:
 				level = document.getLevel();
 				version = document.getVersion();
-				print("\n" + "File: " + filepath + " (Level " + str(level) + ", version " + str(version) + ")" );
+				print(("\n" + "File: " + filepath + " (Level " + str(level) + ", version " + str(version) + ")" ));
 				model = document.getModel();
 				if (model == None):
 					print("No model present." );
 					return moose.element('/');
 				else:
-					print " model ",model
-					print("functionDefinitions: " + str(model.getNumFunctionDefinitions()) );
-					print("    unitDefinitions: " + str(model.getNumUnitDefinitions()) );
-					print("   compartmentTypes: " + str(model.getNumCompartmentTypes()) );
-					print("        specieTypes: " + str(model.getNumSpeciesTypes()) );
-					print("       compartments: " + str(model.getNumCompartments()) );
-					print("            species: " + str(model.getNumSpecies()) );
-					print("         parameters: " + str(model.getNumParameters()) );
-					print(" initialAssignments: " + str(model.getNumInitialAssignments()) );
-					print("              rules: " + str(model.getNumRules()) );
-					print("        constraints: " + str(model.getNumConstraints()) );
-					print("          reactions: " + str(model.getNumReactions()) );
-					print("             events: " + str(model.getNumEvents()) );
+					print(" model ",model)
+					print(("functionDefinitions: " + str(model.getNumFunctionDefinitions()) ));
+					print(("    unitDefinitions: " + str(model.getNumUnitDefinitions()) ));
+					print(("   compartmentTypes: " + str(model.getNumCompartmentTypes()) ));
+					print(("        specieTypes: " + str(model.getNumSpeciesTypes()) ));
+					print(("       compartments: " + str(model.getNumCompartments()) ));
+					print(("            species: " + str(model.getNumSpecies()) ));
+					print(("         parameters: " + str(model.getNumParameters()) ));
+					print((" initialAssignments: " + str(model.getNumInitialAssignments()) ));
+					print(("              rules: " + str(model.getNumRules()) ));
+					print(("        constraints: " + str(model.getNumConstraints()) ));
+					print(("          reactions: " + str(model.getNumReactions()) ));
+					print(("             events: " + str(model.getNumEvents()) ));
 					print("\n");
 
 					if (model.getNumCompartments() == 0):
@@ -99,7 +99,7 @@ else:
 						#Map Compartment's SBML id as key and value is list of[ Moose ID and SpatialDimensions ]
 						global comptSbmlidMooseIdMap
 						comptSbmlidMooseIdMap = {}
-						print ": ",basePath.path
+						print(": ",basePath.path)
 						globparameterIdValue = {}
 						modelAnnotaInfo = {}
 						mapParameter(model,globparameterIdValue)
@@ -114,7 +114,7 @@ else:
 							getModelAnnotation(model,baseId,basePath)
 									
 						if not errorFlag:
-							print msg
+							print(msg)
 							#Any time in the middle if SBML does not read then I delete everything from model level
 							#This is important as while reading in GUI the model will show up untill built which is not correct
 							#print "Deleted rest of the model"
@@ -123,7 +123,7 @@ else:
 
 
 		except IOError:
-			print "File " ,filepath ," does not exist."
+			print("File " ,filepath ," does not exist.")
 			return moose.element('/')
 def setupEnzymaticReaction(enz,groupName,enzName,specInfoMap,modelAnnotaInfo):
 	enzPool = (modelAnnotaInfo[groupName]["enzyme"])
@@ -163,7 +163,7 @@ def addSubPrd(reac,reName,type,reactSBMLIdMooseId,specInfoMap):
 			sp = rct.getSpecies()
 			rctMapIter[sp] = rct.getStoichiometry()
 			noplusStoichsub = noplusStoichsub+rct.getStoichiometry()
-		for key,value in rctMapIter.items():
+		for key,value in list(rctMapIter.items()):
 			src = specInfoMap[key]["Mpath"]
 			des = reactSBMLIdMooseId[reName]["MooseId"]
 			for s in range(0,int(value)):
@@ -180,7 +180,7 @@ def addSubPrd(reac,reName,type,reactSBMLIdMooseId,specInfoMap):
 			rctMapIter[sp] = rct.getStoichiometry()
 			noplusStoichprd = noplusStoichprd+rct.getStoichiometry()
 		
-		for key,values in rctMapIter.items():
+		for key,values in list(rctMapIter.items()):
 			#src ReacBase
 			src = reactSBMLIdMooseId[reName]["MooseId"]
 			des = specInfoMap[key]["Mpath"]
@@ -190,7 +190,7 @@ def addSubPrd(reac,reName,type,reactSBMLIdMooseId,specInfoMap):
 		reactSBMLIdMooseId[reName].update(addPrdinfo)
 
 def populatedict(annoDict,label,value):
-	if annoDict.has_key(label):
+	if label in annoDict:
 		annoDict.setdefault(label,[])
 		annoDict[label].update({value})
 	else:
@@ -245,7 +245,7 @@ def getObjAnnotation(obj,modelAnnotationInfo):
 					if (grandChildNode.getNumChildren() == 1):
 						nodeValue = grandChildNode.getChild(0).toXMLString()
 					else:
-						print "Error: expected exactly ONE child of ", nodeName
+						print("Error: expected exactly ONE child of ", nodeName)
 					
 					if nodeName == "xCord":
 						annotateMap[nodeName] = nodeValue
@@ -274,7 +274,7 @@ def getEnzAnnotation(obj,modelAnnotaInfo):
 					if (grandChildNode.getNumChildren() == 1):
 						nodeValue = grandChildNode.getChild(0).toXMLString()
 					else:
-						print "Error: expected exactly ONE child of ", nodeName
+						print("Error: expected exactly ONE child of ", nodeName)
 					
 					if nodeName == "enzyme":
 						populatedict(annotateMap,"enzyme",nodeValue)
@@ -296,10 +296,10 @@ def getEnzAnnotation(obj,modelAnnotaInfo):
 					elif ( nodeName == "yCord" ):
 						populatedict(annotateMap,"yCord" ,nodeValue)
 	groupName = ""
-	if annotateMap.has_key('grpName'):
+	if 'grpName' in annotateMap:
 		groupName = list(annotateMap["grpName"])[0]
 		if list(annotateMap["stage"])[0] == '1':
-			if modelAnnotaInfo.has_key(groupName):
+			if groupName in modelAnnotaInfo:
 				modelAnnotaInfo[groupName].update	(
 					{"enzyme" : list(annotateMap["enzyme"])[0],
 					"stage" : list(annotateMap["stage"])[0],
@@ -317,7 +317,7 @@ def getEnzAnnotation(obj,modelAnnotaInfo):
 					}
 
 		elif list(annotateMap["stage"])[0] == '2':
-			if modelAnnotaInfo.has_key(groupName):
+			if groupName in modelAnnotaInfo:
 				stage = int(modelAnnotaInfo[groupName]["stage"])+int(list(annotateMap["stage"])[0])
 				modelAnnotaInfo[groupName].update (
 					{"complex" : list(annotateMap["complex"])[0],
@@ -364,7 +364,7 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 		rev = reac.getReversible()
 		fast = reac.getFast()
 		if ( fast ):
-			print " warning: for now fast attribute is not handled \"", rName,"\""
+			print(" warning: for now fast attribute is not handled \"", rName,"\"")
 		if (reac.getAnnotation() != None):
 			groupName = getEnzAnnotation(reac,modelAnnotaInfo)
 			
@@ -377,7 +377,7 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 			nummodifiers = reac.getNumModifiers()
 			
 			if not (numRcts and numPdts):
-				print rName," : Substrate and Product is missing, we will be skiping creating this reaction in MOOSE"
+				print(rName," : Substrate and Product is missing, we will be skiping creating this reaction in MOOSE")
 			
 			elif (reac.getNumModifiers() > 0):
 				reactionCreated = setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId,modelAnnotaInfo,model,globparameterIdValue)
@@ -413,7 +413,7 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 						reacInfo = moose.Annotator(reaction_.path+'/info')
 					else:
 						reacInfo = moose.element(reaction_.path+'/info')
-					for k,v in reacAnnoInfo.items():
+					for k,v in list(reacAnnoInfo.items()):
 						if k == 'xCord':
 							reacInfo.x = float(v)
 						elif k == 'yCord':
@@ -466,10 +466,10 @@ def getKLaw( model, klaw, rev,globparameterIdValue,specMapList):
     kbp = ""
     mssgstr =  ""
     for i in ruleMemlist:
-    	if parmValueMap.has_key(i) or globparameterIdValue.has_key(i):
+    	if i in parmValueMap or i in globparameterIdValue:
     		if index == 0:
     			kfparm = i
-    			if parmValueMap.has_key(i):
+    			if i in parmValueMap:
     				kfvalue = parmValueMap[i]
     				kfp = klaw.getParameter(kfparm)
     			else:
@@ -477,7 +477,7 @@ def getKLaw( model, klaw, rev,globparameterIdValue,specMapList):
     				kfp = model.getParameter(kfparm)
     		elif index == 1:
     			kbparm = i
-    			if parmValueMap.has_key(i):
+    			if i in parmValueMap:
     				kbvalue = parmValueMap[i]
     				kbp = klaw.getParameter(kbparm)
     			else:
@@ -485,7 +485,7 @@ def getKLaw( model, klaw, rev,globparameterIdValue,specMapList):
     				kbp = model.getParameter(kbparm)
     		index += 1
 
-    	elif not (specMapList.has_key(i) or comptSbmlidMooseIdMap.has_key(i)):
+    	elif not (i in specMapList or i in comptSbmlidMooseIdMap):
     		mssgstr = "\""+i+ "\" is not defined "
     		return ( False, mssgstr)
     if kfp != "":
@@ -543,7 +543,7 @@ def getMembers(node,ruleMemlist):
 			getMembers(node.getChild(i),ruleMemlist)
 	else:
 
-		print " this case need to be handled",node.getType()
+		print(" this case need to be handled",node.getType())
 	# if len(ruleMemlist) > 2:
 	# 	print "Sorry! for now MOOSE cannot handle more than 2 parameters"
  #        return True
@@ -561,35 +561,35 @@ def createRules(model,specInfoMap,globparameterIdValue):
 				speFunXterm = {}
 				getMembers(ruleMath,ruleMemlist)
 				for i in ruleMemlist:
-					if (specInfoMap.has_key(i)):
+					if (i in specInfoMap):
 						specMapList = specInfoMap[i]["Mpath"]
 						numVars = funcId.numVars
 						x = funcId.path+'/x['+str(numVars)+']'
 						speFunXterm[i] = 'x'+str(numVars)
 						moose.connect(specMapList , 'nOut', x, 'input' )
 						funcId.numVars = numVars +1
-					elif not(globparameterIdValue.has_key(i)):
-						print "check the variable type ",i
+					elif not(i in globparameterIdValue):
+						print("check the variable type ",i)
 
 				exp = rule.getFormula()
 				for mem in ruleMemlist:
-					if ( specInfoMap.has_key(mem)):
+					if ( mem in specInfoMap):
 						exp1 = exp.replace(mem,str(speFunXterm[mem]))
 						exp = exp1
-					elif( globparameterIdValue.has_key(mem)):
+					elif( mem in globparameterIdValue):
 						exp1 = exp.replace(mem,str(globparameterIdValue[mem]))
 						exp = exp1
 					else:
-						print "Math expression need to be checked"
+						print("Math expression need to be checked")
 				funcId.expr = exp.strip(" \t\n\r")
 				return True
 
 			elif( rule.isRate() ):
-				print "Warning : For now this \"",rule.getVariable(), "\" rate Rule is not handled in moose "
+				print("Warning : For now this \"",rule.getVariable(), "\" rate Rule is not handled in moose ")
 				return False
 
 			elif ( rule.isAlgebraic() ):
-				print "Warning: For now this " ,rule.getVariable()," Algebraic Rule is not handled in moose"
+				print("Warning: For now this " ,rule.getVariable()," Algebraic Rule is not handled in moose")
 				return False
 	return True
 
@@ -649,7 +649,7 @@ def createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap,modelAnnotaIn
 					poolInfo = moose.Annotator(poolId.path+'/info')
 				else:
 					poolInfo = moose.element(poolId.path+'/info')
-				for k,v in specAnnoInfo.items():
+				for k,v in list(specAnnoInfo.items()):
 					if k == 'xCord':
 						poolInfo.x = float(v)
 					elif k == 'yCord':
@@ -675,7 +675,7 @@ def createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap,modelAnnotaIn
 					initvalue = initvalue * unitfactor
 				elif spe.isSetInitialConcentration():
 					initvalue = spe.getInitialConcentration()
-					print " Since hasonlySubUnit is true and concentration is set units are not checked"
+					print(" Since hasonlySubUnit is true and concentration is set units are not checked")
 				poolId.nInit = initvalue
 
 			elif hasonlySubUnit == False:
@@ -705,7 +705,7 @@ def createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap,modelAnnotaIn
 							found = True
 							break
 				if not (found):
-					print "Invalid SBML: Either initialConcentration or initialAmount must be set or it should be found in assignmentRule but non happening for ",sName
+					print("Invalid SBML: Either initialConcentration or initialAmount must be set or it should be found in assignmentRule but non happening for ",sName)
 					return False
 
 
@@ -799,14 +799,14 @@ def createCompartment(basePath,model,comptSbmlidMooseIdMap):
 			if ( compt.isSetSize() ):
 				msize = compt.getSize()
 				if msize == 1:
-					print "Compartment size is 1"
+					print("Compartment size is 1")
 
 			dimension = compt.getSpatialDimensions();
 			if dimension == 3:
 				unitfactor,unitset, unittype = transformUnit(compt)
 				
 			else:
-				print " Currently we don't deal with spatial Dimension less than 3 and unit's area or length"
+				print(" Currently we don't deal with spatial Dimension less than 3 and unit's area or length")
 				return False
 
 			if not( name ):
@@ -840,7 +840,7 @@ def setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId,modelAnnotaI
 						reacInfo = moose.Annotator(reaction_.path+'/info')
 					else:
 						reacInfo = moose.element(reaction_.path+'/info')
-					for k,v in reacAnnoInfo.items():
+					for k,v in list(reacAnnoInfo.items()):
 						if k == 'xCord':
 							reacInfo.x = float(v)
 						elif k == 'yCord':
@@ -875,6 +875,6 @@ if __name__ == "__main__":
 	
 	read = mooseReadSBML(filepath,loadpath)
 	if read:
-		print " Read to path",loadpath
+		print(" Read to path",loadpath)
 	else:
-		print " could not read  SBML to MOOSE"
+		print(" could not read  SBML to MOOSE")
