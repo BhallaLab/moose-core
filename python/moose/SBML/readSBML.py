@@ -53,10 +53,10 @@ try:
     #from libsbml import *
     import libsbml
 except ImportError: 
-    def mooseReadSBML(filepath,loadpath):
+    def mooseReadSBML(filepath,loadpath,solver="ee"):
     	return (-2,"\n ReadSBML : python-libsbml module not installed",None)
 else:
-	def mooseReadSBML(filepath,loadpath):
+	def mooseReadSBML(filepath,loadpath,solver="ee"):
 		try:
 			filep = open(filepath, "r")
 			document = libsbml.readSBML(filepath)
@@ -74,7 +74,7 @@ else:
 					print("No model present." );
 					return moose.element('/');
 				else:
-					print(" model ",model)
+					print((" model: " +str(model)));
 					print(("functionDefinitions: " + str(model.getNumFunctionDefinitions()) ));
 					print(("    unitDefinitions: " + str(model.getNumUnitDefinitions()) ));
 					print(("   compartmentTypes: " + str(model.getNumCompartmentTypes()) ));
@@ -98,7 +98,7 @@ else:
 						#Map Compartment's SBML id as key and value is list of[ Moose ID and SpatialDimensions ]
 						global comptSbmlidMooseIdMap
 						comptSbmlidMooseIdMap = {}
-						print(": ",basePath.path)
+						print(("modelPath:" + basePath.path))
 						globparameterIdValue = {}
 						modelAnnotaInfo = {}
 						mapParameter(model,globparameterIdValue)
@@ -111,7 +111,7 @@ else:
 								if errorFlag:
 									errorFlag,msg = createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue)
 							getModelAnnotation(model,baseId,basePath)
-									
+						
 						if not errorFlag:
 							print(msg)
 							#Any time in the middle if SBML does not read then I delete everything from model level
@@ -124,6 +124,7 @@ else:
 		except IOError:
 			print("File " ,filepath ," does not exist.")
 			return moose.element('/')
+
 def setupEnzymaticReaction(enz,groupName,enzName,specInfoMap,modelAnnotaInfo):
 	enzPool = (modelAnnotaInfo[groupName]["enzyme"])
 	enzParent = specInfoMap[enzPool]["Mpath"]
@@ -490,7 +491,7 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 						if reaction_.className == "Reac":
 							reaction_.Kf = kfvalue
 							reaction_.Kb = kbvalue
-						elif reaction_className == "MMenz":
+						elif reaction_.className == "MMenz":
 							reaction_.kcat  = kfvalue
 							reaction_.Km = kbvalue
 	return (errorFlag,msg)
