@@ -791,7 +791,8 @@ Id findParentComptOfReac( Id reac )
 
 		vector< Id > subVec;
 		reac.element()->getNeighbors( subVec, subFinfo );
-		assert( subVec.size() > 0 );
+		if ( subVec.size() == 0 ) // Dangling reaction
+			return Id();
 		// For now just put the reac in the compt belonging to the 
 		// first substrate
 		return getCompt( subVec[0] );
@@ -808,10 +809,10 @@ void ReadKkit::assignReacCompartments()
 	for ( map< string, Id >::iterator i = reacIds_.begin(); 
 		i != reacIds_.end(); ++i ) {
 		Id compt = findParentComptOfReac( i->second );
-		// if ( moveOntoCompartment_ ) {
+		if ( compt != Id() ) {
 			if ( ! (getCompt( i->second ).id == compt ) )
 				shell_->doMove( i->second, compt );
-		// }
+		}
 	}
 }
 
@@ -1410,7 +1411,7 @@ void ReadKkit::addmsg( const vector< string >& args)
 			}
 			vector< Id > enzcplx;
 			i->second.element()->getNeighbors( enzcplx, 
-				i->second.element()->cinfo()->findFinfo( "toCplx" ) );
+				i->second.element()->cinfo()->findFinfo( "cplxOut" ) );
 			assert( enzcplx.size() == 1 );
 			pool = enzcplx[0];
 		}  else {

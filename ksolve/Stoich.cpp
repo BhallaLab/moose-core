@@ -1491,24 +1491,27 @@ void Stoich::unZombifyModel()
 
     unZombifyPools();
 
-    for ( vector< Id >::iterator i = reacVec_.begin();
-            i != reacVec_.end(); ++i )
+	vector< Id > temp = reacVec_; temp.insert( temp.end(), 
+					offSolverReacVec_.begin(), offSolverReacVec_.end() );
+    for ( vector< Id >::iterator i = temp.begin(); i != temp.end(); ++i )
     {
         Element* e = i->element();
         if ( e != 0 &&  e->cinfo() == zombieReacCinfo )
             ReacBase::zombify( e, reacCinfo, Id() );
     }
 
-    for ( vector< Id >::iterator i = mmEnzVec_.begin();
-            i != mmEnzVec_.end(); ++i )
+	temp = mmEnzVec_; temp.insert( temp.end(), 
+					offSolverMMenzVec_.begin(), offSolverMMenzVec_.end() );
+    for ( vector< Id >::iterator i = temp.begin(); i != temp.end(); ++i )
     {
         Element* e = i->element();
         if ( e != 0 &&  e->cinfo() == zombieMMenzCinfo )
             EnzBase::zombify( e, mmEnzCinfo, Id() );
     }
 
-    for ( vector< Id >::iterator i = enzVec_.begin();
-            i != enzVec_.end(); ++i )
+	temp = enzVec_; temp.insert( temp.end(), 
+					offSolverEnzVec_.begin(), offSolverEnzVec_.end() );
+    for ( vector< Id >::iterator i = temp.begin(); i != temp.end(); ++i )
     {
         Element* e = i->element();
         if ( e != 0 &&  e->cinfo() == zombieEnzCinfo )
