@@ -12,7 +12,7 @@
 **           copyright (C) 2003-2016 Upinder S. Bhalla. and NCBS
 Created : Thu May 12 10:19:00 2016(+0530)
 Version 
-Last-Updated:
+Last-Updated: Wed Sep 28
 		  By:
 **********************************************************************/
 /****************************
@@ -53,11 +53,10 @@ try:
     #from libsbml import *
     import libsbml
 except ImportError: 
-    def mooseReadSBML(filepath,loadpath):
+    def mooseReadSBML(filepath,loadpath,solver="ee"):
     	return (-2,"\n ReadSBML : python-libsbml module not installed",None)
 else:
-	def mooseReadSBML(filepath,loadpath):
-		print(" filepath ",filepath)
+	def mooseReadSBML(filepath,loadpath,solver="ee"):
 		try:
 			filep = open(filepath, "r")
 			document = libsbml.readSBML(filepath)
@@ -75,7 +74,7 @@ else:
 					print("No model present." );
 					return moose.element('/');
 				else:
-					print(" model ",model)
+					print((" model: " +str(model)));
 					print(("functionDefinitions: " + str(model.getNumFunctionDefinitions()) ));
 					print(("    unitDefinitions: " + str(model.getNumUnitDefinitions()) ));
 					print(("   compartmentTypes: " + str(model.getNumCompartmentTypes()) ));
@@ -99,7 +98,7 @@ else:
 						#Map Compartment's SBML id as key and value is list of[ Moose ID and SpatialDimensions ]
 						global comptSbmlidMooseIdMap
 						comptSbmlidMooseIdMap = {}
-						print(": ",basePath.path)
+						print(("modelPath:" + basePath.path))
 						globparameterIdValue = {}
 						modelAnnotaInfo = {}
 						mapParameter(model,globparameterIdValue)
@@ -112,7 +111,7 @@ else:
 								if errorFlag:
 									errorFlag,msg = createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue)
 							getModelAnnotation(model,baseId,basePath)
-									
+						
 						if not errorFlag:
 							print(msg)
 							#Any time in the middle if SBML does not read then I delete everything from model level
@@ -125,6 +124,7 @@ else:
 		except IOError:
 			print("File " ,filepath ," does not exist.")
 			return moose.element('/')
+
 def setupEnzymaticReaction(enz,groupName,enzName,specInfoMap,modelAnnotaInfo):
 	enzPool = (modelAnnotaInfo[groupName]["enzyme"])
 	enzParent = specInfoMap[enzPool]["Mpath"]
@@ -151,6 +151,8 @@ def setupEnzymaticReaction(enz,groupName,enzName,specInfoMap,modelAnnotaInfo):
 	
 	if (enz.isSetNotes):
 		pullnotes(enz,enzyme_)
+
+	return enzyme_,True
 
 def addSubPrd(reac,reName,type,reactSBMLIdMooseId,specInfoMap):
 	rctMapIter = {}
@@ -216,16 +218,23 @@ def getModelAnnotation(obj,baseId,basepath):
 								datapath = moose.Neutral(baseId.path+"/data")
 								graph = moose.Neutral(datapath.path+"/graph_0")
 								plotlist= plotValue.split(";")
+								tablelistname = []
 								for plots in plotlist:
+									plots = plots.replace(" ", "")
 									plotorg = plots
-									tt = basepath.path+plotorg.replace(" ","")
-									plotSId = moose.element(tt)
-									plot2 = plots.replace('/','_')
-									plot3 = plot2.replace('[','_')
-									plotClean = plot3.replace(']','_')
-									plotName =  plotClean + ".conc"
-									tab = moose.Table2(graph.path+'/'+plotName.replace(" ",""))
-									moose.connect(tab,"requestOut",plotSId,"getConc")
+									if moose.exists(basepath.path+plotorg):
+										plotSId = moose.element(basepath.path+plotorg)
+										#plotorg = convertSpecialChar(plotorg)
+										plot2 = plots.replace('/','_')
+										plot3 = plot2.replace('[','_')
+										plotClean = plot3.replace(']','_')
+										plotName =  plotClean + ".conc"
+										fullPath = graph.path+'/'+plotName.replace(" ","")
+										#If table exist with same name then its not created
+										if not fullPath  in tablelistname:
+											tab = moose.Table2(fullPath)
+											tablelistname.append(fullPath)
+											moose.connect(tab,"requestOut",plotSId,"getConc")
 
 def getObjAnnotation(obj,modelAnnotationInfo):
 	name = obj.getId()
@@ -236,7 +245,7 @@ def getObjAnnotation(obj,modelAnnotationInfo):
 		annoNode = obj.getAnnotation()
 		for ch in range(0,annoNode.getNumChildren()):
 			childNode = annoNode.getChild(ch)
-			if (childNode.getPrefix() == "moose" and childNode.getName() == "ModelAnnotation"):
+			if (childNode.getPrefix() == "moose" and (childNode.getName() == "ModelAnnotation" or childNode.getName() == "EnzymaticReaction")):
 				sublist = []
 				for gch in range(0,childNode.getNumChildren()):
 					grandChildNode = childNode.getChild(gch)
@@ -252,11 +261,11 @@ def getObjAnnotation(obj,modelAnnotationInfo):
 					if nodeName == "yCord":
 						annotateMap[nodeName] = nodeValue
 					if nodeName == "bgColor":
-						annotateMap[nodeName] = nodeValue
+							annotateMap[nodeName] = nodeValue
 					if nodeName == "textColor":
 						annotateMap[nodeName] = nodeValue
 	return annotateMap
-def getEnzAnnotation(obj,modelAnnotaInfo):
+def getEnzAnnotation(obj,modelAnnotaInfo,rev,globparameterIdValue,specInfoMap):
 	name = obj.getId()
 	name = name.replace(" ","_space_")
 	#modelAnnotaInfo= {}
@@ -298,19 +307,36 @@ def getEnzAnnotation(obj,modelAnnotaInfo):
 	groupName = ""
 	if 'grpName' in annotateMap:
 		groupName = list(annotateMap["grpName"])[0]
+		klaw=obj.getKineticLaw();
+		mmsg = ""
+		errorFlag, mmsg,k1,k2 = getKLaw(obj,klaw,rev,globparameterIdValue,specInfoMap)
+
+		if 'substrates' in annotateMap:
+		    sublist = list(annotateMap["substrates"])
+		else:
+			sublist = {}
+		if 'product' in annotateMap:
+		    prdlist = list(annotateMap["product"])
+		else:
+			prdlist = {}
+
 		if list(annotateMap["stage"])[0] == '1':
 			if groupName in modelAnnotaInfo:
 				modelAnnotaInfo[groupName].update	(
 					{"enzyme" : list(annotateMap["enzyme"])[0],
 					"stage" : list(annotateMap["stage"])[0],
-					"substrate" : list(annotateMap["substrates"])
+					"substrate" : sublist,
+					"k1": k1,
+					"k2" : k2
 					}
 				)
 			else:
 				modelAnnotaInfo[groupName]= {
 					"enzyme" : list(annotateMap["enzyme"])[0],
 					"stage" : list(annotateMap["stage"])[0],
-					"substrate" : list(annotateMap["substrates"])
+					"substrate" :  sublist,
+					"k1" : k1,
+					"k2" : k2
 					#"group" : list(annotateMap["Group"])[0],
 					#"xCord" : list(annotateMap["xCord"])[0],
 					#"yCord" : list(annotateMap["yCord"]) [0]
@@ -321,15 +347,17 @@ def getEnzAnnotation(obj,modelAnnotaInfo):
 				stage = int(modelAnnotaInfo[groupName]["stage"])+int(list(annotateMap["stage"])[0])
 				modelAnnotaInfo[groupName].update (
 					{"complex" : list(annotateMap["complex"])[0],
-					"product" : list(annotateMap["product"]),
-					"stage" : [stage]
+					"product" : prdlist,
+					"stage" : [stage],
+					"k3" : k1
 					}
 				)
 			else:
 				modelAnnotaInfo[groupName]= {
 					"complex" : list(annotateMap["complex"])[0],
-					"product" : list(annotateMap["product"]),
-					"stage" : [stage]
+					"product" : prdlist,
+					"stage" : [stage],
+					"k3" : k1
 					}
 	return(groupName)
 
@@ -349,7 +377,7 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 	msg = ""
 	rName = ""
 	reaction_ = ""
-	reactionType = "reaction"
+	
 	for ritem in range(0,model.getNumReactions()):
 		reactionCreated = False
 		groupName = ""
@@ -366,10 +394,33 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 		if ( fast ):
 			print(" warning: for now fast attribute is not handled \"", rName,"\"")
 		if (reac.getAnnotation() != None):
-			groupName = getEnzAnnotation(reac,modelAnnotaInfo)
+			groupName = getEnzAnnotation(reac,modelAnnotaInfo,rev,globparameterIdValue,specInfoMap)
 			
 		if (groupName != "" and list(modelAnnotaInfo[groupName]["stage"])[0] == 3):
-			setupEnzymaticReaction(reac,groupName,rName,specInfoMap,modelAnnotaInfo)
+			reaction_,reactionCreated = setupEnzymaticReaction(reac,groupName,rName,specInfoMap,modelAnnotaInfo)
+			reaction_.k3 = modelAnnotaInfo[groupName]['k3']
+			reaction_.k2 = modelAnnotaInfo[groupName]['k2']
+			reaction_.concK1 = modelAnnotaInfo[groupName]['k1']
+			if reactionCreated:
+				if (reac.isSetNotes):
+					pullnotes(reac,reaction_)
+					reacAnnoInfo = {}
+				reacAnnoInfo = getObjAnnotation(reac,modelAnnotaInfo)
+				if reacAnnoInfo:
+					if not moose.exists(reaction_.path+'/info'):
+						reacInfo = moose.Annotator(reaction_.path+'/info')
+					else:
+						reacInfo = moose.element(reaction_.path+'/info')
+					for k,v in list(reacAnnoInfo.items()):
+						if k == 'xCord':
+							reacInfo.x = float(v)
+						elif k == 'yCord':
+							reacInfo.y = float(v)
+						elif k == 'bgColor':
+							reacInfo.color = v
+						else:
+							reacInfo.textColor = v
+
 
 		elif(groupName == ""):
 			numRcts = reac.getNumReactants()
@@ -378,11 +429,13 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 			
 			if not (numRcts and numPdts):
 				print(rName," : Substrate and Product is missing, we will be skiping creating this reaction in MOOSE")
-			
+				reactionCreated = False
 			elif (reac.getNumModifiers() > 0):
-				reactionCreated = setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId,modelAnnotaInfo,model,globparameterIdValue)
-				reaction_ = reactSBMLIdMooseId['classical']['MooseId']
-				reactionType = "MMEnz"
+				reactionCreated,reaction_ = setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId,modelAnnotaInfo,model,globparameterIdValue)
+			# elif (reac.getNumModifiers() > 0):
+			# 	reactionCreated = setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId,modelAnnotaInfo,model,globparameterIdValue)
+			# 	reaction_ = reactSBMLIdMooseId['classical']['MooseId']
+			# 	reactionType = "MMEnz"
 			elif (numRcts):
 				# In moose, reactions compartment are decided from first Substrate compartment info
 				# substrate is missing then check for product
@@ -402,7 +455,7 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 					speCompt = specInfoMap[sp]["comptId"].path
 					reaction_ = moose.Reac(speCompt+'/'+rName)
 					reactionCreated = True
-					reactSBMLIdMooseId[rName] = {"MooseId":reaction_}
+					reactSBMLIdMooseId[rId] = {"MooseId" : reaction_, "className": "reaction"}
 			if reactionCreated:
 				if (reac.isSetNotes):
 					pullnotes(reac,reaction_)
@@ -435,10 +488,10 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 							msg = msg+mmsg
 						return(errorFlag,msg)
 					else:
-						if reactionType == "reaction":
+						if reaction_.className == "Reac":
 							reaction_.Kf = kfvalue
 							reaction_.Kb = kbvalue
-						elif reactionType == "MMEnz":
+						elif reaction_.className == "MMenz":
 							reaction_.kcat  = kfvalue
 							reaction_.Km = kbvalue
 	return (errorFlag,msg)
@@ -533,6 +586,7 @@ def getMembers(node,ruleMemlist):
 			getMembers(lchild,ruleMemlist)
 			rchild = node.getRightChild();
 			getMembers(rchild,ruleMemlist)
+	
 	elif node.getType() == libsbml.AST_TIMES:
 		if node.getNumChildren() == 0:
 			print ("0")
@@ -541,6 +595,9 @@ def getMembers(node,ruleMemlist):
 		for i in range(1,node.getNumChildren()):
 			# Multiplication
 			getMembers(node.getChild(i),ruleMemlist)
+	
+	elif node.getType() == libsbml.AST_FUNCTION_POWER:
+		pass
 	else:
 
 		print(" this case need to be handled",node.getType())
@@ -836,10 +893,10 @@ def setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId,modelAnnotaI
 				reacAnnoInfo = {}
 				reacAnnoInfo = getObjAnnotation(reac,modelAnnotaInfo)
 				if reacAnnoInfo:
-					if not moose.exists(reaction_.path+'/info'):
-						reacInfo = moose.Annotator(reaction_.path+'/info')
+					if not moose.exists(MMEnz.path+'/info'):
+						reacInfo = moose.Annotator(MMEnz.path+'/info')
 					else:
-						reacInfo = moose.element(reaction_.path+'/info')
+						reacInfo = moose.element(MMEnz.path+'/info')
 					for k,v in list(reacAnnoInfo.items()):
 						if k == 'xCord':
 							reacInfo.x = float(v)
@@ -849,7 +906,7 @@ def setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId,modelAnnotaI
 							reacInfo.color = v
 						else:
 							reacInfo.textColor = v
-			return(errorFlag,msg)
+			return(reactionCreated,MMEnz)
 
 def mapParameter(model,globparameterIdValue):
 	for pm in range(0,model.getNumParameters()):
@@ -860,6 +917,16 @@ def mapParameter(model,globparameterIdValue):
 		if ( prm.isSetValue() ):
 			value = prm.getValue()
 		globparameterIdValue[parid] = value
+
+def convertSpecialChar(str1):
+	d = {"&":"_and","<":"_lessthan_",">":"_greaterthan_","BEL":"&#176","-":"_minus_","'":"_prime_",
+		 "+": "_plus_","*":"_star_","/":"_slash_","(":"_bo_",")":"_bc_",
+		 "[":"_sbo_","]":"_sbc_",".":"_dot_"," ":"_"
+		}
+	for i,j in list(d.items()):
+		str1 = str1.replace(i,j)
+	return str1
+
 
 if __name__ == "__main__":
 	
