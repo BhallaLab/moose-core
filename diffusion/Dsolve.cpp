@@ -361,13 +361,36 @@ void Dsolve::process( const Eref& e, ProcPtr p )
 {
 
 
+    static int cellsPerThread = 0; // Used for printing...
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Parallel Dsolve::Advance with OpenMP  and Pthreads
 ///if the environment variable NUM_THREADS is greater than one execute parallel version, else execute sequential version
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**********
+  ****** Initially checking if the NUM_THREADS environment variable is set.
+  ****** If not, we set it to default 1.
+  ****** This will execute sequential program.
+  ****** We do this just once.
+  *************/
+   if (!cellsPerThread) 
+   {
+      if(getenv("NUM_THREADS") == 0) 
+      {
+         cout << "NUM_THREADS is not set up so assuming it is 1" << endl;
+         NTHREADSDsolve = 1;
+      }
+      else
+         NTHREADSDsolve = atoi(getenv("NUM_THREADS"));
+   }
+
+   /*****************
+     ******** We execute the parallel version only if NUM_THREADS > 1
+     ******* Else we execute the sequential version
+     ****************/
+
    if(NTHREADSDsolve > 1) 
    {
-            static int cellsPerThread = 0; // Used for printing...
             if(!cellsPerThread)
             {
                   cellsPerThread = 2;
@@ -386,11 +409,9 @@ void Dsolve::process( const Eref& e, ProcPtr p )
    }
    else
    {
-            static int useSeq = 0;
-
-            if(!useSeq)
+            if(!cellsPerThread)
             {
-                  useSeq = NTHREADSDsolve;
+                  cellsPerThread = NTHREADSDsolve;
                   cout << endl << "Executing Sequential version of Dsolve " << endl;
             }
            for ( vector< DiffPoolVec >::iterator 

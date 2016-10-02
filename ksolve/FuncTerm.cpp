@@ -24,10 +24,8 @@
 using namespace std;
 
 #include "muParser.h"
-//#include "Gsolve.h"
 #include "FuncTerm.h"
 #include "../utility/numutil.h"
-#include "../basecode/header.h"
 
 FuncTerm::FuncTerm()
 	: reactantIndex_( 1, 0 ),

@@ -28,6 +28,9 @@
 #define SIMPLE_ROUNDING 0
     
 const unsigned int OFFNODE = ~0;
+//int NTHREADSGsolve = 0;
+
+      
 
 // static function
 SrcFinfo2< Id, vector< double > >* Gsolve::xComptOut() {
@@ -348,7 +351,8 @@ void Gsolve::setClockedUpdate( bool val )
 //////////////////////////////////////////////////////////////
 void Gsolve::process( const Eref& e, ProcPtr p )
 {
-	// cout << stoichPtr_ << "	dsolve = " <<	dsolvePtr_ << endl;
+   static int cellsPerThread = 0;
+   cout << "IN GSOLVE" << endl;
 	if ( !stoichPtr_ )
 		return;
 	// First, handle incoming diffusion values. Note potential for
@@ -411,21 +415,43 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 // OpenMP parallelization
 ///if the environment variable NUM_THREADS is greater than one execute parallel version, else execute sequential version
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-   if (NTHREADS > 1) 
+
+/**********
+  ****** Initially checking if the NUM_THREADS environment variable is set.
+  ****** If not, we set it to default 1.
+  ****** This will execute sequential program.
+  ****** We do this just once.
+  *************/
+   if (!cellsPerThread) 
+   {
+      if(getenv("NUM_THREADS") == 0) 
+      {
+         cout << "NUM_THREADS is not set up so assuming it is 1" << endl;
+         NTHREADSGsolve = 1;
+      }
+      else
+         NTHREADSGsolve = atoi(getenv("NUM_THREADS"));
+   }
+
+   /*****************
+     ******** We execute the parallel version only if NUM_THREADS > 1
+     ******* Else we execute the sequential version
+     ****************/
+
+   if (NTHREADSGsolve > 1) 
    {
            int poolSize = pools_.size();
            GssaSystem* sysPtr = &sys_;
-           static int cellsPerThread = 0;
-           int blockSize = poolSize/NTHREADS;
+           int blockSize = poolSize/NTHREADSGsolve;
 
            if(!cellsPerThread)
            {
                    cellsPerThread = 1;
                    cout << endl << "OpenMP parallelism: Using parallel-for in GSOLVE " << endl;
-                   cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
+                   cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADSGsolve << endl;
            }
 
-#pragma omp parallel for schedule(static) num_threads(NTHREADS) default(shared)
+#pragma omp parallel for schedule(static) num_threads(NTHREADSGsolve) default(shared)
            for(int j = 0; j < poolSize; j++)
                    pools_[j].advance( p, sysPtr );
    }

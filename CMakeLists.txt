@@ -345,14 +345,16 @@ if(READLINE_FOUND AND TERMCAP_FOUND)
     include_directories(${Readline_INCLUDE_DIR})
 endif()
 
+# OpenMP
 if(WITH_OPENMP)
     find_package(OpenMP)
     if (OPENMP_FOUND)
             message(STATUS "FOUND OPENMP PACKAGE USING the flags ${OpenMP_C_FLAGS} and ${OpenMP_CXX_FLAGS}")
             set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
             set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+            set (ENV{NUM_THREADS} 1)
+            message(STATUS "NUM THREADS = $ENV{NUM_THREADS}")
     endif()
-	
 endif(WITH_OPENMP)
 
 # Openmpi

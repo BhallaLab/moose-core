@@ -6,23 +6,14 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#include <omp.h>
-#include <sys/time.h>
 #include "header.h"
-
 #ifdef USE_GSL
-
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
-
-#else                           // USE_BOOST
-
-#include <boost/numeric/odeint.hpp>
-#include <boost/bind.hpp>
-#include "BoostSys.h"
-
 #endif
+#include <stdio.h>
+#include <cstdlib>
 
 #include "OdeSystem.h"
 #include "VoxelPoolsBase.h"
@@ -305,13 +296,9 @@ double Ksolve::getEpsAbs() const
 void Ksolve::setEpsAbs( double epsAbs )
 {
     if ( epsAbs < 0 )
-    {
         epsAbs_ = 1.0e-4;
-    }
     else
-    {
         epsAbs_ = epsAbs;
-    }
 }
 
 
@@ -512,12 +499,10 @@ double Ksolve::getEstimatedDt() const
 //////////////////////////////////////////////////////////////
 void Ksolve::process( const Eref& e, ProcPtr p )
 {
+   static int cellsPerThread = 0; // Used for printing...
     if ( isBuilt_ == false )
         return;
 
-    int poolSize = pools_.size(); //Find out the size of the vector
-    int blockSize = poolSize/NTHREADS;
-    VoxelPools* poolArray = &pools_[0];
 
     // First, handle incoming diffusion values, update S with those.
     if ( dsolvePtr_ )
@@ -529,38 +514,85 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         dvalues[3] = stoichPtr_->getNumVarPools();
         dsolvePtr_->getBlock( dvalues );
 
+        /*
+        vector< double >::iterator i = dvalues.begin() + 4;
+        for ( ; i != dvalues.end(); ++i )
+        	cout << *i << "	" << round( *i ) << endl;
+        getBlock( kvalues );
+        vector< double >::iterator d = dvalues.begin() + 4;
+        for ( vector< double >::iterator
+        		k = kvalues.begin() + 4; k != kvalues.end(); ++k )
+        		*k++ = ( *k + *d )/2.0
+        setBlock( kvalues );
+        */
         setBlock( dvalues );
     }
-    // Loop Fusion 2nd and 3rd step and parallelize it.  take the arrived xCompt reac values and update S with them.
+    // Second, take the arrived xCompt reac values and update S with them.
+    for ( unsigned int i = 0; i < xfer_.size(); ++i )
+    {
+        const XferInfo& xf = xfer_[i];
+        // cout << xfer_.size() << "	" << xf.xferVoxel.size() << endl;
+        for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j )
+        {
+            pools_[xf.xferVoxel[j]].xferIn(
+                xf.xferPoolIdx, xf.values, xf.lastValues, j );
+        }
+    }
+    // Third, record the current value of pools as the reference for the
+    // next cycle.
     for ( unsigned int i = 0; i < xfer_.size(); ++i )
     {
         XferInfo& xf = xfer_[i];
-        unsigned int xferSize = xf.xferVoxel.size();
-        int xferBlock = xferSize/NTHREADS;
-        for ( unsigned int j = 0; j < xferSize; ++j )
+        for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j )
         {
-            poolArray[xf.xferVoxel[j]].xferIn( xf.xferPoolIdx, xf.values, xf.lastValues, j );
-            poolArray[xf.xferVoxel[j]].xferOut( j, xf.lastValues, xf.xferPoolIdx );
+            pools_[xf.xferVoxel[j]].xferOut( j, xf.lastValues, xf.xferPoolIdx );
         }
     }
 
+    // Fourth, do the numerical integration for all reactions.
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // OpenMP parallelization for the Integration step 
 ///if the environment variable NUM_THREADS is greater than one execute parallel version, else execute sequential version
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    if (NTHREADS > 1) 
+
+/**********
+  ****** Initially checking if the NUM_THREADS environment variable is set.
+  ****** If not, we set it to default 1.
+  ****** This will execute sequential program.
+  ****** We do this just once.
+  *************/
+   if (!cellsPerThread) 
+   {
+      if(getenv("NUM_THREADS") == 0) 
+      {
+         cout << "NUM_THREADS is not set up so assuming it is 1" << endl;
+         NTHREADSKsolve = 1;
+      }
+      else
+         NTHREADSKsolve = atoi(getenv("NUM_THREADS"));
+   }
+
+   /*****************
+     ******** We execute the parallel version only if NUM_THREADS > 1
+     ******* Else we execute the sequential version
+     ****************/
+
+    if (NTHREADSKsolve > 1) 
     {
            //! Using a static variable to print the type of parallelization used. 
-            static int cellsPerThread = 0; // Used for printing...
             if(!cellsPerThread)
             {
                   cellsPerThread = 1;
                   cout << endl << "KSOLVE:: OpenMP parallelism: Using parallel-for " << endl;
-                  cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADS << endl;
+                  cout << "NUMBER OF CELLS PER THREAD = " << cellsPerThread << "\t threads used = " << NTHREADSKsolve << endl;
             }
 
+            int poolSize = pools_.size(); //Find out the size of the vector
+            int blockSize = poolSize/NTHREADSKsolve;
+            VoxelPools* poolArray = &pools_[0];
+
             omp_set_dynamic(0); //!Set the dynamic openmp feature off. It may conflict with our parameters.
-            omp_set_num_threads(NTHREADS); //! Set the number of threads to the parameter set.
+            omp_set_num_threads(NTHREADSKsolve); //! Set the number of threads to the parameter set.
             
 #pragma omp parallel for default(shared) 
             for (int j = 0; j < poolSize; j++ )
@@ -572,16 +604,13 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 //////////////////////////////////////////////////////////////////
 // Sequential Code
 //////////////////////////////////////////////////////////////////
-            static int useSeq = 0;
-
-            if(!useSeq)
+            if(!cellsPerThread)
             {
-                  useSeq = NTHREADS;
+                  cellsPerThread = NTHREADSKsolve;
                   cout << endl << "Executing Sequential version of Ksolve " << endl;
             }
             for ( vector< VoxelPools >::iterator i = pools_.begin(); i != pools_.end(); ++i )
                 i->advance( p );
-
     }
 
     // Finally, assemble and send the integrated values off for the Dsolve.
@@ -720,7 +749,6 @@ unsigned int Ksolve::getVoxelIndex( const Eref& e ) const
         return OFFNODE;
     return ret - startVoxel_;
 }
-
 
 //////////////////////////////////////////////////////////////
 // Zombie Pool Access functions

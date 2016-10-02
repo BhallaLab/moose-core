@@ -15,8 +15,7 @@
 //////////////////////////////////////////////////////////////////
 //It represents the number of threads one wants to run the application with. 
 //////////////////////////////////////////////////////////////////
-const char *env_value2 = getenv("NUM_THREADS");
-int NTHREADSDsolve  = atoi(env_value2);
+int NTHREADSDsolve;
 
 /**
  * The Dsolve manages a large number of pools, each inhabiting a large

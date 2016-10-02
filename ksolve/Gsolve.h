@@ -11,14 +11,14 @@
 #define _GSOLVE_H
 #include <omp.h>
 
-class Stoich;
-
 //////////////////////////////////////////////////////////////////
 // NTHREADS = NUM_THREADS
 //It represents the number of threads one wants to run the application with. 
 //////////////////////////////////////////////////////////////////
-const char *env_value1 = getenv("NUM_THREADS");
-int NTHREADS  = atoi(env_value1);
+int NTHREADSGsolve;
+
+class Stoich;
+
 
 
 class Gsolve: public ZombiePoolInterface
