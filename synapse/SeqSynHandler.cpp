@@ -163,7 +163,10 @@ SeqSynHandler::SeqSynHandler()
 		responseScale_( 1.0 ),
 		weightScale_( 0.0 ),
 		seqActivation_( 0.0 )
-{ ; }
+{ 
+	int numHistory = static_cast< int >( 1.0 + floor( historyTime_ * (1.0 - 1e-6 ) / seqDt_ ) );
+	history_.resize( numHistory, 0 );
+}
 
 SeqSynHandler::~SeqSynHandler()
 { ; }
@@ -373,31 +376,35 @@ void SeqSynHandler::vProcess( const Eref& e, ProcPtr p )
 {
 	// Here we look at the correlations and do something with them.
 	int numHistory = static_cast< int >( 1.0 + floor( historyTime_ * (1.0 - 1e-6 ) / seqDt_ ) );
-	// Check if timestep rolls over a seqDt boundary
-	if ( static_cast< int >( p->currTime / seqDt_ ) > 
-			static_cast< int >( (p->currTime - p->dt) / seqDt_ ) ) {
-		history_.rollToNextRow();
-		history_.sumIntoRow( latestSpikes_, 0 );
-		latestSpikes_.assign( vGetNumSynapses(), 0.0 );
 
-		// Build up the sum of correlations over time
-		vector< double > correlVec( vGetNumSynapses(), 0.0 );
-		for ( int i = 0; i < numHistory; ++i )
-			history_.correl( correlVec, kernel_[i], i );
-		if ( responseScale_ > 0.0 ) { // Sum all responses, send to chan
-			seqActivation_ = 0.0;
-			for ( vector< double >::iterator y = correlVec.begin(); 
-							y != correlVec.end(); ++y )
-				seqActivation_ += *y;
-
-			// We'll use the seqActivation_ to send a special msg.
-			seqActivation_ *= responseScale_;
-		}
-		if ( weightScale_ > 0.0 ) { // Short term changes in individual wts
-			weightScaleVec_ = correlVec;
-			for ( vector< double >::iterator y = weightScaleVec_.begin(); 
+	// Check if we need to do correlations at all.
+	if ( numHistory > 0 && kernel_.size() > 0 ) {
+		// Check if timestep rolls over a seqDt boundary
+		if ( static_cast< int >( p->currTime / seqDt_ ) > 
+				static_cast< int >( (p->currTime - p->dt) / seqDt_ ) ) {
+			history_.rollToNextRow();
+			history_.sumIntoRow( latestSpikes_, 0 );
+			latestSpikes_.assign( vGetNumSynapses(), 0.0 );
+	
+			// Build up the sum of correlations over time
+			vector< double > correlVec( vGetNumSynapses(), 0.0 );
+			for ( int i = 0; i < numHistory; ++i )
+				history_.correl( correlVec, kernel_[i], i );
+			if ( responseScale_ > 0.0 ) { // Sum all responses, send to chan
+				seqActivation_ = 0.0;
+				for ( vector< double >::iterator y = correlVec.begin(); 
+								y != correlVec.end(); ++y )
+					seqActivation_ += *y;
+	
+				// We'll use the seqActivation_ to send a special msg.
+				seqActivation_ *= responseScale_;
+			}
+			if ( weightScale_ > 0.0 ) { // Short term changes in individual wts
+				weightScaleVec_ = correlVec;
+				for ( vector< double >::iterator y=weightScaleVec_.begin(); 
 							y != weightScaleVec_.end(); ++y )
-				*y *= weightScale_;
+					*y *= weightScale_;
+			}
 		}
 	}
 
