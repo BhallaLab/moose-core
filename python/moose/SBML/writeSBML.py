@@ -480,11 +480,7 @@ def writeReac(modelpath,cremodel_,sceneitems,autoCoordinateslayout):
 				if reacSub:
 					noofSub,sRateLaw = getSubprd(cremodel_,False,"sub",reacSub)
 					if noofSub:
-						#print " Reaction here at write483 ",reac.name
-						
 						comptVec = findCompartment(moose.element(reacSub[0]))
-						print " Reaction here at write483 ",reac.name, comptVec.name,
-						print "##",reac.neighbors["subOut"][0].parent
 						if not isinstance(moose.element(comptVec),moose.ChemCompt):
 							return -2
 						else:
@@ -978,11 +974,11 @@ def autoCoordinates(meshEntry,srcdesConnection):
             else:
                 for items in (items for items in out ):
                 	G.add_edge(element(items[0]).path,inn.path)
-    from networkx.drawing.nx_agraph import graphviz_layout
-    position = graphviz_layout(G,prog='dot')
+    #from networkx.drawing.nx_agraph import graphviz_layout
+    #position = graphviz_layout(G,prog='dot')
 
-    #position = nx.pygraphviz_layout(G, prog = 'dot')
-    #position = nx.spring_layout(G)
+    position = nx.pygraphviz_layout(G, prog = 'dot')
+    position = nx.spring_layout(G)
     #agraph = nx.to_agraph(G)
     #agraph.draw("~/out.png", format = 'png', prog = 'dot')
 
