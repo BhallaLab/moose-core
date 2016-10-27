@@ -127,8 +127,10 @@ else:
 
 def setupEnzymaticReaction(enz,groupName,enzName,specInfoMap,modelAnnotaInfo):
 	enzPool = (modelAnnotaInfo[groupName]["enzyme"])
+	enzPool = str(idBeginWith(enzPool))
 	enzParent = specInfoMap[enzPool]["Mpath"]
 	cplx = (modelAnnotaInfo[groupName]["complex"])
+	cplx = str(idBeginWith(cplx))
 	complx = moose.element(specInfoMap[cplx]["Mpath"].path)
 	
 	enzyme_ = moose.Enz(enzParent.path+'/'+enzName)
@@ -141,11 +143,13 @@ def setupEnzymaticReaction(enz,groupName,enzName,specInfoMap,modelAnnotaInfo):
 
 	for si in range(0,len(sublist)):
 		sl = sublist[si]
+		sl = str(idBeginWith(sl))
 		mSId =specInfoMap[sl]["Mpath"]
 		moose.connect(enzyme_,"sub",mSId,"reac")
 
 	for pi in range(0,len(prdlist)):
 		pl = prdlist[pi]
+		pl = str(idBeginWith(pl))
 		mPId = specInfoMap[pl]["Mpath"]
 		moose.connect(enzyme_,"prd",mPId,"reac")
 	
@@ -156,7 +160,6 @@ def setupEnzymaticReaction(enz,groupName,enzName,specInfoMap,modelAnnotaInfo):
 
 def addSubPrd(reac,reName,type,reactSBMLIdMooseId,specInfoMap):
 	rctMapIter = {}
-
 	if (type == "sub"):
 		noplusStoichsub = 0
 		addSubinfo = collections.OrderedDict()
@@ -164,8 +167,12 @@ def addSubPrd(reac,reName,type,reactSBMLIdMooseId,specInfoMap):
 			rct = reac.getReactant(rt)
 			sp = rct.getSpecies()
 			rctMapIter[sp] = rct.getStoichiometry()
+			if rct.getStoichiometry() > 1:
+				pass
+				#print " stoich ",reac.name,rct.getStoichiometry()
 			noplusStoichsub = noplusStoichsub+rct.getStoichiometry()
 		for key,value in list(rctMapIter.items()):
+			key = str(idBeginWith(key))
 			src = specInfoMap[key]["Mpath"]
 			des = reactSBMLIdMooseId[reName]["MooseId"]
 			for s in range(0,int(value)):
@@ -180,11 +187,15 @@ def addSubPrd(reac,reName,type,reactSBMLIdMooseId,specInfoMap):
 			rct = reac.getProduct(rt)
 			sp = rct.getSpecies()
 			rctMapIter[sp] = rct.getStoichiometry()
+			if rct.getStoichiometry() > 1:
+				pass
+				#print " stoich prd",reac.name,rct.getStoichiometry()
 			noplusStoichprd = noplusStoichprd+rct.getStoichiometry()
 		
 		for key,values in list(rctMapIter.items()):
 			#src ReacBase
 			src = reactSBMLIdMooseId[reName]["MooseId"]
+			key = parentSp = str(idBeginWith(key))
 			des = specInfoMap[key]["Mpath"]
 			for i in range(0,int(values)):
 				moose.connect(src, 'prd', des, 'reac', 'OneToOne')
@@ -440,8 +451,10 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 				# In moose, reactions compartment are decided from first Substrate compartment info
 				# substrate is missing then check for product
 				if (reac.getNumReactants()):
-					react = reac.getReactant(0)
+					react = reac.getReactant(reac.getNumReactants()-1)
+					#react = reac.getReactant(0)
 					sp = react.getSpecies()
+					sp = str(idBeginWith(sp))
 					speCompt = specInfoMap[sp]["comptId"].path
 					reaction_ = moose.Reac(speCompt+'/'+rName)
 					reactionCreated = True
@@ -452,6 +465,7 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 				if (reac.getNumProducts()):
 					react = reac.getProducts(0)
 					sp = react.getSpecies()
+					sp = str(idBeginWith(sp))
 					speCompt = specInfoMap[sp]["comptId"].path
 					reaction_ = moose.Reac(speCompt+'/'+rName)
 					reactionCreated = True
@@ -488,9 +502,12 @@ def createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue):
 							msg = msg+mmsg
 						return(errorFlag,msg)
 					else:
+						#print " reactSBMLIdMooseId ",reactSBMLIdMooseId[rName]["nSub"], " prd ",reactSBMLIdMooseId[rName]["nPrd"]
 						if reaction_.className == "Reac":
-							reaction_.Kf = kfvalue
-							reaction_.Kb = kbvalue
+							subn = reactSBMLIdMooseId[rName]["nSub"]
+							prdn = reactSBMLIdMooseId[rName]["nPrd"]
+							reaction_.Kf = kfvalue #* pow(1e-3,subn-1)
+							reaction_.Kb = kbvalue #* pow(1e-3,prdn-1)
 						elif reaction_.className == "MMenz":
 							reaction_.kcat  = kfvalue
 							reaction_.Km = kbvalue
@@ -607,47 +624,49 @@ def getMembers(node,ruleMemlist):
 
 def createRules(model,specInfoMap,globparameterIdValue):
 	for r in range(0,model.getNumRules()):
-			rule = model.getRule(r)
-			if (rule.isAssignment()):
-				rule_variable = rule.getVariable();
-				poolList = specInfoMap[rule_variable]["Mpath"].path
-				funcId = moose.Function(poolList+'/func')
-				moose.connect( funcId, 'valueOut', poolList ,'setN' )
-				ruleMath = rule.getMath()
-				ruleMemlist = []
-				speFunXterm = {}
-				getMembers(ruleMath,ruleMemlist)
-				for i in ruleMemlist:
-					if (i in specInfoMap):
-						specMapList = specInfoMap[i]["Mpath"]
-						numVars = funcId.numVars
-						x = funcId.path+'/x['+str(numVars)+']'
-						speFunXterm[i] = 'x'+str(numVars)
-						moose.connect(specMapList , 'nOut', x, 'input' )
-						funcId.numVars = numVars +1
-					elif not(i in globparameterIdValue):
-						print("check the variable type ",i)
+		rule = model.getRule(r)
+		if (rule.isAssignment()):
+			rule_variable = rule.getVariable();
+			rule_variable = parentSp = str(idBeginWith(rule_variable))
+			poolList = specInfoMap[rule_variable]["Mpath"].path
+			funcId = moose.Function(poolList+'/func')
+			moose.connect( funcId, 'valueOut', poolList ,'setN' )
+			ruleMath = rule.getMath()
+			ruleMemlist = []
+			speFunXterm = {}
+			getMembers(ruleMath,ruleMemlist)
+			for i in ruleMemlist:
+				if (i in specInfoMap):
+					i = str(idBeginWith(i))
+					specMapList = specInfoMap[i]["Mpath"]
+					numVars = funcId.numVars
+					x = funcId.path+'/x['+str(numVars)+']'
+					speFunXterm[i] = 'x'+str(numVars)
+					moose.connect(specMapList , 'nOut', x, 'input' )
+					funcId.numVars = numVars +1
+				elif not(i in globparameterIdValue):
+					print("check the variable type ",i)
+			exp = rule.getFormula()
+			for mem in ruleMemlist:
+				if ( mem in specInfoMap):
+					exp1 = exp.replace(mem,str(speFunXterm[mem]))
+					exp = exp1
+				elif( mem in globparameterIdValue):
+					exp1 = exp.replace(mem,str(globparameterIdValue[mem]))
+					exp = exp1
+				else:
+					print("Math expression need to be checked")
+			exp = exp.replace(" ","")
+			funcId.expr = exp.strip(" \t\n\r")
+			#return True
 
-				exp = rule.getFormula()
-				for mem in ruleMemlist:
-					if ( mem in specInfoMap):
-						exp1 = exp.replace(mem,str(speFunXterm[mem]))
-						exp = exp1
-					elif( mem in globparameterIdValue):
-						exp1 = exp.replace(mem,str(globparameterIdValue[mem]))
-						exp = exp1
-					else:
-						print("Math expression need to be checked")
-				funcId.expr = exp.strip(" \t\n\r")
-				return True
+		elif( rule.isRate() ):
+			print("Warning : For now this \"",rule.getVariable(), "\" rate Rule is not handled in moose ")
+			#return False
 
-			elif( rule.isRate() ):
-				print("Warning : For now this \"",rule.getVariable(), "\" rate Rule is not handled in moose ")
-				return False
-
-			elif ( rule.isAlgebraic() ):
-				print("Warning: For now this " ,rule.getVariable()," Algebraic Rule is not handled in moose")
-				return False
+		elif ( rule.isAlgebraic() ):
+			print("Warning: For now this " ,rule.getVariable()," Algebraic Rule is not handled in moose")
+			#return False
 	return True
 
 def pullnotes(sbmlId,mooseId):
@@ -882,6 +901,7 @@ def setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId,modelAnnotaI
 	if (nummodifiers):
 		parent = reac.getModifier(0)
 		parentSp = parent.getSpecies()
+		parentSp = str(idBeginWith(parentSp))
 		enzParent = specInfoMap[parentSp]["Mpath"]
 		MMEnz = moose.MMenz(enzParent.path+'/'+rName)
 		moose.connect(enzParent,"nOut",MMEnz,"enzDest");
@@ -917,6 +937,12 @@ def mapParameter(model,globparameterIdValue):
 		if ( prm.isSetValue() ):
 			value = prm.getValue()
 		globparameterIdValue[parid] = value
+
+def idBeginWith( name ):
+	changedName = name;
+	if name[0].isdigit() :
+		changedName = "_"+name
+	return changedName;
 
 def convertSpecialChar(str1):
 	d = {"&":"_and","<":"_lessthan_",">":"_greaterthan_","BEL":"&#176","-":"_minus_","'":"_prime_",
