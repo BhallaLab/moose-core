@@ -1240,14 +1240,17 @@ const KinSparseMatrix& Stoich::getStoichiometryMatrix() const
 
 void Stoich::buildXreacs( const Eref& e, Id otherStoich )
 {
-    kinterface_->setupCrossSolverReacs( offSolverPoolMap_, otherStoich );
+	if ( status_ == 0 )
+    	kinterface_->setupCrossSolverReacs( offSolverPoolMap_,otherStoich);
 }
 
 void Stoich::filterXreacs()
 {
-    kinterface_->filterCrossRateTerms( offSolverReacVec_, offSolverReacCompts_ );
-    kinterface_->filterCrossRateTerms( offSolverEnzVec_, offSolverEnzCompts_ );
-    kinterface_->filterCrossRateTerms( offSolverMMenzVec_, offSolverMMenzCompts_ );
+	if ( status_ == 0 ) {
+    	kinterface_->filterCrossRateTerms( offSolverReacVec_, offSolverReacCompts_ );
+    	kinterface_->filterCrossRateTerms( offSolverEnzVec_, offSolverEnzCompts_ );
+    	kinterface_->filterCrossRateTerms( offSolverMMenzVec_, offSolverMMenzCompts_ );
+	}
 }
 
 /*
@@ -2285,7 +2288,7 @@ unsigned int Stoich::indexOfMatchingVolume( double vol ) const
 
 void Stoich::scaleBufsAndRates( unsigned int index, double volScale )
 {
-    if ( !kinterface_ )
+    if ( !kinterface_ || status_ != 0 )
         return;
     kinterface_->pools( index )->scaleVolsBufsRates( volScale, this );
 }

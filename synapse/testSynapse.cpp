@@ -143,11 +143,15 @@ void testSeqSynapse()
 	shell->doDelete( sid );
 }
 
+#endif // DO_UNIT_TESTS
+
 // This tests stuff without using the messaging.
 void testSynapse()
 {
+#ifdef DO_UNIT_TESTS
 	testRollingMatrix();
 	testSeqSynapse();
+#endif // DO_UNIT_TESTS
 }
 
 // This is applicable to tests that use the messaging and scheduling.
@@ -155,4 +159,3 @@ void testSynapseProcess()
 {
 }
 
-#endif // DO_UNIT_TESTS

@@ -249,6 +249,12 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
     }
     t_ = 0.0;
     refreshAtot( g );
+	numFire_.assign( v_.size(), 0 );
+}
+
+vector< unsigned int > GssaVoxelPools::numFire() const
+{
+	return numFire_;
 }
 
 /////////////////////////////////////////////////////////////////////////
