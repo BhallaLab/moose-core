@@ -97,6 +97,8 @@ else:
 						basePath = moose.Neutral(baseId.path+'/model')
 						#Map Compartment's SBML id as key and value is list of[ Moose ID and SpatialDimensions ]
 						global comptSbmlidMooseIdMap
+						global warning
+						warning = " "
 						comptSbmlidMooseIdMap = {}
 						print(("modelPath:" + basePath.path))
 						globparameterIdValue = {}
@@ -107,7 +109,7 @@ else:
 							specInfoMap = {}
 							errorFlag = createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap,modelAnnotaInfo)
 							if errorFlag:
-								errorFlag = createRules(model,specInfoMap,globparameterIdValue)
+								errorFlag, warning = createRules(model,specInfoMap,globparameterIdValue)
 								if errorFlag:
 									errorFlag,msg = createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue)
 							getModelAnnotation(model,baseId,basePath)
@@ -625,25 +627,50 @@ def getMembers(node,ruleMemlist):
 def createRules(model,specInfoMap,globparameterIdValue):
 	for r in range(0,model.getNumRules()):
 		rule = model.getRule(r)
+		comptvolume = []
 		if (rule.isAssignment()):
 			rule_variable = rule.getVariable();
 			rule_variable = parentSp = str(idBeginWith(rule_variable))
 			poolList = specInfoMap[rule_variable]["Mpath"].path
+			poolsCompt = findCompartment(moose.element(poolList))
+			if not isinstance(moose.element(poolsCompt),moose.ChemCompt):
+				return -2
+			else:
+				if poolsCompt.name not in comptvolume:
+					comptvolume.append(poolsCompt.name)
+
 			funcId = moose.Function(poolList+'/func')
-			moose.connect( funcId, 'valueOut', poolList ,'setN' )
+			
+			objclassname = moose.element(poolList).className
+			if  objclassname == "BufPool" or objclassname == "ZombieBufPool":
+				moose.connect( funcId, 'valueOut', poolList ,'setN' )
+			elif  objclassname == "Pool" or objclassname == "ZombiePool":
+				moose.connect( funcId, 'valueOut', poolList ,'increament' )
+			elif  objclassname == "Reac" or objclassname == "ZombieReac":
+				moose.connect( funcId, 'valueOut', poolList ,'setNumkf' )	
+			
 			ruleMath = rule.getMath()
 			ruleMemlist = []
 			speFunXterm = {}
 			getMembers(ruleMath,ruleMemlist)
+			
 			for i in ruleMemlist:
+
 				if (i in specInfoMap):
 					i = str(idBeginWith(i))
 					specMapList = specInfoMap[i]["Mpath"]
+					poolsCompt = findCompartment(moose.element(specMapList))
+					if not isinstance(moose.element(poolsCompt),moose.ChemCompt):
+						return -2
+					else:
+						if poolsCompt.name not in comptvolume:
+							comptvolume.append(poolsCompt.name)
 					numVars = funcId.numVars
 					x = funcId.path+'/x['+str(numVars)+']'
 					speFunXterm[i] = 'x'+str(numVars)
 					moose.connect(specMapList , 'nOut', x, 'input' )
 					funcId.numVars = numVars +1
+
 				elif not(i in globparameterIdValue):
 					print("check the variable type ",i)
 			exp = rule.getFormula()
@@ -667,7 +694,9 @@ def createRules(model,specInfoMap,globparameterIdValue):
 		elif ( rule.isAlgebraic() ):
 			print("Warning: For now this " ,rule.getVariable()," Algebraic Rule is not handled in moose")
 			#return False
-	return True
+		if len(comptvolume) >1:
+			warning = "\nFunction ",moose.element(poolList).name," has input from different compartment which is depricated in moose and running this model cause moose to crash"
+	return True, warning
 
 def pullnotes(sbmlId,mooseId):
 	if sbmlId.getNotes() != None:
@@ -953,6 +982,13 @@ def convertSpecialChar(str1):
 		str1 = str1.replace(i,j)
 	return str1
 
+def mooseIsInstance(element, classNames):
+	return moose.element(element).__class__.__name__ in classNames
+
+def findCompartment(element):
+	while not mooseIsInstance(element,["CubeMesh","CyclMesh"]):
+		element = element.parent
+	return element
 
 if __name__ == "__main__":
 	
