@@ -645,7 +645,8 @@ def createRules(model,specInfoMap,globparameterIdValue):
 			if  objclassname == "BufPool" or objclassname == "ZombieBufPool":
 				moose.connect( funcId, 'valueOut', poolList ,'setN' )
 			elif  objclassname == "Pool" or objclassname == "ZombiePool":
-				moose.connect( funcId, 'valueOut', poolList ,'increament' )
+				#moose.connect( funcId, 'valueOut', poolList ,'increament' )
+				moose.connect(funcId, 'valueOut', poolList ,'setConc' )
 			elif  objclassname == "Reac" or objclassname == "ZombieReac":
 				moose.connect( funcId, 'valueOut', poolList ,'setNumkf' )	
 			
