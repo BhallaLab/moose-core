@@ -1521,8 +1521,9 @@ void Stoich::unZombifyModel()
             CplxEnzBase::zombify( e, enzCinfo, Id() );
     }
 
-    for ( vector< Id >::iterator i = poolFuncVec_.begin();
-            i != poolFuncVec_.end(); ++i )
+	temp = poolFuncVec_; temp.insert( temp.end(), 
+		incrementFuncVec_.begin(), incrementFuncVec_.end() );
+    for ( vector< Id >::iterator i = temp.begin(); i != temp.end(); ++i )
     {
         Element* e = i->element();
         if ( e != 0 && e->cinfo() == zombieFunctionCinfo )
