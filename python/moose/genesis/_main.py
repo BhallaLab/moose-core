@@ -474,8 +474,10 @@ def trimPath(mobj):
     # Any moose object comes under /kinetics then one level down the path is taken.
     # e.g /group/poolObject or /Reac
     if found:
-        if mobj.name != "kinetics":
+        if mobj.name != "kinetics" and (mobj.className != "CubeMesh"):
+            print " 478 ",mobj.name,mobj.className
             splitpath = original.path[(original.path.find(mobj.name)):len(original.path)]
+            print " splitpath ",original,splitpath
         else:
             pos = original.path.find(mobj.name)
             slash = original.path.find('/',pos+1)
@@ -548,6 +550,7 @@ def writeplot( tgraphs,f ):
     return first,second
 
 def writePool(modelpath,f,volIndex,sceneitems):
+    print " modelpath ",modelpath
     color = ""
     textcolor = ""
     for p in wildcardFind(modelpath+'/##[ISA=PoolBase]'):
@@ -585,6 +588,7 @@ def writePool(modelpath,f,volIndex,sceneitems):
                 color = getRandColor()
             if textcolor == ""  or textcolor == " ":
                 textcolor = getRandColor()
+	    print " trimPath",trimPath(p)
             f.write("simundump kpool /kinetics/" + trimPath(p) + " 0 " +
                     str(p.diffConst) + " " +
                     str(0) + " " +
