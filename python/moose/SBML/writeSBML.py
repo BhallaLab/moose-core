@@ -698,9 +698,9 @@ def writeSimulationAnnotation(modelpath):
 		mooseclock = moose.Clock('/clock')
 		modelAnno ="<moose:ModelAnnotation>\n"
 		modelAnnotation = moose.element(modelpath+'/info')
-		modelAnno = modelAnno+"<moose:ModelTime> "+str(modelAnnotation.runtime)+" </moose:ModelTime>\n"
-		modelAnno = modelAnno+"<moose:ModelSolver> "+modelAnnotation.solver+" </moose:ModelSolver>\n"
-		modelAnno = modelAnno+"<moose:simdt>"+ str(mooseclock.dts[11]) + " </moose:simdt>\n";
+		modelAnno = modelAnno+"<moose:runTime> "+str(modelAnnotation.runtime)+" </moose:runTime>\n"
+		modelAnno = modelAnno+"<moose:solver> "+modelAnnotation.solver+" </moose:solver>\n"
+		modelAnno = modelAnno+"<moose:simdt>"+ str(mooseclock.dts[12]) + " </moose:simdt>\n";
 		modelAnno = modelAnno+"<moose:plotdt> " + str(mooseclock.dts[18]) +" </moose:plotdt>\n";
 		plots = "";
 		graphs = moose.wildcardFind(modelpath+"/##[TYPE=Table2]")

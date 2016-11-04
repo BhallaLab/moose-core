@@ -109,7 +109,7 @@ else:
 							specInfoMap = {}
 							errorFlag = createSpecies(basePath,model,comptSbmlidMooseIdMap,specInfoMap,modelAnnotaInfo)
 							if errorFlag:
-								errorFlag, warning = createRules(model,specInfoMap,globparameterIdValue)
+								errorFlag = createRules(model,specInfoMap,globparameterIdValue)
 								if errorFlag:
 									errorFlag,msg = createReaction(model,specInfoMap,modelAnnotaInfo,globparameterIdValue)
 							getModelAnnotation(model,baseId,basePath)
@@ -223,6 +223,13 @@ def getModelAnnotation(obj,baseId,basepath):
 					grandChildNode = childNode.getChild(gchild_no)
 					nodeName = grandChildNode.getName()
 					if (grandChildNode.getNumChildren() == 1 ):
+						baseinfo = moose.Annotator(baseId.path+'/info')
+						baseinfo.modeltype = "xml"
+						if nodeName == "runTime":
+							runtime = float((grandChildNode.getChild(0).toXMLString()))
+						if nodeName == "solver":
+							solver = (grandChildNode.getChild(0).toXMLString())
+							baseinfo.solver = solver
 						if(nodeName == "plots"):
 							plotValue = (grandChildNode.getChild(0).toXMLString())
 							p = moose.element(baseId)
@@ -697,7 +704,7 @@ def createRules(model,specInfoMap,globparameterIdValue):
 			#return False
 		if len(comptvolume) >1:
 			warning = "\nFunction ",moose.element(poolList).name," has input from different compartment which is depricated in moose and running this model cause moose to crash"
-	return True, warning
+	return True
 
 def pullnotes(sbmlId,mooseId):
 	if sbmlId.getNotes() != None:
