@@ -227,6 +227,7 @@ def getModelAnnotation(obj,baseId,basepath):
 						baseinfo.modeltype = "xml"
 						if nodeName == "runTime":
 							runtime = float((grandChildNode.getChild(0).toXMLString()))
+							baseinfo.runtime = runtime
 						if nodeName == "solver":
 							solver = (grandChildNode.getChild(0).toXMLString())
 							baseinfo.solver = solver
