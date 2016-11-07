@@ -15,15 +15,19 @@ include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 include(FindPkgConfig)
 
-# Set moose version
-# Get the latest abbreviated commit hash of the working branch
-execute_process(
-  COMMAND git describe --tags --long
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  OUTPUT_VARIABLE GIT_VERSION_OUTPUT
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-add_definitions( -DMOOSE_VERSION="${GIT_VERSION_OUTPUT}")
+# Get the latest abbreviated commit hash of the working branch, if not passed
+# from command line
+if( NOT VERSION )
+    execute_process(
+      command git describe --tags --long
+      working_directory ${cmake_source_dir}
+      output_variable git_version_output
+      output_strip_trailing_whitespace
+    )
+    add_definitions( -DMOOSE_VERSION="${GIT_VERSION_OUTPUT}")
+else(NOT VERSION)
+    add_definitions( -DMOOSE_VERSION="${VERSION}")
+endif( )
 
 
 # This snippet is from LLVM project.
