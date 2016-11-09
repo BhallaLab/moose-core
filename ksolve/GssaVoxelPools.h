@@ -34,6 +34,8 @@ public:
 
     void advance( const ProcInfo* p, const GssaSystem* g );
 
+	vector< unsigned int > numFire() const;
+
     /**
     * Cleans out all reac rates and recalculates atot. Needed whenever a
     * mol conc changes, or if there is a roundoff error. Returns true

@@ -1240,14 +1240,17 @@ const KinSparseMatrix& Stoich::getStoichiometryMatrix() const
 
 void Stoich::buildXreacs( const Eref& e, Id otherStoich )
 {
-    kinterface_->setupCrossSolverReacs( offSolverPoolMap_, otherStoich );
+	if ( status_ == 0 )
+    	kinterface_->setupCrossSolverReacs( offSolverPoolMap_,otherStoich);
 }
 
 void Stoich::filterXreacs()
 {
-    kinterface_->filterCrossRateTerms( offSolverReacVec_, offSolverReacCompts_ );
-    kinterface_->filterCrossRateTerms( offSolverEnzVec_, offSolverEnzCompts_ );
-    kinterface_->filterCrossRateTerms( offSolverMMenzVec_, offSolverMMenzCompts_ );
+	if ( status_ == 0 ) {
+    	kinterface_->filterCrossRateTerms( offSolverReacVec_, offSolverReacCompts_ );
+    	kinterface_->filterCrossRateTerms( offSolverEnzVec_, offSolverEnzCompts_ );
+    	kinterface_->filterCrossRateTerms( offSolverMMenzVec_, offSolverMMenzCompts_ );
+	}
 }
 
 /*
@@ -1518,8 +1521,9 @@ void Stoich::unZombifyModel()
             CplxEnzBase::zombify( e, enzCinfo, Id() );
     }
 
-    for ( vector< Id >::iterator i = poolFuncVec_.begin();
-            i != poolFuncVec_.end(); ++i )
+	temp = poolFuncVec_; temp.insert( temp.end(), 
+		incrementFuncVec_.begin(), incrementFuncVec_.end() );
+    for ( vector< Id >::iterator i = temp.begin(); i != temp.end(); ++i )
     {
         Element* e = i->element();
         if ( e != 0 && e->cinfo() == zombieFunctionCinfo )
@@ -2285,7 +2289,7 @@ unsigned int Stoich::indexOfMatchingVolume( double vol ) const
 
 void Stoich::scaleBufsAndRates( unsigned int index, double volScale )
 {
-    if ( !kinterface_ )
+    if ( !kinterface_ || status_ != 0 )
         return;
     kinterface_->pools( index )->scaleVolsBufsRates( volScale, this );
 }

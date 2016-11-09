@@ -15,15 +15,26 @@ include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 include(FindPkgConfig)
 
-# Set moose version
-# Get the latest abbreviated commit hash of the working branch
-execute_process(
-  COMMAND git describe --tags --long
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  OUTPUT_VARIABLE GIT_VERSION_OUTPUT
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-add_definitions( -DMOOSE_VERSION="${GIT_VERSION_OUTPUT}")
+# If from command line, version info is not passed, use the git to generate a
+# version file. If GIT fails, use the previous known version.
+set(VERSION_FILE ${CMAKE_SOURCE_DIRECTORY}/VERSION)
+find_program(GIT_EXEC "git")
+message( STATUS "Looking for git ${GIT_EXEC}" )
+if( (NOT VERSION) AND GITEXEC)
+    execute_process( 
+        COMMAND ${GIT_EXEC} describe --tags --long
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_VERSION_OUTPUT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    file(WRITE ${VERSION_FILE} ${GIT_VERSION_OUTPUT})
+    add_definitions( -DMOOSE_VERSION="${GIT_VERSION_OUTPUT}")
+elseif( (NOT VERSION) AND (NOT GIT_EXEC) )
+    file( READ ${VERSION_FILE} GIT_VERSION_OUTPUT )
+    add_definitions( -DMOOSE_VERSION="${GIT_VERSION_OUTPUT}")
+else()
+    add_definitions( -DMOOSE_VERSION="${VERSION}")
+endif( )
 
 
 # This snippet is from LLVM project.
@@ -235,7 +246,7 @@ ELSE(HDF5_STATIC_HOME)
     pkg_check_modules(HDF5 hdf5)
     if(NOT HDF5_FOUND)
         message(STATUS "pkg-config could not find hdf5. fallback to default")
-        find_package(HDF5 COMPONENTS CXX HL)
+        find_package(HDF5 COMPONENTS CXX HL REQUIRED)
      endif()
 endif(HDF5_STATIC_HOME)
 

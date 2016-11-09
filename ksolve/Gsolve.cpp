@@ -122,6 +122,14 @@ const Cinfo* Gsolve::initCinfo()
 			&Gsolve::setClockedUpdate,
 			&Gsolve::getClockedUpdate
 		);
+		static ReadOnlyLookupValueFinfo< 
+				Gsolve, unsigned int, vector< unsigned int > > numFire(
+			"numFire",
+			"Vector of the number of times each reaction has fired."
+			"Indexed by the voxel number."
+			"Zeroed out at reinit.",
+			&Gsolve::getNumFire
+		);
 
 		///////////////////////////////////////////////////////
 		// DestFinfo definitions
@@ -198,6 +206,7 @@ const Cinfo* Gsolve::initCinfo()
 		// Here we put new fields that were not there in the Ksolve. 
 		&useRandInit,		// Value
 		&useClockedUpdate,	// Value
+		&numFire,			// ReadOnlyLookupValue
 	};
 	
 	static Dinfo< Gsolve > dinfo;
@@ -322,6 +331,16 @@ void Gsolve::setNvec( unsigned int voxel, vector< double > nVec )
 			pools_[voxel].refreshAtot( &sys_ );
 	}
 }
+
+vector< unsigned int > Gsolve::getNumFire( unsigned int voxel) const
+{
+	static vector< unsigned int > dummy;
+	if ( voxel < pools_.size() ) {
+		return const_cast< GssaVoxelPools* >( &( pools_[ voxel ]) )->numFire();
+	}
+	return dummy;
+}
+
 
 bool Gsolve::getRandInit() const
 {

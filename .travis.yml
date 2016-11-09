@@ -20,9 +20,9 @@ env:
     - CTEST_MODEL=Nightly
 cache: apt
 
-matrix:
-    allow_failures:
-        - clang
+#matrix:
+#    allow_failures:
+#        - clang
 
 before_script:
     - sudo apt-get install -qq libxml2-dev libbz2-dev
