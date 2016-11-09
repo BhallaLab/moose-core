@@ -427,6 +427,7 @@ if(MACOSX)
 
     target_link_libraries(libmoose
         ${SYSTEM_SHARED_LIBS}
+        ${CMAKE_DL_LIBS}
         )
 ELSE(MACOSX)
     target_link_libraries(libmoose 
