@@ -15,17 +15,24 @@ include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 include(FindPkgConfig)
 
-# Get the latest abbreviated commit hash of the working branch, if not passed
-# from command line
-if( NOT VERSION )
-    execute_process(
-      command git describe --tags --long
-      working_directory ${cmake_source_dir}
-      output_variable git_version_output
-      output_strip_trailing_whitespace
-    )
+# If from command line, version info is not passed, use the git to generate a
+# version file. If GIT fails, use the previous known version.
+set(VERSION_FILE ${CMAKE_SOURCE_DIRECTORY}/VERSION)
+find_program(GIT_EXEC "git")
+message( STATUS "Looking for git ${GIT_EXEC}" )
+if( (NOT VERSION) AND GITEXEC)
+    execute_process( 
+        COMMAND ${GIT_EXEC} describe --tags --long
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_VERSION_OUTPUT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    file(WRITE ${VERSION_FILE} ${GIT_VERSION_OUTPUT})
     add_definitions( -DMOOSE_VERSION="${GIT_VERSION_OUTPUT}")
-else(NOT VERSION)
+elseif( (NOT VERSION) AND (NOT GIT_EXEC) )
+    file( READ ${VERSION_FILE} GIT_VERSION_OUTPUT )
+    add_definitions( -DMOOSE_VERSION="${GIT_VERSION_OUTPUT}")
+else()
     add_definitions( -DMOOSE_VERSION="${VERSION}")
 endif( )
 
@@ -239,7 +246,7 @@ ELSE(HDF5_STATIC_HOME)
     pkg_check_modules(HDF5 hdf5)
     if(NOT HDF5_FOUND)
         message(STATUS "pkg-config could not find hdf5. fallback to default")
-        find_package(HDF5 COMPONENTS CXX HL)
+        find_package(HDF5 COMPONENTS CXX HL REQUIRED)
      endif()
 endif(HDF5_STATIC_HOME)
 
