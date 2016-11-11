@@ -444,12 +444,9 @@ add_dependencies(moose.bin libmoose)
 # This target is only for testing purpose. It links to libmoose.
 if(CMAKE_VERSION VERSION_LESS "2.8.0")
     message(STATUS "Using a fix for cmake ( < 2.8)")
-    target_link_libraries(moose.bin PUBLIC moose)
+    target_link_libraries(moose.bin PUBLIC moose ${CMAKE_DL_LIBS})
 ELSE()
-    target_link_libraries(moose.bin LINK_PUBLIC moose)
-    if(LIBSBML_FOUND)
-        target_link_libraries(moose.bin LINK_PUBLIC ${LIBSBML_LIBRARIES})
-    endif(LIBSBML_FOUND)
+    target_link_libraries(moose.bin LINK_PUBLIC moose ${CMAKE_DL_LIBS})
 ENDIF()
 
 ######################### BUILD PYMOOSE ########################################
