@@ -20,7 +20,7 @@ include(FindPkgConfig)
 set(VERSION_FILE ${CMAKE_SOURCE_DIRECTORY}/VERSION)
 find_program(GIT_EXEC "git")
 message( STATUS "Looking for git ${GIT_EXEC}" )
-if( (NOT VERSION) AND GITEXEC)
+if( (NOT MOOSE_VERSION) AND GITEXEC)
     execute_process( 
         COMMAND ${GIT_EXEC} describe --tags --long
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -29,11 +29,12 @@ if( (NOT VERSION) AND GITEXEC)
         )
     file(WRITE ${VERSION_FILE} ${GIT_VERSION_OUTPUT})
     add_definitions( -DMOOSE_VERSION="${GIT_VERSION_OUTPUT}")
-elseif( (NOT VERSION) AND (NOT GIT_EXEC) )
+elseif( (NOT MOOSE_VERSION) AND (NOT GIT_EXEC) )
     file( READ ${VERSION_FILE} GIT_VERSION_OUTPUT )
     add_definitions( -DMOOSE_VERSION="${GIT_VERSION_OUTPUT}")
 else()
-    add_definitions( -DMOOSE_VERSION="${VERSION}")
+    file(WRITE ${VERSION_FILE} ${MOOSE_VERSION})
+    add_definitions( -DMOOSE_VERSION="${MOOSE_VERSION}")
 endif( )
 
 
