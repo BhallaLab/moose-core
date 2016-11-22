@@ -118,7 +118,7 @@ elseif(ENABLE_UNIT_TESTS)
 else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
-    add_definitions(-UDO_UNIT_TESTS -O3)
+    add_definitions(-UDO_UNIT_TESTS -DQUIET_MODE -O3)
 endif()
 
 if(GPROF AND DEBUG)
