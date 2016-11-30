@@ -37,7 +37,7 @@ before_script:
     - sudo apt-get install -qq libgraphviz-dev
     #- sudo pip install python-libsbml
     #- sudo pip3 install python-libsbml
-    - sudo pip3 install pygraphviz
+    #- sudo pip3 install pygraphviz
 
 install:
     - echo "nothing to do here"
