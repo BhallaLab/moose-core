@@ -35,8 +35,8 @@ before_script:
     - sudo apt-get install -qq libgsl0-dev
     - sudo apt-get install -qq python-pip python3-pip
     - sudo apt-get install -qq libgraphviz-dev
-    - sudo pip install python-libsbml
-    - sudo pip3 install python-libsbml
+    #- sudo pip install python-libsbml
+    #- sudo pip3 install python-libsbml
     - sudo pip3 install pygraphviz
 
 install:
