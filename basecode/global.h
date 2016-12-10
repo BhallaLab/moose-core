@@ -17,7 +17,6 @@
 #include <sstream>
 
 
-
 #ifdef  USE_BOOST
 //#ifdef BOOST_FILESYSTEM_EXISTS
 #include <boost/filesystem.hpp>
@@ -25,7 +24,7 @@
 #endif
 
 #include "randnum/RNG.h"                        /* Use inbuilt rng */
-#include "../external/debug/print_function.hpp"
+#include "../utility/print_function.hpp"
 
 using namespace std;
 
@@ -126,7 +125,7 @@ namespace moose
      * @param path Reutrn path is given path if creation was successful, else
      * directory is renamed to a filename.
      */
-    string createPosixPath( const string& path );
+    string createMOOSEPath( const string& path );
 
     /**
      * @brief Convert a given value to string.

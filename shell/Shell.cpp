@@ -8,6 +8,8 @@
 **********************************************************************/
 
 #include <string>
+#include <algorithm>
+
 using namespace std;
 
 
@@ -25,13 +27,12 @@ using namespace std;
 
 // Want to separate out this search path into the Makefile options
 #include "../scheduling/Clock.h"
-#include "../external/debug/simple_logger.hpp"
 
-#ifdef USE_SBML
+/*#ifdef USE_SBML
 #include "../sbml/MooseSbmlWriter.h"
 #include "../sbml/MooseSbmlReader.h"
 #endif
-
+*/
 const unsigned int Shell::OkStatus = ~0;
 const unsigned int Shell::ErrorStatus = ~1;
 
@@ -382,17 +383,9 @@ bool isDoingReinit()
 void Shell::doReinit( )
 {
 
-#ifdef ENABLE_LOGGER
-    clock_t t = clock();
-    cout << logger.dumpStats(0);
-#endif
     Id clockId( 1 );
     SetGet0::set( clockId, "reinit" );
 
-#ifdef ENABLE_LOGGER
-    float time = (float(clock() - t)/CLOCKS_PER_SEC);
-    logger.initializationTime.push_back(time);
-#endif
 }
 
 void Shell::doStop( )
@@ -405,6 +398,14 @@ void Shell::doStop( )
 void Shell::doSetClock( unsigned int tickNum, double dt )
 {
     LookupField< unsigned int, double >::set( ObjId( 1 ), "tickDt", tickNum, dt );
+
+    // FIXME:
+    // HACK: If clock 18 is being updated, make sure that clock 19 (streamer is also
+    // updated with correct dt (10 or 100*dt). This is bit hacky.
+    if( tickNum == 18 )
+        LookupField< unsigned int, double >::set( ObjId( 1 ), "tickDt"
+                , tickNum + 1, max( 100 * dt, 10.0 )
+                );
 }
 
 void Shell::doUseClock( string path, string field, unsigned int tick )
@@ -418,6 +419,7 @@ void Shell::doUseClock( string path, string field, unsigned int tick )
 /**
  * Write given model to SBML file. Returns success value.
  */
+ /*
 int Shell::doWriteSBML( const string& fname, const string& modelpath )
 {
 #ifdef USE_SBML
@@ -430,10 +432,11 @@ int Shell::doWriteSBML( const string& fname, const string& modelpath )
     return -2;
 #endif
 }
+*/
 /**
  * read given SBML model to moose. Returns success value.
  */
-
+/*
 Id Shell::doReadSBML( const string& fname, const string& modelpath, const string& solverclass )
 {
 #ifdef USE_SBML
@@ -444,7 +447,7 @@ Id Shell::doReadSBML( const string& fname, const string& modelpath, const string
     return Id();
 #endif
 }
-
+*/
 
 ////////////////////////////////////////////////////////////////////////
 

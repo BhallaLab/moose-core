@@ -50,11 +50,7 @@
 
 #include "header.h"
 #include "Clock.h"
-
-#ifdef NOTIFY_PROGRESS
-#include <ctime>
-#include <cmath>
-#endif
+#include "../utility/numutil.h"
 
 // Declaration of some static variables.
 const unsigned int Clock::numTicks = 32;
@@ -311,7 +307,7 @@ const Cinfo* Clock::initCinfo()
         "Name", "Clock",
         "Author", "Upinder S. Bhalla, Nov 2013, NCBS",
         "Description",
-        "Clock: Clock class. Handles sequencing of operations in simulations."
+
         "Every object scheduled for operations in MOOSE is connected to one"
         "of the 'Tick' entries on the Clock.\n"
         "The Clock manages 32 'Ticks', each of which has its own dt,"
@@ -358,6 +354,7 @@ const Cinfo* Clock::initCinfo()
         "	SimpleSynHandler		1		50e-6\n"
         "   STDPSynHandler		1		50e-6\n"
         "   GraupnerBrunel2012CaPlasticitySynHandler    1		50e-6\n"
+        "   SeqSynHandler		1		50e-6\n"
         "	CaConc				1		50e-6\n"
         "	CaConcBase			1		50e-6\n"
         "	DifShell			1		50e-6\n"
@@ -417,9 +414,9 @@ const Cinfo* Clock::initCinfo()
         "	Gsolve				16		0.1\n"
         "	Ksolve				16		0.1\n"
         "	Stats				17		0.1\n"
-
         "	Table2				18		1\n"
-        "	Streamer			29		2\n"
+        "	Streamer			19		10\n"
+
         "	HDF5DataWriter			30		1\n"
         "	HDF5WriterBase			30		1\n"
         "	NSDFWriter			30		1\n"
@@ -595,6 +592,7 @@ void Clock::setTickDt( unsigned int i, double v )
     }
     for ( unsigned int j = 0; j < numTicks; ++j )
         numUsed += ( ticks_[j] != 0 );
+
     if ( numUsed == 0 )
     {
         dt_ = v;
@@ -717,7 +715,7 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     assert( activeTicks_.size() == activeTicksMap_.size() );
     nSteps_ += numSteps;
     runTime_ = nSteps_ * dt_;
-    for ( isRunning_ = true;
+    for ( isRunning_ = (activeTicks_.size() > 0 );
             isRunning_ && currentStep_ < nSteps_; currentStep_ += stride_ )
     {
         // Curr time is end of current step.
@@ -735,31 +733,26 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
             ++k;
         }
 
-        // Don't write too much. When 10% of simulation is over, write to
-        // the file. We need 10 points. We just use a sine function
-        // which cross 0 ten time in this time interval.
-        // NOTE: Dont use == 0.0 since we may never get a sample for
-        // which sine is 0.0. Hoever, getting 1.0 or -1.0 is very likely
-        // since sin function is relatively flat when its value is near
-        // 1.0/-1.0.
-        // NOTE: Use cosine instead of sin to sample 0%, 10% etc.
+        // When 10% of simulation is over, notify user when notify_ is set to
+        // true.
         if( notify_ )
         {
-            if( cos(20 * M_PI * currentTime_ / runTime_) == 1.0)
+            if( fmod(100 * currentTime_ / runTime_ , 10.0) == 0.0 )
             {
                 time( &rawtime );
                 timeinfo = localtime( &rawtime );
                 strftime(now, 80, "%c", timeinfo);
                 cout << "@ " << now << ": " << 100 * currentTime_ / runTime_ 
-                    << "\% of total " << runTime_ << " is over." << endl;
+                    << "% of total " << runTime_ << " seconds is over." << endl;
             }
         }
     }
+	if ( activeTicks_.size() == 0 )
+		currentTime_ = runTime_;
 
     info_.dt = dt_;
     isRunning_ = false;
     finished()->send( e );
-
 }
 
 /**
@@ -840,6 +833,7 @@ void Clock::buildDefaultTick()
     defaultTick_["SimpleSynHandler"] = 1;
     defaultTick_["STDPSynHandler"] = 1;
     defaultTick_["GraupnerBrunel2012CaPlasticitySynHandler"] = 1;
+    defaultTick_["SeqSynHandler"] = 1;
     defaultTick_["CaConc"] = 1;
     defaultTick_["CaConcBase"] = 1;
     defaultTick_["DifShell"] = 1;
@@ -901,7 +895,7 @@ void Clock::buildDefaultTick()
     defaultTick_["Stats"] = 17;
 
     defaultTick_["Table2"] = 18;
-    defaultTick_["Streamer"] = 29;
+    defaultTick_["Streamer"] = 19;
     defaultTick_["HDF5DataWriter"] = 30;
     defaultTick_["HDF5WriterBase"] = 30;
     defaultTick_["NSDFWriter"] = 30;
@@ -966,9 +960,9 @@ void Clock::buildDefaultTick()
     defaultDt_[5] = 50.0e-6;
     defaultDt_[6] = 50.0e-6;
     defaultDt_[7] = 50.0e-6;
-    defaultDt_[8] = 1.0e-4; // For the tables for electrical calculations
-    defaultDt_[9] = 0.0; // Not assigned
-    defaultDt_[10] = 0.01; // For diffusion.
+    defaultDt_[8] = 1.0e-4;                     // For the tables for electrical calculations
+    defaultDt_[9] = 0.0;                        // Not assigned
+    defaultDt_[10] = 0.01;                      // For diffusion.
     defaultDt_[11] = 0.1;
     defaultDt_[12] = 0.1;
     defaultDt_[13] = 0.1;
@@ -976,9 +970,10 @@ void Clock::buildDefaultTick()
     defaultDt_[15] = 0.1;
     defaultDt_[16] = 0.1;
     defaultDt_[17] = 0.1;
-    defaultDt_[18] = 1; // For tables for chemical calculations.
-    // 19-28 are not assigned.
-    defaultDt_[29] = 10; // For Streamer
+    defaultDt_[18] = 1;                         // For tables for chemical calculations.
+    defaultDt_[19] = 10;                        // For Streamer
+
+    // 20-29 are not assigned.
     defaultDt_[30] = 1;	// For the HDF writer
     defaultDt_[31] = 0.01; // For the postmaster.
 }

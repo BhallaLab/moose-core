@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-echo "Env $PYTHON"
-PYTHON_EXECUTABLE=${PYTHON:-/usr/bin/python}
+PYTHON_EXECUTABLE=${1:-/usr/bin/python}
+if [ $2 ]; then 
+    export PYTHONPATH="$2"
+fi
 FAILED=0
 a=`${PYTHON_EXECUTABLE} -c 'import moose; moose.seed(1); print([moose.rand() for x in range(10)])'`
 b=`${PYTHON_EXECUTABLE} -c 'import moose; moose.seed(2); print([moose.rand() for x in range(10)])'`

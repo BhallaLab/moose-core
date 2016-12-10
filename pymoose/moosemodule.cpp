@@ -56,7 +56,7 @@
 #include <mpi.h>
 #endif
 
-#include "../external/debug/print_function.hpp"
+#include "../utility/print_function.hpp"
 #include "../basecode/header.h"
 #include "../basecode/global.h"
 #include "../basecode/Id.h"
@@ -907,7 +907,7 @@ const map<string, string>& get_field_alias()
 */
 vector <string> setup_runtime_env()
 {
-    const map<string, string>& argmap = getArgMap();
+    const map<string, string>& argmap = moose::getArgMap();
     vector<string> args;
     args.push_back("moose");
     map<string, string>::const_iterator it;
@@ -1151,7 +1151,7 @@ int parseFinfoType(string className, string finfoType, string fieldName, vector<
     {
         return -1;
     }
-    tokenize(typestring, ",", typeVec);
+    moose::tokenize(typestring, ",", typeVec);
     if ((int)typeVec.size() > maxArgs)
     {
         return -1;
@@ -1792,6 +1792,7 @@ PyObject * moose_exists(PyObject * dummy, PyObject * args)
 }
 
 //Harsha : For writing genesis file to sbml
+/*
 PyObject * moose_writeSBML(PyObject * dummy, PyObject * args)
 {
     char * fname = NULL, * modelpath = NULL;
@@ -1802,7 +1803,8 @@ PyObject * moose_writeSBML(PyObject * dummy, PyObject * args)
     int ret = SHELLPTR->doWriteSBML(string(modelpath),string(fname));
     return Py_BuildValue("i", ret);
 }
-
+*/
+/*
 PyObject * moose_readSBML(PyObject * dummy, PyObject * args)
 {
     char * fname = NULL, * modelpath = NULL, * solverclass = NULL;
@@ -1832,7 +1834,7 @@ PyObject * moose_readSBML(PyObject * dummy, PyObject * args)
     PyObject * ret = reinterpret_cast<PyObject*>(model);
     return ret;
 }
-
+*/
 PyDoc_STRVAR(moose_loadModel_documentation,
              "loadModel(filename, modelpath, solverclass) -> vec\n"
              "\n"
@@ -3073,8 +3075,8 @@ static PyMethodDef MooseMethods[] =
     {"stop", (PyCFunction)moose_stop, METH_VARARGS, "Stop simulation"},
     {"isRunning", (PyCFunction)moose_isRunning, METH_VARARGS, "True if the simulation is currently running."},
     {"exists", (PyCFunction)moose_exists, METH_VARARGS, "True if there is an object with specified path."},
-    {"writeSBML", (PyCFunction)moose_writeSBML, METH_VARARGS, "Export biochemical model to an SBML file."},
-    {"readSBML",  (PyCFunction)moose_readSBML,  METH_VARARGS, "Import SBML model to Moose."},
+    //{"writeSBML", (PyCFunction)moose_writeSBML, METH_VARARGS, "Export biochemical model to an SBML file."},
+    //{"readSBML",  (PyCFunction)moose_readSBML,  METH_VARARGS, "Import SBML model to Moose."},
     {"loadModel", (PyCFunction)moose_loadModel, METH_VARARGS, moose_loadModel_documentation},
     {"saveModel", (PyCFunction)moose_saveModel, METH_VARARGS, moose_saveModel_documentation},
     {"connect", (PyCFunction)moose_connect, METH_VARARGS, moose_connect_documentation},

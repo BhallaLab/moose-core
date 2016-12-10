@@ -19,6 +19,7 @@ OBJ = \
 	setupenv.o	\
 	numutil.o	\
 	Annotator.o	\
+	cnpy.o 		\
 	Vec.o	\
 
 
@@ -26,12 +27,14 @@ HEADERS = \
 	strutil.h 	\
 	numutil.h	\
 	../basecode/header.h \
+	cnpy.hpp 	\
 
 default: $(TARGET)
 
 strutil.o: strutil.h
 Annotator.o: Annotator.h
 Vec.o: Vec.h ../basecode/doubleEq.h
+cnpy.o : cnpy.hpp
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -I.. -I../basecode $< -c

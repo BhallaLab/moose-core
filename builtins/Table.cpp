@@ -16,7 +16,6 @@
 #include "Clock.h"
 #include "StreamerBase.h"
 
-
 // Write to numpy arrays.
 #include "../utility/cnpy.hpp"
 
@@ -75,6 +74,13 @@ const Cinfo* Table::initCinfo()
         , &Table::getFormat
     );
 
+    static ValueFinfo< Table, string > name(
+        "name"
+        , "Name of the table."
+        , &Table::setName
+        , &Table::getName
+    );
+
     //////////////////////////////////////////////////////////////
     // MsgDest Definitions
     //////////////////////////////////////////////////////////////
@@ -120,6 +126,7 @@ const Cinfo* Table::initCinfo()
     {
         &threshold,		// Value
         &format,                // Value
+        &name,                  // Value
         &outfile,               // Value 
         &useStreamer,           // Value
         handleInput(),		// DestFinfo
@@ -191,11 +198,13 @@ const Cinfo* Table::initCinfo()
 
 static const Cinfo* tableCinfo = Table::initCinfo();
 
-Table::Table() : threshold_( 0.0 ) , lastTime_( 0.0 ) , input_( 0.0 )
-                 , useStreamer_( false ) 
+Table::Table() : threshold_( 0.0 ) , lastTime_( 0.0 ) , input_( 0.0 ), dt_( 0.0 )
 {
     // Initialize the directory to which each table should stream.
     rootdir_ = "_tables";
+    useStreamer_ = false;
+    format_ = "csv";
+    outfileIsSet_ = false;
 }
 
 Table::~Table( )
@@ -268,7 +277,7 @@ void Table::reinit( const Eref& e, ProcPtr p )
 
         // If user has not set the filepath, then use the table path prefixed
         // with rootdit as path.
-        if( ! outfileIsSet )
+        if( ! outfileIsSet_ )
             setOutfile( rootdir_ +
                     moose::moosePathToUserPath(tablePath_) + '.' + format_ 
                     );
@@ -323,14 +332,30 @@ double Table::getThreshold() const
 // Set the format of table to which its data should be written.
 void Table::setFormat( string format )
 {
-    format_ = format;
-    useStreamer_ = true;
+    if( format == "csv" or format == "npy" )
+        format_ = format;
+    else
+        LOG( moose::warning
+                , "Unsupported format " << format 
+                << " only npy and csv are supported"
+           );
 }
 
 // Get the format of table to which it has to be written.
 string Table::getFormat( void ) const
 {
     return format_;
+}
+
+/*  User defined name  */
+string Table::getName( void ) const
+{
+    return tableName_;
+}
+
+void Table::setName( const string name )
+{
+    tableName_ = name ;
 }
 
 /* Enable/disable streamer support. */
@@ -347,11 +372,11 @@ bool Table::getUseStreamer( void ) const
 /*  set/get outfile_ */
 void Table::setOutfile( string outpath )
 {
-    outfile_ = moose::createPosixPath( outpath );
+    outfile_ = moose::createMOOSEPath( outpath );
     if( ! moose::createParentDirs( outfile_ ) )
         outfile_ = moose::toFilename( outfile_ );
 
-    outfileIsSet = true;
+    outfileIsSet_ = true;
     setUseStreamer( true );
 
     // If possible get the format of file as well.

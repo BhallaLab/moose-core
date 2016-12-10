@@ -810,7 +810,7 @@ void SteadyState::settle( bool forceSetup )
             ksolve, "nVec", 0, ss->ri.nVec 
             );
         // Check what we set
-        auto t = LookupField< unsigned int, vector< double > >::get(
+        vector<double> t = LookupField< unsigned int, vector< double > >::get(
              ksolve,"nVec", 0 
              );
 

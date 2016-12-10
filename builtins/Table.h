@@ -14,6 +14,7 @@
 #if  USE_BOOST
 #include <boost/filesystem.hpp>
 #endif     /* -----  USE_BOOST  ----- */
+#include <fstream>
 
 /**
  * Receives and records inputs. Handles plot and spiking data in batch mode.
@@ -33,8 +34,11 @@ public:
     void setThreshold( double v );
     double getThreshold() const;
 
-    void setFormat( string format );
+    void setFormat( const string format );
     string getFormat( ) const;
+
+    void setName( const string name );
+    string getName( ) const;
 
     void setUseStreamer( bool status );
     bool getUseStreamer( void ) const;
@@ -98,7 +102,10 @@ private:
     // `pwd1/_tables_/table.path().
     string outfile_;
 
-    bool outfileIsSet;
+    /**
+     * @brief Wheather or not outfile path is set by user
+     */
+    bool outfileIsSet_;                         
 
     /**
      * @brief format of data. Currently fixed to csv.

@@ -764,7 +764,7 @@ void Function::reinit(const Eref &e, ProcPtr p)
         cout << "Error: Function::reinit() - invalid parser state. Will do nothing." << endl;
         return;
     }
-    if (trim(_parser.GetExpr(), " \t\n\r").length() == 0){
+    if (moose::trim(_parser.GetExpr(), " \t\n\r").length() == 0){
         cout << "Error: no expression set. Will do nothing." << endl;
         setExpr(e, "0.0");
         _valid = false;

@@ -32,7 +32,7 @@ default: $(TARGET)
 $(OBJ): $(HEADERS)
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -I. -Iinclude $< -c -o $@
+	$(CXX) $(CXXFLAGS) -I. -I../../ -Iinclude $< -c -o $@
 
 $(TARGET):	$(OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ)
