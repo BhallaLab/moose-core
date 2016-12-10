@@ -165,7 +165,7 @@ if(WITH_GSL)
             " Or build and install gsl from source code \n"
             "     https://www.gnu.org/software/gsl/ \n"
             " After installing gsl, rerun cmake.\n\n"
-            " If you install gsl in non-standard place, set the GSL_HOME environment \n"
+            " If you install gsl in non-standard place, set the GSL_ROOT_DIR environment \n"
             " variable. CMAKE use this to search for required files. \n"
             "====================================================================\n"
             )
