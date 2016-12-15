@@ -79,16 +79,17 @@ set_tests_properties(pymoose-ksolve-test
     PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
     )
 
-## Test basic SBML support.
-#ADD_TEST(NAME pymoose-test-basic-sbml-support
-    #COMMAND ${TEST_COMMAND}
-    #${PROJECT_SOURCE_DIR}/tests/python/test_sbml_support.py
-    #)
-#set_tests_properties(pymoose-test-basic-sbml-support 
-    #PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
-    #)
+## Test basic SBML support. Only for python2.
+if( PYTHON_VERSION_STRING VERSION_LESS "3.0.0" )
+    ADD_TEST(NAME pymoose-test-basic-sbml-support
+        COMMAND ${TEST_COMMAND}
+        ${PROJECT_SOURCE_DIR}/tests/python/test_sbml.py
+        )
+    set_tests_properties(pymoose-test-basic-sbml-support 
+        PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+        )
+endif( )
 
-# Test basic SBML support.
 ADD_TEST(NAME pymoose-test-rng
     COMMAND ${PROJECT_SOURCE_DIR}/tests/python/test_random_gen.sh
     ${PYTHON_EXECUTABLE} ${PROJECT_BINARY_DIR}/python
