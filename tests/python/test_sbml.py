@@ -16,13 +16,13 @@ import os
 
 import moose
 import moose.utils as mu
-from moose.SBML import *
+
 # the model lives in the same directory as the test script
-modeldir = os.path.dirname(__file__)
+modeldir = os.path.dirname( os.path.realpath( __file__ ) )
 
 def main():
-    modelname = os.path.join(modeldir, 'chem_models/00001-sbml-l3v1.xml')
-    model = mooseReadSBML(modelname, '/sbml')
+    modelname = os.path.join(modeldir, './chem_models/00001-sbml-l3v1.xml' )
+    model = moose.readSBML( modelname, '/sbml' )
     tables = moose.wildcardFind('/sbml/##[TYPE=Table2]')
     records = {}
     for t in tables: records[t.path.split('/')[-1]] = t

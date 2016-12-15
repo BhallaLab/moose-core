@@ -12,6 +12,7 @@ from contextlib import closing
 import warnings
 import platform
 import pydoc
+import os
 from io import StringIO
 from collections import defaultdict
 from . import _moose
@@ -54,7 +55,7 @@ def readSBML( filepath, loadpath, solver = 'ee' ):
     solver   -- Solver to use (default 'ee' )
 
     """
-    if os.path.isfile( filepath ):
+    if not os.path.isfile( filepath ):
         raise UserWarning( 'File %s not found' % filepath )
 
     return mooseReadSBML( filepath, loadpath, solver )

@@ -1,48 +1,7 @@
-# -*- coding: utf-8 -*-
-# Filename: loadSbmlmodel.py
-# Description: 
-# Author: Harsha rani 
-# Maintainer: 
-# Created: Fri Jan 29 11:43:15 2016 (+0530)
-# Version: 
-# Last-Updated: 
-#           By: 
-#     Update #: 0
-# URL: 
-# Keywords: 
-# Compatibility: 
-# 
-# 
-
-# Commentary: 
-# 
-# 
-# 
-# 
-
-# Change log:
-# 
-# 
-# 
-# 
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License as
-# published by the Free Software Foundation; either version 3, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-# 
-# Thu 10 Mar 2016 10:52:27 AM IST
-#  Dilawar: Modified for turning it into a test script.
-# 
-
 import moose
 import sys
 import os
-from moose.SBML import *
+
 script_dir = os.path.dirname( os.path.realpath( __file__) )
 
 print( "Using moose from: %s" % moose.__file__ )
@@ -60,8 +19,8 @@ def main():
     writefile =  os.path.join( script_dir, 'chem_models/acc27.xml')    
     
     #Load model to moose and write to SBML
-    moose.loadModel(mfile,'/acc27')
-    writeerror,message,sbmlId = moose.SBML.mooseWriteSBML('/acc27',writefile)
+    moose.loadModel(mfile, '/acc27')
+    writeerror, message, sbmlId = moose.readSBML('/acc27',writefile)
     if writeerror == -2:
         print ( "Could not save the Model" )
     elif writeerror == -1:
@@ -88,9 +47,8 @@ def displayPlots():
     
     pylab.legend()
     pylab.show()
-
     quit()
+
 if __name__=='__main__':
-    
     main()
-    # displayPlots()
+    displayPlots()
