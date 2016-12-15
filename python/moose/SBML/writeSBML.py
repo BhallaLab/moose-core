@@ -18,7 +18,8 @@ Last-Updated: Thursday Oct 27 11:20:00 2016(+0530)
 /****************************
 
 '''
-from moose import *
+
+import moose
 import re
 from collections import Counter
 import networkx as nx
@@ -35,7 +36,7 @@ foundLibSBML_ = False
 try:
     from libsbml import *
     foundLibSBML_ = True
-except Excpetion as e:
+except Exception as e:
     pass
 
 def mooseWriteSBML(modelpath, filename, sceneitems={}):
@@ -71,7 +72,7 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
     cremodel_.setExtentUnits("substance")
     cremodel_.setSubstanceUnits("substance")
     neutralNotes = ""
-    specieslist = wildcardFind(modelpath + '/##[ISA=PoolBase]')
+    specieslist = moose.wildcardFind(modelpath + '/##[ISA=PoolBase]')
     neutralPath = getGroupinfo(specieslist[0])
     if moose.exists(neutralPath.path + '/info'):
         neutralInfo = moose.element(neutralPath.path + '/info')
@@ -120,7 +121,7 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
 
 
 def writeEnz(modelpath, cremodel_, sceneitems, autoCoordinateslayout):
-    for enz in wildcardFind(modelpath + '/##[ISA=EnzBase]'):
+    for enz in moose.wildcardFind(modelpath + '/##[ISA=EnzBase]'):
         enzannoexist = False
         enzGpnCorCol = " "
         cleanEnzname = convertSpecialChar(enz.name)
@@ -499,7 +500,7 @@ def listofname(reacSub, mobjEnz):
 
 
 def writeReac(modelpath, cremodel_, sceneitems, autoCoordinateslayout):
-    for reac in wildcardFind(modelpath + '/##[ISA=ReacBase]'):
+    for reac in moose.wildcardFind(modelpath + '/##[ISA=ReacBase]'):
         reacSub = reac.neighbors["sub"]
         reacPrd = reac.neighbors["prd"]
         if (len(reacSub) != 0 and len(reacPrd) != 0):
@@ -625,7 +626,7 @@ def writeReac(modelpath, cremodel_, sceneitems, autoCoordinateslayout):
 
 
 def writeFunc(modelpath, cremodel_):
-    funcs = wildcardFind(modelpath + '/##[ISA=Function]')
+    funcs = moose.wildcardFind(modelpath + '/##[ISA=Function]')
     # if func:
     for func in funcs:
         if func:
@@ -712,7 +713,7 @@ def convertSpecialChar(str1):
 def writeSpecies(modelpath, cremodel_, sbmlDoc,
                  sceneitems, autoCoordinateslayout):
     # getting all the species
-    for spe in wildcardFind(modelpath + '/##[ISA=PoolBase]'):
+    for spe in moose.wildcardFind(modelpath + '/##[ISA=PoolBase]'):
         sName = convertSpecialChar(spe.name)
         comptVec = findCompartment(spe)
         speciannoexist = False
@@ -816,7 +817,7 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc,
 
 def writeCompt(modelpath, cremodel_):
     # getting all the compartments
-    for compt in wildcardFind(modelpath + '/##[ISA=ChemCompt]'):
+    for compt in moose.wildcardFind(modelpath + '/##[ISA=ChemCompt]'):
         comptName = convertSpecialChar(compt.name)
         # converting m3 to litre
         size = compt.volume * pow(10, 3)
@@ -835,8 +836,6 @@ def writeCompt(modelpath, cremodel_):
         c1.setUnits('volume')
 
 # write Simulation runtime,simdt,plotdt
-
-
 def writeSimulationAnnotation(modelpath):
     modelAnno = ""
     plots = ""
@@ -918,9 +917,9 @@ def validateModel(sbmlDoc):
         for i in range(0, numCheckFailures):
             sbmlErr = sbmlDoc.getError(i)
             if (sbmlErr.isFatal() or sbmlErr.isError()):
-                ++numConsistencyErrors
+                numConsistencyErrors += 1
             else:
-                ++numConsistencyWarnings
+                numConsistencyWarnings += 1
         constStr = sbmlDoc.printErrors()
         consistencyMessages = constStr
 
@@ -938,9 +937,9 @@ def validateModel(sbmlDoc):
                 consistencyMessages = sbmlDoc.getErrorLog().toString()
                 sbmlErr = sbmlDoc.getError(i)
                 if (sbmlErr.isFatal() or sbmlErr.isError()):
-                    ++numValidationErrors
+                    numValidationErrors += 1
                 else:
-                    ++numValidationWarnings
+                    numValidationWarnings += 1
         warning = sbmlDoc.getErrorLog().toString()
         oss = sbmlDoc.printErrors()
         validationMessages = oss
@@ -1027,60 +1026,60 @@ def setupItem(modelPath):
         if modelPath != '/':
             path = modelPath + path
         if ((baseObj == 'ReacBase') or (baseObj == 'EnzBase')):
-            for items in wildcardFind(path):
+            for items in moose.wildcardFind(path):
                 sublist = []
                 prdlist = []
                 uniqItem, countuniqItem = countitems(items, 'subOut')
                 subNo = uniqItem
                 for sub in uniqItem:
-                    sublist.append((element(sub), 's', countuniqItem[sub]))
+                    sublist.append((moose.element(sub), 's', countuniqItem[sub]))
 
                 uniqItem, countuniqItem = countitems(items, 'prd')
                 prdNo = uniqItem
                 if (len(subNo) == 0 or len(prdNo) == 0):
                     print("Substrate Product is empty ", " ", items)
                 for prd in uniqItem:
-                    prdlist.append((element(prd), 'p', countuniqItem[prd]))
+                    prdlist.append((moose.element(prd), 'p', countuniqItem[prd]))
 
                 if (baseObj == 'CplxEnzBase'):
                     uniqItem, countuniqItem = countitems(items, 'toEnz')
                     for enzpar in uniqItem:
                         sublist.append(
-                            (element(enzpar), 't', countuniqItem[enzpar]))
+                            (moose.element(enzpar), 't', countuniqItem[enzpar]))
 
                     uniqItem, countuniqItem = countitems(items, 'cplxDest')
                     for cplx in uniqItem:
                         prdlist.append(
-                            (element(cplx), 'cplx', countuniqItem[cplx]))
+                            (moose.element(cplx), 'cplx', countuniqItem[cplx]))
 
                 if (baseObj == 'EnzBase'):
                     uniqItem, countuniqItem = countitems(items, 'enzDest')
                     for enzpar in uniqItem:
                         sublist.append(
-                            (element(enzpar), 't', countuniqItem[enzpar]))
+                            (moose.element(enzpar), 't', countuniqItem[enzpar]))
                 cntDict[items] = sublist, prdlist
         elif baseObj == 'Function':
-            for items in wildcardFind(path):
+            for items in moose.wildcardFind(path):
                 sublist = []
                 prdlist = []
                 item = items.path + '/x[0]'
                 uniqItem, countuniqItem = countitems(item, 'input')
                 for funcpar in uniqItem:
                     sublist.append(
-                        (element(funcpar), 'sts', countuniqItem[funcpar]))
+                        (moose.element(funcpar), 'sts', countuniqItem[funcpar]))
 
                 uniqItem, countuniqItem = countitems(items, 'valueOut')
                 for funcpar in uniqItem:
                     prdlist.append(
-                        (element(funcpar), 'stp', countuniqItem[funcpar]))
+                        (moose.element(funcpar), 'stp', countuniqItem[funcpar]))
                 cntDict[items] = sublist, prdlist
         else:
-            for tab in wildcardFind(path):
+            for tab in moose.wildcardFind(path):
                 tablist = []
                 uniqItem, countuniqItem = countitems(tab, 'output')
                 for tabconnect in uniqItem:
                     tablist.append(
-                        (element(tabconnect), 'tab', countuniqItem[tabconnect]))
+                        (moose.element(tabconnect), 'tab', countuniqItem[tabconnect]))
                 cntDict[tab] = tablist
     return cntDict
 
@@ -1088,7 +1087,7 @@ def setupItem(modelPath):
 def countitems(mitems, objtype):
     items = []
     # print "mitems in countitems ",mitems,objtype
-    items = element(mitems).neighbors[objtype]
+    items = moose.element(mitems).neighbors[objtype]
     uniqItems = set(items)
     countuniqItems = Counter(items)
     return(uniqItems, countuniqItems)
@@ -1108,19 +1107,19 @@ def setupMeshObj(modelRoot):
     meshEntryWildcard = '/##[ISA=ChemCompt]'
     if modelRoot != '/':
         meshEntryWildcard = modelRoot + meshEntryWildcard
-    for meshEnt in wildcardFind(meshEntryWildcard):
+    for meshEnt in moose.wildcardFind(meshEntryWildcard):
         mollist = []
         cplxlist = []
-        mol_cpl = wildcardFind(meshEnt.path + '/##[ISA=PoolBase]')
-        funclist = wildcardFind(meshEnt.path + '/##[ISA=Function]')
-        enzlist = wildcardFind(meshEnt.path + '/##[ISA=EnzBase]')
-        realist = wildcardFind(meshEnt.path + '/##[ISA=ReacBase]')
-        tablist = wildcardFind(meshEnt.path + '/##[ISA=StimulusTable]')
+        mol_cpl = moose.wildcardFind(meshEnt.path + '/##[ISA=PoolBase]')
+        funclist = moose.wildcardFind(meshEnt.path + '/##[ISA=Function]')
+        enzlist = moose.wildcardFind(meshEnt.path + '/##[ISA=EnzBase]')
+        realist = moose.wildcardFind(meshEnt.path + '/##[ISA=ReacBase]')
+        tablist = moose.wildcardFind(meshEnt.path + '/##[ISA=StimulusTable]')
         if mol_cpl or funclist or enzlist or realist or tablist:
             for m in mol_cpl:
-                if isinstance(element(m.parent), CplxEnzBase):
+                if isinstance(moose.element(m.parent), moose.CplxEnzBase):
                     cplxlist.append(m)
-                elif isinstance(element(m), PoolBase):
+                elif isinstance(moose.element(m), moose.PoolBase):
                     mollist.append(m)
 
             meshEntry[meshEnt] = {'enzyme': enzlist,
@@ -1179,7 +1178,7 @@ def autoCoordinates(meshEntry, srcdesConnection):
                     "  doesn't have input message")
             else:
                 for items in (items for items in out[0]):
-                    G.add_edge(element(items[0]).path, inn.path)
+                    G.add_edge(moose.element(items[0]).path, inn.path)
 
             if len(out[1]) == 0:
                 print(
@@ -1189,14 +1188,14 @@ def autoCoordinates(meshEntry, srcdesConnection):
                     "doesn't have output mssg")
             else:
                 for items in (items for items in out[1]):
-                    G.add_edge(inn.path, element(items[0]).path)
+                    G.add_edge(inn.path, moose.element(items[0]).path)
 
         elif isinstance(out, list):
             if len(out) == 0:
                 print("Func pool doesn't have sumtotal")
             else:
                 for items in (items for items in out):
-                    G.add_edge(element(items[0]).path, inn.path)
+                    G.add_edge(moose.element(items[0]).path, inn.path)
     #from networkx.drawing.nx_agraph import graphviz_layout
     #position = graphviz_layout(G,prog='dot')
 
@@ -1212,7 +1211,7 @@ def autoCoordinates(meshEntry, srcdesConnection):
     for key, value in list(position.items()):
         xycord.append(value[0])
         xycord.append(value[1])
-        sceneitems[element(key)] = {'x': value[0], 'y': value[1]}
+        sceneitems[moose.element(key)] = {'x': value[0], 'y': value[1]}
     if len(xycord) > 0:
         cmin = min(xycord)
         cmax = max(xycord)
