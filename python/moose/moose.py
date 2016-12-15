@@ -58,9 +58,7 @@ def readSBML( filepath, loadpath, solver = 'ee' ):
     if not os.path.isfile( filepath ):
         raise UserWarning( 'File %s not found' % filepath )
 
-    res = mooseReadSBML( filepath, loadpath, solver )
-    if res[0] != 0:
-        print( res[1] )
+    mooseReadSBML( filepath, loadpath, solver )
 
 
 def writeSBML( modelpath, filenpath, sceneitems = { } ):
