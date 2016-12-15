@@ -5,6 +5,7 @@
  * Author:          HarshaRani
  * E-mail:          hrani@ncbs.res.in
  ********************************************************************/
+
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
@@ -15,7 +16,6 @@ Version
 Last-Updated: Wed Sep 28
 		  By:
 **********************************************************************/
-/****************************
 
 '''
 
