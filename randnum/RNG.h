@@ -54,14 +54,18 @@ template < typename T >
 class RNG
 {
     public:
-        RNG ()                                  /* constructor      */
+
+        /* constructor      */
+        RNG ( const string& name ) : name_( name ) 
         {
             // Setup a random seed if possible.
 #if defined(USE_BOOST) 
+
 #if defined(BOOST_RANDOM_DEVICE_EXISTS)
             boost::random::random_device rd;
             setSeed( rd() );
 #endif
+
 #elif defined(ENABLE_CPP11)
             std::random_device rd;
             setSeed( rd() );
@@ -82,10 +86,18 @@ class RNG
             return seed_;
         }
 
-        /* ====================  MUTATORS      ======================================= */
+        /**
+         * @brief This function is called by many other classes. The last call
+         * set the seed. This can be manually set by calling moose.seed
+         * function.
+         *
+         * @param seed
+         */
         void setSeed( const unsigned long int seed )
         {
             seed_ = seed;
+            cout << "Setting seed of " << '(' << this << ") " << name_ 
+                << " to " << seed_ << endl;
 #if defined(USE_BOOST) || defined(ENABLE_CPP11)
             rng_.seed( seed_ );
 #else
@@ -123,11 +135,23 @@ class RNG
 #endif
         }
 
+        void setName( const string& name )
+        {
+            name_ = name;
+        }
+
+        string getName( )
+        {
+            return name_;
+        }
+
 
     private:
         /* ====================  DATA MEMBERS  ======================================= */
         T res_;
         T seed_;
+
+        string name_;                            /* Path of the element */
 
 #if USE_BOOST
         boost::random::mt19937 rng_;

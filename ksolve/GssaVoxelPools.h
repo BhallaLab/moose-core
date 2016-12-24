@@ -34,7 +34,7 @@ public:
 
     void advance( const ProcInfo* p, const GssaSystem* g );
 
-	vector< unsigned int > numFire() const;
+    vector< unsigned int > numFire() const;
 
     /**
     * Cleans out all reac rates and recalculates atot. Needed whenever a
@@ -97,15 +97,15 @@ private:
      * recalculated on each step.
      */
     vector< double > v_;
-    // Possibly we should put independent RNGS, so save one here.
-	
-	// Count how many times each reaction has fired.
-	vector< unsigned int > numFire_;
+
+    // Count how many times each reaction has fired.
+    vector< unsigned int > numFire_;
 
     /**
-     * @brief RNG.
+     * @brief RNG. If each class has its own rng, it makes parallelism is
+     * easier.
      */
-    moose::RNG<double> rng_;
+    moose::RNG<double>* rng_;
 
 };
 

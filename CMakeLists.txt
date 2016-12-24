@@ -175,7 +175,7 @@ if(WITH_GSL)
     # top level.
     include_directories( ${GSL_INCLUDE_DIRS} )
 elseif(WITH_BOOST)
-    find_package(Boost 1.44 COMPONENTS filesystem random REQUIRED)
+    find_package(Boost 1.44 COMPONENTS random REQUIRED)
     find_package( LAPACK REQUIRED )
     add_definitions( -DUSE_BOOST -UUSE_GSL )
     include_directories( ${Boost_INCLUDE_DIRS} )

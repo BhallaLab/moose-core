@@ -367,12 +367,13 @@ void Gsolve::setClockedUpdate( bool val )
 //////////////////////////////////////////////////////////////
 void Gsolve::process( const Eref& e, ProcPtr p )
 {
-	// cout << stoichPtr_ << "	dsolve = " <<	dsolvePtr_ << endl;
+         //cout << stoichPtr_ << "	dsolve = " <<	dsolvePtr_ << endl;
 	if ( !stoichPtr_ )
 		return;
 	// First, handle incoming diffusion values. Note potential for
 	// issues with roundoff if diffusion is not integral.
-	if ( dsolvePtr_ ) {
+	if ( dsolvePtr_ ) 
+        {
 		vector< double > dvalues( 4 );
 		dvalues[0] = 0;
 		dvalues[1] = getNumLocalVoxels();
@@ -383,8 +384,9 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 		// one would use a stochastic (integral) diffusion method with 
 		// the GSSA, but in mixed models it may be more complicated.
 		vector< double >::iterator i = dvalues.begin() + 4;
-		for ( ; i != dvalues.end(); ++i ) {
-		//	cout << *i << "	" << round( *i ) << "		";
+		for ( ; i != dvalues.end(); ++i ) 
+                {
+			//cout << *i << "	" << round( *i ) << "		";
 #if SIMPLE_ROUNDING
 			*i = round( *i );
 #else
@@ -429,6 +431,7 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 					i = pools_.begin(); i != pools_.end(); ++i ) {
 		i->advance( p, &sys_ );
 	}
+
 	if ( useClockedUpdate_ ) { // Check if a clocked stim is to be updated
 		for ( vector< GssaVoxelPools >::iterator 
 					i = pools_.begin(); i != pools_.end(); ++i ) {

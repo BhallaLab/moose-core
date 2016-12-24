@@ -138,13 +138,14 @@ public:
     double mtrand( void );
 
 private:
+
     HSolve* hsolve_;
 
     static const double EPSILON;
 
     void copyFields( moose::Compartment* c );
 
-    moose::RNG<double> rng;
+    moose::RNG<double>* rng_;
 
 };
 

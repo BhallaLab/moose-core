@@ -34,7 +34,7 @@
 
 int _seed_ = 0;
 
-moose::RNG<double> rng_;
+moose::RNG<double> rng_( "test_async" );
 
 void _mtseed_( unsigned int seed )
 {

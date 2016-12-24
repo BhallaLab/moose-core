@@ -78,7 +78,7 @@ void init_genrand(unsigned long s)
 
 //Add code for gettimeofday
 #ifdef _WIN32
-	int gettimeofday( struct timeval* tv, void* timezone ) {
+int gettimeofday( struct timeval* tv, void* timezone ) {
      FILETIME time;
      double   timed;
  

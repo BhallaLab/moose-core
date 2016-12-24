@@ -31,8 +31,6 @@ unsigned int totalTests = 0;
 
 stringstream errorSS;
 
-bool isRNGInitialized = false;
-
 clock_t simClock = clock();
 
 extern int checkPath( const string& path);
@@ -45,7 +43,7 @@ namespace moose {
 
     int __rng_seed__ = 0;
 
-    moose::RNG<double> rng;
+    moose::RNG<double> rng( "global" );
 
     /* Check if path is OK */
     int checkPath( const string& path  )
@@ -89,8 +87,11 @@ namespace moose {
      */
     void mtseed( unsigned int x )
     {
+        // Set __rng_seed__ to x. This is used by other RNGs as well.
+        __rng_seed__ = x;
+
+        // Set global RNG as well.
         moose::rng.setSeed( x );
-        isRNGInitialized = true;
     }
 
     /*  Generate a random number */

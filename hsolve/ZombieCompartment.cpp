@@ -58,11 +58,12 @@ static const Cinfo* zombieCompartmentCinfo = ZombieCompartment::initCinfo();
 ZombieCompartment::ZombieCompartment()
 {
     hsolve_   = NULL;
+    rng_ = new moose::RNG<double>( "ZombieCompartment" );
 }
 
 ZombieCompartment::~ZombieCompartment()
 {
-    ;
+    delete rng_;
 }
 
 // Value Field access function definitions.
