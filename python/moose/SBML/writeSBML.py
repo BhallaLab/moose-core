@@ -42,8 +42,10 @@ except Exception as e:
 def mooseWriteSBML(modelpath, filename, sceneitems={}):
     global foundLibSBML_ 
     if not foundLibSBML_:
-        msg  = 'No python-libsbml found. Doing nothing'
-        print( msg )
+        print('No python-libsbml found.' 
+            '\nThis module can be installed by following command in terminal:'
+            '\n\t easy_install python-libsbl'
+            )
         return -1, msg
 
     sbmlDoc = SBMLDocument(3, 1)

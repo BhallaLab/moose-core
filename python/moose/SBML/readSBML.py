@@ -61,7 +61,10 @@ except ImportError:
 def mooseReadSBML(filepath, loadpath, solver="ee"):
     global foundLibSBML_
     if not foundLibSBML_:
-        print('No python-libsbml found. Doing nothing')
+        print('No python-libsbml found.' 
+            '\nThis module can be installed by following command in terminal:'
+            '\n\t easy_install python-libsbl'
+            )
         return None
 
     if not os.path.isfile(filepath):
