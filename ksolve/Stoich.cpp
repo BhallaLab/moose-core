@@ -1210,6 +1210,7 @@ void Stoich::installAndUnschedFuncReac( Id func, Id reac )
 
 void Stoich::convertRatesToStochasticForm()
 {
+
     for ( unsigned int i = 0; i < rates_.size(); ++i )
     {
         vector< unsigned int > molIndex;

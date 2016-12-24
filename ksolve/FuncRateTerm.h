@@ -33,7 +33,8 @@ class FuncRate: public ExternReac
 			return func_( S, t ); // get rate from func calculation.
 		}
 
-		unsigned int getReactants( vector< unsigned int >& molIndex ) const{
+		unsigned int getReactants( vector< unsigned int >& molIndex ) const
+                {
 			molIndex.resize( 1 );
 			molIndex[0] = func_.getTarget();
 
