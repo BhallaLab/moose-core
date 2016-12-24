@@ -125,7 +125,7 @@ private:
     unsigned int numFailed_;
     VoxelPools pool_;
 
-    moose::RNG<double> rng;
+    moose::RNG<double>* rng_;
 
 #if USE_BOOST
     NonlinearSystem* ss;

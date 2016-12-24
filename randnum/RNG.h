@@ -96,8 +96,6 @@ class RNG
         void setSeed( const unsigned long int seed )
         {
             seed_ = seed;
-            cout << "Setting seed of " << '(' << this << ") " << name_ 
-                << " to " << seed_ << endl;
 #if defined(USE_BOOST) || defined(ENABLE_CPP11)
             rng_.seed( seed_ );
 #else
