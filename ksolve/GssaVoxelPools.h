@@ -25,10 +25,13 @@ public:
     //////////////////////////////////////////////////////////////////
     void advance( const ProcInfo* p );
     void recalcTime( const GssaSystem* g, double currTime );
+
     void updateDependentMathExpn(
         const GssaSystem* g, unsigned int rindex, double time );
+
     void updateDependentRates(
         const vector< unsigned int >& deps, const Stoich* stoich );
+
     unsigned int pickReac();
     void setNumReac( unsigned int n );
 
@@ -54,6 +57,7 @@ public:
                           unsigned int numCoreRates, unsigned int index );
 
     double getReacVelocity( unsigned int r, const double* s ) const;
+
     void updateReacVelocities( const GssaSystem* g,
                                const double* s, vector< double >& v ) const;
 

@@ -49,8 +49,9 @@ const double SAFETY_FACTOR = 1.0 + 1.0e-9;
 
 GssaVoxelPools::GssaVoxelPools() :
      VoxelPoolsBase(), t_( 0.0 ), atot_( 0.0 )
-     , rng_ ( new moose::RNG<double>( "GssaVoxelPool" ) )
-{ ; }
+{ 
+     rng_  = new moose::RNG<double>( "GssaVoxelPool" );
+}
 
 GssaVoxelPools::~GssaVoxelPools()
 {
@@ -220,9 +221,10 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 
 void GssaVoxelPools::reinit( const GssaSystem* g )
 {
+    VoxelPoolsBase::reinit(); // Assigns S = Sinit;
+
     rng_->setSeed( moose::__rng_seed__ );
 
-    VoxelPoolsBase::reinit(); // Assigns S = Sinit;
     unsigned int numVarPools = g->stoich->getNumVarPools();
     g->stoich->updateFuncs( varS(), 0 );
 
