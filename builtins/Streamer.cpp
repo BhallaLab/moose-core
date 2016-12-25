@@ -394,7 +394,8 @@ string Streamer::getFormat( void ) const
 void Streamer::zipWithTime( )
 {
     size_t numEntriesInEachTable = tables_[0]->getVecSize( );
-    LOG( moose::debug, "Entries in each table " << numEntriesInEachTable );
+
+    //LOG( moose::debug, "Entries in each table " << numEntriesInEachTable );
 
     // Collect data from all table. If some table does not have enough data,
     // fill it with nan
@@ -404,9 +405,11 @@ void Streamer::zipWithTime( )
         vector<double> tVec( tables_[i]->getVec( ) );
         if( tVec.size( ) <= numEntriesInEachTable )
         {
-            LOG( moose::warning
+#if 0
+            LOG( moose::debug
                     , "Table " << tables_[i]->getName( ) << " is not functional. Filling with zero " 
                     );
+#endif
             tVec.resize( numEntriesInEachTable, 0 );
         }
         collectedData.push_back( tVec );
