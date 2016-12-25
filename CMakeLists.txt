@@ -175,7 +175,7 @@ if(WITH_GSL)
     # top level.
     include_directories( ${GSL_INCLUDE_DIRS} )
 elseif(WITH_BOOST)
-    find_package(Boost 1.44 COMPONENTS filesystem random REQUIRED)
+    find_package(Boost 1.44 COMPONENTS system filesystem random REQUIRED)
     find_package( LAPACK REQUIRED )
     add_definitions( -DUSE_BOOST -UUSE_GSL )
     include_directories( ${Boost_INCLUDE_DIRS} )
@@ -383,6 +383,9 @@ endif(MACOSX)
 add_dependencies(moose.bin libmoose)
 
 target_link_libraries(moose.bin LINK_PUBLIC moose ${CMAKE_DL_LIBS})
+if( WITH_BOOST )
+    target_link_libraries( moose.bin ${Boost_LIBRARIES} )
+endif( WITH_BOOST )
 
 ######################### BUILD PYMOOSE ########################################
 # Root of all python module.
