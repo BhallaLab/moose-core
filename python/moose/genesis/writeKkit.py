@@ -11,7 +11,8 @@ __status__           = "Development"
 
 import sys
 import random
-from moose import wildcardFind, element, loadModel, ChemCompt, exists, Annotator, Pool, ZombiePool,PoolBase,CplxEnzBase,Function,ZombieFunction
+#from moose import wildcardFind, element, loadModel, ChemCompt, exists, Annotator, Pool, ZombiePool,PoolBase,CplxEnzBase,Function,ZombieFunction
+import moose
 import numpy as np
 import re
 from collections import Counter
@@ -39,7 +40,7 @@ GENESIS_COLOR_SEQUENCE = ((248, 0, 255), (240, 0, 255), (232, 0, 255), (224, 0, 
 #Todo : To be written
 #               --StimulusTable
 
-def write( modelpath, filename,sceneitems=None):
+def mooseWriteKkit( modelpath, filename,sceneitems=None):
     if filename.rfind('.') != -1:
         filename = filename[:filename.rfind('.')]
     else:
@@ -55,7 +56,7 @@ def write( modelpath, filename,sceneitems=None):
     ymin = 0
     ymax = 1
 
-    compt = wildcardFind(modelpath+'/##[ISA=ChemCompt]')
+    compt = moose.wildcardFind(modelpath+'/##[ISA=ChemCompt]')
     maxVol = estimateDefaultVol(compt)
     f = open(filename, 'w')
 
@@ -94,7 +95,7 @@ def write( modelpath, filename,sceneitems=None):
         writeSumtotal(modelpath,f)
         f.write("simundump xgraph /graphs/conc1 0 0 99 0.001 0.999 0\n"
                 "simundump xgraph /graphs/conc2 0 0 100 0 1 0\n")
-        tgraphs = wildcardFind(modelpath+'/##[ISA=Table2]')
+        tgraphs = moose.wildcardFind(modelpath+'/##[ISA=Table2]')
         first, second = " ", " "
         if tgraphs:
             first,second = writeplot(tgraphs,f)
@@ -137,13 +138,13 @@ def setupItem(modelPath,cntDict):
         if modelPath != '/':
             path = modelPath+path
         if ( (baseObj == 'ReacBase') or (baseObj == 'EnzBase')):
-            for items in wildcardFind(path):
+            for items in moose.wildcardFind(path):
                 sublist = []
                 prdlist = []
                 uniqItem,countuniqItem = countitems(items,'subOut')
                 subNo = uniqItem
                 for sub in uniqItem: 
-                    sublist.append((element(sub),'s',countuniqItem[sub]))
+                    sublist.append((moose.element(sub),'s',countuniqItem[sub]))
 
                 uniqItem,countuniqItem = countitems(items,'prd')
                 prdNo = uniqItem
@@ -151,46 +152,45 @@ def setupItem(modelPath,cntDict):
                     print("Substrate Product is empty ",path, " ",items)
                     
                 for prd in uniqItem:
-                    prdlist.append((element(prd),'p',countuniqItem[prd]))
+                    prdlist.append((moose.element(prd),'p',countuniqItem[prd]))
                 
                 if (baseObj == 'CplxEnzBase') :
                     uniqItem,countuniqItem = countitems(items,'toEnz')
                     for enzpar in uniqItem:
-                        sublist.append((element(enzpar),'t',countuniqItem[enzpar]))
+                        sublist.append((moose.element(enzpar),'t',countuniqItem[enzpar]))
                     
                     uniqItem,countuniqItem = countitems(items,'cplxDest')
                     for cplx in uniqItem:
-                        prdlist.append((element(cplx),'cplx',countuniqItem[cplx]))
+                        prdlist.append((moose.element(cplx),'cplx',countuniqItem[cplx]))
 
                 if (baseObj == 'EnzBase'):
                     uniqItem,countuniqItem = countitems(items,'enzDest')
                     for enzpar in uniqItem:
-                        sublist.append((element(enzpar),'t',countuniqItem[enzpar]))
+                        sublist.append((moose.element(enzpar),'t',countuniqItem[enzpar]))
                 cntDict[items] = sublist,prdlist
         elif baseObj == 'Function':
-            for items in wildcardFind(path):
+            for items in moose.wildcardFind(path):
                 sublist = []
                 prdlist = []
                 item = items.path+'/x[0]'
                 uniqItem,countuniqItem = countitems(item,'input')
                 for funcpar in uniqItem:
-                    sublist.append((element(funcpar),'sts',countuniqItem[funcpar]))
+                    sublist.append((moose.element(funcpar),'sts',countuniqItem[funcpar]))
                 
                 uniqItem,countuniqItem = countitems(items,'valueOut')
                 for funcpar in uniqItem:
-                    prdlist.append((element(funcpar),'stp',countuniqItem[funcpar]))
+                    prdlist.append((moose.element(funcpar),'stp',countuniqItem[funcpar]))
                 cntDict[items] = sublist,prdlist
         else:
-            for tab in wildcardFind(path):
+            for tab in moose.wildcardFind(path):
                 tablist = []
                 uniqItem,countuniqItem = countitems(tab,'output')
                 for tabconnect in uniqItem:
-                    tablist.append((element(tabconnect),'tab',countuniqItem[tabconnect]))
+                    tablist.append((moose.element(tabconnect),'tab',countuniqItem[tabconnect]))
                 cntDict[tab] = tablist
 def countitems(mitems,objtype):
     items = []
-    #print "mitems in countitems ",mitems,objtype
-    items = element(mitems).neighbors[objtype]
+    items = moose.element(mitems).neighbors[objtype]
     uniqItems = set(items)
     countuniqItems = Counter(items)
     return(uniqItems,countuniqItems)
@@ -209,19 +209,19 @@ def setupMeshObj(modelRoot):
     meshEntryWildcard = '/##[ISA=ChemCompt]'
     if modelRoot != '/':
         meshEntryWildcard = modelRoot+meshEntryWildcard
-    for meshEnt in wildcardFind(meshEntryWildcard):
+    for meshEnt in moose.wildcardFind(meshEntryWildcard):
         mollist = []
         cplxlist = []
-        mol_cpl  = wildcardFind(meshEnt.path+'/##[ISA=PoolBase]')
-        funclist = wildcardFind(meshEnt.path+'/##[ISA=Function]')
-        enzlist  = wildcardFind(meshEnt.path+'/##[ISA=EnzBase]')
-        realist  = wildcardFind(meshEnt.path+'/##[ISA=ReacBase]')
-        tablist  = wildcardFind(meshEnt.path+'/##[ISA=StimulusTable]')
+        mol_cpl  = moose.wildcardFind(meshEnt.path+'/##[ISA=PoolBase]')
+        funclist = moose.wildcardFind(meshEnt.path+'/##[ISA=Function]')
+        enzlist  = moose.wildcardFind(meshEnt.path+'/##[ISA=EnzBase]')
+        realist  = moose.wildcardFind(meshEnt.path+'/##[ISA=ReacBase]')
+        tablist  = moose.wildcardFind(meshEnt.path+'/##[ISA=StimulusTable]')
         if mol_cpl or funclist or enzlist or realist or tablist:
             for m in mol_cpl:
-                if isinstance(element(m.parent),CplxEnzBase):
+                if isinstance(moose.element(m.parent),moose.CplxEnzBase):
                     cplxlist.append(m)
-                elif isinstance(element(m),PoolBase):
+                elif isinstance(moose.element(m),moose.PoolBase):
                     mollist.append(m)
                     
             meshEntry[meshEnt] = {'enzyme':enzlist,
@@ -248,7 +248,7 @@ def autoCoordinates(meshEntry,srcdesConnection):
             #G.add_edge((cplxObj.parent).path,cplxObj.path)
         for reaObj in find_index(memb,'reaction'):
             #G.add_node(reaObj.path)
-            G.add_node(reaObj.path,label=reaObj.name,shape='record',color='')
+            G.add_node(reaObj.path,label=reaObj.name,shape='',color='')
         for funcObj in find_index(memb,'function'):
             G.add_node(poolObj.path,label = funcObj.name,shape = 'box',color = 'red',style = 'filled',fontname = 'Helvetica',fontsize = 12,fontcolor = 'blue')
 
@@ -262,18 +262,18 @@ def autoCoordinates(meshEntry,srcdesConnection):
                 print(inn.className + ':' +inn.name + "  doesn't have input message")
             else:
                 for items in (items for items in out[0] ):
-                    G.add_edge(element(items[0]).path,inn.path)
+                    G.add_edge(moose.element(items[0]).path,inn.path)
             if len(out[1]) == 0:
                 print(inn.className + ':' + inn.name + "doesn't have output mssg")
             else:
                 for items in (items for items in out[1] ):
-                    G.add_edge(inn.path,element(items[0]).path)
+                    G.add_edge(inn.path,moose.element(items[0]).path)
         elif isinstance(out,list):
             if len(out) == 0:
                 print("Func pool doesn't have sumtotal")
             else:
                 for items in (items for items in out ):
-                    G.add_edge(element(items[0]).path,inn.path)
+                    G.add_edge(moose.element(items[0]).path,inn.path)
     
     position = nx.graphviz_layout(G, prog = 'dot')
     #agraph = nx.to_agraph(G)
@@ -284,7 +284,7 @@ def autoCoordinates(meshEntry,srcdesConnection):
     for key,value in list(position.items()):
         xycord.append(value[0])
         xycord.append(value[1])
-        sceneitems[element(key)] = {'x':value[0],'y':value[1]}
+        sceneitems[moose.element(key)] = {'x':value[0],'y':value[1]}
     cmin = min(xycord)
     cmax = max(xycord)
     return cmin,cmax,sceneitems
@@ -314,15 +314,15 @@ def storeMMenzMsgs( enz, f):
     prdList = enz.neighbors["prd"]
     enzDestList = enz.neighbors["enzDest"]
     for esub in subList:
-        es = "addmsg /kinetics/" + trimPath(element(esub)) + " /kinetics/" + trimPath(enz) + " SUBSTRATE n \n";
-        es = es+"addmsg /kinetics/" + trimPath(enz) + " /kinetics/" + trimPath(element(esub)) + " REAC sA B \n";
+        es = "addmsg /kinetics/" + trimPath(moose.element(esub)) + " /kinetics/" + trimPath(enz) + " SUBSTRATE n \n";
+        es = es+"addmsg /kinetics/" + trimPath(enz) + " /kinetics/" + trimPath(moose.element(esub)) + " REAC sA B \n";
         f.write(es)
 
     for eprd in prdList:
-        es = "addmsg /kinetics/" + trimPath( enz ) + " /kinetics/" + trimPath( element(eprd)) + " MM_PRD pA \n";
+        es = "addmsg /kinetics/" + trimPath( enz ) + " /kinetics/" + trimPath( moose.element(eprd)) + " MM_PRD pA \n";
         f.write(es)
     for eenzDest in enzDestList:
-        enzDest = "addmsg /kinetics/" + trimPath( element(eenzDest)) + " /kinetics/" + trimPath( enz ) + " ENZYME n \n";
+        enzDest = "addmsg /kinetics/" + trimPath( moose.element(eenzDest)) + " /kinetics/" + trimPath( enz ) + " ENZYME n \n";
         f.write(enzDest)
 
 def storeEnzMsg( enzList, f):
@@ -334,7 +334,7 @@ def storeEnzMsg( enzList, f):
             storeCplxEnzMsgs( enz, f )
 
 def writeEnz( modelpath,f,sceneitems):
-    enzList = wildcardFind(modelpath+'/##[ISA=EnzBase]')
+    enzList = moose.wildcardFind(modelpath+'/##[ISA=EnzBase]')
     for enz in enzList:
         x = random.randrange(0,10)
         y = random.randrange(0,10)
@@ -348,7 +348,7 @@ def writeEnz( modelpath,f,sceneitems):
         n = 0;
         conc = 0;
         enzParent = enz.parent
-        if (isinstance(enzParent.className,Pool)) or (isinstance(enzParent.className,ZombiePool)):
+        if (isinstance(enzParent.className,moose.Pool)) or (isinstance(enzParent.className,moose.ZombiePool)):
             print(" raise exception enz doesn't have pool as parent")
             return False
         else:
@@ -376,11 +376,11 @@ def writeEnz( modelpath,f,sceneitems):
                 y = sceneitems[enz]['y']
 
             einfo = enz.path+'/info'
-            if exists(einfo):
-                color = Annotator(einfo).getField('color')
+            if moose.exists(einfo):
+                color = moose.Annotator(einfo).getField('color')
                 color = getColorCheck(color,GENESIS_COLOR_SEQUENCE)
 
-                textcolor = Annotator(einfo).getField('textColor')
+                textcolor = moose.Annotator(einfo).getField('textColor')
                 textcolor = getColorCheck(textcolor,GENESIS_COLOR_SEQUENCE)
 
             if color == "" or color == " ":
@@ -432,7 +432,7 @@ def storeReacMsg(reacList,f):
             f.write( s)
 
 def writeReac(modelpath,f,sceneitems):
-    reacList = wildcardFind(modelpath+'/##[ISA=ReacBase]')
+    reacList = moose.wildcardFind(modelpath+'/##[ISA=ReacBase]')
     for reac in reacList :
         color = ""
         textcolor = ""
@@ -445,11 +445,11 @@ def writeReac(modelpath,f,sceneitems):
         x = sceneitems[reac]['x']
         y = sceneitems[reac]['y']
         rinfo = reac.path+'/info'
-        if exists(rinfo):
-            color = Annotator(rinfo).getField('color')
+        if moose.exists(rinfo):
+            color = moose.Annotator(rinfo).getField('color')
             color = getColorCheck(color,GENESIS_COLOR_SEQUENCE)
 
-            textcolor = Annotator(rinfo).getField('textColor')
+            textcolor = moose.Annotator(rinfo).getField('textColor')
             textcolor = getColorCheck(textcolor,GENESIS_COLOR_SEQUENCE)
         
         if color == "" or color == " ":
@@ -462,10 +462,10 @@ def writeReac(modelpath,f,sceneitems):
  
 def trimPath(mobj):
     original = mobj
-    mobj = element(mobj)
+    mobj = moose.element(mobj)
     found = False
-    while not isinstance(mobj,ChemCompt) and mobj.path != "/":
-        mobj = element(mobj.parent)
+    while not isinstance(mobj,moose.ChemCompt) and mobj.path != "/":
+        mobj = moose.element(mobj.parent)
         found = True
     if mobj.path == "/":
         print(("compartment is not found with the given path and the path has reached root ",original))
@@ -475,9 +475,7 @@ def trimPath(mobj):
     # e.g /group/poolObject or /Reac
     if found:
         if mobj.name != "kinetics" and (mobj.className != "CubeMesh"):
-            print(" 478 ",mobj.name,mobj.className)
             splitpath = original.path[(original.path.find(mobj.name)):len(original.path)]
-            print(" splitpath ",original,splitpath)
         else:
             pos = original.path.find(mobj.name)
             slash = original.path.find('/',pos+1)
@@ -487,12 +485,12 @@ def trimPath(mobj):
         return s
 
 def writeSumtotal( modelpath,f):
-    funclist = wildcardFind(modelpath+'/##[ISA=Function]')
+    funclist = moose.wildcardFind(modelpath+'/##[ISA=Function]')
     for func in funclist:
-        funcInputs = element(func.path+'/x[0]')
+        funcInputs = moose.element(func.path+'/x[0]')
         s = ""
         for funcInput in funcInputs.neighbors["input"]:
-            s = s+ "addmsg /kinetics/" + trimPath(funcInput)+ " /kinetics/" + trimPath(element(func.parent)) + " SUMTOTAL n nInit\n"
+            s = s+ "addmsg /kinetics/" + trimPath(funcInput)+ " /kinetics/" + trimPath(moose.element(func.parent)) + " SUMTOTAL n nInit\n"
         f.write(s)
 
 def storePlotMsgs( tgraphs,f):
@@ -510,12 +508,12 @@ def storePlotMsgs( tgraphs,f):
                     slash1 = graph.path.find('/',slash)
                     tabPath = "/graphs/conc1" +graph.path[slash1:len(graph.path)]
 
-                if len(element(graph).msgOut):
-                    poolPath = (element(graph).msgOut)[0].e2.path
-                    poolEle = element(poolPath)
+                if len(moose.element(graph).msgOut):
+                    poolPath = (moose.element(graph).msgOut)[0].e2.path
+                    poolEle = moose.element(poolPath)
                     poolName = poolEle.name
                     bgPath = (poolEle.path+'/info')
-                    bg = Annotator(bgPath).color
+                    bg = moose.Annotator(bgPath).color
                     bg = getColorCheck(bg,GENESIS_COLOR_SEQUENCE)
                     tabPath = re.sub("\[[0-9]+\]", "", tabPath)
                     s = s+"addmsg /kinetics/" + trimPath( poolEle ) + " " + tabPath + \
@@ -536,11 +534,11 @@ def writeplot( tgraphs,f ):
                 else:
                     slash1 = graphs.path.find('/',slash)
                     tabPath = "/graphs/conc1" +graphs.path[slash1:len(graphs.path)]
-                if len(element(graphs).msgOut):
-                    poolPath = (element(graphs).msgOut)[0].e2.path
-                    poolEle = element(poolPath)
+                if len(moose.element(graphs).msgOut):
+                    poolPath = (moose.element(graphs).msgOut)[0].e2.path
+                    poolEle = moose.element(poolPath)
                     poolAnno = (poolEle.path+'/info')
-                    fg = Annotator(poolAnno).textColor
+                    fg = moose.Annotator(poolAnno).textColor
                     fg = getColorCheck(fg,GENESIS_COLOR_SEQUENCE)
                     tabPath = re.sub("\[[0-9]+\]", "", tabPath)
                     if tabPath.find("conc1") >= 0 or tabPath.find("conc2") >= 0:
@@ -550,10 +548,9 @@ def writeplot( tgraphs,f ):
     return first,second
 
 def writePool(modelpath,f,volIndex,sceneitems):
-    print(" modelpath ",modelpath)
     color = ""
     textcolor = ""
-    for p in wildcardFind(modelpath+'/##[ISA=PoolBase]'):
+    for p in moose.wildcardFind(modelpath+'/##[ISA=PoolBase]'):
         slave_enable = 0
         if (p.className == "BufPool" or p.className == "ZombieBufPool"):
             pool_children = p.children
@@ -576,10 +573,10 @@ def writePool(modelpath,f,volIndex,sceneitems):
             #     y = calPrime(value['y'])
                 
             pinfo = p.path+'/info'
-            if exists(pinfo):
-                color = Annotator(pinfo).getField('color')
+            if moose.exists(pinfo):
+                color = moose.Annotator(pinfo).getField('color')
                 color = getColorCheck(color,GENESIS_COLOR_SEQUENCE)
-                textcolor = Annotator(pinfo).getField('textColor')
+                textcolor = moose.Annotator(pinfo).getField('textColor')
                 textcolor = getColorCheck(textcolor,GENESIS_COLOR_SEQUENCE)
             
             geometryName = volIndex[p.volume]
@@ -672,7 +669,7 @@ def writeCompartment(modelpath,compts,f):
 
 def writeGroup(modelpath,f):
     ignore = ["graphs","moregraphs","geometry","groups","conc1","conc2","conc3","conc4","model","data","graph_0","graph_1","graph_2","graph_3","graph_4","graph_5"]
-    for g in wildcardFind(modelpath+'/##[TYPE=Neutral]'):
+    for g in moose.wildcardFind(modelpath+'/##[TYPE=Neutral]'):
         if not g.name in ignore:
             if trimPath(g) != None:
                 x = xmin+1
@@ -740,20 +737,20 @@ def estimateDefaultVol(compts):
 
 def writeNotes(modelpath,f):
     notes = ""
-    #items = wildcardFind(modelpath+"/##[ISA=ChemCompt],/##[ISA=ReacBase],/##[ISA=PoolBase],/##[ISA=EnzBase],/##[ISA=Function],/##[ISA=StimulusTable]")
+    #items = moose.wildcardFind(modelpath+"/##[ISA=ChemCompt],/##[ISA=ReacBase],/##[ISA=PoolBase],/##[ISA=EnzBase],/##[ISA=Function],/##[ISA=StimulusTable]")
     items = []
-    items = wildcardFind(modelpath+"/##[ISA=ChemCompt]") +\
-            wildcardFind(modelpath+"/##[ISA=PoolBase]") +\
-            wildcardFind(modelpath+"/##[ISA=ReacBase]") +\
-            wildcardFind(modelpath+"/##[ISA=EnzBase]") +\
-            wildcardFind(modelpath+"/##[ISA=Function]") +\
-            wildcardFind(modelpath+"/##[ISA=StimulusTable]")
+    items = moose.wildcardFind(modelpath+"/##[ISA=ChemCompt]") +\
+            moose.wildcardFind(modelpath+"/##[ISA=PoolBase]") +\
+            moose.wildcardFind(modelpath+"/##[ISA=ReacBase]") +\
+            moose.wildcardFind(modelpath+"/##[ISA=EnzBase]") +\
+            moose.wildcardFind(modelpath+"/##[ISA=Function]") +\
+            moose.wildcardFind(modelpath+"/##[ISA=StimulusTable]")
     for item in items:
-        if exists(item.path+'/info'):
+        if moose.exists(item.path+'/info'):
             info = item.path+'/info'
-            notes = Annotator(info).getField('notes')
+            notes = moose.Annotator(info).getField('notes')
             if (notes):
-                f.write("call /kinetics/"+ trimPath(item)+"/notes LOAD \ \n\""+Annotator(info).getField('notes')+"\"\n")
+                f.write("call /kinetics/"+ trimPath(item)+"/notes LOAD \ \n\""+moose.Annotator(info).getField('notes')+"\"\n")
 
 def writeFooter1(f):
     f.write("\nenddump\n // End of dump\n")
@@ -766,7 +763,7 @@ if __name__ == "__main__":
 
     filename = sys.argv[1]
     modelpath = filename[0:filename.find('.')]
-    loadModel(filename,'/'+modelpath,"gsl")
+    moose.loadModel(filename,'/'+modelpath,"gsl")
     output = modelpath+"_4mmoose.g"
     written = write('/'+modelpath,output)
     if written:

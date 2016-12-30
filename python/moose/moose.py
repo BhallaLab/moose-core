@@ -20,6 +20,8 @@ from ._moose import *
 import __main__ as main
 from .SBML.readSBML import mooseReadSBML 
 from .SBML.writeSBML import mooseWriteSBML 
+from .genesis.writeKkit import mooseWriteKkit
+from add_Delete_ChemicalSolver import moosedeleteChemSolver,mooseaddChemSolver
 
 sequence_types = ['vector<double>',
                   'vector<int>',
@@ -45,13 +47,13 @@ known_types = ['void',
                'melement'] + sequence_types
 
 # SBML related functions.
-def readSBML( filepath, loadpath, solver = 'ee' ):
+def mooseReadSBML( filepath, loadpath, solver = 'ee' ):
     """Load SBML model.
 
     keyword arguments:
 
-    filepath -- model path.
-    loadpath -- Root path for this model e.g. /model/sbml/mymodel 
+    filepath -- filepath to be loaded
+    loadpath -- Root path for this model e.g. /model/mymodel 
     solver   -- Solver to use (default 'ee' )
 
     """
@@ -61,18 +63,52 @@ def readSBML( filepath, loadpath, solver = 'ee' ):
     mooseReadSBML( filepath, loadpath, solver )
 
 
-def writeSBML( modelpath, filenpath, sceneitems = { } ):
+def mooseWriteSBML( modelpath, filenpath, sceneitems = { } ):
     """Write module under modelpath to a file in SBML format.
 
     keyword arguments:
 
-    modelath -- model path in moose e.g /model/sbml/mymodel
+    modelath -- model path in moose e.g /model/mymodel
     filepath -- Path of output file.
-    sceneitems -- dict (options)
+    sceneitems -- dictlist (UserWarning: user need not worry about this)
+                    layout position is saved in Annotation field of all the moose Object (pool,Reaction,enzyme)
+                    If this function is called from 
+                        -- GUI, the layout position of moose object is passed 
+                        -- command line, 
+                            ---if genesis/kkit model is loaded then layout position is taken from the file
+                            --- else, auto-coordinates is used for layout position and passed
+
     """
     return mooseWriteSBML( modelpath, filepath, sceneitems )
 
+def mooseWriteKkit(modelpath,filepath):
+    """Write module under modelpath to a file in Kkit format.
 
+    keyword arguments:
+
+    modelath -- model path in moose 
+    filepath -- Path of output file.
+    """
+    return mooseWiteKkit(modelpath,filepath)
+
+def moosedeleteChemSolver(modelpath):
+    """ deletes solver on all the compartment and its children.
+        This is neccesary while created a new moose object on a pre-existing modelpath,\n
+        this is to be followed by mooseaddChemSolver for simulation else default is Exponential Euler (ee)
+    """
+    return moosedeleteChemSolver(modelpath)
+def mooseaddChemSolver(modelpath,solver):
+    """ Add solver on chemical compartment and its children for calculation
+
+    keyword arguments:
+    
+    modelpath -- model path that is loaded into moose
+    solver -- "Exponential Euler" (ee) (default), 
+              "Gillespie"         ("gssa")
+              "Runge Kutta"       ("gsl")
+
+    """
+    return mooseaddChemSolver(modelpath,solver)
 ################################################################
 # Wrappers for global functions
 ################################################################
