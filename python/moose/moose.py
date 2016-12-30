@@ -64,11 +64,11 @@ def mooseReadSBML( filepath, loadpath, solver = 'ee' ):
 
 
 def mooseWriteSBML( modelpath, filenpath, sceneitems = { } ):
-    """Write module under modelpath to a file in SBML format.
+    """Writes loaded model under modelpath to a file in SBML format.
 
     keyword arguments:
 
-    modelath -- model path in moose e.g /model/mymodel
+    modelpath -- model path in moose e.g /model/mymodel
     filepath -- Path of output file.
     sceneitems -- dictlist (UserWarning: user need not worry about this)
                     layout position is saved in Annotation field of all the moose Object (pool,Reaction,enzyme)
@@ -82,11 +82,11 @@ def mooseWriteSBML( modelpath, filenpath, sceneitems = { } ):
     return mooseWriteSBML( modelpath, filepath, sceneitems )
 
 def mooseWriteKkit(modelpath,filepath):
-    """Write module under modelpath to a file in Kkit format.
+    """Writes  loded model under modelpath to a file in Kkit format.
 
     keyword arguments:
 
-    modelath -- model path in moose 
+    modelpath -- model path in moose 
     filepath -- Path of output file.
     """
     return mooseWiteKkit(modelpath,filepath)
@@ -94,7 +94,8 @@ def mooseWriteKkit(modelpath,filepath):
 def moosedeleteChemSolver(modelpath):
     """ deletes solver on all the compartment and its children.
         This is neccesary while created a new moose object on a pre-existing modelpath,\n
-        this is to be followed by mooseaddChemSolver for simulation else default is Exponential Euler (ee)
+        this should be followed by mooseaddChemSolver for add solvers on to compartment to simulate else 
+        default is Exponential Euler (ee)
     """
     return moosedeleteChemSolver(modelpath)
 def mooseaddChemSolver(modelpath,solver):
