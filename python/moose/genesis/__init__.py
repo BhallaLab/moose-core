@@ -1,1 +1,1 @@
-from ._main import write
+from  .writeKkit import mooseWriteKkit
