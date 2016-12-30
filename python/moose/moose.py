@@ -50,11 +50,11 @@ known_types = ['void',
 def mooseReadSBML( filepath, loadpath, solver = 'ee' ):
     """Load SBML model.
 
-    keyword arguments:
+    keyword arguments: \n
 
-    filepath -- filepath to be loaded
-    loadpath -- Root path for this model e.g. /model/mymodel 
-    solver   -- Solver to use (default 'ee' )
+    filepath -- filepath to be loaded \n
+    loadpath -- Root path for this model e.g. /model/mymodel \n
+    solver   -- Solver to use (default 'ee' ) \n
 
     """
     if not os.path.isfile( filepath ):
@@ -66,16 +66,16 @@ def mooseReadSBML( filepath, loadpath, solver = 'ee' ):
 def mooseWriteSBML( modelpath, filenpath, sceneitems = { } ):
     """Writes loaded model under modelpath to a file in SBML format.
 
-    keyword arguments:
+    keyword arguments:\n
 
-    modelpath -- model path in moose e.g /model/mymodel
-    filepath -- Path of output file.
-    sceneitems -- dictlist (UserWarning: user need not worry about this)
-                    layout position is saved in Annotation field of all the moose Object (pool,Reaction,enzyme)
-                    If this function is called from 
-                        -- GUI, the layout position of moose object is passed 
-                        -- command line, 
-                            ---if genesis/kkit model is loaded then layout position is taken from the file
+    modelpath -- model path in moose e.g /model/mymodel \n
+    filepath -- Path of output file. \n
+    sceneitems -- dictlist (UserWarning: user need not worry about this) \n
+                    layout position is saved in Annotation field of all the moose Object (pool,Reaction,enzyme)\n
+                    If this function is called from \n
+                        -- GUI, the layout position of moose object is passed \n
+                        -- command line, \n
+                            ---if genesis/kkit model is loaded then layout position is taken from the file \n
                             --- else, auto-coordinates is used for layout position and passed
 
     """
@@ -84,9 +84,9 @@ def mooseWriteSBML( modelpath, filenpath, sceneitems = { } ):
 def mooseWriteKkit(modelpath,filepath):
     """Writes  loded model under modelpath to a file in Kkit format.
 
-    keyword arguments:
+    keyword arguments:\n
 
-    modelpath -- model path in moose 
+    modelpath -- model path in moose \n
     filepath -- Path of output file.
     """
     return mooseWiteKkit(modelpath,filepath)
@@ -101,11 +101,11 @@ def moosedeleteChemSolver(modelpath):
 def mooseaddChemSolver(modelpath,solver):
     """ Add solver on chemical compartment and its children for calculation
 
-    keyword arguments:
+    keyword arguments:\n
     
-    modelpath -- model path that is loaded into moose
-    solver -- "Exponential Euler" (ee) (default), 
-              "Gillespie"         ("gssa")
+    modelpath -- model path that is loaded into moose \n
+    solver -- "Exponential Euler" (ee) (default), \n
+              "Gillespie"         ("gssa"), \n
               "Runge Kutta"       ("gsl")
 
     """
