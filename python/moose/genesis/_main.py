@@ -16,7 +16,6 @@ import numpy as np
 import re
 from collections import Counter
 import networkx as nx
-from PyQt4.QtGui import QColor
 import matplotlib 
 
 GENESIS_COLOR_SEQUENCE = ((248, 0, 255), (240, 0, 255), (232, 0, 255), (224, 0, 255), (216, 0, 255), (208, 0, 255),
@@ -276,6 +275,9 @@ def autoCoordinates(meshEntry,srcdesConnection):
                     G.add_edge(element(items[0]).path,inn.path)
     
     position = nx.graphviz_layout(G, prog = 'dot')
+    if int( nx.__version__.split( '.' )[-1] ) >= 11:
+        prog = nx.spring_layout( G )
+
     #agraph = nx.to_agraph(G)
     #agraph.draw("writetogenesis.png", format = 'png', prog = 'dot')
     sceneitems = {}
