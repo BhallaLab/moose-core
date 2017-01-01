@@ -26,6 +26,12 @@ matrix:
             - clang
         os:
             - osx
+    include:
+        - os : linux
+          dist : trust 
+          sudo : required 
+        - os : osx
+          osx_image : xcode8.1
 
 before_script:
     - sudo apt-get install -qq libxml2-dev libbz2-dev
@@ -37,9 +43,12 @@ before_script:
     - sudo apt-get install -qq libgsl0-dev
     - sudo apt-get install -qq python-pip python3-pip
     - sudo apt-get install -qq libgraphviz-dev
-    #- sudo pip install python-libsbml
-    #- sudo pip3 install python-libsbml
-    #- sudo pip3 install pygraphviz
+    - echo "OsX related"
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cmake ; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gsl hdf ; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install libsbml ; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install homebrew/python/numpy ; fi
 
 install:
     - echo "nothing to do here"
