@@ -11,7 +11,6 @@ __status__           = "Development"
 
 import sys
 import random
-#from moose import wildcardFind, element, loadModel, ChemCompt, exists, Annotator, Pool, ZombiePool,PoolBase,CplxEnzBase,Function,ZombieFunction
 import moose
 import numpy as np
 import re
@@ -276,7 +275,7 @@ def autoCoordinates(meshEntry,srcdesConnection):
     
     position = nx.graphviz_layout(G, prog = 'dot')
     if int( nx.__version__.split( '.' )[-1] ) >= 11:
-        prog = nx.spring_layout( G )
+        position = nx.spring_layout( G )
 
     #agraph = nx.to_agraph(G)
     #agraph.draw("writetogenesis.png", format = 'png', prog = 'dot')
