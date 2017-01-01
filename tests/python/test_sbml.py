@@ -22,7 +22,7 @@ modeldir = os.path.dirname( os.path.realpath( __file__ ) )
 
 def main():
     modelname = os.path.join(modeldir, './chem_models/00001-sbml-l3v1.xml' )
-    model = moose.readSBML( modelname, '/sbml' )
+    model = moose.mooseReadSBML( modelname, '/sbml' )
     print( model )
     c = moose.Clock('/clock')
     moose.reinit()
