@@ -21,8 +21,8 @@ import __main__ as main
 
 sbmlSupport_, genesisSupport_ = True, True
 try:
-    from .SBML.readSBML import mooseReadSBML 
-    from .SBML.writeSBML import mooseWriteSBML 
+    import SBML.readSBML
+    import SBML.writeSBML 
 except Exception as e:
     print( 'MOOSE could not load SBML support' )
     print( '\tError was %s' % e )
@@ -32,7 +32,7 @@ try:
     from .genesis.writeKkit import mooseWriteKkit
 except Exception as e:
     print( 'MOOSE could not load GENESIS support' )
-    print( '\Error was %s' % e )
+    print( '\tError was %s' % e )
     genesisSupport_ = False
 
 from add_Delete_ChemicalSolver import moosedeleteChemSolver,mooseaddChemSolver
@@ -78,7 +78,7 @@ def mooseReadSBML( filepath, loadpath, solver = 'ee' ):
     if not os.path.isfile( filepath ):
         raise UserWarning( 'File %s not found' % filepath )
 
-    mooseReadSBML( filepath, loadpath, solver )
+    return SBML.readSBML.mooseReadSBML( filepath, loadpath, solver )
 
 
 def mooseWriteSBML( modelpath, filenpath, sceneitems = { } ):
@@ -101,9 +101,9 @@ def mooseWriteSBML( modelpath, filenpath, sceneitems = { } ):
     global sbmlSupport_ 
     if not sbmlSupport_:
         print( 'SBML support was not loaded' )
-        return  None
+        return None
 
-    return mooseWriteSBML( modelpath, filepath, sceneitems )
+    return SBML.writeSBML.mooseWriteSBML( modelpath, filepath, sceneitems )
 
 def mooseWriteKkit(modelpath,filepath):
     """Writes  loded model under modelpath to a file in Kkit format.
