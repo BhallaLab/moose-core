@@ -18,9 +18,23 @@ from collections import defaultdict
 from . import _moose
 from ._moose import *
 import __main__ as main
-from .SBML.readSBML import mooseReadSBML 
-from .SBML.writeSBML import mooseWriteSBML 
-from .genesis.writeKkit import mooseWriteKkit
+
+sbmlSupport_, genesisSupport_ = True, True
+try:
+    from .SBML.readSBML import mooseReadSBML 
+    from .SBML.writeSBML import mooseWriteSBML 
+except Exception as e:
+    print( 'MOOSE could not load SBML support' )
+    print( '\tError was %s' % e )
+    sbmlSupport_ = False
+
+try:
+    from .genesis.writeKkit import mooseWriteKkit
+except Exception as e:
+    print( 'MOOSE could not load GENESIS support' )
+    print( '\Error was %s' % e )
+    genesisSupport_ = False
+
 from add_Delete_ChemicalSolver import moosedeleteChemSolver,mooseaddChemSolver
 
 sequence_types = ['vector<double>',
@@ -57,6 +71,10 @@ def mooseReadSBML( filepath, loadpath, solver = 'ee' ):
     solver   -- Solver to use (default 'ee' ) \n
 
     """
+    global sbmlSupport_ 
+    if not sbmlSupport_:
+        print( 'SBML support was not loaded' )
+        return None
     if not os.path.isfile( filepath ):
         raise UserWarning( 'File %s not found' % filepath )
 
@@ -79,6 +97,12 @@ def mooseWriteSBML( modelpath, filenpath, sceneitems = { } ):
                             --- else, auto-coordinates is used for layout position and passed
 
     """
+    
+    global sbmlSupport_ 
+    if not sbmlSupport_:
+        print( 'SBML support was not loaded' )
+        return  None
+
     return mooseWriteSBML( modelpath, filepath, sceneitems )
 
 def mooseWriteKkit(modelpath,filepath):
@@ -89,6 +113,11 @@ def mooseWriteKkit(modelpath,filepath):
     modelpath -- model path in moose \n
     filepath -- Path of output file.
     """
+    global genesisSupport_ 
+    if not genesisSupport_:
+        print( 'GENESIS(kkit) support was not loaded' )
+        return None 
+
     return mooseWiteKkit(modelpath,filepath)
 
 def moosedeleteChemSolver(modelpath):
