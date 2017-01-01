@@ -24,18 +24,16 @@ try:
     import SBML.readSBML
     import SBML.writeSBML 
 except Exception as e:
-    print( 'MOOSE could not load SBML support' )
-    print( '\tError was %s' % e )
+    print( 'MOOSE could not load SBML support due to %s' % e )
     sbmlSupport_ = False
 
 try:
     from .genesis.writeKkit import mooseWriteKkit
 except Exception as e:
-    print( 'MOOSE could not load GENESIS support' )
-    print( '\tError was %s' % e )
+    print( 'MOOSE could not load GENESIS support due to %s' % e )
     genesisSupport_ = False
 
-from add_Delete_ChemicalSolver import moosedeleteChemSolver,mooseaddChemSolver
+from .add_Delete_ChemicalSolver import moosedeleteChemSolver,mooseaddChemSolver
 
 sequence_types = ['vector<double>',
                   'vector<int>',
