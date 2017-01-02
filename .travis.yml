@@ -9,8 +9,6 @@ notifications:
     email:
         recipients:
             - dilawar.s.rajput@gmail.com
-            - bhalla@ncbs.res.in
-            - hrani@ncbs.res.in
         on_success: change
         on_failure: always
 
@@ -30,8 +28,8 @@ matrix:
 
 before_script : 
     - echo "OSX related"
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]] then ./scripts/travis_prepare_osx.sh fi
-    - if [[ "$TRAVIS_OS_NAME" == "linux" ]] then ./scripts/travis_prepare_linux.sh fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./scripts/travis_prepare_osx.sh fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./scripts/travis_prepare_linux.sh fi
 
 install:
     - echo "nothing to do here"
