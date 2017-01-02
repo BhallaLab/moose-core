@@ -33,24 +33,28 @@ PYTHON3="/usr/bin/python3"
     make 
     ## CMAKE based flow
     mkdir -p _GSL_BUILD && cd _GSL_BUILD && \
-        cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=$PYTHON2 ..
+        cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
     make && ctest --output-on-failure
     cd .. # Now with boost.
     mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && \
-        cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=$PYTHON2 ..
+        cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
     make && ctest --output-on-failure
     cd .. 
 
     # This is only applicable on linux build.
     echo "Python3 support. Removed python2-networkx and install python3" 
-    sudo apt-get remove -qq python-networkx 
-    sudo apt-get install -qq python3-networkx
-    mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && \
-        cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=$(PYTHON3) ..
-    make && ctest --output-on-failure
-    cd .. # Now with BOOST and python3
-    mkdir -p _BOOST_BUILD2 && cd _BOOST_BUILD2 && \
-        cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=$(PYTHON3) ..
-    make && ctest --output-on-failure
-    cd .. && echo "All done"
+    if type $PYTHON3 -c 'import os' > /dev/null; then 
+        sudo apt-get remove -qq python-networkx 
+        sudo apt-get install -qq python3-networkx
+        mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && \
+            cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
+        make && ctest --output-on-failure
+        cd .. # Now with BOOST and python3
+        mkdir -p _BOOST_BUILD2 && cd _BOOST_BUILD2 && \
+            cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
+        make && ctest --output-on-failure
+        cd .. && echo "All done"
+    else
+        echo "Python3 is not found. Build disabled"
+    fi
 )
