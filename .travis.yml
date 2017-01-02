@@ -28,34 +28,10 @@ matrix:
         - os : osx
           osx_image : xcode8.1
 
-before_script:
+before_script : 
     - echo "OSX related"
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-          brew update;
-          brew outdated cmake || brew install cmake;
-          brew outdated gsl || brew install gsl;
-          brew outdated hdf5 || brew install homebrew/science/hdf5;
-          brew outdated libsbml || brew install homebrew/science/libsbml;
-          brew outdated python || brew install python;
-          brew outdated numpy || brew install homebrew/python/numpy;
-          brew link --overwrite numpy || echo "Failed to link numpy";
-          # Numpy caveats
-          mkdir -p $HOME/Library/Python/2.7/lib/python/site-packages;
-          echo 'import sys; sys.path.insert(1, "/usr/local/lib/python2.7/site-packages")' \
-            >> $HOME/Library/Python/2.7/lib/python/site-packages/homebrew.pth;
-         # Python 3. 
-          brew outdated python3 || brew install python3;
-      else
-          sudo apt-get install -qq libxml2-dev libbz2-dev;
-          sudo apt-get install -qq libhdf5-serial-dev;
-          sudo apt-get install -qq make cmake;
-          sudo apt-get install -qq python-numpy python-matplotlib python-networkx;
-          sudo apt-get install -qq python3-numpy python3-matplotlib python3-dev;
-          sudo apt-get install -qq libboost-all-dev;
-          sudo apt-get install -qq libgsl0-dev;
-          sudo apt-get install -qq python-pip python3-pip;
-          sudo apt-get install -qq libgraphviz-dev;
-      fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]] then ./scripts/travis_prepare_osx.sh fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]] then ./scripts/travis_prepare_linux.sh fi
 
 install:
     - echo "nothing to do here"
@@ -64,20 +40,5 @@ script:
     - # checking if any python3 incompatible file is in the source tree.
     - python2 -m compileall -q .
     - python3 -m compileall -q .
-    - # Then run the old make scripts
-    - make 
-    - ## CMAKE based flow
-    - mkdir -p _GSL_BUILD && cd _GSL_BUILD && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=`which python` ..
-    - make && ctest --output-on-failure
-    - cd .. # Now with boost.
-    - mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=`which python` ..
-    - make && ctest --output-on-failure
-    - cd .. 
-    - echo "Python3 support. Removed python2-networkx and install python3"
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then echo "nothing"; else sudo apt-get remove -qq python-networkx fi;
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then echo "nothing"; else sudo apt-get install -qq python3-networkx fi;
-    - mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=`which python3` ..
-    - make && ctest --output-on-failure
-    - cd .. # Now with BOOST and python3
-    - mkdir -p _BOOST_BUILD2 && cd _BOOST_BUILD2 && cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=`which python3` ..
-    - make && ctest --output-on-failure
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]] then ./scripts/travis_build_osx.sh fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]] then ./scripts/travis_build_linux.sh fi
