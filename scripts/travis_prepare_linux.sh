@@ -20,12 +20,12 @@
 set -o nounset                              # Treat unset variables as an error
 set -e
 
-sudo apt-get install -qq libxml2-dev libbz2-dev;
-sudo apt-get install -qq libhdf5-serial-dev;
-sudo apt-get install -qq make cmake;
-sudo apt-get install -qq python-numpy python-matplotlib python-networkx;
-sudo apt-get install -qq python3-numpy python3-matplotlib python3-dev;
-sudo apt-get install -qq libboost-all-dev;
-sudo apt-get install -qq libgsl0-dev;
-sudo apt-get install -qq python-pip python3-pip;
-sudo apt-get install -qq libgraphviz-dev;
+apt-get install -qq libxml2-dev libbz2-dev;
+apt-get install -qq libhdf5-serial-dev;
+apt-get install -qq make cmake;
+apt-get install -qq python-numpy python-matplotlib python-networkx;
+apt-get install -qq python3-numpy python3-matplotlib python3-dev;
+apt-get install -qq libboost-all-dev;
+apt-get install -qq libgsl0-dev;
+apt-get install -qq python-pip python3-pip;
+apt-get install -qq libgraphviz-dev;
