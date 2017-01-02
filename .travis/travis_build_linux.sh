@@ -30,6 +30,9 @@ PYTHON3="/usr/bin/python3"
 
 (
     # Old makefile based flow.
+    python2 -m compileall -q .
+    if type python3 -c 'import sys' > /dev/null; then python3 -m compileall -q . ; fi
+    # Traditional make.
     make 
     ## CMAKE based flow
     mkdir -p _GSL_BUILD && cd _GSL_BUILD && \
