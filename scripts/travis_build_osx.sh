@@ -21,9 +21,6 @@ set -o nounset                              # Treat unset variables as an error
 set -e
 
 (
-    cd ..
-    make 
-    ## CMAKE based flow
     mkdir -p _GSL_BUILD && cd _GSL_BUILD && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=`which python` ..
     make && ctest --output-on-failure
     cd .. # Now with boost.

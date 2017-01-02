@@ -21,7 +21,7 @@ set -o nounset                              # Treat unset variables as an error
 set -e
 
 (
-    cd ..
+    # Old makefile based flow.
     make 
     ## CMAKE based flow
     mkdir -p _GSL_BUILD && cd _GSL_BUILD && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=`which python` ..
