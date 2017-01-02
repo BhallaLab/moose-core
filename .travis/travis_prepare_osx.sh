@@ -31,7 +31,4 @@ brew outdated libsbml || brew install homebrew/science/libsbml
 mkdir -p $HOME/Library/Python/2.7/lib/python/site-packages
 echo 'import sys; sys.path.insert(1, "/usr/local/lib/python2.7/site-packages")' >> $HOME/Library/Python/2.7/lib/python/site-packages/homebrew.pth
 pip install matplotlib
-# Python 3. 
-brew install python3
-pip3 install matplotlib
 
