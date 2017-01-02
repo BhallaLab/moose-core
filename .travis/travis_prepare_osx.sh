@@ -18,7 +18,7 @@
 #===============================================================================
 
 set -o nounset                              # Treat unset variables as an error
-set -e
+set +e
 brew update;
 brew outdated cmake || brew install cmake;
 brew outdated gsl || brew install gsl;
