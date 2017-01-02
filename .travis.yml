@@ -3,7 +3,7 @@ compiler:
     - gcc
     - clang
 os:
-    - linux
+    #- linux
     - osx
 notifications:
     email:
@@ -29,12 +29,14 @@ matrix:
           osx_image : xcode8.1
 
 before_script:
-    - echo "OsX related"
+    - echo "OSX related"
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
           brew update;
           brew install cmake;
-          brew install gsl hdf;
+          brew install gsl hdf5;
           brew install libsbml;
+          brew install python3;
+          brew install boost;
           brew install homebrew/python/numpy;
       else
           sudo apt-get install -qq libxml2-dev libbz2-dev;
@@ -58,19 +60,17 @@ script:
     - # Then run the old make scripts
     - make 
     - ## CMAKE based flow
-    - mkdir -p _GSL_BUILD && cd _GSL_BUILD && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python ..
+    - mkdir -p _GSL_BUILD && cd _GSL_BUILD && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=`which python` ..
     - make && ctest --output-on-failure
     - cd .. # Now with boost.
-    - mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python ..
+    - mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=`which python` ..
     - make && ctest --output-on-failure
     - cd .. 
     - echo "Python3 support. Removed python2-networkx and install python3"
-    - sudo apt-get remove -qq python-networkx
-    - sudo apt-get install -qq python3-networkx
-    - mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 ..
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then echo "nothing"; else sudo apt-get remove -qq python-networkx fi;
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then echo "nothing"; else sudo apt-get install -qq python3-networkx fi;
+    - mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=`which python3` ..
     - make && ctest --output-on-failure
     - cd .. # Now with BOOST and python3
-    - mkdir -p _BOOST_BUILD2 && cd _BOOST_BUILD2 && cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=/usr/bin/python3 ..
+    - mkdir -p _BOOST_BUILD2 && cd _BOOST_BUILD2 && cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=`which python3` ..
     - make && ctest --output-on-failure
-    - cd ..
-    - echo "All done. Phew"
