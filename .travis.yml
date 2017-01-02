@@ -3,8 +3,8 @@ compiler:
     - gcc
     - clang
 os:
-    #- linux
-    - osx
+    - linux
+    #- osx
 notifications:
     email:
         recipients:
@@ -40,5 +40,5 @@ script:
     - # checking if any python3 incompatible file is in the source tree.
     - python2 -m compileall -q .
     - python3 -m compileall -q .
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]] then ./scripts/travis_build_osx.sh fi
-    - if [[ "$TRAVIS_OS_NAME" == "linux" ]] then ./scripts/travis_build_linux.sh fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./scripts/travis_build_osx.sh fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./scripts/travis_build_linux.sh fi
