@@ -28,8 +28,8 @@ matrix:
 
 before_script : 
     - echo "OSX related"
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./scripts/travis_prepare_osx.sh fi
-    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./scripts/travis_prepare_linux.sh fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./scripts/travis_prepare_osx.sh; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./scripts/travis_prepare_linux.sh; fi
 
 install:
     - echo "nothing to do here"
@@ -38,5 +38,5 @@ script:
     - # checking if any python3 incompatible file is in the source tree.
     - python2 -m compileall -q .
     - python3 -m compileall -q .
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./scripts/travis_build_osx.sh fi
-    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./scripts/travis_build_linux.sh fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./scripts/travis_build_osx.sh; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./scripts/travis_build_linux.sh; fi
