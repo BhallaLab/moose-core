@@ -33,11 +33,11 @@ before_script:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
           brew update;
           brew install cmake;
-          brew install gsl hdf5;
-          brew install libsbml;
+          brew install homebrew/science/gsl homebrew/science/hdf5;
+          brew install homebrew/science/libsbml;
+          brew install homebrew/python/numpy;
           brew install python3;
           brew install boost;
-          brew install homebrew/python/numpy;
       else
           sudo apt-get install -qq libxml2-dev libbz2-dev;
           sudo apt-get install -qq libhdf5-serial-dev;
