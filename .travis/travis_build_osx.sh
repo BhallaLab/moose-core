@@ -21,9 +21,6 @@ set -o nounset                              # Treat unset variables as an error
 set -e
 
 (
-    cd ..
-    make 
-    ## CMAKE based flow
     mkdir -p _GSL_BUILD && cd _GSL_BUILD && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=`which python` ..
     make && ctest --output-on-failure
     cd .. # Now with boost.
@@ -31,8 +28,6 @@ set -e
     make && ctest --output-on-failure
     cd .. 
     echo "Python3 support. Removed python2-networkx and install python3"
-    sudo apt-get remove -qq python-networkx 
-    sudo apt-get install -qq python3-networkx
     mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && cmake -DDEBUG=ON -DPYTHON_EXECUTABLE=`which python3` ..
     make && ctest --output-on-failure
     cd .. # Now with BOOST and python3
