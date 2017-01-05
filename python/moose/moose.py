@@ -18,8 +18,22 @@ from collections import defaultdict
 from . import _moose
 from ._moose import *
 import __main__ as main
-from .SBML.readSBML import mooseReadSBML 
-from .SBML.writeSBML import mooseWriteSBML 
+
+sbmlSupport_, genesisSupport_ = True, True
+try:
+    import SBML.readSBML
+    import SBML.writeSBML 
+except Exception as e:
+    print( 'MOOSE could not load SBML support due to %s' % e )
+    sbmlSupport_ = False
+
+try:
+    from .genesis.writeKkit import mooseWriteKkit
+except Exception as e:
+    print( 'MOOSE could not load GENESIS support due to %s' % e )
+    genesisSupport_ = False
+
+from .add_Delete_ChemicalSolver import moosedeleteChemSolver,mooseaddChemSolver
 
 sequence_types = ['vector<double>',
                   'vector<int>',
@@ -45,34 +59,84 @@ known_types = ['void',
                'melement'] + sequence_types
 
 # SBML related functions.
-def readSBML( filepath, loadpath, solver = 'ee' ):
+def mooseReadSBML( filepath, loadpath, solver = 'ee' ):
     """Load SBML model.
 
-    keyword arguments:
+    keyword arguments: \n
 
-    filepath -- model path.
-    loadpath -- Root path for this model e.g. /model/sbml/mymodel 
-    solver   -- Solver to use (default 'ee' )
+    filepath -- filepath to be loaded \n
+    loadpath -- Root path for this model e.g. /model/mymodel \n
+    solver   -- Solver to use (default 'ee' ) \n
 
     """
+    global sbmlSupport_ 
+    if not sbmlSupport_:
+        print( 'SBML support was not loaded' )
+        return None
     if not os.path.isfile( filepath ):
         raise UserWarning( 'File %s not found' % filepath )
 
-    mooseReadSBML( filepath, loadpath, solver )
+    return SBML.readSBML.mooseReadSBML( filepath, loadpath, solver )
 
 
-def writeSBML( modelpath, filenpath, sceneitems = { } ):
-    """Write module under modelpath to a file in SBML format.
+def mooseWriteSBML( modelpath, filenpath, sceneitems = { } ):
+    """Writes loaded model under modelpath to a file in SBML format.
 
-    keyword arguments:
+    keyword arguments:\n
 
-    modelath -- model path in moose e.g /model/sbml/mymodel
-    filepath -- Path of output file.
-    sceneitems -- dict (options)
+    modelpath -- model path in moose e.g /model/mymodel \n
+    filepath -- Path of output file. \n
+    sceneitems -- dictlist (UserWarning: user need not worry about this) \n
+                    layout position is saved in Annotation field of all the moose Object (pool,Reaction,enzyme)\n
+                    If this function is called from \n
+                        -- GUI, the layout position of moose object is passed \n
+                        -- command line, \n
+                            ---if genesis/kkit model is loaded then layout position is taken from the file \n
+                            --- else, auto-coordinates is used for layout position and passed
+
     """
-    return mooseWriteSBML( modelpath, filepath, sceneitems )
+    
+    global sbmlSupport_ 
+    if not sbmlSupport_:
+        print( 'SBML support was not loaded' )
+        return None
 
+    return SBML.writeSBML.mooseWriteSBML( modelpath, filepath, sceneitems )
 
+def mooseWriteKkit(modelpath,filepath):
+    """Writes  loded model under modelpath to a file in Kkit format.
+
+    keyword arguments:\n
+
+    modelpath -- model path in moose \n
+    filepath -- Path of output file.
+    """
+    global genesisSupport_ 
+    if not genesisSupport_:
+        print( 'GENESIS(kkit) support was not loaded' )
+        return None 
+
+    return mooseWiteKkit(modelpath,filepath)
+
+def moosedeleteChemSolver(modelpath):
+    """ deletes solver on all the compartment and its children.
+        This is neccesary while created a new moose object on a pre-existing modelpath,\n
+        this should be followed by mooseaddChemSolver for add solvers on to compartment to simulate else 
+        default is Exponential Euler (ee)
+    """
+    return moosedeleteChemSolver(modelpath)
+def mooseaddChemSolver(modelpath,solver):
+    """ Add solver on chemical compartment and its children for calculation
+
+    keyword arguments:\n
+    
+    modelpath -- model path that is loaded into moose \n
+    solver -- "Exponential Euler" (ee) (default), \n
+              "Gillespie"         ("gssa"), \n
+              "Runge Kutta"       ("gsl")
+
+    """
+    return mooseaddChemSolver(modelpath,solver)
 ################################################################
 # Wrappers for global functions
 ################################################################

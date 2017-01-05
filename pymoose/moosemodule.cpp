@@ -1838,7 +1838,7 @@ PyObject * moose_loadModel(PyObject * dummy, PyObject * args)
     PyObject * ret = reinterpret_cast<PyObject*>(model);
     return ret;
 }
-
+/*
 PyDoc_STRVAR(moose_saveModel_documentation,
              "saveModel(source, filename) -> None\n"
              "\n"
@@ -1895,7 +1895,7 @@ PyObject * moose_saveModel(PyObject * dummy, PyObject * args)
     SHELLPTR->doSaveModel(model, filename);
     Py_RETURN_NONE;
 }
-
+*/
 PyObject * moose_setCwe(PyObject * dummy, PyObject * args)
 {
     PyObject * element = NULL;
@@ -3032,7 +3032,7 @@ static PyMethodDef MooseMethods[] =
     {"isRunning", (PyCFunction)moose_isRunning, METH_VARARGS, "True if the simulation is currently running."},
     {"exists", (PyCFunction)moose_exists, METH_VARARGS, "True if there is an object with specified path."},
     {"loadModel", (PyCFunction)moose_loadModel, METH_VARARGS, moose_loadModel_documentation},
-    {"saveModel", (PyCFunction)moose_saveModel, METH_VARARGS, moose_saveModel_documentation},
+    //{"saveModel", (PyCFunction)moose_saveModel, METH_VARARGS, moose_saveModel_documentation},
     {"connect", (PyCFunction)moose_connect, METH_VARARGS, moose_connect_documentation},
     {"getCwe", (PyCFunction)moose_getCwe, METH_VARARGS, "Get the current working element. 'pwe' is an alias of this function."},
     {"setCwe", (PyCFunction)moose_setCwe, METH_VARARGS, "Set the current working element. 'ce' is an alias of this function"},

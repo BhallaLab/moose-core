@@ -219,8 +219,15 @@ if(HDF5_FOUND)
             )
         set(HDF5_LIBRARIES ${HDF5_CXX_LIBRARIES} ${HDF5_HL_LIBRARIES})
     endif()
+    
+    # Make sure, HDF5_HL_LIBRARIES are set. The COMPONENTS in find_package may
+    # or may not work. See BhallaLab/moose-core#163. 
+    if(NOT HDF5_HL_LIBRARIES)
+        set(HDF5_HL_LIBRARIES ${HDF5_HL_LIBRARIES})
+    endif(NOT HDF5_HL_LIBRARIES)
+    list(APPEND HDF5_LIBRARIES ${HDF5_HL_LIBRARIES})
 
-    message(STATUS "MOOSE will following HDF5 ${HDF5_LIBRARIES}" )
+    message(STATUS "MOOSE will use following HDF5 ${HDF5_LIBRARIES}" )
     foreach(HDF5_LIB ${HDF5_LIBRARIES})
         if(HDF5_LIB)
             get_filename_component( HDF5_LIB_EXT ${HDF5_LIB} EXT )

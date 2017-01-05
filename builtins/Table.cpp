@@ -74,12 +74,16 @@ const Cinfo* Table::initCinfo()
         , &Table::getFormat
     );
 
+	/*
+	 * Upi Jan 2017: No idea why this is here. Messes up the default name_
+	 * field.
     static ValueFinfo< Table, string > name(
         "name"
         , "Name of the table."
         , &Table::setName
         , &Table::getName
     );
+	*/
 
     //////////////////////////////////////////////////////////////
     // MsgDest Definitions
@@ -126,7 +130,7 @@ const Cinfo* Table::initCinfo()
     {
         &threshold,		// Value
         &format,                // Value
-        &name,                  // Value
+        // &name,                  // Value
         &outfile,               // Value 
         &useStreamer,           // Value
         handleInput(),		// DestFinfo
@@ -348,6 +352,7 @@ string Table::getFormat( void ) const
 }
 
 /*  User defined name  */
+/*
 string Table::getName( void ) const
 {
     return tableName_;
@@ -357,6 +362,7 @@ void Table::setName( const string name )
 {
     tableName_ = name ;
 }
+*/
 
 /* Enable/disable streamer support. */
 void Table::setUseStreamer( bool useStreamer )
