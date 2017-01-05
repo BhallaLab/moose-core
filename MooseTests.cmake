@@ -115,3 +115,13 @@ ADD_TEST( NAME pymoose-test-streaming_in_tables
 set_tests_properties(pymoose-test-streaming_in_tables
     PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
     )
+
+# Test kkit support.
+ADD_TEST( NAME pymoose-test-kkit 
+    COMMAND ${TEST_COMMAND} 
+    ${PROJECT_SOURCE_DIR}/tests/python/test_kkit.py
+    )
+set_tests_properties(pymoose-test-kkit
+    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+    )
+

@@ -292,8 +292,8 @@ void Streamer::addTable( Id table )
 
     // NOTE: If user can make sure that names are unique in table, using name is
     // better than using the full path.
-    if( table.element()->getName().size() > 0 )
-        columns_.push_back( table.element()->getName( ) );
+    if( t->getColumnName().size() > 0 )
+        columns_.push_back( t->getColumnName( ) );
     else
         columns_.push_back( moose::moosePathToUserPath( table.path() ) );
 }

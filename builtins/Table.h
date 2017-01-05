@@ -37,6 +37,9 @@ public:
     void setFormat ( const string format );
     string getFormat( ) const;
 
+    void setColumnName( const string colname );
+    string getColumnName( ) const;
+
     void setUseStreamer ( bool status );
     bool getUseStreamer ( void ) const;
 
@@ -81,7 +84,12 @@ private:
     vector<string> columns_;                    /* Store the name of tables */
 
     string tablePath_;
-    // string tableName_;
+
+
+    /**
+     * @brief Column name of this table. Use it when writing data to a datafile.
+     */
+    string tableColumnName_;
 
     /**
      * @brief If stream is set to true, then stream to outfile_. Default value
@@ -105,7 +113,7 @@ private:
     bool outfileIsSet_;
 
     /**
-     * @brief format of data. Currently fixed to csv.
+     * @brief format of data. Default to csv.
      */
     string format_;
 
