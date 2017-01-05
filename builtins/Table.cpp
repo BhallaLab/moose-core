@@ -74,16 +74,14 @@ const Cinfo* Table::initCinfo()
         , &Table::getFormat
     );
 
-	/*
-	 * Upi Jan 2017: No idea why this is here. Messes up the default name_
-	 * field.
-    static ValueFinfo< Table, string > name(
-        "name"
-        , "Name of the table."
-        , &Table::setName
-        , &Table::getName
+    // relevant for Streamer class.  When data is written to a datafile, this is
+    // used to create column name.
+    static ValueFinfo< Table, string > colname(
+        "colname"
+        , "Name of the table written in header of data file."
+        , &Table::setColumnName
+        , &Table::getColumnName
     );
-	*/
 
     //////////////////////////////////////////////////////////////
     // MsgDest Definitions
@@ -130,7 +128,7 @@ const Cinfo* Table::initCinfo()
     {
         &threshold,		// Value
         &format,                // Value
-        // &name,                  // Value
+        &colname,                  // Value
         &outfile,               // Value 
         &useStreamer,           // Value
         handleInput(),		// DestFinfo
@@ -351,18 +349,16 @@ string Table::getFormat( void ) const
     return format_;
 }
 
-/*  User defined name  */
-/*
-string Table::getName( void ) const
+/*  User defined column name for streamer  */
+string Table::getColumnName( void ) const
 {
-    return tableName_;
+    return tableColumnName_;
 }
 
-void Table::setName( const string name )
+void Table::setColumnName( const string colname )
 {
-    tableName_ = name ;
+    tableColumnName_ = name ;
 }
-*/
 
 /* Enable/disable streamer support. */
 void Table::setUseStreamer( bool useStreamer )
