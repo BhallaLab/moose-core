@@ -1,14 +1,12 @@
-import moose
 import matplotlib
-
 # Tests may be run over ssh without -X e.g. on travis.
-
 matplotlib.use( 'Agg' )
+
 import matplotlib.pyplot as plt
 import numpy
 import sys
 import os
-
+import moose
 
 scriptdir = os.path.dirname( os.path.realpath( __file__ ) )
 print( 'Script dir %s' % scriptdir )
