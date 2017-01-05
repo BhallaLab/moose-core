@@ -51,10 +51,9 @@ def main():
             plt.plot( t, x.vector, label=x.name )
 
         vals = x.vector
-        stats = ( vals.min(), vals.max( ), vals.mean(), vals.std( ) )
-        assert stats == (0.0, 0.00040463972935574999, 0.00014440064528623649
-                , 0.00013176896429492781
-                ), stats 
+        stats = [ vals.min(), vals.max( ), vals.mean(), vals.std( ) ]
+        expected = [ 0.0, 0.00040464 , 0.0001444 , 0.00013177 ]
+        assert numpy.allclose(stats, expected, rtol=1e-4) , 'Got %s expected %s' % (stats, expected ) 
         plt.legend()
         plt.savefig( '%s.png' % sys.argv[0] )
         print( 'Wrote results to %s.png' % sys.argv[0] )
