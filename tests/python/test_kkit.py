@@ -4,19 +4,23 @@ import moose
 import pylab
 import numpy
 import sys
+import os
+
+scriptdir = os.path.dirname( os.path.realpath( __file__ ) )
+print( 'Script dir %s' % scriptdir )
 
 def main():
         """ This example illustrates loading, running, and saving a kinetic model 
         defined in kkit format. It uses a default kkit model but you can specify another using the command line ``python filename runtime solver``. We use the gsl solver here. The model already defines a couple of plots and sets the runtime to 20 seconds.
         """
         solver = "gsl"  # Pick any of gsl, gssa, ee..
-        mfile = './genesis/kkit_objects_example.g'
+        mfile = os.path.join( scriptdir, 'genesis/kkit_objects_example.g' )
         runtime = 20.0
         if ( len( sys.argv ) >= 3 ):
             if sys.argv[1][0] == '/':
                 mfile = sys.argv[1]
             else:
-                mfile = '../genesis/' + sys.argv[1]
+                mfile = './genesis/' + sys.argv[1]
                 runtime = float( sys.argv[2] )
         if ( len( sys.argv ) == 4 ):
                 solver = sys.argv[3]
@@ -45,6 +49,7 @@ def main():
             pylab.plot( t, x.vector, label=x.name )
         pylab.legend()
         pylab.savefig( '%s.png' % sys.argv[0] )
+        print( 'Wrote results to %s.png' % sys.argv[0] )
 
 # Run the 'main' if this script is executed standalone.
 if __name__ == '__main__':
