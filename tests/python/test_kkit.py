@@ -54,7 +54,7 @@ def main():
         stats = ( vals.min(), vals.max( ), vals.mean(), vals.std( ) )
         assert stats == (0.0, 0.00040463972935574999, 0.00014440064528623649
                 , 0.00013176896429492781
-                ), 'test failed, %s' % stats 
+                ), stats 
         plt.legend()
         plt.savefig( '%s.png' % sys.argv[0] )
         print( 'Wrote results to %s.png' % sys.argv[0] )

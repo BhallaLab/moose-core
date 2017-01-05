@@ -124,3 +124,4 @@ ADD_TEST( NAME pymoose-test-kkit
 set_tests_properties(pymoose-test-kkit
     PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
     )
+
