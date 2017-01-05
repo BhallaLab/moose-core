@@ -37,8 +37,10 @@ public:
     void setFormat( const string format );
     string getFormat( ) const;
 
+	/*
     void setName( const string name );
     string getName( ) const;
+	*/
 
     void setUseStreamer( bool status );
     bool getUseStreamer( void ) const;
@@ -84,7 +86,7 @@ private:
     vector<string> columns_;                    /* Store the name of tables */
 
     string tablePath_;
-    string tableName_;
+    // string tableName_;
 
     /**
      * @brief If stream is set to true, then stream to outfile_. Default value
