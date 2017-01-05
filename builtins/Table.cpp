@@ -357,7 +357,7 @@ string Table::getColumnName( void ) const
 
 void Table::setColumnName( const string colname )
 {
-    tableColumnName_ = name ;
+    tableColumnName_ = colname ;
 }
 
 /* Enable/disable streamer support. */
