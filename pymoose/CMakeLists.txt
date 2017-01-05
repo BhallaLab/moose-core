@@ -13,15 +13,12 @@ set(PYMOOSE_SRCS
 add_library( _moose MODULE ${PYMOOSE_SRCS} )
 
 set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
-
-find_package( PythonInterp REQUIRED )
-
-#execute_process(COMMAND 
-#    ${PYTHON_EXECUTABLE} "-c 'try: import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])
-#except Exception: pass'"
-#    OUTPUT_VARIABLE PYTHON_SO_EXTENSION
-#    )
-#message( STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
+EXEC_PROGRAM(${PYTHON_EXECUTABLE}
+    ARGS "-c 'try: import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])
+except Exception: pass'"
+    OUTPUT_VARIABLE PYTHON_SO_EXTENSION
+    )
+message( STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
 
 find_package(NumPy REQUIRED)
 include_directories(${NUMPY_INCLUDE_DIRS})
@@ -85,9 +82,11 @@ endif(MACOSX)
 # Make this target dependant on all python files in python folder.
 add_custom_target(copy_python_files ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/python
-    ${CMAKE_BINARY_DIR}/python
-    COMMENT "Copying python files to build directory"
+        ${CMAKE_SOURCE_DIR}/python ${CMAKE_BINARY_DIR}/python
+    COMMAND ${CMAKE_COMMAND} -E copy 
+        ${CMAKE_SOURCE_DIR}/VERSION ${CMAKE_BINARY_DIR}/VERSION 
+    COMMENT "Copying required python files and other files to build directory"
     VERBATIM
     )
+
 add_dependencies(_moose copy_python_files)
