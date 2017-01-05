@@ -76,8 +76,8 @@ const Cinfo* Table::initCinfo()
 
     // relevant for Streamer class.  When data is written to a datafile, this is
     // used to create column name.
-    static ValueFinfo< Table, string > colname(
-        "colname"
+    static ValueFinfo< Table, string > columnName(
+        "columnName"
         , "Name of the table written in header of data file."
         , &Table::setColumnName
         , &Table::getColumnName
@@ -128,7 +128,7 @@ const Cinfo* Table::initCinfo()
     {
         &threshold,		// Value
         &format,                // Value
-        &colname,                  // Value
+        &columnName,            // Value
         &outfile,               // Value 
         &useStreamer,           // Value
         handleInput(),		// DestFinfo
