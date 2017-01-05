@@ -21,10 +21,9 @@ import __main__ as main
 sbmlSupport_, genesisSupport_ = True, True
 try:
     import SBML.readSBML
-    import SBML.writeSBML
+    import SBML.writeSBML 
 except Exception as e:
-    print('MOOSE could not load SBML support')
-    print('\tError was %s' % e)
+    print( 'MOOSE could not load SBML support due to %s' % e )
     sbmlSupport_ = False
 
 try:
@@ -79,7 +78,7 @@ def mooseReadSBML(filepath, loadpath, solver='ee'):
     if not os.path.isfile(filepath):
         raise UserWarning('File %s not found' % filepath)
 
-    return SBML.readSBML.mooseReadSBML(filepath, loadpath, solver)
+    return SBML.readSBML.mooseReadSBML( filepath, loadpath, solver )
 
 
 def mooseWriteSBML(modelpath, filenpath, sceneitems={}):

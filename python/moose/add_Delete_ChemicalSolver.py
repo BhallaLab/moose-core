@@ -2,8 +2,8 @@ from . import _moose as moose
 
 
 def moosedeleteChemSolver(modelRoot):
-    """
-            Delete solvers from Chemical Compartment
+    """Delete solvers from Chemical Compartment
+
     """
     compts = moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]')
     for compt in compts:
@@ -13,7 +13,7 @@ def moosedeleteChemSolver(modelRoot):
             moose.delete(st)
             if moose.exists((st_ksolve).path):
                 moose.delete(st_ksolve)
-                print("Solver is deleted for modelpath ", modelRoot)
+                print("Solver is deleted for modelpath %s " % modelRoot)
 
 
 def mooseaddChemSolver(modelRoot, solver):
@@ -79,4 +79,4 @@ def setCompartmentSolver(modelRoot, solver):
 
     for i in stoichList:
         i.filterXreacs()
-    print(" Solver is added to model path ", modelRoot)
+    print( " Solver is added to model path %s" % modelRoot )
