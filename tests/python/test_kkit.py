@@ -1,10 +1,14 @@
-# test_kkit.py --- 
-
 import moose
-import pylab
+import matplotlib
+
+# Tests may be run over ssh without -X e.g. on travis.
+
+matplotlib.use( 'Agg' )
+import matplotlib.pyplot as plt
 import numpy
 import sys
 import os
+
 
 scriptdir = os.path.dirname( os.path.realpath( __file__ ) )
 print( 'Script dir %s' % scriptdir )
@@ -46,9 +50,15 @@ def main():
         # Display all plots.
         for x in moose.wildcardFind( '/model/#graphs/conc#/#' ):
             t = numpy.arange( 0, x.vector.size, 1 ) * x.dt
-            pylab.plot( t, x.vector, label=x.name )
-        pylab.legend()
-        pylab.savefig( '%s.png' % sys.argv[0] )
+            plt.plot( t, x.vector, label=x.name )
+
+        vals = x.vector
+        stats = ( vals.min(), vals.max( ), vals.mean(), vals.std( ) )
+        assert stats == (0.0, 0.00040463972935574999, 0.00014440064528623649
+                , 0.00013176896429492781
+                ), 'test failed, %s' % stats 
+        plt.legend()
+        plt.savefig( '%s.png' % sys.argv[0] )
         print( 'Wrote results to %s.png' % sys.argv[0] )
 
 # Run the 'main' if this script is executed standalone.
