@@ -27,15 +27,10 @@ if( (NOT _MOOSE_VERSION) AND GIT_EXEC)
         OUTPUT_VARIABLE _MOOSE_VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE
         )
-    message(STATUS "+ Writing ${_MOOSE_VERSION} to ${VERSION_FILE}" )
-    file(WRITE ${VERSION_FILE} ${_MOOSE_VERSION})
-elseif( (NOT _MOOSE_VERSION) AND (NOT GIT_EXEC) )
-    message(STATUS "+ Reading ${VERSION_FILE}" )
-    file(READ ${VERSION_FILE} GIT_VERSION_OUTPUT )
 elseif(_MOOSE_VERSION)
     message(STATUS "+ Using user specified VERSION = ${_MOOSE_VERSION}" )
     file(WRITE ${VERSION_FILE} ${_MOOSE_VERSION})
-else()
+else( )
     message(FATAL_ERROR "Could not determine _MOOSE_VERSION" )
 endif( )
 
