@@ -20,27 +20,27 @@ include(FindPkgConfig)
 set(VERSION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/VERSION)
 find_program(GIT_EXEC "git")
 message( STATUS "Looking for git ${GIT_EXEC}" )
-if( (NOT MOOSE_VERSION) AND GIT_EXEC)
+if( (NOT __VERSION__) AND GIT_EXEC)
     execute_process( 
         COMMAND ${GIT_EXEC} describe --tags --long
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE MOOSE_VERSION
+        OUTPUT_VARIABLE __VERSION__
         OUTPUT_STRIP_TRAILING_WHITESPACE
         )
-    message(STATUS "+ Writing ${MOOSE_VERSION} to ${VERSION_FILE}" )
-    file(WRITE ${VERSION_FILE} ${MOOSE_VERSION})
-elseif( (NOT MOOSE_VERSION) AND (NOT GIT_EXEC) )
+    message(STATUS "+ Writing ${__VERSION__} to ${VERSION_FILE}" )
+    file(WRITE ${VERSION_FILE} ${__VERSION__})
+elseif( (NOT __VERSION__) AND (NOT GIT_EXEC) )
     message(STATUS "+ Reading ${VERSION_FILE}" )
     file(READ ${VERSION_FILE} GIT_VERSION_OUTPUT )
-elseif(MOOSE_VERSION)
-    message(STATUS "+ Using user specified VERSION = ${MOOSE_VERSION}" )
-    file(WRITE ${VERSION_FILE} ${MOOSE_VERSION})
+elseif(__VERSION__)
+    message(STATUS "+ Using user specified VERSION = ${__VERSION__}" )
+    file(WRITE ${VERSION_FILE} ${__VERSION__})
 else()
-    message(FATAL_ERROR "Could not determine MOOSE_VERSION" )
+    message(FATAL_ERROR "Could not determine __VERSION__" )
 endif( )
 
-add_definitions( -DMOOSE_VERSION="${MOOSE_VERSION}")
-message( STATUS "MOOSE Version ${MOOSE_VERSION}" )
+add_definitions( -D__VERSION__="${__VERSION__}")
+message( STATUS "MOOSE Version ${__VERSION__}" )
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
