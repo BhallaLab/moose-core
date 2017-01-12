@@ -337,11 +337,23 @@ def storePlotMsgs( tgraphs,f):
         for graph in tgraphs:
             slash = graph.path.find('graphs')
             if not slash > -1:
-                slash = graph.path.find('graph_0')
+                slash = graph.path.find('graph')
             if slash > -1:
-                conc = graph.path.find('conc')
-                if conc > -1 :
-                    tabPath = graph.path[slash:len(graph.path)]
+                foundConc = True
+                if not ( (graph.path.find('conc1') > -1 ) or
+                            (graph.path.find('conc2') > -1 ) or 
+                            (graph.path.find('conc3') > -1 ) or
+                            (graph.path.find('conc4') > -1) ):
+                    foundConc = False
+
+                #conc = graph.path.find('conc')
+                # if conc > -1 :
+                #     tabPath = graph.path[slash:len(graph.path)]
+                # else:
+                #     slash1 = graph.path.find('/',slash)
+                #     tabPath = "/graphs/conc1" +graph.path[slash1:len(graph.path)]
+                if foundConc == True:
+                    tabPath = "/"+graph.path[slash:len(graph.path)]
                 else:
                     slash1 = graph.path.find('/',slash)
                     tabPath = "/graphs/conc1" +graph.path[slash1:len(graph.path)]
@@ -364,14 +376,21 @@ def writeplot( tgraphs,f ):
         for graphs in tgraphs:
             slash = graphs.path.find('graphs')
             if not slash > -1:
-                slash = graphs.path.find('graph_0')
+                slash = graphs.path.find('graph')
             if slash > -1:
-                conc = graphs.path.find('conc')
-                if conc > -1 :
+                foundConc = True
+                if not ( (graphs.path.find('conc1') > -1 ) or
+                            (graphs.path.find('conc2') > -1 ) or 
+                            (graphs.path.find('conc3') > -1 ) or
+                            (graphs.path.find('conc4') > -1) ):
+                    foundConc = False
+                if foundConc == True:
                     tabPath = "/"+graphs.path[slash:len(graphs.path)]
                 else:
                     slash1 = graphs.path.find('/',slash)
                     tabPath = "/graphs/conc1" +graphs.path[slash1:len(graphs.path)]
+                    
+
                 if len(moose.element(graphs).msgOut):
                     poolPath = (moose.element(graphs).msgOut)[0].e2.path
                     poolEle = moose.element(poolPath)
