@@ -124,18 +124,6 @@ def mergeChemModel(A,B):
             print ("Enzyme:")
             for ed in list(E_Daggling):
                 print ("%s " %str(ed.name))             
-    
-    cnt = {}
-    setupItem(modelA,cnt)
-    meshEntry,xmin,xmax,ymin,ymax,positionInfoExist,sceneitems = setupMeshObj(modelA)
-    xmin = 0.0
-    xmax = 1.0
-    ymin = 0.0
-    ymax = 1.0
-    xratio = 1.0
-    yratio = 1.0
-    autoCordinatepos = autoCoordinates(meshEntry, cnt)
-    
 
 def functionMerge(comptA,comptB,key):
     funcNotallowed = []
@@ -597,6 +585,6 @@ def mooseIsInstance(element, classNames):
 
 if __name__ == "__main__":
 
-    modelA = 'acc92.g'
-    modelB = 'acc50.g'
+    modelA = '/home/harsha/genesis_files/gfile/acc92.g'
+    modelB = '/home/harsha/genesis_files/gfile/acc50.g'
     mergered = mergeChemModel(modelA,modelB)
