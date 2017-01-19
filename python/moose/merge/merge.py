@@ -32,101 +32,108 @@ from moose.chemUtil.chemConnectUtil import *
 from moose.chemUtil.graphUtils import *
 
 def mergeChemModel(A,B):
-    """ Merges two model or the path """"
+    """ Merges two model or the path """
 
-    modelA = loadModels(A)
-    modelB = loadModels(B)
+    modelA,loadedA = loadModels(A)
+    modelB,loadedB = loadModels(B)
+    if not loadedA or not loadedB:
+        if not loadedA:
+            modelB = moose.Shell('/')
+        if not loadedB:
+            modelA = moose.Shell('/')    
+    else:
+        directory, bfname = os.path.split(B)
+        global grpNotcopiedyet,poolListina
+        poolListina = {}
+        grpNotcopiedyet = []
+        dictComptA = dict( [ (i.name,i) for i in moose.wildcardFind(modelA+'/##[ISA=ChemCompt]') ] )
+        dictComptB = dict( [ (i.name,i) for i in moose.wildcardFind(modelB+'/##[ISA=ChemCompt]') ] )
 
-    directory, bfname = os.path.split(B)
-    global grpNotcopiedyet,poolListina
-    poolListina = {}
-    grpNotcopiedyet = []
-    dictComptA = dict( [ (i.name,i) for i in moose.wildcardFind(modelA+'/##[ISA=ChemCompt]') ] )
-    dictComptB = dict( [ (i.name,i) for i in moose.wildcardFind(modelB+'/##[ISA=ChemCompt]') ] )
+        poolNotcopiedyet = []
 
-    poolNotcopiedyet = []
+        for key in list(dictComptB.keys()):
+            if key not in dictComptA:
+                # if compartmentname from modelB does not exist in modelA, then copy
+                copy = moose.copy(dictComptB[key],moose.element(modelA))
+            else:       
+                #if compartmentname from modelB exist in modelA,
+                #volume is not same, then change volume of ModelB same as ModelA
+                if abs(dictComptA[key].volume - dictComptB[key].volume):
+                    #hack for now
+                    while (abs(dictComptA[key].volume - dictComptB[key].volume) != 0.0):
+                        dictComptB[key].volume = float(dictComptA[key].volume)
+                dictComptA = dict( [ (i.name,i) for i in moose.wildcardFind(modelA+'/##[ISA=ChemCompt]') ] )
 
-    for key in list(dictComptB.keys()):
-        if key not in dictComptA:
-            # if compartmentname from modelB does not exist in modelA, then copy
-            copy = moose.copy(dictComptB[key],moose.element(modelA))
-        else:       
-            #if compartmentname from modelB exist in modelA,
-            #volume is not same, then change volume of ModelB same as ModelA
-            if abs(dictComptA[key].volume - dictComptB[key].volume):
-                #hack for now
-                while (abs(dictComptA[key].volume - dictComptB[key].volume) != 0.0):
-                    dictComptB[key].volume = float(dictComptA[key].volume)
-            dictComptA = dict( [ (i.name,i) for i in moose.wildcardFind(modelA+'/##[ISA=ChemCompt]') ] )
+                #Mergering pool
+                poolMerge(dictComptA[key],dictComptB[key],poolNotcopiedyet)
 
-            #Mergering pool
-            poolMerge(dictComptA[key],dictComptB[key],poolNotcopiedyet)
+        if grpNotcopiedyet:
+            # objA = moose.element(comptA).parent.name
+            # if not moose.exists(objA+'/'+comptB.name+'/'+bpath.name):
+            #   print bpath
+            #   moose.copy(bpath,moose.element(objA+'/'+comptB.name))
+            pass
 
-    if grpNotcopiedyet:
-        # objA = moose.element(comptA).parent.name
-        # if not moose.exists(objA+'/'+comptB.name+'/'+bpath.name):
-        #   print bpath
-        #   moose.copy(bpath,moose.element(objA+'/'+comptB.name))
-        pass
-
-    comptAdict =  comptList(modelA)
-    poolListina = {}
-    poolListina = updatePoolList(comptAdict)
-    funcNotallowed = []
-    R_Duplicated, R_Notcopiedyet,R_Daggling = [], [], []
-    E_Duplicated, E_Notcopiedyet,E_Daggling = [], [], []
-    for key in list(dictComptB.keys()):
+        comptAdict =  comptList(modelA)
+        poolListina = {}
+        poolListina = updatePoolList(comptAdict)
         funcNotallowed = []
-        funcNotallowed = functionMerge(dictComptA,dictComptB,key)
+        R_Duplicated, R_Notcopiedyet,R_Daggling = [], [], []
+        E_Duplicated, E_Notcopiedyet,E_Daggling = [], [], []
+        for key in list(dictComptB.keys()):
+            funcNotallowed = []
+            funcNotallowed = functionMerge(dictComptA,dictComptB,key)
+            
+            poolListina = updatePoolList(dictComptA)
+            R_Duplicated,R_Notcopiedyet,R_Daggling = reacMerge(dictComptA,dictComptB,key,poolListina)
+
+            poolListina = updatePoolList(dictComptA)
+            E_Duplicated,E_Notcopiedyet,E_Daggling = enzymeMerge(dictComptA,dictComptB,key,poolListina)
         
-        poolListina = updatePoolList(dictComptA)
-        R_Duplicated,R_Notcopiedyet,R_Daggling = reacMerge(dictComptA,dictComptB,key,poolListina)
+        print("\n Model is merged to %s" %modelA)
+        
+        if funcNotallowed:
+            print( "\nPool already connected to a function, this function is not to connect to same pool, since no two function are allowed to connect to same pool:")
+            for fl in list(funcNotallowed):
+                print("\t [Pool]:  %s [Function]:  %s \n" %(str(fl.parent.name), str(fl.path)))
 
-        poolListina = updatePoolList(dictComptA)
-        E_Duplicated,E_Notcopiedyet,E_Daggling = enzymeMerge(dictComptA,dictComptB,key,poolListina)
-    
-    if funcNotallowed:
-        print( "\nPool already connected to a function, this function is not to connect to same pool, since no two function are allowed to connect to same pool:")
-        for fl in list(funcNotallowed):
-            print("\t [Pool]:  %s [Function]:  %s \n" %(str(fl.parent.name), str(fl.path)))
-
-    if R_Duplicated or E_Duplicated:
-        print ("Reaction / Enzyme are Duplicate"
-                "\n 1. The once whoes substrate / product names are different for a give reaction name "
-                "\n 2. its compartment to which it belongs to may be is different"
-                "\n Models have to decide to keep or delete these reaction/enzyme")
-        if E_Duplicated:
-            print("Reaction: ")
-        for rd in list(R_Duplicated):
-            print ("%s " %str(rd.name))
-            
-        if E_Duplicated:
-            print ("Enzyme:")
-            for ed in list(E_Duplicated):
-                print ("%s " %str(ed.name))
-
-    if R_Notcopiedyet or E_Notcopiedyet:
-
-        print ("\nThese Reaction/Enzyme in model are not dagging but while copying the associated substrate or product is missing")
-        if R_Notcopiedyet:
-            print("Reaction: ")
-        for rd in list(R_Notcopiedyet):
-            print ("%s " %str(rd.name))
-        if E_Notcopiedyet:
-            print ("Enzyme:")
-            for ed in list(E_Notcopiedyet):
-                print ("%s " %str(ed.name))
-            
-    if R_Daggling or E_Daggling:
-        print ("\n Daggling reaction/enzyme are not not allowed in moose, these are not merged")
-        if R_Daggling:
-            print("Reaction: ")
-            for rd in list(R_Daggling):
+        if R_Duplicated or E_Duplicated:
+            print ("Reaction / Enzyme are Duplicate"
+                    "\n 1. The once whoes substrate / product names are different for a give reaction name "
+                    "\n 2. its compartment to which it belongs to may be is different"
+                    "\n Models have to decide to keep or delete these reaction/enzyme")
+            if E_Duplicated:
+                print("Reaction: ")
+            for rd in list(R_Duplicated):
                 print ("%s " %str(rd.name))
-        if E_Daggling:
-            print ("Enzyme:")
-            for ed in list(E_Daggling):
-                print ("%s " %str(ed.name))             
+                
+            if E_Duplicated:
+                print ("Enzyme:")
+                for ed in list(E_Duplicated):
+                    print ("%s " %str(ed.name))
+
+        if R_Notcopiedyet or E_Notcopiedyet:
+
+            print ("\nThese Reaction/Enzyme in model are not dagging but while copying the associated substrate or product is missing")
+            if R_Notcopiedyet:
+                print("Reaction: ")
+            for rd in list(R_Notcopiedyet):
+                print ("%s " %str(rd.name))
+            if E_Notcopiedyet:
+                print ("Enzyme:")
+                for ed in list(E_Notcopiedyet):
+                    print ("%s " %str(ed.name))
+                
+        if R_Daggling or E_Daggling:
+            print ("\n Daggling reaction/enzyme are not not allowed in moose, these are not merged")
+            if R_Daggling:
+                print("Reaction: ")
+                for rd in list(R_Daggling):
+                    print ("%s " %str(rd.name))
+            if E_Daggling:
+                print ("Enzyme:")
+                for ed in list(E_Daggling):
+                    print ("%s " %str(ed.name))             
 
 def functionMerge(comptA,comptB,key):
     funcNotallowed = []
@@ -215,8 +222,9 @@ def comptList(modelpath):
 def loadModels(filename):
     """ load models into moose if file, if moosepath itself it passes back the path and 
     delete solver if exist """
-    
+
     modelpath = '/'
+    loaded = False
 
     if os.path.isfile(filename) :
         modelpath = filename[filename.rfind('/'): filename.rfind('.')]
@@ -224,27 +232,25 @@ def loadModels(filename):
         filename = filename.strip()
         modeltype = mtypes.getType(filename)
         subtype = mtypes.getSubtype(filename, modeltype)
-        
-        if subtype == 'kkit':
+        if subtype == 'kkit' or modeltype == "cspace":
             moose.loadModel(filename,modelpath)
-            
-        elif subtype == 'SBML':
+            loaded = True    
+    
+        elif subtype == 'sbml':
             #moose.ReadSBML()
             pass
-        elif subtype == "CSPACE":
-            pass
         else:
-            #check with extension if python file
-            pass
+            print("This file is not supported for mergering")
+            modelpath = moose.Shell('/')
     elif moose.exists(filename):
         modelpath = filename
-
+        loaded = True
     ## default is 'ee' solver while loading the model using moose.loadModel,
     ## yet deleteSolver is called just to be assured 
+    if loaded:
+        deleteSolver(modelpath) 
 
-    deleteSolver(modelpath) 
-
-    return modelpath
+    return modelpath,loaded
 
 def deleteSolver(modelRoot):
     compts = moose.wildcardFind(modelRoot+'/##[ISA=ChemCompt]')
@@ -306,7 +312,7 @@ def copy_deleteUnlyingPoolObj(pool,path):
         for fl in funclist:
             moose.delete(fl)
         enzlist = moose.element(poolcopied).neighbors['reac']
-        for el in enzlist:
+        for el in list(set(enzlist)):
             moose.delete(el.path)
     return copied
 
