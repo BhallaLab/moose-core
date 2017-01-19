@@ -32,7 +32,8 @@ from moose.chemUtil.chemConnectUtil import *
 from moose.chemUtil.graphUtils import *
 
 def mergeChemModel(A,B):
-    #load models into moose and solver's are deleted
+    """ Merges two model or the path """"
+
     modelA = loadModels(A)
     modelB = loadModels(B)
 
@@ -71,7 +72,9 @@ def mergeChemModel(A,B):
     comptAdict =  comptList(modelA)
     poolListina = {}
     poolListina = updatePoolList(comptAdict)
-
+    funcNotallowed = []
+    R_Duplicated, R_Notcopiedyet,R_Daggling = [], [], []
+    E_Duplicated, E_Notcopiedyet,E_Daggling = [], [], []
     for key in list(dictComptB.keys()):
         funcNotallowed = []
         funcNotallowed = functionMerge(dictComptA,dictComptB,key)
@@ -210,27 +213,37 @@ def comptList(modelpath):
     return comptdict
 
 def loadModels(filename):
-    modelpath = '/'
-    modelpath = filename[filename.rfind('/'): filename.rfind('.')]
-    ext = os.path.splitext(filename)[1]
-    filename = filename.strip()
-    modeltype = mtypes.getType(filename)
-    subtype = mtypes.getSubtype(filename, modeltype)
+    """ load models into moose if file, if moosepath itself it passes back the path and 
+    delete solver if exist """
     
-    if subtype == 'kkit':
-        moose.loadModel(filename,modelpath)
+    modelpath = '/'
+
+    if os.path.isfile(filename) :
+        modelpath = filename[filename.rfind('/'): filename.rfind('.')]
+        ext = os.path.splitext(filename)[1]
+        filename = filename.strip()
+        modeltype = mtypes.getType(filename)
+        subtype = mtypes.getSubtype(filename, modeltype)
         
-    elif subtype == 'SBML':
-        #moose.ReadSBML()
-        pass
-    elif subtype == "CSPACE":
-        pass
-    else:
-        #check with extension if python file
-        pass
+        if subtype == 'kkit':
+            moose.loadModel(filename,modelpath)
+            
+        elif subtype == 'SBML':
+            #moose.ReadSBML()
+            pass
+        elif subtype == "CSPACE":
+            pass
+        else:
+            #check with extension if python file
+            pass
+    elif moose.exists(filename):
+        modelpath = filename
+
     ## default is 'ee' solver while loading the model using moose.loadModel,
     ## yet deleteSolver is called just to be assured 
+
     deleteSolver(modelpath) 
+
     return modelpath
 
 def deleteSolver(modelRoot):

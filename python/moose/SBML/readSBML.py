@@ -147,7 +147,6 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                                     model, specInfoMap, modelAnnotaInfo, globparameterIdValue)
                         getModelAnnotation(
                             model, baseId, basePath)
-
                     if not errorFlag:
                         print(msg)
                         # Any time in the middle if SBML does not read then I
@@ -156,6 +155,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                         # built which is not correct print "Deleted rest of the
                         # model"
                         moose.delete(basePath)
+                        basePath = moose.Shell('/')
             return basePath
         else:
             print("Validation failed while reading the model.")
@@ -511,9 +511,7 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue):
             nummodifiers = reac.getNumModifiers()
 
             if not (numRcts and numPdts):
-                print(
-                    rName,
-                    " : Substrate and Product is missing, we will be skiping creating this reaction in MOOSE")
+                print("Warning: %s" %(rName)," : Substrate or Product is missing, we will be skiping creating this reaction in MOOSE")
                 reactionCreated = False
             elif (reac.getNumModifiers() > 0):
                 reactionCreated, reaction_ = setupMMEnzymeReaction(
