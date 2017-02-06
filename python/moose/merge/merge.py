@@ -33,6 +33,7 @@ from moose.chemUtil.graphUtils import *
 
 def mergeChemModel(A,B):
     """ Merges two model or the path """
+    
 
     modelA,loadedA = loadModels(A)
     modelB,loadedB = loadModels(B)
@@ -171,7 +172,7 @@ def functionMerge(comptA,comptB,key):
                     #Pool in model 'A' already exist function "
                     funcExist.append(fb)
             else:
-                print " Path in model A doesn't exists ",poolinA
+                print (" Path in model A doesn't exists ",poolinA)
         
     return funcExist,funcNotallowed
 
@@ -243,6 +244,7 @@ def loadModels(filepath):
     elif moose.exists(filepath):
         modelpath = filepath
         loaded = True
+
     ## default is 'ee' solver while loading the model using moose.loadModel,
     ## yet deleteSolver is called just to be assured 
     if loaded:
