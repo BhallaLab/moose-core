@@ -77,12 +77,11 @@ def mergeChemModel(A,B):
         comptAdict =  comptList(modelA)
         poolListina = {}
         poolListina = updatePoolList(comptAdict)
-        funcNotallowed = []
         R_Duplicated, R_Notcopiedyet,R_Daggling = [], [], []
         E_Duplicated, E_Notcopiedyet,E_Daggling = [], [], []
         for key in list(dictComptB.keys()):
-            funcNotallowed = []
-            funcNotallowed = functionMerge(dictComptA,dictComptB,key)
+            funcExist, funcNotallowed = [], []
+            funcExist,funcNotallowed = functionMerge(dictComptA,dictComptB,key)
             
             poolListina = updatePoolList(dictComptA)
             R_Duplicated,R_Notcopiedyet,R_Daggling = reacMerge(dictComptA,dictComptB,key,poolListina)
@@ -91,12 +90,14 @@ def mergeChemModel(A,B):
             E_Duplicated,E_Notcopiedyet,E_Daggling = enzymeMerge(dictComptA,dictComptB,key,poolListina)
         
         print("\n Model is merged to %s" %modelA)
-        
-        if funcNotallowed:
+        if funcExist:
             print( "\nPool already connected to a function, this function is not to connect to same pool, since no two function are allowed to connect to same pool:")
+            for fl in list(funcExist):
+                print("\t [Pool]:  %s [Function]:  %s \n" %(str(fl.parent.name), str(fl.path)))
+        if funcNotallowed:
+            print( "\nThis function is not to copied, since pool connected to function input are from different compartment:")
             for fl in list(funcNotallowed):
                 print("\t [Pool]:  %s [Function]:  %s \n" %(str(fl.parent.name), str(fl.path)))
-
         if R_Duplicated or E_Duplicated:
             print ("Reaction / Enzyme are Duplicate"
                     "\n 1. The once whoes substrate / product names are different for a give reaction name "
@@ -136,60 +137,48 @@ def mergeChemModel(A,B):
                     print ("%s " %str(ed.name))             
 
 def functionMerge(comptA,comptB,key):
-    funcNotallowed = []
+    funcNotallowed, funcExist = [], []
     comptApath = moose.element(comptA[key]).path
     comptBpath = moose.element(comptB[key]).path
-    funcListina = moose.wildcardFind(comptApath+'/##[ISA=PoolBase]') 
-    funcListinb = moose.wildcardFind(comptBpath+'/##[ISA=Function]')
     objA = moose.element(comptApath).parent.name
     objB = moose.element(comptBpath).parent.name
-    #For function mergering pool name is taken as reference
-    funcNotcopiedyet = []
+    
+    #This will give us all the function which exist in modelB
+    funcListinb = moose.wildcardFind(comptBpath+'/##[ISA=Function]')
     for fb in funcListinb:
-
-        if fb.parent.className in ['ZombiePool','Pool','ZombieBufPool','BufPool']:
-            objA = moose.element(comptApath).parent.name
-            fbpath = fb.path
-            #funcpath = fbpath[fbpath.find(findCompartment(fb).name)-1:len(fbpath)]
-            funcparentB = fb.parent.path
-            funcpath = fbpath.replace(objB,objA)
-            funcparentA = funcparentB.replace(objB,objA)
-            tt = moose.element(funcparentA).neighbors['setN']
-            if tt:
-                funcNotallowed.append(fb)
-            else:
-                if len(moose.element(fb.path+'/x').neighbors["input"]):
-                    #inputB = moose.element(fb.path+'/x').neighbors["input"]
-                    inputB = subprdList(moose.element(fb.path+'/x'),"input")
-                    inputB_expr = fb.expr
-                    if moose.exists(funcpath):
-                        #inputA = moose.element(objA+funcpath+'/x').neighbors["input"]
-                        inputA = subprdList(moose.element(funcpath+'/x'),"input")
-                        inputA_expr = moose.element(funcpath).expr
-                        hassameExpr = False
-                        if inputA_expr == inputB_expr:
-                            hassameExpr = True
-                        hassameLen,hassameS,hassameVols = same_len_name_vol(inputA,inputB)
-                        if not all((hassameLen,hassameS,hassameVols,hassameExpr)):
-                            fb.name = fb.name+'_duplicatedF'
-                            createFunction(fb,inputB,objB,objA)
+        #This will give us all the pools that its connected to, for this function
+        fvalueOut = moose.element(fb).neighbors['valueOut']
+        for poolinB in fvalueOut:
+            poolinBpath = poolinB.path
+            poolinA = poolinBpath.replace(objB,objA)
+            connectionexist = []
+            if moose.exists(poolinA):
+                #This is give us if pool which is to be connected already exist any connection
+                connectionexist = moose.element(poolinA).neighbors['setN']+moose.element(poolinA).neighbors['setConc']+ moose.element(poolinA).neighbors['increment']
+                if len(connectionexist) == 0:
+                    #This pool in model A doesnot exist with any function
+                    inputs = moose.element(fb.path+'/x').neighbors['input']
+                    volumes = []
+                    for ins in inputs:
+                        volumes.append((findCompartment(moose.element(ins))).volume)
+                    if len(set(volumes)) == 1:
+                        # If all the input connected belongs to one compartment then copy
+                        createFunction(fb,poolinA,objB,objA)
                     else:
-                        #function doesnot exist then copy
-                        if len(inputB):
-                            volinput = []
-                            for inb in inputB:
-                                volinput.append(findCompartment(moose.element(inb)).volume)
-                                if len(set(volinput)) == 1:
-                                    # If all the input connected belongs to one compartment then copy
-                                    createFunction(fb,inputB,objB,objA)
-                                else:
-                                    # moose doesn't allow function input to come from different compartment
-                                    funcNotallowed.append(fb)
-    return funcNotallowed
+                        # moose doesn't allow function's input to come from different compartment
+                        funcNotallowed.append(fb)
+                else:
+                    #Pool in model 'A' already exist function "
+                    funcExist.append(fb)
+            else:
+                print " Path in model A doesn't exists ",poolinA
+        
+    return funcExist,funcNotallowed
 
-def createFunction(fb,inputB,objB,objA):
+def createFunction(fb,setpool,objB,objA):
     fapath1 = fb.path.replace(objB,objA)
     fapath = fapath1.replace('[0]','')
+
     if not moose.exists(fapath):
         # if fb.parent.className in ['CubeMesh','CyclMesh']:
         #   des = moose.Function('/'+objA+'/'+fb.parent.name+'/'+fb.name)
@@ -198,7 +187,13 @@ def createFunction(fb,inputB,objB,objA):
         #       if fb.parent.name == akey.name:
         #           des = moose.Function(akey.path+'/'+fb.name)
         des = moose.Function(fapath)
-        moose.connect(des, 'valueOut', moose.element(fapath).parent,'setN' )
+    else:
+        des = moose.element(fapath)
+    inputB = moose.element(fb.path+'/x').neighbors["input"]
+    moose.connect(des, 'valueOut', moose.element(setpool),'setN' )
+    inputA = []
+    inputA = moose.element(fapath+'/x').neighbors["input"]
+    if not inputA:
         for src in inputB:
             pool = ((src.path).replace(objB,objA)).replace('[0]','')
             numVariables = des.numVars
@@ -209,41 +204,44 @@ def createFunction(fb,inputB,objB,objA):
             des.expr = expr
             moose.connect( pool, 'nOut', des.x[numVariables], 'input' )
 
-        #if fb.expr != des.expr:
-        #    print "Function ",des, " which is duplicated from modelB, expression is different, this is tricky in moose to know what those constants are connected to "
-        #    print "ModelB ", fb, fb.expr, "\nModelA ",des, des.expr
-
 def comptList(modelpath):
     comptdict = {}
     for ca in moose.wildcardFind(modelpath+'/##[ISA=ChemCompt]'):
         comptdict[ca.name] = ca
     return comptdict
 
-def loadModels(filename):
+def loadModels(filepath):
     """ load models into moose if file, if moosepath itself it passes back the path and 
     delete solver if exist """
 
     modelpath = '/'
     loaded = False
 
-    if os.path.isfile(filename) :
-        modelpath = filename[filename.rfind('/'): filename.rfind('.')]
-        ext = os.path.splitext(filename)[1]
-        filename = filename.strip()
+    if os.path.isfile(filepath) :
+        fpath, filename = os.path.split(filepath)
+        # print " head and tail ",head,  " ",tail
+        # modelpath = filename[filename.rfind('/'): filename.rfind('.')]
+        # print "modelpath ",modelpath
+        # ext = os.path.splitext(filename)[1]
+        # filename = filename.strip()
+        modelpath = '/'+filename[:filename.rfind('.')]
         modeltype = mtypes.getType(filename)
         subtype = mtypes.getSubtype(filename, modeltype)
+
         if subtype == 'kkit' or modeltype == "cspace":
-            moose.loadModel(filename,modelpath)
+            moose.loadModel(filepath,modelpath)
             loaded = True    
     
         elif subtype == 'sbml':
-            #moose.ReadSBML()
+            #moose.mooseReadSBML(filename,modelpath)
+            #loaded = True
             pass
         else:
             print("This file is not supported for mergering")
             modelpath = moose.Shell('/')
-    elif moose.exists(filename):
-        modelpath = filename
+
+    elif moose.exists(filepath):
+        modelpath = filepath
         loaded = True
     ## default is 'ee' solver while loading the model using moose.loadModel,
     ## yet deleteSolver is called just to be assured 
@@ -300,15 +298,15 @@ def copy_deleteUnlyingPoolObj(pool,path):
     # which will automatically copie's the pool
     copied = False
 
-    if pool.parent.className not in ["Enz","ZombieEnz"]:
+    if pool.parent.className not in ["Enz","ZombieEnz","MMenz","ZombieMMenz"]:
         poolcopied = moose.copy(pool,path)
         copied = True
         # deleting function and enzyme which gets copied if exist under pool
         # This is done to ensure daggling function / enzyme not copied.
         funclist = []
         for types in ['setConc','setN','increment']:
-
             funclist.extend(moose.element(poolcopied).neighbors[types])
+
         for fl in funclist:
             moose.delete(fl)
         enzlist = moose.element(poolcopied).neighbors['reac']
@@ -364,20 +362,15 @@ def enzymeMerge(comptA,comptB,key,poolListina):
                             allclean = True
                         else:
                             # didn't find sub or prd for this Enzyme
-                            #print ("didn't find sub or prd for this reaction" )
                             RE_Notcopiedyet.append(eb)
                     else:
                         #   -- it is dagging reaction
                         RE_Daggling.append(eb)
-                        #print ("This reaction \""+eb.path+"\" has no substrate/product daggling reaction are not copied")
-                        #war_msg = war_msg+"\nThis reaction \""+eb.path+"\" has no substrate/product daggling reaction are not copied"
                 else:
                     #Same Enzyme name 
                     #   -- Same substrate and product including same volume then don't copy
                     #   -- different substrate/product or if sub/prd's volume is different then DUPLICATE the Enzyme
                     allclean = False
-                    #ea = moose.element('/'+obj+'/'+enzcompartment.name+'/'+enzparent.name+'/'+eb.name)
-                    #ea = moose.element(pA.path+'/'+eb.name)
                     ea = moose.element(eb.path.replace(objB,objA))
                     eAsubname = subprdList(ea,"sub")
                     eBsubname = subprdList(eb,"sub")
@@ -407,7 +400,6 @@ def enzymeMerge(comptA,comptB,key,poolListina):
                                     moose.connect(moose.element(enz).parent,"nOut",moose.element(enz),"enzDest")
                                     #moose.connect(moose.element(enz),"enz",moose.element(enz).parent,"reac")
 
-                                #moose.connect( cplxItem, 'reac', enz, 'cplx' )
                                 connectObj(enz,eBsubname,"sub",comptA,war_msg)
                                 connectObj(enz,eBprdname,"prd",comptA,war_msg)
                                 RE_Duplicated.append(enz)
@@ -422,12 +414,9 @@ def enzymeMerge(comptA,comptB,key,poolListina):
                         #   --  it may be connected Enzyme cplx
                         if eBsubname and eBprdname:
                             RE_Notcopiedyet.append(eb)
-                            #print ("This Enzyme \""+eb.path+"\" has no substrate/product must be connect to cplx")
-                            #war_msg = war_msg+ "\nThis Enzyme \""+rb.path+"\" has no substrate/product must be connect to cplx"
                         else:
                             RE_Daggling.append(eb)
-                            #print ("This enzyme \""+eb.path+"\" has no substrate/product daggling reaction are not copied")
-                            #war_msg = war_msg+"\nThis reaction \""+eb.path+"\" has no substrate/product daggling reaction are not copied"
+
     return RE_Duplicated,RE_Notcopiedyet,RE_Daggling
 
 def reacMerge(comptA,comptB,key,poolListina):
@@ -511,17 +500,12 @@ def reacMerge(comptA,comptB,key,poolListina):
                         #   --  it may be connected Enzyme cplx
                         if rBsubname and rBprdname:
                             RE_Notcopiedyet.append(rb)
-                            #print ("This reaction \""+rb.path+"\" has no substrate/product must be connect to cplx")
-                            #war_msg = war_msg+ "\nThis reaction \""+rb.path+"\" has no substrate/product must be connect to cplx"
                         else:
                             RE_Daggling.append(rb)
-                            #print ("This reaction \""+rb.path+"\" has no substrate/product daggling reaction are not copied")
-                            #war_msg = war_msg+"\nThis reaction \""+rb.path+"\" has no substrate/product daggling reaction are not copied"      
             
     return RE_Duplicated,RE_Notcopiedyet,RE_Daggling
 
 def subprdList(reac,subprd):
-    #print  "Reac ",reac
     rtype = moose.element(reac).neighbors[subprd]
     rname = []
     for rs in rtype:
@@ -572,8 +556,6 @@ def connectObj(reac,spList,spType,comptA,war_msg):
                     allclean = True
                 else:
                     #It should not come here unless the sub/prd is connected to enzyme cplx pool
-                    #print ("This pool \""+rsp.name+"\" doesnot exists in this "+comptName+" compartment to connect to this reaction \""+reac.name+"\"")
-                    #war_msg = war_msg+ "This pool \""+rsp.name+"\" doesnot exists in this "+comptName+" compartment to connect to this reaction \""+reac.name+"\""
                     allclean = False
     return allclean
 
@@ -604,6 +586,6 @@ def mooseIsInstance(element, classNames):
 
 if __name__ == "__main__":
 
-    modelA = '/home/harsha/genesis_files/gfile/acc92.g'
-    modelB = '/home/harsha/genesis_files/gfile/acc50.g'
+    modelA = 'acc92.g'
+    modelB = 'acc50.g'
     mergered = mergeChemModel(modelA,modelB)
