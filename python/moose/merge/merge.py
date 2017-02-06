@@ -33,18 +33,33 @@ from moose.chemUtil.graphUtils import *
 
 def mergeChemModel(A,B):
     """ Merges two model or the path """
-    
+    loadedA = False
+    loadedB = False
 
-    modelA,loadedA = loadModels(A)
-    modelB,loadedB = loadModels(B)
-    if not loadedA or not loadedB:
-        if not loadedA:
-            modelB = moose.Shell('/')
-        if not loadedB:
-            modelA = moose.Shell('/')    
+    if os.path.isfile(A):
+        modelA,loadedA = loadModels(A)
+    elif moose.exists(A):
+        modelA = A
+        loadedA = True
     else:
-        directory, bfname = os.path.split(B)
-        global grpNotcopiedyet,poolListina
+        print ("%s path or file doesnot exists. Mergering will exist" % (A))
+        exit(0)
+
+    if os.path.isfile(B):
+        modelB,loadedB = loadModels(B)
+    elif moose.exists(B):
+        modelB = B
+        loadedB = True
+    else:
+        print ("%s path or file doesnot exists. Mergering will exist " % (B))
+        exit(0)
+
+    if loadedA and loadedB:
+        ## yet deleteSolver is called to make sure all the moose object are off from solver
+        deleteSolver(modelA) 
+        deleteSolver(modelB)
+
+        global poolListina
         poolListina = {}
         grpNotcopiedyet = []
         dictComptA = dict( [ (i.name,i) for i in moose.wildcardFind(modelA+'/##[ISA=ChemCompt]') ] )
@@ -172,7 +187,7 @@ def functionMerge(comptA,comptB,key):
                     #Pool in model 'A' already exist function "
                     funcExist.append(fb)
             else:
-                print (" Path in model A doesn't exists ",poolinA)
+                print(" Path in model A doesn't exists %s" %(poolinA))
         
     return funcExist,funcNotallowed
 
@@ -244,11 +259,6 @@ def loadModels(filepath):
     elif moose.exists(filepath):
         modelpath = filepath
         loaded = True
-
-    ## default is 'ee' solver while loading the model using moose.loadModel,
-    ## yet deleteSolver is called just to be assured 
-    if loaded:
-        deleteSolver(modelpath) 
 
     return modelpath,loaded
 
