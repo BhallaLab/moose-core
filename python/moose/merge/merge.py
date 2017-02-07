@@ -64,25 +64,24 @@ def mergeChemModel(A,B):
         grpNotcopiedyet = []
         dictComptA = dict( [ (i.name,i) for i in moose.wildcardFind(modelA+'/##[ISA=ChemCompt]') ] )
         dictComptB = dict( [ (i.name,i) for i in moose.wildcardFind(modelB+'/##[ISA=ChemCompt]') ] )
-
         poolNotcopiedyet = []
 
-        for key in list(dictComptB.keys()):
-            if key not in dictComptA:
+        for key in list(dictComptA.keys()):
+            if key not in dictComptB:
                 # if compartmentname from modelB does not exist in modelA, then copy
-                copy = moose.copy(dictComptB[key],moose.element(modelA))
+                copy = moose.copy(dictComptA[key],moose.element(modelB))
             else:       
                 #if compartmentname from modelB exist in modelA,
                 #volume is not same, then change volume of ModelB same as ModelA
-                if abs(dictComptA[key].volume - dictComptB[key].volume):
+                if abs(dictComptB[key].volume - dictComptA[key].volume):
                     #hack for now
-                    while (abs(dictComptA[key].volume - dictComptB[key].volume) != 0.0):
-                        dictComptB[key].volume = float(dictComptA[key].volume)
-                dictComptA = dict( [ (i.name,i) for i in moose.wildcardFind(modelA+'/##[ISA=ChemCompt]') ] )
+                    while (abs(dictComptB[key].volume - dictComptA[key].volume) != 0.0):
+                        dictComptA[key].volume = float(dictComptB[key].volume)
+                dictComptB = dict( [ (i.name,i) for i in moose.wildcardFind(modelB+'/##[ISA=ChemCompt]') ] )
 
                 #Mergering pool
-                poolMerge(dictComptA[key],dictComptB[key],poolNotcopiedyet)
-
+                poolMerge(dictComptB[key],dictComptA[key],poolNotcopiedyet)
+        
         if grpNotcopiedyet:
             # objA = moose.element(comptA).parent.name
             # if not moose.exists(objA+'/'+comptB.name+'/'+bpath.name):
@@ -90,22 +89,22 @@ def mergeChemModel(A,B):
             #   moose.copy(bpath,moose.element(objA+'/'+comptB.name))
             pass
 
-        comptAdict =  comptList(modelA)
-        poolListina = {}
-        poolListina = updatePoolList(comptAdict)
+        comptBdict =  comptList(modelB)
+        poolListinb = {}
+        poolListinb = updatePoolList(comptBdict)
         R_Duplicated, R_Notcopiedyet,R_Daggling = [], [], []
         E_Duplicated, E_Notcopiedyet,E_Daggling = [], [], []
-        for key in list(dictComptB.keys()):
+        for key in list(dictComptA.keys()):
             funcExist, funcNotallowed = [], []
-            funcExist,funcNotallowed = functionMerge(dictComptA,dictComptB,key)
+            funcExist,funcNotallowed = functionMerge(dictComptB,dictComptA,key)
             
-            poolListina = updatePoolList(dictComptA)
-            R_Duplicated,R_Notcopiedyet,R_Daggling = reacMerge(dictComptA,dictComptB,key,poolListina)
-
-            poolListina = updatePoolList(dictComptA)
-            E_Duplicated,E_Notcopiedyet,E_Daggling = enzymeMerge(dictComptA,dictComptB,key,poolListina)
+            poolListinb = updatePoolList(dictComptB)
+            R_Duplicated,R_Notcopiedyet,R_Daggling = reacMerge(dictComptB,dictComptA,key,poolListinb)
+            
+            poolListinb = updatePoolList(dictComptB)
+            E_Duplicated,E_Notcopiedyet,E_Daggling = enzymeMerge(dictComptB,dictComptA,key,poolListinb)
         
-        print("\n Model is merged to %s" %modelA)
+        print("\n Model is merged to %s" %modelB)
         if funcExist:
             print( "\nPool already connected to a function, this function is not to connect to same pool, since no two function are allowed to connect to same pool:")
             for fl in list(funcExist):
@@ -151,7 +150,7 @@ def mergeChemModel(A,B):
                 print ("Enzyme:")
                 for ed in list(E_Daggling):
                     print ("%s " %str(ed.name))             
-
+        
 def functionMerge(comptA,comptB,key):
     funcNotallowed, funcExist = [], []
     comptApath = moose.element(comptA[key]).path
@@ -241,8 +240,8 @@ def loadModels(filepath):
         # ext = os.path.splitext(filename)[1]
         # filename = filename.strip()
         modelpath = '/'+filename[:filename.rfind('.')]
-        modeltype = mtypes.getType(filename)
-        subtype = mtypes.getSubtype(filename, modeltype)
+        modeltype = mtypes.getType(filepath)
+        subtype = mtypes.getSubtype(filepath, modeltype)
 
         if subtype == 'kkit' or modeltype == "cspace":
             moose.loadModel(filepath,modelpath)
@@ -598,6 +597,6 @@ def mooseIsInstance(element, classNames):
 
 if __name__ == "__main__":
 
-    modelA = 'acc92.g'
-    modelB = 'acc50.g'
+    modelA = 'acc50.g'
+    modelB = 'acc92.g'
     mergered = mergeChemModel(modelA,modelB)
