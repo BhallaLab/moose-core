@@ -87,7 +87,7 @@ def mooseReadSBML(filepath, loadpath, solver='ee'):
     return SBML.readSBML.mooseReadSBML( filepath, loadpath, solver )
 
 
-def mooseWriteSBML(modelpath, filenpath, sceneitems={}):
+def mooseWriteSBML(modelpath, filepath, sceneitems={}):
     """Writes loaded model under modelpath to a file in SBML format.
 
     keyword arguments:\n
