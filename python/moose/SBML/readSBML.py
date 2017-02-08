@@ -131,7 +131,6 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                     #print(("modelPath:" + basePath.path))
                     globparameterIdValue = {}
                     modelAnnotaInfo = {}
-                    print " 134 ",modelAnnotaInfo
                     mapParameter(model, globparameterIdValue)
                     errorFlag = createCompartment(
                         basePath, model, comptSbmlidMooseIdMap)
@@ -546,7 +545,6 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue):
                         else:
                             speCompt = (moose.Neutral(speCompt+'/'+group)).path
                     reaction_ = moose.Reac(speCompt + '/' + rName)
-                    print " Reaction _ ",reaction_
                     reactionCreated = True
                     reactSBMLIdMooseId[rName] = {
                         "MooseId": reaction_, "className ": "reaction"}
