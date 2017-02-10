@@ -13,7 +13,7 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Thu May 12 10:19:00 2016(+0530)
 Version
-Last-Updated: Tue Feb 7 2017
+Last-Updated: Tue Feb 10 2017
           By:
 **********************************************************************/
 
@@ -24,7 +24,7 @@ import os.path
 import collections
 import moose
 from validation import validateModel
-
+import re
 '''
    TODO in
     -Compartment
@@ -773,10 +773,12 @@ def createRules(model, specInfoMap, globparameterIdValue):
             exp = rule.getFormula()
             for mem in ruleMemlist:
                 if (mem in specInfoMap):
-                    exp1 = exp.replace(mem, str(speFunXterm[mem]))
+                    #exp1 = exp.replace(mem, str(speFunXterm[mem]))
+                    exp1 = re.sub(r'\b%s\b'% (mem), speFunXterm[mem], exp)
                     exp = exp1
                 elif(mem in globparameterIdValue):
-                    exp1 = exp.replace(mem, str(globparameterIdValue[mem]))
+                    #exp1 = exp.replace(mem, str(globparameterIdValue[mem]))
+                    exp1 = re.sub(r'\b%s\b'% (mem), globparameterIdValue[mem], exp)
                     exp = exp1
                 else:
                     print("Math expression need to be checked")
