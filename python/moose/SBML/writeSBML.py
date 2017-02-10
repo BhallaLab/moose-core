@@ -876,12 +876,12 @@ def writeSimulationAnnotation(modelpath):
                     graphSpefound = True
                 if graphSpefound:
                     if not plots:
-                        #plots = ori[ori.find(q.name)-1:len(ori)]
-                        plots = '/' + q.name + '/' + name
+                        plots = ori[ori.find(q.name)-1:len(ori)]
+                        #plots = '/' + q.name + '/' + name
 
                     else:
-                        #plots = plots + "; "+ori[ori.find(q.name)-1:len(ori)]
-                        plots = plots + "; /" + q.name + '/' + name
+                        plots = plots + "; "+ori[ori.find(q.name)-1:len(ori)]
+                        #plots = plots + "; /" + q.name + '/' + name
         if plots != " ":
             modelAnno = modelAnno + "<moose:plots> " + plots + "</moose:plots>\n"
         modelAnno = modelAnno + "</moose:ModelAnnotation>"
