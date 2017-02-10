@@ -116,10 +116,11 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                     return moose.element('/')
                 else:
                     baseId = moose.Neutral(loadpath)
+                    basePath = baseId
                     # All the model will be created under model as
                     # a thumbrule
-                    basePath = moose.Neutral(
-                        baseId.path + '/model')
+                    # basePath = moose.Neutral(
+                    #     baseId.path + '/model')
                     # Map Compartment's SBML id as key and value is
                     # list of[ Moose ID and SpatialDimensions ]
                     global comptSbmlidMooseIdMap
@@ -287,7 +288,7 @@ def getModelAnnotation(obj, baseId, basepath):
                                 for plots in plotlist:
                                     plots = plots.replace(" ", "")
                                     plotorg = plots
-                                    if moose.exists(basepath.path + plotorg):
+                                    if( moose.exists(basepath.path + plotorg) and isinstance(moose.element(basepath.path+plotorg),moose.PoolBase)) :
                                         plotSId = moose.element(
                                             basepath.path + plotorg)
                                         # plotorg = convertSpecialChar(plotorg)
@@ -302,8 +303,7 @@ def getModelAnnotation(obj, baseId, basepath):
                                         if not fullPath in tablelistname:
                                             tab = moose.Table2(fullPath)
                                             tablelistname.append(fullPath)
-                                            moose.connect(
-                                                tab, "requestOut", plotSId, "getConc")
+                                            moose.connect(tab, "requestOut", plotSId, "getConc")
 
 
 def getObjAnnotation(obj, modelAnnotationInfo):
