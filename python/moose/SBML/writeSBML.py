@@ -47,9 +47,10 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
     if not foundLibSBML_:
         print('No python-libsbml found.' 
             '\nThis module can be installed by following command in terminal:'
-            '\n\t easy_install python-libsbml'
+            '\n\t easy_install python-libsbml or'
+            '\n\t apt-get install python-libsbml'
             )
-        return -2, "Could not save the model in to SBML file. \n \n No python-libsbml found. \n Install python-libsbml for saving the model",''
+        return -2, "Could not save the model in to SBML file. \nThis module can be installed by following command in terminal: \n\t easy_install python-libsbml or \n\t apt-get install python-libsbml",''
 
     sbmlDoc = SBMLDocument(3, 1)
     filepath, filenameExt = os.path.split(filename)

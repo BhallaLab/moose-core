@@ -63,6 +63,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
         print('No python-libsbml found.' 
             '\nThis module can be installed by following command in terminal:'
             '\n\t easy_install python-libsbml'
+            '\n\t apt-get install python-libsbml'
             )
         return None
 
@@ -119,8 +120,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                     basePath = baseId
                     # All the model will be created under model as
                     # a thumbrule
-                    # basePath = moose.Neutral(
-                    #     baseId.path + '/model')
+                    basePath = moose.Neutral(baseId.path + '/model')
                     # Map Compartment's SBML id as key and value is
                     # list of[ Moose ID and SpatialDimensions ]
                     global comptSbmlidMooseIdMap
