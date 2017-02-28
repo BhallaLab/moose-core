@@ -124,9 +124,9 @@ def mergeChemModel(src,des):
             E_Duplicated,E_Notcopiedyet,E_Daggling = enzymeMerge(dictComptB,dictComptA,key,poolListinb)
         path, sfile = os.path.split(src)
         path, dfile = os.path.split(des)
-        print("\n %s model is merged to %s" %(sfile, dfile))
+        print("\n %s (src) model is merged to %s (des)" %(sfile, dfile))
         if funcExist:
-            print( "\nIn model \"%s\" pool already has connection from a function, these function from model \"%s\" is not to connect to same pool,\n since no two function are allowed to connect to same pool:"%(dfile, sfile))
+            print( "\nIn model \"%s\" pool already has connection from a function, these function from model \"%s\" is not allowed to connect to same pool,\n since no two function are allowed to connect to same pool:"%(dfile, sfile))
             for fl in list(funcExist):
                 print("\t [Pool]:  %s [Function]:  %s \n" %(str(fl.parent.name), str(fl.path)))
         if funcNotallowed:
@@ -134,10 +134,10 @@ def mergeChemModel(src,des):
             for fl in list(funcNotallowed):
                 print("\t [Pool]:  %s [Function]:  %s \n" %(str(fl.parent.name), str(fl.path)))
         if R_Duplicated or E_Duplicated:
-            print ("These Reaction / Enzyme are \"Duplicate\" into destination file \"%s\", due to "
-                    "\n 1. The once whoes substrate / product names are different for a give reaction name "
-                    "\n 2. its compartment to which it belongs to may be is different"
-                    "\n Models have to decide to keep or delete these reaction/enzyme" %(dfile))
+            print ("These Reaction / Enzyme are \"Duplicated\" into destination file \"%s\", due to "
+                    "\n 1. If substrate / product name's are different for a give reaction/Enzyme name "
+                    "\n 2. If product belongs to different compartment "
+                    "\n Models have to decide to keep or delete these reaction/enzyme in %s" %(dfile, dfile))
             if E_Duplicated:
                 print("Reaction: ")
             for rd in list(R_Duplicated):
