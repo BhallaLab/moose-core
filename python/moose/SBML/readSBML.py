@@ -128,6 +128,21 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                     warning = " "
                     global msg
                     msg = " "
+                    groupInfo  = {}
+                    mplugin = model.getPlugin("groups");
+                    modelgn = mplugin.getNumGroups()
+                    for gindex in range(0, mplugin.getNumGroups()):
+                        p = mplugin.getGroup(gindex)
+                        if p.getKind() == 2:
+                            if p.getId() not in groupInfo:
+                                #groupInfo[p.getId()]
+                                for gmemIndex in range(0,p.getNumMembers()):
+                                    mem = p.getMember(gmemIndex)
+                                    if p.getId() in groupInfo:
+                                        groupInfo[p.getId()].append(mem.getIdRef())
+                                    else:
+                                        groupInfo[p.getId()] =[mem.getIdRef()]
+
                     comptSbmlidMooseIdMap = {}
                     #print(("modelPath:" + basePath.path))
                     globparameterIdValue = {}
@@ -138,7 +153,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                     if errorFlag:
                         specInfoMap = {}
                         errorFlag,warning = createSpecies(
-                            basePath, model, comptSbmlidMooseIdMap, specInfoMap, modelAnnotaInfo)
+                            basePath, model, comptSbmlidMooseIdMap, specInfoMap, modelAnnotaInfo,groupInfo)
                         #print(errorFlag,warning)
                         
                         if errorFlag:
@@ -146,7 +161,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                                 model, specInfoMap, globparameterIdValue)
                             if errorFlag:
                                 errorFlag, msg = createReaction(
-                                    model, specInfoMap, modelAnnotaInfo, globparameterIdValue)
+                                    model, specInfoMap, modelAnnotaInfo, globparameterIdValue,groupInfo)
                         getModelAnnotation(
                             model, baseId, basePath)
                         
@@ -443,7 +458,7 @@ def getEnzAnnotation(obj, modelAnnotaInfo, rev,
     return(groupName)
 
 
-def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue):
+def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,groupInfo):
     # print " reaction "
     # Things done for reaction
     # --Reaction is not created, if substrate and product is missing
@@ -467,11 +482,14 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue):
         group = ""
         reacAnnoInfo = {}
         reacAnnoInfo = getObjAnnotation(reac, modelAnnotaInfo)
-        if "Group" in reacAnnoInfo:
-            group = reacAnnoInfo["Group"]
-
+        # if "Group" in reacAnnoInfo:
+        #     group = reacAnnoInfo["Group"]
+        
         if (reac.isSetId()):
             rId = reac.getId()
+            groups = [k for k, v in groupInfo.iteritems() if rId in v]
+            if groups:
+                group = groups[0] 
         if (reac.isSetName()):
             rName = reac.getName()
             rName = rName.replace(" ", "_space_")
@@ -817,7 +835,7 @@ def pullnotes(sbmlId, mooseId):
 
 
 def createSpecies(basePath, model, comptSbmlidMooseIdMap,
-                  specInfoMap, modelAnnotaInfo):
+                  specInfoMap, modelAnnotaInfo,groupInfo):
     # ToDo:
     # - Need to add group name if exist in pool
     # - Notes
@@ -830,11 +848,16 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
             group = ""
             specAnnoInfo = {}
             specAnnoInfo = getObjAnnotation(spe, modelAnnotaInfo)
-            if "Group" in specAnnoInfo:
-                group = specAnnoInfo["Group"]
+
+            # if "Group" in specAnnoInfo:
+            #     group = specAnnoInfo["Group"]
             
             sName = None
             sId = spe.getId()
+
+            groups = [k for k, v in groupInfo.iteritems() if sId in v]
+            if groups:
+                group = groups[0] 
             if spe.isSetName():
                 sName = spe.getName()
                 sName = sName.replace(" ", "_space_")
