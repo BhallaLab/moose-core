@@ -63,19 +63,24 @@ ELSE(WIN32)
         SET(GSL_CBLAS_LIB_NAMES gslcblas)
     ENDIF( )
 
-    FIND_LIBRARY(GSL_LIB 
-        NAMES ${GSL_LIB_NAMES} 
-        PATHS 
-            ${GSL_ROOT_DIR}/lib ${GSL_ROOT_DIR}/lib64
-            /opt/lib /opt/lib64
-        )
+    if(GSL_ROOT_DIR)
+        message("  Debug: Searching in user given path " )
+        FIND_LIBRARY(GSL_LIB 
+            NAMES ${GSL_LIB_NAMES} 
+            PATHS ${GSL_ROOT_DIR}/lib ${GSL_ROOT_DIR}/lib64
+            NO_DEFAULT_PATH
+            )
 
-    FIND_LIBRARY(GSLCBLAS_LIB 
-        NAMES ${GSL_CBLAS_LIB_NAMES}
-        PATHS 
-            ${GSL_ROOT_DIR}/lib ${GSL_ROOT_DIR}/lib64
-            /opt/lib /opt/lib64
-        )
+        FIND_LIBRARY(GSLCBLAS_LIB 
+            NAMES ${GSL_CBLAS_LIB_NAMES}
+            PATHS ${GSL_ROOT_DIR}/lib ${GSL_ROOT_DIR}/lib64
+            NO_DEFAULT_PATH
+            )
+    else( )
+        FIND_LIBRARY(GSL_LIB NAMES ${GSL_LIB_NAMES} )
+        FIND_LIBRARY(GSLCBLAS_LIB NAMES ${GSL_CBLAS_LIB_NAMES})
+    endif()
+
     IF (GSL_LIB AND GSLCBLAS_LIB)
         SET (GSL_LIBRARIES ${GSL_LIB} ${GSLCBLAS_LIB})
     ENDIF (GSL_LIB AND GSLCBLAS_LIB)
