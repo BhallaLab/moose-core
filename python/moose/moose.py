@@ -77,17 +77,10 @@ def mooseReadSBML(filepath, loadpath, solver='ee'):
     solver   -- Solver to use (default 'ee' ) \n
 
     """
-    global sbmlSupport_
-    if not sbmlSupport_:
-        print('SBML support was not loaded')
-        return None
-    if not os.path.isfile(filepath):
-        raise UserWarning('File %s not found' % filepath)
-
     return SBML.readSBML.mooseReadSBML( filepath, loadpath, solver )
 
 
-def mooseWriteSBML(modelpath, filenpath, sceneitems={}):
+def mooseWriteSBML(modelpath, filepath, sceneitems={}):
     """Writes loaded model under modelpath to a file in SBML format.
 
     keyword arguments:\n
@@ -103,12 +96,6 @@ def mooseWriteSBML(modelpath, filenpath, sceneitems={}):
                             --- else, auto-coordinates is used for layout position and passed
 
     """
-
-    global sbmlSupport_
-    if not sbmlSupport_:
-        print('SBML support was not loaded')
-        return None
-
     return SBML.writeSBML.mooseWriteSBML(modelpath, filepath, sceneitems)
 
 
@@ -120,11 +107,6 @@ def mooseWriteKkit(modelpath, filepath,sceneitems={}):
     modelpath -- model path in moose \n
     filepath -- Path of output file.
     """
-    global genesisSupport_
-    if not genesisSupport_:
-        print('GENESIS(kkit) support was not loaded')
-        return None
-
     return genesis.writeKkit.mooseWriteKkit(modelpath, filepath,sceneitems)
 
 
