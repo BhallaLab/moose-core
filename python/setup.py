@@ -31,6 +31,16 @@ __status__           = "Development"
 import os
 from distutils.core import setup
 
+script_dir = os.path.dirname( os.path.abspath( __file__ ) )
+
+version = '3.1'
+try:
+    with open( os.path.join( script_dir, '..', 'VERSION'), 'r' ) as f:
+        version = f.read( )
+except Exception as e:
+    print( 'Failed to read VERSION %s' % e )
+    print( 'Using default 3.1' )
+
 try:
     import importlib.machinery
     suffix = importlib.machinery.EXTENSION_SUFFIXES[0]
@@ -39,21 +49,25 @@ except Exception as e:
 
 setup(
         name='moose',
-        version='3.0.2',
+        version=version,
         description='MOOSE python scripting module.',
-        author='Dilwar Singh',
-        author_email='dilawars@ncbs.res.in',
+        author='MOOSERes',
+        author_email='bhalla@ncbs.res.in',
+        maintainer='Dilawar Singh',
+        maintainer_email='dilawars@ncbs.res.in',
         url='http://moose.ncbs.res.in',
         packages=[
             'rdesigneur'
             , 'moose'
+            , 'moose.SBML'
             , 'moose.neuroml'
             , 'moose.genesis'
+            , 'moose.chemUtil'
+            , 'moose.merge'
             ],
         package_dir = { 
             'moose' : 'moose' 
             , 'rdesigneur' : 'rdesigneur'
-            , 'genesis' : 'genesis'
             },
         package_data = { 'moose' : ['_moose' + suffix] },
     ) 

@@ -9,13 +9,6 @@
 
 #include "header.h"
     
-
-#if 0
-#include <boost/log/trivial.hpp>
-#include <boost/log/core.hpp>
-#include <boost/log/expressions.hpp>
-#endif
-
 #ifndef WIN32
 #include <sys/time.h>
 #else
@@ -57,6 +50,7 @@ extern void testShell();
 extern void testScheduling();
 extern void testSchedulingProcess();
 extern void testBuiltins();
+extern void testSynapse();
 extern void testBuiltinsProcess();
 
 extern void testMpiScheduling();
@@ -152,30 +146,10 @@ void checkChildren( Id parent, const string& info )
     }
 }
 
-/**
- * @brief Initialize logger.
- */
-void initLogger( void )
-{
-
-#if 0
-    boost::log::core::get()->set_filter
-    (
-#ifdef DEBUG
-        boost::log::trivial::severity >= boost::log::trivial::debug
-#else
-        boost::log::trivial::severity >= boost::log::trivial::info
-#endif
-    );
-#endif
-
-}
 
 Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests,
          unsigned int& benchmark )
 {
-    initLogger( );
-
     unsigned int numCores = getNumCores();
     int numNodes = 1;
     int myNode = 0;
@@ -342,6 +316,7 @@ void nonMpiTests( Shell* s )
         MOOSE_TEST("testHsolve", testHSolve());
         //MOOSE_TEST("testGeom", testGeom());
         MOOSE_TEST("testMesh", testMesh());
+        MOOSE_TEST("testSynapse", testSynapse());
         MOOSE_TEST( "testSigneur", testSigNeur());
 #ifdef USE_SMOLDYN
         //MOOSE_TEST(testSmoldyn());

@@ -113,8 +113,9 @@ def test( ):
     # print( data.dtype )
     time = data['time'] 
     print( time ) 
-    assert data.shape >= (58,4), data.shape
+    assert data.shape >= (58,), data.shape
     print( '[INFO] Test 2 passed' )
+    return 0
 
 def main( ):
     sanity_test( )

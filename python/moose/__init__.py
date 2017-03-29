@@ -26,4 +26,7 @@ from .moose import *
 
 # Wrapper to get moose version information.
 __version__ = moose._moose.__version__
+
 VERSION = moose._moose.VERSION
+
+# NOTE: No module should be imported here. Use moose.py to write imports.
