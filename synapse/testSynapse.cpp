@@ -155,11 +155,14 @@ void testSeqSynapse()
 
 	cout << "." << flush;
 
-	ssh.setResponseScale( 1.0 );
+        // FIXME: See issue BhallaLab/moose-core#174 
+	// ssh.setResponseScale( 1.0 );
 	for ( int i = 0; i < numSyn; ++i ) {
 		ssh.addSpike( i, 0.0, 1.0 );
 	}
-	ssh.setWeightScale( 1.0 );
+
+        // FIXME: See issue BhallaLab/moose-core#174 
+	// ssh.setWeightScale( 1.0 );
 	ProcInfo p;
 
 	Eref sheller( Id().eref() );
