@@ -184,7 +184,7 @@ def checkGroup(basePath,model):
                 moosegrpinfo = moose.Annotator(moosegrp.path+'/info')
                 moosegrpinfo.color = groupAnnoInfo["bgColor"]
             else:
-                print "Compartment not found"
+                print ("Compartment not found")
 
             if p.getKind() == 2:
                 if p.getId() not in groupInfo:
