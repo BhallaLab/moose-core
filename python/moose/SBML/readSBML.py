@@ -13,7 +13,8 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Thu May 12 10:19:00 2016(+0530)
 Version
-Last-Updated: Tue Feb 10 2017
+Last-Updated: Mon Apr 3 15:50:00 2017(+0530)
+
           By:
 **********************************************************************/
 
@@ -28,10 +29,8 @@ import re
 '''
    TODO in
     -Compartment
-      --Need to add group
       --Need to deal with compartment outside
     -Molecule
-      -- Need to add group
       -- mathML only AssisgmentRule is taken partly I have checked addition and multiplication,
        --, need to do for other calculation.
        -- In Assisgment rule one of the variable is a function, in moose since assignment is done using function,
@@ -129,27 +128,15 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                     global msg
                     msg = " "
                     groupInfo  = {}
-                    mplugin = model.getPlugin("groups");
-                    modelgn = mplugin.getNumGroups()
-                    for gindex in range(0, mplugin.getNumGroups()):
-                        p = mplugin.getGroup(gindex)
-                        if p.getKind() == 2:
-                            if p.getId() not in groupInfo:
-                                #groupInfo[p.getId()]
-                                for gmemIndex in range(0,p.getNumMembers()):
-                                    mem = p.getMember(gmemIndex)
-                                    if p.getId() in groupInfo:
-                                        groupInfo[p.getId()].append(mem.getIdRef())
-                                    else:
-                                        groupInfo[p.getId()] =[mem.getIdRef()]
-
-                    comptSbmlidMooseIdMap = {}
-                    #print(("modelPath:" + basePath.path))
-                    globparameterIdValue = {}
                     modelAnnotaInfo = {}
+                    comptSbmlidMooseIdMap = {}
+                    globparameterIdValue = {}
+
                     mapParameter(model, globparameterIdValue)
                     errorFlag = createCompartment(
                         basePath, model, comptSbmlidMooseIdMap)
+
+                    groupInfo = checkGroup(basePath,model)                        
                     if errorFlag:
                         specInfoMap = {}
                         errorFlag,warning = createSpecies(
@@ -179,7 +166,37 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
             print("Validation failed while reading the model.")
             return moose.element('/')
 
+def checkGroup(basePath,model):
+    groupInfo = {}
+    modelAnnotaInfo = {}
+    if model.getPlugin("groups") != None:
+        mplugin = model.getPlugin("groups")
+        modelgn = mplugin.getNumGroups()
+        for gindex in range(0, mplugin.getNumGroups()):
+            p = mplugin.getGroup(gindex)
+            groupAnnoInfo = {}
+            groupAnnoInfo = getObjAnnotation(p, modelAnnotaInfo)
+            if moose.exists(basePath.path+'/'+groupAnnoInfo["Compartment"]):
+                if not moose.exists(basePath.path+'/'+groupAnnoInfo["Compartment"]+'/'+p.getId()):
+                    moosegrp = moose.Neutral(basePath.path+'/'+groupAnnoInfo["Compartment"]+'/'+p.getId())
+                else:
+                    moosegrp = moose.element(basePath.path+'/'+groupAnnoInfo["Compartment"]+'/'+p.getId())
+                moosegrpinfo = moose.Annotator(moosegrp.path+'/info')
+                moosegrpinfo.color = groupAnnoInfo["bgColor"]
+            else:
+                print ("Compartment not found")
 
+            if p.getKind() == 2:
+                if p.getId() not in groupInfo:
+                    #groupInfo[p.getId()]
+                    for gmemIndex in range(0,p.getNumMembers()):
+                        mem = p.getMember(gmemIndex)
+
+                        if p.getId() in groupInfo:
+                            groupInfo[p.getId()].append(mem.getIdRef())
+                        else:
+                            groupInfo[p.getId()] =[mem.getIdRef()]
+    return groupInfo
 def setupEnzymaticReaction(enz, groupName, enzName,
                            specInfoMap, modelAnnotaInfo):
     enzPool = (modelAnnotaInfo[groupName]["enzyme"])
@@ -327,11 +344,11 @@ def getObjAnnotation(obj, modelAnnotationInfo):
     # modelAnnotaInfo= {}
     annotateMap = {}
     if (obj.getAnnotation() is not None):
+
         annoNode = obj.getAnnotation()
         for ch in range(0, annoNode.getNumChildren()):
             childNode = annoNode.getChild(ch)
-            if (childNode.getPrefix() == "moose" and (childNode.getName() ==
-                                                      "ModelAnnotation" or childNode.getName() == "EnzymaticReaction")):
+            if (childNode.getPrefix() == "moose" and (childNode.getName() in["ModelAnnotation","EnzymaticReaction","GroupAnnotation"])):
                 sublist = []
                 for gch in range(0, childNode.getNumChildren()):
                     grandChildNode = childNode.getChild(gch)
@@ -352,6 +369,8 @@ def getObjAnnotation(obj, modelAnnotationInfo):
                     if nodeName == "textColor":
                         annotateMap[nodeName] = nodeValue
                     if nodeName == "Group":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "Compartment":
                         annotateMap[nodeName] = nodeValue
     return annotateMap
 
