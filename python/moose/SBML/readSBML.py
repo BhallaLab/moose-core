@@ -24,7 +24,9 @@ import sys
 import os.path
 import collections
 import moose
-from validation import validateModel
+
+from moose.SBML.validation import validateModel
+
 import re
 '''
    TODO in

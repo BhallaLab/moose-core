@@ -17,9 +17,11 @@ from collections import defaultdict
 from . import _moose
 from ._moose import *
 import __main__ as main
-import genesis.writeKkit
-import SBML.readSBML
-import SBML.writeSBML
+
+import moose.SBML.readSBML
+import moose.SBML.writeSBML
+import moose.genesis
+
 sequence_types = ['vector<double>',
                   'vector<int>',
                   'vector<long>',

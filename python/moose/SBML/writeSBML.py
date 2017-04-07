@@ -22,7 +22,7 @@ import sys
 import re
 from collections import Counter
 import moose
-from validation import validateModel
+from moose.SBML.validation import validateModel
 from moose.chemUtil.chemConnectUtil import *
 from moose.chemUtil.graphUtils import *
 
