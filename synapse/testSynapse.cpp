@@ -129,14 +129,17 @@ void testRollingMatrix()
 	cout << "." << flush;
 }
 
+// FIXME: This test is failing on travis.
 void testSeqSynapse()
 {
 	int numSyn = 10;
 	int kernelWidth = 5;
 	SeqSynHandler ssh;
 	ssh.vSetNumSynapses( numSyn );
+
 	// for ( int i = 0; i < numSyn; ++i )
 		// ssh.addSynapse();
+
 	assert( static_cast< int >( ssh.vGetNumSynapses() ) == numSyn );
 	ssh.setSeqDt( 1.0 );
 	ssh.setHistoryTime( 5.0 );
@@ -156,7 +159,7 @@ void testSeqSynapse()
 	cout << "." << flush;
 
         // FIXME: See issue BhallaLab/moose-core#174 
-	// ssh.setResponseScale( 1.0 );
+        // ssh.setResponseScale( 1.0 );
 	for ( int i = 0; i < numSyn; ++i ) {
 		ssh.addSpike( i, 0.0, 1.0 );
 	}
