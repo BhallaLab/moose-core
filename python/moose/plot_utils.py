@@ -286,9 +286,13 @@ def plotRecords(records, xvec = None, **kwargs):
     else:
         plt.show()
 
+def plot_records( data_dict, xvec = None, **kwargs ):
+    """Renamed (deprecated)
+    """
+    return plot_tables( data_dict, xvec, **kwargs )
 
-def plot_records(data_dict, xvec = None, **kwargs):
-    """plot_records Plot given dictionary.
+def plot_tables(data_dict, xvec = None, **kwargs):
+    """plot_tables plots moose.Table stored in a dictionary.
 
     :param data_dict:
     :param xvec: If None, use moose.Clock to generate xvec.
@@ -312,7 +316,7 @@ def plot_records(data_dict, xvec = None, **kwargs):
                 
         if plotThis:
             if not subplot: 
-                yvec = data_dict[k]
+                yvec = data_dict[k].vector
                 plotVector(yvec, xvec, label=k, **kwargs)
             else:
                 plt.subplot(len(data_dict), 1, i)
