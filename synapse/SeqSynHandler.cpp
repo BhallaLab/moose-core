@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include <queue>
+#include "global.h"
 #include "header.h"
 #include "Synapse.h"
 #include "SynEvent.h"
@@ -301,11 +302,11 @@ void SeqSynHandler::refillSynapseOrder( unsigned int newSize )
 			synapseOrder_[i] = i;
 	} else {
 		if ( synapseOrderOption_ > 0 ) { // Specify seed explicitly
-			mtseed( synapseOrderOption_ );
+                    moose::mtseed( synapseOrderOption_ );
 		}
 		vector< double > x;
 		for ( unsigned int i = 0; i < newSize; ++i )
-			x.push_back( mtrand() );
+			x.push_back( moose::mtrand() );
 		auto idx = sort_indexes< double >( x );
 		for ( unsigned int i = 0; i < newSize; ++i )
 			synapseOrder_[i] = idx[i];
