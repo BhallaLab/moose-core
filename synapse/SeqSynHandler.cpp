@@ -300,6 +300,7 @@ void SeqSynHandler::refillSynapseOrder( unsigned int newSize )
 		for ( unsigned int i = 0 ; i < newSize; ++i )
 			synapseOrder_[i] = i;
 	} else {
+		synapseOrder_.resize( newSize );
 		if ( synapseOrderOption_ > 0 ) { // Specify seed explicitly
 			mtseed( synapseOrderOption_ );
 		}
