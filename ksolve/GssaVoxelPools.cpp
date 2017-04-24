@@ -209,6 +209,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
         {
             r = rng_.uniform();
         }
+
         t_ -= ( 1.0 / atot_ ) * log( r );
         // g->stoich->updateFuncs( varS(), t_ ); // Handled next line.
         updateDependentMathExpn( g, rindex, t_ );
@@ -369,9 +370,9 @@ void GssaVoxelPools::xferIn( XferInfo& xf,
     {
         double& x = s[*k];
         // cout << x << "	i = " << *i << *j << "	m = " << *m << endl;
-        double dx = *i++ - *j++;
+        double dx = *(i++) - *(j++);
         double base = floor( dx );
-        if ( rng_.uniform() > dx - base )
+        if ( rng_.uniform() >= (dx - base) )
             x += base;
         else
             x += base + 1.0;
