@@ -205,10 +205,8 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 		numFire_[rindex]++;
 		
         double r = rng_.uniform();
-        while ( r <= 0.0 )
-        {
+        while ( r == 0.0 )
             r = rng_.uniform();
-        }
 
         t_ -= ( 1.0 / atot_ ) * log( r );
         // g->stoich->updateFuncs( varS(), t_ ); // Handled next line.
@@ -426,7 +424,7 @@ void GssaVoxelPools::xferInOnlyProxies(
         if ( *k >= stoichPtr_->getNumVarPools() && *k < proxyEndIndex )
         {
             double base = floor( *i );
-            if ( rng_.uniform() > *i - base )
+            if ( rng_.uniform() >= (*i - base) )
                 varSinit()[*k] = (varS()[*k] += base );
             else
                 varSinit()[*k] = (varS()[*k] += base + 1.0 );

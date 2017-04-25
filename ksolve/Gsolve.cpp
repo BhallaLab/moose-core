@@ -389,7 +389,7 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 			*i = round( *i );
 #else
 			double base = floor( *i );
-			if ( mtrand() >= (*i - base) )
+			if ( mtrand() > (*i - base) )
 				*i = base;
 			else
 				*i = base + 1.0;
