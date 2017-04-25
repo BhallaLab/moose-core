@@ -205,6 +205,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 		numFire_[rindex]++;
 		
         double r = rng_.uniform();
+
         while ( r == 0.0 )
             r = rng_.uniform();
 
