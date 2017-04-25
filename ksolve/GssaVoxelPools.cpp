@@ -233,7 +233,7 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
             double base = floor( n[i] );
             assert( base >= 0.0 );
             double frac = n[i] - base;
-            if ( rng_.uniform() > frac )
+            if ( rng_.uniform() >= frac )
                 n[i] = base;
             else
                 n[i] = base + 1.0;
