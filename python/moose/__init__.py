@@ -613,4 +613,4 @@ def doc(arg, inherited=True, paged=True):
     if pager:
         pager(text)
     else:
-        pprint(text, width=80)
+        print(text, width=80)
