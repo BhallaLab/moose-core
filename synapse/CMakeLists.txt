@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
+
 include_directories( ../basecode ../utility ../kinetics)
 include_directories( ../external/muparser/include/ )
 
-file(GLOB SYNAPSE_SRCS *.cpp)
 set( SYNAPSE_SRCS 
     GraupnerBrunel2012CaPlasticitySynHandler.cpp
     RollingMatrix.cpp
