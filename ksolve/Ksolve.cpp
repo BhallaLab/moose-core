@@ -238,8 +238,8 @@ Ksolve::Ksolve()
 #elif USE_BOOST
     method_( "rk5a" ),
 #endif
-    epsAbs_( 1e-4 ),
-    epsRel_( 1e-6 ),
+    epsAbs_( 1e-7 ),
+    epsRel_( 1e-7 ),
     pools_( 1 ),
     startVoxel_( 0 ),
     dsolve_(),
