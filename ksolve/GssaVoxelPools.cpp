@@ -125,6 +125,7 @@ void GssaVoxelPools::setNumReac( unsigned int n )
 {
     v_.clear();
     v_.resize( n, 0.0 );
+    numFire_.resize( n, 0 );
 }
 
 /**
@@ -201,11 +202,13 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 
         double sign = double(v_[rindex] >= 0) - double(0 > v_[rindex] );
         g->transposeN.fireReac( rindex, Svec(), sign );
+		numFire_[rindex]++;
+		
         double r = rng_.uniform();
-        while ( r <= 0.0 )
-        {
+
+        while ( r == 0.0 )
             r = rng_.uniform();
-        }
+
         t_ -= ( 1.0 / atot_ ) * log( r );
         // g->stoich->updateFuncs( varS(), t_ ); // Handled next line.
         updateDependentMathExpn( g, rindex, t_ );
@@ -215,7 +218,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
 
 void GssaVoxelPools::reinit( const GssaSystem* g )
 {
-    //rng_.setSeed( moose::__rng_seed__ );
+    rng_.setSeed( moose::__rng_seed__ );
     VoxelPoolsBase::reinit(); // Assigns S = Sinit;
     unsigned int numVarPools = g->stoich->getNumVarPools();
     g->stoich->updateFuncs( varS(), 0 );
@@ -231,7 +234,7 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
             double base = floor( n[i] );
             assert( base >= 0.0 );
             double frac = n[i] - base;
-            if ( rng_.uniform() > frac )
+            if ( rng_.uniform() >= frac )
                 n[i] = base;
             else
                 n[i] = base + 1.0;
@@ -246,6 +249,12 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
     }
     t_ = 0.0;
     refreshAtot( g );
+	numFire_.assign( v_.size(), 0 );
+}
+
+vector< unsigned int > GssaVoxelPools::numFire() const
+{
+	return numFire_;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -360,9 +369,9 @@ void GssaVoxelPools::xferIn( XferInfo& xf,
     {
         double& x = s[*k];
         // cout << x << "	i = " << *i << *j << "	m = " << *m << endl;
-        double dx = *i++ - *j++;
+        double dx = *(i++) - *(j++);
         double base = floor( dx );
-        if ( rng_.uniform() > dx - base )
+        if ( rng_.uniform() >= (dx - base) )
             x += base;
         else
             x += base + 1.0;
@@ -416,7 +425,7 @@ void GssaVoxelPools::xferInOnlyProxies(
         if ( *k >= stoichPtr_->getNumVarPools() && *k < proxyEndIndex )
         {
             double base = floor( *i );
-            if ( rng_.uniform() > *i - base )
+            if ( rng_.uniform() >= (*i - base) )
                 varSinit()[*k] = (varS()[*k] += base );
             else
                 varSinit()[*k] = (varS()[*k] += base + 1.0 );

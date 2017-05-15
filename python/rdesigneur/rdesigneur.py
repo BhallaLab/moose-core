@@ -27,8 +27,28 @@ import rmoogli
 from rdesigneurProtos import *
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
-import lxml
-from lxml import etree
+
+try:
+  from lxml import etree
+except ImportError:
+  try:
+    # Python 2.5
+    import xml.etree.cElementTree as etree
+  except ImportError:
+    try:
+      # Python 2.5
+      import xml.etree.ElementTree as etree
+    except ImportError:
+      try:
+        # normal cElementTree install
+        import cElementTree as etree
+      except ImportError:
+        try:
+          # normal ElementTree install
+          import elementtree.ElementTree as etree
+        except ImportError:
+          print("Failed to import ElementTree from any known place")
+
 import csv
 
 #EREST_ACT = -70e-3
@@ -60,6 +80,7 @@ class rdesigneur:
             useGssa = True,
             combineSegments = True,
             stealCellFromLibrary = False,
+            verbose = True,
             diffusionLength= 2e-6,
             meshLambda = -1.0,    #This is a backward compatibility hack
             temperature = 32,
@@ -91,6 +112,7 @@ class rdesigneur:
         self.useGssa = useGssa
         self.combineSegments = combineSegments
         self.stealCellFromLibrary = stealCellFromLibrary
+        self.verbose = verbose
         self.diffusionLength= diffusionLength
         if meshLambda > 0.0:
             print("Warning: meshLambda argument is deprecated. Please use 'diffusionLength' instead.\nFor now rdesigneur will accept this argument.")
@@ -181,7 +203,8 @@ class rdesigneur:
             self._buildMoogli()
             self._buildStims()
             self._configureClocks()
-            self._printModelStats()
+            if self.verbose:
+                self._printModelStats()
             self._savePlots()
 
         except BuildError as msg:
@@ -295,7 +318,8 @@ class rdesigneur:
                 return True
             if moose.exists( '/library/' + protoVec[0] ):
                 #moose.copy('/library/' + protoVec[0], '/library/', protoVec[1])
-                print('renaming /library/' + protoVec[0] + ' to ' + protoVec[1])
+                if self.verbose:
+                    print('renaming /library/' + protoVec[0] + ' to ' + protoVec[1])
                 moose.element( '/library/' + protoVec[0]).name = protoVec[1]
                 #moose.le( '/library' )
                 return True
@@ -434,6 +458,7 @@ class rdesigneur:
                     "buildChemDistrib: No elec compartments found in path: '" \
                         + pair + "'" )
             self.spineComptElist = self.elecid.spinesFromExpression[ pair ]
+            #print( 'LEN SPINECOMPTELIST =' + str( pair ) + ", " str( len( self.spineComptElist ) ) )
             '''
             if len( self.spineComptElist ) == 0:
                 raise BuildError( \
@@ -494,7 +519,7 @@ class rdesigneur:
             return (), ""
 
         kf = knownFields[field] # Find the field to decide type.
-        if ( kf[0] == 'CaConcBase' or kf[0] == 'ChanBase' ):
+        if ( kf[0] == 'CaConcBase' or kf[0] == 'ChanBase' or kf[0] == 'NMDAChan' ):
             objList = self._collapseElistToPathAndClass( comptList, plotSpec[2], kf[0] )
             # print ("objList: ", len(objList), kf[1])
             return objList, kf[1]
@@ -539,6 +564,7 @@ class rdesigneur:
             'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)' ),
             'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)' ),
             'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)' ),
+            'ICa':('NMDAChan', 'getICa', 1e9, 'Ca current (nA)' ),
             'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)' ),
             'n':('PoolBase', 'getN', 1, '# of molecules'),
             'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' )
@@ -574,14 +600,16 @@ class rdesigneur:
     def _buildMoogli( self ):
         knownFields = {
             'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)', -80.0, 40.0 ),
-            'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)', -10, 10 ),
-            'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)', -10, 10 ),
-            'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)', 0, 1 ),
-            'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)', 0, 1 ),
-            'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)', -10, 10 ),
-            'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)', 0, 10 ),
-            'n':('PoolBase', 'getN', 1, '# of molecules', 0, 200 ),
-            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)', 0, 2 )
+            'initVm':('CompartmentBase', 'getInitVm', 1000, 'Init. Memb. Potl (mV)', -80.0, 40.0 ),
+            'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)', -10.0, 10.0 ),
+            'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)', -10.0, 10.0 ),
+            'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)', 0.0, 1.0 ),
+            'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)', 0.0, 1.0 ),
+            'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)', -10.0, 10.0 ),
+            'ICa':('NMDAChan', 'getICa', 1e9, 'Ca current (nA)', -10.0, 10.0 ),
+            'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)', 0.0, 10.0 ),
+            'n':('PoolBase', 'getN', 1, '# of molecules', 0.0, 200.0 ),
+            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)', 0.0, 2.0 )
         }
         moogliBase = moose.Neutral( self.modelPath + '/moogli' )
         k = 0
@@ -645,6 +673,7 @@ class rdesigneur:
             'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)' ),
             'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)' ),
             'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)' ),
+            'ICa':('NMDAChan', 'getICa', 1e9, 'Ca current (nA)' ),
             'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)' ),
             'n':('PoolBase', 'getN', 1, '# of molecules'),
             'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' )
@@ -695,6 +724,7 @@ class rdesigneur:
             'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)' ),
             'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)' ),
             'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)' ),
+            'ICa':('NMDAChan', 'getICa', 1e9, 'Ca current (nA)' ),
             'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)' ),
             'n':('PoolBase', 'getN', 1, '# of molecules'),
             'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' )
@@ -1252,8 +1282,8 @@ class rdesigneur:
             else:
                 ePath = i[0].path + '/' + elecRelPath
                 if not( moose.exists( ePath ) ):
-                    raise BuildError( \
-                        "Error: buildAdaptor: no elec obj in " + ePath )
+                    continue
+                    #raise BuildError( "Error: buildAdaptor: no elec obj in " + ePath )
                 elObj = moose.element( i[0].path + '/' + elecRelPath )
             if ( isElecToChem ):
                 elecFieldSrc = 'get' + capField

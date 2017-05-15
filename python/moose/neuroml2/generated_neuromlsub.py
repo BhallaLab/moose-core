@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 
 #
 # Generated Sun Apr 17 15:01:32 2016 by generateDS.py version 2.22a.
@@ -20,7 +20,8 @@
 import sys
 from lxml import etree as etree_
 
-import ??? as supermod
+# FIXME: Comment it out 
+# import ??? as supermod
 
 def parsexml_(infile, parser=None, **kwargs):
     if parser is None:
