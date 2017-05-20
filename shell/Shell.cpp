@@ -216,7 +216,6 @@ Id Shell::doCreate( string type, ObjId parent, string name,
                     NodePolicy nodePolicy,
                     unsigned int preferredNode )
 {
-
     const Cinfo* c = Cinfo::find( type );
     if ( !isNameValid( name ) )
     {

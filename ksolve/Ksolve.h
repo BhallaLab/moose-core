@@ -153,7 +153,7 @@ private:
      * multinode management by indexing only the subset of entries
      * present on this node.
      */
-    vector< VoxelPools > pools_;
+    vector< VoxelPools > voxelPools_;
 
     /// First voxel indexed on the current node.
     unsigned int startVoxel_;

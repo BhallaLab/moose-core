@@ -83,6 +83,7 @@ void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
     VoxelPoolsBase::reinit();
 }
 
+// MICKY: This solves system of ODE for chemical reactions.
 void VoxelPools::advance( const ProcInfo* p )
 {
     double t = p->currTime - p->dt;
@@ -103,7 +104,6 @@ void VoxelPools::advance( const ProcInfo* p )
     }
     
 #elif USE_BOOST
-
 
     // NOTE: Make sure to assing vp to BoostSys vp. In next call, it will be used by
     // updateRates func. Unlike gsl call, we can't pass extra void*  to gslFunc. 
@@ -229,6 +229,8 @@ void VoxelPools::setInitDt( double dt )
 int VoxelPools::gslFunc( double t, const double* y, double *dydt, 
 						void* params )
 {
+    //printf( "%g, %g\n", y[0], dydt[0] );
+
 	VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
 	// Stoich* s = reinterpret_cast< Stoich* >( params );
 	double* q = const_cast< double* >( y ); // Assign the func portion.
@@ -245,6 +247,7 @@ int VoxelPools::gslFunc( double t, const double* y, double *dydt,
 
 	vp->stoichPtr_->updateFuncs( q, t );
 	vp->updateRates( y, dydt );
+
 #ifdef USE_GSL
 	return GSL_SUCCESS;
 #else
@@ -314,8 +317,8 @@ void VoxelPools::updateRates( const double* s, double* yprime ) const
 			N.nRows() == stoichPtr_->getNumAllPools() );
 	assert( N.nColumns() == rates_.size() );
 
-	for ( vector< RateTerm* >::const_iterator
-		i = rates_.begin(); i != rates_.end(); i++) {
+	for ( vector< RateTerm* >::const_iterator i = rates_.begin(); i != rates_.end(); i++)
+        {
 		*j++ = (**i)( s );
 		assert( !std::isnan( *( j-1 ) ) );
 	}
