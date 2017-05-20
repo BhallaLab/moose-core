@@ -259,7 +259,7 @@ def writeEnz( modelpath,f,sceneitems):
                 str(0) + " " +
                 str(isMichaelisMenten) + " " +
                 "\"\"" + " " +
-                str(textcolor) + " " + str(color) + " \"\"" +
+                str(color) + " " + str(textcolor) + " \"\"" +
                 " " + str(int(x)) + " " + str(int(y)) + " "+str(0)+"\n")
     return enzList
 
