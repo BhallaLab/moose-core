@@ -39,7 +39,6 @@ else()
     message(FATAL_ERROR "Could not determine MOOSE_VERSION" )
 endif( )
 
-add_definitions( -DMOOSE_VERSION="${MOOSE_VERSION}")
 message( STATUS "MOOSE Version ${MOOSE_VERSION}" )
 
 # This snippet is from LLVM project.

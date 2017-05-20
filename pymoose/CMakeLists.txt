@@ -3,6 +3,7 @@ include_directories(../basecode ../msg)
 
 find_package( PythonInterp REQUIRED )
 
+add_definitions( -DMOOSE_VERSION=${MOOSE_VERSION} )
 set(PYMOOSE_SRCS 
     moosemodule.cpp
     vec.cpp
