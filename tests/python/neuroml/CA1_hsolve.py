@@ -12,6 +12,7 @@ import moose
 from moose.utils import *
 
 from moose.neuroml.NeuroML import NeuroML
+import numpy as np
 
 simdt = 10e-6 # s
 plotdt = 10e-6 # s
@@ -35,7 +36,7 @@ def loadGran98NeuroML_L123(filename,params):
     resetSim(['/elec','/cells'],simdt,plotdt,simmethod='hsolve') # from moose.utils
     print("Running ... ")
     moose.start(runtime)
-    tvec = arange(0.0,runtime,simdt)
+    tvec = np.arange(0.0,runtime,simdt)
 
 if __name__ == "__main__":
     if len(sys.argv)<2:

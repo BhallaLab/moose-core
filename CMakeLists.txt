@@ -103,8 +103,27 @@ option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_BOOST "Use boost library instead of GSL" OFF)
 option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
 
+################################# CMKAE MACROS #################################
+
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 
 ############################ BUILD CONFIGURATION #################################
+
+# VERBOSITY OF OUTPUT
+
+option(WITH_CUDA "Enable GPU acceleration" ON)
+if(WITH_CUDA)
+    find_package(CUDA)
+    if(CUDA_FOUND)
+        MESSAGE(STATUS "Using CUDA ${CUDA_VERSION}")
+    else(CUDA_FOUND)
+        MESSAGE(FATAL_ERROR "I could not locate CUDA!\n"
+        "If CUDA is installed in non-standard place use -DCUDA_TOOLKIT_ROOT_DIR"
+        " to specify the PATH to CUDA e.g. \n"
+        "   $ cmake -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-7.5 .." 
+        )
+    endif(CUDA_FOUND)
+endif()
 
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
@@ -253,13 +272,6 @@ if(HDF5_LIBRARY_DIRS)
     set_target_properties( libmoose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
 endif()
 
-find_package(Termcap)
-find_package(Readline)
-
-if(READLINE_FOUND AND TERMCAP_FOUND)
-    add_definitions(-DUSE_READLINE)
-    include_directories(${Readline_INCLUDE_DIR})
-endif()
 
 # Openmpi
 if(WITH_MPI)
