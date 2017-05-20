@@ -498,6 +498,7 @@ void testHSolveUtils( )
 	
 	// Clean up
 	shell->doDelete( n );
+        cout << "." << flush;
         //  TEST_END;
 }
 

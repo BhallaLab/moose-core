@@ -1,17 +1,22 @@
-sudo: required
-dist: trusty
 language: cpp
+dist: trusty
+sudo: required 
 compiler:
     - gcc
     - clang
 os:
     - linux
+    - osx
 notifications:
     email:
         recipients:
-            - dilawar.s.rajput@gmail.com
             - bhalla@ncbs.res.in
+<<<<<<< HEAD
             - dharmatv@instem.res.in
+=======
+            - hrani@ncbs.res.in
+            - dilawar.s.rajput@gmail.com
+>>>>>>> master
         on_success: change
         on_failure: always
 

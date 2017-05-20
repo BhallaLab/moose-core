@@ -74,6 +74,15 @@ const Cinfo* Table::initCinfo()
         , &Table::getFormat
     );
 
+    // relevant for Streamer class.  When data is written to a datafile, this is
+    // used to create column name.
+    static ValueFinfo< Table, string > columnName(
+        "columnName"
+        , "Name of the table written in header of data file."
+        , &Table::setColumnName
+        , &Table::getColumnName
+    );
+
     //////////////////////////////////////////////////////////////
     // MsgDest Definitions
     //////////////////////////////////////////////////////////////
@@ -119,6 +128,7 @@ const Cinfo* Table::initCinfo()
     {
         &threshold,		// Value
         &format,                // Value
+        &columnName,            // Value
         &outfile,               // Value 
         &useStreamer,           // Value
         handleInput(),		// DestFinfo
@@ -190,7 +200,7 @@ const Cinfo* Table::initCinfo()
 
 static const Cinfo* tableCinfo = Table::initCinfo();
 
-Table::Table() : threshold_( 0.0 ) , lastTime_( 0.0 ) , input_( 0.0 )
+Table::Table() : threshold_( 0.0 ) , lastTime_( 0.0 ) , input_( 0.0 ), dt_( 0.0 )
 {
     // Initialize the directory to which each table should stream.
     rootdir_ = "_tables";
@@ -339,6 +349,17 @@ string Table::getFormat( void ) const
     return format_;
 }
 
+/*  User defined column name for streamer  */
+string Table::getColumnName( void ) const
+{
+    return tableColumnName_;
+}
+
+void Table::setColumnName( const string colname )
+{
+    tableColumnName_ = colname ;
+}
+
 /* Enable/disable streamer support. */
 void Table::setUseStreamer( bool useStreamer )
 {
@@ -353,7 +374,7 @@ bool Table::getUseStreamer( void ) const
 /*  set/get outfile_ */
 void Table::setOutfile( string outpath )
 {
-    outfile_ = moose::createPosixPath( outpath );
+    outfile_ = moose::createMOOSEPath( outpath );
     if( ! moose::createParentDirs( outfile_ ) )
         outfile_ = moose::toFilename( outfile_ );
 

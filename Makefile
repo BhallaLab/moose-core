@@ -52,15 +52,11 @@
 # 		generating the python interface using swig.
 #
 # USE_MPI - compile with support for parallel computing through MPICH library
-#
-# USE_SBML (default value: 0) - compile with support for the Systems Biology
-# 		Markup Language (SBML). This allows you to read and write chemical
-# 		kinetic models in the simulator-indpendent SBML format.
-#
+
 
 # Default values for flags. The operator ?= assigns the given value only if the
 # variable is not already defined.
-USE_SBML?=0
+
 USE_HDF5?=1
 USE_CUDA?=0
 USE_NEUROKIT?=0
@@ -222,22 +218,12 @@ endif
 
 # To use GSL, pass USE_GSL=true ( anything on the right will do) in make command line
 ifdef USE_GSL
-#LIBS+= $(shell gsl-config --libs)
+LIBS+= $(shell gsl-config --libs)
 #LIBS+= -L/usr/lib -Wl,--no-as-needed -lgsl -lgslcblas -lm
-LIBS+= -L/usr/lib -lgsl -lgslcblas -lm
+#LIBS+= -L/usr/lib -lgsl -lgslcblas -lm
 CXXFLAGS+= -DUSE_GSL
 else
 LIBS+= -lm
-endif
-
-#harsha
-# To use SBML, pass USE_SBML=1 in make command line
-ifeq ($(USE_SBML),1)
-LIBS+= -lsbml
-CXXFLAGS+=-DUSE_SBML
-LDFLAGS += -L/usr/lib64 -Wl,--rpath='/usr/lib64'
-SBML_DIR = sbml
-SBML_LIB = sbml/_sbml.o
 endif
 
 #Saeed
@@ -287,12 +273,12 @@ endif
 
 # Here we automagically change compilers to deal with MPI.
 ifdef USE_MPI
-	CXX = mpicxx
+	CXX = mpicxx --std=c++11
 #	CXX = /usr/local/mvapich2/bin/mpicxx
 #	PARALLEL_DIR = parallel
 #	PARALLEL_LIB = parallel/parallel.o
 else
-	CXX = g++
+	CXX = g++  --std=c++11
 #	CXX = CC	# Choose between Solaris CC and g++ on a Solaris machine
 endif
 
@@ -371,7 +357,7 @@ export CXXFLAGS
 export LD
 export LIBS
 export USE_GSL
-export USE_SBML
+#export USE_SBML
 
 all: moose pymoose
 

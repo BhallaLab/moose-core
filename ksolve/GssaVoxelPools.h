@@ -11,90 +11,102 @@
 #define _GSSA_VOXEL_POOLS_BASE_H
 
 class Stoich;
+
 class GssaVoxelPools: public VoxelPoolsBase
 {
-	public: 
-		GssaVoxelPools();
-		virtual ~GssaVoxelPools();
+public:
+    GssaVoxelPools();
+
+    virtual ~GssaVoxelPools();
 
 
-		//////////////////////////////////////////////////////////////////
-		// Solver interface functions
-		//////////////////////////////////////////////////////////////////
-		void advance( const ProcInfo* p );
-		void recalcTime( const GssaSystem* g, double currTime );
-		void updateDependentMathExpn( 
-				const GssaSystem* g, unsigned int rindex, double time );
-		void updateDependentRates( 
-			const vector< unsigned int >& deps, const Stoich* stoich );
-		unsigned int pickReac() const;
-		void setNumReac( unsigned int n );
+    //////////////////////////////////////////////////////////////////
+    // Solver interface functions
+    //////////////////////////////////////////////////////////////////
+    void advance( const ProcInfo* p );
+    void recalcTime( const GssaSystem* g, double currTime );
+    void updateDependentMathExpn(
+        const GssaSystem* g, unsigned int rindex, double time );
+    void updateDependentRates(
+        const vector< unsigned int >& deps, const Stoich* stoich );
+    unsigned int pickReac();
+    void setNumReac( unsigned int n );
 
-		void advance( const ProcInfo* p, const GssaSystem* g );
+    void advance( const ProcInfo* p, const GssaSystem* g );
 
-		/**
- 		* Cleans out all reac rates and recalculates atot. Needed whenever a
- 		* mol conc changes, or if there is a roundoff error. Returns true
- 		* if OK, returns false if it is in a stuck state and atot<=0
- 		*/
-		bool refreshAtot( const GssaSystem* g );
+	vector< unsigned int > numFire() const;
 
-		/**
-		 * Builds the gssa system as needed.
-		 */
-		void reinit( const GssaSystem* g );
+    /**
+    * Cleans out all reac rates and recalculates atot. Needed whenever a
+    * mol conc changes, or if there is a roundoff error. Returns true
+    * if OK, returns false if it is in a stuck state and atot<=0
+    */
+    bool refreshAtot( const GssaSystem* g );
 
-		void updateAllRateTerms( const vector< RateTerm* >& rates,
-					   unsigned int numCoreRates	);
-		void updateRateTerms( const vector< RateTerm* >& rates,
-			unsigned int numCoreRates, unsigned int index );
+    /**
+     * Builds the gssa system as needed.
+     */
+    void reinit( const GssaSystem* g );
 
-		double getReacVelocity( unsigned int r, const double* s ) const;
-		void updateReacVelocities( const GssaSystem* g,
-			const double* s, vector< double >& v ) const;
+    void updateAllRateTerms( const vector< RateTerm* >& rates,
+                             unsigned int numCoreRates	);
+    void updateRateTerms( const vector< RateTerm* >& rates,
+                          unsigned int numCoreRates, unsigned int index );
 
-		/**
-		 * Assign the volume, and handle the cascading effects by scaling
-		 * all the dependent values of nInit and rates if applicable.
-		 */
-		void setVolumeAndDependencies( double vol );
+    double getReacVelocity( unsigned int r, const double* s ) const;
+    void updateReacVelocities( const GssaSystem* g,
+                               const double* s, vector< double >& v ) const;
 
-		/**
-		 * Digests incoming data values for cross-compt reactions.
-		 * Sums the changes in the values onto the specified pools.
-		 */
-		void xferIn( XferInfo& xf, 
-						unsigned int voxelIndex, const GssaSystem* g );
+    /**
+     * Assign the volume, and handle the cascading effects by scaling
+     * all the dependent values of nInit and rates if applicable.
+     */
+    void setVolumeAndDependencies( double vol );
 
-		/**
-		 * Used during initialization: Takes only the proxy pool values 
-		 * from the incoming transfer data, and assigns it to the proxy
-		 * pools on current solver
-		 */
-		void xferInOnlyProxies(
-			const vector< unsigned int >& poolIndex,
-			const vector< double >& values, 
-			unsigned int numProxyPools,
-	    	unsigned int voxelIndex	);
+    /**
+     * Digests incoming data values for cross-compt reactions.
+     * Sums the changes in the values onto the specified pools.
+     */
+    void xferIn( XferInfo& xf,
+                 unsigned int voxelIndex, const GssaSystem* g );
 
-		void setStoich( const Stoich* stoichPtr );
+    /**
+     * Used during initialization: Takes only the proxy pool values
+     * from the incoming transfer data, and assigns it to the proxy
+     * pools on current solver
+     */
+    void xferInOnlyProxies(
+        const vector< unsigned int >& poolIndex,
+        const vector< double >& values,
+        unsigned int numProxyPools,
+        unsigned int voxelIndex	);
 
-	private:
-		/// Time at which next event will occur.
-		double t_; 
+    void setStoich( const Stoich* stoichPtr );
 
-		/**
-		 * Total propensity of all the reactions in the system
-		 */
-		double atot_;
+private:
+    /// Time at which next event will occur.
+    double t_;
 
-		/** 
-		 * State vector of reaction velocities. Only a subset are
-		 * recalculated on each step.
-		 */
-		vector< double > v_; 
-		// Possibly we should put independent RNGS, so save one here.
-		
+    /**
+     * Total propensity of all the reactions in the system
+     */
+    double atot_;
+
+    /**
+     * State vector of reaction velocities. Only a subset are
+     * recalculated on each step.
+     */
+    vector< double > v_;
+    // Possibly we should put independent RNGS, so save one here.
+	
+	// Count how many times each reaction has fired.
+	vector< unsigned int > numFire_;
+
+    /**
+     * @brief RNG.
+     */
+    moose::RNG<double> rng_;
+
 };
 
 #endif	// _GSSA_VOXEL_POOLS_H

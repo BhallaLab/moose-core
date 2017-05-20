@@ -233,9 +233,13 @@ static const Cinfo* ksolveCinfo = Ksolve::initCinfo();
 
 Ksolve::Ksolve()
     :
+#if USE_GSL
     method_( "rk5" ),
-    epsAbs_( 1e-4 ),
-    epsRel_( 1e-6 ),
+#elif USE_BOOST
+    method_( "rk5a" ),
+#endif
+    epsAbs_( 1e-7 ),
+    epsRel_( 1e-7 ),
     pools_( 1 ),
     startVoxel_( 0 ),
     dsolve_(),
@@ -290,13 +294,9 @@ double Ksolve::getEpsAbs() const
 void Ksolve::setEpsAbs( double epsAbs )
 {
     if ( epsAbs < 0 )
-    {
         epsAbs_ = 1.0e-4;
-    }
     else
-    {
         epsAbs_ = epsAbs;
-    }
 }
 
 
@@ -368,8 +368,10 @@ void Ksolve::setStoich( Id stoich )
         ode.method = method_;
 #ifdef USE_GSL
         ode.gslSys.dimension = stoichPtr_->getNumAllPools();
-        if ( ode.gslSys.dimension == 0 )
+        if ( ode.gslSys.dimension == 0 ) {
+			stoichPtr_ = 0;
             return; // No pools, so don't bother.
+		}
         innerSetMethod( ode, method_ );
         ode.gslSys.function = &VoxelPools::gslFunc;
         ode.gslSys.jacobian = 0;
@@ -565,7 +567,8 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
 void Ksolve::reinit( const Eref& e, ProcPtr p )
 {
-    assert( stoichPtr_ );
+    if ( !stoichPtr_ )
+		return;
     if ( isBuilt_ )
     {
         for ( unsigned int i = 0 ; i < pools_.size(); ++i )

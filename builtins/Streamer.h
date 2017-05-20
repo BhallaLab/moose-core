@@ -30,7 +30,7 @@
 
 using namespace std;
 
-class Streamer
+class Streamer : public StreamerBase 
 {
 
 public:
@@ -56,7 +56,7 @@ public:
     void removeTable( Id table );
     void removeTables( vector<Id> table );
 
-    void zipWithTime( vector<double>& data, double currTime);
+    void zipWithTime( );
 
     /** Dest functions.
      * The process function called by scheduler on every tick
@@ -76,8 +76,9 @@ private:
     string format_;
     bool isOutfilePathSet_;
 
-    // dt_ of Table's clock
+    // dt_ and tick number of Table's clock
     vector<double> tableDt_;
+    vector<unsigned int> tableTick_;
 
     // This currTime is not computed using the ProcPtr but rather using Tables
     // dt_ and number of entries written.
