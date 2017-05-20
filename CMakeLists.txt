@@ -11,9 +11,11 @@ endif(COMMAND cmake_policy)
 
 project(MOOSE)
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 include(FindPkgConfig)
+include(GetRevision)
 
 # If from command line, version info is not passed, use the git to generate a
 # version file. If GIT fails, use the previous known version.
@@ -27,20 +29,22 @@ if( (NOT MOOSE_VERSION) AND GIT_EXEC)
         OUTPUT_VARIABLE MOOSE_VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE
         )
-    message(STATUS "+ Writing ${MOOSE_VERSION} to ${VERSION_FILE}" )
-    file(WRITE ${VERSION_FILE} ${MOOSE_VERSION})
-elseif( (NOT MOOSE_VERSION) AND (NOT GIT_EXEC) )
-    message(STATUS "+ Reading ${VERSION_FILE}" )
-    file(READ ${VERSION_FILE} GIT_VERSION_OUTPUT )
+endif( )
+
+# Default to current date.
+if( (NOT MOOSE_VERSION)  )
+    NOW(TIMESTAMP)
+    set(MOOSE_VERSION "nightly-${TIMESTAMP}" )
 elseif(MOOSE_VERSION)
     message(STATUS "+ Using user specified VERSION = ${MOOSE_VERSION}" )
-    file(WRITE ${VERSION_FILE} ${MOOSE_VERSION})
 else()
     message(FATAL_ERROR "Could not determine MOOSE_VERSION" )
 endif( )
 
-add_definitions( -DMOOSE_VERSION="${MOOSE_VERSION}")
 message( STATUS "MOOSE Version ${MOOSE_VERSION}" )
+
+# Write VERSION to a file VERSION so that setup.py can use it.
+file(WRITE ${VERSION_FILE} ${MOOSE_VERSION} )
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -90,12 +94,12 @@ endif()
 
 option(VERBOSITY "Set MOOSE verbosity level (deprecated)" 0)
 ## Unit testing and debug mode.
-option(DEBUG "Build with debug support" OFF)
-option(GPROF "Build for profiling using gprof" OFF)
+option(DEBUG "Build with debug support" ON)
+option(GPROF "Build for profiling using gprof" ON)
 option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
-option(WITH_BOOST "Use boost library instead of GSL" OFF)
+option(WITH_BOOST "Use boost library instead of GSL" ON)
 option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
 
 ################################# CMKAE MACROS #################################

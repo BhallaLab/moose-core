@@ -3,6 +3,7 @@ include_directories(../basecode ../msg)
 
 find_package( PythonInterp REQUIRED )
 
+add_definitions( -DMOOSE_VERSION=${MOOSE_VERSION} )
 set(PYMOOSE_SRCS 
     moosemodule.cpp
     vec.cpp
@@ -93,8 +94,6 @@ endif(MACOSX)
 add_custom_target(copy_python_files ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/python ${CMAKE_BINARY_DIR}/python
-    COMMAND ${CMAKE_COMMAND} -E copy 
-        ${CMAKE_SOURCE_DIR}/VERSION ${CMAKE_BINARY_DIR}/VERSION 
     COMMENT "Copying required python files and other files to build directory"
     VERBATIM
     )
