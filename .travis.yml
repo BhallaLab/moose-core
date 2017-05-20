@@ -12,6 +12,8 @@ notifications:
         recipients:
             - bhalla@ncbs.res.in
             - dharmatv@instem.res.in
+            - dilawar.s.rajput@gmail.com
+            - dharmatv@instem.res.in
         on_success: change
         on_failure: always
 
