@@ -325,8 +325,9 @@ def plot_tables(data_dict, xvec = None, **kwargs):
                 yvec = data_dict[k].vector
                 plotVector(yvec, xvec, label=k, **kwargs)
             else:
-                ax = plt.subplot(len(data_dict), 1, i)
-                yvec = data_dict[k]
+                ax = plt.subplot(len(data_dict), 1, i+1)
+                kwargs[ 'ax' ] = ax
+                yvec = data_dict[k].vector
                 plotVector(yvec, xvec, label=k, **kwargs)
     if subplot:
         try:
