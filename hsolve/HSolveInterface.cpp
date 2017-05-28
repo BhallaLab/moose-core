@@ -184,9 +184,7 @@ double HSolve::getInject( Id id ) const
     unsigned int index = localIndex( id );
     // Not assert( index < inject_.size() ), because inject_ is a map.
     assert( index < nCompt_ );
-#ifdef USE_CUDA
-    return inject_[index].injectBasal;
-#else
+
     map< unsigned int, InjectStruct >::const_iterator i;
 
     i = inject_.find( index );
@@ -194,7 +192,6 @@ double HSolve::getInject( Id id ) const
         return i->second.injectBasal;
 
     return 0.0;
-#endif
 }
 
 void HSolve::setInject( Id id, double value )
@@ -202,7 +199,6 @@ void HSolve::setInject( Id id, double value )
     unsigned int index = localIndex( id );
     // Not assert( index < inject_.size() ), because inject_ is a map.
     assert( index < nCompt_ );
-
     inject_[ index ].injectBasal = value;
 }
 
