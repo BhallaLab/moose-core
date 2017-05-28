@@ -5,7 +5,6 @@ include_directories(../builtins ../basecode ../utility ../kinetics)
 include_directories(../ )
 include_directories(../mesh)
 include_directories(../external/muparser/include )
-
 IF(WITH_BOOST)
     check_include_file_cxx( ${Boost_INCLUDE_DIRS}/boost/numeric/odeint.hpp
         ODEINT_EXISTS)
