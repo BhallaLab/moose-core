@@ -19,9 +19,9 @@ def create_cylinder( name ):
 #Making the model cylindrical, setting the properties of the model...like here its a cylinder
     c = moose.CylMesh( '/model/%s' % name )
 #Setting the length of the cyliinder
-    c.x1 = 1e-3
+    c.x1 = 1
 #Setting the number of voxels
-    c.diffLength = c.x1 / 10000
+    c.diffLength = c.x1 / (10 ** 4 )
 #radius of the cylinder at both the faces, in here its kept same at both the faces
     c.r0 = c.r1 = 1e-3
     print( 'Volume of cylinder %s is %g' % (c.name,  c.volume) )
@@ -81,10 +81,13 @@ def make_model( ):
 #The solver for c has been defined using the setup_solver function
     setup_solver( c )
     moose.reinit( )   # Build the system
-    moose.start( 1 ) # Run the system
-    #mu.plot_records( tables_, subplot = True, outfile = 'result.png' )
+
+    t1 = time.clock()
+    moose.start( 5 ) # Run the system
+    print(' Time takes %f' % (time.clock() - t1))
+
+    print( tables_[ 'A' ].vector )
     k = moose.element( '/model/ksolve' )
-#printing the number of species
     print( k.numPools )
 
 
@@ -93,6 +96,4 @@ def main( ):
 
 #running the function!
 if __name__ == '__main__':
-    start = time.clock()
     main()
-    print(' Time takes %f' % (time.clock()-start))

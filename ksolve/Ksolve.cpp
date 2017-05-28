@@ -554,8 +554,11 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
     int tid  = omp_get_thread_num( );
 
-    omp_set_num_threads( 4 );
+    omp_set_num_threads( 2 );
     size_t nvPools = voxelPools_.size( );
+    cout << "Size of loop " << nvPools 
+            << " thread " << omp_get_num_threads( )  << endl;
+
     #pragma omp parallel for
     for ( size_t i = 0; i < nvPools; i++ )
     {
