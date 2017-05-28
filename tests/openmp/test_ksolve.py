@@ -21,7 +21,7 @@ def create_cylinder( name ):
 #Setting the length of the cyliinder
     c.x1 = 1
 #Setting the number of voxels
-    c.diffLength = c.x1 / (10 ** 4 )
+    c.diffLength = c.x1 / (10 ** 3 )
 #radius of the cylinder at both the faces, in here its kept same at both the faces
     c.r0 = c.r1 = 1e-3
     print( 'Volume of cylinder %s is %g' % (c.name,  c.volume) )
@@ -33,9 +33,6 @@ def setup_solver( c ):
     s = moose.Stoich( '/model/stoich')
 #we declared k to be denoting ksolve
     k = moose.Ksolve( '/model/ksolve' )
-#we declared d to be dsolve
-    d = moose.Dsolve( '/model/dsolve' )
-    # s.dsolve =  d
 #solver for the s is ksolve
     s.ksolve = k
 #On which compartment does s has to work
@@ -47,48 +44,38 @@ def setup_solver( c ):
 #Defining wha should be happening in the compartment and therefore in the voxels, the reactions are defined 
 #There are different species in a pool
 def make_model( ):
-    c = create_cylinder( 'a' )
-#it stores the pool species
+    cyl = create_cylinder( 'a' )
+    # it stores the pool species
     pools = { }
-    for x in [ 'A', 'C' ]:
-#storing the species and concentrations
-        p = moose.Pool( '/model/a/%s' % x )
-#for getting the concentrations of the species
-        t = moose.Table2( '/model/a/tab%s' %  x)
-#connecting the pool and the table for transferring concentrations
-        moose.connect( t, 'requestOut', p, 'getN' )
-#storing species names and concentrations
-        pools[ x ] = p
-        tables_[ x ] = t
+    for i in range( 100 ):
+        a = 'A%d' % i
+        c = 'C%d' % i
+        pa = moose.Pool( '/model/a/%s' % a )
+        pc = moose.Pool( '/model/a/%s' % c )
+        ta = moose.Table2( '/model/a/tab%s' %  a)
+        tc = moose.Table2( '/model/a/tab%s' %  c)
+        moose.connect( ta, 'requestOut', pa, 'getN' )
+        moose.connect( tc, 'requestOut', pc, 'getN' )
+        pools[ a ] = pa
+        pools[ c ] = pc
+        pa.concInit = 1.0
+        pc.concInit = 0.1
+        tables_[ a ] = ta
+        tables_[ c ] = tc
+        r = moose.Reac( '/model/a/r%d' % i )
+        moose.connect( r, 'sub', pa, 'reac' )
+        moose.connect( r, 'prd', pc, 'reac' )
+        r.Kf = 1
+        r.Kb = 0.1
 
-#setting up the initial concentrations of the reactants
-    pools[ 'A' ].concInit = 1.0 
-    # pools[ 'A' ].diffConst = 1.0 
-    pools[ 'C' ].concInit = 0.1 
-
-    # A + 2B <-- kf, kb --> C + D 
-#defining the reaction in the comapartment(a)
-    r1 = moose.Reac( '/model/a/r1' )
-#connect is used here for connecting the species the different species in a reaction, like tis reaction consisits of 'A' as the substrate and 'C ' as the product, see the syntax, it also describes which reaction they are part of!! 
-    moose.connect( r1, 'sub', pools['A'], 'reac' )
-    # moose.connect( r1, 'sub', pools['B'], 'reac' )
-    # moose.connect( r1, 'sub', pools['B'], 'reac' )
-    moose.connect( r1, 'prd', pools['C'], 'reac' )
-    # moose.connect( r1, 'prd', pools['D'], 'reac' )
-#setting the reaction forward and backward rate constansts
-    r1.Kf = 1
-    r1.Kb = 0.1
-#The solver for c has been defined using the setup_solver function
-    setup_solver( c )
+    setup_solver( cyl )
     moose.reinit( )   # Build the system
 
     t1 = time.clock()
     moose.start( 5 ) # Run the system
     print(' Time takes %f' % (time.clock() - t1))
-
-    print( tables_[ 'A' ].vector )
+    # print( tables_[ 'A' ].vector )
     k = moose.element( '/model/ksolve' )
-    print( k.numPools )
 
 
 def main( ):
