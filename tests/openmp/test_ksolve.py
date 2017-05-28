@@ -95,4 +95,4 @@ def main( ):
 if __name__ == '__main__':
     start = time.clock()
     main()
-    print(time.clock()-start)
+    print(' Time takes %f' % (time.clock()-start))
