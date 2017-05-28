@@ -182,6 +182,7 @@ namespace moose
      * @return 
      */
     string moosePathToUserPath( string path );
+
 }
 
 #endif   /* ----- #ifndef __MOOSE_GLOBAL_INC_  ----- */
