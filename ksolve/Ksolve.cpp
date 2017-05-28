@@ -31,6 +31,7 @@
 #include "../mesh/Boundary.h"
 #include "../mesh/ChemCompt.h"
 #include "Ksolve.h"
+#include <omp.h>
 
 const unsigned int OFFNODE = ~0;
 
@@ -549,14 +550,19 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     }
 
     // Fourth, do the numerical integration for all reactions.
-    // MICKY: This can be parallelized.
+    //MICKY: This can be parallelized.
+   #pragma omp parallel num_threads(4)
+   {
+   cout << "hello there"<<endl;
+   #pragma omp for
+     
     for ( vector< VoxelPools >::iterator
             i = voxelPools_.begin(); i != voxelPools_.end(); ++i )
     {
         i->advance( p );
     }
 
-
+    }
     // Finally, assemble and send the integrated values off for the Dsolve.
     if ( dsolvePtr_ )
     {
