@@ -550,10 +550,10 @@ void SeqSynHandler::vProcess( const Eref& e, ProcPtr p )
 				seqActivation_ = 0.0;
 				for ( vector< double >::iterator y = correlVec.begin(); 
 								y != correlVec.end(); ++y )
-					seqActivation_ += *y;
+					seqActivation_ += pow( *y, sequencePower_ );
 	
 				// We'll use the seqActivation_ to send a special msg.
-				seqActivation_ = pow( seqActivation_, sequencePower_ ) * sequenceScale_;
+				seqActivation_ *= sequenceScale_;
 			}
 			if ( plasticityScale_ > 0.0 ) { // Short term changes in individual wts
 				weightScaleVec_ = correlVec;
