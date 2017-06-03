@@ -83,7 +83,7 @@ hid_t require_attribute(hid_t file_id, string path,
 hid_t require_group(hid_t file, string path)
 {
     vector<string> pathTokens;
-    tokenize(path, "/", pathTokens);
+    moose::tokenize(path, "/", pathTokens);
     hid_t prev = file, current;
     htri_t exists;
     // Open the container for the event maps

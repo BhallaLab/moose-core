@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "ElementValueFinfo.h"
 #include "lookupVolumeFromMesh.h"
 #include "PoolBase.h"
 #include "Pool.h"
@@ -19,43 +20,21 @@ const Cinfo* Pool::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Field Definitions: All inherited from PoolBase.
 		//////////////////////////////////////////////////////////////
-
 		//////////////////////////////////////////////////////////////
-		// MsgDest Definitions: All but increment and decrement inherited
+		// MsgDest Definitions: All inherited
 		//////////////////////////////////////////////////////////////
-		static DestFinfo increment( "increment",
-			"Increments mol numbers by specified amount. Can be +ve or -ve",
-			new OpFunc1< Pool, double >( &Pool::increment )
-		);
-
-		static DestFinfo decrement( "decrement",
-			"Decrements mol numbers by specified amount. Can be +ve or -ve",
-			new OpFunc1< Pool, double >( &Pool::decrement )
-		);
-
-		static DestFinfo nIn( "nIn",
-			"Set the number of molecules by specified amount",
-			new OpFunc1< Pool, double >( &Pool::nIn )
-		);
-
 		//////////////////////////////////////////////////////////////
 		// SrcFinfo Definitions: All inherited.
 		//////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions: All inherited.
 		//////////////////////////////////////////////////////////////
-	static Finfo* poolFinfos[] = {
-		&increment,			// DestFinfo
-		&decrement,			// DestFinfo
-                &nIn,
-	};
-
 	static Dinfo< Pool > dinfo;
 	static Cinfo poolCinfo (
 		"Pool",
 		PoolBase::initCinfo(),
-		poolFinfos,
-		sizeof( poolFinfos ) / sizeof ( Finfo* ),
+		0,
+		0,
 		&dinfo
 	);
 
@@ -79,6 +58,36 @@ Pool::~Pool()
 {;}
 
 //////////////////////////////////////////////////////////////
+// Field Definitions
+/**
+ * setIsBuffered is a really nasty operation, made possible only because
+ * BufPool is derived from Pool and has no other fields.
+ * It uses a low-level replaceCinfo call to just change the 
+ * identity of the Cinfo used, leaving everything else as is.
+ */
+void Pool::vSetIsBuffered( const Eref& e, bool v )
+{
+	static const Cinfo* bufPoolCinfo = Cinfo::find( "BufPool" );
+	if (vGetIsBuffered( e ) == v)
+		return;
+	if (v) {
+		e.element()->replaceCinfo( bufPoolCinfo );
+	} else {
+		e.element()->replaceCinfo( poolCinfo );
+	}
+}
+
+bool Pool::vGetIsBuffered( const Eref& e ) const
+{
+	/// We need this explicit check because when the moose class is
+	/// flipped, the internal C++ class isn't.
+	/// Inherited by BufPool.
+	return e.element()->cinfo()->name() == "BufPool";
+}
+
+//////////////////////////////////////////////////////////////
+//
+//////////////////////////////////////////////////////////////
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
@@ -86,14 +95,6 @@ void Pool::vProcess( const Eref& e, ProcPtr p )
 {
 	// double A = e.sumBuf( aSlot );
 	// double B = e.sumBuf( bSlot );
-		/*
-	if ( n_ < 0 )
-		cout << "nugh" << e.objId().path() << endl;
-	if ( B_ < 0 )
-		cout << "bugh" << e.objId().path() << endl;
-	if ( p->dt < 0 )
-		cout << "tugh" << e.objId().path() << endl;
-		*/
 
 	if ( n_ > EPSILON && B_ > EPSILON ) {
 		double C = exp( -B_ * p->dt / n_ );
@@ -123,7 +124,7 @@ void Pool::vReac( double A, double B )
 	B_ += B;
 }
 
-void Pool::increment( double val )
+void Pool::vIncrement( double val )
 {
 	if ( val > 0 )
 		A_ += val;
@@ -131,7 +132,7 @@ void Pool::increment( double val )
 		B_ -= val;
 }
 
-void Pool::decrement( double val )
+void Pool::vDecrement( double val )
 {
 	if ( val < 0 )
 		A_ -= val;
@@ -139,36 +140,12 @@ void Pool::decrement( double val )
 		B_ += val;
 }
 
-void Pool::nIn( double val)
+void Pool::vnIn( double val)
 {
     n_ = val;
     B_ = 0;
     A_ = 0;
 }
-
-/*
-void Pool::vRemesh( const Eref& e,
-	double oldvol,
-	unsigned int numTotalEntries, unsigned int startEntry, 
-	const vector< unsigned int >& localIndices, 
-	const vector< double >& vols )
-{
-	if ( e.dataIndex() != 0 )
-		return;
-	Neutral* n = reinterpret_cast< Neutral* >( e.data() );
-	assert( vols.size() > 0 );
-	double concInit = nInit_ / ( NA * oldvol );
-	if ( vols.size() != e.element()->dataHandler()->localEntries() )
-		n->setLastDimension( e, q, vols.size() );
-	// Note that at this point the Pool pointer may be invalid!
-	// But we need to update the concs anyway.
-	assert( e.element()->dataHandler()->localEntries() == vols.size() );
-	Pool* pooldata = reinterpret_cast< Pool* >( e.data() );
-	for ( unsigned int i = 0; i < vols.size(); ++i ) {
-		pooldata[i].nInit_ = pooldata[i].n_ = concInit * vols[i] * NA;
-	}
-}
-*/
 
 void Pool::vHandleMolWt( const Eref& e, double v )
 {

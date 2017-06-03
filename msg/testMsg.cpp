@@ -369,11 +369,11 @@ void benchmarkMsg( unsigned int n, string msgType )
 
 void testMsg()
 {
-	testAssortedMsg();
-	testMsgElementListing();
+    testAssortedMsg();
+    testMsgElementListing();
 }
 
 void testMpiMsg( )
 {
-	;
+    cout << "." << flush;
 }

@@ -53,6 +53,13 @@ class Pool: public PoolBase
 		void vSetSpecies( const Eref& e, SpeciesId v );
 		SpeciesId vGetSpecies( const Eref& e ) const;
 
+
+		/**
+		 * Functions to examine and change class between Pool and BufPool.
+		 */
+		void vSetIsBuffered( const Eref& e, bool v );
+		bool vGetIsBuffered( const Eref& e) const;
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs. These too override virtual funcs in the Pool base 
 		// class.
@@ -62,13 +69,13 @@ class Pool: public PoolBase
 		void vProcess( const Eref& e, ProcPtr p );
 		void vReinit( const Eref& e, ProcPtr p );
 		void vReac( double A, double B );
+		void vIncrement( double val );
+		void vDecrement( double val );
+        void vnIn( double val );
 
 		//////////////////////////////////////////////////////////////////
 		// Novel Dest funcs not present in Pool base class.
 		//////////////////////////////////////////////////////////////////
-		void increment( double val );
-		void decrement( double val );
-                void nIn( double val );
 
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();

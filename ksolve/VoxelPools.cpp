@@ -60,7 +60,7 @@ void VoxelPools::reinit( double dt )
 	if ( !driver_ )
 		return;
 	gsl_odeiv2_driver_reset( driver_ );
-	gsl_odeiv2_driver_reset_hstart( driver_, dt );
+	gsl_odeiv2_driver_reset_hstart( driver_, dt / 10.0 );
 #endif
 }
 
@@ -132,15 +132,32 @@ void VoxelPools::advance( const ProcInfo* p )
 
     double absTol = sys_.epsAbs;
     double relTol = sys_.epsRel;
-    string method = sys_.method;
 
-    if( method == "rk2" )
-        rk_midpoint_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
-    else if( method == "rk4" )
-        rk_karp_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
-    else if( method == "rk5")
-        rk_karp_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
-    else if( method == "rk5a")
+
+    /**
+     * @brief Default step size for fixed size iterator. 
+     * FIXME/TODO: I am not sure if this is a right value to pick by default. May be
+     * user should provide the stepping size when using fixed dt. This feature
+     * can be incredibly useful on large system.
+     */
+    const double fixedDt = 0.1;
+
+    if( sys_.method == "rk2" )
+        odeint::integrate_const( rk_midpoint_stepper_type_()
+                , sys_ , Svec()
+                , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
+                );
+    else if( sys_.method == "rk4" )
+        odeint::integrate_const( rk4_stepper_type_()
+                , sys_ , Svec()
+                , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
+                );
+    else if( sys_.method == "rk5")
+        odeint::integrate_const( rk_karp_stepper_type_()
+                , sys_ , Svec()
+                , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
+                );
+    else if( sys_.method == "rk5a")
         odeint::integrate_adaptive( 
                 odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol)
                 , sys_
@@ -149,9 +166,12 @@ void VoxelPools::advance( const ProcInfo* p )
                 , p->currTime
                 , p->dt 
                 );
-    else if ("rk54" == method )
-        rk_karp_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
-    else if ("rk54a" == method )
+    else if ("rk54" == sys_.method )
+        odeint::integrate_const( rk_karp_stepper_type_()
+                , sys_ , Svec()
+                , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
+                );
+    else if ("rk54a" == sys_.method )
         odeint::integrate_adaptive( 
                 odeint::make_controlled<rk_karp_stepper_type_>( absTol, relTol )
                 , sys_, Svec()
@@ -159,9 +179,12 @@ void VoxelPools::advance( const ProcInfo* p )
                 , p->currTime
                 , p->dt 
                 );
-    else if ("rk5" == method )
-        rk_dopri_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
-    else if ("rk5a" == method )
+    else if ("rk5" == sys_.method )
+        odeint::integrate_const( rk_dopri_stepper_type_()
+                , sys_ , Svec()
+                , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
+                );
+    else if ("rk5a" == sys_.method )
         odeint::integrate_adaptive( 
                 odeint::make_controlled<rk_dopri_stepper_type_>( absTol, relTol )
                 , sys_, Svec()
@@ -169,9 +192,12 @@ void VoxelPools::advance( const ProcInfo* p )
                 , p->currTime
                 , p->dt 
                 );
-    else if( method == "rk8" ) 
-        rk_felhberg_stepper_type_().do_step( sys_ , Svec(),  p->currTime, p->dt);
-    else if( method == "rk8a" ) 
+    else if( sys_.method == "rk8" ) 
+        odeint::integrate_const( rk_felhberg_stepper_type_()
+                , sys_ , Svec()
+                , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
+                );
+    else if( sys_.method == "rk8a" ) 
         odeint::integrate_adaptive(
                 odeint::make_controlled<rk_felhberg_stepper_type_>( absTol, relTol )
                 , sys_, Svec()

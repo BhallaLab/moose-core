@@ -60,15 +60,11 @@ namespace moose {
      * @brief Enumerate type for debug and log.
      */
     enum serverity_level_ { 
-        trace, debug, info
-            , warning, fixme
-            , error, fatal, failed 
+        trace, debug, info , warning, fixme , error, fatal, failed 
     };
 
     static string levels_[9] = { 
-        "TRACE", "DEBUG", "INFO", "LOG"
-            , "WARNING", "FIXME"
-            , "ERROR", "FATAL", "FAILED" 
+        "TRACE", "DEBUG", "INFO", "WARNING", "FIXME" , "ERROR", "FATAL", "FAILED" 
     };
 
     /* 
@@ -190,7 +186,7 @@ namespace moose {
                 }
             }
             else if('\n' == msg[i])
-                ss << "\n + ";
+                ss << "\n | ";
             else
                 ss << msg[i];
         }
@@ -199,6 +195,24 @@ namespace moose {
         if(!reset)
             ss << T_RESET;
         cout << ss.str() << endl;
+    }
+
+    /*
+     * Wrapper function around __dump__
+     */
+    inline void showInfo( string msg )
+    {
+        moose::__dump__( msg, moose::info );
+    }
+
+    inline void showWarn( string msg )
+    {
+        moose::__dump__(msg, moose::warning );
+    }
+
+    inline void showError( string msg )
+    {
+        moose::__dump__( msg, moose::error );
     }
 
     /**
@@ -210,7 +224,7 @@ namespace moose {
      */
 
 #ifdef  NDEBUG
-#define LOG(a, t ) ((void)0);
+#define LOG(t, a ) ((void)0);
 #else      /* -----  not NDEBUG  ----- */
 #define LOG(t, a) { stringstream __ss__;  __ss__ << a; moose::__dump__(__ss__.str(), t ); } 
 #endif     /* -----  not NDEBUG  ----- */

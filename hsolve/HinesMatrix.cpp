@@ -1442,6 +1442,7 @@ void testHinesMatrix()
                 );
             }
     }
+    cout << "." << flush;
 
 }
 
