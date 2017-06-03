@@ -11,9 +11,10 @@ while still including certain others.
 indent(...) is an in-place prettyprint formatter copied from http://effbot.org/zone/element-lib.htm
 """
 
+from __future__ import print_function
 from xml.etree import cElementTree as ET
 from xml.etree import ElementTree as slowET
-from math import *
+import math
 import os
 
 neuroml_debug = False
@@ -194,7 +195,7 @@ def keepOnlyInclude(network, onlyInclude):
     populations = network.find(".//{"+nml_ns+"}populations")
     for population in network.findall(".//{"+nml_ns+"}population"):
         popname = population.attrib["name"]
-        if popname in list(includeCellsDict.keys()):
+        if popname in includeCellsDict:
             includecellids = includeCellsDict[popname]
             instances = population.find(".//{"+nml_ns+"}instances")
             for instance in instances.findall(".//{"+nml_ns+"}instance"):
@@ -256,12 +257,12 @@ def indent(elem, level=0):
             elem.tail = i
 
 ## make a list of safe functions possible to be used safely in eval()
-safe_list = ['acos', 'asin', 'atan', 'atan2', 'ceil',
+safe_list = ('acos', 'asin', 'atan', 'atan2', 'ceil',
     'cos', 'cosh', 'degrees', 'e', 'exp', 'fabs', 'floor',
     'fmod', 'frexp', 'hypot', 'ldexp', 'log', 'log10', 'modf',
-    'pi', 'pow', 'radians', 'sin', 'sinh', 'sqrt', 'tan', 'tanh']
+    'pi', 'pow', 'radians', 'sin', 'sinh', 'sqrt', 'tan', 'tanh')
 ## use the list to filter the local namespace
-safe_dict = dict([ (k, locals().get(k, None)) for k in safe_list ])
+safe_dict = {k:getattr(math, k) for k in safe_list}
 ## add any needed builtins back in.
 safe_dict['abs'] = abs
 

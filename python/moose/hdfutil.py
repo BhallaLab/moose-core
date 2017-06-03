@@ -84,6 +84,10 @@
 
 # Code:
 from __future__ import print_function
+try:
+    from future_builtins import zip
+except ImportError:
+    pass
 from . import moose as moose__
 import numpy as np
 import h5py as h5
@@ -121,19 +125,17 @@ def get_rec_dtype(em):
         print('Creating entries for class:', obj.className)
         fielddict = moose__.getFieldDict(obj.className, 'valueFinfo')
         print(fielddict)
-        keys = sorted(list(fielddict.keys()))
-        fields = [] # [('path', 'S1024')]
-        for fieldname in keys:
-            ftype = fielddict[fieldname]
-            # If we do not have the type of this field in cpp-np data
-            # type map, skip it. We can handle vectors as nested
-            # table, but the problem with that is numpy requires all
-            # entries to have a fixed size for this table. Since
-            # vectors can have arbitrary length, we cannot get such a
-            # fixed size without checking the size of the vector field
-            # in all elements.
-            if ftype in cpptonp:
-                fields.append((fieldname, cpptonp[ftype]))
+
+        # If we do not have the type of this field in cpp-np data
+        # type map, skip it. We can handle vectors as nested
+        # table, but the problem with that is numpy requires all
+        # entries to have a fixed size for this table. Since
+        # vectors can have arbitrary length, we cannot get such a
+        # fixed size without checking the size of the vector field
+        # in all elements.
+        fields = [(fieldname, cpptonp[ftype]) # [('path', 'S1024')]
+                  for fieldname, ftype in sorted(fielddict.items())
+                  if ftype in cpptonp]
         dtype_table[obj.className] = np.dtype(fields)
         return dtype_table[obj.className]
             
@@ -256,7 +258,7 @@ def savestate(filename=None):
                 print('Creating entries for class:', obj.className)
                 fielddict = moose__.getFieldDict(obj.className, 'valueFinfo')
                 print(fielddict)
-                keys = sorted(list(fielddict.keys()))
+                keys = sorted(fielddict)
                 fields = [] # [('path', 'S1024')]
                 for fieldname in keys:
                     ftype = fielddict[fieldname]
@@ -309,9 +311,9 @@ def restorestate(filename):
     with h5.File(filename, 'r') as fd:
         typeinfo = fd['/metadata/typeinfo'][:]
         classdict = {}
-        dimsdict = dict(list(zip(typeinfo['path'], typeinfo['dims'])))
-        classdict = dict(list(zip(typeinfo['path'], typeinfo['class'])))
-        parentdict = dict(list(zip(typeinfo['path'], typeinfo['parent'])))
+        dimsdict = dict(zip(typeinfo['path'], typeinfo['dims']))
+        classdict = dict(zip(typeinfo['path'], typeinfo['class']))
+        parentdict = dict(zip(typeinfo['path'], typeinfo['parent']))
         sorted_paths = sorted(typeinfo['path'], key=lambda x: x.count('/'))
         for path in sorted_paths:
             name = path.rpartition('/')[-1].partition('[')[0]

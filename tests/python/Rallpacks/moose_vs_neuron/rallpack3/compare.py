@@ -95,7 +95,7 @@ def compare(mooseData, nrnData, outputFile = None):
         mooseY[v] = [ 1e3 * y for y in mooseY[v]]
     for i, v in enumerate( mooseY ):
         peaksY1 = compareData(mooseX, mooseY.values()[i], nrnX, nrnY.values()[i])
-        print peaksY1
+        print(peaksY1)
 """
         pylab.figure()
         pylab.plot(mooseX, mooseY.values()[i])

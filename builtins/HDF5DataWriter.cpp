@@ -3,28 +3,8 @@
 // Filename: HDF5DataWriter.cpp
 // Description: 
 // Author: Subhasis Ray
-// Maintainer: 
+// Maintainer:  Dilawar Singh
 // Created: Sat Feb 25 16:03:59 2012 (+0530)
-// Version: 
-// Last-Updated: Sun Dec 20 23:16:02 2015 (-0500)
-//           By: subha
-//     Update #: 741
-// URL: 
-// Keywords: 
-// Compatibility: 
-// 
-// 
-
-// Commentary: 
-// 
-// 
-// 
-// 
-
-// Change log:
-// 
-// 2012-02-25 16:04:02 (+0530) Subha - started initial implementation
-// 
 
 // Code:
 
@@ -49,9 +29,9 @@ const Cinfo * HDF5DataWriter::initCinfo()
 {
     static DestFinfo process(
         "process",
-        "Handle process calls. Write data to file and clear all Table objects"
-        " associated with this. Hence you want to keep it on a slow clock"
-        " 1000 times or more slower than that for the tables.",
+        "Handle process calls. Gets data from connected fields into a local"
+        " buffer and dumps them to `filename` if the buffer length exceeds"
+        " `flushLimit`",
         new ProcOpFunc<HDF5DataWriter>( &HDF5DataWriter::process)
                              );
     static  DestFinfo reinit(
@@ -87,20 +67,25 @@ const Cinfo * HDF5DataWriter::initCinfo()
     static string doc[] = {
         "Name", "HDF5DataWriter",
         "Author", "Subhasis Ray",
-        "Description", "HDF5 file writer for saving data tables. It saves the tables connected"
-        " to it via `requestOut` field into an HDF5 file.  The path of the"
-        " table is maintained in the HDF5 file, with a HDF5 group for each"
-        " element above the table."
+        "Description", "HDF5 file writer for saving field values from multiple objects."
         "\n"
-        "Thus, if you have a table `/data/VmTable` in MOOSE, then it will be"
-        " written as an HDF5 table called `VmTable` inside an HDF5 Group called"
-        " `data`."
+        "\nConnect the `requestOut` field of this object to the"
+        " `get{Fieldname}` of other objects where `fieldname` is the"
+        " target value field of type double. The HDF5DataWriter collects the"
+        " current values of the fields in all the targets at each time step in"
+        " a local buffer. When the buffer size exceeds `flushLimit` (default"
+        " 4M), it will write the data into the HDF5 file specified in its"
+        " `filename` field (default moose_output.h5). You can explicitly force"
+        " writing by calling the `flush` function."
         "\n"
-        "However Table inside Table is considered a pathological case and is"
-        " not handled.\n"
-        "At every process call it writes the contents of the tables to the file"
-        " and clears the table vectors. You can explicitly force writing of the"
-        " data via the `flush` function."
+        "The dataset location in the output file replicates the MOOSE element"
+        " tree structure. Thus, if you record the Vm field from"
+        " `/model[0]/neuron[0]/soma[0], the dataset path will be"
+        " `/model[0]/neuron[0]/soma[0]/vm`"
+        "\n"
+        "\n"
+        "NOTE: The output file remains open until this object is destroyed, or"
+        " `close()` is called explicitly."
     };
 
     static Dinfo< HDF5DataWriter > dinfo;
@@ -256,7 +241,7 @@ hid_t HDF5DataWriter::getDataset(string path)
     // Create the groups corresponding to this path
     string::size_type lastslash = path.find_last_of("/");
     vector<string> pathTokens;
-    tokenize(path, "/", pathTokens);
+    moose::tokenize(path, "/", pathTokens);
     hid_t prev_id = filehandle_;
     hid_t id = -1;
     for ( unsigned int ii = 0; ii < pathTokens.size()-1; ++ii ){

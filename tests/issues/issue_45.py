@@ -1,3 +1,4 @@
+from __future__ import print_function
 import moose
 
 moose.Neutral('/model')
@@ -38,8 +39,8 @@ moose.connect( s, 'nOut', f1.x[numVariables], 'input' )
 
 compts = moose.wildcardFind('/model/##[ISA=ChemCompt]')
 
-print " f name= ",f.name, f.tick
-print " f1 name= ",f1.name, f1.tick
+print(" f name= ",f.name, f.tick)
+print(" f1 name= ",f1.name, f1.tick)
 for compt in compts:
     ksolve = moose.Ksolve( compt.path+'/ksolve' )
     stoich = moose.Stoich( compt.path+'/stoich' )
@@ -47,6 +48,6 @@ for compt in compts:
     stoich.ksolve = ksolve
     stoich.path = compt.path+"/##"
 
-print "After solver is set"
-print " f name= ",f.name,f.tick
-print " f1 name= ", f1.name, f1.tick
+print("After solver is set")
+print(" f name= ",f.name,f.tick)
+print(" f1 name= ", f1.name, f1.tick)

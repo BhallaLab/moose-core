@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jul 24 15:55:54 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Jul 26 17:06:35 2013 (+0530)
+# Last-Updated: Sun Apr 17 16:32:59 2016 (-0400)
 #           By: subha
-#     Update #: 383
+#     Update #: 455
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -51,9 +51,13 @@ TODO: handle include statements (start with simple ion channel
 prototype includes.
 
 """
+
+from __future__ import print_function
+try:
+    from future_builtins import zip, map
+except ImportError:
+    pass
 import sys, os
-from itertools import izip
-from urllib2 import urlopen
 import numpy as np
 import moose
 import generated_neuroml as nml
@@ -136,9 +140,22 @@ def calculateRateFn(ratefn, vmin, vmax, tablen=3000):
     return rate_fn_map[ratefn.type_](tab, rate, scale, midpoint)
 
 class NML2Reader(object):
-    """Reads NeuroML2 and creates MOOSE model"""
-    def __init__(self):
+    """Reads NeuroML2 and creates MOOSE model. 
+
+    NML2Reader.read(filename) reads an NML2 model under `/library`
+    with the toplevel name defined in the NML2 file.
+
+    Example:
+
+    >>> from moose import neuroml2 as nml
+    >>> reader = nml.NML2Reader()
+    >>> reader.read('moose/neuroml2/test_files/Purk2M9s.nml')
+    
+    creates a passive neuronal morphology `/library/Purk2M9s`.
+    """
+    def __init__(self, verbose=False):
         self.lunit = 1e-6 # micron is the default length unit
+        self.verbose = verbose
         self.doc = None
         self.filename = None        
         self.nml_to_moose = {} # NeuroML object to MOOSE object
@@ -152,11 +169,13 @@ class NML2Reader(object):
         self._cell_to_sg = {} # nml cell to dict - the dict maps segment groups to segments
         
     def read(self, filename):
-        self.doc = nml.parse(filename)
+        self.doc = nml.parse(filename, silence=True)
+        if self.verbose:
+            print('Parsed', filename)
         self.filename = filename
         self.importIncludes(self.doc)
-        self.importIonChannels(self.doc)
         self.importConcentrationModels(self.doc)
+        self.importIonChannels(self.doc)
         for cell in self.doc.cell:
             self.createCellPrototype(cell)
 
@@ -211,9 +230,9 @@ class NML2Reader(object):
                     p0 = parent.distal
                 else:
                     raise Exception('No proximal point and no parent segment for segment: name=%s, id=%s' % (segment.name, segment.id))
-            comp.x0, comp.y0, comp.z0 = map(lambda x: x * self.lunit, map(float, (p0.x, p0.y, p0.z)))            
+            comp.x0, comp.y0, comp.z0 = (x * self.lunit for x in map(float, (p0.x, p0.y, p0.z)))
             p1 = segment.distal
-            comp.x, comp.y, comp.z = map(lambda x: x * self.lunit, map(float, (p1.x, p1.y, p1.z)))
+            comp.x, comp.y, comp.z = (x * self.lunit for x in map(float, (p1.x, p1.y, p1.z)))
             comp.length = np.sqrt((comp.x - comp.x0)**2
                                   + (comp.y - comp.y0)**2
                                   + (comp.z - comp.z0)**2)
@@ -235,13 +254,15 @@ class NML2Reader(object):
         according to NeuroML2 cell `nmlcell`."""
         bp = nmlcell.biophysicalProperties
         if bp is None:
-            print 'Warning: %s in %s has no biophysical properties' % (nmlcell.id, self.filename)
+            print('Warning: %s in %s has no biophysical properties' % (nmlcell.id, self.filename))
             return
         self.importMembraneProperties(nmlcell, moosecell, bp.membraneProperties)
         self.importIntracellularProperties(nmlcell, moosecell, bp.intracellularProperties)
 
     def importMembraneProperties(self, nmlcell, moosecell, mp):
         """Create the membrane properties from nmlcell in moosecell"""
+        if self.verbose:
+            print('Importing membrane properties')
         self.importCapacitances(nmlcell, moosecell, mp.specificCapacitance)
         self.importChannelsToCell(nmlcell, moosecell, mp)
 
@@ -302,7 +323,7 @@ class NML2Reader(object):
             try:
                 ionChannel = self.id_to_ionChannel[chdens.ionChannel]
             except KeyError:
-                print 'No channel with id', chdens.ionChannel
+                print('No channel with id', chdens.ionChannel)                
                 continue
             if ionChannel.type_ == 'ionChannelPassive':
                 for seg in segments:
@@ -330,18 +351,21 @@ class NML2Reader(object):
         chan = moose.element(chid)
         chan.Gbar = sarea(comp) * condDensity
         moose.connect(chan, 'channel', comp, 'channel')
-        return chan
-    
+        return chan    
 
-    def importIncludes(self, doc):
+    def importIncludes(self, doc):        
         for include in doc.include:
+            if self.verbose:
+                print(self.filename, 'Loading include', include)
             error = None
-            inner = NML2Reader()
+            inner = NML2Reader(self.verbose)
             paths = [include.href, os.path.join(os.path.dirname(self.filename), include.href)]
             for path in paths:
                 try:
                     inner.read(path)                    
-                except IOError, e:
+                    if self.verbose:
+                        print(self.filename, 'Loaded', path, '... OK')
+                except IOError as e:
                     error = e
                 else:
                     self.includes[include.href] = inner
@@ -351,54 +375,73 @@ class NML2Reader(object):
                     error = None
                     break
             if error:
-                print 'Last exception:', error
+                print(self.filename, 'Last exception:', error)
                 raise IOError('Could not read any of the locations: %s' % (paths))
 
+    def createHHChannel(self, chan):
+        mchan = moose.HHChannel('%s/%s' % (self.lib.path, chan.id))
+        mgates = map(moose.element, (mchan.gateX, mchan.gateY, mchan.gateZ))
+        assert(len(chan.gate) <= 3) # We handle only up to 3 gates in HHCHannel
+        for ngate, mgate in zip(chan.gate, mgates):
+            if mgate.name.endswith('X'):
+                mchan.Xpower = ngate.instances
+            elif mgate.name.endswith('Y'):
+                mchan.Ypower = ngate.instances
+            elif mgate.name.endswith('Z'):
+                mchan.Zpower = ngate.instance
+            mgate.min = vmin
+            mgate.max = vmax
+            mgate.divs = vdivs
+
+            # I saw only examples of GateHHRates in
+            # HH-channels, the meaning of forwardRate and
+            # reverseRate and steadyState are not clear in the
+            # classes GateHHRatesInf, GateHHRatesTau and in
+            # FateHHTauInf the meaning of timeCourse and
+            # steady state is not obvious. Is the last one
+            # refering to tau_inf and m_inf??
+            fwd = ngate.forwardRate
+            rev = ngate.reverseRate
+            if (fwd is not None) and (rev is not None):
+                beta = calculateRateFn(fwd, vmin, vmax, vdivs)
+                alpha = calculateRateFn(rev, vmin, vmax, vdivs)
+                mgate.tableA = alpha
+                mgate.tableB = alpha + beta
+                break
+            # Assuming the meaning of the elements in GateHHTauInf ...
+            tau = ngate.timeCourse
+            inf = ngate.steadyState
+            if (tau is not None) and (inf is not None):
+                tau = calculateRateFn(tau, vmin, vmax, vdivs)
+                inf = calculateRateFn(inf, vmin, vmax, vdivs)
+                mgate.tableA = inf / tau
+                mgate.tableB = 1 / tau
+                break
+        if self.verbose:
+            print(self.filename, 'Created', mchan.path, 'for', chan.id)
+        return mchan
+
+    def createPassiveChannel(chan):
+        mchan = moose.Leakage('%s/%s' % (self.lib.path, chan.id))
+        if self.verbose:
+            print(self.filename, 'Created', mchan.path, 'for', chan.id)
+        return mchan
+
     def importIonChannels(self, doc, vmin=-120e-3, vmax=40e-3, vdivs=3000):
+        if self.verbose:
+            print(self.filename, 'Importing ion channels')
+            print(self.filename, doc.ionChannel)
         for chan in doc.ionChannel:
-            # print dir(chan)
+            print(self.filename, chan.id)
             if chan.type_ == 'ionChannelHH':
-                mchan = moose.HHChannel('%s/%s' % (self.lib.path, chan.id))
-                mgates = map(moose.element, (mchan.gateX, mchan.gateY, mchan.gateZ))
-                assert(len(chan.gate) <= 3) # We handle only up to 3 gates in HHCHannel
-                for ngate, mgate in izip(chan.gate, mgates):
-                    if mgate.name.endswith('X'):
-                        mchan.Xpower = ngate.instances
-                    elif mgate.name.endswith('Y'):
-                        mchan.Ypower = ngate.instances
-                    elif mgate.name.endswith('Z'):
-                        mchan.Zpower = ngate.instance
-                    mgate.min = vmin
-                    mgate.max = vmax
-                    mgate.divs = vdivs
-                    
-                    # I saw only examples of GateHHRates in
-                    # HH-channels, the meaning of forwardRate and
-                    # reverseRate and steadyState are not clear in the
-                    # classes GateHHRatesInf, GateHHRatesTau and in
-                    # FateHHTauInf the meaning of timeCourse and
-                    # steady state is not obvious. Is the last one
-                    # refering to tau_inf and m_inf??
-                    fwd = ngate.forwardRate
-                    rev = ngate.reverseRate
-                    if (fwd is not None) and (rev is not None):
-                        beta = calculateRateFn(fwd, vmin, vmax, vdivs)
-                        alpha = calculateRateFn(rev, vmin, vmax, vdivs)
-                        mgate.tableA = alpha
-                        mgate.tableB = alpha + beta
-                        break
-                    # Assuming the meaning of the elements in GateHHTauInf ...
-                    tau = ngate.timeCourse
-                    inf = ngate.steadyState
-                    if (tau is not None) and (inf is not None):
-                        tau = calculateRateFn(tau, vmin, vmax, vdivs)
-                        inf = calculateRateFn(inf, vmin, vmax, vdivs)
-                        mgate.tableA = inf / tau
-                        mgate.tableB = 1 / tau
-                        break
-                self.id_to_ionChannel[chan.id] = chan
-                self.nml_to_moose[chan] = mchan
-                self.proto_chans[chan.id] = mchan
+                mchan = self.createHHChannel(chan)
+            elif chan.type_ == 'ionChannelPassive':
+                mchan = self.createPassiveChannel(chan)
+            self.id_to_ionChannel[chan.id] = chan
+            self.nml_to_moose[chan] = mchan
+            self.proto_chans[chan.id] = mchan
+            if self.verbose:
+                print(self.filename, 'Created ion channel', mchan.path, 'for', chan.type_, chan.id)
 
     def importConcentrationModels(self, doc):
         for concModel in doc.decayingPoolConcentrationModel:
@@ -411,9 +454,9 @@ class NML2Reader(object):
         else:
             name = concModel.id
         ca = moose.CaConc('%s/%s' % (self.lib.path, id))
-        print '11111', concModel.restingConc
-        print '2222', concModel.decayConstant
-        print '33333', concModel.shellThickness
+        print('11111', concModel.restingConc)
+        print('2222', concModel.decayConstant)
+        print('33333', concModel.shellThickness)
 
         ca.CaBasal = SI(concModel.restingConc)
         ca.tau = SI(concModel.decayConstant)

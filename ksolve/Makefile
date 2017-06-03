@@ -24,7 +24,7 @@ OBJ = \
 	FuncTerm.o \
 	Stoich.o \
 	Ksolve.o \
-	SteadyState.o \
+	SteadyStateGsl.o \
 	Gsolve.o \
 	ZombiePoolInterface.o \
 	testKsolve.o \
@@ -65,9 +65,10 @@ KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
 ZombiePool.o:	../kinetics/PoolBase.h ZombiePoolInterface.h ZombiePool.h ../kinetics/lookupVolumeFromMesh.h
 ZombieBufPool.o:	../kinetics/PoolBase.h ZombiePoolInterface.h ZombiePool.h ZombieBufPool.h ../kinetics/lookupVolumeFromMesh.h
 ZombieBufPool.o:	../kinetics/PoolBase.h ZombiePoolInterface.h ZombiePool.h
-VoxelPoolsBase.o:	VoxelPoolsBase.h
+VoxelPoolsBase.o:	VoxelPoolsBase.h ../randnum/RNG.h
 VoxelPools.o:	VoxelPoolsBase.h VoxelPools.h OdeSystem.h RateTerm.h Stoich.h
-GssaVoxelPools.o:	VoxelPoolsBase.h GssaVoxelPools.h ../basecode/SparseMatrix.h KinSparseMatrix.h GssaSystem.h RateTerm.h Stoich.h
+GssaVoxelPools.o:	VoxelPoolsBase.h GssaVoxelPools.h ../basecode/SparseMatrix.h \
+    ../randnum/RNG.h KinSparseMatrix.h GssaSystem.h RateTerm.h Stoich.h
 RateTerm.o:		RateTerm.h
 FuncTerm.o:		FuncTerm.h
 Stoich.o:		RateTerm.h FuncTerm.h FuncRateTerm.h Stoich.h ../kinetics/PoolBase.h ../kinetics/ReacBase.h ../kinetics/EnzBase.h ../kinetics/CplxEnzBase.h ../basecode/SparseMatrix.h KinSparseMatrix.h ../scheduling/Clock.h ZombiePoolInterface.h
@@ -76,7 +77,7 @@ ZombieEnz.o:		RateTerm.h FuncTerm.h Stoich.h ../kinetics/EnzBase.h ../kinetics/C
 ZombieMMenz.o:		RateTerm.h FuncTerm.h Stoich.h ../kinetics/EnzBase.h ../kinetics/lookupVolumeFromMesh.h ../basecode/SparseMatrix.h KinSparseMatrix.h ZombieMMenz.h
 ZombieFunction.o:		RateTerm.h FuncTerm.h Stoich.h ../builtins/Function.h ZombieFunction.h
 Ksolve.o:		RateTerm.h Stoich.h Ksolve.h VoxelPoolsBase.h VoxelPools.h OdeSystem.h ZombiePoolInterface.h
-SteadyState.o:	SteadyState.h ../basecode/SparseMatrix.h KinSparseMatrix.h RateTerm.h FuncTerm.h Stoich.h ../randnum/randnum.h
+SteadyStateGsl.o:	SteadyStateGsl.h ../basecode/SparseMatrix.h KinSparseMatrix.h RateTerm.h FuncTerm.h Stoich.h ../randnum/randnum.h
 Gsolve.o:		RateTerm.h FuncTerm.h FuncRateTerm.h Stoich.h Gsolve.h VoxelPoolsBase.h VoxelPools.h GssaSystem.h ZombiePoolInterface.h ../basecode/SparseMatrix.h KinSparseMatrix.h
 ZombiePoolInterface.o:	VoxelPoolsBase.h ZombiePoolInterface.h ../mesh/VoxelJunction.h Stoich.h ../shell/Shell.h
 testKsolve.o:	../shell/Shell.h

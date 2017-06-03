@@ -17,15 +17,11 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-import sys
-sys.path.append('../../../python')
+import numpy as np
+
 import moose
 from moose import utils
-
-import os
-import numpy as np
-import matplotlib.pyplot as plt
-
+import time
 
 EREST_ACT = -65e-3
 per_ms = 1e3
@@ -66,7 +62,7 @@ class MooseCompartment():
                         , "Failed with error %s " % e
                         ]
                     )
-            sys.exit(0)
+            raise
         #utils.dump('DEBUG', [ 'Compartment: {}'.format( self ) ] )
 
 
@@ -261,18 +257,16 @@ def simulate( runTime, dt):
     moose.useClock(1, '/##', 'process')
     moose.reinit()
     setupSolver( hsolveDt = dt )
-    utils.verify()
+    t = time.time( )
     moose.start( runTime )
+    print( 'Time taken to simulate %f = %f' % (  runTime, time.time() - t ) )
 
 def main(args):
     global cable
     dt = args['dt']
     makeCable(args)
     setupDUT( dt )
-    table0 = utils.recordAt( '/table0', cable[0], 'vm')
-    table1 = utils.recordAt( '/table1', cable[-1], 'vm')
     simulate( args['run_time'], dt )
-    utils.saveTables( [ table0, table1 ], file = args['output'], xscale = dt )
 
 if __name__ == '__main__':
     import argparse

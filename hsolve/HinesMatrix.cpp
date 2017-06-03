@@ -750,6 +750,7 @@ void testHinesMatrix()
                 );
             }
     }
+    cout << "." << flush;
 
 }
 

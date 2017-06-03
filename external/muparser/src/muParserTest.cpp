@@ -1384,14 +1384,14 @@ namespace mu
           // The tests equations never result in infinity, if they do thats a bug.
           // reference:
           // http://sourceforge.net/projects/muparser/forums/forum/462843/topic/5037825
-          #pragma warning(push)
-          #pragma warning(disable:4127)
-		  if (std::numeric_limits<value_type>::has_infinity)
-          #pragma warning(pop)
-		  {
-            bCloseEnough &= (fabs(fVal[i]) != numeric_limits<value_type>::infinity());
-		  }
-		}
+#pragma warning(push)
+#pragma warning(disable:4127)
+          if (std::numeric_limits<value_type>::has_infinity)
+#pragma warning(pop)
+          {
+              bCloseEnough &= (fabs(fVal[i]) != numeric_limits<value_type>::infinity());
+          }
+        }
 
         iRet = ((bCloseEnough && a_fPass) || (!bCloseEnough && !a_fPass)) ? 0 : 1;
         

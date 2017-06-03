@@ -9,14 +9,35 @@
 #########################################################################
 
 import math
-from PyQt4 import QtGui
-import moogli
-import moogli.extensions.moose
 import matplotlib
 import sys
 import moose
+import os
 
-app = QtGui.QApplication(sys.argv)
+# Check if DISPLAY environment variable is properly set. If not, warn the user
+# and continue.
+hasDisplay = True
+hasMoogli = False
+display = os.environ.get('DISPLAY',  '' )
+if not display:
+    hasDisplay = False
+    print( "Warning: Environment variable DISPLAY is not set."
+            " Did you forget to pass -X or -Y switch to ssh command?\n" 
+            "Anyway, MOOSE will continue without graphics.\n"
+            )
+
+
+if hasDisplay:
+    try: 
+        from PyQt4 import QtGui
+        import moogli
+        import moogli.extensions.moose
+        app = QtGui.QApplication(sys.argv)
+        hasMoogli = True
+    except Exception as e:
+        print( 'Warning: Moogli not found. All moogli calls will use dummy functions' )
+        hasMoogli = False
+
 runtime = 0.0
 moogliDt = 1.0
 rotation = math.pi / 500.0
@@ -34,19 +55,19 @@ def getComptParent( obj ):
 def prelude( view ):
     view.home()
     view.pitch( math.pi / 2.0 )
-    view.zoom( 0.3 )
+    view.zoom( 0.05 )
     #network.groups["soma"].set( "color", moogli.colors.RED )
 
 # This func is used for the first viewer, it has to handle advancing time.
 def interlude( view ):
     moose.start( moogliDt )
     val = [ moose.getField( i, view.mooField, "double" ) * view.mooScale for i in view.mooObj ]
-    #print "LEN = ", len( val ), "field = ", view.mooField
-    
     view.mooGroup.set("color", val, view.mapper)
     view.yaw( rotation )
     #print moogliDt, len( val ), runtime
-    if moose.element("/clock").currentTime >= runtime:
+    currt = moose.element("/clock").currentTime
+    view.timecb.set_title( 'T = {:.3f} s'.format( currt ) )
+    if currt >= runtime:
         view.stop()
 
 # This func is used for later viewers, that don't handle advancing time.
@@ -62,6 +83,8 @@ def postlude( view ):
     view.rd.display()
 
 def makeMoogli( rd, mooObj, moogliEntry, fieldInfo ):
+    if not hasMoogli:
+        return None
     mooField = moogliEntry[3]
     numMoogli = len( mooObj )
     network = moogli.extensions.moose.read( path = rd.elecid.path, vertices=15)
@@ -93,6 +116,7 @@ def makeMoogli( rd, mooObj, moogliEntry, fieldInfo ):
 
 
     viewer = moogli.Viewer("Viewer")
+    viewer.setWindowTitle( moogliEntry[4] )
     if ( mooField == 'n' or mooField == 'conc' ):
         viewer.attach_shapes( updateGroup.shapes.values())
         viewer.detach_shape(soma)
@@ -116,24 +140,48 @@ def makeMoogli( rd, mooObj, moogliEntry, fieldInfo ):
                                  size=moogli.geometry.Vec3f(0.30, 0.05, 0.0),
                                  text_font="/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-R.ttf",
                                  orientation=math.pi / 2.0,
-                                 text_character_size=20,
+                                 text_character_size=16,
                                  label_formatting_precision=0,
                                  colormap=moogli.colors.MatplotlibColorMap(matplotlib.cm.rainbow),
                                  color_resolution=100,
                                  scalar_range=moogli.geometry.Vec2f(
                                      moogliEntry[5],
                                      moogliEntry[6]))
+    cb.set_num_labels(3)
+
+    # Use the text title on a colorbar to display the current time!!
+    # Spectacularly ugly hack, but I was unable to find other ways to put
+    # text in a predefined place in a moogli view.
+    timecb = moogli.widgets.ColorBar( id="timecb",
+        title = "T = 0 s",
+        text_color=moogli.colors.BLACK,
+        position=moogli.geometry.Vec3f(0.1, -0.01, 0.0),
+        size=moogli.geometry.Vec3f(0.01, 0.02, 0.0),
+        text_font="/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-R.ttf",
+        orientation=0.0,
+        text_character_size=16,
+        label_formatting_precision=1,
+        colormap=moogli.colors.MatplotlibColorMap(matplotlib.cm.rainbow),
+        color_resolution=2,
+        scalar_range=moogli.geometry.Vec2f( 0.0, 1.0 )
+    )
+    timecb.set_num_labels( 0 )
+
     view.attach_color_bar(cb)
+    view.attach_color_bar(timecb)
     view.rd = rd
     view.mooObj = displayObj
     view.mooGroup = updateGroup
     view.mooField = mooField
     view.mooScale = fieldInfo[2]
     view.mapper = mapper
+    view.timecb = timecb
     viewer.attach_view(view)
     return viewer
 
 def displayMoogli( rd, _dt, _runtime, _rotation ):
+    if not hasMoogli:
+        return None
     global runtime
     global moogliDt
     global rotation

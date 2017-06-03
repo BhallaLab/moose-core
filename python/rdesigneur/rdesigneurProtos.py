@@ -1,50 +1,51 @@
-# rdesignerProtos.py --- 
-# 
+# rdesignerProtos.py ---
+#
 # Filename: rdesignerProtos.py
-# Description: 
+# Description:
 # Author: Subhasis Ray, Upi Bhalla
-# Maintainer: 
+# Maintainer:
 # Created: Tue May  7 12:11:22 2013 (+0530)
-# Version: 
+# Version:
 # Last-Updated: Wed Dec 30 13:01:00 2015 (+0530)
 #           By: Upi
-# URL: 
-# Keywords: 
-# Compatibility: 
-# 
-# 
+# URL:
+# Keywords:
+# Compatibility:
+#
+#
 
-# Commentary: 
-# 
-# 
-# 
-# 
+# Commentary:
+#
+#
+#
+#
 
 # Change log:
-# 
-# 
-# 
-# 
+#
+#
+#
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 3, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 # Floor, Boston, MA 02110-1301, USA.
-# 
-# 
+#
+#
 
 # Code:
 import numpy as np
 import moose
+import math
 from moose import utils
 
 EREST_ACT = -70e-3
@@ -55,9 +56,9 @@ FaradayConst = 96485.3365 # Coulomb/mol
 
 def make_HH_Na(name = 'HH_Na', parent='/library', vmin=-110e-3, vmax=50e-3, vdivs=3000):
     """Create a Hodhkin-Huxley Na channel under `parent`.
-    
+
     vmin, vmax, vdivs: voltage range and number of divisions for gate tables
-    
+
     """
     na = moose.HHChannel('%s/%s' % (parent, name))
     na.Ek = 50e-3
@@ -85,9 +86,9 @@ def make_HH_Na(name = 'HH_Na', parent='/library', vmin=-110e-3, vmax=50e-3, vdiv
 
 def make_HH_K(name = 'HH_K', parent='/library', vmin=-120e-3, vmax=40e-3, vdivs=3000):
     """Create a Hodhkin-Huxley K channel under `parent`.
-    
+
     vmin, vmax, vdivs: voltage range and number of divisions for gate tables
-    
+
     """
     k = moose.HHChannel('%s/%s' % (parent, name))
     k.Ek = -77e-3
@@ -104,7 +105,41 @@ def make_HH_K(name = 'HH_K', parent='/library', vmin=-120e-3, vmax=40e-3, vdivs=
     k.tick = -1
     return k
 
-def make_Chem_Oscillator( name = 'osc', parent = '/library' ):
+#========================================================================
+#                SynChan: Glu receptor
+#========================================================================
+
+def make_glu( name ):
+    if moose.exists( '/library/' + name ):
+        return
+    glu = moose.SynChan( '/library/' + name )
+    glu.Ek = 0.0
+    glu.tau1 = 2.0e-3
+    glu.tau2 = 9.0e-3
+    sh = moose.SimpleSynHandler( glu.path + '/sh' )
+    moose.connect( sh, 'activationOut', glu, 'activation' )
+    sh.numSynapses = 1
+    sh.synapse[0].weight = 1
+    return glu
+
+#========================================================================
+#                SynChan: GABA receptor
+#========================================================================
+
+def make_GABA( name ):
+    if moose.exists( '/library/' + name ):
+        return
+    GABA = moose.SynChan( '/library/' + name )
+    GABA.Ek = EK + 10.0e-3
+    GABA.tau1 = 4.0e-3
+    GABA.tau2 = 9.0e-3
+    sh = moose.SimpleSynHandler( GABA.path + '/sh' )
+    moose.connect( sh, 'activationOut', GABA, 'activation' )
+    sh.numSynapses = 1
+    sh.synapse[0].weight = 1
+
+
+def makeChemOscillator( name = 'osc', parent = '/library' ):
     model = moose.Neutral( parent + '/' + name )
     compt = moose.CubeMesh( model.path + '/kinetics' )
     """
@@ -124,7 +159,7 @@ def make_Chem_Oscillator( name = 'osc', parent = '/library' ):
     diffConst = 10e-12 # m^2/sec
     motorRate = 1e-6 # m/sec
     concA = 1 # millimolar
-    
+
     # create molecules and reactions
     a = moose.Pool( compt.path + '/a' )
     b = moose.Pool( compt.path + '/b' )
@@ -201,20 +236,26 @@ def transformNMDAR( path ):
         moose.connect( pa, 'channel', nmdar, 'channel' )
         caconc = moose.wildcardFind( pa.path + '/#[ISA=CaConcBase]' )
         if ( len( caconc ) < 1 ):
-            print 'no caconcs found on ', pa.path
+            print('no caconcs found on ', pa.path)
         else:
             moose.connect( nmdar, 'ICaOut', caconc[0], 'current' )
             moose.connect( caconc[0], 'concOut', nmdar, 'assignIntCa' )
     ################################################################
     # Utility function for building a compartment, used for spines.
-def buildCompt( pa, name, length, dia, xoffset, RM, RA, CM ):
+    # Builds a compartment object downstream (further away from soma)
+    # of the specfied previous compartment 'pa'. If 'pa' is not a
+    # compartment, it builds it on 'pa'. It places the compartment
+    # on the end of 'prev', and at 0,0,0 otherwise.
+
+def buildCompt( pa, name, RM = 1.0, RA = 1.0, CM = 0.01, dia = 1.0e-6, x = 0.0, y = 0.0, z = 0.0, dx = 10e-6, dy = 0.0, dz = 0.0 ):
+    length = np.sqrt( dx * dx + dy * dy + dz * dz )
     compt = moose.Compartment( pa.path + '/' + name )
-    compt.x0 = xoffset
-    compt.y0 = 0
-    compt.z0 = 0
-    compt.x = length + xoffset
-    compt.y = 0
-    compt.z = 0
+    compt.x0 = x
+    compt.y0 = y
+    compt.z0 = z
+    compt.x = dx + x
+    compt.y = dy + y
+    compt.z = dz + z
     compt.diameter = dia
     compt.length = length
     xa = dia * dia * PI / 4.0
@@ -223,6 +264,9 @@ def buildCompt( pa, name, length, dia, xoffset, RM, RA, CM ):
     compt.Rm = RM / sa
     compt.Cm = CM * sa
     return compt
+
+def buildComptWrapper( pa, name, length, dia, xoffset, RM, RA, CM ):
+    return buildCompt( pa, name, RM, RA, CM, dia = dia, x = xoffset, dx = length )
 
     ################################################################
     # Utility function for building a synapse, used for spines.
@@ -246,39 +290,39 @@ def buildSyn( name, compt, Ek, tau1, tau2, Gbar, CM ):
 def make_LCa( name = 'LCa', parent = '/library' ):
         EREST_ACT = -0.060 #/* hippocampal cell resting potl */
         ECA = 0.140 + EREST_ACT #// 0.080
-	if moose.exists( parent + '/' + name ):
-		return
-	Ca = moose.HHChannel( parent + '/' + 'name' )
-	Ca.Ek = ECA
-	Ca.Gbar = 0
-	Ca.Gk = 0
-	Ca.Xpower = 2
-	Ca.Ypower = 1
-	Ca.Zpower = 0
+        if moose.exists( parent + '/' + name ):
+                return
+        Ca = moose.HHChannel( parent + '/' + name )
+        Ca.Ek = ECA
+        Ca.Gbar = 0
+        Ca.Gk = 0
+        Ca.Xpower = 2
+        Ca.Ypower = 1
+        Ca.Zpower = 0
 
-	xgate = moose.element( parent + '/' + name + '/gateX' )
-	xA = np.array( [ 1.6e3, 0, 1.0, -1.0 * (0.065 + EREST_ACT), -0.01389, -20e3 * (0.0511 + EREST_ACT), 20e3, -1.0, -1.0 * (0.0511 + EREST_ACT), 5.0e-3, 3000, -0.1, 0.05 ] )
+        xgate = moose.element( parent + '/' + name + '/gateX' )
+        xA = np.array( [ 1.6e3, 0, 1.0, -1.0 * (0.065 + EREST_ACT), -0.01389, -20e3 * (0.0511 + EREST_ACT), 20e3, -1.0, -1.0 * (0.0511 + EREST_ACT), 5.0e-3, 3000, -0.1, 0.05 ] )
         xgate.alphaParms = xA
-	ygate = moose.element( parent + '/' + name + '/gateY' )
-	ygate.min = -0.1
-	ygate.max = 0.05
-	ygate.divs = 3000
-	yA = np.zeros( (ygate.divs + 1), dtype=float)
-	yB = np.zeros( (ygate.divs + 1), dtype=float)
+        ygate = moose.element( parent + '/' + name + '/gateY' )
+        ygate.min = -0.1
+        ygate.max = 0.05
+        ygate.divs = 3000
+        yA = np.zeros( (ygate.divs + 1), dtype=float)
+        yB = np.zeros( (ygate.divs + 1), dtype=float)
 
 
 #Fill the Y_A table with alpha values and the Y_B table with (alpha+beta)
-	dx = (ygate.max - ygate.min)/ygate.divs
-	x = ygate.min
-	for i in range( ygate.divs + 1 ):
-		if ( x > EREST_ACT):
-			yA[i] = 5.0 * math.exp( -50 * (x - EREST_ACT) )
-		else:
-			yA[i] = 5.0
-		yB[i] = 5.0
-		x += dx
-	ygate.tableA = yA
-	ygate.tableB = yB
+        dx = (ygate.max - ygate.min)/ygate.divs
+        x = ygate.min
+        for i in range( ygate.divs + 1 ):
+                if ( x > EREST_ACT):
+                        yA[i] = 5.0 * math.exp( -50 * (x - EREST_ACT) )
+                else:
+                        yA[i] = 5.0
+                yB[i] = 5.0
+                x += dx
+        ygate.tableA = yA
+        ygate.tableB = yB
         return Ca
 
     ################################################################
@@ -301,10 +345,10 @@ def addSpineProto( name = 'spine',
         chanList = (),
         caTau = 0.0
         ):
-    assert( moose.exists( parent ) )
+    assert( moose.exists( parent ) ), "%s must exist" % parent
     spine = moose.Neutral( parent + '/' + name )
-    shaft = buildCompt( spine, 'shaft', shaftLen, shaftDia, 0.0, RM, RA, CM )
-    head = buildCompt( spine, 'head', headLen, headDia, shaftLen, RM, RA, CM )
+    shaft = buildComptWrapper( spine, 'shaft', shaftLen, shaftDia, 0.0, RM, RA, CM )
+    head = buildComptWrapper( spine, 'head', headLen, headDia, shaftLen, RM, RA, CM )
     moose.connect( shaft, 'axial', head, 'raxial' )
 
     if caTau > 0.0:
@@ -338,25 +382,45 @@ def addSpineProto( name = 'spine',
     transformNMDAR( parent + '/' + name )
     return spine
 
+#######################################################################
+# Here are some compartment related prototyping functions
+def makePassiveHHsoma(name = 'passiveHHsoma', parent='/library'):
+    ''' Make HH squid model sized compartment:
+    len and dia 500 microns. CM = 0.01 F/m^2, RA =
+    '''
+    elecpath = parent + '/' + name
+    if not moose.exists( elecpath ):
+        elecid = moose.Neuron( elecpath )
+        dia = 500e-6
+        soma = buildComptWrapper( elecid, 'soma', dia, dia, 0.0,
+            0.33333333, 3000, 0.01 )
+        soma.initVm = -65e-3 # Resting of -65, from HH
+        soma.Em = -54.4e-3 # 10.6 mV above resting of -65, from HH
+    else:
+        elecid = moose.element( elecpath )
+    return elecid
+
 # Wrapper function. This is used by the proto builder from rdesigneur
-def make_active_spine(name = 'active_spine', parent='/library'):
-    return addSpineProto( name = name, parent = parent, 
+def makeActiveSpine(name = 'active_spine', parent='/library'):
+    return addSpineProto( name = name, parent = parent,
             synList = ( ['glu', 0.0, 2e-3, 9e-3, 200.0, False],
             ['NMDA', 0.0, 20e-3, 20e-3, 80.0, True] ),
             chanList = ( ['Ca', 10.0, True ], ),
             caTau = 13.333e-3
         )
 
-def make_exc_spine(name = 'exc_spine', parent='/library'):
-    return addSpineProto( name = name, parent = parent, 
+# Wrapper function. This is used by the proto builder from rdesigneur
+def makeExcSpine(name = 'exc_spine', parent='/library'):
+    return addSpineProto( name = name, parent = parent,
             synList = ( ['glu', 0.0, 2e-3, 9e-3, 200.0, False],
             ['NMDA', 0.0, 20e-3, 20e-3, 80.0, True] ),
             caTau = 13.333e-3 )
 
-def make_passive_spine(name = 'passive_spine', parent='/library'):
+# Wrapper function. This is used by the proto builder from rdesigneur
+def makePassiveSpine(name = 'passive_spine', parent='/library'):
     return addSpineProto( name = name, parent = parent)
 
 
+# legacy function. This is used by the proto builder from rdesigneur
 def makeSpineProto( name ):
     addSpineProto( name = name, chanList = () )
-
