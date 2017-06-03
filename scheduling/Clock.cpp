@@ -719,9 +719,11 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     assert( activeTicks_.size() == activeTicksMap_.size() );
     nSteps_ += numSteps;
     runTime_ = nSteps_ * dt_;
+
     for ( isRunning_ = (activeTicks_.size() > 0 );
             isRunning_ && currentStep_ < nSteps_; currentStep_ += stride_ )
     {
+        cout << "Running stide " << numSteps << endl;
         // Curr time is end of current step.
         unsigned long endStep = currentStep_ + stride_;
         currentTime_ = info_.currTime = dt_ * endStep;

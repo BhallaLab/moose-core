@@ -632,14 +632,6 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
                 j, xf.lastValues, xf.xferPoolIdx );
         }
     }
-
-    // Create thread pool.
-    string env_NUM_THREADS( std::getenv( "OMP_NUM_THREADS" ) );
-    string numT = moose::trim( env_NUM_THREADS );
-    if( numT.size( ) < 1 )
-        numT = "1";
-    num_threads_ = std::stoi( numT );
-
 }
 
 //////////////////////////////////////////////////////////////
