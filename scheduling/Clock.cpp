@@ -51,7 +51,7 @@
 #include "header.h"
 #include "Clock.h"
 #include "../utility/numutil.h"
-
+#include <omp.h>
 // Declaration of some static variables.
 const unsigned int Clock::numTicks = 32;
 /// minimumDt is smaller than any known event on the scales MOOSE handles.
@@ -728,6 +728,13 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
         unsigned long endStep = currentStep_ + stride_;
         currentTime_ = info_.currTime = dt_ * endStep;
         vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
+	//Starting the omp part
+	omp_set_dynamic(0);
+	//int num_threads = 4;
+	omp_set_num_threads(4);
+	#pragma omp parallel
+	{
+            //size_t thread_no = omp_get_thread_num();
         for ( vector< unsigned int>::iterator j =
                     activeTicks_.begin(); j != activeTicks_.end(); ++j )
         {
@@ -738,7 +745,8 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
             }
             ++k;
         }
-
+        #pragma omp barrier
+	}
         // When 10% of simulation is over, notify user when notify_ is set to
         // true.
         if( notify_ )
