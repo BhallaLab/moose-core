@@ -72,7 +72,7 @@ def make_model( ):
     moose.reinit( )   # Build the system
 
     t1 = time.clock()
-    moose.start( 5 ) # Run the system
+    moose.start( 10 ) # Run the system
     print(' Time takes %f' % (time.clock() - t1))
     print( tables_[ 'A0' ].vector )
     k = moose.element( '/model/ksolve' )

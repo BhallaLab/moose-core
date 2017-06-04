@@ -9,6 +9,5 @@ test_without_openmp : ./test_ksolve.py
 
 test_with_openmp : ./test_ksolve.py 
 	@echo "With OpenMP"
-	OMP_WAIT_POLICY=active OMP_NUM_THREADS=4 \
-			PYTHONPATH=$(MKFILE_PATH)/../../_build/python python $<
+	PYTHONPATH=$(MKFILE_PATH)/../../_build/python python $<
 
