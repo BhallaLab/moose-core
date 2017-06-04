@@ -558,18 +558,33 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     // Fourth, do the numerical integration for all reactions.
     //MICKY: This can be parallelized.
 
-    int tid  = omp_get_thread_num( );
+    //int tid  = omp_get_thread_num( );
 
     size_t nvPools = voxelPools_.size( );
 
     // Compute the grain size.
-    size_t grainSize = 1 + (nvPools / num_threads_);
+    //size_t grainSize = 1 + (nvPools / num_threads_);
 
-#if 0
-    for ( size_t i = 0; i < nvPools; i++ )
+#if 1
+    //omp part
+    size_t thread_no = omp_get_thread_num();
+
+    //std::cout << "Threads are " << thread_no  << std::endl;
+
+    for(size_t k=0; k<4; ++k)
     {
-        //cout << "Total threads " << omp_get_num_threads( )  << endl;
-        voxelPools_[i].advance( p );
+
+        if(k == thread_no){
+            for ( size_t i = thread_no; i < nvPools-4; i = i + 4 )
+            {
+                //cout << "Total threads " << omp_get_num_threads( )  << endl;
+                cout << "Voxel pool id " <<  i << " out of " << nvPools 
+                    << " thread id " << thread_no << endl;
+                voxelPools_[i].advance( p );
+            }
+            break;
+        }
+
     }
 #else
     for (size_t i = 0; i < num_threads_; i++) 
@@ -921,4 +936,5 @@ void Ksolve::print() const
             cout << "	" << xv[j];
     }
 }
+
 
