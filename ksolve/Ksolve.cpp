@@ -575,11 +575,11 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     {
 
         if(k == thread_no){
-            for ( size_t i = thread_no; i < nvPools-4; i = i + 4 )
+            for ( size_t i = thread_no; i < nvPools; i = i + 4 )
             {
                 //cout << "Total threads " << omp_get_num_threads( )  << endl;
-                cout << "Voxel pool id " <<  i << " out of " << nvPools 
-                    << " thread id " << thread_no << endl;
+               // cout << "Voxel pool id " <<  i << " out of " << nvPools 
+                 //   << " thread id " << thread_no << endl;
                 voxelPools_[i].advance( p );
             }
             break;
