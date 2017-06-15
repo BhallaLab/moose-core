@@ -132,7 +132,7 @@ protected:
 		*   Tells you which compartments have external calcium-dependent
 		*   channels so that you can send out Calcium concentrations in only
 		*   those compartments. */
-    int step_num;
+    int step_num = 0;
 #ifdef USE_CUDA    
     //int step_num;
 
@@ -191,6 +191,8 @@ protected:
 
 	// Hines Matrix related
 	double* d_HS_;
+	double* d_perv_dynamic;
+	double* d_perv_static;
 
 	double* d_chan_x;
 	int* d_chan_colIndex;
@@ -209,6 +211,9 @@ protected:
 	// caConc_ Array of structures to structure of arrays.
 	double* d_CaConcStruct_c_; // Dynamic array
 	double* d_CaConcStruct_CaBasal_, *d_CaConcStruct_factor1_, *d_CaConcStruct_factor2_, *d_CaConcStruct_ceiling_, *d_CaConcStruct_floor_; // Static array
+	int ADVANCE_CALCIUM_APPROACH;
+	int ADVANCE_CALCIUM_WPT_APPROACH = 0;
+	int ADVANCE_CALCIUM_SPMV_APPROACH = 1;
 
 	// CUDA Active Permanent data
 	double* d_V;
@@ -222,6 +227,14 @@ protected:
 	double* d_Ca_fractions;
 
 	bool is_initialized; // Initializing device memory data
+
+	//// Variables for event based optimization for update_matrix method.
+	int* hits; // Number of times setInject method is called in zero time-step.
+	double* stim_basal_values, *d_stim_basal_values; // Basal value for stimulated compartments.
+	int* stim_comp_indices, *d_stim_comp_indices; // Compartment id's which have an injectCurrent stimulation;
+	int* stim_map, *d_stim_map; // An array of size nCompt, which stores the id in stim_comp_indices array if it is a stem, else -1.
+	int num_stim_comp; // Number of compartment with an injectCurrent stimlation.
+
 #endif
 
     static const int INSTANT_X;
@@ -265,10 +278,12 @@ private:
     void updateForwardFlowMatrix();
     void forwardFlowSolver();
 
-    void updatePervasiveFlowMatrix();
-    void pervasiveFlowSolver();
+    void updatePervasiveFlowMatrixOpt();
+    void pervasiveFlowSolverOpt();
 
 #ifdef USE_CUDA
+    // Allocate buffer memory required for optimizations.
+    void allocate_cpu_memory();
     // Hsolve GPU set up kernels
     void allocate_hsolve_memory_cuda();
     void copy_table_data_cuda();
@@ -281,8 +296,10 @@ private:
     void calculate_channel_currents_cuda_wrapper();
 
     void update_matrix_cuda_wrapper();
+    void update_perv_matrix_cuda_wrapper();
     void update_csrmatrix_cuda_wrapper();
     int choose_update_matrix_approach();
+    int choose_advance_calcium_approach();
 
     void calculate_V_from_Vmid_wrapper();
 

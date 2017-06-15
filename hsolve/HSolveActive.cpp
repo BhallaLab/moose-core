@@ -87,6 +87,10 @@ HSolveActive::HSolveActive()
 
 void HSolveActive::step( ProcPtr info )
 {	
+
+	if(step_num == 0)
+		cout << "SIMULATION STARTED" << endl;
+
     if ( nCompt_ <= 0 )
         return;
 
@@ -119,11 +123,13 @@ void HSolveActive::step( ProcPtr info )
 	ofstream currentFile("current.csv",ios::app);
 	currentFile << inject_[3580].injectBasal << endl;
 	*/
-
 	updateMatrix();
 
-	HSolvePassive::forwardEliminate();
-	HSolvePassive::backwardSubstitute();
+	//HSolvePassive::forwardEliminate();
+	//HSolvePassive::backwardSubstitute();
+
+	pervasiveFlowSolverOpt();
+
 	cudaMemcpy(d_Vmid, &(VMid_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 	calculate_V_from_Vmid_wrapper(); // Avoing Vm memory transfer and using CUDA kernel
 
@@ -138,7 +144,7 @@ void HSolveActive::step( ProcPtr info )
 #else
 	advanceChannels( info->dt );
 	calculateChannelCurrents();
-	int solver_choice = 0; // 0-Moose , 1-Forward-flow, 2-Pervasive-flow
+	int solver_choice = 2; // 0-Moose , 1-Forward-flow, 2-Pervasive-flow
 
 	/*
 	string pPath = getenv("SOLVER_CHOICE");
@@ -162,8 +168,10 @@ void HSolveActive::step( ProcPtr info )
 			break;
 		case 2:
 			// Using pervasive flow solution
-			updatePervasiveFlowMatrix();
-			pervasiveFlowSolver();
+			//updatePervasiveFlowMatrix();
+			//pervasiveFlowSolver();
+			updatePervasiveFlowMatrixOpt();
+			pervasiveFlowSolverOpt();
 			break;
 	}
 
@@ -220,10 +228,16 @@ void HSolveActive::updateMatrix()
 {
 
 #ifdef USE_CUDA
+	/*
 	// Updates HS matrix and sends it to CPU
 	if ( HJ_.size() != 0 )
 		memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
 	update_matrix_cuda_wrapper();
+	*/
+
+	// Copying initial matrix
+	memcpy(qfull_mat.values, perv_mat_values_copy, qfull_mat.nnz*sizeof(double));
+	update_perv_matrix_cuda_wrapper();
 
 	// Updates CSR matrix and sends it to CPU.
 	//update_csrmatrix_cuda_wrapper();
@@ -381,11 +395,11 @@ void HSolveActive::forwardFlowSolver(){
 	stage_ = 2;
 }
 
-void HSolveActive::updatePervasiveFlowMatrix(){
+
+void HSolveActive::updatePervasiveFlowMatrixOpt(){
 
 	// Copying initial matrix
-	memcpy(upper_mat.values, upper_mat_values_copy, upper_mat.nnz*sizeof(double));
-	memcpy(lower_mat.values, lower_mat_values_copy, lower_mat.nnz*sizeof(double));
+	memcpy(qfull_mat.values, perv_mat_values_copy, qfull_mat.nnz*sizeof(double));
 
 	double GkSum, GkEkSum; vector< CurrentStruct >::iterator icurrent = current_.begin();
 	vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
@@ -399,8 +413,8 @@ void HSolveActive::updatePervasiveFlowMatrix(){
 			GkEkSum += icurrent->Gk * icurrent->Ek;
 		}
 
-		upper_mat.values[per_mainDiag_map[i]] = per_mainDiag_passive[i] + GkSum;
-		per_rhs[i] = V_[i] * compartment_[i].CmByDt + compartment_[i].EmByRm + GkEkSum;
+		perv_dynamic[i] = per_mainDiag_passive[i] + GkSum;
+		perv_dynamic[nCompt_+i] = V_[i] * compartment_[i].CmByDt + compartment_[i].EmByRm + GkEkSum;
 
 		++iboundary;
 	}
@@ -417,59 +431,63 @@ void HSolveActive::updatePervasiveFlowMatrix(){
 	        unsigned int ic = inject->first;
 	        InjectStruct& value = inject->second;
 
-	        per_rhs[ic] += value.injectVarying + value.injectBasal;
+	        perv_dynamic[nCompt_+ic] += (value.injectVarying + value.injectBasal);
 	        value.injectVarying = 0.0;
 	    }
 	#endif
 
-
     vector< double >::iterator iec;
     for (unsigned int i = 0; i < nCompt_; i++)
     {
-    	upper_mat.values[per_mainDiag_map[i]] += externalCurrent_[2*i];
-    	per_rhs[i] += externalCurrent_[2*i+1];
+    	perv_dynamic[i] += externalCurrent_[2*i];
+    	perv_dynamic[nCompt_+i] += externalCurrent_[2*i+1];
     }
 
     stage_ = 0;
 }
+void HSolveActive::pervasiveFlowSolverOpt(){
+	//// Optimized pervasive flow solver
+	//bool is_lower_triang;
+	int elim_index = 0;
+	for (int i = 0; i < nCompt_; ++i) {
+		for (int j = qfull_mat.rowPtr[i]; j < upper_triang_offsets[i]; ++j) {
+			// Eliminating an element
+			int r1 = qfull_mat.colIndex[j];
+			double scaling = qfull_mat.values[j]/perv_dynamic[2*r1];
 
-void HSolveActive::pervasiveFlowSolver(){
-   	// TODO
-	// Gauss elimination
-	for(int i=0;i<lower_mat.nnz;i++){
-		double scaling = lower_mat.values[i]/upper_mat.values[upper_mat.rowPtr[lower_mat.colIndex[i]]];
-		// UT-LT
-		for(int j=ut_lt_rowPtr[i];j < ut_lt_rowPtr[i+1]; j++){
-			lower_mat.values[ut_lt_lower[j]] -= (upper_mat.values[ut_lt_upper[j]]*scaling);
+			// Dealing with non-main diagonal
+			for (int k = elim_rowPtr[elim_index]; k < elim_rowPtr[elim_index+1]; ++k){
+				qfull_mat.values[eliminfo_r2[k]] -= (qfull_mat.values[eliminfo_r1[k]]* scaling);
+			}
+
+			// Dealing with main diagonal
+			perv_dynamic[2*i] -= (qfull_mat.values[eliminfo_diag[elim_index]]*scaling);
+
+			//Dealing with rhs
+			perv_dynamic[2*i+1] -= (perv_dynamic[2*r1+1]*scaling);
+
+			elim_index++;
 		}
-
-		// UT-UT
-		for(int j=ut_ut_rowPtr[i]; j < ut_ut_rowPtr[i+1]; j++){
-			upper_mat.values[ut_ut_lower[j]] -= (upper_mat.values[ut_ut_upper[j]]*scaling);
-		}
-
-		// RHS
-		per_rhs[lower_mat.rowIndex[i]] -= (per_rhs[lower_mat.colIndex[i]]*scaling);
 	}
 
-	//print_csr_matrix(upper_mat);
-	//print_matrix(rhs,num_comp,1);
-
 	// Backward substitution
-	for(int i=nCompt_-1;i>=0;i--){
-		double sum = 0;
-		for(int j=upper_mat.rowPtr[i]+1;j<upper_mat.rowPtr[i+1];j++){
-			sum += (upper_mat.values[j]*VMid_[upper_mat.colIndex[j]]);
+	bool is_upper_triang;
+	double sum;
+	for (int i = nCompt_-1; i >=0; --i) {
+		sum = 0;
+		for (int j = qfull_mat.rowPtr[i+1]-1; j >= upper_triang_offsets[i] ; --j) {
+			sum += (qfull_mat.values[j]*VMid_[qfull_mat.colIndex[j]]);
 		}
-		VMid_[i] = (per_rhs[i]-sum)/upper_mat.values[upper_mat.rowPtr[i]];
+
+		VMid_[i] = (perv_dynamic[2*i+1]-sum)/perv_dynamic[2*i];
 	}
 
 	for (unsigned int i = 0; i < nCompt_; ++i) {
 		V_[i] = 2*VMid_[i] - V_[i];
 	}
-
 	stage_ = 2;
 }
+
 
 void HSolveActive::advanceCalcium()
 {
@@ -700,6 +718,20 @@ void HSolveActive::advanceChannels( double dt )
 
 #ifdef USE_CUDA
 
+void HSolveActive::allocate_cpu_memory(){
+	hits = new int[nCompt_]();
+	stim_basal_values = new double[nCompt_](); // nCompt+1, because for non-stimulated compartments map id is zero.
+	stim_comp_indices = new int[nCompt_](); // nCompt+1, because for non-stimulated compartments map id is zero.
+	stim_map = new int[nCompt_]();
+	num_stim_comp = 0;
+
+	// Initializing elements in map to -1
+	for (int i = 0; i < nCompt_; ++i) {
+		stim_map[i] = -1;
+	}
+
+}
+
 /* Used to allocate device memory on GPU for Hsolve variables */
 void HSolveActive::allocate_hsolve_memory_cuda(){
 
@@ -753,6 +785,8 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 
 	// Hines Matrix related
 	cudaMalloc((void**)&d_HS_, HS_.size()*sizeof(double));
+	cudaMalloc((void**)&d_perv_dynamic, 2*nCompt_*sizeof(double));
+	cudaMalloc((void**)&d_perv_static, nCompt_*sizeof(double));
 
 	cudaMalloc((void**)&d_chan_colIndex, num_channels*sizeof(int));
 	cudaMalloc((void**)&d_chan_rowPtr, (nCompt_+1)*sizeof(int));
@@ -778,6 +812,11 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	cudaMalloc((void**)&d_state_powers, num_cmprsd_gates*sizeof(double));
 	cudaMalloc((void**)&d_state2chanId, num_cmprsd_gates*sizeof(int));
 	cudaMalloc((void**)&d_state2column, num_cmprsd_gates*sizeof(int));
+
+	//// Memory allocation for Variables of event based optimization for update_matrix method.
+	cudaMalloc((void**)&d_stim_basal_values, nCompt_*sizeof(double));
+	cudaMalloc((void**)&d_stim_comp_indices, nCompt_*sizeof(int));
+	cudaMalloc((void**)&d_stim_map, nCompt_*sizeof(int));
 
 }
 
@@ -949,6 +988,7 @@ void HSolveActive::copy_hsolve_information_cuda(){
 
 	// Hines Matrix related
 	cudaMemcpy(d_HS_, &(HS_.front()), HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_perv_static, per_mainDiag_passive, nCompt_*sizeof(double), cudaMemcpyHostToDevice);
 
 	int* chan_colIndex = new int[num_channels]();
 	double* chan_x = new double[nCompt_];
@@ -1030,6 +1070,12 @@ void HSolveActive::copy_hsolve_information_cuda(){
 		cudaMemcpy(d_CaConcStruct_floor_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice);
 	}
 
+
+	//// Memory transfer for Variables of event based optimization for update_matrix method.
+	cudaMemcpy(d_stim_basal_values, stim_basal_values, nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_stim_comp_indices, stim_comp_indices, nCompt_*sizeof(int), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_stim_map, stim_map, nCompt_*sizeof(int), cudaMemcpyHostToDevice);
+
 	/*
 	// Writing load to file.
 	ofstream load_file("umat_load.csv");
@@ -1047,7 +1093,7 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	}
 	chan_dist.close();
 	*/
-
+	// Choosing approach in update matrix
 	UPDATE_MATRIX_APPROACH = choose_update_matrix_approach();
 
 	if(UPDATE_MATRIX_APPROACH == UPDATE_MATRIX_WPT_APPROACH){
@@ -1057,6 +1103,19 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	}else{
 		// Future approaches, if any.
 	}
+
+	// Choosing approach in advance calcium
+	ADVANCE_CALCIUM_APPROACH = choose_advance_calcium_approach();
+	if(ADVANCE_CALCIUM_APPROACH == ADVANCE_CALCIUM_WPT_APPROACH){
+		cout << "AC APPROACH : WPT " << endl;
+	}else if(ADVANCE_CALCIUM_APPROACH == ADVANCE_CALCIUM_SPMV_APPROACH){
+		cout << "AC APPROACH : SPMV" << endl;
+	}else{
+		// Future approaches, if any.
+	}
+
+
+
 }
 
 void HSolveActive::transfer_memory2cpu_cuda(){

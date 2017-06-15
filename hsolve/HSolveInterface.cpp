@@ -195,6 +195,8 @@ double HSolve::getInject( Id id ) const
 
     return 0.0;
 #endif
+   	//cout << step_num << " "  << "getInject " << index << endl;
+
 }
 
 void HSolve::setInject( Id id, double value )
@@ -204,6 +206,35 @@ void HSolve::setInject( Id id, double value )
     assert( index < nCompt_ );
 
     inject_[ index ].injectBasal = value;
+#ifdef USE_CUDA
+    if(step_num == 0){
+    	// Getting compartments which have stimulation.
+
+    	hits[index] += 1;
+    	// compartment with id 'index' is a stimulated compartment.
+    	if(hits[index] == 2){
+    		stim_comp_indices[num_stim_comp] = index;
+    		stim_basal_values[num_stim_comp] = value;
+    		stim_map[index] = num_stim_comp;
+    		num_stim_comp++;
+    	}
+    }else if(step_num > 0){
+    	/*
+    	// Printing debug information
+    	if(step_num == 20){
+    		for (int i = 0; i < num_stim_comp; ++i) {
+				cout <<"stim " << i << " " << stim_comp_indices[i] << endl;
+			}
+
+    		for (int i = 0; i < nCompt_; ++i) {
+    			cout << i << " " << stim_map[i] << " " << endl;
+    		}
+
+    	}
+    	*/
+    	stim_basal_values[stim_map[index]] = value;
+    }
+#endif
 }
 
 void HSolve::addInject( Id id, double value )
@@ -212,6 +243,9 @@ void HSolve::addInject( Id id, double value )
     // Not assert( index < inject_.size() ), because inject_ is a map.
     assert( index < nCompt_ );
     inject_[ index ].injectVarying += value;
+
+
+    cout << step_num << " add Inject " << value <<  endl;
 }
 
 
