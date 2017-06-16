@@ -760,7 +760,6 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
         //    cout << "Thread_no = " << omp_get_thread_num() << endl; 
             currentTime_ = info_.currTime = dt_ * endStep;
         }
-#pragma omp barrier
     }
     }
 	if ( activeTicks_.size() == 0 )
