@@ -1,7 +1,7 @@
 import moose
 import moose.utils as mu
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import time
 
 #to know the path from where the files are taken

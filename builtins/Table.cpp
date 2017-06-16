@@ -234,6 +234,8 @@ Table& Table::operator=( const Table& tab )
 void Table::process( const Eref& e, ProcPtr p )
 {
     lastTime_ = p->currTime;
+    assert( e.data() );
+    assert( p );
 
     // Copy incoming data to ret and insert into vector.
     vector< double > ret;
