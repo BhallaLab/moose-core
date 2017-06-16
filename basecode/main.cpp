@@ -51,7 +51,6 @@ extern void testScheduling();
 extern void testSchedulingProcess();
 extern void testBuiltins();
 extern void testSynapse();
-
 extern void testBuiltinsProcess();
 
 extern void testMpiScheduling();
