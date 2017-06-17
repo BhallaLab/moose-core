@@ -567,25 +567,20 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
 #if 1
     //omp part
-    size_t thread_no = omp_get_thread_num();
+    //size_t thread_no = omp_get_thread_num();
 
     //std::cout << "Threads are " << thread_no  << std::endl;
 
-    for(size_t k=0; k<4; ++k)
-    {
-
-        if(k == thread_no){
-            for ( size_t i = thread_no; i < nvPools; i = i + 4 )
+            for ( size_t i = 0; i < nvPools; ++i )
             {
                 //cout << "Total threads " << omp_get_num_threads( )  << endl;
                // cout << "Voxel pool id " <<  i << " out of " << nvPools 
                  //   << " thread id " << thread_no << endl;
                 voxelPools_[i].advance( p );
             }
-            break;
-        }
+        
 
-    }
+
 #else
     for (size_t i = 0; i < num_threads_; i++) 
     {
