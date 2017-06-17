@@ -1,7 +1,5 @@
-cmake_minimum_required(VERSION 2.8)
-
-include(CheckIncludeFileCXX)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
@@ -13,20 +11,40 @@ endif(COMMAND cmake_policy)
 
 project(MOOSE)
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 include(FindPkgConfig)
+include(GetRevision)
 
-# Set moose version
-# Get the latest abbreviated commit hash of the working branch
-execute_process(
-  COMMAND git describe --tags --long
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  OUTPUT_VARIABLE GIT_VERSION_OUTPUT
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-add_definitions( -DMOOSE_VERSION="${GIT_VERSION_OUTPUT}")
+# If from command line, version info is not passed, use the git to generate a
+# version file. If GIT fails, use the previous known version.
+set(VERSION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/VERSION)
+find_program(GIT_EXEC "git")
+message( STATUS "Looking for git ${GIT_EXEC}" )
+if( (NOT MOOSE_VERSION) AND GIT_EXEC)
+    execute_process( 
+        COMMAND ${GIT_EXEC} describe --tags --long
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE MOOSE_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+endif( )
 
+# Default to current date.
+if( (NOT MOOSE_VERSION)  )
+    NOW(TIMESTAMP)
+    set(MOOSE_VERSION "nightly-${TIMESTAMP}" )
+elseif(MOOSE_VERSION)
+    message(STATUS "+ Using user specified VERSION = ${MOOSE_VERSION}" )
+else()
+    message(FATAL_ERROR "Could not determine MOOSE_VERSION" )
+endif( )
+
+message( STATUS "MOOSE Version ${MOOSE_VERSION}" )
+
+# Write VERSION to a file VERSION so that setup.py can use it.
+file(WRITE ${VERSION_FILE} ${MOOSE_VERSION} )
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -76,29 +94,13 @@ endif()
 
 option(VERBOSITY "Set MOOSE verbosity level (deprecated)" 0)
 ## Unit testing and debug mode.
-option(DEBUG "Build with debug support" OFF)
-option(GPROF "Build for profiling using gprof" OFF)
+option(DEBUG "Build with debug support" ON)
+option(GPROF "Build for profiling using gprof" ON)
 option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
-option(WITH_CYTHON "Build python extension using Cython. (experimental)" OFF)
 option(WITH_MPI  "Enable Openmpi support" OFF)
-option(WITH_OPENMP  "Enable Openmp support" ON)
-option(WITH_BOOST "Use boost library instead of GSL" OFF)
+option(WITH_BOOST "Use boost library instead of GSL" ON)
 option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
-
-# If SBML is available, it will automaticall enable the support. If ON, then
-# libSBML must be present.
-option(WITH_SBML  "Enable SBML support. Automatically detected." OFF)
-
-# If GSL_STATIC_HOME is set, we use it to search for static gsl libs.
-option(GSL_STATIC_HOME 
-    "Path prefix where static gsl library can be found e.g. /opt/sw/gsl116 " 
-    OFF
-    )
-option(HDF5_STATIC_HOME
-    "Path prefix where static hdf5 library can be found e.g /opt/sw/hdf5 "
-    OFF
-    )
 
 ################################# CMKAE MACROS #################################
 
@@ -107,13 +109,19 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 ############################ BUILD CONFIGURATION #################################
 
 # VERBOSITY OF OUTPUT
-if(VERBOSITY)
-    message(STATUS "Verbosity of output is ${VERBOSITY}. This is not implemented
-    yet!")
-    add_definitions(-DVERBOSITY=${VERBOSITY})
-else()
-    message(STATUS "Moose will be quiet")
-    add_definitions(-DQUIET_MODE)
+
+option(WITH_CUDA "Enable GPU acceleration" ON)
+if(WITH_CUDA)
+    find_package(CUDA)
+    if(CUDA_FOUND)
+        MESSAGE(STATUS "Using CUDA ${CUDA_VERSION}")
+    else(CUDA_FOUND)
+        MESSAGE(FATAL_ERROR "I could not locate CUDA!\n"
+        "If CUDA is installed in non-standard place use -DCUDA_TOOLKIT_ROOT_DIR"
+        " to specify the PATH to CUDA e.g. \n"
+        "   $ cmake -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-7.5 .." 
+        )
+    endif(CUDA_FOUND)
 endif()
 
 # Default macros
@@ -130,7 +138,7 @@ elseif(ENABLE_UNIT_TESTS)
 else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
-    add_definitions(-UDO_UNIT_TESTS )
+    add_definitions(-UDO_UNIT_TESTS -DQUIET_MODE -O3)
 endif()
 
 if(GPROF AND DEBUG)
@@ -139,17 +147,6 @@ if(GPROF AND DEBUG)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
 endif()
 
-IF(NOTIFY_PROGRESS)
-    IF(COMPILER_SUPPORTS_CXX11 OR COMPILER_SUPPORTS_CXX0X)
-        MESSAGE(STATUS "MOOSE will occasionally write to __moose__progress__ file "
-            " status of simulation (done time/total time)"
-            )
-    ELSE()
-        MESSAGE(FATAL_ERROR "No c++11 or c++0x support in compiler."
-            "You can not use -DNOTIFY_PROGRESS=ON without it"
-            )
-    ENDIF()
-ENDIF()
 ################################### TARGETS ####################################
 
 add_library(libmoose SHARED basecode/main.cpp)
@@ -162,54 +159,37 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
 if(WITH_BOOST)
     set(WITH_GSL OFF)
-    message(STATUS "USING BOOST LIBRARIES")
 endif(WITH_BOOST)
 
-# If this variable is used while packaging; we build this project using another
-# cmake script and pass the location of SBML static library using this variable.
-# Otherwise, this is useless. FIXME: This is not a clean solution.
 include_directories(msg basecode)
 
 set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
 
+## Variable to collect all static libraries.
+set(STATIC_LIBRARIES "" )
+# Collect all shared libraries here.
+set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
+
 if(WITH_GSL)
-    message(STATUS "USING GSL LIBRARIES")
-    if(GSL_STATIC_HOME)
-        SET(GSL_INCLUDE_DIRS "${GSL_STATIC_HOME}/include")
-        find_library(GSL_LIBRARY 
-            NAME libgsl.a 
-            PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64
-            NO_DEFAULT_PATH
+    find_package(GSL 1.16)
+    if(NOT GSL_FOUND)
+        message(FATAL_ERROR 
+            "=====================================================================\n"
+            " FATAL gsl(>1.16) not found.\n\n"
+            " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
+            " Please install the `dev` or `devel` package e.g. \n"
+            "     $ sudo apt-get install libgsl0-dev \n"
+            "     $ sudo yum install libgsl-devel \n"
+            "     $ brew install gsl \n\n"
+            " Or build and install gsl from source code \n"
+            "     https://www.gnu.org/software/gsl/ \n"
+            " After installing gsl, rerun cmake.\n\n"
+            " If you install gsl in non-standard place, set the GSL_ROOT_DIR environment \n"
+            " variable. CMAKE use this to search for required files. \n"
+            "====================================================================\n"
             )
-        find_library(GSLCBLAS_LIBRARY
-            NAME libgslcblas.a 
-            PATHS ${GSL_STATIC_HOME}/lib ${GSL_STATIC_HOME}/lib64 
-            NO_DEFAULT_PATH
-            )
-        SET(GSL_LIBRARIES ${GSL_LIBRARY} ${GSLCBLAS_LIBRARY})
-        message(STATUS "STATIC GSL_LIBRARIES ${GSL_LIBRARIES}")
-        set(GSL_FOUND TRUE)
-    ELSE()
-        find_package(GSL 1.16)
-        if(NOT GSL_FOUND)
-            message(FATAL_ERROR 
-                "=====================================================================\n"
-                " FATAL gsl(>1.16) not found.\n\n"
-                " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
-                " Please install the `dev` or `devel` package e.g. \n"
-                "     $ sudo apt-get install libgsl0-dev \n"
-                "     $ sudo yum install libgsl-devel \n"
-                "     $ brew install gsl \n\n"
-                " Or build and install gsl from source code \n"
-                "     https://www.gnu.org/software/gsl/ \n"
-                " After installing gsl, rerun cmake.\n\n"
-                " If you install gsl in non-standard place, set the GSL_HOME environment \n"
-                " variable. CMAKE use this to search for required files. \n"
-                "====================================================================\n"
-                )
-        endif(NOT GSL_FOUND)
-    endif()
+    endif(NOT GSL_FOUND)
     add_definitions(-DUSE_GSL)
     # GSL is also used in RNG (whenever applicable), therefore include paths are
     # top level.
@@ -228,29 +208,8 @@ elseif(WITH_BOOST)
     endif(BOOST_RANDOM_DEVICE_EXISTS)
 endif()
 
-## Setup hdf5
-if(HDF5_STATIC_HOME)
-    SET(HDF5_INCLUDE_DIRS "${HDF5_STATIC_HOME}/include")
-    find_library(HDF5_LIBRARY 
-        NAME libhdf5-static.a
-        PATHS ${HDF5_STATIC_HOME}/lib ${HDF5_STATIC_HOME}/lib64
-        NO_DEFAULT_PATH
-        )
-    find_library(HDF5_HL_LIBRARY
-        NAME libhdf5_hl-static.a
-        PATHS ${HDF5_STATIC_HOME}/lib ${HDF5_STATIC_HOME}/lib64
-        NO_DEFAULT_PATH
-        )
-    SET(HDF5_LIBRARIES ${HDF5_LIBRARY} ${HDF5_HL_LIBRARY})
-    SET(HDF5_FOUND TRUE)
-ELSE(HDF5_STATIC_HOME)
-    pkg_check_modules(HDF5 hdf5)
-    if(NOT HDF5_FOUND)
-        message(STATUS "pkg-config could not find hdf5. fallback to default")
-        find_package(HDF5 COMPONENTS CXX HL)
-     endif()
-endif(HDF5_STATIC_HOME)
 
+find_package(HDF5 COMPONENTS CXX HL)
 if(NOT HDF5_FOUND)
     message(
         "==================================================================\n"
@@ -265,18 +224,45 @@ if(NOT HDF5_FOUND)
         " variable HDF5_ROOT to the location. Rerun cmake \n"
         "================================================================ \n"
         )
-ELSEIF(HDF5_FOUND AND (NOT HDF5_STATIC_HOME))
-    if(HDF5_HL_LIBRARIES)
-        set(HDF5_LIBRARIES ${HDF5_HL_LIBRARIES})
-    else()
-        set(HDF5_LIBRARIES "-lhdf5 -lhdf5_hl")
-    endif()
-    include_directories(${HDF5_INCLUDE_DIRS})
 endif(NOT HDF5_FOUND)
 
 if(HDF5_FOUND)
-    add_definitions( -DUSE_HDF5 )
     include_directories( ${HDF5_INCLUDE_DIRS} )
+    add_definitions( -DUSE_HDF5 )
+    if(HDF5_USE_STATIC_LIBRARIES)
+	message(STATUS "Finding static HDF5 libraries in $ENV{HDF5_ROOT}")
+        find_library(HDF5_CXX_LIBRARIES NAMES libhdf5.a 
+            PATHS $ENV{HDF5_ROOT}/lib $ENV{HDF5_ROOT}/lib64
+            )
+        find_library(HDF5_HL_LIBRARIES NAMES libhdf5_hl.a
+            PATHS $ENV{HDF5_ROOT}/lib $ENV{HDF5_ROOT}/lib64 
+            )
+        set(HDF5_LIBRARIES ${HDF5_CXX_LIBRARIES} ${HDF5_HL_LIBRARIES})
+    endif()
+
+    
+    # Make sure, HDF5_HL_LIBRARIES are set. The COMPONENTS in find_package may
+    # or may not work. See BhallaLab/moose-core#163. 
+    if(NOT HDF5_HL_LIBRARIES)
+        set(HDF5_HL_LIBRARIES ${HDF5_HL_LIBRARIES})
+    endif(NOT HDF5_HL_LIBRARIES)
+    list(APPEND HDF5_LIBRARIES ${HDF5_HL_LIBRARIES})
+
+    message(STATUS "MOOSE will use following HDF5 ${HDF5_LIBRARIES}" )
+    foreach(HDF5_LIB ${HDF5_LIBRARIES})
+        if(HDF5_LIB)
+            get_filename_component( HDF5_LIB_EXT ${HDF5_LIB} EXT )
+            if(HDF5_LIB_EXT)
+                if(${HDF5_LIB_EXT} STREQUAL ".a")
+                    list(APPEND STATIC_LIBRARIES ${HDF5_LIB} )
+                else( )
+                    list(APPEND SYSTEM_SHARED_LIBS ${HDF5_LIB} )
+                endif( )
+            endif()
+        endif( )
+    endforeach( )
+else( HDF5_FOUND )
+    message(STATUS "HDF5 is not found" )
 endif( HDF5_FOUND )
 
 # This is a fix for new HDF5 package on Debian/Ubuntu which installs hdf5
@@ -285,45 +271,56 @@ if(HDF5_LIBRARY_DIRS)
     set_target_properties( libmoose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
 endif()
 
-find_package(Termcap)
-find_package(Readline)
-
-if(READLINE_FOUND AND TERMCAP_FOUND)
-    add_definitions(-DUSE_READLINE)
-    include_directories(${Readline_INCLUDE_DIR})
-endif()
-
-# OpenMP
-if(WITH_OPENMP)
-    find_package(OpenMP)
-    if (OPENMP_FOUND)
-            message(STATUS "FOUND OPENMP PACKAGE USING the flags ${OpenMP_C_FLAGS} and ${OpenMP_CXX_FLAGS}")
-            set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-            set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-            set (ENV{NUM_THREADS} 1)
-            message(STATUS "NUM THREADS = $ENV{NUM_THREADS}")
-    endif()
-endif(WITH_OPENMP)
 
 # Openmpi
 if(WITH_MPI)
     find_package(MPI REQUIRED)
-    message(STATUS "Using MPI compiler  ${MPI_CXX_COMPILER}")
-    set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
-    add_definitions( -DUSE_MPI )
-    set_target_properties( moose.bin libmoose _moose 
-        PROPERTIES 
-        COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} -fopenmp"
-        LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -fopenmp"
-        )
-    find_package(OpenMP REQUIRED)
-    MESSAGE("++ OpenMPI support is ON")
-    add_definitions(-DUSE_OPENMPI -O3)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${-pthread}")
-	
+    if(MPI_CXX_FOUND)
+        message(STATUS "Using MPI from ${MPI_CXX_INCLUDE_PATH}")
+        include_directories(${MPI_CXX_INCLUDE_PATH})
+        set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
+        add_definitions(-DUSE_MPI)
+        SET(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+        SET(CMAKE_C_COMPILER ${MPI_C_COMPILER})
+    else()
+        message(STATUS "Cound not find MPI")
+        add_definitions(-UUSE_MPI)
+    endif()
 endif(WITH_MPI)
+
+if(WITH_BOOST)
+    list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES})
+    list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
+endif(WITH_BOOST)
+
+# These libraries could be static of dynamic. We need to discrimate between
+# these two types because of --whole-archive option. See
+# BhallaLab/moose-core#66,
+if(WITH_GSL)
+    message(STATUS "Using gsl libraries: ${GSL_LIBRARIES}")
+    foreach(GSL_LIB ${GSL_LIBRARIES} )
+        if(GSL_LIB)
+            get_filename_component( GSL_LIB_EXT ${GSL_LIB} EXT )
+            if(GSL_LIB_EXT)
+                if(GSL_LIB_EXT STREQUAL ".a" )
+                    list(APPEND STATIC_LIBRARIES ${GSL_LIB})
+                else()
+                    list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIB})
+                endif( )
+            endif( )
+        endif( )
+    endforeach( )
+endif()
+
+if(WITH_MPI)
+    if(MPI_CXX_FOUND)
+        list(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
+    endif()
+endif(WITH_MPI)
+
+# Always use private version of muparser. We have some custom edits.
+add_subdirectory(external/muparser)
+list(APPEND MOOSE_LIBRARIES muparser)
 
 # Add subdirectroeis
 add_subdirectory(basecode)
@@ -345,59 +342,6 @@ add_subdirectory(benchmarks)
 add_subdirectory(kinetics)
 add_subdirectory(synapse)
 add_subdirectory(intfire)
-
-# These are always shared libraries.
-set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
-if(WITH_BOOST)
-        #find_package( LAPACK REQUIRED )
-    # NOTE: On nargis, find LAPACK does not work, one has to specify lapack and
-    # blas library manually.
-    list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES})# -llapack -lblas)
-    list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
-endif(WITH_BOOST)
-if(WITH_MPI)
-    LIST(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
-endif(WITH_MPI)
-
-# These libraries could be static of dynamic.
-# When building packages on OBS or launchpad, we build static library of a
-# dependencies if a correct version is not found. 
-# Here we make sure that the correct static version is linked; if a correct
-# shared version is found then link the shared version in SYSTEM_SHARED_LIBS.
-
-# If CMAKE_STATIC_LIBRARIES are mentiond on command line, use it as list.
-set(STATIC_LIBRARIES  "")
-
-if(HDF5_STATIC_HOME)
-    list(APPEND STATIC_LIBRARIES ${HDF5_LIBRARIES})
-elseif(HDF5_FOUND)
-    list(APPEND SYSTEM_SHARED_LIBS ${HDF5_LIBRARIES})
-endif()
-
-if(WITH_GSL)
-    if(GSL_STATIC_HOME)
-        message(STATUS "Using STATIC gsl libraries: ${GSL_LIBRARIES}")
-        list(APPEND STATIC_LIBRARIES ${GSL_LIBRARIES})
-    else()
-        message(STATUS "Using system gsl : ${GSL_LIBRARIES}")
-        list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIBRARIES})
-    endif()
-endif()
-
-# Deprecated.
-#if(READLINE_FOUND AND TERMCAP_FOUND)
-#    list(APPEND SYSTEM_SHARED_LIBS ${Readline_LIBRARY} ${TERMCAP_LIBRARY})
-#endif()
-
-pkg_check_modules(MUPARSER muparser)
-if(MUPARSER_FOUND)
-    message(STATUS "Using system muparser ${MUPARSER_VERSION}")
-    list(APPEND SYSTEM_SHARED_LIBS ${MUPARSER_LIBRARIES})
-else()
-    message(STATUS "Using private muparser")
-    add_subdirectory(external/muparser)
-    list(APPEND MOOSE_LIBRARIES muparser)
-endif()
 
 ###################################### LINKING #################################
 list(APPEND MOOSE_LIBRARIES
@@ -422,6 +366,11 @@ list(APPEND MOOSE_LIBRARIES
     basecode
     )
 
+# Make sure to remove duplicates.
+list(REMOVE_DUPLICATES STATIC_LIBRARIES)
+if(SYSTEM_SHARED_LIBS)
+    list(REMOVE_DUPLICATES SYSTEM_SHARED_LIBS)
+endif( )
 
 # MAC linker does not understand many of gnu-ld options.
 message( STATUS "Shared libs: ${SYSTEM_SHARED_LIBS}")
@@ -434,6 +383,7 @@ if(MACOSX)
 
     target_link_libraries(libmoose
         ${SYSTEM_SHARED_LIBS}
+        ${CMAKE_DL_LIBS}
         )
 ELSE(MACOSX)
     target_link_libraries(libmoose 
@@ -447,13 +397,10 @@ endif(MACOSX)
 
 add_dependencies(moose.bin libmoose)
 
-# This target is only for testing purpose. It links to libmoose.
-if(CMAKE_VERSION VERSION_LESS "2.8.0")
-    message(STATUS "Using a fix for cmake ( < 2.8)")
-    target_link_libraries(moose.bin PUBLIC moose)
-ELSE()
-    target_link_libraries(moose.bin LINK_PUBLIC moose)
-ENDIF()
+target_link_libraries(moose.bin moose ${CMAKE_DL_LIBS})
+if( WITH_BOOST )
+    target_link_libraries( moose.bin ${Boost_LIBRARIES} )
+endif( WITH_BOOST )
 
 ######################### BUILD PYMOOSE ########################################
 # Root of all python module.
@@ -475,6 +422,7 @@ install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     DESTINATION bin
     )
 
+# This target is built by pymoose/CMakeLists.txt file.
 if(WITH_PYTHON)
     install(CODE 
         "
@@ -496,9 +444,6 @@ if(${CMAKE_BUILD_TOOL} MATCHES "make")
         "=======================================\n"
         )
 endif()
-
-#SET(CMAKE_CXX_FLAGS "-O0")
-#SET(CMAKE_C_FLAGS "-O0")
 
 
 ############################ CTEST ######################################
