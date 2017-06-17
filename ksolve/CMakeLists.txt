@@ -18,6 +18,24 @@ elseif(WITH_GSL)
     include_directories( ${GSL_INCLUDE_DIRS} )
 endif(WITH_BOOST)
 
+option(DEBUG_CUDA "Enable CUDA debug macros" OFF)
+if(DEBUG_CUDA)
+    add_definitions(-DDEBUG_CUDA)
+endif()
+
+if(WITH_CUDA)
+    #SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_30,code=sm_30)
+    SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )
+    FILE(GLOB CUDA_SRC *.cu)
+    INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS})
+    CUDA_COMPILE(KSOLVE_CUDA_OBJS ${CUDA_SRC})
+    CUDA_ADD_LIBRARY(ksolve_cuda ${KSOLVE_CUDA_OBJS})
+    TARGET_LINK_LIBRARIES(ksolve_cuda 
+        ${CUDA_LIBRARIES} ${CUDA_cusparse_LIBRARY} ${CUDA_cublas_LIBRARY} 
+        )
+endif()
+
 set(KSOLVE_SRCS
 	KinSparseMatrix.cpp	
 	ZombiePool.cpp 
@@ -27,7 +45,7 @@ set(KSOLVE_SRCS
 	ZombieEnz.cpp 
 	ZombieMMenz.cpp 
         VoxelPoolsBase.cpp
-	VoxelPools.cpp 
+	#VoxelPools.cpp 
         GssaVoxelPools.cpp
 	RateTerm.cpp 
         FuncTerm.cpp
@@ -44,5 +62,9 @@ elseif(WITH_BOOST)
     list(APPEND KSOLVE_SRCS SteadyStateBoost.cpp )
     list(APPEND KSOLVE_SRCS BoostSys.cpp)
 endif(WITH_GSL)
+
+if(WITH_CUDA)
+    target_link_libraries( ksolve ksolve_cuda )
+endif( WITH_CUDA )
 
 add_library( ksolve ${KSOLVE_SRCS} )
