@@ -33,6 +33,36 @@ using namespace boost::numeric;
 // Class definitions
 //////////////////////////////////////////////////////////////
 
+void operate_0(int arr_size)
+{
+    double h_arr[arr_size];
+    double *d_arr;
+    for(int i=0; i < arr_size; ++i){
+        h_arr[i] = i;
+    }
+    
+    cudaMalloc((void**)&d_arr, arr_size * sizeof(double));
+    cudaMemcpy(d_arr, h_arr, arr_size * sizeof(double),
+            cudaMemcpyHostToDevice);
+
+    dim3 blockdim(100, 1, 1);
+    int c = (99 + arr_size)/100;
+    dim3 griddim(c, 1, 1);
+
+    operate <<< griddim, blockdim >> ( d_arr );
+    cudaMemcpy(h_arr, d_arr, arr_size * sizeof( double ),
+            cudaMemcpyDeviceToHost);
+    cudaFree( d_arr );
+
+}
+
+VoxelPools::VoxelPools()
+{
+#ifdef USE_GSL
+		driver_ = 0;
+#endif
+}
+
 VoxelPools::VoxelPools()
 {
 #ifdef USE_GSL
