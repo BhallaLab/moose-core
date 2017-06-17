@@ -52,8 +52,6 @@
 #include "Clock.h"
 #include "../utility/numutil.h"
 #include <omp.h>
-#include <future>
-
 // Declaration of some static variables.
 const unsigned int Clock::numTicks = 32;
 /// minimumDt is smaller than any known event on the scales MOOSE handles.
@@ -724,8 +722,10 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
 
     runTime_ = nSteps_ * dt_;
 
+    omp_set_dynamic( 0 );
+    omp_set_num_threads( 3 );
     const size_t activeTickSize = activeTicks_.size( );
-    const size_t threadPoolSize = 3;
+    const size_t threadPoolSize = omp_get_num_threads( );
     const size_t blockSize = 1 + (activeTickSize / threadPoolSize);
 
     {
@@ -736,28 +736,28 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
             unsigned long endStep = currentStep_ + stride_;
             vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
 
+            #pragma omp parallel
             for( size_t ti = 0; ti < threadPoolSize; ++ti )
             {
+                size_t from = ti * blockSize;
+                size_t to = min(( 1 + ti ) * blockSize, activeTickSize );
 
-                std::async( std::launch::async
-                        , [this,ti,blockSize,activeTickSize, endStep, e] 
+                if( omp_get_thread_num( ) == ti )
+                {
+                    for ( size_t i = from ; i < to; ++i ) 
+                    {
+                        ProcInfo pInfo;
+                        unsigned int k = activeTicksMap_[ i ];
+                        int j = activeTicks_[i];
+                        if ( endStep % j == 0 )
                         {
-                            size_t from = ti * blockSize;
-                            size_t to = min(( 1 + ti ) * blockSize, activeTickSize );
-                            for ( size_t i = from ; i < to; ++i ) 
-                            {
-                                ProcInfo pInfo;
-                                unsigned int k = this->activeTicksMap_[ i ];
-                                int j = this->activeTicks_[i];
-                                if ( endStep % j == 0 )
-                                {
-                                    pInfo.dt = j * dt_;
-                                    processVec()[k]->send( e, &pInfo );
-                                }
-                            }
+                            pInfo.dt = j * dt_;
+                            processVec()[k]->send( e, &pInfo );
                         }
-                    );
+                    }
+                }
             }
+            #pragma omp barrier
 
 
             // When 10% of simulation is over, notify user when notify_ is set to
