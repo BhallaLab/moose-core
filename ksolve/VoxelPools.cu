@@ -33,27 +33,40 @@ using namespace boost::numeric;
 // Class definitions
 //////////////////////////////////////////////////////////////
 
+__global__ void operate(double *array, int *arr_size){                             
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;                             
+    if (tid < *arr_size){                                                         
+        array[tid] = array[tid] * array[tid] +  array[tid] ;                     
+    }                                                                            
+}  
+
+
 void operate_0(int arr_size)
 {
     double h_arr[arr_size];
     double *d_arr;
+    int *d_size;
     for(int i=0; i < arr_size; ++i){
         h_arr[i] = i;
     }
     
     cudaMalloc((void**)&d_arr, arr_size * sizeof(double));
+    cudaMalloc((void**)&d_size, 1 * sizeof(int));
+
     cudaMemcpy(d_arr, h_arr, arr_size * sizeof(double),
+            cudaMemcpyHostToDevice);
+    cudaMemcpy(d_size, &arr_size, 1 * sizeof(int),
             cudaMemcpyHostToDevice);
 
     dim3 blockdim(100, 1, 1);
     int c = (99 + arr_size)/100;
     dim3 griddim(c, 1, 1);
 
-    operate <<< griddim, blockdim >> ( d_arr );
+    operate <<< griddim, blockdim >>> ( d_arr, d_size );
     cudaMemcpy(h_arr, d_arr, arr_size * sizeof( double ),
             cudaMemcpyDeviceToHost);
     cudaFree( d_arr );
-
+    cudaFree( d_size );
 }
 
 VoxelPools::VoxelPools()
@@ -63,12 +76,6 @@ VoxelPools::VoxelPools()
 #endif
 }
 
-VoxelPools::VoxelPools()
-{
-#ifdef USE_GSL
-		driver_ = 0;
-#endif
-}
 
 VoxelPools::~VoxelPools()
 {
@@ -115,7 +122,8 @@ void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
 
 // MICKY: This solves system of ODE for chemical reactions.
 void VoxelPools::advance( const ProcInfo* p )
-{
+{   
+    operate_0(50);
     double t = p->currTime - p->dt;
 #ifdef USE_GSL
     int status = gsl_odeiv2_driver_apply( driver_, &t, p->currTime, varS());

@@ -285,33 +285,6 @@ RateTerm.cpp.s:
 	$(MAKE) -f CMakeFiles/ksolve.dir/build.make CMakeFiles/ksolve.dir/RateTerm.cpp.s
 .PHONY : RateTerm.cpp.s
 
-SteadyStateGsl.o: SteadyStateGsl.cpp.o
-
-.PHONY : SteadyStateGsl.o
-
-# target to build an object file
-SteadyStateGsl.cpp.o:
-	$(MAKE) -f CMakeFiles/ksolve.dir/build.make CMakeFiles/ksolve.dir/SteadyStateGsl.cpp.o
-.PHONY : SteadyStateGsl.cpp.o
-
-SteadyStateGsl.i: SteadyStateGsl.cpp.i
-
-.PHONY : SteadyStateGsl.i
-
-# target to preprocess a source file
-SteadyStateGsl.cpp.i:
-	$(MAKE) -f CMakeFiles/ksolve.dir/build.make CMakeFiles/ksolve.dir/SteadyStateGsl.cpp.i
-.PHONY : SteadyStateGsl.cpp.i
-
-SteadyStateGsl.s: SteadyStateGsl.cpp.s
-
-.PHONY : SteadyStateGsl.s
-
-# target to generate assembly for a file
-SteadyStateGsl.cpp.s:
-	$(MAKE) -f CMakeFiles/ksolve.dir/build.make CMakeFiles/ksolve.dir/SteadyStateGsl.cpp.s
-.PHONY : SteadyStateGsl.cpp.s
-
 Stoich.o: Stoich.cpp.o
 
 .PHONY : Stoich.o
@@ -338,33 +311,6 @@ Stoich.s: Stoich.cpp.s
 Stoich.cpp.s:
 	$(MAKE) -f CMakeFiles/ksolve.dir/build.make CMakeFiles/ksolve.dir/Stoich.cpp.s
 .PHONY : Stoich.cpp.s
-
-VoxelPools.o: VoxelPools.cpp.o
-
-.PHONY : VoxelPools.o
-
-# target to build an object file
-VoxelPools.cpp.o:
-	$(MAKE) -f CMakeFiles/ksolve.dir/build.make CMakeFiles/ksolve.dir/VoxelPools.cpp.o
-.PHONY : VoxelPools.cpp.o
-
-VoxelPools.i: VoxelPools.cpp.i
-
-.PHONY : VoxelPools.i
-
-# target to preprocess a source file
-VoxelPools.cpp.i:
-	$(MAKE) -f CMakeFiles/ksolve.dir/build.make CMakeFiles/ksolve.dir/VoxelPools.cpp.i
-.PHONY : VoxelPools.cpp.i
-
-VoxelPools.s: VoxelPools.cpp.s
-
-.PHONY : VoxelPools.s
-
-# target to generate assembly for a file
-VoxelPools.cpp.s:
-	$(MAKE) -f CMakeFiles/ksolve.dir/build.make CMakeFiles/ksolve.dir/VoxelPools.cpp.s
-.PHONY : VoxelPools.cpp.s
 
 VoxelPoolsBase.o: VoxelPoolsBase.cpp.o
 
@@ -636,15 +582,9 @@ help:
 	@echo "... RateTerm.o"
 	@echo "... RateTerm.i"
 	@echo "... RateTerm.s"
-	@echo "... SteadyStateGsl.o"
-	@echo "... SteadyStateGsl.i"
-	@echo "... SteadyStateGsl.s"
 	@echo "... Stoich.o"
 	@echo "... Stoich.i"
 	@echo "... Stoich.s"
-	@echo "... VoxelPools.o"
-	@echo "... VoxelPools.i"
-	@echo "... VoxelPools.s"
 	@echo "... VoxelPoolsBase.o"
 	@echo "... VoxelPoolsBase.i"
 	@echo "... VoxelPoolsBase.s"

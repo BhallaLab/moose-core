@@ -33,7 +33,6 @@
 #include "utility/strutil.h"
 #include "Ksolve.h"
 
-#include <omp.h>
 #include <thread>
 #include <atomic>
 #include <future>
