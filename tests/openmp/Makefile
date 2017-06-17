@@ -10,5 +10,5 @@ test_without_openmp : ./test_ksolve.py
 test_with_openmp : ./test_ksolve.py 
 	@echo "With OpenMP"
 	#PYTHONPATH=$(MKFILE_PATH)/../../_build/python python $<
-	PYTHONPATH=$(MKFILE_PATH)/../../_build/python python_in_gdb.sh $<
+	OMP_NUM_THREADS=1 PYTHONPATH=$(MKFILE_PATH)/../../_build/python python $<
 

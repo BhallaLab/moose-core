@@ -52,6 +52,8 @@
 #include "Clock.h"
 #include "../utility/numutil.h"
 #include <omp.h>
+#include <future>
+
 // Declaration of some static variables.
 const unsigned int Clock::numTicks = 32;
 /// minimumDt is smaller than any known event on the scales MOOSE handles.
@@ -718,30 +720,48 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     assert( currentStep_ == nSteps_ );
     assert( activeTicks_.size() == activeTicksMap_.size() );
     nSteps_ += numSteps;
+
+
     runTime_ = nSteps_ * dt_;
+
+    const size_t activeTickSize = activeTicks_.size( );
+    const size_t threadPoolSize = 3;
+    const size_t blockSize = 1 + (activeTickSize / threadPoolSize);
+
     {
-    for ( isRunning_ = (activeTicks_.size() > 0 );
-            isRunning_ && currentStep_ < nSteps_; currentStep_+=stride_ )
-    {
-        cout << "dt_ " << dt_ << endl;
-        // Curr time is end of current step.
-        unsigned long endStep = currentStep_ + stride_;
-               vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
-        
-        for ( vector< unsigned int>::iterator j =
-                    activeTicks_.begin(); j != activeTicks_.end(); ++j )
+        for ( isRunning_ = (activeTicks_.size() > 0 );
+                isRunning_ && currentStep_ < nSteps_; currentStep_+=stride_ )
         {
-            if ( endStep % *j == 0 )
+            // Curr time is end of current step.
+            unsigned long endStep = currentStep_ + stride_;
+            vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
+
+            for( size_t ti = 0; ti < threadPoolSize; ++ti )
             {
-                info_.dt = *j * dt_;
-                processVec()[*k]->send( e, &info_ );
+
+                std::async( std::launch::async
+                        , [this,ti,blockSize,activeTickSize, endStep, e] 
+                        {
+                            size_t from = ti * blockSize;
+                            size_t to = min(( 1 + ti ) * blockSize, activeTickSize );
+                            for ( size_t i = from ; i < to; ++i ) 
+                            {
+                                ProcInfo pInfo;
+                                unsigned int k = this->activeTicksMap_[ i ];
+                                int j = this->activeTicks_[i];
+                                if ( endStep % j == 0 )
+                                {
+                                    pInfo.dt = j * dt_;
+                                    processVec()[k]->send( e, &pInfo );
+                                }
+                            }
+                        }
+                    );
             }
-            ++k;
-            cout << "dt_" << dt_ << endl;
-        }
-        // When 10% of simulation is over, notify user when notify_ is set to
-        // true.
-    
+
+
+            // When 10% of simulation is over, notify user when notify_ is set to
+            // true.
             if( notify_ )
             {
                 if( fmod(100 * currentTime_ / runTime_ , 10.0) == 0.0 )
@@ -753,14 +773,16 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
                         << "% of total " << runTime_ << " seconds is over." << endl;
                 }
             }
+        }
     }
 
-	if ( activeTicks_.size() == 0 )
-		currentTime_ = runTime_;
+    if ( activeTicks_.size() == 0 )
+        currentTime_ = runTime_;
 
     info_.dt = dt_;
     isRunning_ = false;
     finished()->send( e );
+
 }
 
 /**
