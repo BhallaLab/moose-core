@@ -10,6 +10,8 @@
 #ifndef _KSOLVE_H
 #define _KSOLVE_H
 
+#include <thread>
+
 class Stoich;
 
 class Ksolve: public ZombiePoolInterface
@@ -52,6 +54,8 @@ public:
     /// Returns the vector of pool Num at the specified voxel.
     vector< double > getNvec( unsigned int voxel) const;
     void setNvec( unsigned int voxel, vector< double > vec );
+
+    void par_advance(int begin, int end, ProcPtr p );
 
     /**
      * This does a quick and dirty estimate of the timestep suitable
@@ -168,6 +172,9 @@ private:
 
     /// Pointer to diffusion solver
     ZombiePoolInterface* dsolvePtr_;
+
+    size_t num_threads_;
+    std::vector< std::thread* > threads_;
 };
 
 #endif	// _KSOLVE_H

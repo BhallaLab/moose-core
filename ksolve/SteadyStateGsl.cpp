@@ -41,12 +41,14 @@
 #include <gsl/gsl_sort_vector.h>
 #include <gsl/gsl_eigen.h>
 #include <gsl/gsl_odeiv2.h>
+
 #endif
 
 #include "VoxelPoolsBase.h"
 #include "OdeSystem.h"
 #include "VoxelPools.h"
 #include "SteadyStateGsl.h"
+
 
 int ss_func( const gsl_vector* x, void* params, gsl_vector* f );
 #ifdef USE_GSL

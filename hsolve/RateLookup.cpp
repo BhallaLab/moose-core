@@ -6,8 +6,8 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+
 #include <vector>
-#include <stdio.h>
 using namespace std;
 
 #include "RateLookup.h"
@@ -26,7 +26,6 @@ LookupTable::LookupTable(
 	
 	//~ interpolate_.resize( nSpecies );
 	table_.resize( nPts_ * nColumns_ );
-
 }
 
 void LookupTable::addColumns(
@@ -62,7 +61,6 @@ void LookupTable::column( unsigned int species, LookupColumn& column )
 
 void LookupTable::row( double x, LookupRow& row )
 {
-
 	if ( x < min_ )
 		x = min_;
 	else if ( x > max_ )
@@ -73,38 +71,7 @@ void LookupTable::row( double x, LookupRow& row )
 	
 	row.fraction = div - integer;
 	row.row = &( table_.front() ) + integer * nColumns_;
-	row.rowIndex = integer * nColumns_;
-
 }
-
-#ifdef USE_CUDA
-     
-unsigned int LookupTable::get_num_of_columns()
-{
-    return LookupTable::nColumns_;
-}
-
-vector<double> LookupTable::get_table()
-{
-    return LookupTable::table_;
-}
-
-double LookupTable::get_min()
-{
-	return min_;
-}
-
-double LookupTable::get_max()
-{
-	return max_;
-}
-
-double LookupTable::get_dx()
-{
-	return dx_;
-}
-
-#endif
 
 void LookupTable::lookup(
 	const LookupColumn& column,

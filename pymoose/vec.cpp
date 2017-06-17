@@ -63,7 +63,7 @@
 #endif
 
 #include "../basecode/header.h"
-#include "../basecode/global.h"
+#include "../utility/strutil.h"
 #include "../basecode/Id.h"
 #include "../basecode/ObjId.h"
 #include "../utility/utility.h"

@@ -51,7 +51,7 @@
 #include "header.h"
 #include "Clock.h"
 #include "../utility/numutil.h"
-
+#include <omp.h>
 // Declaration of some static variables.
 const unsigned int Clock::numTicks = 32;
 /// minimumDt is smaller than any known event on the scales MOOSE handles.
@@ -718,45 +718,71 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     assert( currentStep_ == nSteps_ );
     assert( activeTicks_.size() == activeTicksMap_.size() );
     nSteps_ += numSteps;
-    runTime_ = nSteps_ * dt_;
-    for ( isRunning_ = (activeTicks_.size() > 0 );
-            isRunning_ && currentStep_ < nSteps_; currentStep_ += stride_ )
-    {
-        // Curr time is end of current step.
-        unsigned long endStep = currentStep_ + stride_;
-        currentTime_ = info_.currTime = dt_ * endStep;
-        vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
-        for ( vector< unsigned int>::iterator j =
-                    activeTicks_.begin(); j != activeTicks_.end(); ++j )
-        {
-            if ( endStep % *j == 0 )
-            {
-                info_.dt = *j * dt_;
-                processVec()[*k]->send( e, &info_ );
-            }
-            ++k;
-        }
 
-        // When 10% of simulation is over, notify user when notify_ is set to
-        // true.
-        if( notify_ )
+
+    runTime_ = nSteps_ * dt_;
+
+    omp_set_dynamic( 0 );
+    omp_set_num_threads( 3 );
+    const size_t activeTickSize = activeTicks_.size( );
+    const size_t threadPoolSize = omp_get_num_threads( );
+    const size_t blockSize = 1 + (activeTickSize / threadPoolSize);
+
+    {
+        for ( isRunning_ = (activeTicks_.size() > 0 );
+                isRunning_ && currentStep_ < nSteps_; currentStep_+=stride_ )
         {
-            if( fmod(100 * currentTime_ / runTime_ , 10.0) == 0.0 )
+            // Curr time is end of current step.
+            unsigned long endStep = currentStep_ + stride_;
+            vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
+
+            #pragma omp parallel
+            for( size_t ti = 0; ti < threadPoolSize; ++ti )
             {
-                time( &rawtime );
-                timeinfo = localtime( &rawtime );
-                strftime(now, 80, "%c", timeinfo);
-                cout << "@ " << now << ": " << 100 * currentTime_ / runTime_ 
-                    << "% of total " << runTime_ << " seconds is over." << endl;
+                size_t from = ti * blockSize;
+                size_t to = min(( 1 + ti ) * blockSize, activeTickSize );
+
+                if( omp_get_thread_num( ) == ti )
+                {
+                    for ( size_t i = from ; i < to; ++i ) 
+                    {
+                        ProcInfo pInfo;
+                        unsigned int k = activeTicksMap_[ i ];
+                        int j = activeTicks_[i];
+                        if ( endStep % j == 0 )
+                        {
+                            pInfo.dt = j * dt_;
+                            processVec()[k]->send( e, &pInfo );
+                        }
+                    }
+                }
+            }
+            #pragma omp barrier
+
+
+            // When 10% of simulation is over, notify user when notify_ is set to
+            // true.
+            if( notify_ )
+            {
+                if( fmod(100 * currentTime_ / runTime_ , 10.0) == 0.0 )
+                {
+                    time( &rawtime );
+                    timeinfo = localtime( &rawtime );
+                    strftime(now, 80, "%c", timeinfo);
+                    cout << "@ " << now << ": " << 100 * currentTime_ / runTime_ 
+                        << "% of total " << runTime_ << " seconds is over." << endl;
+                }
             }
         }
     }
-	if ( activeTicks_.size() == 0 )
-		currentTime_ = runTime_;
+
+    if ( activeTicks_.size() == 0 )
+        currentTime_ = runTime_;
 
     info_.dt = dt_;
     isRunning_ = false;
     finished()->send( e );
+
 }
 
 /**

@@ -155,18 +155,12 @@ void HSolvePassive::initialize()
         compartment.CmByDt = 2.0 * Cm / dt_;
         compartment.EmByRm = EmGmThev;
         compartment_.push_back( compartment );
-#ifdef USE_CUDA
-        InjectStruct is;
-        is.injectVarying = 0.0;
-        is.injectBasal = inject;
-        inject_.push_back(is);
-#else
+
         if ( inject != 0.0 )
         {
             inject_[ ic ].injectVarying = 0.0;
             inject_[ ic ].injectBasal = inject;
         }
-#endif
     }
 }
 
@@ -234,12 +228,7 @@ void HSolvePassive::updateMatrix()
 
         ihs += 4, ++iv;
     }
-#ifdef USE_CUDA
-    for(unsigned int i=0;i<inject_.size();i++){
-    	HS_[ 4 * i + 3 ] += inject_[i].injectVarying + inject_[i].injectBasal;
-    	inject_[i].injectVarying = 0;
-    }
-#else
+
     map< unsigned int, InjectStruct >::iterator inject;
     for ( inject = inject_.begin(); inject != inject_.end(); inject++ )
     {
@@ -250,7 +239,7 @@ void HSolvePassive::updateMatrix()
 
         value.injectVarying = 0.0;
     }
-#endif
+
     stage_ = 0;    // Update done.
 }
 

@@ -16,7 +16,7 @@
 #include "OdeSystem.h"
 #include "VoxelPoolsBase.h"
 #include "VoxelPools.h"
-#include "../mesh/VoxelJunction.h"
+#include "mesh/VoxelJunction.h"
 #include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 
@@ -25,12 +25,18 @@
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "Stoich.h"
-#include "../shell/Shell.h"
+#include "shell/Shell.h"
 
-#include "../mesh/MeshEntry.h"
-#include "../mesh/Boundary.h"
-#include "../mesh/ChemCompt.h"
+#include "mesh/MeshEntry.h"
+#include "mesh/Boundary.h"
+#include "mesh/ChemCompt.h"
+#include "utility/strutil.h"
 #include "Ksolve.h"
+
+#include <omp.h>
+#include <thread>
+#include <atomic>
+#include <future>
 
 const unsigned int OFFNODE = ~0;
 
@@ -250,7 +256,8 @@ Ksolve::Ksolve()
 
 Ksolve::~Ksolve()
 {
-    ;
+    //for (size_t i = 0; i < num_threads_; i++) 
+        //threads_[i]->join( );
 }
 
 //////////////////////////////////////////////////////////////
@@ -549,13 +556,39 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     }
 
     // Fourth, do the numerical integration for all reactions.
-    // MICKY: This can be parallelized.
-    for ( vector< VoxelPools >::iterator
-            i = voxelPools_.begin(); i != voxelPools_.end(); ++i )
+    //MICKY: This can be parallelized.
+
+    //int tid  = omp_get_thread_num( );
+
+    size_t nvPools = voxelPools_.size( );
+
+    // Compute the grain size.
+    //size_t grainSize = 1 + (nvPools / num_threads_);
+
+#if 1
+    //omp part
+    //size_t thread_no = omp_get_thread_num();
+
+    //std::cout << "Threads are " << thread_no  << std::endl;
+
+            for ( size_t i = 0; i < nvPools; ++i )
+            {
+                //cout << "Total threads " << omp_get_num_threads( )  << endl;
+               // cout << "Voxel pool id " <<  i << " out of " << nvPools 
+                 //   << " thread id " << thread_no << endl;
+                voxelPools_[i].advance( p );
+            }
+        
+
+
+#else
+    for (size_t i = 0; i < num_threads_; i++) 
     {
-        i->advance( p );
+        par_advance( i * num_threads_, (i+1) * num_threads_, p );
     }
 
+
+#endif
 
     // Finally, assemble and send the integrated values off for the Dsolve.
     if ( dsolvePtr_ )
@@ -767,6 +800,26 @@ VoxelPoolsBase* Ksolve::pools( unsigned int i )
     return 0;
 }
 
+void Ksolve::par_advance(int begin, int end, ProcPtr p) 
+{
+    std::atomic<int> idx( begin );
+    int num_cpus = std::thread::hardware_concurrency();
+    for (int cpu = 0; cpu != num_cpus; ++cpu) 
+    {
+        std::async( std::launch::async
+                , [this, &idx, end, p]() { 
+                    for (;;) 
+                    {
+                        int i = idx++;
+                        if (i >= end) 
+                            break;
+                        voxelPools_[i].advance( p );
+                    }
+                }
+            );
+    }
+}
+
 double Ksolve::volume( unsigned int i ) const
 {
     if ( voxelPools_.size() > i )
@@ -878,4 +931,5 @@ void Ksolve::print() const
             cout << "	" << xv[j];
     }
 }
+
 
