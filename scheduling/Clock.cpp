@@ -719,17 +719,15 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     assert( activeTicks_.size() == activeTicksMap_.size() );
     nSteps_ += numSteps;
     runTime_ = nSteps_ * dt_;
-    omp_set_dynamic(0);
-    omp_set_num_threads(4);
-    #pragma omp parallel
     {
     for ( isRunning_ = (activeTicks_.size() > 0 );
-            isRunning_ && currentStep_ < nSteps_;  )
+            isRunning_ && currentStep_ < nSteps_; currentStep_+=stride_ )
     {
-       // cout << "Running stide " << numSteps << endl;
+        cout << "dt_ " << dt_ << endl;
         // Curr time is end of current step.
         unsigned long endStep = currentStep_ + stride_;
                vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
+        
         for ( vector< unsigned int>::iterator j =
                     activeTicks_.begin(); j != activeTicks_.end(); ++j )
         {
@@ -739,12 +737,11 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
                 processVec()[*k]->send( e, &info_ );
             }
             ++k;
+            cout << "dt_" << dt_ << endl;
         }
         // When 10% of simulation is over, notify user when notify_ is set to
         // true.
-        
-        if (omp_get_thread_num() == 0 )
-        {
+    
             if( notify_ )
             {
                 if( fmod(100 * currentTime_ / runTime_ , 10.0) == 0.0 )
@@ -756,13 +753,8 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
                         << "% of total " << runTime_ << " seconds is over." << endl;
                 }
             }
-            currentStep_ = currentStep_ + stride_;
-        //    cout << "Thread_no = " << omp_get_thread_num() << endl; 
-            currentTime_ = info_.currTime = dt_ * endStep;
-        }
-#pragma omp barrier
     }
-    }
+
 	if ( activeTicks_.size() == 0 )
 		currentTime_ = runTime_;
 
