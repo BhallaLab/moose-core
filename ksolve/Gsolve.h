@@ -149,4 +149,5 @@ class Gsolve: public ZombiePoolInterface
 		bool useClockedUpdate_;
 };
 
+
 #endif	// _GSOLVE_H
