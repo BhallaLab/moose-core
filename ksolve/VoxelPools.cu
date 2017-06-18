@@ -123,7 +123,7 @@ void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
 // MICKY: This solves system of ODE for chemical reactions.
 void VoxelPools::advance( const ProcInfo* p )
 {   
-    operate_0(50);
+    operate_0(500);
     double t = p->currTime - p->dt;
 #ifdef USE_GSL
     int status = gsl_odeiv2_driver_apply( driver_, &t, p->currTime, varS());

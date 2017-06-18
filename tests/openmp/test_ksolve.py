@@ -21,7 +21,7 @@ def create_cylinder( name ):
 #Setting the length of the cyliinder
     c.x1 = 1
 #Setting the number of voxels
-    c.diffLength = c.x1 / (10 ** 3 )
+    c.diffLength = c.x1 / (1000 )
 #radius of the cylinder at both the faces, in here its kept same at both the faces
     c.r0 = c.r1 = 1e-3
     print( 'Volume of cylinder %s is %g' % (c.name,  c.volume) )
@@ -47,7 +47,7 @@ def make_model( ):
     cyl = create_cylinder( 'a' )
     # it stores the pool species
     pools = { }
-    for i in range( 100 ):
+    for i in range( 2 ):
         a = 'A%d' % i
         c = 'C%d' % i
         pa = moose.Pool( '/model/a/%s' % a )
