@@ -496,9 +496,9 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 	// As inject_ and externalCurrent_ data structures are updated by messages,
 	// they have to be updated on the device too. Hence the transfer
 	if(step_num%20 == 1)
-		cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
+		cudaSafeCall(cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice));
 
-	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
 
 	// As inject data is already on device, injectVarying can be set to zero.
 	for (int i = 0; i < inject_.size(); ++i) {
@@ -525,15 +525,15 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 		const double beta = 0.0;
 
 		// SPMV approach for update matrix
-		cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+		cusparseSafeCall(cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
 			nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
 			d_chan_Gk, d_chan_rowPtr, d_chan_colIndex,
-			d_chan_x , &beta, d_comp_Gksum);
+			d_chan_x , &beta, d_comp_Gksum));
 
-		cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+		cusparseSafeCall(cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
 			nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
 			d_chan_GkEk, d_chan_rowPtr, d_chan_colIndex,
-			d_chan_x , &beta, d_comp_GkEksum);
+			d_chan_x , &beta, d_comp_GkEksum));
 
 		update_matrix_kernel<<<BLOCKS, THREADS_PER_BLOCK>>>(d_V,
 						d_HS_,
@@ -547,7 +547,7 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 		// Future approaches, if any.
 	}
 
-	cudaMemcpy(&HS_[0], d_HS_, HS_.size()*sizeof(double), cudaMemcpyDeviceToHost );
+	cudaSafeCall(cudaMemcpy(&HS_[0], d_HS_, HS_.size()*sizeof(double), cudaMemcpyDeviceToHost ));
 }
 
 void HSolveActive::update_perv_matrix_cuda_wrapper(){
@@ -558,13 +558,13 @@ void HSolveActive::update_perv_matrix_cuda_wrapper(){
 	// As inject_ and externalCurrent_ data structures are updated by messages,
 	// they have to be updated on the device too. Hence the transfer
 	if(step_num == 19){
-		cudaMemcpy(d_stim_map, stim_map, nCompt_*sizeof(int), cudaMemcpyHostToDevice); // Initializing map.
+		cudaSafeCall(cudaMemcpy(d_stim_map, stim_map, nCompt_*sizeof(int), cudaMemcpyHostToDevice)); // Initializing map.
 	}
 	if(step_num%20 == 1){
-		cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
-		cudaMemcpy(d_stim_basal_values, stim_basal_values, num_stim_comp*sizeof(double), cudaMemcpyHostToDevice);
+		cudaSafeCall(cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice));
+		cudaSafeCall(cudaMemcpy(d_stim_basal_values, stim_basal_values, num_stim_comp*sizeof(double), cudaMemcpyHostToDevice));
 	}
-	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
 
 	// As inject data is already on device, injectVarying can be set to zero.
 	for (int i = 0; i < inject_.size(); ++i) {
@@ -592,15 +592,15 @@ void HSolveActive::update_perv_matrix_cuda_wrapper(){
 		const double beta = 0.0;
 
 		// SPMV approach for update matrix
-		cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+		cusparseSafeCall(cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
 			nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
 			d_chan_Gk, d_chan_rowPtr, d_chan_colIndex,
-			d_chan_x , &beta, d_comp_Gksum);
+			d_chan_x , &beta, d_comp_Gksum));
 
-		cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+		cusparseSafeCall(cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
 			nCompt_, nCompt_, num_channels, &alpha, cusparse_descr,
 			d_chan_GkEk, d_chan_rowPtr, d_chan_colIndex,
-			d_chan_x , &beta, d_comp_GkEksum);
+			d_chan_x , &beta, d_comp_GkEksum));
 
 		update_matrix_kernel<<<BLOCKS, THREADS_PER_BLOCK>>>(d_V,
 						d_HS_,
@@ -614,7 +614,7 @@ void HSolveActive::update_perv_matrix_cuda_wrapper(){
 		// Future approaches, if any.
 	}
 
-	cudaMemcpy(perv_dynamic, d_perv_dynamic, 2*nCompt_*sizeof(double), cudaMemcpyDeviceToHost );
+	cudaSafeCall(cudaMemcpy(perv_dynamic, d_perv_dynamic, 2*nCompt_*sizeof(double), cudaMemcpyDeviceToHost ));
 
 #ifdef PIN_POINT_ERROR
 	cudaCheckError(); // Checking for cuda related errors.
@@ -635,10 +635,10 @@ void HSolveActive::update_csrmatrix_cuda_wrapper(){
 	const double alpha_ = 1.0;
 	const double beta_ = 0.0;
 
-	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+	cusparseSafeCall(cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
 		nCompt_, nCompt_, num_channels, &alpha_, cusparse_descr,
 		d_chan_Gk, d_chan_rowPtr, d_chan_colIndex,
-		d_chan_x , &beta_, d_comp_Gksum);
+		d_chan_x , &beta_, d_comp_Gksum));
 
 	cusparseDcsrmv(cusparse_handle,  CUSPARSE_OPERATION_NON_TRANSPOSE,
 		nCompt_, nCompt_, num_channels, &alpha_, cusparse_descr,
@@ -650,8 +650,8 @@ void HSolveActive::update_csrmatrix_cuda_wrapper(){
 	int BLOCKS = nCompt_/THREADS_PER_BLOCK;
 	BLOCKS = (nCompt_%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
-	cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
 
 	update_csr_matrix_kernel<<<BLOCKS, THREADS_PER_BLOCK>>>(d_V,
 			d_mat_values, d_main_diag_passive, d_main_diag_map, d_b,
@@ -662,7 +662,7 @@ void HSolveActive::update_csrmatrix_cuda_wrapper(){
 			d_externalCurrent_,
 			(int)nCompt_);
 
-	cudaMemcpy(&inject_[0], d_inject_, nCompt_*sizeof(InjectStruct), cudaMemcpyDeviceToHost );
+	cudaSafeCall(cudaMemcpy(&inject_[0], d_inject_, nCompt_*sizeof(InjectStruct), cudaMemcpyDeviceToHost ));
 
 }
 
@@ -702,12 +702,12 @@ void HSolveActive::advance_calcium_cuda_wrapper(){
 				d_capool_values, d_chan_to_comp,
 				num_catarget_channels);
 
-		cusparseDcsrmv(cusparse_handle,
+		cusparseSafeCall(cusparseDcsrmv(cusparse_handle,
 				CUSPARSE_OPERATION_NON_TRANSPOSE,
 				num_ca_pools, num_catarget_channels, num_catarget_channels ,
 				&alpha, cusparse_descr,
 				d_capool_values, d_capool_rowPtr, d_capool_colIndex, d_capool_onex,
-				&beta, d_caActivation_values);
+				&beta, d_caActivation_values));
 
 		BLOCKS = num_ca_pools/THREADS_PER_BLOCK;
 		BLOCKS = (num_ca_pools%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
@@ -716,7 +716,7 @@ void HSolveActive::advance_calcium_cuda_wrapper(){
 	}
 
 	// Sending calcium data to host
-	cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost);
+	cudaSafeCall(cudaMemcpy(&(ca_[0]), d_ca, ca_.size()*sizeof(double), cudaMemcpyDeviceToHost));
 
 #ifdef PIN_POINT_ERROR
 	cudaCheckError(); // Checking for cuda related errors.
@@ -740,13 +740,13 @@ int HSolveActive::choose_update_matrix_approach(){
 
 	// Setting up cusparse information
 	cusparseHandle_t cusparseH;
-	cusparseCreate(&cusparseH);
+	cusparseSafeCall(cusparseCreate(&cusparseH));
 
 	// create and setup matrix descriptors A, B & C
 	cusparseMatDescr_t cuspaseDescr;
-	cusparseCreateMatDescr(&cuspaseDescr);
-	cusparseSetMatType(cuspaseDescr, CUSPARSE_MATRIX_TYPE_GENERAL);
-	cusparseSetMatIndexBase(cuspaseDescr, CUSPARSE_INDEX_BASE_ZERO);
+	cusparseSafeCall(cusparseCreateMatDescr(&cuspaseDescr));
+	cusparseSafeCall(cusparseSetMatType(cuspaseDescr, CUSPARSE_MATRIX_TYPE_GENERAL));
+	cusparseSafeCall(cusparseSetMatIndexBase(cuspaseDescr, CUSPARSE_INDEX_BASE_ZERO));
 
 
 	int num_channels = channel_.size();
@@ -759,23 +759,23 @@ int HSolveActive::choose_update_matrix_approach(){
 		int BLOCKS = (nCompt_+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
 		timer1.Start();
 			wpt_kernel<<<BLOCKS,THREADS_PER_BLOCK>>>(d_chan_Gk, d_chan_GkEk , d_chan_rowPtr, d_comp_Gksum, d_comp_GkEksum, nCompt_);
-			cudaDeviceSynchronize();
+			cudaSafeCall(cudaDeviceSynchronize());
 		timer1.Stop();
 
 		double t1 = timer1.Elapsed();
 		if(i>0)	wpt_cum_time += t1;
 
 		timer2.Start();
-			cusparseDcsrmv(cusparseH,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+			cusparseSafeCall(cusparseDcsrmv(cusparseH,  CUSPARSE_OPERATION_NON_TRANSPOSE,
 				nCompt_, nCompt_, num_channels, &alpha, cuspaseDescr,
 				d_chan_Gk, d_chan_rowPtr, d_chan_colIndex,
-				d_chan_x , &beta, d_comp_Gksum);
+				d_chan_x , &beta, d_comp_Gksum));
 
-			cusparseDcsrmv(cusparseH,  CUSPARSE_OPERATION_NON_TRANSPOSE,
+			cusparseSafeCall(cusparseDcsrmv(cusparseH,  CUSPARSE_OPERATION_NON_TRANSPOSE,
 				nCompt_, nCompt_, num_channels, &alpha, cuspaseDescr,
 				d_chan_GkEk, d_chan_rowPtr, d_chan_colIndex,
-				d_chan_x , &beta, d_comp_GkEksum);
-			cudaDeviceSynchronize();
+				d_chan_x , &beta, d_comp_GkEksum));
+			cudaSafeCall(cudaDeviceSynchronize());
 		timer2.Stop();
 
 		double t2 = timer2.Elapsed();
@@ -798,13 +798,13 @@ int HSolveActive::choose_advance_calcium_approach(){
 
 	// Setting up cusparse information
 	cusparseHandle_t cusparseH;
-	cusparseCreate(&cusparseH);
+	cusparseSafeCall(cusparseCreate(&cusparseH));
 
 	// create and setup matrix descriptors A, B & C
 	cusparseMatDescr_t cuspaseDescr;
-	cusparseCreateMatDescr(&cuspaseDescr);
-	cusparseSetMatType(cuspaseDescr, CUSPARSE_MATRIX_TYPE_GENERAL);
-	cusparseSetMatIndexBase(cuspaseDescr, CUSPARSE_INDEX_BASE_ZERO);
+	cusparseSafeCall(cusparseCreateMatDescr(&cuspaseDescr));
+	cusparseSafeCall(cusparseSetMatType(cuspaseDescr, CUSPARSE_MATRIX_TYPE_GENERAL));
+	cusparseSafeCall(cusparseSetMatIndexBase(cuspaseDescr, CUSPARSE_INDEX_BASE_ZERO));
 
 
 	int num_ca_pools = caConc_.size();
@@ -816,13 +816,13 @@ int HSolveActive::choose_advance_calcium_approach(){
 	double* d_ca_backup, *d_CaConcStruct_c_backup;
 	CaConcStruct* d_caConc_backup;
 
-	cudaMalloc((void**)&d_ca_backup, sizeof(double)*num_ca_pools);
-	cudaMalloc((void**)&d_CaConcStruct_c_backup, sizeof(double)*num_ca_pools);
-	cudaMalloc((void**)&d_caConc_backup, sizeof(CaConcStruct)*num_ca_pools);
+	cudaSafeCall(cudaMalloc((void**)&d_ca_backup, sizeof(double)*num_ca_pools));
+	cudaSafeCall(cudaMalloc((void**)&d_CaConcStruct_c_backup, sizeof(double)*num_ca_pools));
+	cudaSafeCall(cudaMalloc((void**)&d_caConc_backup, sizeof(CaConcStruct)*num_ca_pools));
 
-	cudaMemcpy(d_ca_backup, d_ca, num_ca_pools*sizeof(double), cudaMemcpyDeviceToDevice);
-	cudaMemcpy(d_CaConcStruct_c_backup, d_CaConcStruct_c_, num_ca_pools*sizeof(double), cudaMemcpyDeviceToDevice);
-	cudaMemcpy(d_caConc_backup, d_caConc_, sizeof(CaConcStruct)*num_ca_pools, cudaMemcpyDeviceToDevice);
+	cudaSafeCall(cudaMemcpy(d_ca_backup, d_ca, num_ca_pools*sizeof(double), cudaMemcpyDeviceToDevice));
+	cudaSafeCall(cudaMemcpy(d_CaConcStruct_c_backup, d_CaConcStruct_c_, num_ca_pools*sizeof(double), cudaMemcpyDeviceToDevice));
+	cudaSafeCall(cudaMemcpy(d_caConc_backup, d_caConc_, sizeof(CaConcStruct)*num_ca_pools, cudaMemcpyDeviceToDevice));
 
 	for (int i = 0; i < num_repeats; ++i) {
 		GpuTimer timer1, timer2;
@@ -843,7 +843,7 @@ int HSolveActive::choose_advance_calcium_approach(){
 							//d_caActivation_values,
 							num_ca_pools);
 		timer1.Stop();
-		cudaDeviceSynchronize();
+		cudaSafeCall(cudaDeviceSynchronize());
 		wpt_cum_time += timer1.Elapsed();
 
 		// SPMV approach.
@@ -858,27 +858,27 @@ int HSolveActive::choose_advance_calcium_approach(){
 					d_capool_values, d_chan_to_comp,
 					num_catarget_channels);
 
-			cusparseDcsrmv(cusparse_handle,
+			cusparseSafeCall(cusparseDcsrmv(cusparse_handle,
 					CUSPARSE_OPERATION_NON_TRANSPOSE,
 					num_ca_pools, num_catarget_channels, num_catarget_channels ,
 					&alpha, cusparse_descr,
 					d_capool_values, d_capool_rowPtr, d_capool_colIndex, d_capool_onex,
-					&beta, d_caActivation_values);
+					&beta, d_caActivation_values));
 
 			BLOCKS = num_ca_pools/THREADS_PER_BLOCK;
 			BLOCKS = (num_ca_pools%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 
 			advance_calcium_conc_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_caConc_, d_ca, d_caActivation_values, num_ca_pools);
 		timer2.Stop();
-		cudaDeviceSynchronize();
+		cudaSafeCall(cudaDeviceSynchronize());
 
 		spmv_cum_time += timer2.Elapsed();
 	}
 
 	// Restoring glory
-	cudaMemcpy(d_ca, d_ca_backup, num_ca_pools*sizeof(double), cudaMemcpyDeviceToDevice);
-	cudaMemcpy(d_CaConcStruct_c_, d_CaConcStruct_c_backup, num_ca_pools*sizeof(double), cudaMemcpyDeviceToDevice);
-	cudaMemcpy(d_caConc_, d_caConc_backup, sizeof(CaConcStruct)*num_ca_pools, cudaMemcpyDeviceToDevice);
+	cudaSafeCall(cudaMemcpy(d_ca, d_ca_backup, num_ca_pools*sizeof(double), cudaMemcpyDeviceToDevice));
+	cudaSafeCall(cudaMemcpy(d_CaConcStruct_c_, d_CaConcStruct_c_backup, num_ca_pools*sizeof(double), cudaMemcpyDeviceToDevice));
+	cudaSafeCall(cudaMemcpy(d_caConc_, d_caConc_backup, sizeof(CaConcStruct)*num_ca_pools, cudaMemcpyDeviceToDevice));
 
 	if(wpt_cum_time < spmv_cum_time){
 		return ADVANCE_CALCIUM_WPT_APPROACH;

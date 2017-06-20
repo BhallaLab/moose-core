@@ -241,18 +241,18 @@ void HinesMatrix::makeCsrMatrixGpu(){
 	}
 
 	// Allocating memory on GPU
-	cudaMalloc((void**)&d_mat_values, mat_nnz*sizeof(double));
-	cudaMalloc((void**)&d_mat_colIndex, mat_nnz*sizeof(int));
-	cudaMalloc((void**)&d_mat_rowPtr, (nCompt_+1)*sizeof(int));
-	cudaMalloc((void**)&d_main_diag_map, nCompt_*sizeof(int));
-	cudaMalloc((void**)&d_main_diag_passive, nCompt_*sizeof(double));
-	cudaMalloc((void**)&d_b, nCompt_*sizeof(double));
+	cudaSafeCall(cudaMalloc((void**)&d_mat_values, mat_nnz*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_mat_colIndex, mat_nnz*sizeof(int)));
+	cudaSafeCall(cudaMalloc((void**)&d_mat_rowPtr, (nCompt_+1)*sizeof(int)));
+	cudaSafeCall(cudaMalloc((void**)&d_main_diag_map, nCompt_*sizeof(int)));
+	cudaSafeCall(cudaMalloc((void**)&d_main_diag_passive, nCompt_*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_b, nCompt_*sizeof(double)));
 
-	cudaMemcpy(d_mat_values, h_mat_values, mat_nnz*sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_mat_colIndex, h_mat_colIndex, mat_nnz*sizeof(int), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_mat_rowPtr, h_mat_rowPtr, (nCompt_+1)*sizeof(int), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_main_diag_map, h_main_diag_map, nCompt_*sizeof(int), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_main_diag_passive, h_main_diag_passive, nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_mat_values, h_mat_values, mat_nnz*sizeof(double), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_mat_colIndex, h_mat_colIndex, mat_nnz*sizeof(int), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_mat_rowPtr, h_mat_rowPtr, (nCompt_+1)*sizeof(int), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_main_diag_map, h_main_diag_map, nCompt_*sizeof(int), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_main_diag_passive, h_main_diag_passive, nCompt_*sizeof(double), cudaMemcpyHostToDevice));
 
 
 	// Compare two CSR matrices, one from HS_,HJ_ and other from direct method.

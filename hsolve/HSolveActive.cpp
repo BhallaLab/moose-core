@@ -72,6 +72,14 @@ HSolveActive::HSolveActive()
 	cusparse_handle = 0;
 	cusparse_descr = 0;
 
+	// Setting up cusparse information. If SPMV approach is used then
+	cusparseSafeCall(cusparseCreate(&cusparse_handle));
+
+	// create and setup matrix descriptor
+	cusparseSafeCall(cusparseCreateMatDescr(&cusparse_descr));
+	cusparseSafeCall(cusparseSetMatType(cusparse_descr, CUSPARSE_MATRIX_TYPE_GENERAL));
+	cusparseSafeCall(cusparseSetMatIndexBase(cusparse_descr, CUSPARSE_INDEX_BASE_ZERO));
+
 	is_initialized = false;
 #endif
 
@@ -130,7 +138,7 @@ void HSolveActive::step( ProcPtr info )
 
 	pervasiveFlowSolverOpt();
 
-	cudaMemcpy(d_Vmid, &(VMid_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_Vmid, &(VMid_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice));
 	calculate_V_from_Vmid_wrapper(); // Avoing Vm memory transfer and using CUDA kernel
 
 	advanceCalcium();
@@ -139,8 +147,6 @@ void HSolveActive::step( ProcPtr info )
 	sendSpikes( info );
 	//transfer_memory2cpu_cuda();
 
-	// Checking for error after each time-step
-	cudaCheckError();
 #else
 	advanceChannels( info->dt );
 	calculateChannelCurrents();
@@ -587,13 +593,15 @@ void HSolveActive::advanceChannels( double dt )
 		cudaSafeCall(cudaMemcpy(d_state_, &(state_[0]), state_.size()*sizeof(double), cudaMemcpyHostToDevice));
 		cudaSafeCall(cudaMemcpy(d_ca, &(ca_.front()), ca_.size()*sizeof(double), cudaMemcpyHostToDevice));
 
+		/*
 		// Setting up cusparse information. If SPMV approach is used then
-		cusparseCreate(&cusparse_handle);
+		cusparseSafeCall(cusparseCreate(&cusparse_handle));
 
 		// create and setup matrix descriptor
-		cusparseCreateMatDescr(&cusparse_descr);
-		cusparseSetMatType(cusparse_descr, CUSPARSE_MATRIX_TYPE_GENERAL);
-		cusparseSetMatIndexBase(cusparse_descr, CUSPARSE_INDEX_BASE_ZERO);
+		cusparseSafeCall(cusparseCreateMatDescr(&cusparse_descr));
+		cusparseSafeCall(cusparseSetMatType(cusparse_descr, CUSPARSE_MATRIX_TYPE_GENERAL));
+		cusparseSafeCall(cusparseSetMatIndexBase(cusparse_descr, CUSPARSE_INDEX_BASE_ZERO));
+		*/
 
 		is_initialized = true;
 	}
@@ -745,78 +753,78 @@ void HSolveActive::allocate_hsolve_memory_cuda(){
 	int V_table_size = vTable_.get_table().size();
 	int Ca_table_size = caTable_.get_table().size();
 
-	cudaMalloc((void **)&(d_V), num_compts * sizeof(double));
-	cudaMalloc((void **)&(d_V_table), V_table_size * sizeof(double));
+	cudaSafeCall(cudaMalloc((void **)&(d_V), num_compts * sizeof(double)));
+	cudaSafeCall(cudaMalloc((void **)&(d_V_table), V_table_size * sizeof(double)));
 
-	cudaMalloc((void **)&(d_ca), num_Ca_pools * sizeof(double));
-	cudaMalloc((void **)&(d_Ca_table), Ca_table_size * sizeof(double));
+	cudaSafeCall(cudaMalloc((void **)&(d_ca), num_Ca_pools * sizeof(double)));
+	cudaSafeCall(cudaMalloc((void **)&(d_Ca_table), Ca_table_size * sizeof(double)));
 
-	//cudaMalloc((void**)&d_state_, num_cmprsd_gates*sizeof(double));
+	//cudaSafeCall(cudaMalloc((void**)&d_state_, num_cmprsd_gates*sizeof(double)));
 
 	// Channel related
 
-	cudaMalloc((void**)&d_chan_instant, num_channels*sizeof(int));
-	cudaMalloc((void**)&d_chan_modulation, num_channels*sizeof(double));
-	cudaMalloc((void**)&d_chan_Gbar, num_channels*sizeof(double));
-	cudaMalloc((void**)&d_chan_to_comp, num_channels*sizeof(double));
-	cudaMalloc((void**)&d_chan_Gk, num_channels*sizeof(double));
-	cudaMalloc((void**)&d_chan_Ek, num_channels*sizeof(double));
-	cudaMalloc((void**)&d_chan_GkEk, num_channels*sizeof(double));
+	cudaSafeCall(cudaMalloc((void**)&d_chan_instant, num_channels*sizeof(int)));
+	cudaSafeCall(cudaMalloc((void**)&d_chan_modulation, num_channels*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_chan_Gbar, num_channels*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_chan_to_comp, num_channels*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_chan_Gk, num_channels*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_chan_Ek, num_channels*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_chan_GkEk, num_channels*sizeof(double)));
 
-	cudaMalloc((void**)&d_comp_Gksum, num_compts*sizeof(double));
+	cudaSafeCall(cudaMalloc((void**)&d_comp_Gksum, num_compts*sizeof(double)));
 	cudaMemset(d_comp_Gksum, 0, num_compts*sizeof(double));
-	cudaMalloc((void**)&d_comp_GkEksum, num_compts*sizeof(double));
+	cudaSafeCall(cudaMalloc((void**)&d_comp_GkEksum, num_compts*sizeof(double)));
 	cudaMemset(d_comp_GkEksum, 0, num_compts*sizeof(double));
-	cudaMalloc((void**)&d_externalCurrent_, 2*num_compts*sizeof(double));
+	cudaSafeCall(cudaMalloc((void**)&d_externalCurrent_, 2*num_compts*sizeof(double)));
 
 
-	cudaMalloc((void**)&d_current_, current_.size()*sizeof(CurrentStruct));
-	cudaMalloc((void**)&d_inject_, inject_.size()*sizeof(InjectStruct));
-	cudaMalloc((void**)&d_compartment_, compartment_.size()*sizeof(CompartmentStruct));
-	cudaMalloc((void**)&d_caConc_, caConc_.size()*sizeof(CaConcStruct));
+	cudaSafeCall(cudaMalloc((void**)&d_current_, current_.size()*sizeof(CurrentStruct)));
+	cudaSafeCall(cudaMalloc((void**)&d_inject_, inject_.size()*sizeof(InjectStruct)));
+	cudaSafeCall(cudaMalloc((void**)&d_compartment_, compartment_.size()*sizeof(CompartmentStruct)));
+	cudaSafeCall(cudaMalloc((void**)&d_caConc_, caConc_.size()*sizeof(CaConcStruct)));
 
 	// caConc_ Array of structures to structure of arrays related.
-	cudaMalloc((void**)&d_CaConcStruct_c_, caConc_.size()*sizeof(double));
-	cudaMalloc((void**)&d_CaConcStruct_CaBasal_, caConc_.size()*sizeof(double));
-	cudaMalloc((void**)&d_CaConcStruct_factor1_, caConc_.size()*sizeof(double));
-	cudaMalloc((void**)&d_CaConcStruct_factor2_, caConc_.size()*sizeof(double));
-	cudaMalloc((void**)&d_CaConcStruct_ceiling_, caConc_.size()*sizeof(double));
-	cudaMalloc((void**)&d_CaConcStruct_floor_, caConc_.size()*sizeof(double));
+	cudaSafeCall(cudaMalloc((void**)&d_CaConcStruct_c_, caConc_.size()*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_CaConcStruct_CaBasal_, caConc_.size()*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_CaConcStruct_factor1_, caConc_.size()*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_CaConcStruct_factor2_, caConc_.size()*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_CaConcStruct_ceiling_, caConc_.size()*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_CaConcStruct_floor_, caConc_.size()*sizeof(double)));
 
 	// Hines Matrix related
-	cudaMalloc((void**)&d_HS_, HS_.size()*sizeof(double));
-	cudaMalloc((void**)&d_perv_dynamic, 2*nCompt_*sizeof(double));
-	cudaMalloc((void**)&d_perv_static, nCompt_*sizeof(double));
+	cudaSafeCall(cudaMalloc((void**)&d_HS_, HS_.size()*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_perv_dynamic, 2*nCompt_*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_perv_static, nCompt_*sizeof(double)));
 
-	cudaMalloc((void**)&d_chan_colIndex, num_channels*sizeof(int));
-	cudaMalloc((void**)&d_chan_rowPtr, (nCompt_+1)*sizeof(int));
-	cudaMalloc((void**)&d_chan_x, nCompt_*sizeof(double));
+	cudaSafeCall(cudaMalloc((void**)&d_chan_colIndex, num_channels*sizeof(int)));
+	cudaSafeCall(cudaMalloc((void**)&d_chan_rowPtr, (nCompt_+1)*sizeof(int)));
+	cudaSafeCall(cudaMalloc((void**)&d_chan_x, nCompt_*sizeof(double)));
 
 	// Conjugate Gradient related
-	cudaMalloc((void**)&d_Vmid, nCompt_*sizeof(double));
+	cudaSafeCall(cudaMalloc((void**)&d_Vmid, nCompt_*sizeof(double)));
 
 	// Intermediate data for computation
-	cudaMalloc((void**)&d_V_rows, num_compts*sizeof(int));
-	cudaMalloc((void**)&d_V_fractions, num_compts*sizeof(double));
+	cudaSafeCall(cudaMalloc((void**)&d_V_rows, num_compts*sizeof(int)));
+	cudaSafeCall(cudaMalloc((void**)&d_V_fractions, num_compts*sizeof(double)));
 
-	cudaMalloc((void**)&d_Ca_rows, num_Ca_pools*sizeof(int));
-	cudaMalloc((void**)&d_Ca_fractions, num_Ca_pools*sizeof(double));
+	cudaSafeCall(cudaMalloc((void**)&d_Ca_rows, num_Ca_pools*sizeof(int)));
+	cudaSafeCall(cudaMalloc((void**)&d_Ca_fractions, num_Ca_pools*sizeof(double)));
 
 	// AdvanceCalcium related
-	cudaMalloc((void**)&d_capool_values, h_catarget_channel_indices.size()*sizeof(double));
-	cudaMalloc((void**)&d_capool_onex, h_catarget_channel_indices.size()*sizeof(double));
+	cudaSafeCall(cudaMalloc((void**)&d_capool_values, h_catarget_channel_indices.size()*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_capool_onex, h_catarget_channel_indices.size()*sizeof(double)));
 
 	// Optimized approach.
-	cudaMalloc((void**)&d_state_, num_cmprsd_gates*sizeof(double));
-	cudaMalloc((void**)&d_state_rowPtr, (num_channels+1)*sizeof(int));
-	cudaMalloc((void**)&d_state_powers, num_cmprsd_gates*sizeof(double));
-	cudaMalloc((void**)&d_state2chanId, num_cmprsd_gates*sizeof(int));
-	cudaMalloc((void**)&d_state2column, num_cmprsd_gates*sizeof(int));
+	cudaSafeCall(cudaMalloc((void**)&d_state_, num_cmprsd_gates*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_state_rowPtr, (num_channels+1)*sizeof(int)));
+	cudaSafeCall(cudaMalloc((void**)&d_state_powers, num_cmprsd_gates*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_state2chanId, num_cmprsd_gates*sizeof(int)));
+	cudaSafeCall(cudaMalloc((void**)&d_state2column, num_cmprsd_gates*sizeof(int)));
 
 	//// Memory allocation for Variables of event based optimization for update_matrix method.
-	cudaMalloc((void**)&d_stim_basal_values, nCompt_*sizeof(double));
-	cudaMalloc((void**)&d_stim_comp_indices, nCompt_*sizeof(int));
-	cudaMalloc((void**)&d_stim_map, nCompt_*sizeof(int));
+	cudaSafeCall(cudaMalloc((void**)&d_stim_basal_values, nCompt_*sizeof(double)));
+	cudaSafeCall(cudaMalloc((void**)&d_stim_comp_indices, nCompt_*sizeof(int)));
+	cudaSafeCall(cudaMalloc((void**)&d_stim_map, nCompt_*sizeof(int)));
 
 }
 
@@ -825,12 +833,12 @@ void HSolveActive::copy_table_data_cuda(){
 	vector<double> V_table_data = vTable_.get_table();
 	vector<double> Ca_table_data = caTable_.get_table();
 
-	cudaMemcpy(d_V_table, &(V_table_data.front()),
+	cudaSafeCall(cudaMemcpy(d_V_table, &(V_table_data.front()),
 									V_table_data.size() * sizeof(double),
-									cudaMemcpyHostToDevice);
-	cudaMemcpy(d_Ca_table, &(Ca_table_data.front()),
+									cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_Ca_table, &(Ca_table_data.front()),
 										Ca_table_data.size() * sizeof(double),
-										cudaMemcpyHostToDevice);
+										cudaMemcpyHostToDevice));
 }
 
 void HSolveActive::copy_hsolve_information_cuda(){
@@ -846,8 +854,8 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	unsigned int h_chan_to_comp[num_channels];
 
 	// Transferring Vm and Ca concentration values to GPU
-	cudaMemcpy(d_V, &(V_.front()), num_compts*sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_ca, &(ca_.front()), num_Ca_pools*sizeof(double), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_V, &(V_.front()), num_compts*sizeof(double), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_ca, &(ca_.front()), num_Ca_pools*sizeof(double), cudaMemcpyHostToDevice));
 
 	// Gathering data for each channel
 	for(int i=0;i<num_channels;i++){
@@ -861,10 +869,10 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	}
 
 	// Transferring channel data to GPU
-	cudaMemcpy(d_chan_Gbar, h_chan_Gbar, num_channels * sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_chan_instant, h_chan_instant, num_channels * sizeof(int), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_chan_modulation, h_chan_modulation, num_channels * sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_chan_to_comp, h_chan_to_comp, num_channels * sizeof(unsigned int), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_chan_Gbar, h_chan_Gbar, num_channels * sizeof(double), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_chan_instant, h_chan_instant, num_channels * sizeof(int), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_chan_modulation, h_chan_modulation, num_channels * sizeof(double), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_chan_to_comp, h_chan_to_comp, num_channels * sizeof(unsigned int), cudaMemcpyHostToDevice));
 
 	// Constructing ca and channel row ptrs with nCompt as rows.
 	int ca_rowPtr[V_.size()+1];
@@ -945,33 +953,33 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	}
 
 	// Allocating memory (Optimized approach)
-	cudaMalloc((void**)&d_vgate_indices, h_vgate_indices.size()* sizeof(int));
-	cudaMalloc((void**)&d_vgate_compIds, h_vgate_compIds.size()* sizeof(int));
+	cudaSafeCall(cudaMalloc((void**)&d_vgate_indices, h_vgate_indices.size()* sizeof(int)));
+	cudaSafeCall(cudaMalloc((void**)&d_vgate_compIds, h_vgate_compIds.size()* sizeof(int)));
 
-	cudaMalloc((void**)&d_cagate_indices, h_cagate_indices.size()* sizeof(int));
-	cudaMalloc((void**)&d_cagate_capoolIds, h_cagate_capoolIds.size()* sizeof(int));
+	cudaSafeCall(cudaMalloc((void**)&d_cagate_indices, h_cagate_indices.size()* sizeof(int)));
+	cudaSafeCall(cudaMalloc((void**)&d_cagate_capoolIds, h_cagate_capoolIds.size()* sizeof(int)));
 
 	// Transfering memory (Optimized approach)
-	cudaMemcpy(d_state_rowPtr, h_state_rowPtr, (num_channels+1)*sizeof(int), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_state_powers, h_state_powers, num_cmprsd_gates*sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_state2chanId, h_state2chanId, num_cmprsd_gates*sizeof(int), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_state2column, h_state2column, num_cmprsd_gates*sizeof(int), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_state_rowPtr, h_state_rowPtr, (num_channels+1)*sizeof(int), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_state_powers, h_state_powers, num_cmprsd_gates*sizeof(double), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_state2chanId, h_state2chanId, num_cmprsd_gates*sizeof(int), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_state2column, h_state2column, num_cmprsd_gates*sizeof(int), cudaMemcpyHostToDevice));
 
-	cudaMemcpy(d_vgate_indices, &(h_vgate_indices[0]), h_vgate_indices.size()*sizeof(int), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_vgate_compIds, &(h_vgate_compIds[0]), h_vgate_compIds.size()*sizeof(int), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_vgate_indices, &(h_vgate_indices[0]), h_vgate_indices.size()*sizeof(int), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_vgate_compIds, &(h_vgate_compIds[0]), h_vgate_compIds.size()*sizeof(int), cudaMemcpyHostToDevice));
 
-	cudaMemcpy(d_cagate_indices,&(h_cagate_indices[0]), h_cagate_indices.size()*sizeof(int), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_cagate_capoolIds, &(h_cagate_capoolIds[0]), h_cagate_capoolIds.size()*sizeof(int), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_cagate_indices,&(h_cagate_indices[0]), h_cagate_indices.size()*sizeof(int), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_cagate_capoolIds, &(h_cagate_capoolIds[0]), h_cagate_capoolIds.size()*sizeof(int), cudaMemcpyHostToDevice));
 
 
 	// Allocating memory
-	cudaMalloc((void**)&d_catarget_channel_indices, h_catarget_channel_indices.size()* sizeof(int));
-	cudaMalloc((void**)&d_caActivation_values, ca_.size()* sizeof(double));
+	cudaSafeCall(cudaMalloc((void**)&d_catarget_channel_indices, h_catarget_channel_indices.size()* sizeof(int)));
+	cudaSafeCall(cudaMalloc((void**)&d_caActivation_values, ca_.size()* sizeof(double)));
 
-	cudaMalloc((void**)&d_capool_rowPtr, (num_Ca_pools+1)*sizeof(int));
-	cudaMalloc((void**)&d_capool_colIndex, h_catarget_channel_indices.size()*sizeof(int));
+	cudaSafeCall(cudaMalloc((void**)&d_capool_rowPtr, (num_Ca_pools+1)*sizeof(int)));
+	cudaSafeCall(cudaMalloc((void**)&d_capool_colIndex, h_catarget_channel_indices.size()*sizeof(int)));
 
-	cudaMemcpy(d_catarget_channel_indices, &(h_catarget_channel_indices.front()), h_catarget_channel_indices.size()* sizeof(int), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_catarget_channel_indices, &(h_catarget_channel_indices.front()), h_catarget_channel_indices.size()* sizeof(int), cudaMemcpyHostToDevice));
 
 
 	// Current Data
@@ -979,16 +987,16 @@ void HSolveActive::copy_hsolve_information_cuda(){
 	for (int i = 0; i < num_channels; ++i) {
 		h_Ek_temp[i] = current_[i].Ek;
 	}
-	cudaMemcpy(d_chan_Ek, h_Ek_temp, current_.size()*sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * num_compts * sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_current_, &(current_.front()), current_.size()*sizeof(CurrentStruct), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_inject_, &(inject_.front()), inject_.size()*sizeof(InjectStruct), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_compartment_, &(compartment_.front()), compartment_.size()*sizeof(CompartmentStruct), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_caConc_, &(caConc_.front()), caConc_.size()*sizeof(CaConcStruct), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_chan_Ek, h_Ek_temp, current_.size()*sizeof(double), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * num_compts * sizeof(double), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_current_, &(current_.front()), current_.size()*sizeof(CurrentStruct), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_inject_, &(inject_.front()), inject_.size()*sizeof(InjectStruct), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_compartment_, &(compartment_.front()), compartment_.size()*sizeof(CompartmentStruct), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_caConc_, &(caConc_.front()), caConc_.size()*sizeof(CaConcStruct), cudaMemcpyHostToDevice));
 
 	// Hines Matrix related
-	cudaMemcpy(d_HS_, &(HS_.front()), HS_.size()*sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_perv_static, per_mainDiag_passive, nCompt_*sizeof(double), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_HS_, &(HS_.front()), HS_.size()*sizeof(double), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_perv_static, per_mainDiag_passive, nCompt_*sizeof(double), cudaMemcpyHostToDevice));
 
 	int* chan_colIndex = new int[num_channels]();
 	double* chan_x = new double[nCompt_];
@@ -1002,9 +1010,9 @@ void HSolveActive::copy_hsolve_information_cuda(){
 		}
 	}
 
-	cudaMemcpy(d_chan_x, chan_x, nCompt_*sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_chan_colIndex, chan_colIndex , num_channels*sizeof(int), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_chan_rowPtr, chan_rowPtr, (nCompt_+1)*sizeof(int), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_chan_x, chan_x, nCompt_*sizeof(double), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_chan_colIndex, chan_colIndex , num_channels*sizeof(int), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_chan_rowPtr, chan_rowPtr, (nCompt_+1)*sizeof(int), cudaMemcpyHostToDevice));
 
 	// Ca Target related
 	int num_catarget_chans = h_catarget_channel_indices.size();
@@ -1031,50 +1039,50 @@ void HSolveActive::copy_hsolve_information_cuda(){
 		}
 	}
 
-	cudaMemcpy(d_capool_rowPtr, temp_rowPtr, (num_Ca_pools+1)*sizeof(int), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_capool_colIndex, temp_colIndex, num_catarget_chans*sizeof(int), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_capool_rowPtr, temp_rowPtr, (num_Ca_pools+1)*sizeof(int), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_capool_colIndex, temp_colIndex, num_catarget_chans*sizeof(int), cudaMemcpyHostToDevice));
 
 	double temp_x[num_catarget_chans];
 	for(int i=0;i<num_catarget_chans;i++) temp_x[i] = 1;
-	cudaMemcpy(d_capool_onex, temp_x, num_catarget_chans*sizeof(double), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_capool_onex, temp_x, num_catarget_chans*sizeof(double), cudaMemcpyHostToDevice));
 
 	// caConc_ Array of structures to structure of arrays.
 	double* temp_caconc = new double[caConc_.size()]();
 	for (int i = 0; i < caConc_.size(); ++i) {
 		temp_caconc[i] = caConc_[i].c_;
-		cudaMemcpy(d_CaConcStruct_c_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice);
+		cudaSafeCall(cudaMemcpy(d_CaConcStruct_c_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice));
 	}
 
 	for (int i = 0; i < caConc_.size(); ++i) {
 		temp_caconc[i] = caConc_[i].CaBasal_;
-		cudaMemcpy(d_CaConcStruct_CaBasal_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice);
+		cudaSafeCall(cudaMemcpy(d_CaConcStruct_CaBasal_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice));
 	}
 
 	for (int i = 0; i < caConc_.size(); ++i) {
 		temp_caconc[i] = caConc_[i].factor1_;
-		cudaMemcpy(d_CaConcStruct_factor1_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice);
+		cudaSafeCall(cudaMemcpy(d_CaConcStruct_factor1_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice));
 	}
 
 	for (int i = 0; i < caConc_.size(); ++i) {
 		temp_caconc[i] = caConc_[i].factor2_;
-		cudaMemcpy(d_CaConcStruct_factor2_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice);
+		cudaSafeCall(cudaMemcpy(d_CaConcStruct_factor2_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice));
 	}
 
 	for (int i = 0; i < caConc_.size(); ++i) {
 		temp_caconc[i] = caConc_[i].ceiling_;
-		cudaMemcpy(d_CaConcStruct_ceiling_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice);
+		cudaSafeCall(cudaMemcpy(d_CaConcStruct_ceiling_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice));
 	}
 
 	for (int i = 0; i < caConc_.size(); ++i) {
 		temp_caconc[i] = caConc_[i].floor_;
-		cudaMemcpy(d_CaConcStruct_floor_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice);
+		cudaSafeCall(cudaMemcpy(d_CaConcStruct_floor_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice));
 	}
 
 
 	//// Memory transfer for Variables of event based optimization for update_matrix method.
-	cudaMemcpy(d_stim_basal_values, stim_basal_values, nCompt_*sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_stim_comp_indices, stim_comp_indices, nCompt_*sizeof(int), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_stim_map, stim_map, nCompt_*sizeof(int), cudaMemcpyHostToDevice);
+	cudaSafeCall(cudaMemcpy(d_stim_basal_values, stim_basal_values, nCompt_*sizeof(double), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_stim_comp_indices, stim_comp_indices, nCompt_*sizeof(int), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_stim_map, stim_map, nCompt_*sizeof(int), cudaMemcpyHostToDevice));
 
 	/*
 	// Writing load to file.
