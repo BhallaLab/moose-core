@@ -773,7 +773,7 @@ void SteadyState::settle( bool forceSetup )
     for( size_t i = 0; i < numVarPools_; ++i )
         init[i] = max( 0.0, sqrt(ss->ri.nVec[i]) );
 
-    ss->initialize<vector<double> >( init );
+    ss->initialize<vector<double>>( init );
 
     // Fill up boundary condition values
     if ( reassignTotal_ )   // The user has defined new conservation values.
