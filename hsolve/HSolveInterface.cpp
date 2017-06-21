@@ -246,7 +246,13 @@ void HSolve::addGkEk( Id id, double Gk, double Ek )
 void HSolve::addConc( Id id, double conc )
 {
     unsigned int index = localIndex( id );
-    assert(  index + 1 < externalCalcium_.size() );
+
+    /* We commented out the first one because of PR-218.
+     * https://github.com/BhallaLab/moose/pull/218 
+     */
+    //assert(  index + 1 < externalCalcium_.size() );
+    assert(  index + 1 <= externalCalcium_.size() );
+
     externalCalcium_[ index ] = conc;
 }
 
