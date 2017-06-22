@@ -135,7 +135,7 @@ def plotTables(tables, outfile=None, **kwargs):
     subplot = kwargs.get('subplot', True)
     for i, tname in enumerate(tables):
         if subplot:
-            plt.subplot(len(tables), 1, i)
+            plt.subplot(len(tables), 1, i+1)
         yvec = tables[tname].vector 
         xvec = np.linspace(0, moose.Clock('/clock').currentTime, len(yvec))
         plt.plot(xvec, yvec, label=tname)
@@ -233,10 +233,11 @@ def saveRecords(records, xvec = None, **kwargs):
     pu.info("Done writing data to %s" % outfile)
 
 def plotRecords(records, xvec = None, **kwargs):
-    """plotRecords Plot given records in dictionary.
+    """Plot given dictionary of moose.Table/moose.Table2
 
-    :param records:
-    :param xvec: If None, use moose.Clock to generate xvec.
+    :param records: A dictionary of moose.Table. All tables must have same
+    length.
+    :param xvec: If None, moose.Clock is used to generate time-vector.
     :param **kwargs:
     """
     dataDict = {}
@@ -267,7 +268,7 @@ def plotRecords(records, xvec = None, **kwargs):
                 yvec = dataDict[k].vector
                 plotVector(yvec, xvec, label=k, **kwargs)
             else:
-                plt.subplot(len(dataDict), 1, i)
+                plt.subplot(len(dataDict), 1, i+1)
                 yvec = dataDict[k].vector
                 plotVector(yvec, xvec, label=k, **kwargs)
 
@@ -285,47 +286,3 @@ def plotRecords(records, xvec = None, **kwargs):
         plt.savefig("%s" % outfile, transparent=True)
     else:
         plt.show()
-
-
-def plot_records(data_dict, xvec = None, **kwargs):
-    """plot_records Plot given dictionary.
-
-    :param data_dict:
-    :param xvec: If None, use moose.Clock to generate xvec.
-    :param **kwargs:
-    """
-
-    legend = kwargs.get('legend', True)
-    outfile = kwargs.get('outfile', None)
-    subplot = kwargs.get('subplot', False)
-    filters = [ x.lower() for x in kwargs.get('filter', [])]
-
-    plt.figure(figsize=(10, 1.5*len(data_dict)))
-    for i, k in enumerate(data_dict):
-        pu.info("+ Plotting for %s" % k)
-        plotThis = False
-        if not filters: plotThis = True
-        for accept in filters:
-            if accept in k.lower(): 
-                plotThis = True
-                break
-                
-        if plotThis:
-            if not subplot: 
-                yvec = data_dict[k]
-                plotVector(yvec, xvec, label=k, **kwargs)
-            else:
-                plt.subplot(len(data_dict), 1, i)
-                yvec = data_dict[k]
-                plotVector(yvec, xvec, label=k, **kwargs)
-    if subplot:
-        try:
-            plt.tight_layout()
-        except: pass
-
-    if outfile:
-        pu.info("Writing plot to %s" % outfile)
-        plt.savefig("%s" % outfile, transparent=True)
-    else:
-        plt.show()
-
