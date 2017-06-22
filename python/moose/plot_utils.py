@@ -233,12 +233,7 @@ def saveRecords(records, xvec = None, **kwargs):
     pu.info("Done writing data to %s" % outfile)
 
 def plotRecords(records, xvec = None, **kwargs):
-    """Plot given dictionary of moose.Table/moose.Table2
-
-    :param records: A dictionary of moose.Table. All tables must have same
-    length.
-    :param xvec: If None, moose.Clock is used to generate time-vector.
-    :param **kwargs:
+    """Wrapper
     """
     dataDict = {}
     try:
@@ -286,3 +281,15 @@ def plotRecords(records, xvec = None, **kwargs):
         plt.savefig("%s" % outfile, transparent=True)
     else:
         plt.show()
+    plt.close( )
+
+
+def plotTables( records, xvec = None, **kwargs ):
+    """Plot dictionary of moose.Table/moose.Table2
+
+    :param records: A dictionary of moose.Table. All tables must have same
+    length.
+    :param xvec: If None, moose.Clock is used to generate time-vector.
+    :param **kwargs:
+    """
+    return plotRecords( return, xvec, **kwargs )
