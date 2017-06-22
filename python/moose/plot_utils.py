@@ -15,10 +15,10 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-import matplotlib.pyplot as plt
-from . import _moose as moose
-from . import print_utils as pu 
 import numpy as np
+import moose
+import moose.print_utils
+import matplotlib.pyplot as plt
 
 def plotAscii(yvec, xvec = None, file=None):
     """Plot two list-like object in terminal using gnuplot.
