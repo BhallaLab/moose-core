@@ -403,7 +403,7 @@ void HSolveActive::pervasiveFlowSolverOpt(){
 	//// Optimized pervasive flow solver
 	//bool is_lower_triang;
 	int elim_index = 0;
-	for (int i = 0; i < nCompt_; ++i) {
+	for (unsigned int i = 0; i < nCompt_; ++i) {
 		for (int j = qfull_mat.rowPtr[i]; j < upper_triang_offsets[i]; ++j) {
 			// Eliminating an element
 			int r1 = qfull_mat.colIndex[j];
@@ -653,7 +653,7 @@ void HSolveActive::allocate_cpu_memory(){
 	num_stim_comp = 0;
 
 	// Initializing elements in map to -1
-	for (int i = 0; i < nCompt_; ++i) {
+	for (unsigned int i = 0; i < nCompt_; ++i) {
 		stim_map[i] = -1;
 	}
 
@@ -967,32 +967,32 @@ void HSolveActive::copy_hsolve_information_cuda(){
 
 	// caConc_ Array of structures to structure of arrays.
 	double* temp_caconc = new double[caConc_.size()]();
-	for (int i = 0; i < caConc_.size(); ++i) {
+	for (unsigned int i = 0; i < caConc_.size(); ++i) {
 		temp_caconc[i] = caConc_[i].c_;
 		cudaSafeCall(cudaMemcpy(d_CaConcStruct_c_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice));
 	}
 
-	for (int i = 0; i < caConc_.size(); ++i) {
+	for (unsigned int i = 0; i < caConc_.size(); ++i) {
 		temp_caconc[i] = caConc_[i].CaBasal_;
 		cudaSafeCall(cudaMemcpy(d_CaConcStruct_CaBasal_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice));
 	}
 
-	for (int i = 0; i < caConc_.size(); ++i) {
+	for (unsigned int i = 0; i < caConc_.size(); ++i) {
 		temp_caconc[i] = caConc_[i].factor1_;
 		cudaSafeCall(cudaMemcpy(d_CaConcStruct_factor1_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice));
 	}
 
-	for (int i = 0; i < caConc_.size(); ++i) {
+	for (unsigned int i = 0; i < caConc_.size(); ++i) {
 		temp_caconc[i] = caConc_[i].factor2_;
 		cudaSafeCall(cudaMemcpy(d_CaConcStruct_factor2_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice));
 	}
 
-	for (int i = 0; i < caConc_.size(); ++i) {
+	for (unsigned int i = 0; i < caConc_.size(); ++i) {
 		temp_caconc[i] = caConc_[i].ceiling_;
 		cudaSafeCall(cudaMemcpy(d_CaConcStruct_ceiling_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice));
 	}
 
-	for (int i = 0; i < caConc_.size(); ++i) {
+	for (unsigned int i = 0; i < caConc_.size(); ++i) {
 		temp_caconc[i] = caConc_[i].floor_;
 		cudaSafeCall(cudaMemcpy(d_CaConcStruct_floor_, temp_caconc, caConc_.size()*sizeof(double), cudaMemcpyHostToDevice));
 	}
