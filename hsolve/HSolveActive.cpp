@@ -133,10 +133,10 @@ void HSolveActive::step( ProcPtr info )
 	*/
 	updateMatrix();
 
-	//HSolvePassive::forwardEliminate();
-	//HSolvePassive::backwardSubstitute();
+	HSolvePassive::forwardEliminate();
+	HSolvePassive::backwardSubstitute();
 
-	pervasiveFlowSolverOpt();
+	//pervasiveFlowSolverOpt();
 
 	cudaSafeCall(cudaMemcpy(d_Vmid, &(VMid_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice));
 	calculate_V_from_Vmid_wrapper(); // Avoing Vm memory transfer and using CUDA kernel
@@ -234,16 +234,16 @@ void HSolveActive::updateMatrix()
 {
 
 #ifdef USE_CUDA
-	/*
+
 	// Updates HS matrix and sends it to CPU
 	if ( HJ_.size() != 0 )
 		memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
 	update_matrix_cuda_wrapper();
-	*/
+
 
 	// Copying initial matrix
-	memcpy(qfull_mat.values, perv_mat_values_copy, qfull_mat.nnz*sizeof(double));
-	update_perv_matrix_cuda_wrapper();
+	//memcpy(qfull_mat.values, perv_mat_values_copy, qfull_mat.nnz*sizeof(double));
+	//update_perv_matrix_cuda_wrapper();
 
 	// Updates CSR matrix and sends it to CPU.
 	//update_csrmatrix_cuda_wrapper();

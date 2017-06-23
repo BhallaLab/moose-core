@@ -495,8 +495,7 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 
 	// As inject_ and externalCurrent_ data structures are updated by messages,
 	// they have to be updated on the device too. Hence the transfer
-	if(step_num%20 == 1)
-		cudaSafeCall(cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice));
 
 	cudaSafeCall(cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
 
@@ -557,13 +556,11 @@ void HSolveActive::update_perv_matrix_cuda_wrapper(){
 
 	// As inject_ and externalCurrent_ data structures are updated by messages,
 	// they have to be updated on the device too. Hence the transfer
-	if(step_num == 19){
+
 		cudaSafeCall(cudaMemcpy(d_stim_map, stim_map, nCompt_*sizeof(int), cudaMemcpyHostToDevice)); // Initializing map.
-	}
-	if(step_num%20 == 1){
 		cudaSafeCall(cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice));
 		cudaSafeCall(cudaMemcpy(d_stim_basal_values, stim_basal_values, num_stim_comp*sizeof(double), cudaMemcpyHostToDevice));
-	}
+
 	cudaSafeCall(cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
 
 	// As inject data is already on device, injectVarying can be set to zero.
