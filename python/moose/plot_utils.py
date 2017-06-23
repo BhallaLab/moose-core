@@ -135,7 +135,7 @@ def plotTables(tables, outfile=None, **kwargs):
     subplot = kwargs.get('subplot', True)
     for i, tname in enumerate(tables):
         if subplot:
-            plt.subplot(len(tables), 1, i)
+            plt.subplot(len(tables), 1, i+1)
         yvec = tables[tname].vector 
         xvec = np.linspace(0, moose.Clock('/clock').currentTime, len(yvec))
         plt.plot(xvec, yvec, label=tname)
@@ -267,7 +267,7 @@ def plotRecords(records, xvec = None, **kwargs):
                 yvec = dataDict[k].vector
                 plotVector(yvec, xvec, label=k, **kwargs)
             else:
-                plt.subplot(len(dataDict), 1, i)
+                plt.subplot(len(dataDict), 1, i+1)
                 yvec = dataDict[k].vector
                 plotVector(yvec, xvec, label=k, **kwargs)
 
@@ -315,7 +315,7 @@ def plot_records(data_dict, xvec = None, **kwargs):
                 yvec = data_dict[k]
                 plotVector(yvec, xvec, label=k, **kwargs)
             else:
-                plt.subplot(len(data_dict), 1, i)
+                plt.subplot(len(data_dict), 1, i+1)
                 yvec = data_dict[k]
                 plotVector(yvec, xvec, label=k, **kwargs)
     if subplot:
