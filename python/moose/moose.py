@@ -20,9 +20,7 @@ from moose._moose import *
 
 # Version
 def version( ):
-    return moose._moose.VERSION
-
-__version__ = version( )
+    return VERSION
 
 # Tests
 from moose.moose_test import test
