@@ -13,12 +13,14 @@ import platform
 import pydoc
 import os
 from io import StringIO
-from collections import defaultdict
-from . import _moose
-from ._moose import *
-import __main__ as main
-from .genesis import writeKkit
-from . import SBML
+
+import moose.SBML.readSBML as _readSBML
+import moose.SBML.writeSBML as _writeSBML
+import moose.genesis.writeKkit as _writeKkit
+import moose.chemUtil as _chemUtil
+
+from moose._moose import *
+
 sequence_types = ['vector<double>',
                   'vector<int>',
                   'vector<long>',
