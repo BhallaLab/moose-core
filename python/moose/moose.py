@@ -15,7 +15,11 @@ import moose.SBML.writeSBML as _writeSBML
 import moose.genesis.writeKkit as _writeKkit
 import moose.chemUtil as _chemUtil
 
+# Import function from C++ module into moose namespace.
 from moose._moose import *
+
+# Tests
+from moose.moose_test import test
 
 sequence_types = ['vector<double>',
                   'vector<int>',
