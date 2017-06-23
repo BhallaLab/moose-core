@@ -1,6 +1,5 @@
-"""moose_test.py: 
-
-Test MOOSE installation.
+"""
+Test MOOSE installation with moose-examples.
 
 """
 
@@ -24,6 +23,7 @@ import threading
 import signal
 import logging
 from collections import defaultdict
+import time
 
 logging.basicConfig(
         level=logging.DEBUG,
@@ -117,8 +117,10 @@ def run_test( index, testfile ):
     global total_
     pyExec = os.environ.get( 'PYTHON_EXECUTABLE', '/usr/bin/python' )
     cmd = Command( [ pyExec, testfile ] )
+    ti = time.time( )
     status = cmd.run( timeout = 60 )
     name = os.path.basename( testfile )
+    t = time.time( ) - ti
     cwd = os.path.dirname( testfile )
     os.chdir( cwd )
     with open( os.path.join( cwd, 'matplotlibrc' ), 'w' ) as f:
@@ -126,18 +128,18 @@ def run_test( index, testfile ):
         f.write( matplotlibrc_ )
 
     out = (name + '.' * 50)[:50]
-    print( '[TEST %3d/%d] %50s ' % (index, total_, out), end='' )
+    print( '[TEST %3d/%d] %50s %.2f sec ' % (index, total_, out, t), end='' )
     sys.stdout.flush( )
     if status != 0:
         if status == -15:
-            msg = '(%2d) TIMEOUT' % status
+            msg = '%2d TIMEOUT' % status
             test_status_[ 'TIMED-OUT' ].append( testfile )
         else:
-            msg = '(%2d) FAILED' % status
+            msg = '%2d FAILED' % status
             test_status_[ 'FAILED' ].append( testfile )
         print( msg )
     else:
-        print( '(%2d) PASSED' % status )
+        print( '%2d PASSED' % status )
         test_status_[ 'PASSED' ].append( testfile )
     sys.stdout.flush( )
 
