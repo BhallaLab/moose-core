@@ -1,7 +1,13 @@
-"""utils.py:
-Utility functions for moose.
+from __future__ import print_function, division
+
 """
-from __future__ import print_function
+utils.py:
+
+Utility functions for moose.
+
+NOTE: Some function might break because unicode is default string in python3.
+
+"""
 
 __author__           = 'Subhasis Ray, Aditya Gilra, Dilawar Singh'
 __copyright__        = "Copyright 2013, NCBS Bangalore"
@@ -9,12 +15,10 @@ __credits__          = ["NCBS Bangalore", "Bhalla Lab"]
 __license__          = "GPL"
 __version__          = "1.0.0"
 
-
 import types
 import parser
 import token
 import symbol
-import string
 import os
 import math
 import warnings
@@ -22,9 +26,18 @@ from datetime import datetime
 from collections import defaultdict
 import re
 
-from plot_utils import *
-from print_utils import *
 from moose_constants import *
+
+# Make these import non-important.
+try:
+    from plot_utils import *
+except Exception as e:
+    pass
+
+try:
+    from print_utils import *
+except Exception as e:
+    pass
 
 
 def create_table_path(model, graph, element, field):

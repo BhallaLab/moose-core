@@ -15,7 +15,8 @@ __status__           = "Development"
 
 import numpy as np
 import moose
-import print_utils
+import print_utils as pu
+
 import matplotlib.pyplot as plt
 
 def plotAscii(yvec, xvec = None, file=None):
