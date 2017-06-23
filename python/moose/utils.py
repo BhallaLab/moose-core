@@ -22,11 +22,9 @@ from datetime import datetime
 from collections import defaultdict
 import re
 
-from moose.plot_utils import *
-from moose.verification_utils import verify
-from moose.print_utils import *
-from moose.sim_utils import *
-from moose.moose_constants import *
+from plot_utils import *
+from print_utils import *
+from moose_constants import *
 
 
 def create_table_path(model, graph, element, field):

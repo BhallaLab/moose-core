@@ -1,5 +1,3 @@
-
-
 """plot_utils.py: Some utility function for plotting data in moose.
 
 Last modified: Sun Jan 10, 2016  04:04PM
@@ -17,7 +15,7 @@ __status__           = "Development"
 
 import numpy as np
 import moose
-import moose.print_utils
+import print_utils
 import matplotlib.pyplot as plt
 
 def plotAscii(yvec, xvec = None, file=None):
@@ -292,4 +290,4 @@ def plotTables( records, xvec = None, **kwargs ):
     :param xvec: If None, moose.Clock is used to generate time-vector.
     :param **kwargs:
     """
-    return plotRecords( return, xvec, **kwargs )
+    return plotRecords( records, xvec, **kwargs )

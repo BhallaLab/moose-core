@@ -1,3 +1,5 @@
 from __future__ import absolute_import, division, print_function
 
-from moose.moose_init import *
+# Bring moose.py functions into global namespace.
+
+from moose.moose import *
