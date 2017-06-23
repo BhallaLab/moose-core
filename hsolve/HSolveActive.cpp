@@ -194,7 +194,7 @@ void HSolveActive::step( ProcPtr info )
 
 void HSolveActive::calculateChannelCurrents()
 {
-#ifdef USE_CUDA
+#ifndef USE_CUDA
 	/*
 	// TEMPORARY CODE
 	GpuTimer timer;
@@ -233,7 +233,7 @@ void HSolveActive::calculateChannelCurrents()
 void HSolveActive::updateMatrix()
 {
 
-#ifdef USE_CUDA
+#ifndef USE_CUDA
 
 	// Updates HS matrix and sends it to CPU
 	if ( HJ_.size() != 0 )
@@ -497,7 +497,7 @@ void HSolveActive::pervasiveFlowSolverOpt(){
 
 void HSolveActive::advanceCalcium()
 {
-#ifdef USE_CUDA
+#ifndef USE_CUDA
 	/* TEMPORARY CODE FOR Timings
 	GpuTimer timer;
 	timer.Start();
@@ -607,13 +607,14 @@ void HSolveActive::advanceChannels( double dt )
 	}
 
 	// Calling the kernels
-	//cudaSafeCall(cudaMemcpy(d_V, &(V_.front()), nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
-	//cudaSafeCall(cudaMemcpy(d_ca, &(ca_.front()), ca_.size()*sizeof(double), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_V, &(V_.front()), nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_state_, &(state_[0]), state_.size()*sizeof(double), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_ca, &(ca_.front()), ca_.size()*sizeof(double), cudaMemcpyHostToDevice));
 
 	get_lookup_rows_and_fractions_cuda_wrapper(dt); // Gets lookup values for Vm and Ca_.
 	advance_channels_cuda_wrapper(dt); // Advancing fraction values.
 
-	//cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
+	cudaSafeCall(cudaMemcpy(&state_[0], d_state_, state_.size()*sizeof(double), cudaMemcpyDeviceToHost));
 
 	if(step_num == 1){
 		cout << channel_.size() << " " << channel_.size()*3 << " " << state_.size() << " extra % " << (state_.size()*100.0f)/(channel_.size()*3) << endl;
