@@ -18,6 +18,12 @@ import moose.chemUtil as _chemUtil
 # Import function from C++ module into moose namespace.
 from moose._moose import *
 
+# Version
+def version( ):
+    return moose._moose.VERSION
+
+__version__ = version( )
+
 # Tests
 from moose.moose_test import test
 
