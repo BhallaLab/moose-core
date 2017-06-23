@@ -48,8 +48,6 @@ known_types = ['void',
                'melement'] + sequence_types
 
 # SBML related functions.
-
-
 def mooseReadSBML(filepath, loadpath, solver='ee'):
     """Load SBML model.
 
