@@ -10,9 +10,10 @@ import pydoc
 import os
 from io import StringIO
 
-import moose.SBML.readSBML
-import moose.SBML.writeSBML
-import moose.genesis.writeKkit
+import moose.SBML.readSBML as _readSBML
+import moose.SBML.writeSBML as _writeSBML
+import moose.genesis.writeKkit as _writeKkit
+import moose.chemUtils as _chemUtil
 
 from moose._moose import *
 
@@ -52,7 +53,7 @@ def mooseReadSBML(filepath, loadpath, solver='ee'):
     solver   -- Solver to use (default 'ee' ) \n
 
     """
-    return SBML.readSBML.mooseReadSBML( filepath, loadpath, solver )
+    return _readSBML.mooseReadSBML( filepath, loadpath, solver )
 
 
 def mooseWriteSBML(modelpath, filepath, sceneitems={}):
@@ -71,7 +72,7 @@ def mooseWriteSBML(modelpath, filepath, sceneitems={}):
                             --- else, auto-coordinates is used for layout position and passed
 
     """
-    return SBML.writeSBML.mooseWriteSBML(modelpath, filepath, sceneitems)
+    return _writeSBML.mooseWriteSBML(modelpath, filepath, sceneitems)
 
 
 def mooseWriteKkit(modelpath, filepath,sceneitems={}):
@@ -82,7 +83,7 @@ def mooseWriteKkit(modelpath, filepath,sceneitems={}):
     modelpath -- model path in moose \n
     filepath -- Path of output file.
     """
-    return genesis.writeKkit.mooseWriteKkit(modelpath, filepath,sceneitems)
+    return _writeKkit.mooseWriteKkit(modelpath, filepath,sceneitems)
 
 
 def moosedeleteChemSolver(modelpath):
@@ -91,7 +92,7 @@ def moosedeleteChemSolver(modelpath):
         this should be followed by mooseaddChemSolver for add solvers on to compartment to simulate else
         default is Exponential Euler (ee)
     """
-    return chemUtil.add_Delete_ChemicalSolver.moosedeleteChemSolver(modelpath)
+    return _chemUtil.add_Delete_ChemicalSolver.moosedeleteChemSolver(modelpath)
 
 
 def mooseaddChemSolver(modelpath, solver):
@@ -105,7 +106,7 @@ def mooseaddChemSolver(modelpath, solver):
               "Runge Kutta"       ("gsl")
 
     """
-    return chemUtil.add_Delete_ChemicalSolver.mooseaddChemSolver(modelpath, solver)
+    return _chemUtil.add_Delete_ChemicalSolver.mooseaddChemSolver(modelpath, solver)
 
 ################################################################
 # Wrappers for global functions
