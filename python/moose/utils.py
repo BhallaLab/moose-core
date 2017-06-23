@@ -26,16 +26,16 @@ from datetime import datetime
 from collections import defaultdict
 import re
 
-from moose_constants import *
+from moose.moose_constants import *
 
 # Make these import non-important.
 try:
-    from plot_utils import *
+    from moose.plot_utils import *
 except Exception as e:
     pass
 
 try:
-    from print_utils import *
+    from moose.print_utils import *
 except Exception as e:
     pass
 
