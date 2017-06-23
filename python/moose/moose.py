@@ -13,7 +13,7 @@ from io import StringIO
 import moose.SBML.readSBML as _readSBML
 import moose.SBML.writeSBML as _writeSBML
 import moose.genesis.writeKkit as _writeKkit
-import moose.chemUtils as _chemUtil
+import moose.chemUtil as _chemUtil
 
 from moose._moose import *
 
