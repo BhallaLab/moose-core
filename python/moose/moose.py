@@ -1,25 +1,21 @@
-# moose.py ---
-# This is the primary moose module. It wraps _moose.so and adds some
-# utility functions.
+from __future__ import print_function, division, absolute_import
 
-# Filename: moose.py
 # Author: Subhasis Ray
 # Maintainer: Dilawar Singh, Harsha Rani, Upi Bhalla
 
-from __future__ import print_function
 from contextlib import closing
 import warnings
 import platform
 import pydoc
 import os
 from io import StringIO
-from collections import defaultdict
-from . import _moose
-from ._moose import *
-import __main__ as main
-import genesis.writeKkit
-import SBML.readSBML
-import SBML.writeSBML
+
+import moose.SBML.readSBML
+import moose.SBML.writeSBML
+import moose.genesis.writeKkit
+
+from moose._moose import *
+
 sequence_types = ['vector<double>',
                   'vector<int>',
                   'vector<long>',
