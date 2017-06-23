@@ -1,4 +1,4 @@
-from __future__ import print_function, division
+from __future__ import print_function, division, absolute_import
 
 # Author: Subhasis Ray
 # Maintainer: Dilawar Singh, Harsha Rani, Upi Bhalla
@@ -10,11 +10,11 @@ import pydoc
 import os
 from io import StringIO
 
-import SBML.readSBML
-import SBML.writeSBML
-import genesis.writeKkit
+import moose.SBML.readSBML
+import moose.SBML.writeSBML
+import moose.genesis.writeKkit
 
-from _moose import *
+from moose._moose import *
 
 sequence_types = ['vector<double>',
                   'vector<int>',
