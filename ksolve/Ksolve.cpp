@@ -671,7 +671,7 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
         }
     }
 
-    if( getNumThreads( ) > 1 )
+    if( 1 < getNumThreads( ) )
         cout << "Info: Using parallel solver with " << numThreads_ << " threads" << endl;
 }
 
