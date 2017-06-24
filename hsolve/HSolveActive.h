@@ -24,9 +24,12 @@
 #include "HSolveStruct.h"
 #include "HinesMatrix.h"
 #include "HSolvePassive.h"
-
-#include "CudaGlobal.h"
 #include "RateLookup.h"
+
+#ifdef USE_CUDA
+#include "CudaGlobal.h"
+#endif
+
 
 class HSolveActive: public HSolvePassive
 {
@@ -38,6 +41,7 @@ public:
     void setup( Id seed, double dt );
     void step( ProcPtr info );			///< Equivalent to process
     void reinit( ProcPtr info );
+
 protected:
     /**
      * Solver parameters: exposed as fields in MOOSE
@@ -120,6 +124,7 @@ protected:
     vector< double >          externalCurrent_; ///< External currents from
     ///< channels that HSolve
     ///< cannot internalize.
+    vector< double >          externalCalcium_; /// calcium from difshells
     vector< Id >              caConcId_;		///< Used for localIndex-ing.
     vector< Id >              channelId_;		///< Used for localIndex-ing.
     vector< Id >              gateId_;			///< Used for localIndex-ing.
@@ -132,9 +137,9 @@ protected:
 		*   Tells you which compartments have external calcium-dependent
 		*   channels so that you can send out Calcium concentrations in only
 		*   those compartments. */
-    int step_num = 0;
+     vector< unsigned int >    outIk_;	
 #ifdef USE_CUDA    
-    //int step_num;
+    int step_num;
 
     // Optimized data
 	vector<int> h_vgate_indices;
@@ -237,9 +242,7 @@ protected:
 
 #endif
 
-    static const int INSTANT_X;
-    static const int INSTANT_Y;
-    static const int INSTANT_Z;
+
 private:
     /**
      * Setting up of data structures: Defined in HSolveActiveSetup.cpp
@@ -274,6 +277,10 @@ private:
     void advanceSynChans( ProcPtr info );
     void sendSpikes( ProcPtr info );
     void sendValues( ProcPtr info );
+
+    static const int INSTANT_X;
+    static const int INSTANT_Y;
+    static const int INSTANT_Z;
 
     void updateForwardFlowMatrix();
     void forwardFlowSolver();

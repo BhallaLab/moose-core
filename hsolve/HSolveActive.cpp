@@ -6,22 +6,22 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+
 #include "header.h"
 #include <queue>
 #include "HSolveStruct.h"
 #include "HinesMatrix.h"
 #include "HSolvePassive.h"
+#include "RateLookup.h"
 #include "HSolveActive.h"
 #include "HSolve.h"
 #include "../biophysics/CompartmentBase.h"
 #include "../biophysics/Compartment.h"
 #include "../biophysics/CaConcBase.h"
+#include "../biophysics/ChanBase.h"
 #include "ZombieCaConc.h"
 
 #include "CudaGlobal.h"
-#include "RateLookup.h"
-
-
 #ifdef USE_CUDA
 #include "Gpu_timer.h"
 #endif
@@ -49,7 +49,6 @@ u64 getTime()
 
 
 using namespace moose;
-
 //~ #include "ZombieCompartment.h"
 //~ #include "ZombieCaConc.h"
 
@@ -91,9 +90,8 @@ HSolveActive::HSolveActive()
 //////////////////////////////////////////////////////////////////////
 // Solving differential equations
 //////////////////////////////////////////////////////////////////////
-
 void HSolveActive::step( ProcPtr info )
-{	
+{
     if ( nCompt_ <= 0 )
         return;
 
@@ -101,28 +99,11 @@ void HSolveActive::step( ProcPtr info )
     {
         current_.resize( channel_.size() );
     }
-    step_num++;
 
 #ifdef USE_CUDA
-   	advanceChannels( info->dt );
+   	advanceChannels( info->dt);
    	calculateChannelCurrents();
 
-	updateMatrix();
-	HSolvePassive::forwardEliminate();
-	HSolvePassive::backwardSubstitute();
-
-	cudaSafeCall(cudaMemcpy(d_Vmid, &(VMid_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice));
-	calculate_V_from_Vmid_wrapper(); // Avoing Vm memory transfer and using CUDA kernel
-
-	advanceCalcium();
-	advanceSynChans( info );
-	sendValues( info );
-	sendSpikes( info );
-	//transfer_memory2cpu_cuda();
-
-#else
-	advanceChannels( info->dt );
-	calculateChannelCurrents();
 	int solver_choice = 0; // 0-Moose , 1-Forward-flow, 2-Pervasive-flow
 
 	switch(solver_choice){
@@ -146,15 +127,30 @@ void HSolveActive::step( ProcPtr info )
 			break;
 	}
 
+	cudaSafeCall(cudaMemcpy(d_Vmid, &(VMid_[0]), nCompt_*sizeof(double), cudaMemcpyHostToDevice));
+	calculate_V_from_Vmid_wrapper(); // Avoing Vm memory transfer and using CUDA kernel
+
 	advanceCalcium();
 	advanceSynChans( info );
 	sendValues( info );
 	sendSpikes( info );
+	//transfer_memory2cpu_cuda();
 
+#else
+
+    advanceChannels( info->dt );
+    calculateChannelCurrents();
+    updateMatrix();
+    HSolvePassive::forwardEliminate();
+    HSolvePassive::backwardSubstitute();
+    advanceCalcium();
+    advanceSynChans( info );
+
+    sendValues( info );
+    sendSpikes( info );
 #endif
 
     externalCurrent_.assign( externalCurrent_.size(), 0.0 );
-    
 }
 
 void HSolveActive::calculateChannelCurrents()
@@ -183,7 +179,6 @@ void HSolveActive::calculateChannelCurrents()
 
 void HSolveActive::updateMatrix()
 {
-
 #ifdef USE_CUDA
 
 	// Updates HS matrix and sends it to CPU
@@ -200,14 +195,12 @@ void HSolveActive::updateMatrix()
 	//update_csrmatrix_cuda_wrapper();
 
 #else
-	// CPU PART
-	/*
-	 * Copy contents of HJCopy_ into HJ_. Cannot do a vector assign() because
-	 * iterators to HJ_ get invalidated in MS VC++
-	 * TODO Is it needed to do a memcpy each time?
-	 */
-	if ( HJ_.size() != 0 )
-			memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
+    /*
+     * Copy contents of HJCopy_ into HJ_. Cannot do a vector assign() because
+     * iterators to HJ_ get invalidated in MS VC++
+     */
+    if ( HJ_.size() != 0 )
+        memcpy( &HJ_[ 0 ], &HJCopy_[ 0 ], sizeof( double ) * HJ_.size() );
 
     double GkSum, GkEkSum; vector< CurrentStruct >::iterator icurrent = current_.begin();
     vector< currentVecIter >::iterator iboundary = currentBoundary_.begin();
@@ -230,6 +223,7 @@ void HSolveActive::updateMatrix()
 
         ++iboundary, ihs += 4, ++iv;
     }
+
 #ifdef USE_CUDA
     for(int i=0;i<inject_.size();i++){
     	HS_[ 4 * i + 3 ] += inject_[i].injectVarying + inject_[i].injectBasal;
@@ -246,6 +240,7 @@ void HSolveActive::updateMatrix()
 
         value.injectVarying = 0.0;
     }
+
 #endif
     // Synapses are being handled as external channels.
     //~ double Gk, Ek;
@@ -551,9 +546,10 @@ void HSolveActive::advanceChannels( double dt )
     vector< LookupColumn >::iterator icolumn = column_.begin();
     vector< LookupRow >::iterator icarowcompt;
     vector< LookupRow* >::iterator icarow = caRow_.begin();
-
+    vector< double >::iterator iextca = externalCalcium_.begin();
+    
     LookupRow vRow;
-
+    LookupRow dRow;
     double C1, C2;
 
     for ( iv = V_.begin(); iv != V_.end(); ++iv )
@@ -561,12 +557,13 @@ void HSolveActive::advanceChannels( double dt )
         vTable_.row( *iv, vRow );
         icarowcompt = caRowCompt_.begin();
         caBoundary = ica + *icacount;
-        
         for ( ; ica < caBoundary; ++ica )
         {
-            caTable_.row( *ica, * icarowcompt );
+            caTable_.row( *ica, *icarowcompt );
+	 
             ++icarowcompt;
-        }   
+        }
+
         /*
          * Optimize by moving "if ( instant )" outside the loop, because it is
          * rarely used. May also be able to avoid "if ( power )".
@@ -578,6 +575,9 @@ void HSolveActive::advanceChannels( double dt )
         chanBoundary = ichan + *ichannelcount;
         for ( ; ichan < chanBoundary; ++ichan )
         {
+	 
+	  caTable_.row( *iextca, dRow );
+	  
             if ( ichan->Xpower_ > 0.0 )
             {
                 vTable_.lookup( *icolumn, vRow, C1, C2 );
@@ -605,21 +605,29 @@ void HSolveActive::advanceChannels( double dt )
                 {
                     double temp = 1.0 + dt / 2.0 * C2;
                     *istate = ( *istate * ( 2.0 - temp ) + dt * C1 ) / temp;
-                }
-
+                
+}
                 ++icolumn, ++istate;
             }
 
             if ( ichan->Zpower_ > 0.0 )
             {
                 LookupRow* caRow = *icarow;
+		
                 if ( caRow )
                 {
                     caTable_.lookup( *icolumn, *caRow, C1, C2 );
+		   
                 }
-                else
+                 else if (*iextca >0)
+		   
+		   {
+		     caTable_.lookup( *icolumn, dRow, C1, C2 );
+		   }
+		else
                 {
-                    vTable_.lookup( *icolumn, vRow, C1, C2 );
+		  vTable_.lookup( *icolumn, vRow, C1, C2 );
+		 
                 }
 
                 //~ *istate = *istate * C1 + C2;
@@ -633,14 +641,14 @@ void HSolveActive::advanceChannels( double dt )
                 }
 
                 ++icolumn, ++istate, ++icarow;
+	
             }
+	    ++iextca;
         }
 
         ++ichannelcount, ++icacount;
     }
-
 #endif
-      
 }
 
 #ifdef USE_CUDA
@@ -1077,11 +1085,23 @@ void HSolveActive::sendValues( ProcPtr info )
     vector< unsigned int >::iterator i;
 
     for ( i = outVm_.begin(); i != outVm_.end(); ++i )
-        moose::Compartment::VmOut()->send(
+        Compartment::VmOut()->send(
             //~ ZombieCompartment::VmOut()->send(
             compartmentId_[ *i ].eref(),
             V_[ *i ]
         );
+
+
+    for ( i = outIk_.begin(); i != outIk_.end(); ++i ){
+ 
+        unsigned int comptIndex = chan2compt_[ *i ];
+
+        assert( comptIndex < V_.size() );
+
+        ChanBase::IkOut()->send(channelId_[*i].eref(),
+				(current_[ *i ].Ek - V_[ comptIndex ]) * current_[ *i ].Gk);
+
+    }
 
     for ( i = outCa_.begin(); i != outCa_.end(); ++i )
         //~ CaConc::concOut()->send(

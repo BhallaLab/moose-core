@@ -163,7 +163,6 @@ PyObject * moose_Field_repr(_Field * self)
     return PyString_FromString(fieldPath.str().c_str());
 }
 
-
 PyDoc_STRVAR(moose_Field_documentation,
              "Base class for MOOSE fields.\n"
              "\n"
@@ -175,8 +174,6 @@ PyDoc_STRVAR(moose_Field_documentation,
              "are putting fields as dictionary keys, you should do that after names\n"
              "of all elements have been finalized.\n"
              "\n");
-
-
 static PyTypeObject moose_Field =
 {
     PyVarObject_HEAD_INIT(NULL, 0)
@@ -319,7 +316,7 @@ PyObject * moose_DestField_call(PyObject * self, PyObject * args,
         PyObject * arg = PyTuple_GetItem(args, ii);
         Py_INCREF(arg);
         PyTuple_SetItem(newargs, ii+1, arg);
-        // Py_DECREF(arg);
+        Py_DECREF(arg);
     }
     // Call ObjId._setDestField with the new arguments
     PyObject * ret = moose_ObjId_setDestField(((_Field*)self)->owner, newargs);
