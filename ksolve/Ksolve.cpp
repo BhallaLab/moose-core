@@ -32,6 +32,10 @@
 #include "../mesh/ChemCompt.h"
 #include "Ksolve.h"
 
+#include <future>
+#include <atomic>
+#include <thread>
+
 const unsigned int OFFNODE = ~0;
 
 // static function
@@ -84,6 +88,7 @@ const Cinfo* Ksolve::initCinfo()
         &Ksolve::getEpsRel
     );
 
+
     static ValueFinfo< Ksolve, Id > compartment(
         "compartment",
         "Compartment in which the Ksolve reaction system lives.",
@@ -110,6 +115,12 @@ const Cinfo* Ksolve::initCinfo()
         "including proxy voxels to represent abutting compartments.",
         &Ksolve::setNumAllVoxels,
         &Ksolve::getNumAllVoxels
+    );
+    static ValueFinfo< Ksolve, unsigned int > numThreads (
+        "numThreads",
+        "Number of threads to use (applicable in deterministic case)",
+        &Ksolve::setNumThreads,
+        &Ksolve::getNumThreads
     );
 
     static ValueFinfo< Ksolve, unsigned int > numPools(
@@ -199,7 +210,8 @@ const Cinfo* Ksolve::initCinfo()
     {
         &method,			// Value
         &epsAbs,			// Value
-        &epsRel,			// Value
+        &epsRel ,			// Value
+        &numThreads,                    // Value
         &compartment,		// Value
         &numLocalVoxels,	// ReadOnlyValue
         &nVec,				// LookupValue
@@ -240,6 +252,7 @@ Ksolve::Ksolve()
 #endif
     epsAbs_( 1e-7 ),
     epsRel_( 1e-7 ),
+    numThreads_( 2 ),
     pools_( 1 ),
     startVoxel_( 0 ),
     dsolve_(),
@@ -315,6 +328,16 @@ void Ksolve::setEpsRel( double epsRel )
     {
         epsRel_ = epsRel;
     }
+}
+
+void Ksolve::setNumThreads( unsigned int x )
+{
+    numThreads_ = x;
+}
+
+unsigned int Ksolve::getNumThreads(  ) const
+{
+    return numThreads_;
 }
 
 Id Ksolve::getStoich() const
@@ -547,11 +570,30 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     }
 
     // Fourth, do the numerical integration for all reactions.
-    for ( vector< VoxelPools >::iterator
-            i = pools_.begin(); i != pools_.end(); ++i )
+    size_t nvPools = pools_.size( );
+    if( 1 >= getNumThreads( ) )
     {
-        i->advance( p );
+        for ( size_t i = 0; i < nvPools; i++ )
+        {
+            pools_[i].advance( p );
+        }
     }
+    else
+    {
+        /*-----------------------------------------------------------------------------
+         *  Somewhat complicated computation to compute the number of threads. 1
+         *  thread per (at least) voxel pool is ideal situation. 
+         *-----------------------------------------------------------------------------*/
+        size_t grainSize = min( nvPools, 1 + (nvPools / numThreads_ ) );
+        size_t nWorkers = nvPools / grainSize;
+        //cout << "Grain size " << grainSize <<  " Workers : " << nWorkers << endl;
+        for (size_t i = 0; i < nWorkers; i++) 
+        {
+            parallel_advance( i * grainSize, (i+1) * grainSize, nWorkers, p );
+        }
+    }
+
+
     // Finally, assemble and send the integrated values off for the Dsolve.
     if ( dsolvePtr_ )
     {
@@ -564,6 +606,34 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         dsolvePtr_->setBlock( kvalues );
     }
 }
+
+
+/**
+ * @brief Advance voxels pools using parallel Ksolve.    
+ *
+ * @param begin
+ * @param end
+ * @param p
+ */
+void Ksolve::parallel_advance(int begin, int end, size_t nWorkers, ProcPtr p) 
+{
+    std::atomic<int> idx( begin );
+    for (size_t cpu = 0; cpu != nWorkers; ++cpu) 
+    {
+        std::async( std::launch::async
+                , [this, &idx, end, p]() { 
+                    for (;;) 
+                    {
+                        int i = idx++;
+                        if (i >= end) 
+                            break;
+                        pools_[i].advance( p );
+                    }
+                }
+            );
+    }
+}
+
 
 void Ksolve::reinit( const Eref& e, ProcPtr p )
 {
@@ -600,7 +670,11 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
                 j, xf.lastValues, xf.xferPoolIdx );
         }
     }
+
+    if( getNumThreads( ) > 1 )
+        cout << "Info: Using parallel solver with " << numThreads_ << " threads" << endl;
 }
+
 //////////////////////////////////////////////////////////////
 // init operations.
 //////////////////////////////////////////////////////////////

@@ -41,6 +41,10 @@ public:
     Id getDsolve() const;
     void setDsolve( Id dsolve ); /// Inherited from ZombiePoolInterface.
 
+    // Set number of threads to use (for deterministic case only).
+    unsigned int getNumThreads( ) const;
+    void setNumThreads( unsigned int x );
+
     unsigned int getNumLocalVoxels() const;
     unsigned int getNumAllVoxels() const;
     /**
@@ -52,6 +56,9 @@ public:
     /// Returns the vector of pool Num at the specified voxel.
     vector< double > getNvec( unsigned int voxel) const;
     void setNvec( unsigned int voxel, vector< double > vec );
+
+    // Parallel advance().
+    void parallel_advance(int begin, int end, size_t nWorkers, ProcPtr p);
 
     /**
      * This does a quick and dirty estimate of the timestep suitable
@@ -100,6 +107,7 @@ public:
      */
     void setNumPools( unsigned int num );
     unsigned int getNumPools() const;
+
     VoxelPoolsBase* pools( unsigned int i );
     double volume( unsigned int i ) const;
 
@@ -146,6 +154,12 @@ private:
     string method_;
     double epsAbs_;
     double epsRel_;
+
+    /**
+     * @brief Number of threads to use. Only applicable for deterministic case.
+     */
+    unsigned int numThreads_;
+
     /**
      * Each VoxelPools entry handles all the pools in a single voxel.
      * Each entry knows how to update itself in order to complete
@@ -168,6 +182,7 @@ private:
 
     /// Pointer to diffusion solver
     ZombiePoolInterface* dsolvePtr_;
+
 };
 
 #endif	// _KSOLVE_H
