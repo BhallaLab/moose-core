@@ -1,4 +1,4 @@
-#!/bin/bash - 
+#!/usr/bin/env bash
 #===============================================================================
 #
 #          FILE: travis_build_linux.sh
@@ -22,7 +22,7 @@ set -e
 
 PYTHON2="/usr/bin/python2"
 PYTHON3="/usr/bin/python3"
-#MAKEFLAGS="-j 4"
+#MAKEFLAGS="-j4"
 
 # Bug: `which python` returns /opt/bin/python* etc on travis. For which numpy
 # many not be available. Therefore, it is neccessary to use fixed path for
