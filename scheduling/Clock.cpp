@@ -51,6 +51,7 @@
 #include "header.h"
 #include "Clock.h"
 #include "../utility/numutil.h"
+#include "gpu_helper.h"
 
 // Declaration of some static variables.
 const unsigned int Clock::numTicks = 32;
@@ -732,7 +733,10 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
             if ( endStep % *j == 0 )
             {
                 info_.dt = *j * dt_;
-                processVec()[*k]->send( e, &info_ );
+                if( *k == 16 )
+                    cuda_ksolve( NULL,  NULL, currentTime_, currentTime_ + runTime_, 1);
+                else
+                    processVec()[*k]->send( e, &info_ );
             }
             ++k;
         }

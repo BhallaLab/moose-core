@@ -28,7 +28,7 @@ using namespace boost::numeric;
 #include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
-
+#define N_x 2000000
 //////////////////////////////////////////////////////////////
 // Class definitions
 //////////////////////////////////////////////////////////////
@@ -58,8 +58,8 @@ void operate_0(int arr_size)
     cudaMemcpy(d_size, &arr_size, 1 * sizeof(int),
             cudaMemcpyHostToDevice);
 
-    dim3 blockdim(100, 1, 1);
-    int c = (99 + arr_size)/100;
+    dim3 blockdim(1000, 1, 1);
+    int c = (999 + arr_size)/100;
     dim3 griddim(c, 1, 1);
 
     operate <<< griddim, blockdim >>> ( d_arr, d_size );
@@ -123,8 +123,13 @@ void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
 // MICKY: This solves system of ODE for chemical reactions.
 void VoxelPools::advance( const ProcInfo* p )
 {   
-    operate_0(500);
+  //  operate_0(N_x);
     double t = p->currTime - p->dt;
+
+//#ifdef USE_CUDA
+//    advance_on_cuda( 
+
+//#else
 #ifdef USE_GSL
     int status = gsl_odeiv2_driver_apply( driver_, &t, p->currTime, varS());
     if ( status != GSL_SUCCESS ) {
