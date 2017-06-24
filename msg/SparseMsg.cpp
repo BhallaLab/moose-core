@@ -42,40 +42,6 @@ const Cinfo* SparseMsg::initCinfo()
 		&SparseMsg::getNumEntries
 	);
 
-	static ValueFinfo< SparseMsg, vector< unsigned int > > connectionList(
-		"connectionList",
-		"Pairwise specification of connection matrix where each x,y value "
-		"represents a connection from src[x] to dest[y]. "
-		"The (x,y) entries are ordered in a single vector as \n"
-		"(x0, x1,... x_n-1, y0, y1,... y_n-1)\n",
-		&SparseMsg::setEntryPairs,
-		&SparseMsg::getEntryPairs
-	);
-
-    /// Connection matrix entries to manipulate in Python.
-    static ReadOnlyValueFinfo< SparseMsg, vector< unsigned int > >
-    matrixEntry(
-        "matrixEntry",
-        "The non-zero matrix entries in the sparse matrix. Their"
-        "column indices are in a separate vector and the row"
-        "informatino in a third",
-        &SparseMsg::getMatrixEntry
-    );
-    /// connection matrix column indices to manipulate in Python.
-    static ReadOnlyValueFinfo< SparseMsg, vector< unsigned int > >
-    columnIndex(
-        "columnIndex",
-        "Column Index of each matrix entry",
-        &SparseMsg::getColIndex
-    );
-    /// connection matrix rowStart to manipulate in Python.
-    static ReadOnlyValueFinfo< SparseMsg, vector< unsigned int > >
-    rowStart(
-        "rowStart",
-        "Row start for each block of entries and column indices",
-        &SparseMsg::getRowStart
-    );
-
 	static ValueFinfo< SparseMsg, double > probability(
 		"probability",
 		"connection probability for random connectivity.",
@@ -150,10 +116,6 @@ const Cinfo* SparseMsg::initCinfo()
 		&numRows,			// readonly value
 		&numColumns,		// readonly value
 		&numEntries,		// readonly value
-		&connectionList,	// value
-        &matrixEntry,		// ReadOnlyValue
-        &columnIndex,		// ReadOnlyValue
-        &rowStart,			// ReadOnlyValue
 		&probability,		// value
 		&seed,				// value
 		&setRandomConnectivity,	// dest
@@ -220,43 +182,6 @@ unsigned int SparseMsg::getNumColumns() const
 unsigned int SparseMsg::getNumEntries() const
 {
 	return matrix_.nEntries();
-}
-
-vector< unsigned int > SparseMsg::getMatrixEntry() const
-{
-    return matrix_.matrixEntry();
-}
-
-vector< unsigned int > SparseMsg::getColIndex() const
-{
-    return matrix_.colIndex();
-}
-
-vector< unsigned int > SparseMsg::getRowStart() const
-{
-    return matrix_.rowStart();
-}
-
-void SparseMsg::setEntryPairs( vector< unsigned int > v )
-{
-	vector< unsigned int > src( v.begin(), v.begin() + v.size()/2 );
-	vector< unsigned int > dest( v.begin() + v.size()/2, v.end() );
-	pairFill( src, dest );
-}
-
-vector< unsigned int > SparseMsg::getEntryPairs() const
-{
-	vector< unsigned int > cols = matrix_.colIndex();
-	vector< unsigned int > y;
-	for ( unsigned int row = 0; row < matrix_.nRows(); ++row ) {
-		unsigned int begin = matrix_.rowStart()[row];
-		unsigned int end = matrix_.rowStart()[row+1];
-		for ( unsigned int j = begin; j < end; ++j )
-			y.push_back( row );
-	}
-	assert( cols.size() == y.size() );
-	y.insert( y.end(), cols.begin(), cols.end() );
-	return y;
 }
 
 //////////////////////////////////////////////////////////////////

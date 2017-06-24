@@ -316,9 +316,15 @@ if(WITH_MPI)
     endif()
 endif(WITH_MPI)
 
-# Always use private version of muparser. We have some custom edits.
-add_subdirectory(external/muparser)
-list(APPEND MOOSE_LIBRARIES muparser)
+pkg_check_modules(MUPARSER muparser)
+if(MUPARSER_FOUND)
+    message(STATUS "Using system muparser ${MUPARSER_VERSION}")
+    list(APPEND SYSTEM_SHARED_LIBS ${MUPARSER_LIBRARIES})
+else()
+    message(STATUS "Using private muparser")
+    add_subdirectory(external/muparser)
+    list(APPEND MOOSE_LIBRARIES muparser)
+endif()
 
 # Add subdirectroeis
 add_subdirectory(basecode)
