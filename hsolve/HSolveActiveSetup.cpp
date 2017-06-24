@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+
 #include "HSolveActive.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -219,11 +220,12 @@ void HSolveActive::readHHChannels()
              * Map channel index to state index. This is useful in the
              * interface to find gate values.
              */
-            chan2state_.push_back( state_.size() );        
+            chan2state_.push_back( state_.size() );
+
             if ( Xpower > 0.0 )
                 state_.push_back( X );
             if ( Ypower > 0.0 )
-                state_.push_back( Y );  
+                state_.push_back( Y );
             if ( Zpower > 0.0 )
                 state_.push_back( Z );
 
@@ -232,7 +234,7 @@ void HSolveActive::readHHChannels()
              * interface to generate channel Ik values (since we then need the
              * compartment Vm).
              */
-            chan2compt_.push_back( icompt - compartmentId_.begin() );            
+            chan2compt_.push_back( icompt - compartmentId_.begin() );
         }
     }
 
@@ -291,7 +293,6 @@ void HSolveActive::readCalcium()
 	    
 	    if ( nDepend == 0)
                 // Channel does not depend on calcium.
-
 	      caDependIndex_.push_back( -1 );
 
 
@@ -344,7 +345,25 @@ void HSolveActive::readCalcium()
             caTarget_[ ichan ] = &caActivation_[ caTargetIndex[ ichan ] ];
     }
 
-    
+#ifdef USE_CUDA
+    for (unsigned int ichan = 0; ichan < channel_.size(); ++ichan )
+    {
+    	if(caTargetIndex[ichan] != -1){
+    		h_catarget_channel_indices.push_back(ichan);
+    		h_catarget_capool_indices.push_back(caTargetIndex[ichan]);
+
+    		// Assumption: values in h_catarget_capool_indices array will be in increasing order.
+
+    		/*
+    		if(caTargetIndex[ichan] >= caConc_.size() || caTargetIndex[ichan] < 0)
+    			cout << ichan << " " << caTargetIndex[ichan] << endl;
+    		*/
+    	}
+    }
+
+#endif
+
+
 }
 
 void HSolveActive::createLookupTables()
