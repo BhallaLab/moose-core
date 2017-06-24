@@ -491,7 +491,10 @@ void Gsolve::process( const Eref& e, ProcPtr p )
     // Fifth, update the mol #s.
     // First we advance the simulation.
     size_t nvPools = pools_.size( );
-    if( 1 >= getNumThreads( ) )
+
+    // If there is only one voxel-pool and one thread is specified by user then
+    // there is not point in using std::async.
+    if( 1 == getNumThreads( ) || 1 == nvPools )
     {
         for ( size_t i = 0; i < nvPools; i++ )
         {
@@ -575,7 +578,8 @@ void Gsolve::reinit( const Eref& e, ProcPtr p )
     }
 
     if( 1 < getNumThreads( ) )
-        cout << "Info: Using " << getNumThreads( ) << " in Gsolve " << endl;
+        cout << "Info: Using threaded gsolve: " << getNumThreads( ) 
+            << " threads. " << endl;
 }
 
 //////////////////////////////////////////////////////////////
