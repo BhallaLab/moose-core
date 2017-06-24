@@ -135,6 +135,8 @@ protected:
 		*   those compartments. */
      vector< unsigned int >    outIk_;	
 
+#if USE_CUDA 
+
 	// CUDA Active helper data
 	int* d_V_rows;
 	double* d_V_fractions;
