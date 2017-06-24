@@ -48,8 +48,6 @@ message( STATUS "MOOSE Version ${MOOSE_VERSION}" )
 # sure that we don't have any stray generated files lying around in the tree
 # (which would end up getting picked up by header search, instead of the correct
 # versions).
-
-message(STATUS "CMAKE_INSTALL_PREFIX : ${CMAKE_INSTALL_PREFIX}")
 if( CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
     message(FATAL_ERROR 
         "======================================================================\n"
