@@ -7,6 +7,7 @@ if(DEBUG_CUDA)
 endif()
 
 if(WITH_CUDA)
+    add_definitions(-DUSE_CUDA)
     #SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_30,code=sm_30)
     SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )

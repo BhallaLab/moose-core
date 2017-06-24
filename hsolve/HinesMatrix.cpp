@@ -570,12 +570,11 @@ void HinesMatrix::construct_elimination_information_opt(coosr_matrix qfull_mat, 
 			index = i;
 		}
 	}
-	cout << "Should be -1 " <<  index << endl;
 
 	if(DEBUG){
 		print_csr_matrix(qfull_mat);
 		cout << "Upper triangular offsets " << endl;
-		for (int i = 0; i < nCompt_; ++i) {
+		for (unsigned int i = 0; i < nCompt_; ++i) {
 			cout << upper_triang_offsets[i] << endl;
 		}
 
@@ -711,7 +710,7 @@ void HinesMatrix::makePervasiveFlowMatrix(){
 	double error = 0;
 	double* row_sums = new double[nCompt_]();
 
-	for (int i = 0; i < nCompt_; ++i) {
+	for (unsigned int i = 0; i < nCompt_; ++i) {
 		for (int j = qfull_mat.rowPtr[i]; j < qfull_mat.rowPtr[i+1]; ++j) {
 			row_sums[i] += qfull_mat.values[j];
 		}

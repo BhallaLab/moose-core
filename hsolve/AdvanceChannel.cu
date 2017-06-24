@@ -407,7 +407,7 @@ void HSolveActive::get_lookup_rows_and_fractions_cuda_wrapper(double dt){
     		vTable_.get_num_of_columns(), num_comps);
 
 	// Execute this block only if there are gates that are Ca dependent.
-	if(num_cadep_gates > 0){
+	if(num_cadep_gates > 0 && num_Ca_pools > 0){
 		// Getting lookup metadata for Ca
 		BLOCKS = (num_Ca_pools + THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
 		get_lookup_rows_and_fractions_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_ca,
@@ -428,20 +428,24 @@ void HSolveActive::advance_channels_cuda_wrapper(double dt){
 	int num_vdep_gates = h_vgate_indices.size();
 	int num_cadep_gates = h_cagate_indices.size();
 
-	int BLOCKS = (num_vdep_gates+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
-	// For Vm dependent gates
-	advance_channels_opt_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
-			d_V_rows,
-			d_V_fractions,
-			d_V_table,
-			d_vgate_indices,
-			d_vgate_compIds,
-			d_state_,
-			d_state2column,
-			d_state2chanId,
-			d_chan_instant,
-			vTable_.get_num_of_columns(),
-			dt, num_vdep_gates );
+	int BLOCKS;
+
+	if(num_vdep_gates > 0){
+		BLOCKS = (num_vdep_gates+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
+		// For Vm dependent gates
+		advance_channels_opt_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
+				d_V_rows,
+				d_V_fractions,
+				d_V_table,
+				d_vgate_indices,
+				d_vgate_compIds,
+				d_state_,
+				d_state2column,
+				d_state2chanId,
+				d_chan_instant,
+				vTable_.get_num_of_columns(),
+				dt, num_vdep_gates );
+	}
 
 	// Execute this block only if there are gates that are Ca dependent.
 	if(num_cadep_gates > 0){
@@ -470,18 +474,20 @@ void HSolveActive::advance_channels_cuda_wrapper(double dt){
 void HSolveActive::calculate_channel_currents_cuda_wrapper(){
 	int num_channels = channel_.size();
 
-	int BLOCKS = num_channels/THREADS_PER_BLOCK;
-	BLOCKS = (num_channels%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
+	int BLOCKS;
+	BLOCKS = (num_channels+THREADS_PER_BLOCK-1) /THREADS_PER_BLOCK;
 
-	calculate_channel_currents_opt_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
-				d_state_,
-				d_state_powers,
-				d_state_rowPtr,
-				d_chan_modulation,
-				d_chan_Gbar,
-				//d_current_,
-				d_chan_Ek,
-				d_chan_Gk, d_chan_GkEk, num_channels);
+	if(BLOCKS > 0){
+		calculate_channel_currents_opt_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(
+					d_state_,
+					d_state_powers,
+					d_state_rowPtr,
+					d_chan_modulation,
+					d_chan_Gbar,
+					//d_current_,
+					d_chan_Ek,
+					d_chan_Gk, d_chan_GkEk, num_channels);
+	}
 
 #ifdef PIN_POINT_ERROR
 	cudaCheckError(); // Checking for cuda related errors.
@@ -495,8 +501,7 @@ void HSolveActive::update_matrix_cuda_wrapper(){
 
 	// As inject_ and externalCurrent_ data structures are updated by messages,
 	// they have to be updated on the device too. Hence the transfer
-	if(step_num%20 == 1)
-		cudaSafeCall(cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice));
+	cudaSafeCall(cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice));
 
 	cudaSafeCall(cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
 
@@ -557,13 +562,11 @@ void HSolveActive::update_perv_matrix_cuda_wrapper(){
 
 	// As inject_ and externalCurrent_ data structures are updated by messages,
 	// they have to be updated on the device too. Hence the transfer
-	if(step_num == 19){
+
 		cudaSafeCall(cudaMemcpy(d_stim_map, stim_map, nCompt_*sizeof(int), cudaMemcpyHostToDevice)); // Initializing map.
-	}
-	if(step_num%20 == 1){
 		cudaSafeCall(cudaMemcpy(d_inject_, &inject_[0], nCompt_*sizeof(InjectStruct), cudaMemcpyHostToDevice));
 		cudaSafeCall(cudaMemcpy(d_stim_basal_values, stim_basal_values, num_stim_comp*sizeof(double), cudaMemcpyHostToDevice));
-	}
+
 	cudaSafeCall(cudaMemcpy(d_externalCurrent_, &(externalCurrent_.front()), 2 * nCompt_ * sizeof(double), cudaMemcpyHostToDevice));
 
 	// As inject data is already on device, injectVarying can be set to zero.
@@ -673,9 +676,10 @@ void HSolveActive::advance_calcium_cuda_wrapper(){
 
 	if(ADVANCE_CALCIUM_APPROACH == ADVANCE_CALCIUM_WPT_APPROACH){
 		// WPT APPROACH
-		int BLOCKS = num_ca_pools/THREADS_PER_BLOCK;
-		BLOCKS = (num_ca_pools%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
-		advance_calcium_cuda_opt<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
+		int BLOCKS;
+		if(num_ca_pools > 0){
+			BLOCKS = (num_ca_pools+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
+			advance_calcium_cuda_opt<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
 						d_chan_Gk, d_chan_GkEk,
 						d_Vmid,
 						//d_capool_values,
@@ -686,15 +690,16 @@ void HSolveActive::advance_calcium_cuda_wrapper(){
 						d_CaConcStruct_CaBasal_, d_CaConcStruct_factor1_, d_CaConcStruct_factor2_, d_CaConcStruct_ceiling_, d_CaConcStruct_floor_, // Static array
 						//d_caActivation_values,
 						num_ca_pools);
+		}
 	//}else if(ADVANCE_CALCIUM_APPROACH == ADVANCE_CALCIUM_SPMV_APPROACH){
 	}else{
 		// SPMV APPROACH
 		double alpha = 1;
 		double beta = 0;
 
-		int BLOCKS = num_catarget_channels/THREADS_PER_BLOCK;
-		BLOCKS = (num_catarget_channels%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
-
+		int BLOCKS;
+		if(num_catarget_channels > 0){
+		BLOCKS = (num_catarget_channels+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
 		// Find indivudual values and use CSRMV to find caActivation Values
 		advance_calcium_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
 				d_chan_Gk, d_chan_GkEk,
@@ -708,11 +713,12 @@ void HSolveActive::advance_calcium_cuda_wrapper(){
 				&alpha, cusparse_descr,
 				d_capool_values, d_capool_rowPtr, d_capool_colIndex, d_capool_onex,
 				&beta, d_caActivation_values));
+		}
 
-		BLOCKS = num_ca_pools/THREADS_PER_BLOCK;
-		BLOCKS = (num_ca_pools%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
-
-		advance_calcium_conc_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_caConc_, d_ca, d_caActivation_values, num_ca_pools);
+		if(num_ca_pools > 0){
+			BLOCKS = (num_ca_pools+THREADS_PER_BLOCK-1)/THREADS_PER_BLOCK;
+			advance_calcium_conc_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_caConc_, d_ca, d_caActivation_values, num_ca_pools);
+		}
 	}
 
 	// Sending calcium data to host
@@ -780,8 +786,6 @@ int HSolveActive::choose_update_matrix_approach(){
 
 		double t2 = timer2.Elapsed();
 		if(i>0)	spmv_cum_time += t2;
-		// cout << t1 << " " << t2 << endl;
-		// cout << "Cumu " <<  wpt_cum_time << " " << spmv_cum_time << endl;
 	}
 
 	if(wpt_cum_time < spmv_cum_time){
@@ -831,7 +835,8 @@ int HSolveActive::choose_advance_calcium_approach(){
 		int BLOCKS = num_ca_pools/THREADS_PER_BLOCK;
 		BLOCKS = (num_ca_pools%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
 		timer1.Start();
-			advance_calcium_cuda_opt<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
+			if(num_ca_pools > 0){
+				advance_calcium_cuda_opt<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
 							d_chan_Gk, d_chan_GkEk,
 							d_Vmid,
 							//d_capool_values,
@@ -842,6 +847,7 @@ int HSolveActive::choose_advance_calcium_approach(){
 							d_CaConcStruct_CaBasal_, d_CaConcStruct_factor1_, d_CaConcStruct_factor2_, d_CaConcStruct_ceiling_, d_CaConcStruct_floor_, // Static array
 							//d_caActivation_values,
 							num_ca_pools);
+			}
 		timer1.Stop();
 		cudaSafeCall(cudaDeviceSynchronize());
 		wpt_cum_time += timer1.Elapsed();
@@ -852,6 +858,7 @@ int HSolveActive::choose_advance_calcium_approach(){
 
 		timer2.Start();
 			// Find indivudual values and use CSRMV to find caActivation Values
+			if(num_catarget_channels > 0){
 			advance_calcium_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_catarget_channel_indices,
 					d_chan_Gk, d_chan_GkEk,
 					d_Vmid,
@@ -864,11 +871,11 @@ int HSolveActive::choose_advance_calcium_approach(){
 					&alpha, cusparse_descr,
 					d_capool_values, d_capool_rowPtr, d_capool_colIndex, d_capool_onex,
 					&beta, d_caActivation_values));
-
+			}
 			BLOCKS = num_ca_pools/THREADS_PER_BLOCK;
 			BLOCKS = (num_ca_pools%THREADS_PER_BLOCK == 0)?BLOCKS:BLOCKS+1; // Adding 1 to handle last threads
-
-			advance_calcium_conc_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_caConc_, d_ca, d_caActivation_values, num_ca_pools);
+			if(num_ca_pools > 0)
+				advance_calcium_conc_cuda<<<BLOCKS,THREADS_PER_BLOCK>>>(d_caConc_, d_ca, d_caActivation_values, num_ca_pools);
 		timer2.Stop();
 		cudaSafeCall(cudaDeviceSynchronize());
 

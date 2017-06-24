@@ -1,7 +1,7 @@
 #ifndef __CUDA_GLOBAL_H__
 #define __CUDA_GLOBAL_H__
 
-#define USE_CUDA
+//#define USE_CUDA
 
 #ifdef USE_CUDA
 
@@ -13,7 +13,7 @@
 #endif
 
 #define CUDA_ERROR_CHECK
-//#define PIN_POINT_ERROR
+#define PIN_POINT_ERROR
 
 #include <cuda.h>
 #include <cuda_runtime_api.h>
