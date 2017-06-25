@@ -31,4 +31,6 @@ inline void cuda_ksolve( double* dy, double* y, const double currentTime, const 
 
 }
 
+
+
 #endif   /* ----- #ifndef gpu_helper_INC  ----- */

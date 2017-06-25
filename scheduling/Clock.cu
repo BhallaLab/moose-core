@@ -750,6 +750,10 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     assert( elems.size( ) == 1 );
 
     cout << "Debug: Total " << elems.size( ) << " ksolves are found " << endl;
+    //double h_dum[2] = {100 , 1100};
+    //double *d_dum;
+    //checkCudaErrors(cudaMalloc( (void**)&d_dum, sizeof(double) * 4) );
+    //checkCudaErrors(cudaMemcpy( d_dum, h_dum, sizeof(double) * 4, cudaMemcpyHostToDevice ));
 
     for( auto v : elems )
     {
@@ -760,8 +764,11 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
         {
             // Access the VoxelPool here.
             VoxelPoolsBase* vp = ksolve->pools( i );
+            //cout << "type" << i << "content" << vp << endl;
+
         }
     }
+
 
 
 #if 0
@@ -803,9 +810,10 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
                 if( *k == 16 )
                 {
                     SrcFinfo1<ProcPtr>* elem = processVec()[*k];
-                    cout << elem->rttiType( ) << endl;
-                    cout << activeTicksMap_[ *k ] << endl;
-                    cuda_ksolve( NULL,  NULL, currentTime_, currentTime_ + runTime_, 1);
+                    //cout << elem->rttiType( ) << endl;
+                    //cout << activeTicksMap_[ *k ] << endl;
+                    //cuda_ksolve( NULL,  NULL, currentTime_, currentTime_ + runTime_, 1);
+                    //cuda_dum(d_dum);
                 }
                 else
                     processVec()[*k]->send( e, &info_ );
@@ -827,6 +835,14 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
             }
         }
     }
+
+for(int eg = 0; eg < numVoxelPools - numVoxelPools/10; ++eg){
+    VoxelPoolsBase* vp = ksolve -> pools(eg);
+    vp -> setN(0, 0);
+    vp -> setN(1, 0);
+    vp -> setN(2, 0);
+    vp -> setN(3, 0);
+ }
 
 #if 0
 //Transferring back the data to cpu
