@@ -731,26 +731,27 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     nSteps_ += numSteps;
     runTime_ = nSteps_ * dt_;
 
-//Allocating memory onto gpu.
-//
-//double *d_dy, *d_y, *d_currentTime, *d_time;
-//size_t *d_n;
-//
-//checkCudaErrors(cudaMalloc( (void**)&d_dy, sizeof(double) * related_to_voxel1 ));
-//checkCudaErrors(cudaMalloc( (void**)&d_y, sizeof(double) * related_to_voxel2 ));
-//checkCudaErrors(cudaMalloc( (void**)&d_currentTime, sizeof(double)*1 ));
-//checkCudaErrors(cudaMalloc( (void**)&d_time, sizeof(double) * 1 ));
-//checkCudaErrors(cudaMalloc( (void**)&d_n, sizeof(size_t) * 1 ));
-//
-//
-//Copying data to gpu
-//
-//checkCudaErrors(cudaMemcpy( d_dy, dy, sizeof(double) * related_to_voxel1, cudaMemcpyHostToDevice ));
-//checkCudaErrors(cudaMemcpy( d_y, y, sizeof(double) * related_to_voxel2, cudaMemcpyHostToDevice ));
-//checkCudaErrors(cudaMemcpy( d_currentTime, currentTime, sizeof(double) * 1, cudaMemcpyHostToDevice ));
-//checkCudaErrors(cudaMemcpy( d_time, time, sizeof(double) * 1, cudaMemcpyHostToDevice ));
-//checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice ));
 
+#if 0    
+//Allocating memory onto gpu.
+
+double *d_dy, *d_y, *d_currentTime, *d_time;
+size_t *d_n;
+
+checkCudaErrors(cudaMalloc( (void**)&d_dy, sizeof(double) * related_to_voxel1 ));
+checkCudaErrors(cudaMalloc( (void**)&d_y, sizeof(double) * related_to_voxel2 ));
+checkCudaErrors(cudaMalloc( (void**)&d_currentTime, sizeof(double)*1 ));
+checkCudaErrors(cudaMalloc( (void**)&d_time, sizeof(double) * 1 ));
+checkCudaErrors(cudaMalloc( (void**)&d_n, sizeof(size_t) * 1 ));
+
+//Copying data to gpu
+
+checkCudaErrors(cudaMemcpy( d_dy, dy, sizeof(double) * related_to_voxel1, cudaMemcpyHostToDevice ));
+checkCudaErrors(cudaMemcpy( d_y, y, sizeof(double) * related_to_voxel2, cudaMemcpyHostToDevice ));
+checkCudaErrors(cudaMemcpy( d_currentTime, currentTime, sizeof(double) * 1, cudaMemcpyHostToDevice ));
+checkCudaErrors(cudaMemcpy( d_time, time, sizeof(double) * 1, cudaMemcpyHostToDevice ));
+checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice ));
+#endif
 
     for ( isRunning_ = (activeTicks_.size() > 0 );
             isRunning_ && currentStep_ < nSteps_; currentStep_ += stride_ )
