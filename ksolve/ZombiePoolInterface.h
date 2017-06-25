@@ -10,6 +10,9 @@
 #ifndef _ZOMBIE_POOL_INTERFACE_H
 #define _ZOMBIE_POOL_INTERFACE_H
 
+#include "../mesh/VoxelJunction.h"
+#include "../ksolve/XferInfo.h"
+
 /**
  * This pure virtual base class is for solvers that want to talk to
  * the zombie pool. 

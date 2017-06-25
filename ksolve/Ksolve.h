@@ -11,6 +11,8 @@
 #define _KSOLVE_H
 
 #include <thread>
+#include "../ksolve/ZombiePoolInterface.h"
+#include "../mesh/VoxelJunction.h"
 
 class Stoich;
 

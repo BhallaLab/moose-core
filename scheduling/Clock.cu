@@ -48,14 +48,20 @@
  * 		retain their state, the simulation can resume smoothly.
  */
 
+#include <typeinfo>
+
 #include "header.h"
 #include "Clock.h"
 #include "../utility/numutil.h"
 #include "../shell/Wildcard.h"
+
+#include "../ksolve/VoxelPools.h"
+#include "../ksolve/VoxelPoolsBase.h"
+#include "../ksolve/Ksolve.h"
+
 #include "gpu_helper.h"
 #include "timer.h"
 #include "utils.h"
-#include <typeinfo>
 
 // Declaration of some static variables.
 const unsigned int Clock::numTicks = 32;
@@ -63,6 +69,7 @@ const unsigned int Clock::numTicks = 32;
 const double minimumDt = 1e-7;
 map< string, unsigned int > Clock::defaultTick_;
 vector< double > Clock::defaultDt_;
+
 
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
@@ -723,6 +730,9 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     wildcardFind( "/##[TYPE=Ksolve]", ksolves );
     cout << "Total " << ksolves.size( ) << " ksolves are found "
         << endl;
+
+    Ksolve* ksolve = reinterpret_cast< Ksolve* >( ksolves[0].eref().data( ) );
+    size_t numVoxelPools = ksolve->getNumPools( );
     
 
     buildTicks( e );
