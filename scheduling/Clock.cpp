@@ -53,7 +53,8 @@
 #include "../utility/numutil.h"
 #include "../shell/Shell.h"
 #include "gpu_helper.h"
-
+#include "timer.h"
+#include "utils.h"
 #include <typeinfo>
 
 // Declaration of some static variables.
@@ -733,20 +734,20 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
 //double *d_dy, *d_y, *d_currentTime, *d_time;
 //size_t *d_n;
 //
-//cudaMalloc( (void**)&d_dy, sizeof(double) * related_to_voxel1 );
-//cudaMalloc( (void**)&d_y, sizeof(double) * related_to_voxel2 );
-//cudaMalloc( (void**)&d_currentTime, sizeof(double)*1 );
-//cudaMalloc( (void**)&d_time, sizeof(double) * 1 );
-//cudaMalloc( (void**)&d_n, sizeof(size_t) * 1 );
+//checkCudaErrors(cudaMalloc( (void**)&d_dy, sizeof(double) * related_to_voxel1 ));
+//checkCudaErrors(cudaMalloc( (void**)&d_y, sizeof(double) * related_to_voxel2 ));
+//checkCudaErrors(cudaMalloc( (void**)&d_currentTime, sizeof(double)*1 ));
+//checkCudaErrors(cudaMalloc( (void**)&d_time, sizeof(double) * 1 ));
+//checkCudaErrors(cudaMalloc( (void**)&d_n, sizeof(size_t) * 1 ));
 //
 //
 //Copying data to gpu
 //
-//cudaMemcpy( d_dy, dy, sizeof(double) * related_to_voxel1, cudaMemcpyHostToDevice );
-//cudaMemcpy( d_y, y, sizeof(double) * related_to_voxel2, cudaMemcpyHostToDevice );
-//cudaMemcpy( d_currentTime, currentTime, sizeof(double) * 1, cudaMemcpyHostToDevice );
-//cudaMemcpy( d_time, time, sizeof(double) * 1, cudaMemcpyHostToDevice );
-//cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice );
+//checkCudaErrors(cudaMemcpy( d_dy, dy, sizeof(double) * related_to_voxel1, cudaMemcpyHostToDevice ));
+//checkCudaErrors(cudaMemcpy( d_y, y, sizeof(double) * related_to_voxel2, cudaMemcpyHostToDevice ));
+//checkCudaErrors(cudaMemcpy( d_currentTime, currentTime, sizeof(double) * 1, cudaMemcpyHostToDevice ));
+//checkCudaErrors(cudaMemcpy( d_time, time, sizeof(double) * 1, cudaMemcpyHostToDevice ));
+//checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice ));
 
 
     for ( isRunning_ = (activeTicks_.size() > 0 );
@@ -792,18 +793,20 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
 
 //Transferring back the data to cpu
 //
-//cudaMemcpy( dy, d_dy, sizeof(double) * related_to_voxel1, cudaMemcpyDeviceToHost );
-//cudaMemcpy( y, d_y, sizeof(double) * related_to_voxel2, cudaMemcpyDeviceToHost );
-//cudaMemcpy( currentTime, d_currentTime, sizeof(double) * 1, cudaMemcpyDeviceToHost );
-//cudaMemcpy( time, d_time, sizeof(double) * 1, cudaMemcpyDeviceToHost );
-//cudaMemcpy( n, d_n, sizeof(size_t) * 1, cudaMemcpyDeviceToHost );
+//checkCudaErrors(cudaMemcpy( dy, d_dy, sizeof(double) * related_to_voxel1, cudaMemcpyDeviceToHost ));
+//checkCudaErrors(cudaMemcpy( y, d_y, sizeof(double) * related_to_voxel2, cudaMemcpyDeviceToHost ));
+//checkCudaErrors(cudaMemcpy( currentTime, d_currentTime, sizeof(double) * 1, cudaMemcpyDeviceToHost ));
+//checkCudaErrors(cudaMemcpy( time, d_time, sizeof(double) * 1, cudaMemcpyDeviceToHost ));
+//checkCudaErrors(cudaMemcpy( n, d_n, sizeof(size_t) * 1, cudaMemcpyDeviceToHost ));
 //
 //Freeing up the memory on gpu
-//cudaFree( d_dy );
-//cudaFree( d_y );
-//cudaFree( d_currentTime );
-//cudaFree( d_time );
-//cudaFree( d_n );
+//
+//
+//checkCudaErrors(cudaFree( d_dy ));
+//checkCudaErrors(cudaFree( d_y ));
+//checkCudaErrors(cudaFree( d_currentTime ));
+//checkCudaErrors(cudaFree( d_time ));
+//checkCudaErrors(cudaFree( d_n ));
 
 	if ( activeTicks_.size() == 0 )
 		currentTime_ = runTime_;
