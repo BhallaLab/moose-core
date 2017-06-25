@@ -750,6 +750,7 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     assert( elems.size( ) == 1 );
 
     cout << "Debug: Total " << elems.size( ) << " ksolves are found " << endl;
+
     //double h_dum[2] = {100 , 1100};
     //double *d_dum;
     //checkCudaErrors(cudaMalloc( (void**)&d_dum, sizeof(double) * 4) );
@@ -836,13 +837,18 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
         }
     }
 
-for(int eg = 0; eg < numVoxelPools - numVoxelPools/10; ++eg){
-    VoxelPoolsBase* vp = ksolve -> pools(eg);
-    vp -> setN(0, 0);
-    vp -> setN(1, 0);
-    vp -> setN(2, 0);
-    vp -> setN(3, 0);
- }
+    if ( activeTicks_.size() == 0 )
+        currentTime_ = runTime_;
+
+
+    cout << "At the end of simulation " << endl;
+
+    for(int eg = 0; eg < numVoxelPools; ++eg)
+    {
+        VoxelPoolsBase* vp = ksolve->pools(eg);
+        vp->setN(0, 0);
+        vp->setN(1, 0);
+    }
 
 #if 0
 //Transferring back the data to cpu
@@ -863,9 +869,7 @@ checkCudaErrors(cudaFree( d_n ));
 
 #endif
 
-	if ( activeTicks_.size() == 0 )
-		currentTime_ = runTime_;
-
+    // Finish all.
     info_.dt = dt_;
     isRunning_ = false;
     finished()->send( e );
