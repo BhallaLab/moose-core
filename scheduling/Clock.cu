@@ -59,7 +59,7 @@
 #include "../ksolve/VoxelPoolsBase.h"
 #include "../ksolve/Ksolve.h"
 
-#include "gpu_helper.h"
+#include "CudaKsolve.h"
 #include "timer.h"
 #include "utils.h"
 

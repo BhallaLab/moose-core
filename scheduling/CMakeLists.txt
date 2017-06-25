@@ -21,7 +21,8 @@ endif()
 
 if( NOT WITH_CUDA )
     set( scheduling_cuda "Clock.cpp" )
-endif(WITH_CUDA)
+endif(NOT WITH_CUDA)
+
 list(APPEND scheduling_SRC testScheduling.cpp)
 
 if(NOTIFY_PROGRESS)
