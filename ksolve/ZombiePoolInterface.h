@@ -10,8 +10,10 @@
 #ifndef _ZOMBIE_POOL_INTERFACE_H
 #define _ZOMBIE_POOL_INTERFACE_H
 
+#ifdef USE_CUDA
 #include "../mesh/VoxelJunction.h"
 #include "../ksolve/XferInfo.h"
+#endif
 
 /**
  * This pure virtual base class is for solvers that want to talk to

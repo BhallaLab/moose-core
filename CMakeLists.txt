@@ -115,6 +115,7 @@ if(WITH_CUDA)
     find_package(CUDA)
     if(CUDA_FOUND)
         MESSAGE(STATUS "Using CUDA ${CUDA_VERSION}")
+        add_definitions( -DUSE_CUDA )
     else(CUDA_FOUND)
         MESSAGE(FATAL_ERROR "I could not locate CUDA!\n"
         "If CUDA is installed in non-standard place use -DCUDA_TOOLKIT_ROOT_DIR"

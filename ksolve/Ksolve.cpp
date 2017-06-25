@@ -760,6 +760,7 @@ unsigned int Ksolve::getNumPools() const
     return 0;
 }
 
+
 VoxelPoolsBase* Ksolve::pools( unsigned int i )
 {
     if ( voxelPools_.size() > i )

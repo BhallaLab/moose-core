@@ -11,8 +11,11 @@
 #define _KSOLVE_H
 
 #include <thread>
+
+#ifdef USE_CUDA
 #include "../ksolve/ZombiePoolInterface.h"
 #include "../mesh/VoxelJunction.h"
+#endif
 
 class Stoich;
 
@@ -106,14 +109,15 @@ public:
      */
     void setNumPools( unsigned int num );
     unsigned int getNumPools() const;
+
     VoxelPoolsBase* pools( unsigned int i );
+
     double volume( unsigned int i ) const;
 
     void getBlock( vector< double >& values ) const;
     void setBlock( const vector< double >& values );
 
-    void matchJunctionVols( vector< double >& vols, Id otherCompt )
-    const;
+    void matchJunctionVols( vector< double >& vols, Id otherCompt ) const;
 
     /**
      * Rescale specified voxel rate term following rate constant change

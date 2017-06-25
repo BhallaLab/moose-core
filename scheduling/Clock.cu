@@ -741,6 +741,28 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     nSteps_ += numSteps;
     runTime_ = nSteps_ * dt_;
 
+    /**
+     * @brief  We access Ksolve here and extract all VoxelPools. Using them, we
+     * build a datastructure to send over GPU.
+     */
+    vector< ObjId > elems;
+    wildcardFind( "/##[TYPE=Ksolve]", elems );
+    assert( elems.size( ) == 1 );
+
+    cout << "Debug: Total " << elems.size( ) << " ksolves are found " << endl;
+
+    for( auto v : elems )
+    {
+        Ksolve* ksolve = reinterpret_cast< Ksolve* >( v.eref().data( ) );
+        size_t numVoxelPools = ksolve->getNumAllVoxels( );
+
+        for (size_t i = 0; i < numVoxelPools; i++) 
+        {
+            // Access the VoxelPool here.
+            VoxelPoolsBase* vp = ksolve->pools( i );
+        }
+    }
+
 
 #if 0
 //Allocating memory onto gpu.
@@ -752,7 +774,7 @@ checkCudaErrors(cudaMalloc( (void**)&d_dy, sizeof(double) * related_to_voxel1 ))
 checkCudaErrors(cudaMalloc( (void**)&d_y, sizeof(double) * related_to_voxel2 ));
 checkCudaErrors(cudaMalloc( (void**)&d_currentTime, sizeof(double)*1 ));
 checkCudaErrors(cudaMalloc( (void**)&d_time, sizeof(double) * 1 ));
-heckCudaErrors(cudaMalloc( (void**)&d_n, sizeof(size_t) * 1 ));
+checkCudaErrors(cudaMalloc( (void**)&d_n, sizeof(size_t) * 1 ));
 
 //Copying data to gpu
 
@@ -761,7 +783,9 @@ checkCudaErrors(cudaMemcpy( d_y, y, sizeof(double) * related_to_voxel2, cudaMemc
 checkCudaErrors(cudaMemcpy( d_currentTime, currentTime, sizeof(double) * 1, cudaMemcpyHostToDevice ));
 checkCudaErrors(cudaMemcpy( d_time, time, sizeof(double) * 1, cudaMemcpyHostToDevice ));
 checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice ));
+
 #endif
+
 
     for ( isRunning_ = (activeTicks_.size() > 0 );
             isRunning_ && currentStep_ < nSteps_; currentStep_ += stride_ )
