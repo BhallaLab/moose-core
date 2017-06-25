@@ -51,7 +51,7 @@
 #include "header.h"
 #include "Clock.h"
 #include "../utility/numutil.h"
-#include "../shell/Shell.h"
+#include "../shell/Wildcard.h"
 #include "gpu_helper.h"
 #include "timer.h"
 #include "utils.h"
@@ -719,9 +719,11 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     struct tm * timeinfo;
     char now[80];
 
-    Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-    Id kId = s->
-
+    vector< Id > ksolves;
+    wildcardFind( "/##[TYPE=Ksolve]", ksolves );
+    cout << "Total " << ksolves.size( ) << " ksolves are found "
+        << endl;
+    
 
     buildTicks( e );
     assert( currentStep_ == nSteps_ );
@@ -791,22 +793,24 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
         }
     }
 
+#if 0
 //Transferring back the data to cpu
-//
-//checkCudaErrors(cudaMemcpy( dy, d_dy, sizeof(double) * related_to_voxel1, cudaMemcpyDeviceToHost ));
-//checkCudaErrors(cudaMemcpy( y, d_y, sizeof(double) * related_to_voxel2, cudaMemcpyDeviceToHost ));
-//checkCudaErrors(cudaMemcpy( currentTime, d_currentTime, sizeof(double) * 1, cudaMemcpyDeviceToHost ));
-//checkCudaErrors(cudaMemcpy( time, d_time, sizeof(double) * 1, cudaMemcpyDeviceToHost ));
-//checkCudaErrors(cudaMemcpy( n, d_n, sizeof(size_t) * 1, cudaMemcpyDeviceToHost ));
-//
+
+checkCudaErrors(cudaMemcpy( dy, d_dy, sizeof(double) * related_to_voxel1, cudaMemcpyDeviceToHost ));
+checkCudaErrors(cudaMemcpy( y, d_y, sizeof(double) * related_to_voxel2, cudaMemcpyDeviceToHost ));
+checkCudaErrors(cudaMemcpy( currentTime, d_currentTime, sizeof(double) * 1, cudaMemcpyDeviceToHost ));
+checkCudaErrors(cudaMemcpy( time, d_time, sizeof(double) * 1, cudaMemcpyDeviceToHost ));
+checkCudaErrors(cudaMemcpy( n, d_n, sizeof(size_t) * 1, cudaMemcpyDeviceToHost ));
+
 //Freeing up the memory on gpu
-//
-//
-//checkCudaErrors(cudaFree( d_dy ));
-//checkCudaErrors(cudaFree( d_y ));
-//checkCudaErrors(cudaFree( d_currentTime ));
-//checkCudaErrors(cudaFree( d_time ));
-//checkCudaErrors(cudaFree( d_n ));
+
+checkCudaErrors(cudaFree( d_dy ));
+checkCudaErrors(cudaFree( d_y ));
+checkCudaErrors(cudaFree( d_currentTime ));
+checkCudaErrors(cudaFree( d_time ));
+checkCudaErrors(cudaFree( d_n ));
+
+#endif
 
 	if ( activeTicks_.size() == 0 )
 		currentTime_ = runTime_;
