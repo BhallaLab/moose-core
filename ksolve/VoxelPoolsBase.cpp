@@ -359,6 +359,11 @@ void VoxelPoolsBase::filterCrossRateTerms(
 	}
 }
 
+vector<RateTerm*> VoxelPoolsBase::getRateTerms( )
+{
+    return rates_;
+}
+
 ////////////////////////////////////////////////////////////////////////
 void VoxelPoolsBase::print() const
 {

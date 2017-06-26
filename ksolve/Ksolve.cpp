@@ -373,7 +373,7 @@ void Ksolve::setStoich( Id stoich )
             return; // No pools, so don't bother.
 		}
         innerSetMethod( ode, method_ );
-        ode.gslSys.function = &VoxelPools:gslFunc;
+        ode.gslSys.function = &VoxelPools::gslFunc;
         ode.gslSys.jacobian = 0;
         innerSetMethod( ode, method_ );
         unsigned int numVoxels = voxelPools_.size();
@@ -401,6 +401,13 @@ void Ksolve::setStoich( Id stoich )
         isBuilt_ = true;
     }
 }
+
+
+vector<VoxelPools> Ksolve::getVoxelPools( )
+{
+    return voxelPools_;
+}
+
 
 Id Ksolve::getDsolve() const
 {

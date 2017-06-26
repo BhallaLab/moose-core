@@ -143,6 +143,9 @@ public:
 
     void buildCrossReacVolScaling( Id otherKsolve,
                                    const vector< VoxelJunction >& vj );
+
+    vector<VoxelPools> getVoxelPools( );
+
     //////////////////////////////////////////////////////////////////
     // for debugging
     void print() const;

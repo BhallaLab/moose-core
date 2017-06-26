@@ -102,12 +102,15 @@ public:
 
     /// Used for debugging.
     void print() const;
+
 private:
 
 #ifdef USE_GSL
     gsl_odeiv2_driver* driver_;
     gsl_odeiv2_system sys_;
+
 #elif USE_BOOST
+public:
     BoostSys sys_;
 #endif
 

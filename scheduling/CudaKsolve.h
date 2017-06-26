@@ -17,7 +17,7 @@
 #define CUDAKSOLVE_H
 
 #include "CudaOdeSystem.h"
-#include "../ksolve/VoxelPoolsBase.h"
+#include "../ksolve/VoxelPools.h"
 
 inline void callMe( );
 
@@ -29,7 +29,7 @@ inline void cuda_ksolve( double* dy, double* y, const double currentTime, const 
  * @param pool
  * @param ode
  */
-void voxelPoolToCudaOdeSystem( VoxelPoolsBase* pool, CudaOdeSystem* pOde );
+void voxelPoolToCudaOdeSystem( VoxelPools& pool, CudaOdeSystem* pOde );
 
 #endif /* end of include guard: CUDAKSOLVE_H */
 

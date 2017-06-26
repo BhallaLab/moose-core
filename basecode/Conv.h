@@ -266,7 +266,11 @@ template<> class Conv< unsigned int >
             return 1;
         }
 
+#if USE_CUDA
+        static unsigned int buf2val( double** buf ) {
+#else
         static const unsigned int buf2val( double** buf ) {
+#endif
             unsigned int ret = (unsigned int)**buf;
             (*buf)++;
             return ret;
@@ -307,7 +311,11 @@ template<> class Conv< int >
             return 1;
         }
 
+#if USE_CUDA
+        static int buf2val( double** buf ) {
+#else
         static const int buf2val( double** buf ) {
+#endif
             int ret = (int)**buf;
             (*buf)++;
             return ret;
@@ -344,7 +352,11 @@ template<> class Conv< unsigned short >
             return 1;
         }
 
+#if USE_CUDA
+        static unsigned short buf2val( double** buf ) {
+#else
         static const unsigned short buf2val( double** buf ) {
+#endif
             unsigned short ret = (unsigned int)**buf;
             (*buf)++;
             return ret;
@@ -381,7 +393,11 @@ template<> class Conv< short >
             return 1;
         }
 
+#if USE_CUDA
+        static short buf2val( double** buf ) {
+#else
         static const short buf2val( double** buf ) {
+#endif
             short ret = (short)**buf;
             (*buf)++;
             return ret;
@@ -418,7 +434,11 @@ template<> class Conv< bool >
             return 1;
         }
 
+#if USE_CUDA
+        static bool buf2val( double** buf ) {
+#else
         static const bool buf2val( double** buf ) {
+#endif
             bool ret = (**buf > 0.5);
             (*buf)++;
             return ret;
@@ -465,7 +485,11 @@ template<> class Conv< Id >
             return 1;
         }
 
+#if USE_CUDA
+        static Id buf2val( double** buf ) {
+#else
         static const Id buf2val( double** buf ) {
+#endif
             Id ret( (unsigned int)**buf );
             (*buf)++;
             return ret;
@@ -519,6 +543,7 @@ template< class T > class Conv< vector< vector< T > > >
             }
             return ret;
         }
+
 
         static const vector< vector< T > > buf2val( double** buf )
         {

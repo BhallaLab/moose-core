@@ -732,8 +732,6 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     nSteps_ += numSteps;
     runTime_ = nSteps_ * dt_;
 
-    vector<VoxelPoolsBase*> pools;
-
     /**
      * @brief  We access Ksolve here and extract all VoxelPools. Using them, we
      * build a datastructure to send over GPU.
@@ -744,28 +742,12 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     cout << "Debug: Total " << elems.size( ) << " ksolves are found " << endl;
     ObjId ks = elems[ 0 ];
     Ksolve* ksolve = reinterpret_cast< Ksolve* >( ks.eref().data( ) );
-    size_t numVoxelPools = ksolve->getNumAllVoxels( );
-    for (size_t i = 0; i < numVoxelPools; i++) 
+    vector<VoxelPools> pools = ksolve->getVoxelPools( );
+
+    for ( auto vp : pools )
     {
-        // Access the VoxelPool. We need to cast VoxelPoolBase to VoxelPool
-        VoxelPoolsBase* vpb = ksolve->pools( i );
-        pools.push_back( vpb );
-    }
-
-
-    //double h_dum[2] = {100 , 1100};
-    //double *d_dum;
-    //checkCudaErrors(cudaMalloc( (void**)&d_dum, sizeof(double) * 4) );
-    //checkCudaErrors(cudaMemcpy( d_dum, h_dum, sizeof(double) * 4, cudaMemcpyHostToDevice ));
-
-
-    for ( auto vpb : pools )
-    {
-        // Access the VoxelPool. We need to cast VoxelPoolBase to VoxelPool
-        //VoxelPools* vp = reinterpret_cast< VoxelPools* > ( &vpb );
-        //cout << "type" << i << "content" << vp << endl;
         CudaOdeSystem* pOde = new CudaOdeSystem( );
-        voxelPoolToCudaOdeSystem( vpb, pOde );
+        voxelPoolToCudaOdeSystem( vp, pOde );
         pOde->print( );
     }
 

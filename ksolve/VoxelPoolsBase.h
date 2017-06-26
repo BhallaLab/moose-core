@@ -206,8 +206,11 @@ public:
 
     void scaleVolsBufsRates( double ratio, const Stoich* stoichPtr );
 
+    vector<RateTerm*> getRateTerms( );
+
     /// Debugging utility
     void print() const;
+
 
 protected:
     const Stoich* stoichPtr_;
