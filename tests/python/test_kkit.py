@@ -24,6 +24,7 @@ def main():
             runtime = float( sys.argv[2] )
     if ( len( sys.argv ) == 4 ):
             solver = sys.argv[3]
+
     modelId = moose.loadModel( mfile, 'model', solver )
 
     # Increase volume so that the stochastic solver gssa 
@@ -33,6 +34,10 @@ def main():
 
     moose.reinit()
     moose.start( runtime ) 
+
+    for x in moose.wildcardFind( '/model/#graphs/conc#/#' ):
+        t = numpy.arange( 0, x.vector.size, 1 ) * x.dt
+
     vals = x.vector
     stats = [ vals.min(), vals.max( ), vals.mean(), vals.std( ) ]
     expected = [ 0.0, 0.00040464 , 0.0001444 , 0.00013177 ]
