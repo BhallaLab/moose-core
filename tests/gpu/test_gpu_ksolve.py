@@ -20,7 +20,7 @@ def create_cylinder( name ):
 #Setting the length of the cyliinder
     c.x1 = 1e-3
 #Setting the number of voxels
-    c.diffLength = c.x1 / 10
+    c.diffLength = c.x1 / 1
 #radius of the cylinder at both the faces, in here its kept same at both the faces
     c.r0 = c.r1 = 1e-3
     print( 'Volume of cylinder %s is %g' % (c.name,  c.volume) )

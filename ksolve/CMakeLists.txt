@@ -46,7 +46,7 @@ set(KSOLVE_SRCS
 	ZombieEnz.cpp 
 	ZombieMMenz.cpp 
         VoxelPoolsBase.cpp
-	#VoxelPools.cpp 
+	VoxelPools.cpp 
         GssaVoxelPools.cpp
 	RateTerm.cpp 
         FuncTerm.cpp

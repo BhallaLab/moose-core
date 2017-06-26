@@ -726,20 +726,13 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     struct tm * timeinfo;
     char now[80];
 
-    vector< ObjId > ksolves;
-    wildcardFind( "/##[TYPE=Ksolve]", ksolves );
-    cout << "Total " << ksolves.size( ) << " ksolves are found "
-        << endl;
-
-    Ksolve* ksolve = reinterpret_cast< Ksolve* >( ksolves[0].eref().data( ) );
-    size_t numVoxelPools = ksolve->getNumPools( );
-    
-
     buildTicks( e );
     assert( currentStep_ == nSteps_ );
     assert( activeTicks_.size() == activeTicksMap_.size() );
     nSteps_ += numSteps;
     runTime_ = nSteps_ * dt_;
+
+    vector<VoxelPoolsBase*> pools;
 
     /**
      * @brief  We access Ksolve here and extract all VoxelPools. Using them, we
@@ -748,26 +741,32 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     vector< ObjId > elems;
     wildcardFind( "/##[TYPE=Ksolve]", elems );
     assert( elems.size( ) == 1 );
-
     cout << "Debug: Total " << elems.size( ) << " ksolves are found " << endl;
+    ObjId ks = elems[ 0 ];
+    Ksolve* ksolve = reinterpret_cast< Ksolve* >( ks.eref().data( ) );
+    size_t numVoxelPools = ksolve->getNumAllVoxels( );
+    for (size_t i = 0; i < numVoxelPools; i++) 
+    {
+        // Access the VoxelPool. We need to cast VoxelPoolBase to VoxelPool
+        VoxelPoolsBase* vpb = ksolve->pools( i );
+        pools.push_back( vpb );
+    }
+
 
     //double h_dum[2] = {100 , 1100};
     //double *d_dum;
     //checkCudaErrors(cudaMalloc( (void**)&d_dum, sizeof(double) * 4) );
     //checkCudaErrors(cudaMemcpy( d_dum, h_dum, sizeof(double) * 4, cudaMemcpyHostToDevice ));
 
-    for( auto v : elems )
+
+    for ( auto vpb : pools )
     {
-        Ksolve* ksolve = reinterpret_cast< Ksolve* >( v.eref().data( ) );
-        size_t numVoxelPools = ksolve->getNumAllVoxels( );
-
-        for (size_t i = 0; i < numVoxelPools; i++) 
-        {
-            // Access the VoxelPool here.
-            VoxelPoolsBase* vp = ksolve->pools( i );
-            //cout << "type" << i << "content" << vp << endl;
-
-        }
+        // Access the VoxelPool. We need to cast VoxelPoolBase to VoxelPool
+        //VoxelPools* vp = reinterpret_cast< VoxelPools* > ( &vpb );
+        //cout << "type" << i << "content" << vp << endl;
+        CudaOdeSystem* pOde = new CudaOdeSystem( );
+        voxelPoolToCudaOdeSystem( vpb, pOde );
+        pOde->print( );
     }
 
 
@@ -843,12 +842,15 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
 
     cout << "At the end of simulation " << endl;
 
+#if 0
     for(int eg = 0; eg < numVoxelPools; ++eg)
     {
         VoxelPoolsBase* vp = ksolve->pools(eg);
+        
         vp->setN(0, 0);
         vp->setN(1, 0);
     }
+#endif
 
 #if 0
 //Transferring back the data to cpu

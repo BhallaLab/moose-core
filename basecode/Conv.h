@@ -175,7 +175,11 @@ template<> class Conv< double >
             return 1;
         }
 
+#if USE_CUDA
+        static double buf2val( double** buf ) {
+#else
         static const double buf2val( double** buf ) {
+#endif
             double ret = **buf;
             (*buf)++;
             return ret;
@@ -216,7 +220,12 @@ template<> class Conv< float >
             return 1;
         }
 
-        static const float buf2val( double** buf ) {
+#if USE_CUDA
+        static float buf2val( double** buf ) 
+#else
+        static const float buf2val( double** buf ) 
+#endif
+        {
             float ret = **buf;
             (*buf)++;
             return ret;

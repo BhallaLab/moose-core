@@ -61,6 +61,11 @@ vector< double >& VoxelPoolsBase::Svec()
 	return S_;
 }
 
+vector< double >& VoxelPoolsBase::SInitVec()
+{
+	return Sinit_;
+}
+
 double* VoxelPoolsBase::varS()
 {
 	return &S_[0];
@@ -143,6 +148,7 @@ void VoxelPoolsBase::scaleVolsBufsRates(
 
 void VoxelPoolsBase::setN( unsigned int i, double v )
 {
+    cout << " x ; Setting ninit " << v << endl;
 	S_[i] = v;
 	if ( S_[i] < 0.0 ) 
 		S_[i] = 0.0;

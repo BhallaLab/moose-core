@@ -22,7 +22,7 @@ def create_cylinder( name ):
 #Setting the length of the cyliinder
     c.x1 = 1
 #Setting the number of voxels
-    c.diffLength = c.x1 / 1000
+    c.diffLength = c.x1 / 10
 #radius of the cylinder at both the faces, in here its kept same at both the faces
     c.r0 = c.r1 = 1e-3
     print( 'Volume of cylinder %s is %g' % (c.name,  c.volume) )
@@ -54,21 +54,29 @@ def make_model( ):
     pools = OrderedDict( )
     for i in range( 2 ):
         a = 'A%d' % i
+        b = 'B%d' % i
         c = 'C%d' % i
         pa = moose.Pool( '/model/a/%s' % a )
+        pb = moose.Pool( '/model/a/%s' % b )
         pc = moose.Pool( '/model/a/%s' % c )
-        ta = moose.Table2( '/model/a/tab%s' %  a)
-        tc = moose.Table2( '/model/a/tab%s' %  c)
-        moose.connect( ta, 'requestOut', pa, 'getN' )
-        moose.connect( tc, 'requestOut', pc, 'getN' )
+
+        # ta = moose.Table2( '/model/a/tab%s' %  a)
+        # tc = moose.Table2( '/model/a/tab%s' %  c)
+
+        # moose.connect( ta, 'requestOut', pa, 'getN' )
+        # moose.connect( tc, 'requestOut', pc, 'getN' )
+
         pools[ a ] = pa
+        pools[ b ] = pb
         pools[ c ] = pc
-        pa.concInit = 1.0
-        pc.concInit = 0.1
-        tables_[ a ] = ta
-        tables_[ c ] = tc
+        pa.concInit = 0.1
+        pb.nInit = 34
+        pc.concInit = 1e-3
+        # tables_[ a ] = ta
+        # tables_[ c ] = tc
         r = moose.Reac( '/model/a/r%d' % i )
         moose.connect( r, 'sub', pa, 'reac' )
+        moose.connect( r, 'sub', pb, 'reac' )
         moose.connect( r, 'prd', pc, 'reac' )
         r.Kf = 1
         r.Kb = 0.1

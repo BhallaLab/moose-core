@@ -54,6 +54,8 @@ public:
     /// Returns a handle to the mol # vector.
     vector< double >& Svec();
 
+    vector< double >& SInitVec();
+
     /**
      * Returns the array of doubles of current mol #s at the specified
      * mesh index. Dangerous, allows one to modify the values.

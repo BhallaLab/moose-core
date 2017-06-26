@@ -16,9 +16,20 @@
 #ifndef CUDAKSOLVE_H
 #define CUDAKSOLVE_H
 
+#include "CudaOdeSystem.h"
+#include "../ksolve/VoxelPoolsBase.h"
+
 inline void callMe( );
 
 inline void cuda_ksolve( double* dy, double* y, const double currentTime, const double time, size_t n );
+
+/**
+ * @brief Convert a voxel-pool to cuda ODE system.
+ *
+ * @param pool
+ * @param ode
+ */
+void voxelPoolToCudaOdeSystem( VoxelPoolsBase* pool, CudaOdeSystem* pOde );
 
 #endif /* end of include guard: CUDAKSOLVE_H */
 
