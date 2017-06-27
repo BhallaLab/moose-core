@@ -524,6 +524,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 {
     if ( isBuilt_ == false )
         return;
+
     // First, handle incoming diffusion values, update S with those.
     if ( dsolvePtr_ )
     {
@@ -547,6 +548,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         */
         setBlock( dvalues );
     }
+
     // Second, take the arrived xCompt reac values and update S with them.
     for ( unsigned int i = 0; i < xfer_.size(); ++i )
     {
@@ -558,6 +560,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
                 xf.xferPoolIdx, xf.values, xf.lastValues, j );
         }
     }
+
     // Third, record the current value of pools as the reference for the
     // next cycle.
     for ( unsigned int i = 0; i < xfer_.size(); ++i )
@@ -575,10 +578,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     if( 1 == nWorkers || 1 == nvPools )
     {
         if( numThreads_ > 1 )
-        {
-            cout << "Debug: Using 1 thread only." << endl;
             numThreads_ = 1;
-        }
 
         for ( size_t i = 0; i < nvPools; i++ )
             pools_[i].advance( p );
@@ -639,7 +639,8 @@ void Ksolve::parallel_advance(int begin, int end, size_t nWorkers, ProcPtr p)
 void Ksolve::reinit( const Eref& e, ProcPtr p )
 {
     if ( !stoichPtr_ )
-		return;
+        return;
+
     if ( isBuilt_ )
     {
         for ( unsigned int i = 0 ; i < pools_.size(); ++i )
@@ -650,6 +651,7 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
         cout << "Warning:Ksolve::reinit: Reaction system not initialized\n";
         return;
     }
+
     // cout << "************************* path = " << e.id().path() << endl;
     for ( unsigned int i = 0; i < xfer_.size(); ++i )
     {
@@ -673,7 +675,7 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
     }
 
     if( 1 < getNumThreads( ) )
-        cout << "Debug: Using threaded Ksolve with " << numThreads_ << " threads" << endl;
+        cout << "Debug: User wants Ksolve with " << numThreads_ << " threads" << endl;
 }
 
 //////////////////////////////////////////////////////////////
@@ -701,25 +703,20 @@ void Ksolve::initProc( const Eref& e, ProcPtr p )
 void Ksolve::initReinit( const Eref& e, ProcPtr p )
 {
     for ( unsigned int i = 0 ; i < pools_.size(); ++i )
-    {
         pools_[i].reinit( p->dt );
-    }
-    // vector< vector< double > > values( xfer_.size() );
+
     for ( unsigned int i = 0; i < xfer_.size(); ++i )
     {
         XferInfo& xf = xfer_[i];
         unsigned int size = xf.xferPoolIdx.size() * xf.xferVoxel.size();
-//		xf.values.assign( size, 0.0 );
         xf.lastValues.assign( size, 0.0 );
         for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j )
         {
             unsigned int vox = xf.xferVoxel[j];
             pools_[ vox ].xferOut( j, xf.lastValues, xf.xferPoolIdx );
-            // values[i] = xf.lastValues;
         }
         xComptOut()->sendTo( e, xf.ksolve, e.id(), xf.lastValues );
     }
-    // xComptOut()->sendVec( e, values );
 }
 
 /**
