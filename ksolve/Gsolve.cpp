@@ -235,13 +235,12 @@ static const Cinfo* gsolveCinfo = Gsolve::initCinfo();
 // Class definitions
 //////////////////////////////////////////////////////////////
 
-Gsolve::Gsolve()
-    :
+Gsolve::Gsolve() :
+    numThreads_ ( 2 ),
     pools_( 1 ),
     startVoxel_( 0 ),
     dsolve_(),
     dsolvePtr_( 0 ),
-    numThreads_ ( 2 ),
     useClockedUpdate_( false )
 {
     ;
@@ -492,14 +491,12 @@ void Gsolve::process( const Eref& e, ProcPtr p )
     // First we advance the simulation.
     size_t nvPools = pools_.size( );
 
-    // If there is only one voxel-pool and one thread is specified by user then
-    // there is not point in using std::async.
+    // If there is only one voxel-pool or one thread is specified by user then
+    // there is no point in using std::async there.
     if( 1 == getNumThreads( ) || 1 == nvPools )
     {
         for ( size_t i = 0; i < nvPools; i++ )
-        {
             pools_[i].advance( p, &sys_ );
-        }
     }
     else
     {
@@ -509,17 +506,16 @@ void Gsolve::process( const Eref& e, ProcPtr p )
          *-----------------------------------------------------------------------------*/
         size_t grainSize = min( nvPools, 1 + (nvPools / numThreads_ ) );
         size_t nWorkers = nvPools / grainSize;
+
         for (size_t i = 0; i < nWorkers; i++)
             parallel_advance( i * grainSize, (i+1) * grainSize, nWorkers, p, &sys_ );
+
     }
 
     if ( useClockedUpdate_ )   // Check if a clocked stim is to be updated
     {
-        for ( vector< GssaVoxelPools >::iterator
-                i = pools_.begin(); i != pools_.end(); ++i )
-        {
-            i->recalcTime( &sys_, p->currTime );
-        }
+        for ( auto &v : pools_ )
+            v.recalcTime( &sys_, p->currTime );
     }
 
     // Finally, assemble and send the integrated values off for the Dsolve.
