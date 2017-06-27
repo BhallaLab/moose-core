@@ -252,7 +252,7 @@ Ksolve::Ksolve()
 #endif
     epsAbs_( 1e-7 ),
     epsRel_( 1e-7 ),
-    numThreads_( 2 ),
+    numThreads_( 3 ),
     pools_( 1 ),
     startVoxel_( 0 ),
     dsolve_(),
@@ -578,7 +578,10 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     if( 1 == nWorkers || 1 == nvPools )
     {
         if( numThreads_ > 1 )
+        {
+            //cout << "Debug: Reset to 1 threads " << endl;
             numThreads_ = 1;
+        }
 
         for ( size_t i = 0; i < nvPools; i++ )
             pools_[i].advance( p );
