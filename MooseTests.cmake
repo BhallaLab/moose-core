@@ -141,5 +141,5 @@ set_tests_properties(pymoose-test-calcium-hsolve
 #     COMMAND ${TEST_COMMAND} -c "import moose; moose.test( timeout = 10 );"
 #     )
 # set_tests_properties(pymoose-test-moose-examples
-    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
-    )
+#    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+#    )
