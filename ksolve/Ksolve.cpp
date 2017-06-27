@@ -564,19 +564,24 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     {
         XferInfo& xf = xfer_[i];
         for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j )
-        {
             pools_[xf.xferVoxel[j]].xferOut( j, xf.lastValues, xf.xferPoolIdx );
-        }
     }
 
     // Fourth, do the numerical integration for all reactions.
     size_t nvPools = pools_.size( );
-    if( 1 >= getNumThreads( ) )
+    size_t grainSize = min( nvPools, 1 + (nvPools / numThreads_ ) );
+    size_t nWorkers = nvPools / grainSize;
+
+    if( 1 == nWorkers || 1 == nvPools )
     {
-        for ( size_t i = 0; i < nvPools; i++ )
+        if( numThreads_ > 1 )
         {
-            pools_[i].advance( p );
+            cout << "Debug: Using 1 thread only." << endl;
+            numThreads_ = 1;
         }
+
+        for ( size_t i = 0; i < nvPools; i++ )
+            pools_[i].advance( p );
     }
     else
     {
@@ -584,13 +589,9 @@ void Ksolve::process( const Eref& e, ProcPtr p )
          *  Somewhat complicated computation to compute the number of threads. 1
          *  thread per (at least) voxel pool is ideal situation. 
          *-----------------------------------------------------------------------------*/
-        size_t grainSize = min( nvPools, 1 + (nvPools / numThreads_ ) );
-        size_t nWorkers = nvPools / grainSize;
         //cout << "Grain size " << grainSize <<  " Workers : " << nWorkers << endl;
         for (size_t i = 0; i < nWorkers; i++) 
-        {
             parallel_advance( i * grainSize, (i+1) * grainSize, nWorkers, p );
-        }
     }
 
 
@@ -672,7 +673,7 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
     }
 
     if( 1 < getNumThreads( ) )
-        cout << "Info: Using parallel solver with " << numThreads_ << " threads" << endl;
+        cout << "Debug: Using threaded Ksolve with " << numThreads_ << " threads" << endl;
 }
 
 //////////////////////////////////////////////////////////////
