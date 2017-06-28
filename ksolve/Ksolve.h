@@ -54,7 +54,7 @@ public:
     vector< double > getNvec( unsigned int voxel) const;
     void setNvec( unsigned int voxel, vector< double > vec );
 
-#if USE_CPP11_ASYNC_TO_PARALLELIZE
+#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     // Set number of threads to use (for deterministic case only).
     unsigned int getNumThreads( ) const;
     void setNumThreads( unsigned int x );
@@ -158,7 +158,7 @@ private:
     double epsAbs_;
     double epsRel_;
 
-#if USE_CPP11_ASYNC_TO_PARALLELIZE
+#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     /**
      * @brief Number of threads to use. Only applicable for deterministic case.
      */
