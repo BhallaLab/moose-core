@@ -53,6 +53,10 @@
 #include "../utility/numutil.h"
 #include "../utility/print_function.hpp"
 
+#if PARALLELIZE_CLOCK_USING_CPP11_ASYNC
+#include <future>
+#endif
+
 // Declaration of some static variables.
 const unsigned int Clock::numTicks = 32;
 /// minimumDt is smaller than any known event on the scales MOOSE handles.
@@ -729,9 +733,8 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
         unsigned long endStep = currentStep_ + stride_;
         currentTime_ = info_.currTime = dt_ * endStep;
 
-        vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
-
 #ifdef PARALLELIZE_CLOCK_USING_CPP11_ASYNC
+        //vector< unsigned int >::iterator k = activeTicksMap_.begin();
         //moose::log( "Using parallelized clock" );
         unsigned int numThreads_ = 2;
         unsigned int nTasks = activeTicks_.size( );
@@ -740,20 +743,26 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
 
         for( unsigned int i = 0; i < numThreads_; ++i  )
         {
-            // Get the block we want to run in paralle.
-            for( unsigned int ii = i * blockSize; ii < min((i+1) * blockSize, nTasks); ii++ )
-            {
-                unsigned int j = activeTicks_[ ii ];
-                if( endStep % j == 0  )
+            std::async( std::launch::async
+                , [this,blockSize,i,nTasks,endStep,e]
                 {
-                     info_.dt = j * dt_;
-                     processVec( )[*k]->send( e, &info_ );
-                }
-                ++k;
-            }
+                    unsigned int mapI = i * blockSize;
+                    // Get the block we want to run in paralle.
+                    for( unsigned int ii = i * blockSize; ii < min((i+1) * blockSize, nTasks); ii++ )
+                    {
+                        unsigned int j = activeTicks_[ ii ];
+                        if( endStep % j == 0  )
+                        {
+                             info_.dt = j * dt_;
+                             processVec( )[ activeTicksMap_[mapI] ]->send( e, &info_ );
+                        }
+                        mapI++;
+                    } 
+                } 
+            );
         }
-
 #else
+        vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
         for ( vector< unsigned int>::iterator j =
                     activeTicks_.begin(); j != activeTicks_.end(); ++j )
         {
@@ -780,8 +789,9 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
             }
         }
     }
-	if ( activeTicks_.size() == 0 )
-		currentTime_ = runTime_;
+
+    if ( activeTicks_.size() == 0 )
+        currentTime_ = runTime_;
 
     info_.dt = dt_;
     isRunning_ = false;
