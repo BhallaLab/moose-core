@@ -590,7 +590,9 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     {
         if( numThreads_ > 1 )
         {
-            //cout << "Debug: Reset to 1 threads " << endl;
+#ifndef NDEBUG
+            cout << "Debug: Reset to 1 threads " << endl;
+#endif
             numThreads_ = 1;
         }
 

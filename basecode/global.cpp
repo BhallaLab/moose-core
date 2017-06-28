@@ -152,7 +152,8 @@ namespace moose {
 #else      /* -----  not USE_BOOST  ----- */
         string command( "mkdir -p ");
         command += p;
-        system( command.c_str() );
+        int ret = system( command.c_str() );
+        cout << "+ Return code " << ret << endl;
         struct stat info;
         if( stat( p.c_str(), &info ) != 0 )
         {
@@ -219,4 +220,5 @@ namespace moose {
         sprintf(buffer, "%.17g", x );
         return string( buffer );
     }
+
 }

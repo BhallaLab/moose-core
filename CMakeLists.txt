@@ -95,6 +95,8 @@ option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_BOOST "Use boost library instead of GSL" OFF)
 option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
+option(PARALLELIZED_SOLVERS "Use parallel version of GSOLVE. Use 2 threads by defalt" OFF )
+option(PARALLELIZED_CLOCK "High level parallelization of moose::Clock" ON )
 
 ################################# CMKAE MACROS #################################
 
@@ -124,6 +126,11 @@ if(GPROF AND DEBUG)
     add_definitions(-pg)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
 endif()
+
+if(PARALLELIZED_SOLVERS)
+    message( STATUS "Using parallelized solvers" )
+    add_definitions( -DUSE_CPP11_ASYNC_TO_PARALLELIZE=1 )
+endif(PARALLELIZED_SOLVERS)
 
 ################################### TARGETS ####################################
 
