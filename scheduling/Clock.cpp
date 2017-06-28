@@ -734,12 +734,15 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
         currentTime_ = info_.currTime = dt_ * endStep;
 
 #if PARALLELIZE_CLOCK_USING_CPP11_ASYNC
-        //vector< unsigned int >::iterator k = activeTicksMap_.begin();
-        //moose::log( "Using parallelized clock" );
 
+        // NOTE: It does not produce very promising results. The challenge here
+        // is doing load-balancing. 
+        // TODO: To start with, we can put one solver on one thread and everything
+        // else onto 1 thread. Each Hsove, Ksolve, and Gsolve can take its own
+        // thread and rest are on different threads.
+    
         unsigned int nTasks = activeTicks_.size( );
         unsigned int numThreads_ = 3;
-
         unsigned int blockSize = 1 + (nTasks / numThreads_);
 
         for( unsigned int i = 0; i < numThreads_; ++i  )
