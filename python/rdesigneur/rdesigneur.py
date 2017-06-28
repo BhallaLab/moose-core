@@ -16,15 +16,18 @@
 ## channel conductances, between them.
 ##########################################################################
 from __future__ import print_function
+from __future__ import absolute_import
+
 import imp
 import os
 import moose
 import numpy as np
 import pylab
 import math
-import rmoogli
-#import rdesigneurProtos
-from rdesigneurProtos import *
+import rdesigneur.rmoogli
+
+from rdesigneur.rdesigneurProtos import *
+
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
 
