@@ -41,9 +41,6 @@ public:
     Id getDsolve() const;
     void setDsolve( Id dsolve ); /// Inherited from ZombiePoolInterface.
 
-    // Set number of threads to use (for deterministic case only).
-    unsigned int getNumThreads( ) const;
-    void setNumThreads( unsigned int x );
 
     unsigned int getNumLocalVoxels() const;
     unsigned int getNumAllVoxels() const;
@@ -57,8 +54,14 @@ public:
     vector< double > getNvec( unsigned int voxel) const;
     void setNvec( unsigned int voxel, vector< double > vec );
 
+#if USE_CPP11_ASYNC_TO_PARALLELIZE
+    // Set number of threads to use (for deterministic case only).
+    unsigned int getNumThreads( ) const;
+    void setNumThreads( unsigned int x );
+
     // Parallel advance().
     void parallel_advance(int begin, int end, size_t nWorkers, ProcPtr p);
+#endif
 
     /**
      * This does a quick and dirty estimate of the timestep suitable
@@ -155,10 +158,12 @@ private:
     double epsAbs_;
     double epsRel_;
 
+#if USE_CPP11_ASYNC_TO_PARALLELIZE
     /**
      * @brief Number of threads to use. Only applicable for deterministic case.
      */
     unsigned int numThreads_;
+#endif
 
     /**
      * Each VoxelPools entry handles all the pools in a single voxel.

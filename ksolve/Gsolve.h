@@ -123,20 +123,23 @@ public:
     /// Flag: set true if randomized round to integers is to be done.
     void setClockedUpdate( bool val );
 
+#if USE_CPP11_ASYNC_TO_PARALLELIZE
     unsigned int getNumThreads( ) const;
     void setNumThreads( unsigned int x );
+#endif
 
     //////////////////////////////////////////////////////////////////
     static SrcFinfo2< Id, vector< double > >* xComptOut();
     static const Cinfo* initCinfo();
 private:
 
-
+#if USE_CPP11_ASYNC_TO_PARALLELIZE
     /**
      * @brief Number of threads to use when parallel version of Gsolve is
      * used.
      */
     unsigned int numThreads_;
+#endif
 
     GssaSystem sys_;
     /**

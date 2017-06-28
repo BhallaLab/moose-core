@@ -236,7 +236,9 @@ static const Cinfo* gsolveCinfo = Gsolve::initCinfo();
 //////////////////////////////////////////////////////////////
 
 Gsolve::Gsolve() :
+#if USE_CPP11_ASYNC_TO_PARALLELIZE
     numThreads_ ( 2 ),
+#endif
     pools_( 1 ),
     startVoxel_( 0 ),
     dsolve_(),
@@ -491,6 +493,7 @@ void Gsolve::process( const Eref& e, ProcPtr p )
     // First we advance the simulation.
     size_t nvPools = pools_.size( );
 
+#if USE_CPP11_ASYNC_TO_PARALLELIZE
     // If there is only one voxel-pool or one thread is specified by user then
     // there is no point in using std::async there.
     if( 1 == getNumThreads( ) || 1 == nvPools )
@@ -511,6 +514,10 @@ void Gsolve::process( const Eref& e, ProcPtr p )
             parallel_advance( i * grainSize, (i+1) * grainSize, nWorkers, p, &sys_ );
 
     }
+#else
+    for ( size_t i = 0; i < nvPools; i++ )
+        pools_[i].advance( p, &sys_ );
+#endif
 
     if ( useClockedUpdate_ )   // Check if a clocked stim is to be updated
     {
@@ -573,9 +580,11 @@ void Gsolve::reinit( const Eref& e, ProcPtr p )
         i->refreshAtot( &sys_ );
     }
 
+#if USE_CPP11_ASYNC_TO_PARALLELIZE
     if( 1 < getNumThreads( ) )
         cout << "Info: Using threaded gsolve: " << getNumThreads( ) 
             << " threads. " << endl;
+#endif
 }
 
 //////////////////////////////////////////////////////////////
@@ -1148,6 +1157,7 @@ double Gsolve::volume( unsigned int i ) const
     return 0.0;
 }
 
+#if USE_CPP11_ASYNC_TO_PARALLELIZE
 unsigned int Gsolve::getNumThreads( ) const
 {
     return numThreads_;
@@ -1157,3 +1167,4 @@ void Gsolve::setNumThreads( unsigned int x )
 {
     numThreads_ = x;
 }
+#endif
