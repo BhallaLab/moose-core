@@ -733,11 +733,12 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
         unsigned long endStep = currentStep_ + stride_;
         currentTime_ = info_.currTime = dt_ * endStep;
 
-#if 0 // PARALLELIZE_CLOCK_USING_CPP11_ASYNC
+#if PARALLELIZE_CLOCK_USING_CPP11_ASYNC
         //vector< unsigned int >::iterator k = activeTicksMap_.begin();
         //moose::log( "Using parallelized clock" );
+
         unsigned int nTasks = activeTicks_.size( );
-        unsigned int numThreads_ = 1;
+        unsigned int numThreads_ = 2;
 
         unsigned int blockSize = 1 + (nTasks / numThreads_);
 
@@ -788,10 +789,10 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
                     << "% of total " << runTime_ << " seconds is over." << endl;
             }
         }
-    }
 
-    if ( activeTicks_.size() == 0 )
-        currentTime_ = runTime_;
+        if ( activeTicks_.size() == 0 )
+            currentTime_ = runTime_;
+    }
 
     info_.dt = dt_;
     isRunning_ = false;
