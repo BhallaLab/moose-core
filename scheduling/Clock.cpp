@@ -738,7 +738,7 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
         //moose::log( "Using parallelized clock" );
 
         unsigned int nTasks = activeTicks_.size( );
-        unsigned int numThreads_ = 2;
+        unsigned int numThreads_ = 3;
 
         unsigned int blockSize = 1 + (nTasks / numThreads_);
 
