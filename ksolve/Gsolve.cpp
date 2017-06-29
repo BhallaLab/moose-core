@@ -402,7 +402,7 @@ void Gsolve::parallel_advance(int begin, int end, size_t nWorkers, const ProcPtr
     std::atomic<int> idx( begin );
     for (size_t cpu = 0; cpu != nWorkers; ++cpu)
     {
-        std::async( std::launch::async, 
+        std::async( std::launch::async,
                 [this, &idx, end, p, sys]()
                 {
                     for (;;)
@@ -584,7 +584,7 @@ void Gsolve::reinit( const Eref& e, ProcPtr p )
 
 #if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
     if( 1 < getNumThreads( ) )
-        cout << "Info: Using threaded gsolve: " << getNumThreads( ) 
+        cout << "Info: Using threaded gsolve: " << getNumThreads( )
             << " threads. " << endl;
 #endif
 }

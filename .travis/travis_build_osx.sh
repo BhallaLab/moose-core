@@ -1,12 +1,12 @@
-#!/bin/bash - 
+#!/bin/bash -
 #===============================================================================
 #
 #          FILE: travis_build_linux.sh
-# 
-#         USAGE: ./travis_build_linux.sh 
-# 
+#
+#         USAGE: ./travis_build_linux.sh
+#
 #   DESCRIPTION:  Build  on linux environment.
-# 
+#
 #       OPTIONS: ---
 #  REQUIREMENTS: ---
 #          BUGS: ---
@@ -26,5 +26,5 @@ set -e
     cd .. # Now with boost.
     mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE=`which python` ..
     make && ctest --output-on-failure
-    cd .. 
+    cd ..
 )

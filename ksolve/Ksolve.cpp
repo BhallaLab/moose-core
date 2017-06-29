@@ -603,10 +603,10 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     {
         /*-----------------------------------------------------------------------------
          *  Somewhat complicated computation to compute the number of threads. 1
-         *  thread per (at least) voxel pool is ideal situation. 
+         *  thread per (at least) voxel pool is ideal situation.
          *-----------------------------------------------------------------------------*/
         //cout << "Grain size " << grainSize <<  " Workers : " << nWorkers << endl;
-        for (size_t i = 0; i < nWorkers; i++) 
+        for (size_t i = 0; i < nWorkers; i++)
             parallel_advance( i * grainSize, (i+1) * grainSize, nWorkers, p );
     }
 #else
@@ -631,23 +631,23 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
 #if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
 /**
- * @brief Advance voxels pools using parallel Ksolve.    
+ * @brief Advance voxels pools using parallel Ksolve.
  *
  * @param begin
  * @param end
  * @param p
  */
-void Ksolve::parallel_advance(int begin, int end, size_t nWorkers, ProcPtr p) 
+void Ksolve::parallel_advance(int begin, int end, size_t nWorkers, ProcPtr p)
 {
     std::atomic<int> idx( begin );
-    for (size_t cpu = 0; cpu != nWorkers; ++cpu) 
+    for (size_t cpu = 0; cpu != nWorkers; ++cpu)
     {
         std::async( std::launch::async
-                , [this, &idx, end, p]() { 
-                    for (;;) 
+                , [this, &idx, end, p]() {
+                    for (;;)
                     {
                         int i = idx++;
-                        if (i >= end) 
+                        if (i >= end)
                             break;
                         pools_[i].advance( p );
                     }

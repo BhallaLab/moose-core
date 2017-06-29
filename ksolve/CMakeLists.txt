@@ -25,20 +25,20 @@ if(PARALLELIZED_SOLVERS)
 endif(PARALLELIZED_SOLVERS)
 
 set(KSOLVE_SRCS
-	KinSparseMatrix.cpp	
-	ZombiePool.cpp 
+	KinSparseMatrix.cpp
+	ZombiePool.cpp
         ZombieFunction.cpp
-        ZombieBufPool.cpp 
-	ZombieReac.cpp 
-	ZombieEnz.cpp 
-	ZombieMMenz.cpp 
+        ZombieBufPool.cpp
+	ZombieReac.cpp
+	ZombieEnz.cpp
+	ZombieMMenz.cpp
         VoxelPoolsBase.cpp
-	VoxelPools.cpp 
+	VoxelPools.cpp
         GssaVoxelPools.cpp
-	RateTerm.cpp 
+	RateTerm.cpp
         FuncTerm.cpp
-	Stoich.cpp 
-	Ksolve.cpp 
+	Stoich.cpp
+	Ksolve.cpp
         Gsolve.cpp
         ZombiePoolInterface.cpp
         testKsolve.cpp

@@ -1,7 +1,7 @@
 language: cpp
 dist: trusty
-sudo: required 
-group: edge 
+sudo: required
+group: edge
 
 compiler:
     - gcc
@@ -25,8 +25,8 @@ cache: apt
 matrix:
     allow_failure:
         os: osx
-        
-before_script : 
+
+before_script :
     - echo "OSX related"
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./.travis/travis_prepare_osx.sh; fi
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ./.travis/travis_prepare_linux.sh; fi
