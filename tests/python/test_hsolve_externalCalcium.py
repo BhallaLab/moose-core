@@ -54,8 +54,6 @@ if __name__ =='__main__':
 
             if 'SK' in name:
                 moose.connect(difs[0], 'concentrationOut', chan, 'concen')   
-                
-                
     
     data = moose.Neutral('/data')
     vmtab = moose.Table('/data/Vm')
@@ -79,4 +77,3 @@ if __name__ =='__main__':
     assert_stat( vec2, [ 5.0e-5, 5.075007e-5, 5.036985e-5, 2.1950117e-7] )
     assert len(np.where(sktab.vector<1e-19)[0]) == 2001
     assert len(np.where(shelltab.vector>50e-6)[0]) == 2000
-    

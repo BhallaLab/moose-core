@@ -123,7 +123,7 @@ public:
     /// Flag: set true if randomized round to integers is to be done.
     void setClockedUpdate( bool val );
 
-#if USE_CPP11_ASYNC_TO_PARALLELIZE
+#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
     unsigned int getNumThreads( ) const;
     void setNumThreads( unsigned int x );
 #endif
@@ -133,7 +133,7 @@ public:
     static const Cinfo* initCinfo();
 private:
 
-#if USE_CPP11_ASYNC_TO_PARALLELIZE
+#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
     /**
      * @brief Number of threads to use when parallel version of Gsolve is
      * used.
