@@ -23,7 +23,7 @@
  * equivalent of the original sparse matrix, but using only the appropriate
  * RNG seed.
  *
- * A typical case is from an array of IntFire objects to an array of 
+ * A typical case is from an array of IntFire objects to an array of
  * Synapses, which are array fields of IntFire objects.
  * The sparse connectivity maps between the source IntFire and target
  * Synapses.
@@ -35,7 +35,7 @@
  * any two IntFire objects.
  *
  * It is optimized for input coming on Element e1, and going to Element e2.
- * If you expect any significant backward data flow, please use 
+ * If you expect any significant backward data flow, please use
  * BiSparseMsg.
  * It can be modified after creation to add or remove message entries.
  */
@@ -50,7 +50,7 @@ class SparseMsg: public Msg
 
 		void sources( vector< vector< Eref > >& v ) const;
 		void targets( vector< vector< Eref > >& v ) const;
-		
+
 		unsigned int randomConnect( double probability );
 
 		Id managerId() const;
@@ -82,7 +82,7 @@ class SparseMsg: public Msg
 		long getSeed() const;
 		void setSeed( long value );
 
-		void setEntry( unsigned int row, unsigned int column, 
+		void setEntry( unsigned int row, unsigned int column,
 			unsigned int value );
 
 		void unsetEntry( unsigned int row, unsigned int column );
@@ -99,17 +99,17 @@ class SparseMsg: public Msg
 		 * Fills up the entire message based on pairs of src,dest (i.e.,
 		 * row,column) values. All filled entries are set to zero.
 		 */
-		void pairFill( vector< unsigned int > src, 
+		void pairFill( vector< unsigned int > src,
 						vector< unsigned int> dest );
 
 		/**
-		 * Fills up the entire message based on triplets of 
+		 * Fills up the entire message based on triplets of
 		 * src,destDataIndex,destFieldIndex
 		 */
-		void tripletFill( vector< unsigned int > src, 
+		void tripletFill( vector< unsigned int > src,
 					vector< unsigned int> dest,
 					vector< unsigned int > field );
-		
+
 		/**
 		 * Utility function to update all sorts of values after we've
 		 * rebuilt the matrix.

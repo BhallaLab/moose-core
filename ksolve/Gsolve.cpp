@@ -236,7 +236,7 @@ static const Cinfo* gsolveCinfo = Gsolve::initCinfo();
 //////////////////////////////////////////////////////////////
 
 Gsolve::Gsolve() :
-#if USE_CPP11_ASYNC_TO_PARALLELIZE
+#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
     numThreads_ ( 2 ),
 #endif
     pools_( 1 ),
@@ -387,6 +387,7 @@ void Gsolve::setClockedUpdate( bool val )
 }
 
 
+#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
 /**
  * @brief Advance voxels pools but concurrently.
  *
@@ -401,21 +402,22 @@ void Gsolve::parallel_advance(int begin, int end, size_t nWorkers, const ProcPtr
     std::atomic<int> idx( begin );
     for (size_t cpu = 0; cpu != nWorkers; ++cpu)
     {
-        std::async( std::launch::async
-                    , [this, &idx, end, p, sys]()
-        {
-            for (;;)
-            {
-                int i = idx++;
-                if (i >= end)
-                    break;
-                pools_[i].advance( p, sys);
-            }
-        }
-                  );
+        std::async( std::launch::async,
+                [this, &idx, end, p, sys]()
+                {
+                    for (;;)
+                    {
+                        int i = idx++;
+                        if (i >= end)
+                            break;
+                        pools_[i].advance( p, sys);
+                    }
+                }
+            );
     }
 }
 
+#endif
 
 //////////////////////////////////////////////////////////////
 // Process operations.
@@ -493,7 +495,7 @@ void Gsolve::process( const Eref& e, ProcPtr p )
     // First we advance the simulation.
     size_t nvPools = pools_.size( );
 
-#if USE_CPP11_ASYNC_TO_PARALLELIZE
+#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
     // If there is only one voxel-pool or one thread is specified by user then
     // there is no point in using std::async there.
     if( 1 == getNumThreads( ) || 1 == nvPools )
@@ -580,9 +582,9 @@ void Gsolve::reinit( const Eref& e, ProcPtr p )
         i->refreshAtot( &sys_ );
     }
 
-#if USE_CPP11_ASYNC_TO_PARALLELIZE
+#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
     if( 1 < getNumThreads( ) )
-        cout << "Info: Using threaded gsolve: " << getNumThreads( ) 
+        cout << "Info: Using threaded gsolve: " << getNumThreads( )
             << " threads. " << endl;
 #endif
 }
@@ -1157,7 +1159,7 @@ double Gsolve::volume( unsigned int i ) const
     return 0.0;
 }
 
-#if USE_CPP11_ASYNC_TO_PARALLELIZE
+#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
 unsigned int Gsolve::getNumThreads( ) const
 {
     return numThreads_;

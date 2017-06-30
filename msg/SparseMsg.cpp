@@ -62,43 +62,43 @@ const Cinfo* SparseMsg::initCinfo()
 
 	static DestFinfo setRandomConnectivity( "setRandomConnectivity",
 		"Assigns connectivity with specified probability and seed",
-		new OpFunc2< SparseMsg, double, long >( 
+		new OpFunc2< SparseMsg, double, long >(
 		&SparseMsg::setRandomConnectivity ) );
 
 	static DestFinfo setEntry( "setEntry",
 		"Assigns single row,column value",
-		new OpFunc3< SparseMsg, unsigned int, unsigned int, unsigned int >( 
+		new OpFunc3< SparseMsg, unsigned int, unsigned int, unsigned int >(
 		&SparseMsg::setEntry ) );
 
 	static DestFinfo unsetEntry( "unsetEntry",
 		"Clears single row,column entry",
-		new OpFunc2< SparseMsg, unsigned int, unsigned int >( 
+		new OpFunc2< SparseMsg, unsigned int, unsigned int >(
 		&SparseMsg::unsetEntry ) );
 
 	static DestFinfo clear( "clear",
 		"Clears out the entire matrix",
-		new OpFunc0< SparseMsg >( 
+		new OpFunc0< SparseMsg >(
 		&SparseMsg::clear ) );
 
 	static DestFinfo transpose( "transpose",
 		"Transposes the sparse matrix",
-		new OpFunc0< SparseMsg >( 
+		new OpFunc0< SparseMsg >(
 		&SparseMsg::transpose ) );
 
 	static DestFinfo pairFill( "pairFill",
 		"Fills entire matrix using pairs of (x,y) indices to indicate "
 		"presence of a connection. If the target is a FieldElement it"
 		"automagically assigns FieldIndices.",
-		new OpFunc2< SparseMsg, 
-			vector< unsigned int >, vector< unsigned int> >( 
+		new OpFunc2< SparseMsg,
+			vector< unsigned int >, vector< unsigned int> >(
 		&SparseMsg::pairFill ) );
 
 	static DestFinfo tripletFill( "tripletFill",
 		"Fills entire matrix using triplets of (x,y,fieldIndex) to fully "
 		"specify every connection in the sparse matrix.",
-		new OpFunc3< SparseMsg, 
+		new OpFunc3< SparseMsg,
 			vector< unsigned int >, vector< unsigned int>,
-			vector< unsigned int >	>( 
+			vector< unsigned int >	>(
 		&SparseMsg::tripletFill ) );
 
 ////////////////////////////////////////////////////////////////////////
@@ -280,7 +280,7 @@ unsigned int rowIndex( const Element* e, const DataId& d )
 }
 
 
-Eref SparseMsg::firstTgt( const Eref& src ) const 
+Eref SparseMsg::firstTgt( const Eref& src ) const
 {
 	if ( matrix_.nEntries() == 0 )
 		return Eref( 0, 0 );
@@ -301,7 +301,7 @@ Eref SparseMsg::firstTgt( const Eref& src ) const
 
 /**
  * Returns number of synapses formed.
- * Fills it in transpose form, because we need to count and index the 
+ * Fills it in transpose form, because we need to count and index the
  * number of synapses on the target, so we need to iterate over the sources
  * in the inner loop. Once full, does the transpose.
  * Should really have a seed argument for the random number.
@@ -338,7 +338,7 @@ unsigned int SparseMsg::randomConnect( double probability )
 				synIndex.push_back( ~0 );
 			}
 		}
-			
+
 		if ( i >= startData && i < endData ) {
 			e2_->resizeField( i - startData, synNum );
 		}
@@ -427,8 +427,8 @@ Msg* SparseMsg::copy( Id origSrc, Id newSrc, Id newTgt,
 	}
 }
 
-void fillErefsFromMatrix( 
-		const SparseMatrix< unsigned int >& matrix, 
+void fillErefsFromMatrix(
+		const SparseMatrix< unsigned int >& matrix,
 		vector< vector < Eref > >& v, Element* e1, Element* e2 )
 {
 	v.clear();

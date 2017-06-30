@@ -1,12 +1,12 @@
-#!/bin/bash - 
+#!/bin/bash -
 #===============================================================================
 #
 #          FILE: travis_prepare_osx.sh
-# 
-#         USAGE: ./travis_prepare_osx.sh 
-# 
+#
+#         USAGE: ./travis_prepare_osx.sh
+#
 #   DESCRIPTION: Script to prepare OSX build on Travis CI.
-# 
+#
 #       OPTIONS: ---
 #  REQUIREMENTS: ---
 #          BUGS: ---

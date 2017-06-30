@@ -2,11 +2,11 @@
 #===============================================================================
 #
 #          FILE: travis_build_linux.sh
-# 
-#         USAGE: ./travis_build_linux.sh 
-# 
+#
+#         USAGE: ./travis_build_linux.sh
+#
 #   DESCRIPTION:  Build  on linux environment.
-# 
+#
 #       OPTIONS: ---
 #  REQUIREMENTS: ---
 #          BUGS: ---
@@ -45,9 +45,9 @@ PYTHON3="/usr/bin/python3"
     cd .. 
 
     # This is only applicable on linux build.
-    echo "Python3 support. Removed python2-networkx and install python3" 
-    if type $PYTHON3 > /dev/null; then 
-        sudo apt-get remove -qq python-networkx 
+    echo "Python3 support. Removed python2-networkx and install python3"
+    if type $PYTHON3 > /dev/null; then
+        sudo apt-get remove -qq python-networkx
         sudo apt-get install -qq python3-networkx
         mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && \
             cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
