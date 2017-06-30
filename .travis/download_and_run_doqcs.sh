@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set +e 
+
 # Definitions of colors in bash
 RESTORE='\033[0m'
 
