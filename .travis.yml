@@ -3,12 +3,10 @@ dist: trusty
 sudo: required
 group: edge
 
-compiler:
-    - gcc
-    - clang
 os:
     - linux
     - osx
+
 notifications:
     email:
         recipients:
@@ -17,14 +15,6 @@ notifications:
             - dilawar.s.rajput@gmail.com
         on_success: change
         on_failure: always
-
-env:
-    - CTEST_MODEL=Nightly
-cache: apt
-
-matrix:
-    allow_failure:
-        os: osx
 
 before_script :
     - echo "OSX related"

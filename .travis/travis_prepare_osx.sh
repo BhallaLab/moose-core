@@ -19,6 +19,7 @@
 
 set -o nounset                              # Treat unset variables as an error
 set +e
+rvm get head
 brew update
 #brew outdated cmake || brew install cmake
 brew install gsl
