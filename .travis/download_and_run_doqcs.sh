@@ -57,7 +57,7 @@ for _model in ${MODELS}; do
     echo "===================================================================="
     coloredPrint "INFO" "Running $_model for 1 sec"
     T1=$(date +%s.%N)
-    OUT=$(timeout 10 python -c "
+    OUT=$(python -c "
 import moose
 moose.loadModel( '${_model}', '/model', 'gsl' )
 moose.reinit( )
