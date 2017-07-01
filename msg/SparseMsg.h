@@ -85,7 +85,7 @@ class SparseMsg: public Msg
 		vector< unsigned int > getEntryPairs() const;
 		void setEntryPairs( vector< unsigned int > entries );
 
-		void setEntry( unsigned int row, unsigned int column, 
+		void setEntry( unsigned int row, unsigned int column,
 			unsigned int value );
 
 		void unsetEntry( unsigned int row, unsigned int column );
@@ -114,13 +114,13 @@ class SparseMsg: public Msg
 					vector< unsigned int > field );
 
 		/**
-		 * Fills up the entire message based on triplets of 
+		 * Fills up the entire message based on triplets of
 		 * src,destDataIndex,destFieldIndex, but catenates them all into
 		 * a single long vector since PyMoose doesn't know how to handle
 		 * multiple vectors.
 		 */
-		void tripletFill1( vector< unsigned int > entries ); 
-		
+		void tripletFill1( vector< unsigned int > entries );
+
 		/**
 		 * Utility function to update all sorts of values after we've
 		 * rebuilt the matrix.

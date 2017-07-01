@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set +e 
+set +e
 
 # Definitions of colors in bash
 RESTORE='\033[0m'
@@ -23,7 +23,7 @@ WHITE='\033[01;37m'
 
 function coloredPrint
 {
-    case $1 in 
+    case $1 in
         "WARN")
             echo -e "[WARN] ${LRED} $2 ${RESTORE} $3"
             ;;
@@ -69,12 +69,12 @@ moose.start( 1 )
     DT=$(echo "$T2-$T1" | bc)
     OUTTRIMMED=`echo $OUT | xargs`
     coloredPrint "INFO" "TOOK $DT seconds to run 1 sec."
-    if [[ ! -z $OUTTRIMMED ]]; then 
+    if [[ ! -z $OUTTRIMMED ]]; then
         coloredPrint "WARN" "$_model did not load/run cleanly"
         echo "[] ${_model} \n" >> __UNCLEAN__DOQCS__
-        echo "\`\`\`" >> __UNCLEAN__DOQCS__ 
-        echo "$OUTTRIMMED" >> __UNCLEAN__DOQCS__ 
-        echo "\n\`\`\`" >> __UNCLEAN__DOQCS__ 
+        echo "\`\`\`" >> __UNCLEAN__DOQCS__
+        echo "$OUTTRIMMED" >> __UNCLEAN__DOQCS__
+        echo "\n\`\`\`" >> __UNCLEAN__DOQCS__
         echo $OUTTRIMMED
     else
         coloredPrint "INFO" "$_model loaded just fine. We did NOT check output results"

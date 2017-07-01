@@ -42,7 +42,7 @@ PYTHON3="/usr/bin/python3"
         cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
     make && ctest --output-on-failure
     sudo make install   # For testing doqcs database.
-    cd .. 
+    cd ..
 
     # This is only applicable on linux build.
     echo "Python3 support. Removed python2-networkx and install python3"

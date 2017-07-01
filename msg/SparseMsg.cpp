@@ -139,7 +139,7 @@ const Cinfo* SparseMsg::initCinfo()
 		"Single contiguous array to fill entire connection matrix using "
 		"triplets of (x,y, fieldindex) ordered as \n"
 		"(x0, x1,... xn-1, y0, y1,... yn-1, fi0, fi1,... fi_n-1)\n",
-		new OpFunc1< SparseMsg, vector< unsigned int > >( 
+		new OpFunc1< SparseMsg, vector< unsigned int > >(
 		&SparseMsg::tripletFill1 ) );
 
 ////////////////////////////////////////////////////////////////////////
@@ -305,7 +305,7 @@ void SparseMsg::updateAfterFill()
 		const unsigned int* entry;
 		unsigned int num = temp.getRow( i, &entry, &colIndex );
 		if ( i >= startData && i < endData ) {
-			// Inefficient. Better to do it in one pass after getting 
+			// Inefficient. Better to do it in one pass after getting
 			// the max num
 			e2_->resizeField( i - startData, num + 1 );
 		}
@@ -322,7 +322,7 @@ void SparseMsg::pairFill( vector< unsigned int > src,
 	for ( i = src.begin(); i != src.end(); ++i ) {
 		if (*i >= e1()->numData() ) {
 			cout << "Warning: SparseMsg::pairFill: Src index " << *i <<
-				   " exceeds Src array size " << e1()->numData() << 
+				   " exceeds Src array size " << e1()->numData() <<
 				   ". Aborting\n";
 			return;
 		}
@@ -330,16 +330,16 @@ void SparseMsg::pairFill( vector< unsigned int > src,
 	for ( i = dest.begin(); i != dest.end(); ++i ) {
 		if (*i >= e2()->numData() ) {
 			cout << "Warning: SparseMsg::pairFill: Dest index " << *i <<
-				   " exceeds Dest array size " << e2()->numData() << 
+				   " exceeds Dest array size " << e2()->numData() <<
 				   ". Aborting\n";
 			return;
 		}
 	}
-	
+
 	vector< unsigned int > numAtDest( dest.size(), 0 );
 	vector< unsigned int > fieldIndex( dest.size(), 0 );
 	for ( unsigned int i = 0; i < dest.size(); ++i ) {
-		fieldIndex[i] = numAtDest[ dest[i] ]; 
+		fieldIndex[i] = numAtDest[ dest[i] ];
 		// Could do on previous line, but clarity
 		++numAtDest[ dest[i] ];
 	}
@@ -377,8 +377,8 @@ void SparseMsg::tripletFill1( vector< unsigned int > v )
 
 SparseMsg::SparseMsg( Element* e1, Element* e2, unsigned int msgIndex )
 	: Msg( ObjId( managerId_, (msgIndex != 0) ? msgIndex: msg_.size() ),
-					e1, e2 ), 
-				numThreads_( 1 ), 
+					e1, e2 ),
+				numThreads_( 1 ),
 				nrows_( 0 ),
 				p_( 0.0 ), seed_( 0 )
 {
