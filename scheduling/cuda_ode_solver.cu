@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  cuda_ksolve.cpp
+ *       Filename:  cuda_ode_solver.cu
  *
  *    Description: Contains "RK4 METHOD" Code 
  *
@@ -19,7 +19,7 @@
 #include <iostream>
 #include <stdio.h>
 
-#include "cuda_Ksolve.h"
+#include "cuda_ode_solver.h"
 
 using namespace std;
 

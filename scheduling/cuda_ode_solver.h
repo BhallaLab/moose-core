@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  cuda_Ksolve.h
+ *       Filename:  cuda_ode_solver.h
  *
  *    Description:  
  *
@@ -16,9 +16,9 @@
  * =====================================================================================
  */
 
-#ifndef CUDA_KSOLVE_H
+#ifndef CUDA_ODE_SOLVER_H
+#define CUDA_ODE_SOLVER_H
 
-#define CUDA_KSOLVE_H
 
 __host__ __device__ 
 void deriv(double* x0, double* array, double c, int size,  double* ki, double* ko);
@@ -27,4 +27,4 @@ __global__
 void rk4(double* x0, double* array, double* h, int size);
 
 
-#endif /* end of include guard: CUDA_KSOLVE_H */
+#endif /* end of include guard: CUDA_ODE_SOLVER_H */
