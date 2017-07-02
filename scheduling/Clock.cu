@@ -60,6 +60,8 @@
 #include "../ksolve/Ksolve.h"
 
 #include "CudaKsolve.h"
+#include "cuda_ode_solver.h"
+
 #include "timer.h"
 #include "utils.h"
 
@@ -777,8 +779,8 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
 
     int nx_voxel = 10;
     int nx_species = 100;
-    int species_square = n_species * n_species;
-    double x0x[n_species * n_voxel];
+    int species_square = nx_species * nx_species;
+    double x0x[nx_species * nx_voxel];
     double a_mat[species_square];
     double hx = 0.005;
     

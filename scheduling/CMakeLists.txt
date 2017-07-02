@@ -19,11 +19,11 @@ if(WITH_CUDA)
         )
 endif()
 
-if( NOT WITH_CUDA )
-    set( scheduling_cuda "Clock.cpp" )
+if(NOT WITH_CUDA )
+    set(scheduling_SRC "Clock.cpp" )
 endif(NOT WITH_CUDA)
 
-list(APPEND scheduling_SRC testScheduling.cpp)
+list(APPEND scheduling_SRC CudaKsolve.cpp testScheduling.cpp)
 
 if(NOTIFY_PROGRESS)
     ADD_DEFINITIONS("-DNOTIFY_PROGRESS")
@@ -31,6 +31,6 @@ endif()
 
 add_library(scheduling ${scheduling_SRC})
 
-if( WITH_CUDA )
+if(WITH_CUDA)
     target_link_libraries( scheduling scheduling_cuda )
-endif( WITH_CUDA )
+endif(WITH_CUDA)
