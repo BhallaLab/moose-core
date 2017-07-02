@@ -749,8 +749,8 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     for ( auto vp : pools )
     {
         CudaOdeSystem* pOde = new CudaOdeSystem( );
-        voxelPoolToCudaOdeSystem( vp, pOde );
-        pOde->print( );
+        //voxelPoolToCudaOdeSystem( vp, pOde );
+        //pOde->print( );
     }
 
 
@@ -835,6 +835,7 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
                     //cuda_ksolve( NULL,  NULL, currentTime_, currentTime_ + runTime_, 1);
                     //cuda_dum(d_dum)l;
                     rk4 <<< blocks, threads >>> ( d_x0, d_a_mat, &d_h, d_n_species );
+                    cout << "Calling cuda" << endl;
                 }
                 else
                     processVec()[*k]->send( e, &info_ );
@@ -855,6 +856,7 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
                     << "% of total " << runTime_ << " seconds is over." << endl;
             }
         }
+
     }
 
     cudaMemcpy( x0x, d_x0, sizeof(double) * nx_species * nx_voxel, cudaMemcpyDeviceToHost );
@@ -867,7 +869,13 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
 
 
     if ( activeTicks_.size() == 0 )
+    {
         currentTime_ = runTime_;
+        // Finish all.
+        info_.dt = dt_;
+        isRunning_ = false;
+        finished()->send( e );
+    }
 
 
     cout << "At the end of simulation " << endl;
@@ -901,10 +909,6 @@ checkCudaErrors(cudaFree( d_n ));
 
 #endif
 
-    // Finish all.
-    info_.dt = dt_;
-    isRunning_ = false;
-    finished()->send( e );
 }
 
 /**
