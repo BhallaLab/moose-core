@@ -28,11 +28,12 @@ using namespace boost::numeric;
 #include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
-#define N_x 2000000
+//#define N_x 2000000
 //////////////////////////////////////////////////////////////
 // Class definitions
 //////////////////////////////////////////////////////////////
 
+#if 0
 __global__ void operate(double *array, int *arr_size){                             
     int tid = threadIdx.x + blockIdx.x * blockDim.x;                             
     if (tid < *arr_size){                                                         
@@ -68,6 +69,7 @@ void operate_0(int arr_size)
     cudaFree( d_arr );
     cudaFree( d_size );
 }
+#endif
 
 VoxelPools::VoxelPools()
 {
@@ -123,7 +125,7 @@ void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
 // MICKY: This solves system of ODE for chemical reactions.
 void VoxelPools::advance( const ProcInfo* p )
 {   
-  //  operate_0(N_x);
+    //operate_0(N_x);
     double t = p->currTime - p->dt;
 
 //#ifdef USE_CUDA
