@@ -775,6 +775,42 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
 
 #endif
 
+    int nx_voxel = 10;
+    int nx_species = 100;
+    int species_square = n_species * n_species;
+    double x0x[n_species * n_voxel];
+    double a_mat[species_square];
+    double hx = 0.005;
+    
+    //Filling up the a_mat and x0
+    
+    for(int i = 0; i < nx_species; ++i){
+        for(int j = 0; j < nx_species; ++j){
+            a_mat[i * nx_species + j] = rand() % 9 + 1; 
+        }
+    }
+
+    for(int i = 0; i < nx_species * nx_voxel; ++i){
+        x0x[i] = i;
+    }
+    
+    //Porting the problem onto gpu
+    double *d_x0, *d_a_mat, d_h;
+    int  d_n_species;
+    
+    cudaMalloc( (void**)&d_x0, sizeof(double) * nx_species * nx_voxel );
+    cudaMalloc( (void**)&d_a_mat, sizeof(double) * species_square );
+    cudaMalloc( (void**)&d_h, sizeof(double) * 1 );
+    cudaMalloc( (void**)&d_n_species, sizeof(int) * 1 );
+
+    cudaMemcpy( d_x0, x0x, sizeof(double) * nx_species * nx_voxel, cudaMemcpyHostToDevice );
+    cudaMemcpy( d_a_mat, a_mat, sizeof(double) * species_square, cudaMemcpyHostToDevice );
+    cudaMemcpy( &d_h, &hx, sizeof(double) * 1, cudaMemcpyHostToDevice );
+    cudaMemcpy( &d_n_species, &nx_species, sizeof(int) * 1, cudaMemcpyHostToDevice );
+
+    dim3 blocks( 1, 1, 1 );
+    dim3 threads( 10, 1, 1 );
+
 
     for ( isRunning_ = (activeTicks_.size() > 0 );
             isRunning_ && currentStep_ < nSteps_; currentStep_ += stride_ )
@@ -795,7 +831,8 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
                     //cout << elem->rttiType( ) << endl;
                     //cout << activeTicksMap_[ *k ] << endl;
                     //cuda_ksolve( NULL,  NULL, currentTime_, currentTime_ + runTime_, 1);
-                    //cuda_dum(d_dum);
+                    //cuda_dum(d_dum)l;
+                    rk4 <<< blocks, threads >>> ( d_x0, d_a_mat, &d_h, d_n_species );
                 }
                 else
                     processVec()[*k]->send( e, &info_ );
@@ -817,6 +854,15 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
             }
         }
     }
+
+    cudaMemcpy( x0x, d_x0, sizeof(double) * nx_species * nx_voxel, cudaMemcpyDeviceToHost );
+    cudaMemcpy( a_mat, d_a_mat, sizeof(double) * species_square, cudaMemcpyDeviceToHost );
+    
+    cudaFree( d_x0 );
+    cudaFree( d_a_mat );
+    cudaFree( &d_h );
+    cudaFree( &d_n_species );
+
 
     if ( activeTicks_.size() == 0 )
         currentTime_ = runTime_;

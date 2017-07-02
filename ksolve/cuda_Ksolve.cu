@@ -19,11 +19,9 @@
 #include <iostream>
 #include <stdio.h>
 
-using namespace std;
+#include "cuda_Ksolve.h"
 
-__host__ __device__ void deriv(double* x0, double* array, double c, int size,  double* ki, double*
-        ko);
-__global__ void rk4(double* x0, double* array, double* h, int size);
+using namespace std;
 
 
 __global__ void rk4(double* x0, double* array, double* h, int size){
@@ -35,12 +33,12 @@ __global__ void rk4(double* x0, double* array, double* h, int size){
     double* k4_v = new double [size];
 
     int tid = threadIdx.x;
-    for(int i = 0; i < size; ++i){
+    for(int ix = 0; ix < size; ++ix){
 
-        k1_v[i] = x0[ tid*size + i ];
-        k2_v[i] = x0[ tid*size + i ];
-        k3_v[i] = x0[ tid*size + i ];
-        k4_v[i] = x0[ tid*size + i ];
+        k1_v[ix] = x0[ tid*size + ix ];
+        k2_v[ix] = x0[ tid*size + ix ];
+        k3_v[ix] = x0[ tid*size + ix ];
+        k4_v[ix] = x0[ tid*size + ix ];
     
     }
 
@@ -49,8 +47,9 @@ __global__ void rk4(double* x0, double* array, double* h, int size){
     deriv(x0, array, *h/2.0, size, k2_v, k3_v);
     deriv(x0, array, *h, size, k3_v, k4_v);
 
-    for(int i = 0; i < size; ++i){
-        x0[ tid*size + i ] = x0[ tid*size + i ] + (k1_v[i] + 2.0 *  k2_v[i] + 2.0 * k3_v[i] + k4_v[i]) *
+    for(int ix = 0; ix < size; ++ix){
+        x0[ tid*size + ix ] = x0[ tid*size + ix ] + (k1_v[ix] + 2.0 *  k2_v[ix]
+                + 2.0 * k3_v[ix] + k4_v[ix]) *
             (*h)/6.0;  
     }
     delete[] k1_v;
@@ -63,11 +62,11 @@ __global__ void rk4(double* x0, double* array, double* h, int size){
 
 __host__ __device__ void deriv(double* x0, double* array, double c, int size,  double* ki, double* ko){
 
-    for(int i = 0; i < size; ++i){
+    for(int ix = 0; ix < size; ++ix){
 
-        for(int j = 0; j< size; ++j){
+        for(int jx = 0; jx < size; ++jx){
 
-            ko[i] = ko[i] + array[ size * i + j ] * (x0[j] + c * ki[j]); 
+            ko[ix] = ko[ix] + array[ size * ix + jx ] * (x0[jx] + c * ki[jx]); 
 
         }
 
