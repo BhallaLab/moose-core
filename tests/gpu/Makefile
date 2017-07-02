@@ -10,4 +10,5 @@ test_without_cuda : ./test_ksolve.py
 test_with_cuda : ./test_ksolve.py 
 	@echo "With Cuda"
 	PYTHONPATH=$(MKFILE_PATH)/../../_build/python python $<
+	#PYTHONPATH=$(MKFILE_PATH)/../../_build/python python_in_gdb.sh $<
 

@@ -25,6 +25,8 @@ using namespace std;
 
 
 __global__ void rk4(double* x0, double* array, double* h, int size){
+
+
     //int** arr = new int*[row];
     //int size = 100;//size of the species
     double* k1_v = new double [size];

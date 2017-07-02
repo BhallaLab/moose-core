@@ -52,7 +52,7 @@ def make_model( ):
     cyl = create_cylinder( 'a' )
     # it stores the pool species
     pools = OrderedDict( )
-    for i in range( 2 ):
+    for i in range( 33 ):
         a = 'A%d' % i
         b = 'B%d' % i
         c = 'C%d' % i
@@ -88,7 +88,7 @@ def make_model( ):
     printPools( pools )
 
     t1 = time.clock()
-    moose.start( 10 ) # Run the system
+    moose.start( 100000 ) # Run the system
 
     print( '=== After simulation' )
     printPools( pools )

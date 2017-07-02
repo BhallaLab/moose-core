@@ -738,6 +738,8 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
      * @brief  We access Ksolve here and extract all VoxelPools. Using them, we
      * build a datastructure to send over GPU.
      */
+
+   /***
     vector< ObjId > elems;
     wildcardFind( "/##[TYPE=Ksolve]", elems );
     assert( elems.size( ) == 1 );
@@ -752,7 +754,7 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
         voxelPoolToCudaOdeSystem( vp, pOde );
         pOde->print( );
     }
-
+***/
 
 
 #if 0
@@ -778,7 +780,7 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
 #endif
 
     int nx_voxel = 10;
-    int nx_species = 100;
+    int nx_species = 99;
     int species_square = nx_species * nx_species;
     double x0x[nx_species * nx_voxel];
     double a_mat[species_square];
@@ -834,7 +836,8 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
                     //cout << activeTicksMap_[ *k ] << endl;
                     //cuda_ksolve( NULL,  NULL, currentTime_, currentTime_ + runTime_, 1);
                     //cuda_dum(d_dum)l;
-                    rk4 <<< blocks, threads >>> ( d_x0, d_a_mat, &d_h, d_n_species );
+                   rk4 <<< blocks, threads >>> ( d_x0, d_a_mat, &d_h, d_n_species );
+                    cout << "calling_cuda" << endl;
                 }
                 else
                     processVec()[*k]->send( e, &info_ );
