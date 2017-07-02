@@ -1,12 +1,12 @@
 language: cpp
 dist: trusty
-sudo: required 
-compiler:
-    - gcc
-    - clang
+sudo: required
+group: edge
+
 os:
     - linux
     - osx
+
 notifications:
     email:
         recipients:

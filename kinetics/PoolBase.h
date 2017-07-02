@@ -13,17 +13,17 @@
 /**
  * SpeciesId identifies molecular species. This is a unique identifier for
  * any given molecular species, regardless of which compartment or solver
- * is handling it. 
+ * is handling it.
  */
 typedef unsigned int SpeciesId;
 extern const SpeciesId DefaultSpeciesId;
 
 /**
- * The PoolBase class is the base class for molecular pools. 
- * A pool is a set of molecules of a 
+ * The PoolBase class is the base class for molecular pools.
+ * A pool is a set of molecules of a
  * given species, in a uniform chemical context. Note that the same
  * species might be present in other compartments, or be handled by
- * other solvers. 
+ * other solvers.
  * PoolBase is the base class for mass-action, single particle
  * and other numerical variants of pools.
  */
@@ -34,7 +34,7 @@ class PoolBase
 	friend void checkVal( double time, const PoolBase* m, unsigned int size );
 	friend void forceCheckVal( double time, Element* e, unsigned int size );
 
-	public: 
+	public:
 		PoolBase();
 		virtual ~PoolBase();
 
@@ -68,14 +68,9 @@ class PoolBase
 
 		void setSpecies( const Eref& e, SpeciesId v );
 		SpeciesId getSpecies( const Eref& e ) const;
-		/**
-		 * Functions to examine and change class between Pool and BufPool.
-		 */
-		void setIsBuffered( const Eref& e, bool v );
-		bool getIsBuffered( const Eref& e ) const;
-		
+
 		//////////////////////////////////////////////////////////////////
-		// Here are the inner virtual funcs for fields. 
+		// Here are the inner virtual funcs for fields.
 		// All these are pure virtual
 		//////////////////////////////////////////////////////////////////
 
@@ -96,9 +91,6 @@ class PoolBase
 		virtual void vSetVolume( const Eref& e, double v ) = 0;
 		virtual void vSetSpecies( const Eref& e, SpeciesId v ) = 0;
 		virtual SpeciesId vGetSpecies( const Eref& e ) const = 0;
-		/// I put in a default empty function for vSetIsBuffered.
-		virtual void vSetIsBuffered( const Eref& e, bool v );
-		virtual bool vGetIsBuffered( const Eref& e) const = 0;
 		/**
 		 * Assign whatever info is needed by the zombie based on the
 		 * solver Element. Encapsulates some unpleasant field extraction,
@@ -106,13 +98,13 @@ class PoolBase
 		 * nothing.
 		 */
 		virtual void vSetSolver( Id ksolve, Id dsolve );
-		
+
 		//////////////////////////////////////////////////////////////////
 		/**
-		 * zombify is the base function for conversion between pool 
-		 * subclasses. This can be overridden, but should work for most 
+		 * zombify is the base function for conversion between pool
+		 * subclasses. This can be overridden, but should work for most
 		 * things. This takes the original Element, and without touching
-		 * its messaging, replaces it with a new data object of the 
+		 * its messaging, replaces it with a new data object of the
 		 * specified zClass. It does the best it can with conversion of
 		 * fields. Typically needs to be followed by rescheduling and
 		 * possibly a class-specific function for assigning further
@@ -124,7 +116,7 @@ class PoolBase
 		 * carried out to strip an object of independent function, and
 		 * replace it with a solver-controlled facsimile.
 		 */
-		static void zombify( Element* original, const Cinfo* zClass, 
+		static void zombify( Element* original, const Cinfo* zClass,
 			Id ksolve, Id dsolve );
 
 		//////////////////////////////////////////////////////////////////
@@ -134,9 +126,6 @@ class PoolBase
 		void reinit( const Eref& e, ProcPtr p );
 		void reac( double A, double B );
 		void handleMolWt( const Eref& e, double v );
-		void increment( double val );
-		void decrement( double val );
-        void nIn( double val );
 
 		//////////////////////////////////////////////////////////////////
 		// Virtual Dest funcs. Most of these have a generic do-nothing
@@ -147,15 +136,12 @@ class PoolBase
 		virtual void vReinit( const Eref& e, ProcPtr p );
 		virtual void vReac( double A, double B );
 		virtual void vHandleMolWt( const Eref& e, double v);
-		virtual void vIncrement( double val );
-		virtual void vDecrement( double val );
-        virtual void vnIn( double val );
 
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	private:
 		double concInit_; /// Initial concentration.
-		// We don't store the conc here as this is computed on the fly 
+		// We don't store the conc here as this is computed on the fly
 		// by derived classes. But the PoolBase::concInit is authoritative.
 };
 

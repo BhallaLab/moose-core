@@ -377,7 +377,7 @@ public:
         for ( i = N_.begin() + rs; i != end; ++i )
             f( *i );
     }
-#endif 
+#endif
 
     /**
      * Adds a row to the sparse matrix, must go strictly in row order.

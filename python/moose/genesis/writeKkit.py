@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Chemical Signalling model loaded into moose can be save into Genesis-Kkit format """
 
 __author__           = "Harsha Rani"
@@ -8,20 +9,15 @@ __version__          = "1.0.0"
 __maintainer__       = "Harsha Rani"
 __email__            = "hrani@ncbs.res.in"
 __status__           = "Development"
-__updated__          = "Feb 13 2017"
+
 import sys
 import random
 import re
+import matplotlib
 import moose
+
 from moose.chemUtil.chemConnectUtil import *
 from moose.chemUtil.graphUtils import *
-
-foundmatplotlib_ = False
-try:
-    import matplotlib
-    foundmatplotlib_ = True
-except Exception as e:
-    pass
 
 GENESIS_COLOR_SEQUENCE = ((248, 0, 255), (240, 0, 255), (232, 0, 255), (224, 0, 255), (216, 0, 255), (208, 0, 255),
  (200, 0, 255), (192, 0, 255), (184, 0, 255), (176, 0, 255), (168, 0, 255), (160, 0, 255), (152, 0, 255), (144, 0, 255),
@@ -44,93 +40,78 @@ GENESIS_COLOR_SEQUENCE = ((248, 0, 255), (240, 0, 255), (232, 0, 255), (224, 0, 
 #               --StimulusTable
 
 def mooseWriteKkit( modelpath, filename, sceneitems={}):
-    global foundmatplotlib_ 
-    if not foundmatplotlib_:
-        print('No maplotlib found.' 
-            '\nThis module can be installed by following command in terminal:'
-            '\n\t sudo apt install python-maplotlib', "")
-        return False
+    if filename.rfind('.') != -1:
+        filename = filename[:filename.rfind('.')]
     else:
-        error = " "
-        ignoreColor= ["mistyrose","antiquewhite","aliceblue","azure","bisque","black","blanchedalmond","blue","cornsilk","darkolivegreen","darkslategray","dimgray","floralwhite","gainsboro","ghostwhite","honeydew","ivory","lavender","lavenderblush","lemonchiffon","lightcyan","lightgoldenrodyellow","lightgray","lightyellow","linen","mediumblue","mintcream","navy","oldlace","papayawhip","saddlebrown","seashell","snow","wheat","white","whitesmoke","aquamarine","lightsalmon","moccasin","limegreen","snow","sienna","beige","dimgrey","lightsage"]
-        matplotcolor = {}
-        for name,hexno in matplotlib.colors.cnames.items():
-            matplotcolor[name]=hexno
+        filename = filename[:len(filename)]
+    filename = filename+'.g'
+    global NA
+    NA = 6.0221415e23
+    global cmin,cmax,xmin,xmax,ymin,ymax
+    cmin, xmin, ymin = 0, 0, 0
+    cmax, xmax, ymax = 1, 1, 1
 
-        if filename.rfind('.') != -1:
-            filename = filename[:filename.rfind('.')]
-        else:
-            filename = filename[:len(filename)]
-        filename = filename+'.g'
-        global NA
-        NA = 6.0221415e23
-        global cmin,cmax,xmin,xmax,ymin,ymax
-        cmin, xmin, ymin = 0, 0, 0
-        cmax, xmax, ymax = 1, 1, 1
-        
-        compt = moose.wildcardFind(modelpath+'/##[ISA=ChemCompt]')
-        maxVol = estimateDefaultVol(compt)
-        positionInfoExist = True
-        if compt:
-            if bool(sceneitems):
-                cmin,cmax,xmin1,xmax1,ymin1,ymax1 = findMinMax(sceneitems)
-            elif not bool(sceneitems):
-                srcdesConnection = {}
-                setupItem(modelpath,srcdesConnection)
-                meshEntry,xmin,xmax,ymin,ymax,positionInfoExist,sceneitems = setupMeshObj(modelpath)
-                if not positionInfoExist:
-                    #cmin,cmax,sceneitems = autoCoordinates(meshEntry,srcdesConnection)
-                    sceneitems = autoCoordinates(meshEntry,srcdesConnection)
+    compt = moose.wildcardFind(modelpath+'/##[ISA=ChemCompt]')
+    maxVol = estimateDefaultVol(compt)
+    positionInfoExist = True
+    if compt:
+        if bool(sceneitems):
+            cmin,cmax,xmin1,xmax1,ymin1,ymax1 = findMinMax(sceneitems)
+        elif not bool(sceneitems):
+            srcdesConnection = {}
+            setupItem(modelpath,srcdesConnection)
+            meshEntry,xmin,xmax,ymin,ymax,positionInfoExist,sceneitems = setupMeshObj(modelpath)
+            if not positionInfoExist:
+                #cmin,cmax,sceneitems = autoCoordinates(meshEntry,srcdesConnection)
+                sceneitems = autoCoordinates(meshEntry,srcdesConnection)
 
-            if not positionInfoExist:        
-                # if position are not from kkit, then zoom factor is applied while
-                # writing to genesis. Like if position is from pyqtSceneItem or auto-coordinates
-                cmin,cmax,xmin1,xmax1,ymin1,ymax1 = findMinMax(sceneitems)
-                for k,v in list(sceneitems.items()):
-                    anno = moose.element(k.path+'/info')
-                    # x1 = calPrime(v['x'])
-                    # y1 = calPrime(v['y'])
-                    # sceneitems[k]['x'] = x1
-                    # sceneitems[k]['y'] = y1
+        if not positionInfoExist:
+            # if position are not from kkit, then zoom factor is applied while
+            # writing to genesis. Like if position is from pyqtSceneItem or auto-coordinates
+            cmin,cmax,xmin1,xmax1,ymin1,ymax1 = findMinMax(sceneitems)
+            for k,v in list(sceneitems.items()):
+                anno = moose.element(k.path+'/info')
+                x1 = calPrime(v['x'])
+                y1 = calPrime(v['y'])
+                sceneitems[k]['x'] = x1
+                sceneitems[k]['y'] = y1
 
-            f = open(filename, 'w')
-            writeHeader (f,maxVol)
+        f = open(filename, 'w')
+        writeHeader (f,maxVol)
 
-            gtId_vol = writeCompartment(modelpath,compt,f)
-            writePool(modelpath,f,gtId_vol,sceneitems)
-            error = ""            
-            reacList = writeReac(modelpath,f,sceneitems)
-            enzList = writeEnz(modelpath,f,sceneitems)
-            error = writeSumtotal(modelpath,f,error)
-            error = writeStimulus(modelpath,f,error)
-            f.write("simundump xgraph /graphs/conc1 0 0 99 0.001 0.999 0\n"
-                    "simundump xgraph /graphs/conc2 0 0 100 0 1 0\n")
-            tgraphs = moose.wildcardFind(modelpath+'/##[ISA=Table2]')
-            first, second = " ", " "
-            if tgraphs:
-                first,second = writeplot(tgraphs,f)
-            if first:
-                f.write(first)
-            f.write("simundump xgraph /moregraphs/conc3 0 0 100 0 1 0\n"
-                    "simundump xgraph /moregraphs/conc4 0 0 100 0 1 0\n")
-            if second:
-                f.write(second)
-            f.write("simundump xcoredraw /edit/draw 0 -6 4 -2 6\n"
-                    "simundump xtree /edit/draw/tree 0 \\\n"
-                    "  /kinetics/#[],/kinetics/#[]/#[],/kinetics/#[]/#[]/#[][TYPE!=proto],/kinetics/#[]/#[]/#[][TYPE!=linkinfo]/##[] \"edit_elm.D <v>; drag_from_edit.w <d> <S> <x> <y> <z>\" auto 0.6\n"
-                    "simundump xtext /file/notes 0 1\n")
-            storeReacMsg(reacList,f)
-            storeEnzMsg(enzList,f)
-            if tgraphs:
-                storePlotMsgs(tgraphs,f)
-            writeFooter1(f)
-            writeNotes(modelpath,f)
-            writeFooter2(f)
-            print('Written to file '+filename)
-            return error,True
-        else:
-            print(("Warning: writeKkit:: No model found on " , modelpath))
-            return False
+        gtId_vol = writeCompartment(modelpath,compt,f)
+        writePool(modelpath,f,gtId_vol,sceneitems)
+        reacList = writeReac(modelpath,f,sceneitems)
+        enzList = writeEnz(modelpath,f,sceneitems)
+        writeSumtotal(modelpath,f)
+        f.write("simundump xgraph /graphs/conc1 0 0 99 0.001 0.999 0\n"
+                "simundump xgraph /graphs/conc2 0 0 100 0 1 0\n")
+        tgraphs = moose.wildcardFind(modelpath+'/##[ISA=Table2]')
+        first, second = " ", " "
+        if tgraphs:
+            first,second = writeplot(tgraphs,f)
+        if first:
+            f.write(first)
+        f.write("simundump xgraph /moregraphs/conc3 0 0 100 0 1 0\n"
+                "simundump xgraph /moregraphs/conc4 0 0 100 0 1 0\n")
+        if second:
+            f.write(second)
+        f.write("simundump xcoredraw /edit/draw 0 -6 4 -2 6\n"
+                "simundump xtree /edit/draw/tree 0 \\\n"
+                "  /kinetics/#[],/kinetics/#[]/#[],/kinetics/#[]/#[]/#[][TYPE!=proto],/kinetics/#[]/#[]/#[][TYPE!=linkinfo]/##[] \"edit_elm.D <v>; drag_from_edit.w <d> <S> <x> <y> <z>\" auto 0.6\n"
+                "simundump xtext /file/notes 0 1\n")
+        storeReacMsg(reacList,f)
+        storeEnzMsg(enzList,f)
+        if tgraphs:
+            storePlotMsgs(tgraphs,f)
+        writeFooter1(f)
+        writeNotes(modelpath,f)
+        writeFooter2(f)
+        print('Written to file '+filename)
+        return True
+    else:
+        print(("Warning: writeKkit:: No model found on " , modelpath))
+        return False
 
 def findMinMax(sceneitems):
     cmin = 0.0
@@ -310,7 +291,7 @@ def writeReac(modelpath,f,sceneitems):
 
             textcolor = moose.Annotator(rinfo).getField('textColor')
             textcolor = getColorCheck(textcolor,GENESIS_COLOR_SEQUENCE)
-        
+
         if color == "" or color == " ":
             color = getRandColor()
         if textcolor == ""  or textcolor == " ":
@@ -318,7 +299,7 @@ def writeReac(modelpath,f,sceneitems):
         f.write("simundump kreac /kinetics/" + trimPath(reac) + " " +str(0) +" "+ str(kf) + " " + str(kb) + " \"\" " +
                 str(color) + " " + str(textcolor) + " " + str(int(x)) + " " + str(int(y)) + " 0\n")
     return reacList
- 
+
 def trimPath(mobj):
     original = mobj
     mobj = moose.element(mobj)
@@ -343,45 +324,15 @@ def trimPath(mobj):
         s = splitpath.replace("_dash_",'-')
         return s
 
-def writeSumtotal( modelpath,f, error):
+def writeSumtotal( modelpath,f):
     funclist = moose.wildcardFind(modelpath+'/##[ISA=Function]')
-    s = ""
     for func in funclist:
-        fInfound  = True
-        fOutfound = True
         funcInputs = moose.element(func.path+'/x[0]')
-        if not len(funcInputs.neighbors["input"]):
-            fInfound = False
-            error = error +'\n/'+ (moose.element(func)).parent.name+ '/'+moose.element(func).name + ' function doesn\'t have input which is not allowed in genesis. \n This function is not written down into genesis file\n'
+        s = ""
+        for funcInput in funcInputs.neighbors["input"]:
+            s = s+ "addmsg /kinetics/" + trimPath(funcInput)+ " /kinetics/" + trimPath(moose.element(func.parent)) + " SUMTOTAL n nInit\n"
+        f.write(s)
 
-        if not len(func.neighbors["valueOut"]):
-            error = error +'Function'+func.path+' has not been connected to any output, this function is not written to genesis file'
-            fOutfound = False
-        else:
-            for srcfunc in func.neighbors["valueOut"]:
-                if srcfunc.className in ["ZombiePool","ZombieBufPool","Pool","BufPool"]:
-                    functionOut = moose.element(srcfunc)
-                else:
-                    error = error +'Function output connected to '+srcfunc.name+ ' which is a '+ srcfunc.className+' which is not allowed in genesis, this function '+(moose.element(func)).path+' is not written to file'
-                    fOutfound = False
-
-        if fInfound and fOutfound:
-            srcPool = []
-            for funcInput in funcInputs.neighbors["input"]:
-                if funcInput not in srcPool:
-                    srcPool.append(funcInput)
-                    s = "addmsg /kinetics/" + trimPath(funcInput)+ " /kinetics/"+ trimPath(functionOut)+ " SUMTOTAL n nInit\n"
-                    f.write(s)
-                else:
-                    error = error + '\n Genesis doesn\'t allow same moluecule connect to function mutiple times. \n Pool \''+ moose.element(funcInput).name + '\' connected to '+ (moose.element(func)).path
-    return error
-
-def writeStimulus(modelpath,f,error):
-    
-    if len(moose.wildcardFind(modelpath+'/##[ISA=StimulusTable]')):
-        error = error +'\n StimulusTable is not written into genesis. This is in Todo List'
-
-    return error
 def storePlotMsgs( tgraphs,f):
     s = ""
     if tgraphs:
@@ -392,7 +343,7 @@ def storePlotMsgs( tgraphs,f):
             if slash > -1:
                 foundConc = True
                 if not ( (graph.path.find('conc1') > -1 ) or
-                            (graph.path.find('conc2') > -1 ) or 
+                            (graph.path.find('conc2') > -1 ) or
                             (graph.path.find('conc3') > -1 ) or
                             (graph.path.find('conc4') > -1) ):
                     foundConc = False
@@ -431,7 +382,7 @@ def writeplot( tgraphs,f ):
             if slash > -1:
                 foundConc = True
                 if not ( (graphs.path.find('conc1') > -1 ) or
-                            (graphs.path.find('conc2') > -1 ) or 
+                            (graphs.path.find('conc2') > -1 ) or
                             (graphs.path.find('conc3') > -1 ) or
                             (graphs.path.find('conc4') > -1) ):
                     foundConc = False
@@ -440,7 +391,7 @@ def writeplot( tgraphs,f ):
                 else:
                     slash1 = graphs.path.find('/',slash)
                     tabPath = "/graphs/conc1" +graphs.path[slash1:len(graphs.path)]
-                    
+
 
                 if len(moose.element(graphs).msgOut):
                     poolPath = (moose.element(graphs).msgOut)[0].e2.path
@@ -479,14 +430,14 @@ def writePool(modelpath,f,volIndex,sceneitems):
             #     value = sceneitems[p]
             #     x = calPrime(value['x'])
             #     y = calPrime(value['y'])
-                
+
             pinfo = p.path+'/info'
             if moose.exists(pinfo):
                 color = moose.Annotator(pinfo).getField('color')
                 color = getColorCheck(color,GENESIS_COLOR_SEQUENCE)
                 textcolor = moose.Annotator(pinfo).getField('textColor')
                 textcolor = getColorCheck(textcolor,GENESIS_COLOR_SEQUENCE)
-            
+
             geometryName = volIndex[p.volume]
             volume = p.volume * NA * 1e-3
             if color == "" or color == " ":
@@ -505,7 +456,7 @@ def writePool(modelpath,f,volIndex,sceneitems):
                     str(slave_enable) +
                     " /kinetics"+ geometryName + " " +
                     str(color) +" " + str(textcolor) + " " + str(int(x)) + " " + str(int(y)) + " "+ str(0)+"\n")
-            
+
 def getColorCheck(color,GENESIS_COLOR_SEQUENCE):
     if isinstance(color, str):
         if color.startswith("#"):
@@ -534,6 +485,11 @@ def getColorCheck(color,GENESIS_COLOR_SEQUENCE):
         return index
     else:
         raise Exception("Invalid Color Value!")
+
+ignoreColor= ["mistyrose","antiquewhite","aliceblue","azure","bisque","black","blanchedalmond","blue","cornsilk","darkolivegreen","darkslategray","dimgray","floralwhite","gainsboro","ghostwhite","honeydew","ivory","lavender","lavenderblush","lemonchiffon","lightcyan","lightgoldenrodyellow","lightgray","lightyellow","linen","mediumblue","mintcream","navy","oldlace","papayawhip","saddlebrown","seashell","snow","wheat","white","whitesmoke","aquamarine","lightsalmon","moccasin","limegreen","snow","sienna","beige","dimgrey","lightsage"]
+matplotcolor = {}
+for name,hexno in matplotlib.colors.cnames.items():
+    matplotcolor[name]=hexno
 
 def getRandColor():
     k = random.choice(list(matplotcolor.keys()))
@@ -663,19 +619,13 @@ def writeFooter2(f):
 
 if __name__ == "__main__":
     import sys
-    import os
-    filename = sys.argv[1]
-    filepath, filenameWithext = os.path.split(filename)
-    if filenameWithext.find('.') != -1:
-        modelpath = filenameWithext[:filenameWithext.find('.')]
-    else:
-        modelpath = filenameWithext
 
+    filename = sys.argv[1]
+    modelpath = filename[0:filename.find('.')]
     moose.loadModel(filename,'/'+modelpath,"gsl")
     output = modelpath+"_.g"
-    written = mooseWriteKkit('/'+modelpath,output)
-    
+    written = write('/'+modelpath,output)
     if written:
-            print((" file written to ",output))
+            print(" file written to ",output)
     else:
             print(" could be written to kkit format")

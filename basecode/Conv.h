@@ -13,7 +13,7 @@
 
 /**
  * This set of templates defines converters. The conversions are from
- * string to object, object to string, and 
+ * string to object, object to string, and
  * binary buffer to object, object to binary buffer.
  * Many classes convert through a single template. Strings and other things
  * with additional data need special converters.
@@ -162,7 +162,7 @@ template<> class Conv< string >
 
 /**
  * The template specialization of Conv< unsigned int > sets up alignment on
- * word boundaries by storing the data as a double. 
+ * word boundaries by storing the data as a double.
  */
 template<> class Conv< double >
 {
@@ -186,7 +186,7 @@ template<> class Conv< double >
         }
         static void val2buf( double val, double** buf ) {
             **buf = val;
-            (*buf)++; 
+            (*buf)++;
         }
 
         static void str2val( double &val, const string& s ) {
@@ -207,7 +207,7 @@ template<> class Conv< double >
 
 /**
  * The template specialization of Conv< unsigned int > sets up alignment on
- * word boundaries by storing the data as a double. 
+ * word boundaries by storing the data as a double.
  */
 template<> class Conv< float >
 {
@@ -232,7 +232,7 @@ template<> class Conv< float >
         }
         static void val2buf( float val, double** buf ) {
             **buf = val;
-            (*buf)++; 
+            (*buf)++;
         }
 
         static void str2val( float& val, const string& s ) {
@@ -253,7 +253,7 @@ template<> class Conv< float >
 
 /**
  * The template specialization of Conv< unsigned int > sets up alignment on
- * word boundaries by storing the data as a double. 
+ * word boundaries by storing the data as a double.
  */
 template<> class Conv< unsigned int >
 {
@@ -277,7 +277,7 @@ template<> class Conv< unsigned int >
         }
         static void val2buf( unsigned int val, double** buf ) {
             **buf = val;
-            (*buf)++; 
+            (*buf)++;
         }
 
         static void str2val( unsigned int& val, const string& s ) {
@@ -298,7 +298,7 @@ template<> class Conv< unsigned int >
 
 /**
  * The template specialization of Conv< int > sets up alignment on
- * word boundaries by storing the data as a double. 
+ * word boundaries by storing the data as a double.
  */
 template<> class Conv< int >
 {
@@ -322,7 +322,7 @@ template<> class Conv< int >
         }
         static void val2buf( int val, double** buf ) {
             **buf = val;
-            (*buf)++; 
+            (*buf)++;
         }
 
         static void str2val( int& val, const string& s ) {
@@ -363,7 +363,7 @@ template<> class Conv< unsigned short >
         }
         static void val2buf( unsigned short val, double** buf ) {
             **buf = (double)val;
-            (*buf)++; 
+            (*buf)++;
         }
 
         static void str2val( unsigned short& val, const string& s ) {
@@ -404,7 +404,7 @@ template<> class Conv< short >
         }
         static void val2buf( short val, double** buf ) {
             **buf = val;
-            (*buf)++; 
+            (*buf)++;
         }
 
         static void str2val( short& val, const string& s ) {
@@ -445,7 +445,7 @@ template<> class Conv< bool >
         }
         static void val2buf( bool val, double** buf ) {
             **buf = val;
-            (*buf)++; 
+            (*buf)++;
         }
 
         static void str2val( bool& val, const string& s ) {
@@ -470,7 +470,7 @@ template<> class Conv< bool >
 
 /**
  * The template specialization of Conv< Id > sets up alignment on
- * word boundaries by storing the Id as a double. It also deals with 
+ * word boundaries by storing the Id as a double. It also deals with
  * the string conversion issues.
  */
 
@@ -496,7 +496,7 @@ template<> class Conv< Id >
         }
         static void val2buf( Id id, double** buf ) {
             **buf = id.value();
-            (*buf)++; 
+            (*buf)++;
         }
 
         static void str2val( Id& val, const string& s ) {
@@ -598,7 +598,7 @@ template< class T > class Conv< vector< vector< T > > >
 template< class T > class Conv< vector< T > >
 {
     public:
-        /** 
+        /**
          * Size of returned array in doubles.
          */
         static unsigned int size( const vector< T >& val )

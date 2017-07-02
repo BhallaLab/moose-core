@@ -23,6 +23,10 @@
 #include "GssaVoxelPools.h"
 #include "../randnum/randnum.h"
 
+#include <future>
+#include <atomic>
+#include <thread>
+
 #include "Gsolve.h"
 
 #define SIMPLE_ROUNDING 0
@@ -231,8 +235,10 @@ static const Cinfo* gsolveCinfo = Gsolve::initCinfo();
 // Class definitions
 //////////////////////////////////////////////////////////////
 
-Gsolve::Gsolve()
-    :
+Gsolve::Gsolve() :
+#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
+    numThreads_ ( 2 ),
+#endif
     pools_( 1 ),
     startVoxel_( 0 ),
     dsolve_(),
@@ -380,6 +386,39 @@ void Gsolve::setClockedUpdate( bool val )
     useClockedUpdate_ = val;
 }
 
+
+#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
+/**
+ * @brief Advance voxels pools but concurrently.
+ *
+ * @param begin
+ * @param end
+ * @param p
+ */
+void Gsolve::parallel_advance(int begin, int end, size_t nWorkers, const ProcPtr p
+                              , const GssaSystem* sys
+                             )
+{
+    std::atomic<int> idx( begin );
+    for (size_t cpu = 0; cpu != nWorkers; ++cpu)
+    {
+        std::async( std::launch::async,
+                [this, &idx, end, p, sys]()
+                {
+                    for (;;)
+                    {
+                        int i = idx++;
+                        if (i >= end)
+                            break;
+                        pools_[i].advance( p, sys);
+                    }
+                }
+            );
+    }
+}
+
+#endif
+
 //////////////////////////////////////////////////////////////
 // Process operations.
 //////////////////////////////////////////////////////////////
@@ -454,18 +493,38 @@ void Gsolve::process( const Eref& e, ProcPtr p )
     }
     // Fifth, update the mol #s.
     // First we advance the simulation.
-    for ( vector< GssaVoxelPools >::iterator
-            i = pools_.begin(); i != pools_.end(); ++i )
+    size_t nvPools = pools_.size( );
+
+#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
+    // If there is only one voxel-pool or one thread is specified by user then
+    // there is no point in using std::async there.
+    if( 1 == getNumThreads( ) || 1 == nvPools )
     {
-        i->advance( p, &sys_ );
+        for ( size_t i = 0; i < nvPools; i++ )
+            pools_[i].advance( p, &sys_ );
     }
+    else
+    {
+        /*-----------------------------------------------------------------------------
+         *  Somewhat complicated computation to compute the number of threads. 1
+         *  thread per (at least) voxel pool is ideal situation.
+         *-----------------------------------------------------------------------------*/
+        size_t grainSize = min( nvPools, 1 + (nvPools / numThreads_ ) );
+        size_t nWorkers = nvPools / grainSize;
+
+        for (size_t i = 0; i < nWorkers; i++)
+            parallel_advance( i * grainSize, (i+1) * grainSize, nWorkers, p, &sys_ );
+
+    }
+#else
+    for ( size_t i = 0; i < nvPools; i++ )
+        pools_[i].advance( p, &sys_ );
+#endif
+
     if ( useClockedUpdate_ )   // Check if a clocked stim is to be updated
     {
-        for ( vector< GssaVoxelPools >::iterator
-                i = pools_.begin(); i != pools_.end(); ++i )
-        {
-            i->recalcTime( &sys_, p->currTime );
-        }
+        for ( auto &v : pools_ )
+            v.recalcTime( &sys_, p->currTime );
     }
 
     // Finally, assemble and send the integrated values off for the Dsolve.
@@ -522,6 +581,12 @@ void Gsolve::reinit( const Eref& e, ProcPtr p )
     {
         i->refreshAtot( &sys_ );
     }
+
+#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
+    if( 1 < getNumThreads( ) )
+        cout << "Info: Using threaded gsolve: " << getNumThreads( )
+            << " threads. " << endl;
+#endif
 }
 
 //////////////////////////////////////////////////////////////
@@ -1093,3 +1158,15 @@ double Gsolve::volume( unsigned int i ) const
         return pools_[i].getVolume();
     return 0.0;
 }
+
+#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
+unsigned int Gsolve::getNumThreads( ) const
+{
+    return numThreads_;
+}
+
+void Gsolve::setNumThreads( unsigned int x )
+{
+    numThreads_ = x;
+}
+#endif

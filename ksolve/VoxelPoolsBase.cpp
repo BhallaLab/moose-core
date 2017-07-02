@@ -23,7 +23,7 @@
 //////////////////////////////////////////////////////////////
 
 VoxelPoolsBase::VoxelPoolsBase()
-	: 
+	:
 		stoichPtr_( 0 ),
 		S_(1),
 		Sinit_(1),
@@ -100,7 +100,7 @@ void VoxelPoolsBase::setVolumeAndDependencies( double vol )
 {
 	double ratio = vol / volume_;
 	volume_ = vol;
-	for ( vector< double >::iterator 
+	for ( vector< double >::iterator
 					i = Sinit_.begin(); i != Sinit_.end(); ++i )
 		*i *= ratio;
 
@@ -112,11 +112,11 @@ void VoxelPoolsBase::setVolumeAndDependencies( double vol )
 	// a subsequent call via Ksolve or Stoich.
 }
 
-void VoxelPoolsBase::scaleVolsBufsRates( 
+void VoxelPoolsBase::scaleVolsBufsRates(
 			double ratio, const Stoich* stoichPtr )
 {
 	volume_ *= ratio; // Scale vol
-	for ( vector< double >::iterator 
+	for ( vector< double >::iterator
 					i = Sinit_.begin(); i != Sinit_.end(); ++i )
 		*i *= ratio; // Scale Bufs
 	// Here we also need to set the Ns for the buffered pools.
@@ -136,7 +136,7 @@ void VoxelPoolsBase::scaleVolsBufsRates(
 	for ( unsigned int i = 0; i < numCoreRates; ++i )
 		rates_[i] = rates[i]->copyWithVolScaling( getVolume(), 1, 1 );
 	for ( unsigned int i = numCoreRates; i < rates.size(); ++i ) {
-		rates_[i] = rates[i]->copyWithVolScaling(  getVolume(), 
+		rates_[i] = rates[i]->copyWithVolScaling(  getVolume(),
 				getXreacScaleSubstrates(i - numCoreRates),
 				getXreacScaleProducts(i - numCoreRates ) );
 	}
@@ -150,7 +150,7 @@ void VoxelPoolsBase::setN( unsigned int i, double v )
 {
     cout << " x ; Setting ninit " << v << endl;
 	S_[i] = v;
-	if ( S_[i] < 0.0 ) 
+	if ( S_[i] < 0.0 )
 		S_[i] = 0.0;
 }
 
@@ -162,7 +162,7 @@ double VoxelPoolsBase::getN( unsigned int i ) const
 void VoxelPoolsBase::setNinit( unsigned int i, double v )
 {
 	Sinit_[i] = v;
-	if ( Sinit_[i] < 0.0 ) 
+	if ( Sinit_[i] < 0.0 )
 		Sinit_[i] = 0.0;
 }
 
@@ -186,14 +186,14 @@ double VoxelPoolsBase::getDiffConst( unsigned int i ) const
 //////////////////////////////////////////////////////////////
 void VoxelPoolsBase::xferIn(
 		const vector< unsigned int >& poolIndex,
-		const vector< double >& values, 
+		const vector< double >& values,
 		const vector< double >& lastValues,
 	    unsigned int voxelIndex	)
 {
 	unsigned int offset = voxelIndex * poolIndex.size();
 	vector< double >::const_iterator i = values.begin() + offset;
 	vector< double >::const_iterator j = lastValues.begin() + offset;
-	for ( vector< unsigned int >::const_iterator 
+	for ( vector< unsigned int >::const_iterator
 			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
 		S_[*k] += *i++ - *j++;
 	}
@@ -201,15 +201,15 @@ void VoxelPoolsBase::xferIn(
 
 void VoxelPoolsBase::xferInOnlyProxies(
 		const vector< unsigned int >& poolIndex,
-		const vector< double >& values, 
+		const vector< double >& values,
 		unsigned int numProxyPools,
 	    unsigned int voxelIndex	)
 {
 	unsigned int offset = voxelIndex * poolIndex.size();
 	vector< double >::const_iterator i = values.begin() + offset;
-	unsigned int proxyEndIndex = stoichPtr_->getNumVarPools() + 
+	unsigned int proxyEndIndex = stoichPtr_->getNumVarPools() +
 				stoichPtr_->getNumProxyPools();
-	for ( vector< unsigned int >::const_iterator 
+	for ( vector< unsigned int >::const_iterator
 			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
 		// if ( *k >= S_.size() - numProxyPools )
 		if ( *k >= stoichPtr_->getNumVarPools() && *k < proxyEndIndex ) {
@@ -221,20 +221,20 @@ void VoxelPoolsBase::xferInOnlyProxies(
 	}
 }
 
-void VoxelPoolsBase::xferOut( 
-	unsigned int voxelIndex, 
+void VoxelPoolsBase::xferOut(
+	unsigned int voxelIndex,
 	vector< double >& values,
 	const vector< unsigned int >& poolIndex)
 {
 	unsigned int offset = voxelIndex * poolIndex.size();
 	vector< double >::iterator i = values.begin() + offset;
-	for ( vector< unsigned int >::const_iterator 
+	for ( vector< unsigned int >::const_iterator
 			k = poolIndex.begin(); k != poolIndex.end(); ++k ) {
 		*i++ = S_[*k];
 	}
 }
 
-void VoxelPoolsBase::addProxyVoxy( 
+void VoxelPoolsBase::addProxyVoxy(
 		unsigned int comptIndex, Id otherComptId, unsigned int voxel )
 {
 	if ( comptIndex >= proxyPoolVoxels_.size() ) {
@@ -245,7 +245,7 @@ void VoxelPoolsBase::addProxyVoxy(
 	proxyComptMap_[otherComptId] = comptIndex;
 }
 
-void VoxelPoolsBase::addProxyTransferIndex( 
+void VoxelPoolsBase::addProxyTransferIndex(
 				unsigned int comptIndex, unsigned int transferIndex )
 {
 	if ( comptIndex >= proxyTransferIndex_.size() )
@@ -309,7 +309,7 @@ double VoxelPoolsBase::getXreacScaleProducts( unsigned int i ) const
 }
 
 /**
- * Zeroes out rate terms that are involved in cross-reactions that 
+ * Zeroes out rate terms that are involved in cross-reactions that
  * are not present on current voxel.
  */
 void VoxelPoolsBase::filterCrossRateTerms(
@@ -369,7 +369,7 @@ void VoxelPoolsBase::print() const
 {
 	cout << "S_.size=" << S_.size() << ", volume = " << volume_ << endl;
 	cout << "proxyPoolsVoxels.size()=" << proxyPoolVoxels_.size() <<
-		", proxyTransferIndex.size()=" << proxyTransferIndex_.size() << 
+		", proxyTransferIndex.size()=" << proxyTransferIndex_.size() <<
 		endl;
 	assert( proxyPoolVoxels_.size() == proxyTransferIndex_.size() );
 	for ( unsigned int i = 0; i < proxyPoolVoxels_.size(); ++i ) {
@@ -388,7 +388,7 @@ void VoxelPoolsBase::print() const
 		}
 		cout << endl;
 	}
-	cout << 
+	cout <<
 		"xReacScaleSubstrates.size()=" << xReacScaleSubstrates_.size() <<
 		", xReacScaleProducts.size()=" << xReacScaleProducts_.size() <<
 		endl;
@@ -399,7 +399,7 @@ void VoxelPoolsBase::print() const
 	}
 	cout << "##############    RATES    ######################\n";
 	for ( unsigned int i = 0; i < rates_.size(); ++i ) {
-		cout << i << "	:	" << rates_[i]->getR1() << ",	" << 
+		cout << i << "	:	" << rates_[i]->getR1() << ",	" <<
 				rates_[i]->getR2() << endl;
 	}
 }

@@ -18,8 +18,8 @@ const double DifShell::F = 96485.3415; /* C / mol like in genesis */
 
 const Cinfo* DifShell::initCinfo()
 {
-    
-  
+
+
   static string doc[] =
     {
       "Name", "DifShell",
@@ -83,7 +83,7 @@ void DifShell::vSetC( const Eref& e, double C)
     cerr << "Error: DifShell: C cannot be negative!\n";
     return;
   }
-	
+
   C_ = C;
   prevC_ = C_;
 }
@@ -98,8 +98,10 @@ void DifShell::vSetCeq( const Eref& e, double Ceq )
     cerr << "Error: DifShell: Ceq cannot be negative!\n";
     return;
   }
-	
+
   Ceq_ = Ceq;
+  prevC_ = Ceq;
+  C_ = Ceq;
 }
 
 double DifShell::vGetCeq(const Eref& e ) const
@@ -113,7 +115,7 @@ void DifShell::vSetD(const Eref& e, double D )
     cerr << "Error: DifShell: D cannot be negative!\n";
     return;
   }
-	
+
   D_ = D;
 }
 
@@ -128,11 +130,11 @@ void DifShell::vSetValence(const Eref& e, double valence )
     cerr << "Error: DifShell: valence cannot be negative!\n";
     return;
   }
-	
+
   valence_ = valence;
 }
 
-double DifShell::vGetValence(const Eref& e ) const 
+double DifShell::vGetValence(const Eref& e ) const
 {
   return valence_;
 }
@@ -155,6 +157,7 @@ void DifShell::vSetShapeMode(const Eref& e, unsigned int shapeMode )
     return;
   }
   shapeMode_ = shapeMode;
+  calculateVolumeArea(e);
 }
 
 unsigned int DifShell::vGetShapeMode(const Eref& e) const
@@ -168,8 +171,9 @@ void DifShell::vSetLength(const Eref& e, double length )
     cerr << "Error: DifShell: length cannot be negative!\n";
     return;
   }
-	
+
   length_ = length;
+  calculateVolumeArea(e);
 }
 
 double DifShell::vGetLength(const Eref& e ) const
@@ -183,8 +187,9 @@ void DifShell::vSetDiameter(const Eref& e, double diameter )
     cerr << "Error: DifShell: diameter cannot be negative!\n";
     return;
   }
-	
+
   diameter_ = diameter;
+  calculateVolumeArea(e);
 }
 
 double DifShell::vGetDiameter(const Eref& e ) const
@@ -198,8 +203,9 @@ void DifShell::vSetThickness( const Eref& e, double thickness )
     cerr << "Error: DifShell: thickness cannot be negative!\n";
     return;
   }
-	
+
   thickness_ = thickness;
+  calculateVolumeArea(e);
 }
 
 double DifShell::vGetThickness(const Eref& e) const
@@ -211,12 +217,12 @@ void DifShell::vSetVolume(const Eref&  e, double volume )
 {
   if ( shapeMode_ != 3 )
     cerr << "Warning: DifShell: Trying to set volume, when shapeMode is not USER-DEFINED\n";
-	
+
   if ( volume < 0.0 ) {
     cerr << "Error: DifShell: volume cannot be negative!\n";
     return;
   }
-	
+
   volume_ = volume;
 }
 
@@ -229,12 +235,12 @@ void DifShell::vSetOuterArea(const Eref& e, double outerArea )
 {
   if (shapeMode_ != 3 )
     cerr << "Warning: DifShell: Trying to set outerArea, when shapeMode is not USER-DEFINED\n";
-	
+
   if ( outerArea < 0.0 ) {
     cerr << "Error: DifShell: outerArea cannot be negative!\n";
     return;
   }
-	
+
   outerArea_ = outerArea;
 }
 
@@ -247,12 +253,12 @@ void DifShell::vSetInnerArea(const Eref& e, double innerArea )
 {
   if ( shapeMode_ != 3 )
     cerr << "Warning: DifShell: Trying to set innerArea, when shapeMode is not USER-DEFINED\n";
-    
+
   if ( innerArea < 0.0 ) {
     cerr << "Error: DifShell: innerArea cannot be negative!\n";
     return;
   }
-    
+
   innerArea_ = innerArea;
 }
 
@@ -276,18 +282,15 @@ double DifShell::integrate( double state, double dt, double A, double B )
 	return state + A * dt ;
 }
 
-void DifShell::vReinit( const Eref& e, ProcPtr p )
+void DifShell::calculateVolumeArea(const Eref& e)
 {
-  dCbyDt_ = leak_;
-  Cmultiplier_ = 0;
+double rOut = diameter_/2.;
 
-  double rOut = diameter_/2.;
-  
   double rIn = rOut - thickness_;
 
   if (rIn <0)
 	  rIn = 0.;
-  
+
   switch ( shapeMode_ )
     {
       /*
@@ -303,9 +306,9 @@ void DifShell::vReinit( const Eref& e, ProcPtr p )
 	outerArea_ = 2*M_PI * rOut * length_;
 	innerArea_ = 2*M_PI * rIn * length_;
       }
-		
+
       break;
-	
+
       /*
        * Cylindrical Slice
        */
@@ -314,7 +317,7 @@ void DifShell::vReinit( const Eref& e, ProcPtr p )
       outerArea_ = M_PI * diameter_ * diameter_ / 4.0;
       innerArea_ = outerArea_;
       break;
-	
+
       /*
        * User defined
        */
@@ -322,15 +325,24 @@ void DifShell::vReinit( const Eref& e, ProcPtr p )
       // Nothing to be done here. Volume and inner-, outer areas specified by
       // user.
       break;
-	
+
     default:
       assert( 0 );
     }
+}
+
+void DifShell::vReinit( const Eref& e, ProcPtr p )
+{
+  dCbyDt_ = leak_;
+  Cmultiplier_ = 0;
+  calculateVolumeArea(e);
+
   C_= Ceq_;
   prevC_ = Ceq_;
   concentrationOut()->send( e, C_ );
   innerDifSourceOut()->send( e, prevC_, thickness_ );
   outerDifSourceOut()->send( e, prevC_, thickness_ );
+
 }
 
 void DifShell::vProcess( const Eref & e, ProcPtr p )
@@ -339,23 +351,25 @@ void DifShell::vProcess( const Eref & e, ProcPtr p )
    * Send ion concentration and thickness to adjacent DifShells. They will
    * then compute their incoming fluxes.
    */
-  
- 
+
+
   C_ = integrate(C_,p->dt,dCbyDt_,Cmultiplier_);
- 
+
   /**
    * Send ion concentration to ion buffers. They will send back information on
    * the reaction (forward / backward rates ; free / bound buffer concentration)
    * immediately, which this DifShell will use to find amount of ion captured
    * or released in the current time-step.
    */
-  prevC_ = C_;
 
-  //cout<<"Shell "<< C_<<" ";
+
   dCbyDt_ = leak_;
   Cmultiplier_ = 0;
+  prevC_ = C_;
+
   innerDifSourceOut()->send( e, prevC_, thickness_ );
   outerDifSourceOut()->send( e, prevC_, thickness_ );
+
   concentrationOut()->send( e, C_ );
 
 }
@@ -377,9 +391,10 @@ void DifShell::vFluxFromOut(const Eref& e, double outerC, double outerThickness 
    * We could pre-compute ( D / Volume ), but let us leave the optimizations
    * for the solver.
    */
-  
+
   dCbyDt_ +=  diff * outerC;
   Cmultiplier_ += diff ;
+
 }
 
 void DifShell::vFluxFromIn(const Eref& e, double innerC, double innerThickness )
@@ -387,6 +402,7 @@ void DifShell::vFluxFromIn(const Eref& e, double innerC, double innerThickness )
   //influx from inner shell
   //double dx = ( innerThickness + thickness_ ) / 2.0;
   double diff = 2.* D_/volume_ * innerArea_ / (innerThickness + thickness_);
+
   dCbyDt_ +=  diff *  innerC ;
   Cmultiplier_ += diff ;
 }
@@ -399,6 +415,7 @@ void DifShell::vInflux(const Eref& e,	double I )
    * valence_: charge on ion: dimensionless
    */
   dCbyDt_ += I / ( F * valence_ * volume_ );
+
 }
 
 /**
@@ -448,6 +465,7 @@ void DifShell::vEqTauPump(const Eref& e, double kP )
 void DifShell::vMMPump(const Eref& e, double vMax, double Kd )
 {
   Cmultiplier_ += ( vMax / volume_ )  / ( C_ + Kd ) ;
+
 }
 
 void DifShell::vHillPump(const Eref& e, double vMax, double Kd, unsigned int hill )
@@ -475,7 +493,7 @@ void DifShell::vHillPump(const Eref& e, double vMax, double Kd, unsigned int hil
     default:
       ch = pow( C_, static_cast< double >( hill ) );
     };
-	
+
   dCbyDt_ += -( vMax / volume_ ) * ( ch / ( ch + Kd ) );
 }
 

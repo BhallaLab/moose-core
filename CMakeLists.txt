@@ -1,5 +1,6 @@
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
-cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+project(MOOSE)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
@@ -9,13 +10,10 @@ if(COMMAND cmake_policy)
     endif(POLICY CMP0050)
 endif(COMMAND cmake_policy)
 
-project(MOOSE)
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 include(FindPkgConfig)
-include(GetRevision)
 
 # If from command line, version info is not passed, use the git to generate a
 # version file. If GIT fails, use the previous known version.
@@ -23,28 +21,25 @@ set(VERSION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/VERSION)
 find_program(GIT_EXEC "git")
 message( STATUS "Looking for git ${GIT_EXEC}" )
 if( (NOT MOOSE_VERSION) AND GIT_EXEC)
-    execute_process( 
+    execute_process(
         COMMAND ${GIT_EXEC} describe --tags --long
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         OUTPUT_VARIABLE MOOSE_VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE
         )
-endif( )
-
-# Default to current date.
-if( (NOT MOOSE_VERSION)  )
-    NOW(TIMESTAMP)
-    set(MOOSE_VERSION "nightly-${TIMESTAMP}" )
+    message(STATUS "+ Writing ${MOOSE_VERSION} to ${VERSION_FILE}" )
+    file(WRITE ${VERSION_FILE} ${MOOSE_VERSION})
+elseif( (NOT MOOSE_VERSION) AND (NOT GIT_EXEC) )
+    message(STATUS "+ Reading ${VERSION_FILE}" )
+    file(READ ${VERSION_FILE} GIT_VERSION_OUTPUT )
 elseif(MOOSE_VERSION)
     message(STATUS "+ Using user specified VERSION = ${MOOSE_VERSION}" )
+    file(WRITE ${VERSION_FILE} ${MOOSE_VERSION})
 else()
     message(FATAL_ERROR "Could not determine MOOSE_VERSION" )
 endif( )
 
 message( STATUS "MOOSE Version ${MOOSE_VERSION}" )
-
-# Write VERSION to a file VERSION so that setup.py can use it.
-file(WRITE ${VERSION_FILE} ${MOOSE_VERSION} )
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -52,10 +47,8 @@ file(WRITE ${VERSION_FILE} ${MOOSE_VERSION} )
 # sure that we don't have any stray generated files lying around in the tree
 # (which would end up getting picked up by header search, instead of the correct
 # versions).
-
-message(STATUS "CMAKE_INSTALL_PREFIX : ${CMAKE_INSTALL_PREFIX}")
 if( CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
-    message(FATAL_ERROR 
+    message(FATAL_ERROR
         "======================================================================\n"
         "In-source builds are not allowed. Remove CMakeCache.txt and CMakeFiles\n"
         "directory and do something like this inside this directory \n"
@@ -101,6 +94,8 @@ option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_BOOST "Use boost library instead of GSL" ON)
 option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
+option(PARALLELIZED_SOLVERS "Use parallel version of GSOLVE. (alpha)" OFF )
+option(PARALLELIZED_CLOCK "High level parallelization of moose::Clock (alpha)" OFF )
 
 ################################# CMKAE MACROS #################################
 
@@ -148,6 +143,7 @@ if(GPROF AND DEBUG)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
 endif()
 
+
 ################################### TARGETS ####################################
 
 add_library(libmoose SHARED basecode/main.cpp)
@@ -175,7 +171,7 @@ set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 if(WITH_GSL)
     find_package(GSL 1.16)
     if(NOT GSL_FOUND)
-        message(FATAL_ERROR 
+        message(FATAL_ERROR
             "=====================================================================\n"
             " FATAL gsl(>1.16) not found.\n\n"
             " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
@@ -232,18 +228,18 @@ if(HDF5_FOUND)
     add_definitions( -DUSE_HDF5 )
     if(HDF5_USE_STATIC_LIBRARIES)
 	message(STATUS "Finding static HDF5 libraries in $ENV{HDF5_ROOT}")
-        find_library(HDF5_CXX_LIBRARIES NAMES libhdf5.a 
+        find_library(HDF5_CXX_LIBRARIES NAMES libhdf5.a
             PATHS $ENV{HDF5_ROOT}/lib $ENV{HDF5_ROOT}/lib64
             )
         find_library(HDF5_HL_LIBRARIES NAMES libhdf5_hl.a
-            PATHS $ENV{HDF5_ROOT}/lib $ENV{HDF5_ROOT}/lib64 
+            PATHS $ENV{HDF5_ROOT}/lib $ENV{HDF5_ROOT}/lib64
             )
         set(HDF5_LIBRARIES ${HDF5_CXX_LIBRARIES} ${HDF5_HL_LIBRARIES})
     endif()
 
-    
+
     # Make sure, HDF5_HL_LIBRARIES are set. The COMPONENTS in find_package may
-    # or may not work. See BhallaLab/moose-core#163. 
+    # or may not work. See BhallaLab/moose-core#163.
     if(NOT HDF5_HL_LIBRARIES)
         set(HDF5_HL_LIBRARIES ${HDF5_HL_LIBRARIES})
     endif(NOT HDF5_HL_LIBRARIES)
@@ -319,9 +315,15 @@ if(WITH_MPI)
     endif()
 endif(WITH_MPI)
 
-# Always use private version of muparser. We have some custom edits.
-add_subdirectory(external/muparser)
-list(APPEND MOOSE_LIBRARIES muparser)
+pkg_check_modules(MUPARSER muparser)
+if(MUPARSER_FOUND)
+    message(STATUS "Using system muparser ${MUPARSER_VERSION}")
+    list(APPEND SYSTEM_SHARED_LIBS ${MUPARSER_LIBRARIES})
+else()
+    message(STATUS "Using private muparser")
+    add_subdirectory(external/muparser)
+    list(APPEND MOOSE_LIBRARIES muparser)
+endif()
 
 # Add subdirectroeis
 add_subdirectory(basecode)
@@ -353,15 +355,15 @@ list(APPEND MOOSE_LIBRARIES
     randnum
     scheduling
     moose_mpi
-    biophysics 
-    utility 
-    kinetics 
+    biophysics
+    utility
+    kinetics
     synapse
     intfire
-    hsolve 
+    hsolve
     mesh
     signeur
-    diffusion 
+    diffusion
     ksolve
     device
     basecode
@@ -387,7 +389,7 @@ if(MACOSX)
         ${CMAKE_DL_LIBS}
         )
 ELSE(MACOSX)
-    target_link_libraries(libmoose 
+    target_link_libraries(libmoose
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
@@ -423,17 +425,29 @@ install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     DESTINATION bin
     )
 
-# This target is built by pymoose/CMakeLists.txt file.
-if(WITH_PYTHON)
-    install(CODE 
-        "
-        execute_process(
-            COMMAND ${PYTHON_EXECUTABLE} setup.py install --prefix=${CMAKE_INSTALL_PREFIX}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
-            )
-        "
-        )
+# INSTALL python module.
+# This target is built by pymoose/CMakeLists.txt file. Using the --prefix option
+# always override debian default installation directory. It will be installed in
+# site-packages instead of dist-packages.
+# See https://bugs.launchpad.net/ubuntu/+source/python2.6/+bug/362570
+# HACK: Get platform information from python and use it to fix the layout.
+execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} -mplatform OUTPUT_VARIABLE _platform_desc
+    )
+message( STATUS "Platform ${_platform_desc}" )
 
+if(WITH_PYTHON)
+    set(EXTRA_ARGS "--prefix ${CMAKE_INSTALL_PREFIX}")
+    if( ${_platform_desc} MATCHES ".*(Ubuntu|Debian).*" )
+        list( APPEND EXTRA_ARGS "--install-layout=deb" )
+    endif( )
+
+    install(CODE
+        "execute_process(
+            COMMAND ${PYTHON_EXECUTABLE} setup.py install ${EXTRA_ARGS}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
+            )"
+            )
 endif(WITH_PYTHON)
 
 # Print message to start build process

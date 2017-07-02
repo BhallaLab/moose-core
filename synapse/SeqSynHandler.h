@@ -25,7 +25,7 @@
  */
 class SeqSynHandler: public SynHandlerBase
 {
-	public: 
+	public:
 		SeqSynHandler();
 		~SeqSynHandler();
 		SeqSynHandler& operator=( const SeqSynHandler& other );
@@ -55,34 +55,21 @@ class SeqSynHandler: public SynHandlerBase
  		double getSeqDt() const;
 		void setHistoryTime( double v );
  		double getHistoryTime() const;
-		void setBaseScale( double v );
- 		double getBaseScale() const;
-		void setSequenceScale( double v );
- 		double getSequenceScale() const;
-		void setSynapseOrder( vector< unsigned int> v );
- 		vector< unsigned int> getSynapseOrder() const;
-		void setSynapseOrderOption( int v );
- 		int getSynapseOrderOption() const;
+		void setResponseScale( double v );
+ 		double getResponseScale() const;
  		double getSeqActivation() const; // summed activation of syn chan
-		void setPlasticityScale( double v );
- 		double getPlasticityScale() const;
-		void setSequencePower( double v );
- 		double getSequencePower() const;
+		void setWeightScale( double v );
+ 		double getWeightScale() const;
  		vector< double > getWeightScaleVec() const;
  		vector< double > getKernel() const;
  		vector< double > getHistory() const;
 
 		////////////////////////////////////////////////////////////////
-		// Utility func
-		int numHistory() const;
-		void refillSynapseOrder( unsigned int newSize );
-		void fixSynapseOrder();
-		////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	private:
 		void updateKernel();
 		/*
-		 * Here I would like to put in a sparse matrix. 
+		 * Here I would like to put in a sparse matrix.
 		 * Each timestep is a row
 		 * Each column is a neuron
 		 * Each value is the weight, though I could also look this up.
@@ -95,61 +82,31 @@ class SeqSynHandler: public SynHandlerBase
 		 * Then run through all available places.
 		 */
 		string kernelEquation_;
-		unsigned int kernelWidth_; // Width in terms of number of synapses 
+		unsigned int kernelWidth_; // Width in terms of number of synapses
 
-		/// Time to store history. KernelDt defines num of rows
-		double historyTime_;	
+		// Time to store history. KernelDt defines num of rows
+		double historyTime_;
 		double seqDt_;	// Time step for successive entries in kernel
-		/// Scaling factor for baseline synaptic responses.
-		double baseScale_; 
-		/// Scaling factor for sequence recognition responses.
-		double sequenceScale_; 
-
-		/**
-		 * Scaling factor for short-term plastic weight changes in each 
-		 * synapse arising from sequential input.
-		 */
-		double plasticityScale_;
-
-		/**
-		 * Exponent to use for the outcome of the sequential calculations.
-		 * This is needed because linear summation of terms in the kernel
-		 * means that a brief stong sequence match is no better than lots
-		 * of successive low matches. In other words, 12345 is no better
-		 * than 11111.
-		 */
-		double sequencePower_;
+		// Scaling factor for sustained activation of synapse from response
+		double responseScale_;
+		// Scaling factor for weight changes in each synapse from response
+		double weightScale_;
 
 		///////////////////////////////////////////
 		// Some readonly fields
 		double seqActivation_; // global activation if sequence recognized
 
 		// Weight scaling based on individual synapse sequence tuning.
-		vector< double > weightScaleVec_; 
-		
+		vector< double > weightScaleVec_;
+
 		///////////////////////////////////////////
 		// Tracks the spikes that came in recently, as input to correlation
 		// analysis for sequence recognition.
-		vector< double > latestSpikes_; 
+		vector< double > latestSpikes_;
 
 		///////////////////////////////////////////
-		vector< vector<  double > > kernel_; ///Kernel for seq selectivity
-		RollingMatrix history_;	/// Rows = time; cols = synInputs
-		/**
-		 * Remaps synapse order to avoid correlations based on presynaptic 
-		 * object Id order, or on connection building order. This 
-		 * undesirable ordering occurs even when random synaptic
-		 * projections are used. User can alter as preferred. This is 
-		 * simply a look up table so that the incoming synapse index is
-		 * remapped: index_on_Handler = synapseOrder_[original_syn_index]
-		 * This must only have numbers from zero to numSynapses, and should
-		 * normally have all the numbers.
-		 */
-		vector< unsigned int > synapseOrder_; 
-
-		/// Options: -2: User. -1: ordered. 0: random by system seed. 
-		/// > 0: Random by seed specified by this number
-		int synapseOrderOption_;
+		vector< vector<  double > > kernel_;	//Kernel for seq selectivity
+		RollingMatrix history_;	// Rows = time; cols = synInputs
 
 		vector< Synapse > synapses_;
 		priority_queue< PreSynEvent, vector< PreSynEvent >, CompareSynEvent > events_;

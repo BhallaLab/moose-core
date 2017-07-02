@@ -33,48 +33,48 @@ SrcFinfo2< double, double >* DifShellBase::outerDifSourceOut(){
 
 const Cinfo* DifShellBase::initCinfo()
 {
-    
+
   static DestFinfo process( "process",
 			    "Handles process call",
 			    new ProcOpFunc< DifShellBase>(&DifShellBase::process ) );
   static DestFinfo reinit( "reinit",
 			   "Reinit happens only in stage 0",
 			   new ProcOpFunc< DifShellBase>( &DifShellBase::reinit ));
-    
+
   static Finfo* processShared[] = {
     &process, &reinit
   };
 
   static SharedFinfo proc(
-			  "proc", 
+			  "proc",
 			  "Shared message to receive Process message from scheduler",
 			  processShared, sizeof( processShared ) / sizeof( Finfo* ));
-    
 
 
-  
+
+
   static DestFinfo reaction( "reaction",
 			     "Here the DifShell receives reaction rates (forward and backward), and concentrations for the "
 			     "free-buffer and bound-buffer molecules.",
 			     new EpFunc4< DifShellBase, double, double, double, double >( &DifShellBase::buffer ));
-    
+
   static Finfo* bufferShared[] = {
     DifShellBase::concentrationOut(), &reaction
   };
-  
+
   static SharedFinfo buffer( "buffer",
 			     "This is a shared message from a DifShell to a Buffer (FixBuffer or DifBuffer). " ,
 			     bufferShared,
 			     sizeof( bufferShared ) / sizeof( Finfo* ));
   /////
-  
-  
-  
- 
+
+
+
+
   static DestFinfo fluxFromOut( "fluxFromOut",
 				"Destination message",
 				new EpFunc2< DifShellBase, double, double > ( &DifShellBase::fluxFromOut ));
- 
+
   static Finfo* innerDifShared[] = {
     &fluxFromOut,  DifShellBase::innerDifSourceOut(),
   };
@@ -87,7 +87,7 @@ const Cinfo* DifShellBase::initCinfo()
 
   static DestFinfo fluxFromIn( "fluxFromIn", "",
 			       new EpFunc2< DifShellBase, double, double> ( &DifShellBase::fluxFromIn ) );
-    
+
   static Finfo* outerDifShared[] = {
     &fluxFromIn,  DifShellBase::outerDifSourceOut(),
   };
@@ -96,8 +96,8 @@ const Cinfo* DifShellBase::initCinfo()
 				"Using this message, an outer shell sends to, and receives from its inner shell." ,
 				outerDifShared,
 				sizeof( outerDifShared ) / sizeof( Finfo* ));
- 
-  static ElementValueFinfo< DifShellBase, double> C( "C", 
+
+  static ElementValueFinfo< DifShellBase, double> C( "C",
 						     "Concentration C",// is computed by the DifShell",
 						     &DifShellBase::setC,
 						     &DifShellBase::getC);
@@ -136,7 +136,7 @@ const Cinfo* DifShellBase::initCinfo()
 							     &DifShellBase::getInnerArea );
 
   static DestFinfo mmPump( "mmPump", "Here DifShell receives pump outflux",
-			   new EpFunc2< DifShellBase, double, double >( &DifShellBase::mmPump ) );  
+			   new EpFunc2< DifShellBase, double, double >( &DifShellBase::mmPump ) );
   static DestFinfo influx( "influx", "",
 			   new EpFunc1< DifShellBase, double > (&DifShellBase::influx ));
   static DestFinfo outflux( "outflux", "",
@@ -264,7 +264,7 @@ void DifShellBase::setValence(const Eref& e, double valence )
   vSetValence(e,valence);
 }
 
-double DifShellBase::getValence(const Eref& e ) const 
+double DifShellBase::getValence(const Eref& e ) const
 {
   return vGetValence(e);
 }
@@ -452,62 +452,4 @@ void DifShellBase::hillPump(const Eref& e,
 			    unsigned int hill )
 {
   vHillPump(e, vMax, Kd, hill );
-}
-void DifShellBase::vSetSolver( const Eref& e, Id hsolve )
-{;}
-
-void DifShellBase::zombify( Element* orig, const Cinfo* zClass, 
-			    Id hsolve )
-{
-  if ( orig->cinfo() == zClass )
-    return;
-  unsigned int start = orig->localDataStart();
-  unsigned int num = orig->numLocalData();
-  if ( num == 0 )
-    return;
-  unsigned int len = 12;
-  vector< double > data( num * len );
-
-  unsigned int j = 0;
-	
-  for ( unsigned int i = 0; i < num; ++i ) {
-    Eref er( orig, i + start );
-    const DifShellBase* ds = 
-      reinterpret_cast< const DifShellBase* >( er.data() );
-    data[j + 0] = ds->getC( er );
-    data[j + 1] = ds->getCeq( er );
-    data[j + 2] = ds->getD( er );
-    data[j + 3] = ds->getValence( er );
-    data[j + 4] = ds->getLeak( er );
-    data[j + 5] = ds->getShapeMode( er );
-    data[j + 6] = ds->getLength( er );
-    data[j + 7] = ds->getDiameter( er );
-    data[j + 8] = ds->getThickness( er );
-    data[j + 9] = ds->getVolume( er );
-    data[j + 10] = ds->getOuterArea( er );
-    data[j + 11] = ds->getInnerArea( er );
-    j += len;
-  }
-  orig->zombieSwap( zClass );
-  j = 0;
-  for ( unsigned int i = 0; i < num; ++i ) {
-    Eref er( orig, i + start );
-    DifShellBase* ds = 
-      reinterpret_cast< DifShellBase* >( er.data() );
-    ds->vSetSolver(er,hsolve);
-    ds->setC(er, data[j+0]);
-    ds->setCeq(er, data[j + 1]);
-    ds->setD(er, data[j + 2]);
-    ds->setValence(er, data[j + 3]);
-    ds->setLeak(er, data[j + 4]);
-    ds->setShapeMode(er, data[j + 5]);
-    ds->setLength(er, data[j + 6]);
-    ds->setDiameter(er, data[j + 7]);
-    ds->setThickness(er, data[j + 8]);
-    ds->setVolume(er, data[j + 9]);
-    ds->setOuterArea(er, data[j + 10]);
-    ds->setInnerArea(er, data[j + 11]);
-    j += len; //??
-  }
-	
 }

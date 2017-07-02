@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #########################################################################
 ## rdesigneur0_4.py ---
 ## This program is part of 'MOOSE', the
@@ -17,26 +18,26 @@ import os
 # Check if DISPLAY environment variable is properly set. If not, warn the user
 # and continue.
 hasDisplay = True
-hasMoogli = False
 display = os.environ.get('DISPLAY',  '' )
 if not display:
     hasDisplay = False
     print( "Warning: Environment variable DISPLAY is not set."
-            " Did you forget to pass -X or -Y switch to ssh command?\n" 
+            " Did you forget to pass -X or -Y switch to ssh command?\n"
             "Anyway, MOOSE will continue without graphics.\n"
             )
 
+hasMoogli = True
 
 if hasDisplay:
-    try: 
+    try:
         from PyQt4 import QtGui
         import moogli
         import moogli.extensions.moose
         app = QtGui.QApplication(sys.argv)
-        hasMoogli = True
     except Exception as e:
         print( 'Warning: Moogli not found. All moogli calls will use dummy functions' )
         hasMoogli = False
+
 
 runtime = 0.0
 moogliDt = 1.0
@@ -65,15 +66,13 @@ def interlude( view ):
     view.mooGroup.set("color", val, view.mapper)
     view.yaw( rotation )
     #print moogliDt, len( val ), runtime
-    currt = moose.element("/clock").currentTime
-    view.timecb.set_title( 'T = {:.3f} s'.format( currt ) )
-    if currt >= runtime:
+    if moose.element("/clock").currentTime >= runtime:
         view.stop()
 
 # This func is used for later viewers, that don't handle advancing time.
 def interlude2( view ):
     val = [ moose.getField( i, view.mooField, "double" ) * view.mooScale for i in view.mooObj ]
-    
+
     view.mooGroup.set("color", val, view.mapper)
     view.yaw( rotation )
     if moose.element("/clock").currentTime >= runtime:
@@ -107,8 +106,8 @@ def makeMoogli( rd, mooObj, moogliEntry, fieldInfo ):
         #print "########### Len( cpa, mooObj ) = ", len( cpa ), len( mooObj ), len( updateShapes )
         updateGroup.attach_shapes( updateShapes )
 
-    normalizer = moogli.utilities.normalizer( 
-                    moogliEntry[5], moogliEntry[6], 
+    normalizer = moogli.utilities.normalizer(
+                    moogliEntry[5], moogliEntry[6],
                     clipleft =True,
                     clipright = True )
     colormap = moogli.colors.MatplotlibColorMap(matplotlib.cm.rainbow)
@@ -148,34 +147,13 @@ def makeMoogli( rd, mooObj, moogliEntry, fieldInfo ):
                                      moogliEntry[5],
                                      moogliEntry[6]))
     cb.set_num_labels(3)
-
-    # Use the text title on a colorbar to display the current time!!
-    # Spectacularly ugly hack, but I was unable to find other ways to put
-    # text in a predefined place in a moogli view.
-    timecb = moogli.widgets.ColorBar( id="timecb",
-        title = "T = 0 s",
-        text_color=moogli.colors.BLACK,
-        position=moogli.geometry.Vec3f(0.1, -0.01, 0.0),
-        size=moogli.geometry.Vec3f(0.01, 0.02, 0.0),
-        text_font="/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-R.ttf",
-        orientation=0.0,
-        text_character_size=16,
-        label_formatting_precision=1,
-        colormap=moogli.colors.MatplotlibColorMap(matplotlib.cm.rainbow),
-        color_resolution=2,
-        scalar_range=moogli.geometry.Vec2f( 0.0, 1.0 )
-    )
-    timecb.set_num_labels( 0 )
-
     view.attach_color_bar(cb)
-    view.attach_color_bar(timecb)
     view.rd = rd
     view.mooObj = displayObj
     view.mooGroup = updateGroup
     view.mooField = mooField
     view.mooScale = fieldInfo[2]
     view.mapper = mapper
-    view.timecb = timecb
     viewer.attach_view(view)
     return viewer
 
