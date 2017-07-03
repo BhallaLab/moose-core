@@ -67,6 +67,7 @@
 #include "../basecode/Id.h"
 #include "../basecode/ObjId.h"
 #include "../utility/utility.h"
+#include "../utility/print_function.hpp"
 #include "../shell/Shell.h"
 
 #include "moosemodule.h"
@@ -262,7 +263,8 @@ int moose_ObjId_init_from_path(_ObjId * self, PyObject * args,
         if ((basetype != NULL) && PyType_IsSubtype(mytype, basetype))
         {
             // Fine. This path already exits.
-            warn << "Path " << self->oid_.path( ) << "alread exists. Not creating nothing!" << endl;
+            warn << "Path " << self->oid_.path( ) << " already exists. Doing nothing.";
+            moose::showWarn( warn.str( ) );
             return 0;
         }
 #endif
