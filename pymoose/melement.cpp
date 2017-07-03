@@ -230,7 +230,7 @@ int moose_ObjId_init_from_path(_ObjId * self, PyObject * args,
             {
                 return 0;
             }
-            err << "cannot convert " << Field<string>::get(self->oid_, "className")
+            err << "cannot convert moose." << Field<string>::get(self->oid_, "className")
                 << " to " << mytypename
                 << "To get the existing object use `moose.element(obj)` instead.";
             PyErr_SetString(PyExc_TypeError, err.str().c_str());
@@ -250,7 +250,8 @@ int moose_ObjId_init_from_path(_ObjId * self, PyObject * args,
         if ( ii != get_moose_classes().end() )
         {
             basetype = ii->second;
-            basetype_str = string(basetype->tp_name).substr(6); // remove `moose.` prefix from type name
+            // remove `moose.` prefix from type name
+            basetype_str = string(basetype->tp_name).substr(6);
         }
         else
         {
@@ -258,7 +259,6 @@ int moose_ObjId_init_from_path(_ObjId * self, PyObject * args,
             basetype = getBaseClass((PyObject*)self);
         }
 
-#if 0
         // NOTE: Existing paths are handled in Shell::doCreate function.
         if ((basetype != NULL) && PyType_IsSubtype(mytype, basetype))
         {
@@ -267,14 +267,11 @@ int moose_ObjId_init_from_path(_ObjId * self, PyObject * args,
             moose::showWarn( warn.str( ) );
             return 0;
         }
-#endif
 
         // element exists at this path, but it does not inherit from any moose class.
         // throw an error
-        err << "cannot convert "
-            << className
-            << " to "
-            << mytypename
+        err << "cannot convert moose." << className
+            << " to " << mytypename
             << ". To get the existing object use `moose.element(obj)` instead.";
         PyErr_SetString(PyExc_TypeError, err.str().c_str());
         return -1;

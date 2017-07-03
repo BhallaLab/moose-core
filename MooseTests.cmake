@@ -135,11 +135,11 @@ set_tests_properties(pymoose-test-calcium-hsolve
     )
 
 # Test accessing existing path without moose.element.
-ADD_TEST( NAME pymoose-access-existing-path
+ADD_TEST( NAME pymoose-test-path
     COMMAND ${TEST_COMMAND} 
-    ${PROJECT_SOURCE_DIR}/tests/python/test_accessing_existing_path.py
+    ${PROJECT_SOURCE_DIR}/tests/python/test_paths.py
     )
-set_tests_properties(pymoose-access-existing-path
+set_tests_properties(pymoose-test-path
     PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
     )
 
