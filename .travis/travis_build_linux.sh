@@ -39,7 +39,7 @@ PYTHON3="/usr/bin/python3"
     make && ctest --output-on-failure
     cd .. # Now with boost.
     mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && \
-        cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
+        cmake -DWITH_BOOST=ON -DDEBUG=ON -DQUIET_MODE=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
     make && ctest --output-on-failure
     sudo make install   # For testing doqcs database.
     cd ..
