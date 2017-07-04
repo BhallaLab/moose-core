@@ -212,13 +212,17 @@ Id Shell::doCreate( string type, ObjId parent, string name,
             warning( ss.str() );
             return Id();
         }
+
+        // TODO: This should be an error in future.
+        // This logic of handling already existing path is now handled in
+        // melements.cpp . Calling this section should become an error in
+        // future.
         if ( Neutral::child( parent.eref(), name ) != Id() )
         {
             stringstream ss;
-            ss << "Shell::doCreate: Object with same name already present: '"
-               << parent.path() << "/" << name << "'. No Element created";
-            cout << "Warn: " << ss.str( ) << endl;
-            warning( ss.str() );
+            ss << "Object with same path already present : " << parent.path()
+                << "/" << name;
+            moose::showWarn( ss.str() );
             return Id();
         }
         // Get the new Id ahead of time and pass to all nodes.

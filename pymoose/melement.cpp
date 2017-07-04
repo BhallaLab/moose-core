@@ -263,8 +263,10 @@ int moose_ObjId_init_from_path(_ObjId * self, PyObject * args,
         if ((basetype != NULL) && PyType_IsSubtype(mytype, basetype))
         {
             // Fine. This path already exits.
-            warn << "Path " << self->oid_.path( ) << " already exists. Doing nothing.";
-            moose::showWarn( warn.str( ) );
+            err << "Accessing existing paths using object constrcutors has been deprecated. Use "
+                << " moose.element to access existing object. In future "
+                << " this will be an error." << endl;
+            PyErr_WarnEx(PyExc_DeprecationWarning, err.str().c_str(), 1);
             return 0;
         }
 
