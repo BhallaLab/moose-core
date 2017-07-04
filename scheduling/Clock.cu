@@ -751,8 +751,8 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     for ( auto vp : pools )
     {
         CudaOdeSystem* pOde = new CudaOdeSystem( );
-        voxelPoolToCudaOdeSystem( vp, pOde );
-        pOde->print( );
+        //voxelPoolToCudaOdeSystem( vp, pOde );
+        //pOde->print( );
     }
 ***/
 
