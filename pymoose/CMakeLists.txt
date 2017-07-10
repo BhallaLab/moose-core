@@ -82,8 +82,8 @@ ELSE(MACOSX)
 endif(MACOSX)
 
 # Make this target dependant on all python files in python folder.
-add_custom_target(copy_python_files 
-    COMMAND ${CMAKE_COMMAND} -E copy_directory 
+add_custom_target(copy_python_files
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/python ${CMAKE_BINARY_DIR}/python
     COMMENT "Copying required python files and other files to build directory"
     VERBATIM
