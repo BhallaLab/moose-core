@@ -739,15 +739,16 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
      * build a datastructure to send over GPU.
      */
 
-   /***
+   
     vector< ObjId > elems;
     wildcardFind( "/##[TYPE=Ksolve]", elems );
+   
     assert( elems.size( ) == 1 );
     cout << "Debug: Total " << elems.size( ) << " ksolves are found " << endl;
     ObjId ks = elems[ 0 ];
     Ksolve* ksolve = reinterpret_cast< Ksolve* >( ks.eref().data( ) );
     vector<VoxelPools> pools = ksolve->getVoxelPools( );
-
+/**
     for ( auto vp : pools )
     {
         CudaOdeSystem* pOde = new CudaOdeSystem( );

@@ -88,7 +88,7 @@ def make_model( ):
     printPools( pools )
 
     t1 = time.clock()
-    moose.start( 100000 ) # Run the system
+    moose.start( 5 ) # Run the system
 
     print( '=== After simulation' )
     printPools( pools )
