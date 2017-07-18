@@ -64,12 +64,14 @@ set_tests_properties(pymoose-neuroml-reader-test
     PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
     )
 
+if(HDF5_FOUND)
 ADD_TEST(NAME pymoose-nsdf-sanity-test
     COMMAND ${TEST_COMMAND} ${PROJECT_SOURCE_DIR}/tests/python/test_nsdf.py
     )
 set_tests_properties(pymoose-nsdf-sanity-test 
     PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
     )
+endif(HDF5_FOUND)
 
 # Test Ksolve
 ADD_TEST(NAME pymoose-ksolve-test
