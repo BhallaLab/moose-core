@@ -80,16 +80,10 @@ ELSE(WIN32)
         FIND_PATH(GSL_INCLUDE_DIRS NAMES gsl/gsl_blas.h
             PATHS ${GSL_ROOT_DIR}/include NO_DEFAULT_PATH
             )
-    else( )
-        FIND_LIBRARY(GSL_LIB 
-            NAMES ${GSL_LIB_NAMES} 
-            PATHS ${GSL_ROOT_DIR}/lib NO_DEFAULT_PATH
-            )
+    else(GSL_ROOT_DIR)
+        FIND_LIBRARY(GSL_LIB NAMES ${GSL_LIB_NAMES} )
+        FIND_LIBRARY(GSLCBLAS_LIB NAMES ${GSL_CBLAS_LIB_NAMES})
 
-        FIND_LIBRARY(GSLCBLAS_LIB 
-            NAMES ${GSL_CBLAS_LIB_NAMES}
-            PATHS ${GSL_ROOT_DIR}/lib NO_DEFAULT_PATH
-            )
         IF (GSL_LIB AND GSLCBLAS_LIB)
             SET (GSL_LIBRARIES ${GSL_LIB} ${GSLCBLAS_LIB})
         ENDIF (GSL_LIB AND GSLCBLAS_LIB)
@@ -102,7 +96,7 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 # FIND version
-message(STATUS "Searching in ${GSL_INCLUDE_DIRS}") 
+# message(STATUS "Searching in ${GSL_INCLUDE_DIRS}") 
 if(GSL_INCLUDE_DIRS)
     file(READ "${GSL_INCLUDE_DIRS}/gsl/gsl_version.h" GSL_VERSION_TEXT)
     string(REGEX REPLACE ".*define[ ]+GSL_MAJOR_VERSION[ ]*([0-9]+).*"  "\\1"

@@ -36,10 +36,10 @@ if(COMPILER_SUPPORTS_CXX11)
     endif(APPLE)
 else(COMPILER_SUPPORTS_CXX11)
     add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS -DBOOST_NO_SCOPED_ENUMS )
-    message(FATAL_ERROR 
-        "The compiler ${CMAKE_CXX_COMPILER} is too old. 
-        Please use a compiler which has c++11 support". 
-        )
+    message(FATAL_ERROR "\
+        The compiler ${CMAKE_CXX_COMPILER} is too old. \
+        Please use a compiler which has c++11 support.
+        ")
 endif(COMPILER_SUPPORTS_CXX11)
 
 
