@@ -22,8 +22,8 @@ set +e
 rvm get head
 brew update
 #brew outdated cmake || brew install cmake
-brew install homebrew/science/gsl
-brew install homebrew/science/hdf5
+brew install gsl
+brew install hdf5
 brew install homebrew/science/libsbml
 #brew outdated python || brew install python
 #brew outdated numpy || brew install homebrew/python/numpy
