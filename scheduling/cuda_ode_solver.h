@@ -24,7 +24,7 @@ __host__ __device__
 void deriv(double* x0, double* array, double c, int size,  double* ki, double* ko);
 
 __global__ 
-void rk4(double* x0, double* array, double* h, int size);
+void rk4(double* x0, double* array, double* h, int* size);
 
 
 #endif /* end of include guard: CUDA_ODE_SOLVER_H */

@@ -705,6 +705,28 @@ void Clock::buildTicks( const Eref& e )
  * reason, it has to pick up where it left off.
  * The "runtime" argument is the additional time to run the simulation.
  */
+ void foo( ){
+
+        vector< ObjId > elems;
+        wildcardFind( "/##[TYPE=Ksolve]", elems );
+   
+        assert( elems.size( ) == 1 );
+        cout << "Debug: Total " << elems.size( ) << " ksolves are found " << endl;
+        ObjId ks = elems[ 0 ];
+    
+        Ksolve* ksolve = reinterpret_cast< Ksolve* >( ks.eref().data( ) );
+        vector<VoxelPools> pools = ksolve->getVoxelPools( );
+       
+        for ( auto vp : pools )
+        {
+            CudaOdeSystem* pOde = new CudaOdeSystem( );
+            voxelPoolToCudaOdeSystem( vp, pOde );
+            pOde->print( );
+        }
+        //assert(pools.size() > 1000000000);
+        cout << "hey there 111" << endl;
+        }
+    
 void Clock::handleStart( const Eref& e, double runtime, bool notify )
 {
     notify_ = notify;
@@ -740,45 +762,13 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
      */
 
    
-    vector< ObjId > elems;
-    wildcardFind( "/##[TYPE=Ksolve]", elems );
-   
-    assert( elems.size( ) == 1 );
-    cout << "Debug: Total " << elems.size( ) << " ksolves are found " << endl;
-    ObjId ks = elems[ 0 ];
-    Ksolve* ksolve = reinterpret_cast< Ksolve* >( ks.eref().data( ) );
-    vector<VoxelPools> pools = ksolve->getVoxelPools( );
-/**
-    for ( auto vp : pools )
-    {
-        CudaOdeSystem* pOde = new CudaOdeSystem( );
-        //voxelPoolToCudaOdeSystem( vp, pOde );
-        //pOde->print( );
-    }
-***/
+    foo();
+   //pools = vector<VoxelPools>();
+    //delete[] &pools;
+    //cout << "hey there 222" << endl;
+    //The following line is not working
+    //pools.~vector<VoxelPools>();
 
-
-#if 0
-//Allocating memory onto gpu.
-
-double *d_dy, *d_y, *d_currentTime, *d_time;
-size_t *d_n;
-
-checkCudaErrors(cudaMalloc( (void**)&d_dy, sizeof(double) * related_to_voxel1 ));
-checkCudaErrors(cudaMalloc( (void**)&d_y, sizeof(double) * related_to_voxel2 ));
-checkCudaErrors(cudaMalloc( (void**)&d_currentTime, sizeof(double)*1 ));
-checkCudaErrors(cudaMalloc( (void**)&d_time, sizeof(double) * 1 ));
-checkCudaErrors(cudaMalloc( (void**)&d_n, sizeof(size_t) * 1 ));
-
-//Copying data to gpu
-
-checkCudaErrors(cudaMemcpy( d_dy, dy, sizeof(double) * related_to_voxel1, cudaMemcpyHostToDevice ));
-checkCudaErrors(cudaMemcpy( d_y, y, sizeof(double) * related_to_voxel2, cudaMemcpyHostToDevice ));
-checkCudaErrors(cudaMemcpy( d_currentTime, currentTime, sizeof(double) * 1, cudaMemcpyHostToDevice ));
-checkCudaErrors(cudaMemcpy( d_time, time, sizeof(double) * 1, cudaMemcpyHostToDevice ));
-checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice ));
-
-#endif
 
     int nx_voxel = 10;
     int nx_species = 99;
@@ -788,7 +778,7 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
     double hx = 0.005;
     
     //Filling up the a_mat and x0
-    
+    //cout << "het there 2222" << endl;
     for(int i = 0; i < nx_species; ++i){
         for(int j = 0; j < nx_species; ++j){
             a_mat[i * nx_species + j] = rand() % 9 + 1; 
@@ -800,22 +790,32 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
     }
     
     //Porting the problem onto gpu
-    double *d_x0, *d_a_mat, d_h;
-    int  d_n_species;
-    
-    cudaMalloc( (void**)&d_x0, sizeof(double) * nx_species * nx_voxel );
-    cudaMalloc( (void**)&d_a_mat, sizeof(double) * species_square );
-    cudaMalloc( (void**)&d_h, sizeof(double) * 1 );
-    cudaMalloc( (void**)&d_n_species, sizeof(int) * 1 );
+    //Earlier d_h and d_n_species were not pointers, allocation is only occuring
+    //if i declare pointers, it is not occuring if i do not give a pointer in
+    //the start only
 
-    cudaMemcpy( d_x0, x0x, sizeof(double) * nx_species * nx_voxel, cudaMemcpyHostToDevice );
-    cudaMemcpy( d_a_mat, a_mat, sizeof(double) * species_square, cudaMemcpyHostToDevice );
-    cudaMemcpy( &d_h, &hx, sizeof(double) * 1, cudaMemcpyHostToDevice );
-    cudaMemcpy( &d_n_species, &nx_species, sizeof(int) * 1, cudaMemcpyHostToDevice );
+    double *d_x0, *d_a_mat, *d_h;
+    int *d_n_species;
+    
+    checkCudaErrors(cudaMalloc( (void**)&d_x0, sizeof(double) * nx_species *
+               nx_voxel ));
+    checkCudaErrors(cudaMalloc( (void**)&d_a_mat, sizeof(double) *
+                species_square ));
+    checkCudaErrors(cudaMalloc( (void**)&d_h, sizeof(double) * 1 ));
+    checkCudaErrors(cudaMalloc( (void**)&d_n_species, sizeof(int) * 1 ));
+
+    checkCudaErrors(cudaMemcpy( d_x0, x0x, sizeof(double) * nx_species *
+                nx_voxel, cudaMemcpyHostToDevice ));
+    checkCudaErrors(cudaMemcpy( d_a_mat, a_mat, sizeof(double) * species_square,
+                cudaMemcpyHostToDevice ));
+    //cudaThreadSynchronize();
+    
+    checkCudaErrors(cudaMemcpy( d_h, &hx, sizeof(double) * 1, cudaMemcpyHostToDevice ));
+    checkCudaErrors(cudaMemcpy( d_n_species, &nx_species, sizeof(int) * 1, cudaMemcpyHostToDevice ));
 
     dim3 blocks( 1, 1, 1 );
     dim3 threads( 10, 1, 1 );
-
+    //cout << "hey there 222" << endl;
 
     for ( isRunning_ = (activeTicks_.size() > 0 );
             isRunning_ && currentStep_ < nSteps_; currentStep_ += stride_ )
@@ -837,7 +837,9 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
                     //cout << activeTicksMap_[ *k ] << endl;
                     //cuda_ksolve( NULL,  NULL, currentTime_, currentTime_ + runTime_, 1);
                     //cuda_dum(d_dum)l;
-                   rk4 <<< blocks, threads >>> ( d_x0, d_a_mat, &d_h, d_n_species );
+                    rk4 <<< blocks, threads >>> ( d_x0, d_a_mat, d_h, d_n_species );
+                    cudaDeviceSynchronize();
+                    //checkCudaErrors(cudaGetLastError());
                     cout << "calling_cuda" << endl;
                 }
                 else
@@ -861,13 +863,16 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
         }
     }
 
-    cudaMemcpy( x0x, d_x0, sizeof(double) * nx_species * nx_voxel, cudaMemcpyDeviceToHost );
-    cudaMemcpy( a_mat, d_a_mat, sizeof(double) * species_square, cudaMemcpyDeviceToHost );
+    checkCudaErrors(cudaMemcpy( x0x, d_x0, sizeof(double) * nx_species *
+                nx_voxel, cudaMemcpyDeviceToHost ));
+    checkCudaErrors(cudaMemcpy( a_mat, d_a_mat, sizeof(double) * species_square,
+                cudaMemcpyDeviceToHost ));
     
-    cudaFree( d_x0 );
-    cudaFree( d_a_mat );
-    cudaFree( &d_h );
-    cudaFree( &d_n_species );
+    checkCudaErrors(cudaFree( d_x0 ));
+    checkCudaErrors(cudaFree( d_a_mat ));
+    //earlier the foellowing two had & infront of them
+    checkCudaErrors(cudaFree( d_h ));
+    checkCudaErrors(cudaFree( d_n_species ));
 
 
     if ( activeTicks_.size() == 0 )
@@ -886,24 +891,6 @@ checkCudaErrors(cudaMemcpy( d_n, n, sizeof(size_t) * 1, cudaMemcpyHostToDevice )
     }
 #endif
 
-#if 0
-//Transferring back the data to cpu
-
-checkCudaErrors(cudaMemcpy( dy, d_dy, sizeof(double) * related_to_voxel1, cudaMemcpyDeviceToHost ));
-checkCudaErrors(cudaMemcpy( y, d_y, sizeof(double) * related_to_voxel2, cudaMemcpyDeviceToHost ));
-checkCudaErrors(cudaMemcpy( currentTime, d_currentTime, sizeof(double) * 1, cudaMemcpyDeviceToHost ));
-checkCudaErrors(cudaMemcpy( time, d_time, sizeof(double) * 1, cudaMemcpyDeviceToHost ));
-checkCudaErrors(cudaMemcpy( n, d_n, sizeof(size_t) * 1, cudaMemcpyDeviceToHost ));
-
-//Freeing up the memory on gpu
-
-checkCudaErrors(cudaFree( d_dy ));
-checkCudaErrors(cudaFree( d_y ));
-checkCudaErrors(cudaFree( d_currentTime ));
-checkCudaErrors(cudaFree( d_time ));
-checkCudaErrors(cudaFree( d_n ));
-
-#endif
 
     // Finish all.
     info_.dt = dt_;
