@@ -371,7 +371,7 @@ void GssaVoxelPools::xferIn( XferInfo& xf,
         // cout << x << "	i = " << *i << *j << "	m = " << *m << endl;
         double dx = *i++ - *j++;
         double base = floor( dx );
-        if ( rng_.uniform() > dx - base )
+        if ( rng_.uniform() >= (dx - base) )
             x += base;
         else
             x += base + 1.0;
@@ -425,7 +425,7 @@ void GssaVoxelPools::xferInOnlyProxies(
         if ( *k >= stoichPtr_->getNumVarPools() && *k < proxyEndIndex )
         {
             double base = floor( *i );
-            if ( rng_.uniform() > *i - base )
+            if ( rng_.uniform() >= (*i - base) )
                 varSinit()[*k] = (varS()[*k] += base );
             else
                 varSinit()[*k] = (varS()[*k] += base + 1.0 );
