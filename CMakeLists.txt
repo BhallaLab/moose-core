@@ -150,11 +150,11 @@ set(STATIC_LIBRARIES "" )
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 
 if(WITH_GSL)
-    find_package(GSL 1.16)
+    find_package(GSL 1.16 REQUIRED)
     if(NOT GSL_FOUND)
         message(FATAL_ERROR
             "=====================================================================\n"
-            " FATAL gsl(>1.16) not found.\n\n"
+            " FATAL gsl(>=1.16) not found.\n\n"
             " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
             " Please install the `dev` or `devel` package e.g. \n"
             "     $ sudo apt-get install libgsl0-dev \n"
