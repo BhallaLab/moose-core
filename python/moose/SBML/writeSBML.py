@@ -12,15 +12,14 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Friday May 27 12:19:00 2016(+0530)
 Version
-Last-Updated: Fri Jul 28 14:20:00 2017(+0530)
-          By:
+Last-Updated: Fri Jul 28 17:20:00 2017(+0530)
+          By: HarshaRani
 **********************************************************************/
 /****************************
 
 '''
 import sys
 import re
-from collections import Counter
 import moose
 from moose.SBML.validation import validateModel
 from moose.chemUtil.chemConnectUtil import *
@@ -498,6 +497,8 @@ def parmUnit(rct_order, cremodel_):
         unit.setScale(0)
     return unit_stream
 
+def Counter(items):
+    return dict((i, items.count(i)) for i in items)
 
 def getSubprd(cremodel_, mobjEnz, type, neighborslist):
     if type == "sub":

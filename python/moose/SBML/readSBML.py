@@ -13,9 +13,9 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Thu May 12 10:19:00 2016(+0530)
 Version
-Last-Updated: Fri Jul 28 15:50:00 2017(+0530)
+Last-Updated: Fri Jul 28 17:50:00 2017(+0530)
 
-          By:
+          By:HarshaRani
 **********************************************************************/
 
 '''
@@ -493,13 +493,13 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,gro
     errorFlag = True
     reactSBMLIdMooseId = {}
     msg = ""
-    rName = ""
     reaction_ = None
 
     for ritem in range(0, model.getNumReactions()):
         reactionCreated = False
         groupName = ""
-
+        rName = ""
+        rId = ""
         reac = model.getReaction(ritem)
         group = ""
         reacAnnoInfo = {}
