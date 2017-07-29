@@ -1,33 +1,21 @@
-'''
-*******************************************************************
- * File:            readSBML.py
- * Description:
- * Author:          HarshaRani
- * E-mail:          hrani@ncbs.res.in
- ********************************************************************/
+# -*- coding: utf-8 -*-
+# *******************************************************************
+#  * File:            readSBML.py
+#  * Description:
+#  * Author:          HarshaRani
+#  * E-mail:          hrani@ncbs.res.in
+#
+# ** This program is part of 'MOOSE', the
+# ** Messaging Object Oriented Simulation Environment,
+# ** also known as GENESIS 3 base code.
+# **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
+# Created : Thu May 12 10:19:00 2016(+0530)
+# Version
+# Last-Updated: Fri Jul 28 17:50:00 2017(+0530)
+#
+#           By:HarshaRani
+# **********************************************************************/
 
-/**********************************************************************
-** This program is part of 'MOOSE', the
-** Messaging Object Oriented Simulation Environment,
-** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
-Created : Thu May 12 10:19:00 2016(+0530)
-Version
-Last-Updated: Fri Jul 28 17:50:00 2017(+0530)
-
-          By:HarshaRani
-**********************************************************************/
-
-'''
-
-import sys
-import os.path
-import collections
-import moose
-
-from moose.SBML.validation import validateModel
-
-import re
 '''
    TODO in
     -Compartment
@@ -51,6 +39,16 @@ import re
          ---- For Michaelis Menten kinetics km is not defined which is most of the case need to calculate
 '''
 
+import sys
+import os.path
+import collections
+import moose
+
+from moose.SBML.validation import validateModel
+
+import re
+
+
 foundLibSBML_ = False
 try:
     import libsbml
@@ -61,7 +59,7 @@ except ImportError:
 def mooseReadSBML(filepath, loadpath, solver="ee"):
     global foundLibSBML_
     if not foundLibSBML_:
-        print('No python-libsbml found.' 
+        print('No python-libsbml found.'
             '\nThis module can be installed by following command in terminal:'
             '\n\t easy_install python-libsbml'
             '\n\t apt-get install python-libsbml'
@@ -139,13 +137,13 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                     errorFlag = createCompartment(
                         basePath, model, comptSbmlidMooseIdMap)
 
-                    groupInfo = checkGroup(basePath,model)                        
+                    groupInfo = checkGroup(basePath,model)
                     if errorFlag:
                         specInfoMap = {}
                         errorFlag,warning = createSpecies(
                             basePath, model, comptSbmlidMooseIdMap, specInfoMap, modelAnnotaInfo,groupInfo)
                         #print(errorFlag,warning)
-                        
+
                         if errorFlag:
                             errorFlag = createRules(
                                 model, specInfoMap, globparameterIdValue)
@@ -154,7 +152,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                                     model, specInfoMap, modelAnnotaInfo, globparameterIdValue,groupInfo)
                         getModelAnnotation(
                             model, baseId, basePath)
-                        
+
                     if not errorFlag:
                         print(msg)
                         # Any time in the middle if SBML does not read then I
@@ -506,12 +504,12 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,gro
         reacAnnoInfo = getObjAnnotation(reac, modelAnnotaInfo)
         # if "Group" in reacAnnoInfo:
         #     group = reacAnnoInfo["Group"]
-        
+
         if (reac.isSetId()):
             rId = reac.getId()
             groups = [k for k, v in groupInfo.iteritems() if rId in v]
             if groups:
-                group = groups[0] 
+                group = groups[0]
         if (reac.isSetName()):
             rName = reac.getName()
             rName = rName.replace(" ", "_space_")
@@ -873,13 +871,13 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
 
             # if "Group" in specAnnoInfo:
             #     group = specAnnoInfo["Group"]
-            
+
             sName = None
             sId = spe.getId()
 
             groups = [k for k, v in groupInfo.iteritems() if sId in v]
             if groups:
-                group = groups[0] 
+                group = groups[0]
             if spe.isSetName():
                 sName = spe.getName()
                 sName = sName.replace(" ", "_space_")
@@ -908,7 +906,7 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
 
             if (spe.isSetNotes):
                 pullnotes(spe, poolId)
-            
+
             if specAnnoInfo:
                 if not moose.exists(poolId.path + '/info'):
                     poolInfo = moose.Annotator(poolId.path + '/info')
@@ -976,7 +974,7 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
                         if (rule_variable == sId):
                             found = True
                             break
-                
+
                 if not (found):
                     print(
                         "Invalid SBML: Either initialConcentration or initialAmount must be set or it should be found in assignmentRule but non happening for ",
@@ -1194,7 +1192,7 @@ if __name__ == "__main__":
         filepath = sys.argv[1]
         if not os.path.exists(filepath):
             print("Filename or path does not exist",filepath)
-            
+
         else:
             try:
                 sys.argv[2]
