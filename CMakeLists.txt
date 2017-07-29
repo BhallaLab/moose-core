@@ -455,17 +455,19 @@ include( CTest )
 # onto the console if a test fails.
 set(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
 
-add_test(moose.bin-raw-run moose.bin -u -q)
+# Run this test in debug mode. In Release mode, this does not do anything.
+if(DEBUG)
+    add_test(NAME moose.bin-raw-run COMMAND moose.bin -u -q)
+endif(DEBUG)
 
 ## PyMOOSE tests.
 set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)
+
 # Collect all python script in tests folder and run them.
-message(STATUS "Searching for tests in ${PYMOOSE_TEST_DIRECTORY}" )
 file(GLOB PY_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.py" )
 file(GLOB SH_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.sh" )
-set(TEST_SCRIPTS ${PY_TEST_SCRIPTS} ${SH_TEST_SCRIPTS})
-message(STATUS "Scripts ${TEST_SCRIPTS}")
 
+# Run python tests.
 foreach( _test_script ${PY_TEST_SCRIPTS} )
     get_filename_component( _test_name ${_test_script} NAME_WE)
     add_test( NAME ${_test_name}
@@ -477,15 +479,17 @@ foreach( _test_script ${PY_TEST_SCRIPTS} )
         )
 endforeach( )
 
-# # NOTE: These tests are not enabled yet. They take lot of time. Not all scripts
-# # are fixed yet.
-# # Test moose-examples with very short timeout.
-# ADD_TEST( NAME pymoose-test-moose-examples
-#     COMMAND ${TEST_COMMAND} -c "import moose; moose.test( timeout = 10 );"
-#     )
-# set_tests_properties(pymoose-test-moose-examples
-#    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
-#    )
+# Now run the bash tests.
+foreach( _test_script ${SH_TEST_SCRIPTS} )
+    get_filename_component( _test_name ${_test_script} NAME_WE)
+    add_test( NAME ${_test_name}
+        COMMAND bash ${_test_script}
+        WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+        )
+     set_tests_properties( ${_test_name}
+        PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+        )
+endforeach( )
 
 ############################ CPACK ######################################
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_cpack.cmake)
