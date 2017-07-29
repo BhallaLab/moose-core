@@ -456,6 +456,8 @@ include( CTest )
 set(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
 
 # Run this test in debug mode. In Release mode, this does not do anything.
+set(MOOSE_BIN_LOCATION $<TARGET_FILE:moose.bin>)
+message(STATUS "Executable moose.bin will be at ${MOOSE_BIN_LOCATION}" )
 if(DEBUG)
     add_test(NAME moose.bin-raw-run COMMAND moose.bin -u -q)
 endif(DEBUG)
