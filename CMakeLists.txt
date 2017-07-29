@@ -450,8 +450,35 @@ endif()
 
 
 ############################ CTEST ######################################
+include( CTest )
+# If CTEST_OUTPUT_ON_FAILURE environment variable is set, the output is printed
+# onto the console if a test fails.
+set(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/MooseTests.cmake)
+# Run this test in debug mode. In Release mode, this does not do anything.
+set(MOOSE_BIN_LOCATION $<TARGET_FILE:moose.bin>)
+message(STATUS "Executable moose.bin will be at ${MOOSE_BIN_LOCATION}" )
+if(DEBUG)
+    add_test(NAME moose.bin-raw-run COMMAND moose.bin -u -q)
+endif(DEBUG)
+
+## PyMOOSE tests.
+set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)
+
+# Collect all python script in tests folder and run them.
+file(GLOB PY_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.py" )
+
+# Run python tests.
+foreach( _test_script ${PY_TEST_SCRIPTS} )
+    get_filename_component( _test_name ${_test_script} NAME_WE)
+    add_test( NAME ${_test_name}
+        COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
+        WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+        )
+     set_tests_properties( ${_test_name}
+        PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+        )
+endforeach( )
 
 ############################ CPACK ######################################
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_cpack.cmake)

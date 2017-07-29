@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 *******************************************************************
  * File:            writeSBML.py
@@ -39,10 +40,10 @@ except Exception as e:
     pass
 
 def mooseWriteSBML(modelpath, filename, sceneitems={}):
-    global foundLibSBML_ 
+    global foundLibSBML_
     msg = " "
     if not foundLibSBML_:
-        print('No python-libsbml found.' 
+        print('No python-libsbml found.'
             '\nThis module can be installed by following command in terminal:'
             '\n\t easy_install python-libsbml or'
             '\n\t apt-get install python-libsbml'
@@ -63,14 +64,14 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
     global nameList_
     nameList_ = []
     positionInfoexist = False
-    
+
     xmlns = SBMLNamespaces(3, 1)
     xmlns.addNamespace("http://www.w3.org/1999/xhtml", "xhtml")
     xmlns.addNamespace("http://www.moose.ncbs.res.in", "moose")
     xmlns.addNamespace("http://www.sbml.org/sbml/level3/version1/groups/version1", "groups")
     sbmlDoc = SBMLDocument(xmlns)
     sbmlDoc.setPackageRequired("groups",bool(0))
-    
+
     cremodel_ = sbmlDoc.createModel()
     cremodel_.setId(filename)
     cremodel_.setTimeUnits("time")
@@ -100,14 +101,14 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
         setupItem(modelpath,srcdesConnection)
         if not positionInfoexist:
             autoCoordinates(meshEntry,srcdesConnection)
-    
+
     writeUnits(cremodel_)
     modelAnno = writeSimulationAnnotation(modelpath)
     if modelAnno:
         cremodel_.setAnnotation(modelAnno)
     groupInfo = {}
     compartexist, groupInfo = writeCompt(modelpath, cremodel_)
-    
+
     if compartexist == True:
         species = writeSpecies( modelpath,cremodel_,sbmlDoc,sceneitems,groupInfo)
         if species:
@@ -160,7 +161,7 @@ def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
         enzSubt = ()
         compt = ""
         notesE = ""
-        
+
         if moose.exists(enz.path + '/info'):
             groupName = moose.element("/")
             Anno = moose.Annotator(enz.path + '/info')
@@ -220,7 +221,7 @@ def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
                                          "_" +
                                          "Complex_formation_"))
             enzyme.setId(enzsetId)
-            
+
             if groupName != moose.element('/'):
                 if groupName not in groupInfo:
                     groupInfo[groupName]=[enzsetId]
@@ -888,8 +889,8 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
                             speGroup[ele]=[spename]
                         else:
                             speGroup[ele].append(spename)
-                        
-                        
+
+
                     if sceneitems:
                         #Saved from GUI, then scene co-ordinates are passed
                         speciAnno = speciAnno + "<moose:xCord>" + \
@@ -936,14 +937,14 @@ def writeCompt(modelpath, cremodel_):
         c1.setSpatialDimensions(ndim)
         c1.setUnits('volume')
         #For each compartment get groups information along
-        for grp in moose.wildcardFind(compt.path+'/##[TYPE=Neutral]'): 
-            grp_cmpt = findGroup_compt(grp.parent)        
+        for grp in moose.wildcardFind(compt.path+'/##[TYPE=Neutral]'):
+            grp_cmpt = findGroup_compt(grp.parent)
             try:
                 value = groupInfo[moose.element(grp)]
             except KeyError:
                 # Grp is not present
                 groupInfo[moose.element(grp)] = []
-            
+
 
     if compts:
         return True,groupInfo
@@ -1022,7 +1023,7 @@ def writeUnits(cremodel_):
     unit.setMultiplier(1.0)
     unit.setExponent(2.0)
     unit.setScale(0)
-    
+
     unitTime = cremodel_.createUnitDefinition()
     unitTime.setId("time")
     unit = unitTime.createUnit()
@@ -1048,7 +1049,7 @@ if __name__ == "__main__":
                 modelpath = filepath[filepath.rfind('/'):filepath.find('.')]
             else:
                 modelpath = sys.argv[2]
-    
+
             moose.loadModel(filepath, modelpath, "gsl")
 
             written, c, writtentofile = mooseWriteSBML(modelpath, filepath)
