@@ -9,6 +9,7 @@ import warnings
 import pydoc
 from io import StringIO
 
+import moose
 import moose.SBML.readSBML as _readSBML
 import moose.SBML.writeSBML as _writeSBML
 import moose.chemUtil as _chemUtil
@@ -22,6 +23,7 @@ except ImportError as e:
 
 # Import function from C++ module into moose namespace.
 from moose._moose import *
+
 
 def version( ):
     return VERSION
