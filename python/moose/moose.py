@@ -134,7 +134,7 @@ def pwe():
     the path, use moose.getCwe()
 
     """
-    pwe_ = _moose.getCwe()
+    pwe_ = moose.getCwe()
     print(pwe_.getPath())
     return pwe_
 
@@ -191,10 +191,10 @@ def syncDataHandler(target):
     raise NotImplementedError('The implementation is not working for IntFire - goes to invalid objects. \
 First fix that issue with SynBase or something in that line.')
     if isinstance(target, str):
-        if not _moose.exists(target):
+        if not moose.exists(target):
             raise ValueError('%s: element does not exist.' % (target))
         target = vec(target)
-        _moose.syncDataHandler(target)
+        moose.syncDataHandler(target)
 
 
 def showfield(el, field='*', showtype=False):
@@ -349,7 +349,7 @@ def getfielddoc(tokens, indent=''):
     fieldname = tokens[1]
     while True:
         try:
-            classelement = _moose.element('/classes/' + classname)
+            classelement = moose.element('/classes/' + classname)
             for finfo in classelement.children:
                 for fieldelement in finfo:
                     baseinfo = ''
@@ -412,7 +412,7 @@ def getmoosedoc(tokens, inherited=False):
         if not tokens:
             return ""
         try:
-            class_element = _moose.element('/classes/%s' % (tokens[0]))
+            class_element = moose.element('/classes/%s' % (tokens[0]))
         except ValueError:
             raise NameError('name \'%s\' not defined.' % (tokens[0]))
         if len(tokens) > 1:
@@ -421,14 +421,14 @@ def getmoosedoc(tokens, inherited=False):
             docstring.write(toUnicode('%s\n' % (class_element.docs)))
             append_finfodocs(tokens[0], docstring, indent)
             if inherited:
-                mro = eval('_moose.%s' % (tokens[0])).mro()
+                mro = eval('moose.%s' % (tokens[0])).mro()
                 for class_ in mro[1:]:
-                    if class_ == _moose.melement:
+                    if class_ == moose.melement:
                         break
                     docstring.write(toUnicode(
                         '\n\n#Inherited from %s#\n' % (class_.__name__)))
                     append_finfodocs(class_.__name__, docstring, indent)
-                    if class_ == _moose.Neutral:    # Neutral is the toplevel moose class
+                    if class_ == moose.Neutral:    # Neutral is the toplevel moose class
                         break
         return docstring.getvalue()
 
@@ -436,13 +436,13 @@ def getmoosedoc(tokens, inherited=False):
 def append_finfodocs(classname, docstring, indent):
     """Append list of finfos in class name to docstring"""
     try:
-        class_element = _moose.element('/classes/%s' % (classname))
+        class_element = moose.element('/classes/%s' % (classname))
     except ValueError:
         raise NameError('class \'%s\' not defined.' % (classname))
     for ftype, rname in finfotypes:
         docstring.write(toUnicode('\n*%s*\n' % (rname.capitalize())))
         try:
-            finfo = _moose.element('%s/%s' % (class_element.path, ftype))
+            finfo = moose.element('%s/%s' % (class_element.path, ftype))
             for field in finfo.vec:
                 docstring.write(toUnicode(
                     '%s%s: %s\n' % (indent, field.fieldName, field.type)))
