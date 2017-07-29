@@ -467,25 +467,12 @@ set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)
 
 # Collect all python script in tests folder and run them.
 file(GLOB PY_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.py" )
-file(GLOB SH_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.sh" )
 
 # Run python tests.
 foreach( _test_script ${PY_TEST_SCRIPTS} )
     get_filename_component( _test_name ${_test_script} NAME_WE)
     add_test( NAME ${_test_name}
         COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
-        WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
-        )
-     set_tests_properties( ${_test_name}
-        PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
-        )
-endforeach( )
-
-# Now run the bash tests.
-foreach( _test_script ${SH_TEST_SCRIPTS} )
-    get_filename_component( _test_name ${_test_script} NAME_WE)
-    add_test( NAME ${_test_name}
-        COMMAND bash ${_test_script}
         WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
         )
      set_tests_properties( ${_test_name}
