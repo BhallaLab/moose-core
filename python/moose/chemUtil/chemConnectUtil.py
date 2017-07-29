@@ -1,7 +1,26 @@
 # -*- coding: utf-8 -*-
+'''
+*******************************************************************
+ * File:            chemConnectUtil.py
+ * Description:
+ * Author:          HarshaRani
+ * E-mail:          hrani@ncbs.res.in
+ ********************************************************************/
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
+Created : Friday May 27 12:19:00 2016(+0530)
+Version
+Last-Updated: Fri Jul 28 17:20:00 2017(+0530)
+          By: HarshaRani
+**********************************************************************/
+/****************************
+
+'''
 import moose
 import numpy as np
-from collections import Counter
 
 def xyPosition(objInfo,xory):
     try:
@@ -178,5 +197,6 @@ def countitems(mitems,objtype):
     items = []
     items = moose.element(mitems).neighbors[objtype]
     uniqItems = set(items)
-    countuniqItems = Counter(items)
+    #countuniqItems = Counter(items)
+    countuniqItems = dict((i, items.count(i)) for i in items)
     return(uniqItems,countuniqItems)
