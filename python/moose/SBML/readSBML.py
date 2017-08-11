@@ -910,13 +910,12 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
 
             if (spe.isSetNotes):
                 pullnotes(spe, poolId)
-            print " species annotator ",sName, ": ",specAnnoInfo
             #if specAnnoInfo.keys() in ['xCord','yCord','bgColor','textColor']:
             if not moose.exists(poolId.path + '/info'):
                 poolInfo = moose.Annotator(poolId.path + '/info')
             else:
                 poolInfo = moose.element(poolId.path + '/info')
-            print " species annotator 920",specAnnoInfo
+            
             for k, v in list(specAnnoInfo.items()):
                 if k == 'xCord':
                     poolInfo.x = float(v)
