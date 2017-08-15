@@ -34,6 +34,7 @@ from moose.moose_constants import *
 try:
     from moose.plot_utils import *
 except Exception as e:
+    print( '[WARN] Failed to import plot_util. Error was %s' % e )
     pass
 
 try:

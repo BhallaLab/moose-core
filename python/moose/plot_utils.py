@@ -15,8 +15,9 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import numpy as np
+
 import moose
-import print_utils as pu
+import moose.print_utils as pu
 
 import matplotlib.pyplot as plt
 
