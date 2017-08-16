@@ -18,6 +18,7 @@ import moose.genesis.writeKkit as _writeKkit
 import moose.chemUtil as _chemUtil
 
 # Import function from C++ module into moose namespace.
+from moose import _moose
 from moose._moose import *
 
 def version( ):

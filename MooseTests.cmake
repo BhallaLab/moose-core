@@ -131,3 +131,13 @@ set_tests_properties(pymoose-test-kkit
     PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
     )
 
+# Test doc support.
+ADD_TEST( NAME pymoose-test-doc 
+    COMMAND ${TEST_COMMAND} 
+    ${PROJECT_SOURCE_DIR}/tests/python/test_doc.py
+    )
+set_tests_properties(pymoose-test-doc
+    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+    )
+
+
