@@ -69,6 +69,7 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
     spe_constTrue = []
     global nameList_
     nameList_ = []
+
     xcord,ycord = [],[]
     if moose.exists(moose.element(modelpath).path):
         mObj = moose.wildcardFind(moose.element(modelpath).path+'/##[ISA=PoolBase]'+','+
@@ -113,6 +114,7 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
             cremodel_.setNotes(notesString)
 
     srcdesConnection = {}
+
     writeUnits(cremodel_)
     modelAnno = writeSimulationAnnotation(modelpath)
     if modelAnno:

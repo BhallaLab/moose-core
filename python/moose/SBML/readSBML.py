@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 '''
 *******************************************************************
  * File:            readSBML.py
@@ -29,25 +28,6 @@ import collections
 import moose
 from moose.chemUtil.chemConnectUtil import *
 from moose.SBML.validation import validateModel
-=======
-# -*- coding: utf-8 -*-
-# *******************************************************************
-#  * File:            readSBML.py
-#  * Description:
-#  * Author:          HarshaRani
-#  * E-mail:          hrani@ncbs.res.in
-#
-# ** This program is part of 'MOOSE', the
-# ** Messaging Object Oriented Simulation Environment,
-# ** also known as GENESIS 3 base code.
-# **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
-# Created : Thu May 12 10:19:00 2016(+0530)
-# Version
-# Last-Updated: Fri Jul 28 17:50:00 2017(+0530)
-#
-#           By:HarshaRani
-# **********************************************************************/
->>>>>>> cdbe6add93c96736b51e5d819ff81fb73fd3b8f9
 
 '''
    TODO in
@@ -939,7 +919,7 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
 
             if (spe.isSetNotes):
                 pullnotes(spe, poolId)
-<<<<<<< HEAD
+
             #if specAnnoInfo.keys() in ['xCord','yCord','bgColor','textColor']:
             if not moose.exists(poolId.path + '/info'):
                 poolInfo = moose.Annotator(poolId.path + '/info')
@@ -955,25 +935,6 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
                     poolInfo.color = v
                 elif k == 'Color':
                     poolInfo.textColor = v
-=======
-
-            if specAnnoInfo:
-                if not moose.exists(poolId.path + '/info'):
-                    poolInfo = moose.Annotator(poolId.path + '/info')
-                else:
-                    poolInfo = moose.element(poolId.path + '/info')
-
-                for k, v in list(specAnnoInfo.items()):
-                    if k == 'xCord':
-                        poolInfo.x = float(v)
-                    elif k == 'yCord':
-                        poolInfo.y = float(v)
-                    elif k == 'bgColor':
-                        poolInfo.color = v
-                    else:
-                        poolInfo.textColor = v
->>>>>>> cdbe6add93c96736b51e5d819ff81fb73fd3b8f9
-
             specInfoMap[sId] = {
                 "Mpath": poolId,
                 "const": constant,
