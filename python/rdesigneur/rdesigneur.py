@@ -896,18 +896,17 @@ class rdesigneur:
         if self.turnOffElec:
             elecDt = 1e6
             elecPlotDt = 1e6
-            diffDt = 0.1    # Slow it down again because no multiscaling
-            chemDt = 0.1    # Slow it down again because no multiscaling
         else:
             elecDt = self.elecDt
-            diffDt = self.diffDt
-            chemDt = self.chemDt
+            elecPlotDt = self.elecPlotDt
+        diffDt = self.diffDt
+        chemDt = self.chemDt
         for i in range( 0, 9 ):
             moose.setClock( i, elecDt )
+        moose.setClock( 8, elecPlotDt )
         moose.setClock( 10, diffDt )
         for i in range( 11, 18 ):
             moose.setClock( i, chemDt )
-        moose.setClock( 8, self.elecPlotDt )
         moose.setClock( 18, self.chemPlotDt )
         hsolve = moose.HSolve( self.elecid.path + '/hsolve' )
         hsolve.dt = elecDt
