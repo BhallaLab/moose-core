@@ -45,8 +45,8 @@ const Cinfo* Pool::initCinfo()
 // Class definitions
 //////////////////////////////////////////////////////////////
 static const Cinfo* poolCinfo = Pool::initCinfo();
-const SrcFinfo1< double >& nOut = 
-	*dynamic_cast< const SrcFinfo1< double >* >( 
+const SrcFinfo1< double >& nOut =
+	*dynamic_cast< const SrcFinfo1< double >* >(
 	poolCinfo->findFinfo( "nOut" ) );
 
 Pool::Pool()
@@ -62,7 +62,7 @@ Pool::~Pool()
 /**
  * setIsBuffered is a really nasty operation, made possible only because
  * BufPool is derived from Pool and has no other fields.
- * It uses a low-level replaceCinfo call to just change the 
+ * It uses a low-level replaceCinfo call to just change the
  * identity of the Cinfo used, leaving everything else as is.
  */
 void Pool::vSetIsBuffered( const Eref& e, bool v )
@@ -177,7 +177,7 @@ double Pool::vGetNinit( const Eref& e ) const
 }
 
 // Conc is given in millimolar. Volume is in m^3
-void Pool::vSetConc( const Eref& e, double c ) 
+void Pool::vSetConc( const Eref& e, double c )
 {
 	n_ = NA * c * lookupVolumeFromMesh( e );
 }

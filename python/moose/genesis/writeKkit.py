@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Chemical Signalling model loaded into moose can be save into Genesis-Kkit format """
 
 __author__           = "Harsha Rani"
@@ -48,9 +49,9 @@ GENESIS_COLOR_SEQUENCE = ((248, 0, 255), (240, 0, 255), (232, 0, 255), (224, 0, 
 #               --StimulusTable
 
 def mooseWriteKkit( modelpath, filename, sceneitems={}):
-    global foundmatplotlib_ 
+    global foundmatplotlib_
     if not foundmatplotlib_:
-        print('No maplotlib found.' 
+        print('No maplotlib found.'
             '\nThis module can be installed by following command in terminal:'
             '\n\t sudo apt install python-maplotlib', "")
         return False
@@ -67,7 +68,7 @@ def mooseWriteKkit( modelpath, filename, sceneitems={}):
         global cmin,cmax,xmin,xmax,ymin,ymax
         cmin, xmin, ymin = 0, 0, 0
         cmax, xmax, ymax = 1, 1, 1
-        
+
         compt = moose.wildcardFind(modelpath+'/##[ISA=ChemCompt]')
         maxVol = estimateDefaultVol(compt)
         positionInfoExist = True
@@ -82,7 +83,7 @@ def mooseWriteKkit( modelpath, filename, sceneitems={}):
                     #cmin,cmax,sceneitems = autoCoordinates(meshEntry,srcdesConnection)
                     sceneitems = autoCoordinates(meshEntry,srcdesConnection)
 
-            if not positionInfoExist:        
+            if not positionInfoExist:
                 # if position are not from kkit, then zoom factor is applied while
                 # writing to genesis. Like if position is from pyqtSceneItem or auto-coordinates
                 cmin,cmax,xmin1,xmax1,ymin1,ymax1 = findMinMax(sceneitems)
@@ -311,6 +312,7 @@ def storeReacMsg(reacList,f):
 def writeReac(modelpath,f,sceneitems):
     error = ""
     reacList = moose.wildcardFind(modelpath+'/##[ISA=ReacBase]')
+
     for reac in reacList:
         if findCompartment(reac) == moose.element('/'):
             error = error + " \n "+reac.path+ " doesn't have compartment ignored to write to genesis"
@@ -431,7 +433,7 @@ def storePlotMsgs( tgraphs,f):
             if slash > -1:
                 foundConc = True
                 if not ( (graph.path.find('conc1') > -1 ) or
-                            (graph.path.find('conc2') > -1 ) or 
+                            (graph.path.find('conc2') > -1 ) or
                             (graph.path.find('conc3') > -1 ) or
                             (graph.path.find('conc4') > -1) ):
                     foundConc = False
@@ -470,7 +472,7 @@ def writeplot( tgraphs,f ):
             if slash > -1:
                 foundConc = True
                 if not ( (graphs.path.find('conc1') > -1 ) or
-                            (graphs.path.find('conc2') > -1 ) or 
+                            (graphs.path.find('conc2') > -1 ) or
                             (graphs.path.find('conc3') > -1 ) or
                             (graphs.path.find('conc4') > -1) ):
                     foundConc = False
@@ -479,7 +481,7 @@ def writeplot( tgraphs,f ):
                 else:
                     slash1 = graphs.path.find('/',slash)
                     tabPath = "/graphs/conc1" +graphs.path[slash1:len(graphs.path)]
-                    
+
 
                 if len(moose.element(graphs).msgOut):
                     poolPath = (moose.element(graphs).msgOut)[0].e2.path
@@ -736,7 +738,7 @@ if __name__ == "__main__":
     moose.loadModel(filename,'/'+modelpath,"gsl")
     output = modelpath+"_.g"
     written = mooseWriteKkit('/'+modelpath,output)
-    
+
     if written:
             print((" file written to ",output))
     else:
