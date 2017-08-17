@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-
-"""print_utils.py:
+"""
+print_utils.py:
 
 A library with some print functions. Very useful during development.
-
-Last modified: Sat Jan 18, 2014  05:01PM
-
 """
 
 __author__           = "Dilawar Singh"

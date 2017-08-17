@@ -17,8 +17,14 @@ try:
     import moose.SBML.writeSBML as _writeSBML
 except Exception as e:
     sbmlImport_ = False
+    sbmlError_ = '%s' % e
 
-import moose.chemUtil as _chemUtil
+chemImport_, chemError_ = True, ''
+try:
+    import moose.chemUtil as _chemUtil
+except Exception as e:
+    chemImport_ = False
+    chemError_ = '%s' % e
 
 kkitImport_, kkitImport_error_ = True, ''
 try:
@@ -71,7 +77,12 @@ def mooseReadSBML(filepath, loadpath, solver='ee'):
     solver   -- Solver to use (default 'ee' ) \n
 
     """
-    return _readSBML.mooseReadSBML( filepath, loadpath, solver )
+    global sbmlImport_
+    if sbmlImport_:
+        return _readSBML.mooseReadSBML( filepath, loadpath, solver )
+    else:
+        print( sbmlError_ )
+        return False
 
 
 def mooseWriteSBML(modelpath, filepath, sceneitems={}):
@@ -90,7 +101,11 @@ def mooseWriteSBML(modelpath, filepath, sceneitems={}):
                             --- else, auto-coordinates is used for layout position and passed
 
     """
-    return _writeSBML.mooseWriteSBML(modelpath, filepath, sceneitems)
+    if sbmlImport_:
+        return _writeSBML.mooseWriteSBML(modelpath, filepath, sceneitems)
+    else:
+        print( sbmlError_ )
+        return False
 
 
 def mooseWriteKkit(modelpath, filepath,sceneitems={}):
@@ -115,7 +130,11 @@ def moosedeleteChemSolver(modelpath):
         this should be followed by mooseaddChemSolver for add solvers on to compartment to simulate else
         default is Exponential Euler (ee)
     """
-    return _chemUtil.add_Delete_ChemicalSolver.moosedeleteChemSolver(modelpath)
+    if chemImport_:
+        return _chemUtil.add_Delete_ChemicalSolver.moosedeleteChemSolver(modelpath)
+    else:
+        print( chemError_ )
+        return False
 
 
 def mooseaddChemSolver(modelpath, solver):
@@ -129,7 +148,11 @@ def mooseaddChemSolver(modelpath, solver):
               "Runge Kutta"       ("gsl")
 
     """
-    return _chemUtil.add_Delete_ChemicalSolver.mooseaddChemSolver(modelpath, solver)
+    if chemImport_:
+        return _chemUtil.add_Delete_ChemicalSolver.mooseaddChemSolver(modelpath, solver)
+    else:
+        print( chemError_ )
+        return False
 
 ################################################################
 # Wrappers for global functions
