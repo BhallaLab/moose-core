@@ -10,8 +10,14 @@ import pydoc
 from io import StringIO
 
 import moose
-import moose.SBML.readSBML as _readSBML
-import moose.SBML.writeSBML as _writeSBML
+
+sbmlImport_, sbmlError_ = True, ''
+try:
+    import moose.SBML.readSBML as _readSBML
+    import moose.SBML.writeSBML as _writeSBML
+except Exception as e:
+    sbmlImport_ = False
+
 import moose.chemUtil as _chemUtil
 
 kkitImport_, kkitImport_error_ = True, ''

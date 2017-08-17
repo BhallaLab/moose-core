@@ -31,17 +31,7 @@ import re
 from moose.moose_constants import *
 
 # Make these import non-important.
-try:
-    from moose.plot_utils import *
-except Exception as e:
-    print( '[WARN] Failed to import plot_util. Error was %s' % e )
-    pass
-
-try:
-    from moose.print_utils import *
-except Exception as e:
-    pass
-
+from moose.plot_utils import *
 
 def create_table_path(model, graph, element, field):
 
