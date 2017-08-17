@@ -3,6 +3,7 @@ import moose
 import moose.utils as mu
 
 def main( ):
+    print( dir( mu ) )
     mu.info( 'Hellow' )
 
 if __name__ == '__main__':

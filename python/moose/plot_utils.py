@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-"""plot_utils.py: Some utility function for plotting data in moose.
+#
+# plot_utils.py: Some utility function for plotting data in moose.
+#
+# Last modified: Sun Jan 10, 2016  04:04PM
 
-Last modified: Sun Jan 10, 2016  04:04PM
-
-"""
+from __future__ import print_function, division, absolute_import
 
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2013, NCBS Bangalore"
@@ -17,7 +18,6 @@ __status__           = "Development"
 import numpy as np
 import matplotlib.pyplot as plt
 import moose
-
 import moose.print_utils as pu
 
 def plotAscii(yvec, xvec = None, file=None):

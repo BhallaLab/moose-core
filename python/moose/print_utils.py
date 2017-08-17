@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-print_utils.py:
+# print_utils.py:
+#
+# A library with some print functions. Very useful during development.
 
-A library with some print functions. Very useful during development.
-"""
+from __future__ import print_function, division, absolute_import
 
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2013, NCBS Bangalore"
@@ -14,7 +14,6 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-import sys
 import moose
 
 HEADER = '\033[95m'
@@ -102,8 +101,11 @@ def dump(label, msg, frame=None, exception=None):
     if exception:
         print((" [Expcetion] {0}".format(exception)))
 
-def info(msg): dump("INFO", msg)
-def warn(msg): dump("WARN", msg)
+def info(msg):
+    dump("INFO", msg)
+
+def warn(msg):
+    dump("WARN", msg)
 
 def error(msg):
     dump("ERROR", msg)

@@ -36,7 +36,6 @@ except ImportError as e:
 # Import function from C++ module into moose namespace.
 from moose._moose import *
 
-
 def version( ):
     return VERSION
 
