@@ -13,10 +13,16 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Friday May 27 12:19:00 2016(+0530)
 Version
-Last-Updated: Fri Jul 28 17:20:00 2017(+0530)
+Last-Updated: Tue 8 Aug 11:10:00 2017(+0530)
           By: HarshaRani
 **********************************************************************/
 /****************************
+
+2017
+Aug 8 : removed "findCompartment" function to chemConnectUtil and imported the function from the same file
+        convertSpecialChar for setId and convertSpecialCharshot for setName.
+        specialChar like /,\,[,],space are not allowed as moose doesn't take
+Aug 3 : Added recalculatecoordinates,cleanup in groupName
 
 '''
 import sys
@@ -63,6 +69,19 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
     spe_constTrue = []
     global nameList_
     nameList_ = []
+
+    xcord,ycord = [],[]
+    if moose.exists(moose.element(modelpath).path):
+        mObj = moose.wildcardFind(moose.element(modelpath).path+'/##[ISA=PoolBase]'+','+
+                                  moose.element(modelpath).path+'/##[ISA=ReacBase]'+','+
+                                  moose.element(modelpath).path+'/##[ISA=EnzBase]'+','+
+                                  moose.element(modelpath).path+'/##[ISA=StimulusTable]')
+        for p in mObj:
+            if not isinstance(moose.element(p.parent),moose.CplxEnzBase):
+                if moose.exists(p.path+'/info'):
+                    xcord.append(moose.element(p.path+'/info').x)
+                    ycord.append(moose.element(p.path+'/info').y)
+        recalculatecoordinates(mObj,xcord,ycord)
     positionInfoexist = False
 
     xmlns = SBMLNamespaces(3, 1)
@@ -95,12 +114,6 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
             cremodel_.setNotes(notesString)
 
     srcdesConnection = {}
-    if not bool(sceneitems):
-        meshEntry,xmin,xmax,ymin,ymax,positionInfoexist,sitem = setupMeshObj(modelpath)
-        #moose.coordinateUtil.setupItem(modelpath,srcdesConnection)
-        setupItem(modelpath,srcdesConnection)
-        if not positionInfoexist:
-            autoCoordinates(meshEntry,srcdesConnection)
 
     writeUnits(cremodel_)
     modelAnno = writeSimulationAnnotation(modelpath)
@@ -120,7 +133,7 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
             for key,value in groupInfo.items():
                 mplugin = cremodel_.getPlugin("groups")
                 group = mplugin.createGroup()
-                name = moose.element(key).name
+                name = str(idBeginWith(moose.element(key).name))
                 group.setId(name)
                 group.setKind("collection")
                 ginfo = moose.element(key.path+'/info')
@@ -161,6 +174,7 @@ def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
         enzSubt = ()
         compt = ""
         notesE = ""
+        groupName = moose.element("/")
 
         if moose.exists(enz.path + '/info'):
             groupName = moose.element("/")
@@ -227,7 +241,8 @@ def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
                     groupInfo[groupName]=[enzsetId]
                 else:
                     groupInfo[groupName].append(enzsetId)
-            enzyme.setName(cleanEnzname)
+            enzyme.setName(str(idBeginWith(convertSpecialCharshot(enz.name))))
+            #enzyme.setName(cleanEnzname)
             enzyme.setFast(False)
             enzyme.setReversible(True)
             k1 = enz.concK1
@@ -308,7 +323,8 @@ def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
                                          "_" +
                                          "Product_formation_"))
             enzyme.setId(enzsetIdP)
-            enzyme.setName(cleanEnzname)
+            enzyme.setName(str(idBeginWith(convertSpecialCharshot(enz.name))))
+            #enzyme.setName(cleanEnzname)
             if groupName != moose.element('/'):
                 if groupName not in groupInfo:
                     groupInfo[groupName]=[enzsetIdP]
@@ -394,7 +410,8 @@ def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
                         groupInfo[groupName]=[mmenzsetId]
                     else:
                         groupInfo[groupName].append(mmenzsetId)
-                enzyme.setName(cleanEnzname)
+                enzyme.setName(str(idBeginWith(convertSpecialCharshot(enz.name))))
+                #enzyme.setName(cleanEnzname)
                 enzyme.setFast(False)
                 enzyme.setReversible(True)
                 if enzannoexist:
@@ -603,7 +620,8 @@ def writeReac(modelpath, cremodel_, sceneitems,reacGroup):
                                            str(reac.getDataIndex()) +
                                            "_"))
             reaction.setId(setId)
-            reaction.setName(cleanReacname)
+            reaction.setName(str(idBeginWith(convertSpecialCharshot(reac.name))))
+            #reaction.setName(cleanReacname)
             #Kf = reac.numKf
             #Kb = reac.numKb
             Kf = reac.Kf
@@ -658,7 +676,7 @@ def writeReac(modelpath, cremodel_, sceneitems,reacGroup):
             kl_s, sRL, pRL, compt = "", "", "", ""
 
             if not reacSub and not reacPrd:
-                print(" Reaction ", reac.name, "missing substrate and product")
+                print(" Reaction ", reac.name, "missing substrate and product, this is not allowed in SBML which will not be written")
             else:
                 kfl = reaction.createKineticLaw()
                 if reacSub:
@@ -715,7 +733,7 @@ def writeReac(modelpath, cremodel_, sceneitems,reacGroup):
             kfl.setFormula(kl_s)
 
         else:
-            print(" Reaction ", reac.name, "missing substrate and product")
+            print(" Reaction ", reac.name, "missing substrate and product, this is not allowed in SBML which will not be written")
 
 
 def writeFunc(modelpath, cremodel_):
@@ -773,16 +791,6 @@ def getGroupinfo(element):
     return element
 
 
-def mooseIsInstance(element, classNames):
-    return moose.element(element).__class__.__name__ in classNames
-
-
-def findCompartment(element):
-    while not mooseIsInstance(element, ["CubeMesh", "CyclMesh"]):
-        element = element.parent
-    return element
-
-
 def idBeginWith(name):
     changedName = name
     if name[0].isdigit():
@@ -793,6 +801,19 @@ def findGroup_compt(melement):
     while not (mooseIsInstance(melement, ["Neutral","CubeMesh", "CyclMesh"])):
         melement = melement.parent
     return melement
+
+def convertSpecialCharshot(str1):
+    d = { "BEL"     : "&#176", 
+            "'"     : "_prime_",
+            "\\"    : "_slash_",
+            "/"     : "_slash_", 
+            "["     : "_sbo_", 
+            "]"     : "_sbc_",
+            ": "    : "_" , 
+            " "     : "_" }
+    for i, j in d.items():
+        str1 = str1.replace(i, j)
+    return str1
 
 def convertSpecialChar(str1):
     d = {"&": "_and", "<": "_lessthan_", ">": "_greaterthan_", "BEL": "&#176", "-": "_minus_", "'": "_prime_",
@@ -835,7 +856,8 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
                     sName = convertSpecialChar(
                         enzPool + "_" + enzname + "_" + sName)
 
-            s1.setName(sName)
+            #s1.setName(sName)
+            s1.setName(str(idBeginWith(convertSpecialCharshot(spe.name))))
             # s1.setInitialAmount(spe.nInit)
             s1.setInitialConcentration(spe.concInit)
             s1.setCompartment(compt)
@@ -990,6 +1012,30 @@ def writeSimulationAnnotation(modelpath):
             modelAnno = modelAnno + "<moose:plots> " + plots + "</moose:plots>\n"
         modelAnno = modelAnno + "</moose:ModelAnnotation>"
     return modelAnno
+
+def xyPosition(objInfo,xory):
+    try:
+        return(float(moose.element(objInfo).getField(xory)))
+    except ValueError:
+        return (float(0))
+
+def recalculatecoordinates(mObjlist,xcord,ycord):
+    positionInfoExist = not(len(np.nonzero(xcord)[0]) == 0 \
+                        and len(np.nonzero(ycord)[0]) == 0)
+
+    if positionInfoExist:
+        #Here all the object has been taken now recalculate and reassign back x and y co-ordinates
+        xmin = min(xcord)
+        xmax = max(xcord)
+        ymin = min(ycord)
+        ymax = max(ycord)
+        for merts in mObjlist:
+            objInfo = merts.path+'/info'
+            if moose.exists(objInfo):
+                Ix = (xyPosition(objInfo,'x')-xmin)/(xmax-xmin)
+                Iy = (ymin-xyPosition(objInfo,'y'))/(ymax-ymin)
+                moose.element(objInfo).x = Ix
+                moose.element(objInfo).y = Iy
 
 def writeUnits(cremodel_):
     unitVol = cremodel_.createUnitDefinition()

@@ -1,20 +1,33 @@
-# -*- coding: utf-8 -*-
-# *******************************************************************
-#  * File:            readSBML.py
-#  * Description:
-#  * Author:          HarshaRani
-#  * E-mail:          hrani@ncbs.res.in
-#
-# ** This program is part of 'MOOSE', the
-# ** Messaging Object Oriented Simulation Environment,
-# ** also known as GENESIS 3 base code.
-# **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
-# Created : Thu May 12 10:19:00 2016(+0530)
-# Version
-# Last-Updated: Fri Jul 28 17:50:00 2017(+0530)
-#
-#           By:HarshaRani
-# **********************************************************************/
+'''
+*******************************************************************
+ * File:            readSBML.py
+ * Description:
+ * Author:          HarshaRani
+ * E-mail:          hrani@ncbs.res.in
+ ********************************************************************/
+
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
+Created : Thu May 12 10:19:00 2016(+0530)
+Version
+Last-Updated: Tue Aug 9 10:50:00 2017(+0530)
+
+          By:HarshaRani
+**********************************************************************/
+2017
+Aug 9 : a check made to for textColor while adding to Annotator
+Aug 8 : removed "findCompartment" function to chemConnectUtil and imported the function from the same file
+'''
+
+import sys
+import os.path
+import collections
+import moose
+from moose.chemUtil.chemConnectUtil import *
+from moose.SBML.validation import validateModel
 
 '''
    TODO in
@@ -360,7 +373,6 @@ def getObjAnnotation(obj, modelAnnotationInfo):
                     else:
                         print(
                             "Error: expected exactly ONE child of ", nodeName)
-
                     if nodeName == "xCord":
                         annotateMap[nodeName] = nodeValue
                     if nodeName == "yCord":
@@ -538,20 +550,21 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,gro
                     pullnotes(reac, reaction_)
                     reacAnnoInfo = {}
                 reacAnnoInfo = getObjAnnotation(reac, modelAnnotaInfo)
-                if reacAnnoInfo:
-                    if not moose.exists(reaction_.path + '/info'):
-                        reacInfo = moose.Annotator(reaction_.path + '/info')
-                    else:
-                        reacInfo = moose.element(reaction_.path + '/info')
-                    for k, v in list(reacAnnoInfo.items()):
-                        if k == 'xCord':
-                            reacInfo.x = float(v)
-                        elif k == 'yCord':
-                            reacInfo.y = float(v)
-                        elif k == 'bgColor':
-                            reacInfo.color = v
-                        else:
-                            reacInfo.textColor = v
+
+                #if reacAnnoInfo.keys() in ['xCord','yCord','bgColor','Color']:
+                if not moose.exists(reaction_.path + '/info'):
+                    reacInfo = moose.Annotator(reaction_.path + '/info')
+                else:
+                    reacInfo = moose.element(reaction_.path + '/info')
+                for k, v in list(reacAnnoInfo.items()):
+                    if k == 'xCord':
+                        reacInfo.x = float(v)
+                    elif k == 'yCord':
+                        reacInfo.y = float(v)
+                    elif k == 'bgColor':
+                        reacInfo.color = v
+                    elif k == 'Color':
+                        reacInfo.textColor = v
 
         elif(groupName == ""):
             numRcts = reac.getNumReactants()
@@ -603,20 +616,21 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,gro
                     pullnotes(reac, reaction_)
                     reacAnnoInfo = {}
                 reacAnnoInfo = getObjAnnotation(reac, modelAnnotaInfo)
-                if reacAnnoInfo:
-                    if not moose.exists(reaction_.path + '/info'):
-                        reacInfo = moose.Annotator(reaction_.path + '/info')
-                    else:
-                        reacInfo = moose.element(reaction_.path + '/info')
-                    for k, v in list(reacAnnoInfo.items()):
-                        if k == 'xCord':
-                            reacInfo.x = float(v)
-                        elif k == 'yCord':
-                            reacInfo.y = float(v)
-                        elif k == 'bgColor':
-                            reacInfo.color = v
-                        else:
-                            reacInfo.textColor = v
+
+                #if reacAnnoInfo.keys() in ['xCord','yCord','bgColor','Color']:
+                if not moose.exists(reaction_.path + '/info'):
+                    reacInfo = moose.Annotator(reaction_.path + '/info')
+                else:
+                    reacInfo = moose.element(reaction_.path + '/info')
+                for k, v in list(reacAnnoInfo.items()):
+                    if k == 'xCord':
+                        reacInfo.x = float(v)
+                    elif k == 'yCord':
+                        reacInfo.y = float(v)
+                    elif k == 'bgColor':
+                        reacInfo.color = v
+                    elif k == 'Color':
+                        reacInfo.textColor = v
 
                 addSubPrd(reac, rName, "sub", reactSBMLIdMooseId, specInfoMap)
                 addSubPrd(reac, rName, "prd", reactSBMLIdMooseId, specInfoMap)
@@ -868,7 +882,6 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
             group = ""
             specAnnoInfo = {}
             specAnnoInfo = getObjAnnotation(spe, modelAnnotaInfo)
-
             # if "Group" in specAnnoInfo:
             #     group = specAnnoInfo["Group"]
 
@@ -907,22 +920,21 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
             if (spe.isSetNotes):
                 pullnotes(spe, poolId)
 
-            if specAnnoInfo:
-                if not moose.exists(poolId.path + '/info'):
-                    poolInfo = moose.Annotator(poolId.path + '/info')
-                else:
-                    poolInfo = moose.element(poolId.path + '/info')
-
-                for k, v in list(specAnnoInfo.items()):
-                    if k == 'xCord':
-                        poolInfo.x = float(v)
-                    elif k == 'yCord':
-                        poolInfo.y = float(v)
-                    elif k == 'bgColor':
-                        poolInfo.color = v
-                    else:
-                        poolInfo.textColor = v
-
+            #if specAnnoInfo.keys() in ['xCord','yCord','bgColor','textColor']:
+            if not moose.exists(poolId.path + '/info'):
+                poolInfo = moose.Annotator(poolId.path + '/info')
+            else:
+                poolInfo = moose.element(poolId.path + '/info')
+            
+            for k, v in list(specAnnoInfo.items()):
+                if k == 'xCord':
+                    poolInfo.x = float(v)
+                elif k == 'yCord':
+                    poolInfo.y = float(v)
+                elif k == 'bgColor':
+                    poolInfo.color = v
+                elif k == 'Color':
+                    poolInfo.textColor = v
             specInfoMap[sId] = {
                 "Mpath": poolId,
                 "const": constant,
@@ -1128,20 +1140,21 @@ def setupMMEnzymeReaction(reac, rName, specInfoMap, reactSBMLIdMooseId,
                 pullnotes(reac, MMEnz)
                 reacAnnoInfo = {}
                 reacAnnoInfo = getObjAnnotation(reac, modelAnnotaInfo)
-                if reacAnnoInfo:
-                    if not moose.exists(MMEnz.path + '/info'):
-                        reacInfo = moose.Annotator(MMEnz.path + '/info')
-                    else:
-                        reacInfo = moose.element(MMEnz.path + '/info')
-                    for k, v in list(reacAnnoInfo.items()):
-                        if k == 'xCord':
-                            reacInfo.x = float(v)
-                        elif k == 'yCord':
-                            reacInfo.y = float(v)
-                        elif k == 'bgColor':
-                            reacInfo.color = v
-                        else:
-                            reacInfo.textColor = v
+
+                #if reacAnnoInfo.keys() in ['xCord','yCord','bgColor','Color']:
+                if not moose.exists(MMEnz.path + '/info'):
+                    reacInfo = moose.Annotator(MMEnz.path + '/info')
+                else:
+                    reacInfo = moose.element(MMEnz.path + '/info')
+                for k, v in list(reacAnnoInfo.items()):
+                    if k == 'xCord':
+                        reacInfo.x = float(v)
+                    elif k == 'yCord':
+                        reacInfo.y = float(v)
+                    elif k == 'bgColor':
+                        reacInfo.color = v
+                    elif k == 'Color':
+                        reacInfo.textColor = v
             return(reactionCreated, MMEnz)
 
 
@@ -1166,21 +1179,11 @@ def idBeginWith(name):
 def convertSpecialChar(str1):
     d = {"&": "_and", "<": "_lessthan_", ">": "_greaterthan_", "BEL": "&#176", "-": "_minus_", "'": "_prime_",
          "+": "_plus_", "*": "_star_", "/": "_slash_", "(": "_bo_", ")": "_bc_",
-         "[": "_sbo_", "]": "_sbc_", ".": "_dot_", " ": "_"
+         "[": "_sbo_", "]": "_sbc_", " ": "_"
          }
     for i, j in list(d.items()):
         str1 = str1.replace(i, j)
     return str1
-
-
-def mooseIsInstance(element, classNames):
-    return moose.element(element).__class__.__name__ in classNames
-
-
-def findCompartment(element):
-    while not mooseIsInstance(element, ["CubeMesh", "CyclMesh"]):
-        element = element.parent
-    return element
 
 if __name__ == "__main__":
     try:
