@@ -238,7 +238,7 @@ def saveRecords(records, xvec = None, **kwargs):
 def plotRecords(records, xvec = None, **kwargs):
     """Wrapper
     """
-    dataDict = {}
+    dataDict = OrderedDict( )
     try:
         for k in sorted(records.keys(), key=str.lower):
             dataDict[k] = records[k]
@@ -301,7 +301,7 @@ def plotTables( regex = '.*', **kwargs ):
     tables = moose.wildcardFind( '/##[TYPE=Table]' )
     tables += moose.wildcardFind( '/##[TYPE=Table2]' )
     toPlot = OrderedDict( )
-    for t in tables:
+    for t in sorted(tables, key = lambda x: x.name):
         if re.search( regex, t.name ):
             toPlot[ t.name ] = t
     return plotRecords( toPlot, None, **kwargs )
