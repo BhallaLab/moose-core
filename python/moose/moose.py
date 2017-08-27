@@ -12,6 +12,7 @@ from io import StringIO
 import moose
 
 sbmlImport_, sbmlError_ = True, ''
+
 try:
     import moose.SBML.readSBML as _readSBML
     import moose.SBML.writeSBML as _writeSBML
