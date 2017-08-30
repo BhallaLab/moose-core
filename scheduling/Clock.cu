@@ -762,12 +762,13 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
      */
 
    
-    foo();
-   //pools = vector<VoxelPools>();
-    //delete[] &pools;
-    //cout << "hey there 222" << endl;
-    //The following line is not working
-    //pools.~vector<VoxelPools>();
+    //foo();
+    
+    // The above foo function extracts the data but when it is
+    // called it gives a seg fault, the reason for that seg fault is that the
+    // dimensions are coming wrong, see the issues. 
+
+    cout << "NOTE: Doing Calculations On The Dummy Data, Need To Extract The  Actual Data" << endl;
 
 
     int nx_voxel = 10;
@@ -790,15 +791,11 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     }
     
     //Porting the problem onto gpu
-    //Earlier d_h and d_n_species were not pointers, allocation is only occuring
-    //if i declare pointers, it is not occuring if i do not give a pointer in
-    //the start only
-
+    
     double *d_x0, *d_a_mat, *d_h;
     int *d_n_species;
     
-    checkCudaErrors(cudaMalloc( (void**)&d_x0, sizeof(double) * nx_species *
-               nx_voxel ));
+    checkCudaErrors(cudaMalloc( (void**)&d_x0, sizeof(double) * nx_species * nx_voxel ));
     checkCudaErrors(cudaMalloc( (void**)&d_a_mat, sizeof(double) *
                 species_square ));
     checkCudaErrors(cudaMalloc( (void**)&d_h, sizeof(double) * 1 ));
