@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 *******************************************************************
  * File:            readSBML.py
@@ -20,16 +21,7 @@ Last-Updated: Tue Aug 9 10:50:00 2017(+0530)
 2017
 Aug 9 : a check made to for textColor while adding to Annotator
 Aug 8 : removed "findCompartment" function to chemConnectUtil and imported the function from the same file
-'''
 
-import sys
-import os.path
-import collections
-import moose
-from moose.chemUtil.chemConnectUtil import *
-from moose.SBML.validation import validateModel
-
-'''
    TODO in
     -Compartment
       --Need to deal with compartment outside
@@ -53,10 +45,9 @@ from moose.SBML.validation import validateModel
 '''
 
 import sys
-import os.path
 import collections
 import moose
-
+from moose.chemUtil.chemConnectUtil import *
 from moose.SBML.validation import validateModel
 
 import re
@@ -925,7 +916,7 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
                 poolInfo = moose.Annotator(poolId.path + '/info')
             else:
                 poolInfo = moose.element(poolId.path + '/info')
-            
+
             for k, v in list(specAnnoInfo.items()):
                 if k == 'xCord':
                     poolInfo.x = float(v)
