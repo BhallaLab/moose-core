@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 '''
 *******************************************************************
  * File:            readSBML.py
@@ -14,11 +13,20 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Thu May 12 10:19:00 2016(+0530)
 Version
-Last-Updated: Tue Aug 9 10:50:00 2017(+0530)
+Last-Updated: Tue Sep 12 18:50:00 2017(+0530)
 
           By:HarshaRani
 **********************************************************************/
 2017
+Sep 12: - Now mooseReadSBML return model and errorFlag
+        - check's are made if model is valid if its not errorFlag is set
+        - check if model has atleast one compartment, if not errorFlag is set
+        - errorFlag is set for Rules (for now piecewise is set which is not read user are warned)
+        - rateRaw are also calculated depending on units and number of substance/product
+
+Sep 8 : -functionDefinitions is read, 
+        - if Kf and Kb unit are not defined then checked if substance units is defined and depending on this unit Kf and Kb is calculated
+            -kf and kb units is not defined and if substance units is also not defined validator fails 
 Aug 9 : a check made to for textColor while adding to Annotator
 Aug 8 : removed "findCompartment" function to chemConnectUtil and imported the function from the same file
 
@@ -27,7 +35,8 @@ Aug 8 : removed "findCompartment" function to chemConnectUtil and imported the f
       --Need to deal with compartment outside
     -Molecule
       -- mathML only AssisgmentRule is taken partly I have checked addition and multiplication,
-       --, need to do for other calculation.
+      -- concentration as piecewise (like tertiary operation with time )
+      -- need to do for other calculation.
        -- In Assisgment rule one of the variable is a function, in moose since assignment is done using function,
           function can't get input from another function (model 000740 in l3v1)
     -Loading Model from SBML
@@ -44,14 +53,14 @@ Aug 8 : removed "findCompartment" function to chemConnectUtil and imported the f
          ---- For Michaelis Menten kinetics km is not defined which is most of the case need to calculate
 '''
 
+
 import sys
 import collections
 import moose
 from moose.chemUtil.chemConnectUtil import *
 from moose.SBML.validation import validateModel
-
 import re
-
+import os
 
 foundLibSBML_ = False
 try:
@@ -118,7 +127,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                 print("\n")
 
                 if (model.getNumCompartments() == 0):
-                    return moose.element('/')
+                    return moose.element('/'), "Atleast one compartment is needed"
                 else:
                     baseId = moose.Neutral(loadpath)
                     basePath = baseId
@@ -132,7 +141,10 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                     warning = " "
                     global msg
                     msg = " "
+                    msgRule = ""
+                    msgReac = ""
                     groupInfo  = {}
+                    funcDef = {}
                     modelAnnotaInfo = {}
                     comptSbmlidMooseIdMap = {}
                     globparameterIdValue = {}
@@ -142,23 +154,21 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                         basePath, model, comptSbmlidMooseIdMap)
 
                     groupInfo = checkGroup(basePath,model)
+                    funcDef = checkFuncDef(model)
                     if errorFlag:
                         specInfoMap = {}
                         errorFlag,warning = createSpecies(
                             basePath, model, comptSbmlidMooseIdMap, specInfoMap, modelAnnotaInfo,groupInfo)
-                        #print(errorFlag,warning)
-
                         if errorFlag:
-                            errorFlag = createRules(
-                                model, specInfoMap, globparameterIdValue)
+                            msgRule = createRules(
+                                 model, specInfoMap, globparameterIdValue)
                             if errorFlag:
-                                errorFlag, msg = createReaction(
-                                    model, specInfoMap, modelAnnotaInfo, globparameterIdValue,groupInfo)
+                                errorFlag, msgReac = createReaction(
+                                    model, specInfoMap, modelAnnotaInfo, globparameterIdValue,funcDef,groupInfo)
                         getModelAnnotation(
                             model, baseId, basePath)
 
                     if not errorFlag:
-                        print(msg)
                         # Any time in the middle if SBML does not read then I
                         # delete everything from model level This is important
                         # as while reading in GUI the model will show up untill
@@ -166,11 +176,29 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                         # model"
                         moose.delete(basePath)
                         basePath = moose.Shell('/')
-            return basePath
+            return basePath, ""
         else:
             print("Validation failed while reading the model.")
-            return moose.element('/')
+            return moose.element('/'), "This document is not valid SBML"
 
+def checkFuncDef(model):
+    funcDef = {}
+    for findex in range(0,model.getNumFunctionDefinitions()):
+        bvar = []
+        funMathML = ""
+        foundbvar = False
+        foundfuncMathML = False
+        f = model.getFunctionDefinition(findex)
+        fmath = f.getMath()
+        for i in range(0,fmath.getNumBvars()):
+            bvar.append(fmath.getChild(i).getName())
+            foundbvar = True
+        funcMathML = fmath.getRightChild()
+        if fmath.getRightChild():
+            foundfuncMathML = True
+        if foundbvar and foundfuncMathML:
+            funcDef[f.getName()] = {'bvar':bvar, "MathML": fmath.getRightChild()}
+    return funcDef
 def checkGroup(basePath,model):
     groupInfo = {}
     modelAnnotaInfo = {}
@@ -380,7 +408,7 @@ def getObjAnnotation(obj, modelAnnotationInfo):
 
 
 def getEnzAnnotation(obj, modelAnnotaInfo, rev,
-                     globparameterIdValue, specInfoMap):
+                     globparameterIdValue, specInfoMap,funcDef):
     name = obj.getId()
     name = name.replace(" ", "_space_")
     # modelAnnotaInfo= {}
@@ -426,8 +454,6 @@ def getEnzAnnotation(obj, modelAnnotaInfo, rev,
         groupName = list(annotateMap["grpName"])[0]
         klaw = obj.getKineticLaw()
         mmsg = ""
-        errorFlag, mmsg, k1, k2 = getKLaw(
-            obj, klaw, rev, globparameterIdValue, specInfoMap)
 
         if 'substrates' in annotateMap:
             sublist = list(annotateMap["substrates"])
@@ -437,6 +463,10 @@ def getEnzAnnotation(obj, modelAnnotaInfo, rev,
             prdlist = list(annotateMap["product"])
         else:
             prdlist = {}
+        noOfsub = len(sublist)
+        noOfprd = len(prdlist)
+        errorFlag, mmsg, k1, k2 = getKLaw(
+            obj, klaw, noOfsub, noOfprd, rev, globparameterIdValue, funcDef,specInfoMap)
 
         if list(annotateMap["stage"])[0] == '1':
             if groupName in modelAnnotaInfo:
@@ -481,7 +511,7 @@ def getEnzAnnotation(obj, modelAnnotaInfo, rev,
     return(groupName)
 
 
-def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,groupInfo):
+def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,funcDef,groupInfo):
     # print " reaction "
     # Things done for reaction
     # --Reaction is not created, if substrate and product is missing
@@ -527,7 +557,7 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,gro
                 "\"")
         if (reac.getAnnotation() is not None):
             groupName = getEnzAnnotation(
-                reac, modelAnnotaInfo, rev, globparameterIdValue, specInfoMap)
+                reac, modelAnnotaInfo, rev, globparameterIdValue, specInfoMap,funcDef)
 
         if (groupName != "" and list(
                 modelAnnotaInfo[groupName]["stage"])[0] == 3):
@@ -558,10 +588,10 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,gro
                         reacInfo.textColor = v
 
         elif(groupName == ""):
+
             numRcts = reac.getNumReactants()
             numPdts = reac.getNumProducts()
             nummodifiers = reac.getNumModifiers()
-
             if not (numRcts and numPdts):
                 print("Warning: %s" %(rName)," : Substrate or Product is missing, we will be skiping creating this reaction in MOOSE")
                 reactionCreated = False
@@ -629,7 +659,7 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,gro
                     klaw = reac.getKineticLaw()
                     mmsg = ""
                     errorFlag, mmsg, kfvalue, kbvalue = getKLaw(
-                        model, klaw, rev, globparameterIdValue, specInfoMap)
+                        model, klaw, reac.num_reactants,reac.num_products, rev, globparameterIdValue,funcDef,specInfoMap)
                     if not errorFlag:
                         msg = "Error while importing reaction \"" + \
                             rName + "\"\n Error in kinetics law "
@@ -637,9 +667,6 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,gro
                             msg = msg + mmsg
                         return(errorFlag, msg)
                     else:
-                        # print " reactSBMLIdMooseId
-                        # ",reactSBMLIdMooseId[rName]["nSub"], " prd
-                        # ",reactSBMLIdMooseId[rName]["nPrd"]
                         if reaction_.className == "Reac":
                             subn = reactSBMLIdMooseId[rName]["nSub"]
                             prdn = reactSBMLIdMooseId[rName]["nPrd"]
@@ -651,7 +678,7 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,gro
     return (errorFlag, msg)
 
 
-def getKLaw(model, klaw, rev, globparameterIdValue, specMapList):
+def getKLaw(model, klaw,noOfsub, noOfprd,rev, globparameterIdValue, funcDef, specMapList):
     parmValueMap = {}
     amt_Conc = "amount"
     value = 0.0
@@ -670,8 +697,8 @@ def getKLaw(model, klaw, rev, globparameterIdValue, specMapList):
     kbparm = ""
     kfvalue = 0
     kbvalue = 0
-    kfp = None
-    kbp = None
+    kfp = ""
+    kbp = ""
     mssgstr = ""
     for i in ruleMemlist:
         if i in parmValueMap or i in globparameterIdValue:
@@ -692,24 +719,125 @@ def getKLaw(model, klaw, rev, globparameterIdValue, specMapList):
                     kbvalue = globparameterIdValue[i]
                     kbp = model.getParameter(kbparm)
             index += 1
-
         elif not (i in specMapList or i in comptSbmlidMooseIdMap):
             mssgstr = "\"" + i + "\" is not defined "
-            return (False, mssgstr)
+            return (False, mssgstr, 0,0)
+
     if kfp != "":
-        # print " unit set for rate law kfp ",kfparm, " ",kfp.isSetUnits()
+        lvalue =1.0
+        
         if kfp.isSetUnits():
             kfud = kfp.getDerivedUnitDefinition()
-            # print " kfud ",kfud
+            lvalue = transformUnits( 1,kfud ,"substance",True)
+        else:
+            unitscale = 1
+            if (noOfsub >1):
+                #converting units to milli M for Moose
+                #depending on the order of reaction,millifactor will calculated
+                unitscale = unitsforRates(model)
+                unitscale = unitscale*1000
+                lvalue = pow(unitscale,1-noOfsub)
+        kfvalue = kfvalue*lvalue;
+            
     if kbp != "":
-        pass
-        # print " unit set for rate law kbp ",kbparm, " ",kbp.isSetUnits()
-
+        lvaue = 1.0;
+        if kbp.isSetUnits():
+            kbud = kbp.getDerivedUnitDefinition()
+        else:
+            unitscale = 1
+            if (noOfprd >1):
+                unitscale = unitsforRates(model)
+                unitscale = unitscale*1000
+                lvalue = pow(unitscale,1-noOfprd)
+        kbvalue = kbvalue*lvalue;
     return (True, mssgstr, kfvalue, kbvalue)
 
+def transformUnits( mvalue, ud, type, hasonlySubUnit ):
+    lvalue = mvalue;
+    if (type == "compartment"): 
+        if(ud.getNumUnits() == 0):
+            unitsDefined = False
+        else:
+            for ut in range(0, ud.getNumUnits()):
+                unit = ud.getUnit(ut)
+            if ( unit.isLitre() ):
+                exponent = unit.getExponent()
+                multiplier = unit.getMultiplier()
+                scale = unit.getScale()
+                offset = unit.getOffset()
+                lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset
+                # Need to check if spatial dimension is less than 3 then,
+                # then volume conversion e-3 to convert cubicmeter shd not be done.
+                lvalue *= pow(1e-3,exponent)
+                
+    elif(type == "substance"):
+        exponent = 1.0
+        if(ud.getNumUnits() == 0):
+            unitsDefined = False
+        else:
+            for ut in range(0, ud.getNumUnits()):
+                unit = ud.getUnit(ut)
+                if ( unit.isMole() ):
+                    exponent = unit.getExponent()
+                    multiplier = unit.getMultiplier()
+                    scale = unit.getScale()
+                    offset = unit.getOffset()
+                    lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset
+                
+                elif (unit.isItem()):
+                    exponent = unit.getExponent()
+                    multiplier = unit.getMultiplier()
+                    scale = unit.getScale()
+                    offset = unit.getOffset()
+                    lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset
+                else:
+                    
+                    exponent = unit.getExponent()
+                    multiplier = unit.getMultiplier()
+                    scale = unit.getScale()
+                    offset = unit.getOffset()
+                    lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset
+        return lvalue
+
+def unitsforRates(model):
+    lvalue =1;
+    for n in range(0,model.getNumUnitDefinitions()):
+        ud = model.getUnitDefinition(n)
+        for ut in range(0,ud.getNumUnits()):
+            unit = ud.getUnit(ut)
+            if (ud.getId() == "substance"):
+                if ( unit.isMole() ):
+                    exponent = unit.getExponent();
+                    multiplier = unit.getMultiplier();
+                    scale = unit.getScale();
+                    offset = unit.getOffset();
+                    lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset;
+                    return lvalue;
 
 def getMembers(node, ruleMemlist):
-    if node.getType() == libsbml.AST_PLUS:
+    msg = ""
+    found = True
+    if  node.getType() == libsbml.AST_LAMBDA:
+        #In lambda get Bvar values and getRighChild which will be kineticLaw
+        if node.getNumBvars() == 0:
+            print ("0")
+            return False
+
+        for i in range (0,node.getNumBvars()):
+            ruleMemlist.append(node.getChild(i).getName())
+        #funcD[funcName] = {"bvar" : bvar, "MathML":node.getRightChild()}
+    elif node.getType() == libsbml.AST_FUNCTION:
+        #funcName = node.getName()
+        #funcValue = []
+        #functionfound = False
+        for i in range(0,node.getNumChildren()):
+            #functionfound = True
+            #print " $$ ",node.getChild(i).getName()
+            #funcValue.append(node.getChild(i).getName())
+            getMembers(node.getChild(i),ruleMemlist)
+        #funcKL[node.getName()] = funcValue
+
+    elif node.getType() == libsbml.AST_PLUS:
         if node.getNumChildren() == 0:
             print ("0")
             return False
@@ -722,6 +850,7 @@ def getMembers(node, ruleMemlist):
         pass
     elif node.getType() == libsbml.AST_NAME:
         # This will be the ci term"
+
         ruleMemlist.append(node.getName())
     elif node.getType() == libsbml.AST_MINUS:
         if node.getNumChildren() == 0:
@@ -752,83 +881,140 @@ def getMembers(node, ruleMemlist):
             # Multiplication
             getMembers(node.getChild(i), ruleMemlist)
 
-    elif node.getType() == libsbml.AST_FUNCTION_POWER:
-        pass
-    else:
+    elif node.getType() == libsbml.AST_LAMBDA:
+        print "\t \t \t \t AST_LAMBDA"
+        if node.getNumChildren() == 0:
+            print ("0")
+            return False
+        getMembers(node.getChild(0), ruleMemlist)
+        for i in range(1, node.getNumChildren()):
+            getMembers(node.getChild(i), ruleMemlist)
 
-        print(" this case need to be handled", node.getType())
+    elif node.getType() == libsbml.AST_FUNCTION_POWER:
+        msg = msg + "\n moose is yet to handle \""+node.getName() + "\" operator"
+        found = False
+    elif node.getType() == libsbml.AST_FUNCTION_PIECEWISE:
+        #print " piecewise ", libsbml.formulaToL3String(node)
+        msg = msg + "\n moose is yet to handle \""+node.getName() + "\" operator"
+        found = False
+        '''
+        if node.getNumChildren() == 0:
+            print("0")
+            return False
+        else:
+            lchild = node.getLeftChild()
+            getMembers(lchild, ruleMemlist)
+            rchild = node.getRightChild()
+            getMembers(rchild, ruleMemlist)
+        '''
+    else:
+        #print(" this case need to be handled", node.getName())
+        msg = msg + "\n moose is yet to handle \""+node.getName() + "\" operator"
+        found = False
     # if len(ruleMemlist) > 2:
     #     print "Sorry! for now MOOSE cannot handle more than 2 parameters"
  #        return True
-
+    return found, msg
 
 def createRules(model, specInfoMap, globparameterIdValue):
+    #This section where assigment, Algebraic, rate rules are converted
+    #For now assignment rules are written and that too just summation of pools for now.
+    msg = ""
+    found = True
     for r in range(0, model.getNumRules()):
         rule = model.getRule(r)
+        
         comptvolume = []
+
         if (rule.isAssignment()):
             rule_variable = rule.getVariable()
-            rule_variable = parentSp = str(idBeginWith(rule_variable))
-            poolList = specInfoMap[rule_variable]["Mpath"].path
-            poolsCompt = findCompartment(moose.element(poolList))
-            if not isinstance(moose.element(poolsCompt), moose.ChemCompt):
-                return -2
-            else:
-                if poolsCompt.name not in comptvolume:
-                    comptvolume.append(poolsCompt.name)
-
-            funcId = moose.Function(poolList + '/func')
-
-            objclassname = moose.element(poolList).className
-            if objclassname == "BufPool" or objclassname == "ZombieBufPool":
-                moose.connect(funcId, 'valueOut', poolList, 'setN')
-            elif objclassname == "Pool" or objclassname == "ZombiePool":
-                # moose.connect( funcId, 'valueOut', poolList ,'increament' )
-                moose.connect(funcId, 'valueOut', poolList, 'setN')
-            elif objclassname == "Reac" or objclassname == "ZombieReac":
-                moose.connect(funcId, 'valueOut', poolList, 'setNumkf')
-
-            ruleMath = rule.getMath()
-            ruleMemlist = []
-            speFunXterm = {}
-            getMembers(ruleMath, ruleMemlist)
-
-            for i in ruleMemlist:
-
-                if (i in specInfoMap):
-                    i = str(idBeginWith(i))
-                    specMapList = specInfoMap[i]["Mpath"]
-                    poolsCompt = findCompartment(moose.element(specMapList))
-                    if not isinstance(moose.element(
-                            poolsCompt), moose.ChemCompt):
-                        return -2
-                    else:
-                        if poolsCompt.name not in comptvolume:
-                            comptvolume.append(poolsCompt.name)
-                    numVars = funcId.numVars
-                    x = funcId.path + '/x[' + str(numVars) + ']'
-                    speFunXterm[i] = 'x' + str(numVars)
-                    moose.connect(specMapList, 'nOut', x, 'input')
-                    funcId.numVars = numVars + 1
-
-                elif not(i in globparameterIdValue):
-                    print("check the variable type ", i)
-            exp = rule.getFormula()
-            for mem in ruleMemlist:
-                if (mem in specInfoMap):
-                    #exp1 = exp.replace(mem, str(speFunXterm[mem]))
-                    exp1 = re.sub(r'\b%s\b'% (mem), speFunXterm[mem], exp)
-                    exp = exp1
-                elif(mem in globparameterIdValue):
-                    #exp1 = exp.replace(mem, str(globparameterIdValue[mem]))
-                    exp1 = re.sub(r'\b%s\b'% (mem), globparameterIdValue[mem], exp)
-                    exp = exp1
+        
+            if specInfoMap.has_key(rule_variable):
+                #In assignment rule only if pool exist, then that is conveted to moose as 
+                # this can be used as summation of pool's, P1+P2+P3 etc 
+                rule_variable = parentSp = str(idBeginWith(rule_variable))
+                poolList = specInfoMap[rule_variable]["Mpath"].path
+                poolsCompt = findCompartment(moose.element(poolList))
+                #If pool comes without a compartment which is not allowed moose
+                #then returning with -2
+                if not isinstance(moose.element(poolsCompt), moose.ChemCompt):
+                    return -2
                 else:
-                    print("Math expression need to be checked")
-            exp = exp.replace(" ", "")
-            funcId.expr = exp.strip(" \t\n\r")
-            # return True
+                    if poolsCompt.name not in comptvolume:
+                        comptvolume.append(poolsCompt.name)
 
+                    ruleMath = rule.getMath()
+                    #libsbml.writeMathMLToString(ruleMath)
+                    ruleMemlist = []
+                    speFunXterm = {}
+                    found, msg = getMembers(ruleMath, ruleMemlist)
+
+                    if found:
+                        allPools = True
+                        for i in ruleMemlist:
+                            if specInfoMap.has_key(i):
+                                pass
+                            else:
+                                allPools = False
+                        if allPools:
+                            #only if addition then summation works, only then I create a function in moose
+                            # which is need to get the summation's output to a pool
+                            funcId = moose.Function(poolList + '/func')
+                            objclassname = moose.element(poolList).className
+                            if objclassname == "BufPool" or objclassname == "ZombieBufPool":
+                                moose.connect(funcId, 'valueOut', poolList, 'setN')
+                            elif objclassname == "Pool" or objclassname == "ZombiePool":
+                                # moose.connect( funcId, 'valueOut', poolList ,'increament' )
+                                moose.connect(funcId, 'valueOut', poolList, 'setN')
+                            elif objclassname == "Reac" or objclassname == "ZombieReac":
+                                moose.connect(funcId, 'valueOut', poolList, 'setNumkf')
+                            for i in ruleMemlist: 
+                                if (i in specInfoMap):
+                                    i = str(idBeginWith(i))
+                                    specMapList = specInfoMap[i]["Mpath"]
+                                    poolsCompt = findCompartment(moose.element(specMapList))
+                                    if not isinstance(moose.element(
+                                            poolsCompt), moose.ChemCompt):
+                                        return -2
+                                    else:
+                                        if poolsCompt.name not in comptvolume:
+                                            comptvolume.append(poolsCompt.name)
+                                    numVars = funcId.numVars
+                                    x = funcId.path + '/x[' + str(numVars) + ']'
+                                    speFunXterm[i] = 'x' + str(numVars)
+                                    moose.connect(specMapList, 'nOut', x, 'input')
+                                    funcId.numVars = numVars + 1
+
+                                elif not(i in globparameterIdValue):
+                                    msg = msg + "check the variable name in mathML, this object neither pool or a constant \"" + i+"\" in assignmentRule " +rule.getVariable()
+
+                                exp = rule.getFormula()
+                                exprOK = True
+                                #print " specFunXTerm ",speFunXterm
+                            for mem in ruleMemlist:
+                                if (mem in specInfoMap):
+                                    #exp1 = exp.replace(mem, str(speFunXterm[mem]))
+                                    #print " mem ",mem, "$ ", speFunXterm[mem], "$$ ",exp
+                                    exp1 = re.sub(r'\b%s\b'% (mem), speFunXterm[mem], exp)
+                                    exp = exp1
+                                elif(mem in globparameterIdValue):
+                                    #exp1 = exp.replace(mem, str(globparameterIdValue[mem]))
+                                    exp1 = re.sub(r'\b%s\b'% (mem), globparameterIdValue[mem], exp)
+                                    exp = exp1
+                                else:
+                                    msg = msg +"Math expression need to be checked", exp
+                                    exprOK = False
+                            if exprOK:
+                                exp = exp.replace(" ", "")
+                                funcId.expr = exp.strip(" \t\n\r")
+            else:
+                msg = msg +"\nAssisgment Rule has parameter as variable, currently moose doesn't have this capability so ignoring."\
+                          + rule.getVariable() + " is not converted to moose."
+                found = False
+
+
+                    
+            
         elif(rule.isRate()):
             print(
                 "Warning : For now this \"",
@@ -843,7 +1029,7 @@ def createRules(model, specInfoMap, globparameterIdValue):
         if len(comptvolume) > 1:
             warning = "\nFunction ", moose.element(
                 poolList).name, " has input from different compartment which is depricated in moose and running this model cause moose to crash"
-    return True
+    return msg
 
 
 def pullnotes(sbmlId, mooseId):
@@ -907,7 +1093,6 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
                 poolId = moose.BufPool(comptEl + '/' + sName)
             else:
                 poolId = moose.Pool(comptEl + '/' + sName)
-
             if (spe.isSetNotes):
                 pullnotes(spe, poolId)
 
@@ -916,7 +1101,7 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
                 poolInfo = moose.Annotator(poolId.path + '/info')
             else:
                 poolInfo = moose.element(poolId.path + '/info')
-
+            
             for k, v in list(specAnnoInfo.items()):
                 if k == 'xCord':
                     poolInfo.x = float(v)
@@ -963,8 +1148,8 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
                 if not unitset:
                     # print " unit is not set"
                     unitfactor = pow(10, -3)
-
                 initvalue = initvalue * unitfactor
+
                 poolId.concInit = initvalue
             else:
                 nr = model.getNumRules()
@@ -1026,12 +1211,14 @@ def transformUnit(unitForObject, hasonlySubUnit=False):
                         lvalue = lvalue * pow(6.0221409e23, 1)
                     elif hasonlySubUnit == False:
                         # Pool units in moose is mM
-                        if scale > 0:
-                            lvalue *= pow(multiplier * pow(10.0,
-                                                           scale - 3), exponent) + offset
-                        elif scale <= 0:
-                            lvalue *= pow(multiplier * pow(10.0,
-                                                           scale + 3), exponent) + offset
+
+                        lvalue = lvalue * pow(multiplier*pow(10.0,scale+3),exponent)+offset
+                        # if scale > 0:
+                        #     lvalue *= pow(multiplier * pow(10.0,
+                        #                                    scale - 3), exponent) + offset
+                        # elif scale <= 0:
+                        #     lvalue *= pow(multiplier * pow(10.0,
+                        #                                    scale + 3), exponent) + offset
                     unitset = True
                     unittype = "Mole"
                     return (lvalue, unitset, unittype)
@@ -1065,6 +1252,7 @@ def transformUnit(unitForObject, hasonlySubUnit=False):
 def createCompartment(basePath, model, comptSbmlidMooseIdMap):
     # ToDoList : Check what should be done for the spaitialdimension is 2 or
     # 1, area or length
+    #print " createCompartment ",model.getNumCompartments()
     if not(model.getNumCompartments()):
         return False,
     else:
