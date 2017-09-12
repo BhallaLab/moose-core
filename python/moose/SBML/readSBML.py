@@ -566,6 +566,7 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,fun
             reaction_.k3 = modelAnnotaInfo[groupName]['k3']
             reaction_.k2 = modelAnnotaInfo[groupName]['k2']
             reaction_.concK1 = modelAnnotaInfo[groupName]['k1']
+            #reaction_.ratio = 4
             if reactionCreated:
                 if (reac.isSetNotes):
                     pullnotes(reac, reaction_)
@@ -882,7 +883,6 @@ def getMembers(node, ruleMemlist):
             getMembers(node.getChild(i), ruleMemlist)
 
     elif node.getType() == libsbml.AST_LAMBDA:
-        print "\t \t \t \t AST_LAMBDA"
         if node.getNumChildren() == 0:
             print ("0")
             return False
