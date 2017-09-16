@@ -157,7 +157,8 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
             return True, consistencyMessages, writeTofile
 
         if (not SBMLok):
-            cerr << "Errors encountered " << endl
+            #cerr << "Errors encountered " << endl
+            consistencyMessages = "Errors encountered"
             return -1, consistencyMessages
     else:
         return False, "Atleast one compartment should exist to write SBML"
