@@ -11,18 +11,22 @@
 ** Messaging Object Oriented Simulation Environment,
 ** also known as GENESIS 3 base code.
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
-Created : Thu May 12 10:19:00 2016(+0530)
+Created : Thu May 13 10:19:00 2016(+0530)
 Version
-Last-Updated: Tue Sep 12 18:50:00 2017(+0530)
+Last-Updated: Tue Sep 13 14:50:00 2017(+0530)
 
           By:HarshaRani
 **********************************************************************/
 2017
+Sep 13: - After EnzymaticReaction's k2 is set, explicity ratio is set to 4 to make sure it balance.
+        - If units are defined in the rate law for the reaction then check is made and if not in milli mole the base unit 
+          then converted to milli unit
+        - Moose doesn't allow Michaelis-Menten Enz to have more than one substrates/product
 Sep 12: - Now mooseReadSBML return model and errorFlag
         - check's are made if model is valid if its not errorFlag is set
         - check if model has atleast one compartment, if not errorFlag is set
         - errorFlag is set for Rules (for now piecewise is set which is not read user are warned)
-        - rateRaw are also calculated depending on units and number of substance/product
+        - rateLaw are also calculated depending on units and number of substrates/product
 
 Sep 8 : -functionDefinitions is read, 
         - if Kf and Kb unit are not defined then checked if substance units is defined and depending on this unit Kf and Kb is calculated
@@ -564,9 +568,9 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,fun
             reaction_, reactionCreated = setupEnzymaticReaction(
                 reac, groupName, rName, specInfoMap, modelAnnotaInfo)
             reaction_.k3 = modelAnnotaInfo[groupName]['k3']
-            reaction_.k2 = modelAnnotaInfo[groupName]['k2']
             reaction_.concK1 = modelAnnotaInfo[groupName]['k1']
-            #reaction_.ratio = 4
+            reaction_.k2 = modelAnnotaInfo[groupName]['k2']
+            reaction_.ratio = 4
             if reactionCreated:
                 if (reac.isSetNotes):
                     pullnotes(reac, reaction_)
@@ -593,6 +597,10 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,fun
             numRcts = reac.getNumReactants()
             numPdts = reac.getNumProducts()
             nummodifiers = reac.getNumModifiers()
+            # if (nummodifiers > 0 and (numRcts > 1 or numPdts >1)):
+            #     print("Warning: %s" %(rName)," : Enzymatic Reaction has more than one Substrate or Product which is not allowed in moose, we will be skiping creating this reaction in MOOSE")
+            #     reactionCreated = False
+
             if not (numRcts and numPdts):
                 print("Warning: %s" %(rName)," : Substrate or Product is missing, we will be skiping creating this reaction in MOOSE")
                 reactionCreated = False
@@ -726,7 +734,6 @@ def getKLaw(model, klaw,noOfsub, noOfprd,rev, globparameterIdValue, funcDef, spe
 
     if kfp != "":
         lvalue =1.0
-        
         if kfp.isSetUnits():
             kfud = kfp.getDerivedUnitDefinition()
             lvalue = transformUnits( 1,kfud ,"substance",True)
@@ -741,7 +748,7 @@ def getKLaw(model, klaw,noOfsub, noOfprd,rev, globparameterIdValue, funcDef, spe
         kfvalue = kfvalue*lvalue;
             
     if kbp != "":
-        lvaue = 1.0;
+        lvalue = 1.0;
         if kbp.isSetUnits():
             kbud = kbp.getDerivedUnitDefinition()
         else:
@@ -769,7 +776,7 @@ def transformUnits( mvalue, ud, type, hasonlySubUnit ):
                 lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset
                 # Need to check if spatial dimension is less than 3 then,
                 # then volume conversion e-3 to convert cubicmeter shd not be done.
-                lvalue *= pow(1e-3,exponent)
+                #lvalue *= pow(1e-3,exponent)
                 
     elif(type == "substance"):
         exponent = 1.0
@@ -783,7 +790,8 @@ def transformUnits( mvalue, ud, type, hasonlySubUnit ):
                     multiplier = unit.getMultiplier()
                     scale = unit.getScale()
                     offset = unit.getOffset()
-                    lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset
+                    #scale+3 is to convert to milli moles for moose
+                    lvalue *= pow( multiplier * pow(10.0,scale+3), exponent ) + offset
                 
                 elif (unit.isItem()):
                     exponent = unit.getExponent()

@@ -141,7 +141,7 @@ def mooseWriteKkit( modelpath, filename, sceneitems={}):
             print('Written to file '+filename)
             return errors, True
         else:
-            print(("Warning: writeKkit:: No model found on " , modelpath))
+            print("Warning: writeKkit:: No model found on " , modelpath)
             return False
 
 def findMinMax(sceneitems):
@@ -356,7 +356,7 @@ def trimPath(mobj):
         mobj = moose.element(mobj.parent)
         found = True
     if mobj.path == "/":
-        print((original, " object doesn't have compartment as a parent "))
+        print(original, " object doesn't have compartment as a parent ")
         return
     #other than the kinetics compartment, all the othername are converted to group in Genesis which are place under /kinetics
     # Any moose object comes under /kinetics then one level down the path is taken.
@@ -737,6 +737,6 @@ if __name__ == "__main__":
     written = mooseWriteKkit('/'+modelpath,output)
 
     if written:
-            print((" file written to ",output))
+            print(" file written to ",output)
     else:
             print(" could be written to kkit format")
