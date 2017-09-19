@@ -91,8 +91,8 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
     with open(filepath, "r") as filep:
         filep = open(filepath, "r")
         document = libsbml.readSBML(filepath)
-        tobecontinue = False
-        tobecontinue = validateModel(document)
+        tobecontinue = True
+        #tobecontinue = validateModel(document)
         if tobecontinue:
             level = document.getLevel()
             version = document.getVersion()
@@ -276,7 +276,10 @@ def addSubPrd(reac, reName, type, reactSBMLIdMooseId, specInfoMap):
         for rt in range(0, reac.getNumReactants()):
             rct = reac.getReactant(rt)
             sp = rct.getSpecies()
-            rctMapIter[sp] = rct.getStoichiometry()
+            if rct.isSetStoichiometry():
+                rctMapIter[sp] = rct.getStoichiometry()
+            else:
+                rctMapIter[sp] = 1
             if rct.getStoichiometry() > 1:
                 pass
                 # print " stoich ",reac.name,rct.getStoichiometry()
@@ -296,7 +299,11 @@ def addSubPrd(reac, reName, type, reactSBMLIdMooseId, specInfoMap):
         for rt in range(0, reac.getNumProducts()):
             rct = reac.getProduct(rt)
             sp = rct.getSpecies()
-            rctMapIter[sp] = rct.getStoichiometry()
+            if rct.isSetStoichiometry():
+                rctMapIter[sp] = rct.getStoichiometry()
+            else:
+                rctMapIter[sp] = 1
+            
             if rct.getStoichiometry() > 1:
                 pass
                 # print " stoich prd",reac.name,rct.getStoichiometry()
@@ -810,19 +817,21 @@ def transformUnits( mvalue, ud, type, hasonlySubUnit ):
 
 def unitsforRates(model):
     lvalue =1;
-    for n in range(0,model.getNumUnitDefinitions()):
-        ud = model.getUnitDefinition(n)
-        for ut in range(0,ud.getNumUnits()):
-            unit = ud.getUnit(ut)
-            if (ud.getId() == "substance"):
-                if ( unit.isMole() ):
-                    exponent = unit.getExponent();
-                    multiplier = unit.getMultiplier();
-                    scale = unit.getScale();
-                    offset = unit.getOffset();
-                    lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset;
-                    return lvalue;
-
+    if model.getNumUnitDefinitions():
+        for n in range(0,model.getNumUnitDefinitions()):
+            ud = model.getUnitDefinition(n)
+            for ut in range(0,ud.getNumUnits()):
+                unit = ud.getUnit(ut)
+                if (ud.getId() == "substance"):
+                    if ( unit.isMole() ):
+                        exponent = unit.getExponent();
+                        multiplier = unit.getMultiplier();
+                        scale = unit.getScale();
+                        offset = unit.getOffset();
+                        lvalue *= pow( multiplier * pow(10.0,scale), exponent ) + offset;
+                        return lvalue
+    else:
+        return lvalue
 def getMembers(node, ruleMemlist):
     msg = ""
     found = True
