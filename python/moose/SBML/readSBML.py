@@ -91,8 +91,8 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
     with open(filepath, "r") as filep:
         filep = open(filepath, "r")
         document = libsbml.readSBML(filepath)
-        tobecontinue = True
-        #tobecontinue = validateModel(document)
+        tobecontinue = False
+        tobecontinue = validateModel(document)
         if tobecontinue:
             level = document.getLevel()
             version = document.getVersion()
