@@ -1974,6 +1974,9 @@ const vector< Id >& Neuron::spineIds( unsigned int index ) const
 void Neuron::scaleBufAndRates( unsigned int spineNum,
                                double lenScale, double diaScale ) const
 {
+    double volScale = lenScale * diaScale * diaScale;
+	if ( doubleEq( volScale, 1.0 ) )
+		return;
     if ( spineStoich_.size() == 0 )
         // Perhaps no chem stuff in model, but user could have forgotten
         // to assign psd and spine meshes.
@@ -1999,7 +2002,6 @@ void Neuron::scaleBufAndRates( unsigned int spineNum,
         // The chem system for the spine may not have been defined.
         return;
     }
-    double volScale = lenScale * diaScale * diaScale;
     SetGet2< unsigned int, double >::set( ss, "scaleBufsAndRates",
                                           spineToMeshOrdering_[spineNum], volScale );
     volScale = diaScale * diaScale;
