@@ -13,11 +13,12 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Thu May 13 10:19:00 2016(+0530)
 Version
-Last-Updated: Tue Sep 13 14:50:00 2017(+0530)
+Last-Updated: Wed Oct 4 14:50:00 2017(+0530)
 
           By:HarshaRani
 **********************************************************************/
 2017
+Oct 4 : - loadpath is cleaned up
 Sep 13: - After EnzymaticReaction's k2 is set, explicity ratio is set to 4 to make sure it balance.
         - If units are defined in the rate law for the reaction then check is made and if not in milli mole the base unit 
           then converted to milli unit
@@ -89,6 +90,8 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
 
 
     with open(filepath, "r") as filep:
+        loadpath  = loadpath[loadpath.find('/')+1:]
+        loaderror = None
         filep = open(filepath, "r")
         document = libsbml.readSBML(filepath)
         tobecontinue = False
@@ -133,11 +136,12 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                 if (model.getNumCompartments() == 0):
                     return moose.element('/'), "Atleast one compartment is needed"
                 else:
+                    loadpath ='/'+loadpath
                     baseId = moose.Neutral(loadpath)
                     basePath = baseId
                     # All the model will be created under model as
                     # a thumbrule
-                    basePath = moose.Neutral(baseId.path + '/model')
+                    basePath = moose.Neutral(baseId.path)
                     # Map Compartment's SBML id as key and value is
                     # list of[ Moose ID and SpatialDimensions ]
                     global comptSbmlidMooseIdMap
@@ -147,6 +151,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                     msg = " "
                     msgRule = ""
                     msgReac = ""
+                    noRE = ""
                     groupInfo  = {}
                     funcDef = {}
                     modelAnnotaInfo = {}
@@ -169,9 +174,11 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                             if errorFlag:
                                 errorFlag, msgReac = createReaction(
                                     model, specInfoMap, modelAnnotaInfo, globparameterIdValue,funcDef,groupInfo)
+                                if len(moose.wildcardFind(moose.element(loadpath).path+"/##[ISA=ReacBase],/##[ISA=EnzBase]")) == 0:
+                                    errorFlag = False
+                                    noRE = ("Atleast one reaction should be present ")
                         getModelAnnotation(
                             model, baseId, basePath)
-
                     if not errorFlag:
                         # Any time in the middle if SBML does not read then I
                         # delete everything from model level This is important
@@ -179,8 +186,12 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                         # built which is not correct print "Deleted rest of the
                         # model"
                         moose.delete(basePath)
-                        basePath = moose.Shell('/')
-            return basePath, ""
+                        loadpath = moose.Shell('/')
+            #return basePath, ""
+            loaderror = msgRule+msgReac+noRE
+            if loaderror != "":
+                loaderror = loaderror +" to display in the widget"
+            return moose.element(loadpath), loaderror
         else:
             print("Validation failed while reading the model.")
             return moose.element('/'), "This document is not valid SBML"
@@ -213,13 +224,14 @@ def checkGroup(basePath,model):
             p = mplugin.getGroup(gindex)
             groupAnnoInfo = {}
             groupAnnoInfo = getObjAnnotation(p, modelAnnotaInfo)
-            if moose.exists(basePath.path+'/'+groupAnnoInfo["Compartment"]):
-                if not moose.exists(basePath.path+'/'+groupAnnoInfo["Compartment"]+'/'+p.getId()):
-                    moosegrp = moose.Neutral(basePath.path+'/'+groupAnnoInfo["Compartment"]+'/'+p.getId())
-                else:
-                    moosegrp = moose.element(basePath.path+'/'+groupAnnoInfo["Compartment"]+'/'+p.getId())
-                moosegrpinfo = moose.Annotator(moosegrp.path+'/info')
-                moosegrpinfo.color = groupAnnoInfo["bgColor"]
+            if groupAnnoInfo != {}:
+                if moose.exists(basePath.path+'/'+groupAnnoInfo["Compartment"]):
+                    if not moose.exists(basePath.path+'/'+groupAnnoInfo["Compartment"]+'/'+p.getId()):
+                        moosegrp = moose.Neutral(basePath.path+'/'+groupAnnoInfo["Compartment"]+'/'+p.getId())
+                    else:
+                        moosegrp = moose.element(basePath.path+'/'+groupAnnoInfo["Compartment"]+'/'+p.getId())
+                    moosegrpinfo = moose.Annotator(moosegrp.path+'/info')
+                    moosegrpinfo.color = groupAnnoInfo["bgColor"]
             else:
                 print ("Compartment not found")
 
@@ -1271,7 +1283,7 @@ def createCompartment(basePath, model, comptSbmlidMooseIdMap):
     # 1, area or length
     #print " createCompartment ",model.getNumCompartments()
     if not(model.getNumCompartments()):
-        return False,
+        return False, "Model has no compartment, atleast one compartment should exist to display the widget"
     else:
         for c in range(0, model.getNumCompartments()):
             compt = model.getCompartment(c)
