@@ -4,4 +4,4 @@
 import moose
 from moose.SBML import *
 import moose.merge
-print( dir(moose.merge) )
+import moose.utils as mu
