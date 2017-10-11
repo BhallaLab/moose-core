@@ -37,9 +37,7 @@ except ImportError as e:
 mergechemImport_, mergechemError_ = True, ''
 try:
     import moose.chemMerge as _chemMerge
-    print (" imported chemMerge")
 except Exception as e:
-    print ("mport mot possible Here chemMerge")
     mergechemImport_ = False
     mergechemError_ = '%s' % e
 
