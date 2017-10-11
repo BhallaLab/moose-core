@@ -12,11 +12,11 @@
 #**           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 #Created : Friday Dec 16 23:19:00 2016(+0530)
 #Version
-#Last-Updated: Tuesday Feb 28 15:05:33 2017(+0530)
+#Last-Updated: Wed Oct 11 14:05:33 2017(+0530)
 #         By: Harsha
 #**********************************************************************/
 
-# This program is used to merge models from src to destination
+# This program is used to merge chem models from src to destination
 #Rules are :
 #   -- If Compartment from the src model doesn't exist in destination model,
 #       then entire compartment and its children are copied over including groups
@@ -37,7 +37,12 @@
 #       --- if same Enz Name but sub or prd is different then duplicated and copied
 #   -- Function are copied only if destination pool to which its suppose to connect doesn't exist with function of its own
 #
+'''
+Oct 11: missing group are copied instead of creating one in new path which also copies Annotator info
+        earlier if user asked to save the model, it was saving default to kkit format, now user need to run the command to save (if this is run in command)
+        To check: When Gui is allowed to merge 2 models, need to see what happens
 
+'''
 
 import sys
 import os
@@ -178,32 +183,36 @@ def mergeChemModel(src,des):
                     print ("%s " %str(ed.name))
         ## Model is saved
         print ("\n ")
-        savemodel = raw_input("Do you want to save the model?  \"YES\" \"NO\" ")
-        if savemodel.lower() == 'yes' or savemodel.lower() == 'y':
-            mergeto = raw_input("Enter File name ")
-            if mergeto and mergeto.strip():
-                filenameto = 'merge.g'
-            else:
-                if str(mergeto).rfind('.') != -1:
-                    mergeto = mergeto[:str(mergeto).rfind('.')]
-                if str(mergeto).rfind('/'):
-                    mergeto = mergeto+'merge'
+        print ('\nMerged model is available under moose.element(\'%s\')' %(modelB))
+        print ('  From the pythong terminal itself \n to save the model in to genesis format use \n   >moose.mooseWriteKkit(\'%s\',\'filename.g\')' %(modelB))
+        print ('  to save into SBML format \n   >moose.mooseWriteSBML(\'%s\',\'filename.xml\')' %(modelB))
 
-                filenameto = mergeto+'.g'
+        # savemodel = raw_input("Do you want to save the model?  \"YES\" \"NO\" ")
+        # if savemodel.lower() == 'yes' or savemodel.lower() == 'y':
+        #     mergeto = raw_input("Enter File name ")
+        #     if mergeto and mergeto.strip():
+        #         filenameto = 'merge.g'
+        #     else:
+        #         if str(mergeto).rfind('.') != -1:
+        #             mergeto = mergeto[:str(mergeto).rfind('.')]
+        #         if str(mergeto).rfind('/'):
+        #             mergeto = mergeto+'merge'
 
-            error,written = moose.mooseWriteKkit(modelB, filenameto)
-            if written == False:
-                print('Could not save the Model, check the files')
-            else:
-                if error == "":
-                    print(" \n The merged model is saved into \'%s\' " %(filenameto))
-                else:
-                    print('Model is saved but these are not written\n %s' %(error))
+        #         filenameto = mergeto+'.g'
 
-        else:
-            print ('\nMerged model is available under moose.element(\'%s\')' %(modelB))
-            print ('  If you are in python terminal you could save \n   >moose.mooseWriteKkit(\'%s\',\'filename.g\')' %(modelB))
+        #     error,written = moose.mooseWriteKkit(modelB, filenameto)
+        #     if written == False:
+        #         print('Could not save the Model, check the files')
+        #     else:
+        #         if error == "":
+        #             print(" \n The merged model is saved into \'%s\' " %(filenameto))
+        #         else:
+        #             print('Model is saved but these are not written\n %s' %(error))
 
+        # else:
+        #     print ('\nMerged model is available under moose.element(\'%s\')' %(modelB))
+        #     print ('  If you are in python terminal you could save \n   >moose.mooseWriteKkit(\'%s\',\'filename.g\')' %(modelB))
+        #     print ('  If you are in python terminal you could save \n   >moose.mooseWriteSBML(\'%s\',\'filename.g\')' %(modelB))
 def functionMerge(comptA,comptB,key):
     funcNotallowed, funcExist = [], []
     comptApath = moose.element(comptA[key]).path
@@ -344,7 +353,11 @@ def poolMerge(comptA,comptB,poolNotcopiedyet):
                 bpath.name = bpath.name+"_grp"
                 l = moose.Neutral(grp_cmpt)
         else:
-            moose.Neutral(grp_cmpt)
+            #moose.Neutral(grp_cmpt)
+            src = bpath
+            srcpath = (bpath.parent).path
+            des = srcpath.replace(objB,objA)
+            moose.copy(bpath,moose.element(des))
 
         apath = moose.element(bpath.path.replace(objB,objA))
 
