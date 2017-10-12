@@ -71,17 +71,16 @@ def mergeChemModel(src,des):
         modelA = A
         loadedA = True
     else:
-        print ("%s path or file doesnot exists. Mergering will exist" % (A))
-        exit(0)
-
+        print ("%s path or filename doesnot exist. " % (A))
+        
     if os.path.isfile(B):
         modelB,loadedB = loadModels(B)
     elif moose.exists(B):
         modelB = B
         loadedB = True
     else:
-        print ("%s path or file doesnot exists. Mergering will exist " % (B))
-        exit(0)
+        print ("%s path or filename doesnot exist. " % (B))
+        
 
     if loadedA and loadedB:
         ## yet deleteSolver is called to make sure all the moose object are off from solver
@@ -213,6 +212,7 @@ def mergeChemModel(src,des):
         #     print ('\nMerged model is available under moose.element(\'%s\')' %(modelB))
         #     print ('  If you are in python terminal you could save \n   >moose.mooseWriteKkit(\'%s\',\'filename.g\')' %(modelB))
         #     print ('  If you are in python terminal you could save \n   >moose.mooseWriteSBML(\'%s\',\'filename.g\')' %(modelB))
+        #return modelB
 def functionMerge(comptA,comptB,key):
     funcNotallowed, funcExist = [], []
     comptApath = moose.element(comptA[key]).path
