@@ -58,6 +58,34 @@ from moose.chemUtil.chemConnectUtil import *
 from moose.chemUtil.graphUtils import *
 #from moose.genesis import mooseWriteKkit
 
+def checkFile_Obj_str(file_Obj_str):
+    model = moose.element('/')
+    loaded = False
+    found = False
+    if isinstance(file_Obj_str, str):
+        if os.path.isfile(file_Obj_str) == True:
+            model,loaded = loadModels(file_Obj_str)
+            found = True
+        elif file_Obj_str.find('/') != -1 :
+            if not isinstance(file_Obj_str,moose.Neutral):
+                if moose.exists(file_Obj_str):
+                    model = file_Obj_str
+                    loaded = True
+                    found = True
+        elif isinstance(file_Obj_str, moose.Neutral):
+            if moose.exists(file_Obj_str.path):
+                model = file_Obj_str.path
+                loaded = True
+                found = True
+    elif isinstance(file_Obj_str, moose.Neutral):
+        if moose.exists(file_Obj_str.path):
+            model = file_Obj_str.path
+            loaded = True
+            found = True
+    if not found:
+        print ("%s path or filename doesnot exist. " % (file_Obj_str))
+    return model,loaded
+
 def mergeChemModel(src,des):
     """ Merges two model or the path """
     A = src
@@ -68,35 +96,9 @@ def mergeChemModel(src,des):
     loadedB = False
     modelA = moose.element('/')
     modelB = moose.element('/')
-
-    if isinstance(A, str):
-        if os.path.isfile(A) == True:
-            modelA,loadedA = loadModels(A)
-            spath, sfile = os.path.split(A)
-        elif moose.exists(moose.element(A).path):
-            modelA = A
-            loadedA = True
-    elif isinstance(A, moose.Neutral):
-        if moose.exists(A.path):
-            modelA = A.path
-            loadedA = True
-    else:
-        print ("%s path or filename doesnot exist. " % (A))
-
-    if isinstance(B, str):
-        if os.path.isfile(B) == True:
-            modelB,loadedB = loadModels(B)
-            dpath, dfile = os.path.split(B)
-        elif moose.exists(moose.element(B).path):
-            modelB = B
-            loadedB = True
-    elif isinstance(B, moose.Neutral):
-        if moose.exists(B.path):
-            modelB = B.path
-            loadedB = True
-    else:
-        print ("%s path or filename doesnot exist. " % (B))
-        
+    modelA,loadedA = checkFile_Obj_str(A)
+    modelB,loadedB = checkFile_Obj_str(B)
+    
     if loadedA and loadedB:
         ## yet deleteSolver is called to make sure all the moose object are off from solver
         deleteSolver(modelA)
