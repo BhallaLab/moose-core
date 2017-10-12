@@ -12,7 +12,7 @@
 #**           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 #Created : Friday Dec 16 23:19:00 2016(+0530)
 #Version
-#Last-Updated: Wed Oct 11 14:05:33 2017(+0530)
+#Last-Updated: Wed Oct 12 14:05:33 2017(+0530)
 #         By: Harsha
 #**********************************************************************/
 
@@ -38,6 +38,10 @@
 #   -- Function are copied only if destination pool to which its suppose to connect doesn't exist with function of its own
 #
 '''
+Oct 12: clean way of cheking the type of path provided, filepath,moose obj, moose path are taken,
+        if source is empty then nothing to copy, 
+        if destination was empty list is update with new object
+
 Oct 11: missing group are copied instead of creating one in new path which also copies Annotator info
         earlier if user asked to save the model, it was saving default to kkit format, now user need to run the command to save (if this is run in command)
         To check: When Gui is allowed to merge 2 models, need to see what happens
@@ -52,36 +56,47 @@ import mtypes
 
 from moose.chemUtil.chemConnectUtil import *
 from moose.chemUtil.graphUtils import *
-from moose.genesis import mooseWriteKkit
+#from moose.genesis import mooseWriteKkit
 
 def mergeChemModel(src,des):
-
     """ Merges two model or the path """
     A = src
     B = des
+    sfile = src
+    dfile = des
     loadedA = False
     loadedB = False
     modelA = moose.element('/')
     modelB = moose.element('/')
 
-    if os.path.isfile(A):
-        modelA,loadedA = loadModels(A)
-
-    elif moose.exists(A):
-        modelA = A
-        loadedA = True
+    if isinstance(A, str):
+        if os.path.isfile(A) == True:
+            modelA,loadedA = loadModels(A)
+            spath, sfile = os.path.split(A)
+        elif moose.exists(moose.element(A).path):
+            modelA = A
+            loadedA = True
+    elif isinstance(A, moose.Neutral):
+        if moose.exists(A.path):
+            modelA = A.path
+            loadedA = True
     else:
         print ("%s path or filename doesnot exist. " % (A))
-        
-    if os.path.isfile(B):
-        modelB,loadedB = loadModels(B)
-    elif moose.exists(B):
-        modelB = B
-        loadedB = True
+
+    if isinstance(B, str):
+        if os.path.isfile(B) == True:
+            modelB,loadedB = loadModels(B)
+            dpath, dfile = os.path.split(B)
+        elif moose.exists(moose.element(B).path):
+            modelB = B
+            loadedB = True
+    elif isinstance(B, moose.Neutral):
+        if moose.exists(B.path):
+            modelB = B.path
+            loadedB = True
     else:
         print ("%s path or filename doesnot exist. " % (B))
         
-
     if loadedA and loadedB:
         ## yet deleteSolver is called to make sure all the moose object are off from solver
         deleteSolver(modelA)
@@ -93,126 +108,143 @@ def mergeChemModel(src,des):
         dictComptA = dict( [ (i.name,i) for i in moose.wildcardFind(modelA+'/##[ISA=ChemCompt]') ] )
         dictComptB = dict( [ (i.name,i) for i in moose.wildcardFind(modelB+'/##[ISA=ChemCompt]') ] )
         poolNotcopiedyet = []
+        if len(dictComptA):
+            for key in list(dictComptA.keys()):
+                if key not in dictComptB:
+                    # if compartmentname from modelB does not exist in modelA, then copy
+                    copy = moose.copy(dictComptA[key],moose.element(modelB))
+                    dictComptB[key]=moose.element(copy)
+                else:
+                    #if compartmentname from modelB exist in modelA,
+                    #volume is not same, then change volume of ModelB same as ModelA
+                    if abs(dictComptB[key].volume - dictComptA[key].volume):
+                        #hack for now
+                        while (abs(dictComptB[key].volume - dictComptA[key].volume) != 0.0):
+                            dictComptA[key].volume = float(dictComptB[key].volume)
+                    dictComptB = dict( [ (i.name,i) for i in moose.wildcardFind(modelB+'/##[ISA=ChemCompt]') ] )
 
-        for key in list(dictComptA.keys()):
-            if key not in dictComptB:
-                # if compartmentname from modelB does not exist in modelA, then copy
-                copy = moose.copy(dictComptA[key],moose.element(modelB))
+                    #Mergering pool
+                    poolMerge(dictComptB[key],dictComptA[key],poolNotcopiedyet)
+
+            if grpNotcopiedyet:
+                # objA = moose.element(comptA).parent.name
+                # if not moose.exists(objA+'/'+comptB.name+'/'+bpath.name):
+                #   print bpath
+                #   moose.copy(bpath,moose.element(objA+'/'+comptB.name))
+                pass
+            comptBdict =  comptList(modelB)
+            poolListinb = {}
+            poolListinb = updatePoolList(comptBdict)
+            R_Duplicated, R_Notcopiedyet,R_Daggling = [], [], []
+            E_Duplicated, E_Notcopiedyet,E_Daggling = [], [], []
+            for key in list(dictComptA.keys()):
+                funcExist, funcNotallowed = [], []
+                funcExist,funcNotallowed = functionMerge(dictComptB,dictComptA,key)
+
+                poolListinb = updatePoolList(dictComptB)
+                R_Duplicated,R_Notcopiedyet,R_Daggling = reacMerge(dictComptB,dictComptA,key,poolListinb)
+
+                poolListinb = updatePoolList(dictComptB)
+                E_Duplicated,E_Notcopiedyet,E_Daggling = enzymeMerge(dictComptB,dictComptA,key,poolListinb)
+            '''
+            if isinstance(src, str):
+                if os.path.isfile(src) == True:
+                    spath, sfile = os.path.split(src)
+                else:
+                    sfile = src
             else:
-                #if compartmentname from modelB exist in modelA,
-                #volume is not same, then change volume of ModelB same as ModelA
-                if abs(dictComptB[key].volume - dictComptA[key].volume):
-                    #hack for now
-                    while (abs(dictComptB[key].volume - dictComptA[key].volume) != 0.0):
-                        dictComptA[key].volume = float(dictComptB[key].volume)
-                dictComptB = dict( [ (i.name,i) for i in moose.wildcardFind(modelB+'/##[ISA=ChemCompt]') ] )
-
-                #Mergering pool
-                poolMerge(dictComptB[key],dictComptA[key],poolNotcopiedyet)
-
-        if grpNotcopiedyet:
-            # objA = moose.element(comptA).parent.name
-            # if not moose.exists(objA+'/'+comptB.name+'/'+bpath.name):
-            #   print bpath
-            #   moose.copy(bpath,moose.element(objA+'/'+comptB.name))
-            pass
-
-        comptBdict =  comptList(modelB)
-        poolListinb = {}
-        poolListinb = updatePoolList(comptBdict)
-        R_Duplicated, R_Notcopiedyet,R_Daggling = [], [], []
-        E_Duplicated, E_Notcopiedyet,E_Daggling = [], [], []
-        for key in list(dictComptA.keys()):
-            funcExist, funcNotallowed = [], []
-            funcExist,funcNotallowed = functionMerge(dictComptB,dictComptA,key)
-
-            poolListinb = updatePoolList(dictComptB)
-            R_Duplicated,R_Notcopiedyet,R_Daggling = reacMerge(dictComptB,dictComptA,key,poolListinb)
-
-            poolListinb = updatePoolList(dictComptB)
-            E_Duplicated,E_Notcopiedyet,E_Daggling = enzymeMerge(dictComptB,dictComptA,key,poolListinb)
-        spath, sfile = os.path.split(src)
-        dpath, dfile = os.path.split(des)
-        print("\nThe content of %s (src) model is merged to %s (des)." %(sfile, dfile))
-        # Here any error or warning during Merge is written it down
-        if funcExist:
-            print( "\nIn model \"%s\" pool already has connection from a function, these function from model \"%s\" is not allowed to connect to same pool,\n since no two function are allowed to connect to same pool:"%(dfile, sfile))
-            for fl in list(funcExist):
-                print("\t [Pool]:  %s [Function]:  %s \n" %(str(fl.parent.name), str(fl.path)))
-        if funcNotallowed:
-            print( "\nThese functions is not to copied, since pool connected to function input are from different compartment:")
-            for fl in list(funcNotallowed):
-                print("\t [Pool]:  %s [Function]:  %s \n" %(str(fl.parent.name), str(fl.path)))
-        if R_Duplicated or E_Duplicated:
-            print ("These Reaction / Enzyme are \"Duplicated\" into destination file \"%s\", due to "
-                    "\n 1. If substrate / product name's are different for a give reaction/Enzyme name "
-                    "\n 2. If product belongs to different compartment "
-                    "\n Models have to decide to keep or delete these reaction/enzyme in %s" %(dfile, dfile))
-            if E_Duplicated:
-                print("Reaction: ")
-            for rd in list(R_Duplicated):
-                print ("%s " %str(rd.name))
-
-            if E_Duplicated:
-                print ("Enzyme:")
-                for ed in list(E_Duplicated):
-                    print ("%s " %str(ed.name))
-
-        if R_Notcopiedyet or E_Notcopiedyet:
-
-            print ("\nThese Reaction/Enzyme in model are not dagging but while copying the associated substrate or product is missing")
-            if R_Notcopiedyet:
-                print("Reaction: ")
-            for rd in list(R_Notcopiedyet):
-                print ("%s " %str(rd.name))
-            if E_Notcopiedyet:
-                print ("Enzyme:")
-                for ed in list(E_Notcopiedyet):
-                    print ("%s " %str(ed.name))
-
-        if R_Daggling or E_Daggling:
-            print ("\n Daggling reaction/enzyme are not allowed in moose, these are not merged to %s from %s" %(dfile, sfile))
-            if R_Daggling:
-                print("Reaction: ")
-                for rd in list(R_Daggling):
+                sfile = src
+            if isinstance(des, str):
+                print " A str",des
+                if os.path.isfile(des) == True:
+                    dpath, dfile = os.path.split(des)
+                else:
+                    dfile = des
+            else:
+                dfile = des
+            '''
+            print("\nThe content of %s (src) model is merged to %s (des)." %(sfile, dfile))
+            # Here any error or warning during Merge is written it down
+            if funcExist:
+                print( "\nIn model \"%s\" pool already has connection from a function, these function from model \"%s\" is not allowed to connect to same pool,\n since no two function are allowed to connect to same pool:"%(dfile, sfile))
+                for fl in list(funcExist):
+                    print("\t [Pool]:  %s [Function]:  %s \n" %(str(fl.parent.name), str(fl.path)))
+            if funcNotallowed:
+                print( "\nThese functions is not to copied, since pool connected to function input are from different compartment:")
+                for fl in list(funcNotallowed):
+                    print("\t [Pool]:  %s [Function]:  %s \n" %(str(fl.parent.name), str(fl.path)))
+            if R_Duplicated or E_Duplicated:
+                print ("These Reaction / Enzyme are \"Duplicated\" into destination file \"%s\", due to "
+                        "\n 1. If substrate / product name's are different for a give reaction/Enzyme name "
+                        "\n 2. If product belongs to different compartment "
+                        "\n Models have to decide to keep or delete these reaction/enzyme in %s" %(dfile, dfile))
+                if E_Duplicated:
+                    print("Reaction: ")
+                for rd in list(R_Duplicated):
                     print ("%s " %str(rd.name))
-            if E_Daggling:
-                print ("Enzyme:")
-                for ed in list(E_Daggling):
-                    print ("%s " %str(ed.name))
-        ## Model is saved
-        print ("\n ")
-        print ('\nMerged model is available under moose.element(\'%s\')' %(modelB))
-        print ('  From the pythong terminal itself \n to save the model in to genesis format use \n   >moose.mooseWriteKkit(\'%s\',\'filename.g\')' %(modelB))
-        print ('  to save into SBML format \n   >moose.mooseWriteSBML(\'%s\',\'filename.xml\')' %(modelB))
 
-        # savemodel = raw_input("Do you want to save the model?  \"YES\" \"NO\" ")
-        # if savemodel.lower() == 'yes' or savemodel.lower() == 'y':
-        #     mergeto = raw_input("Enter File name ")
-        #     if mergeto and mergeto.strip():
-        #         filenameto = 'merge.g'
-        #     else:
-        #         if str(mergeto).rfind('.') != -1:
-        #             mergeto = mergeto[:str(mergeto).rfind('.')]
-        #         if str(mergeto).rfind('/'):
-        #             mergeto = mergeto+'merge'
+                if E_Duplicated:
+                    print ("Enzyme:")
+                    for ed in list(E_Duplicated):
+                        print ("%s " %str(ed.name))
 
-        #         filenameto = mergeto+'.g'
+            if R_Notcopiedyet or E_Notcopiedyet:
 
-        #     error,written = moose.mooseWriteKkit(modelB, filenameto)
-        #     if written == False:
-        #         print('Could not save the Model, check the files')
-        #     else:
-        #         if error == "":
-        #             print(" \n The merged model is saved into \'%s\' " %(filenameto))
-        #         else:
-        #             print('Model is saved but these are not written\n %s' %(error))
+                print ("\nThese Reaction/Enzyme in model are not dagging but while copying the associated substrate or product is missing")
+                if R_Notcopiedyet:
+                    print("Reaction: ")
+                for rd in list(R_Notcopiedyet):
+                    print ("%s " %str(rd.name))
+                if E_Notcopiedyet:
+                    print ("Enzyme:")
+                    for ed in list(E_Notcopiedyet):
+                        print ("%s " %str(ed.name))
 
-        # else:
-        #     print ('\nMerged model is available under moose.element(\'%s\')' %(modelB))
-        #     print ('  If you are in python terminal you could save \n   >moose.mooseWriteKkit(\'%s\',\'filename.g\')' %(modelB))
-        #     print ('  If you are in python terminal you could save \n   >moose.mooseWriteSBML(\'%s\',\'filename.g\')' %(modelB))
-        #return modelB
+            if R_Daggling or E_Daggling:
+                print ("\n Daggling reaction/enzyme are not allowed in moose, these are not merged to %s from %s" %(dfile, sfile))
+                if R_Daggling:
+                    print("Reaction: ")
+                    for rd in list(R_Daggling):
+                        print ("%s " %str(rd.name))
+                if E_Daggling:
+                    print ("Enzyme:")
+                    for ed in list(E_Daggling):
+                        print ("%s " %str(ed.name))
+            ## Model is saved
+            print ("\n ")
+            print ('\nMerged model is available under moose.element(\'%s\')' %(modelB))
+            print ('  From the pythong terminal itself \n to save the model in to genesis format use \n   >moose.mooseWriteKkit(\'%s\',\'filename.g\')' %(modelB))
+            print ('  to save into SBML format \n   >moose.mooseWriteSBML(\'%s\',\'filename.xml\')' %(modelB))
+
+            # savemodel = raw_input("Do you want to save the model?  \"YES\" \"NO\" ")
+            # if savemodel.lower() == 'yes' or savemodel.lower() == 'y':
+            #     mergeto = raw_input("Enter File name ")
+            #     if mergeto and mergeto.strip():
+            #         filenameto = 'merge.g'
+            #     else:
+            #         if str(mergeto).rfind('.') != -1:
+            #             mergeto = mergeto[:str(mergeto).rfind('.')]
+            #         if str(mergeto).rfind('/'):
+            #             mergeto = mergeto+'merge'
+
+            #         filenameto = mergeto+'.g'
+
+            #     error,written = moose.mooseWriteKkit(modelB, filenameto)
+            #     if written == False:
+            #         print('Could not save the Model, check the files')
+            #     else:
+            #         if error == "":
+            #             print(" \n The merged model is saved into \'%s\' " %(filenameto))
+            #         else:
+            #             print('Model is saved but these are not written\n %s' %(error))
+
+            # else:
+            #     print ('\nMerged model is available under moose.element(\'%s\')' %(modelB))
+            #     print ('  If you are in python terminal you could save \n   >moose.mooseWriteKkit(\'%s\',\'filename.g\')' %(modelB))
+            #     print ('  If you are in python terminal you could save \n   >moose.mooseWriteSBML(\'%s\',\'filename.g\')' %(modelB))
+            #return modelB
+        else:
+            print ('\nSource file has no objects to copy(\'%s\')' %(modelA))
 def functionMerge(comptA,comptB,key):
     funcNotallowed, funcExist = [], []
     comptApath = moose.element(comptA[key]).path
