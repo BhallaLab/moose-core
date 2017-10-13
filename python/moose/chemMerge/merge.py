@@ -12,7 +12,7 @@
 #**           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 #Created : Friday Dec 16 23:19:00 2016(+0530)
 #Version
-#Last-Updated: Wed Oct 12 14:05:33 2017(+0530)
+#Last-Updated: Wed Oct 14 00:25:33 2017(+0530)
 #         By: Harsha
 #**********************************************************************/
 
@@ -38,6 +38,9 @@
 #   -- Function are copied only if destination pool to which its suppose to connect doesn't exist with function of its own
 #
 '''
+Change log
+Oct 14: absolute import with mtypes just for python3
+
 Oct 12: clean way of cheking the type of path provided, filepath,moose obj, moose path are taken,
         if source is empty then nothing to copy, 
         if destination was empty list is update with new object
@@ -52,8 +55,8 @@ import sys
 import os
 #from . import _moose as moose
 import moose
-import mtypes
 
+from mooe.mtypes import *
 from moose.chemUtil.chemConnectUtil import *
 from moose.chemUtil.graphUtils import *
 #from moose.genesis import mooseWriteKkit
@@ -98,7 +101,7 @@ def mergeChemModel(src,des):
     modelB = moose.element('/')
     modelA,loadedA = checkFile_Obj_str(A)
     modelB,loadedB = checkFile_Obj_str(B)
-    
+
     if loadedA and loadedB:
         ## yet deleteSolver is called to make sure all the moose object are off from solver
         deleteSolver(modelA)
@@ -215,9 +218,9 @@ def mergeChemModel(src,des):
             ## Model is saved
             print ("\n ")
             print ('\nMerged model is available under moose.element(\'%s\')' %(modelB))
-            print ('  From the pythong terminal itself \n to save the model in to genesis format use \n   >moose.mooseWriteKkit(\'%s\',\'filename.g\')' %(modelB))
+            print ('  From the python terminal itself \n to save the model in to genesis format use \n   >moose.mooseWriteKkit(\'%s\',\'filename.g\')' %(modelB))
             print ('  to save into SBML format \n   >moose.mooseWriteSBML(\'%s\',\'filename.xml\')' %(modelB))
-
+            return modelB
             # savemodel = raw_input("Do you want to save the model?  \"YES\" \"NO\" ")
             # if savemodel.lower() == 'yes' or savemodel.lower() == 'y':
             #     mergeto = raw_input("Enter File name ")
@@ -245,8 +248,9 @@ def mergeChemModel(src,des):
             #     print ('  If you are in python terminal you could save \n   >moose.mooseWriteKkit(\'%s\',\'filename.g\')' %(modelB))
             #     print ('  If you are in python terminal you could save \n   >moose.mooseWriteSBML(\'%s\',\'filename.g\')' %(modelB))
             #return modelB
-        else:
-            print ('\nSource file has no objects to copy(\'%s\')' %(modelA))
+    else:
+        print ('\nSource file has no objects to copy(\'%s\')' %(modelA))
+        return moose.element('/')
 def functionMerge(comptA,comptB,key):
     funcNotallowed, funcExist = [], []
     comptApath = moose.element(comptA[key]).path
