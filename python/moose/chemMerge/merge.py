@@ -56,7 +56,7 @@ import os
 #from . import _moose as moose
 import moose
 
-from mooe.mtypes import *
+from moose.mtypes import *
 from moose.chemUtil.chemConnectUtil import *
 from moose.chemUtil.graphUtils import *
 #from moose.genesis import mooseWriteKkit
