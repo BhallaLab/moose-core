@@ -56,7 +56,7 @@ import os
 #from . import _moose as moose
 import moose
 
-from moose.mtypes import *
+from moose.chemMerge import mtypes
 from moose.chemUtil.chemConnectUtil import *
 from moose.chemUtil.graphUtils import *
 #from moose.genesis import mooseWriteKkit
@@ -101,7 +101,7 @@ def mergeChemModel(src,des):
     modelB = moose.element('/')
     modelA,loadedA = checkFile_Obj_str(A)
     modelB,loadedB = checkFile_Obj_str(B)
-
+    print " modelA ",modelA, modelB, loadedA, loadedB
     if loadedA and loadedB:
         ## yet deleteSolver is called to make sure all the moose object are off from solver
         deleteSolver(modelA)
