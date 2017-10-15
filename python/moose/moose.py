@@ -34,6 +34,14 @@ except ImportError as e:
     kkitImport_ = False
     kkitImport_err_ = '%s' % e
 
+mergechemImport_, mergechemError_ = True, ''
+try:
+    import moose.chemMerge as _chemMerge
+except Exception as e:
+    mergechemImport_ = False
+    mergechemError_ = '%s' % e
+
+
 # Import function from C++ module into moose namespace.
 from moose._moose import *
 
@@ -152,6 +160,17 @@ def mooseaddChemSolver(modelpath, solver):
         return _chemUtil.add_Delete_ChemicalSolver.mooseaddChemSolver(modelpath, solver)
     else:
         print( chemError_ )
+        return False
+
+def mergeChemModel(src, des):
+    """ Merges two chemical model, \n
+        File or filepath can be passed
+        source is merged to destination
+    """
+    #global mergechemImport_
+    if mergechemImport_:
+        return _chemMerge.merge.mergeChemModel(src,des)
+    else:
         return False
 
 ################################################################
