@@ -420,6 +420,16 @@ const Cinfo* Neuron::initCinfo()
 		&Neuron::getParentCompartmentOfSpine
 	);
 
+	static ReadOnlyLookupElementValueFinfo< Neuron, vector< ObjId >, vector< ObjId > >
+			spineIdsFromCompartmentIds(
+		"spineIdsFromCompartmentIds",
+		"Vector of ObjIds of spine entries (FieldElements on this Neuron, "
+	    "used for scaling) that map to the the specified "
+		"electrical compartments. If a bad compartment Id is given, the"
+		"corresponding spine entry is the root Id.",
+		&Neuron::getSpineIdsFromCompartmentIds
+	);
+
 	/////////////////////////////////////////////////////////////////////
 	// DestFinfos
 	/////////////////////////////////////////////////////////////////////
@@ -498,6 +508,7 @@ const Cinfo* Neuron::initCinfo()
 		&spinesFromExpression,  	// ReadOnlyLookupValueFinfo
 		&spinesOnCompartment,	  	// ReadOnlyLookupValueFinfo
 		&parentCompartmentOfSpine, 	// ReadOnlyLookupValueFinfo
+		&spineIdsFromCompartmentIds, 	// ReadOnlyLookupValueFinfo
 		&buildSegmentTree,			// DestFinfo
 		&setSpineAndPsdMesh,		// DestFinfo
 		&setSpineAndPsdDsolve,		// DestFinfo
@@ -1056,6 +1067,37 @@ ObjId Neuron::getParentCompartmentOfSpine(
 				return segId_[ comptIndex ];
 	}
 	return ObjId();
+}
+
+vector< ObjId > Neuron::getSpineIdsFromCompartmentIds(
+	const Eref& e, vector< ObjId > compt ) const
+{
+	vector< ObjId > ret;
+	map< Id, unsigned int > lookupSpine;
+	Id spineBase = Id( e.id().value() + 1 );
+	for ( unsigned int i = 0; i < spines_.size(); ++i ) {
+		for ( vector< Id >::const_iterator j = spines_[i].begin(); j != spines_[i].end(); ++j ) {
+			lookupSpine[ *j ] = i;
+		}
+	}
+	// cout << "################## " << lookupSpine.size() << endl;
+	for ( map< Id, unsigned int >::const_iterator k = lookupSpine.begin(); k != lookupSpine.end(); ++k ) {
+		// cout << "spine[" << k->second << "] has " << k->first.element()->getName() << endl;
+		// cout << "spine[" << k->second << "] has " << k->first << endl;
+
+	}
+	for ( vector< ObjId >::const_iterator j = compt.begin(); j != compt.end(); ++j ) 
+	{
+		// cout << "compt: " << *j << "	" << j->element()->getName() << endl;
+		map< Id, unsigned int >::const_iterator k = lookupSpine.find( j->id );
+		if ( k != lookupSpine.end() ) {
+			ret.push_back( ObjId( spineBase, e.dataIndex(), k->second ) );
+			// cout << "spine[" << k->second << "] has " << j->element()->getName() << endl;
+		} else {
+			ret.push_back( ObjId() );
+		}
+	}
+	return ret;
 }
 
 void Neuron::buildElist( const Eref& e,
