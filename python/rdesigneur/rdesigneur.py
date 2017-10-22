@@ -563,6 +563,7 @@ class rdesigneur:
             'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)' ),
             'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)' ),
             'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)' ),
+            'modulation':('ChanBase', 'getModulation', 1, 'chan modulation (unitless)' ),
             'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)' ),
             'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)' ),
             'ICa':('NMDAChan', 'getICa', 1e9, 'Ca current (nA)' ),
@@ -1233,7 +1234,14 @@ class rdesigneur:
         mesh = moose.element( '/model/chem/' + meshName )
         #elecComptList = mesh.elecComptList
         if elecRelPath == 'spine':
-            elecComptList = moose.vec( mesh.elecComptList[0].path + '/../spine' )
+            # This is nasty. The spine indexing is different from
+            # the compartment indexing and the mesh indexing and the 
+            # chem indexing. Need to fix at some time.
+            #elecComptList = moose.vec( mesh.elecComptList[0].path + '/../spine' )
+            elecComptList = moose.element( '/model/elec').spineIdsFromCompartmentIds[ mesh.elecComptList ]
+            #print( len( mesh.elecComptList ) )
+            # for i,j in zip( elecComptList, mesh.elecComptList ):
+            #    print( "Lookup: {} {} {}; orig: {} {} {}".format( i.name, i.index, i.fieldIndex, j.name, j.index, j.fieldIndex ))
         else:
             elecComptList = mesh.elecComptList
 
@@ -1272,13 +1280,18 @@ class rdesigneur:
         #print 'building ', len( elecComptList ), 'adaptors ', adName, ' for: ', mesh.name, elecRelPath, elecField, chemRelPath
         av = ad.vec
         chemVec = moose.element( mesh.path + '/' + chemRelPath ).vec
+        root = moose.element( '/' )
 
         for i in zip( elecComptList, startVoxelInCompt, endVoxelInCompt, av ):
             i[3].inputOffset = 0.0
             i[3].outputOffset = offset
             i[3].scale = scale
             if elecRelPath == 'spine':
+                # Check needed in case there were unmapped entries in 
+                # spineIdsFromCompartmentIds
                 elObj = i[0]
+                if elObj == root:
+                    continue
             else:
                 ePath = i[0].path + '/' + elecRelPath
                 if not( moose.exists( ePath ) ):
