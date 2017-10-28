@@ -2068,7 +2068,9 @@ void Neuron::scaleHeadDiffusion( unsigned int spineNum,
                                  double len, double dia) const
 {
     double vol = len * dia * dia * PI * 0.25;
-    double diffScale = dia * dia * 0.25 * PI / len;
+	// Note that the diffusion scale for the PSD uses half the length
+	// of the head compartment. I'm explicitly putting this in below.
+    double diffScale = dia * dia * 0.25 * PI / (len/2.0);
     unsigned int meshIndex = spineToMeshOrdering_[ spineNum ];
     Id headCompt = Field< Id >::get( headDsolve_, "compartment" );
     LookupField< unsigned int, double >::set( headCompt, "oneVoxelVolume",
