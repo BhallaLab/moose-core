@@ -524,7 +524,7 @@ class rdesigneur:
             objList = self._collapseElistToPathAndClass( comptList, plotSpec[2], kf[0] )
             # print ("objList: ", len(objList), kf[1])
             return objList, kf[1]
-        elif (field == 'n' or field == 'conc'  ):
+        elif (field == 'n' or field == 'conc' or field == 'volume'  ):
             path = plotSpec[2]
             pos = path.find( '/' )
             if pos == -1:   # Assume it is in the dend compartment.
@@ -569,7 +569,8 @@ class rdesigneur:
             'ICa':('NMDAChan', 'getICa', 1e9, 'Ca current (nA)' ),
             'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)' ),
             'n':('PoolBase', 'getN', 1, '# of molecules'),
-            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' )
+            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' ),
+            'volume':('PoolBase', 'getVolume', 1e18, 'Volume (um^3)' )
         }
         graphs = moose.Neutral( self.modelPath + '/graphs' )
         dummy = moose.element( '/' )
@@ -589,7 +590,7 @@ class rdesigneur:
                 units = knownFields[i[3]][3]
                 self.plotNames.append( ( tabname, i[4], k, scale, units ) )
                 k += 1
-                if i[3] == 'n' or i[3] == 'conc':
+                if i[3] == 'n' or i[3] == 'conc' or i[3] == 'volume':
                     tabs = moose.Table2( tabname, numPlots )
                 else:
                     tabs = moose.Table( tabname, numPlots )
@@ -611,7 +612,8 @@ class rdesigneur:
             'ICa':('NMDAChan', 'getICa', 1e9, 'Ca current (nA)', -10.0, 10.0 ),
             'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)', 0.0, 10.0 ),
             'n':('PoolBase', 'getN', 1, '# of molecules', 0.0, 200.0 ),
-            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)', 0.0, 2.0 )
+            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)', 0.0, 2.0 ),
+            'volume':('PoolBase', 'getVolume', 1e18, 'Volume (um^3)' )
         }
         moogliBase = moose.Neutral( self.modelPath + '/moogli' )
         k = 0
@@ -678,7 +680,8 @@ class rdesigneur:
             'ICa':('NMDAChan', 'getICa', 1e9, 'Ca current (nA)' ),
             'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)' ),
             'n':('PoolBase', 'getN', 1, '# of molecules'),
-            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' )
+            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' ),
+            'volume':('PoolBase', 'getVolume', 1e18, 'Volume (um^3)' )
         }
 
         save_graphs = moose.Neutral( self.modelPath + '/save_graphs' )
@@ -700,7 +703,7 @@ class rdesigneur:
                 units = knownFields[i[3]][3]
                 self.saveNames.append( ( save_tabname, i[4], k, scale, units ) )
                 k += 1
-                if i[3] == 'n' or i[3] == 'conc':
+                if i[3] == 'n' or i[3] == 'conc' or i[3] == 'volume':
                     save_tabs = moose.Table2( save_tabname, numPlots )
                 else:
                     save_tabs = moose.Table( save_tabname, numPlots )
@@ -729,7 +732,8 @@ class rdesigneur:
             'ICa':('NMDAChan', 'getICa', 1e9, 'Ca current (nA)' ),
             'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)' ),
             'n':('PoolBase', 'getN', 1, '# of molecules'),
-            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' )
+            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' ),
+            'volume':('PoolBase', 'getVolume', 1e18, 'Volume (um^3)' )
         }
 
         '''
