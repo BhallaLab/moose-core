@@ -12,6 +12,8 @@ __status__           = "Development"
 
 import sys
 import os
+import matplotlib
+matplotlib.use( 'Agg' )
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
@@ -21,9 +23,6 @@ import matplotlib.pyplot as plt
 import moose
 import abstrModelEqns9 as ame
 import rdesigneur as rd
-
-print( rd.__file__ )
-print( dir(rd) )
 
 
 def singleCompt( name, params ):
