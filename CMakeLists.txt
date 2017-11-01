@@ -11,9 +11,11 @@ if(COMMAND cmake_policy)
 endif(COMMAND cmake_policy)
 
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 include(FindPkgConfig)
+include(GetRevision)
 
 # If from command line, version info is not passed, use the git to generate a
 # version file. If GIT fails, use the previous known version.
@@ -27,20 +29,24 @@ if( (NOT MOOSE_VERSION) AND GIT_EXEC)
         OUTPUT_VARIABLE MOOSE_VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE
         )
-    message(STATUS "+ Writing ${MOOSE_VERSION} to ${VERSION_FILE}" )
-    file(WRITE ${VERSION_FILE} ${MOOSE_VERSION})
-elseif( (NOT MOOSE_VERSION) AND (NOT GIT_EXEC) )
-    message(STATUS "+ Reading ${VERSION_FILE}" )
-    file(READ ${VERSION_FILE} GIT_VERSION_OUTPUT )
+endif( )
+
+# Default to current date.
+if( (NOT MOOSE_VERSION)  )
+    NOW(TIMESTAMP)
+    set(MOOSE_VERSION "nightly-${TIMESTAMP}" )
 elseif(MOOSE_VERSION)
     message(STATUS "+ Using user specified VERSION = ${MOOSE_VERSION}" )
-    file(WRITE ${VERSION_FILE} ${MOOSE_VERSION})
 else()
     message(FATAL_ERROR "Could not determine MOOSE_VERSION" )
 endif( )
 
 add_definitions( -DMOOSE_VERSION="${MOOSE_VERSION}")
 message( STATUS "MOOSE Version ${MOOSE_VERSION}" )
+
+# Write VERSION to a file VERSION so that setup.py can use it.
+message(STATUS "+ Writing ${MOOSE_VERSION} to ${VERSION_FILE}" )
+file(WRITE ${VERSION_FILE} ${MOOSE_VERSION} )
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -95,9 +101,6 @@ option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
 option(PARALLELIZED_SOLVERS "Use parallel version of GSOLVE. (alpha)" OFF )
 option(PARALLELIZED_CLOCK "High level parallelization of moose::Clock (alpha)" OFF )
 
-################################# CMKAE MACROS #################################
-
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 
 ############################ BUILD CONFIGURATION #################################
 
@@ -303,15 +306,9 @@ if(WITH_MPI)
     endif()
 endif(WITH_MPI)
 
-pkg_check_modules(MUPARSER muparser)
-if(MUPARSER_FOUND)
-    message(STATUS "Using system muparser ${MUPARSER_VERSION}")
-    list(APPEND SYSTEM_SHARED_LIBS ${MUPARSER_LIBRARIES})
-else()
-    message(STATUS "Using private muparser")
-    add_subdirectory(external/muparser)
-    list(APPEND MOOSE_LIBRARIES muparser)
-endif()
+# Always use private version of muparser. We have some custom edits.
+add_subdirectory(external/muparser)
+list(APPEND MOOSE_LIBRARIES muparser)
 
 # Add subdirectroeis
 add_subdirectory(basecode)

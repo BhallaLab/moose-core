@@ -16,43 +16,27 @@
 ## latter in the former, including mapping entities like calcium and
 ## channel conductances, between them.
 ##########################################################################
-from __future__ import print_function
+
+from __future__ import print_function, absolute_import
+
 import imp
 import os
 import moose
 import numpy as np
 import pylab
 import math
-import rmoogli
-#import rdesigneurProtos
-from rdesigneurProtos import *
+
+import rdesigneur.rmoogli
+from rdesigneur.rdesigneurProtos import *
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
 
 try:
   from lxml import etree
 except ImportError:
-  try:
-    # Python 2.5
-    import xml.etree.cElementTree as etree
-  except ImportError:
-    try:
-      # Python 2.5
-      import xml.etree.ElementTree as etree
-    except ImportError:
-      try:
-        # normal cElementTree install
-        import cElementTree as etree
-      except ImportError:
-        try:
-          # normal ElementTree install
-          import elementtree.ElementTree as etree
-        except ImportError:
-          print("Failed to import ElementTree from any known place")
+  import xml.etree.cElementTree as etree
 
 import csv
-
-#EREST_ACT = -70e-3
 
 class BuildError(Exception):
     def __init__(self, value):

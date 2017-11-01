@@ -7,6 +7,7 @@ from __future__ import print_function, division, absolute_import
 from contextlib import closing
 import warnings
 import pydoc
+import os
 from io import StringIO
 
 import moose
@@ -245,6 +246,7 @@ First fix that issue with SynBase or something in that line.')
             raise ValueError('%s: element does not exist.' % (target))
         target = vec(target)
         moose.syncDataHandler(target)
+
 
 
 def showfield(el, field='*', showtype=False):
