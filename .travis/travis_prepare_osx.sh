@@ -1,12 +1,12 @@
-#!/bin/bash - 
+#!/bin/bash -
 #===============================================================================
 #
 #          FILE: travis_prepare_osx.sh
-# 
-#         USAGE: ./travis_prepare_osx.sh 
-# 
+#
+#         USAGE: ./travis_prepare_osx.sh
+#
 #   DESCRIPTION: Script to prepare OSX build on Travis CI.
-# 
+#
 #       OPTIONS: ---
 #  REQUIREMENTS: ---
 #          BUGS: ---
@@ -22,8 +22,8 @@ set +e
 brew update
 #brew outdated cmake || brew install cmake
 brew install gsl
-brew outdated hdf5 || brew install homebrew/science/hdf5
-brew outdated libsbml || brew install homebrew/science/libsbml
+brew install homebrew/science/hdf5
+brew install homebrew/science/libsbml
 #brew outdated python || brew install python
 #brew outdated numpy || brew install homebrew/python/numpy
 #brew unlink numpy && brew link numpy || echo "Failed to link numpy"
