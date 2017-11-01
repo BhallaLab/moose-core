@@ -158,10 +158,13 @@ def plotPanelDEFG( seq, row ):
     res = np.array( [ np.mean( x )  for x in tplot ] )
     assert np.isclose( ref.all(), res.all() ), "Expected %s got %s" % (ref,res)
 
-if __name__ == '__main__':
+def main( ):
     moose.Neutral( '/library' )
     moose.Neutral( '/model' )
     plotPanelC()
     plotPanelDEFG( [0,1,2,3,4], 3 )
     plotPanelDEFG( [4,1,0,3,2], 4 )
     print( 'All done' )
+
+if __name__ == '__main__':
+    main( )
