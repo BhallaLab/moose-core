@@ -31,7 +31,7 @@ def singleCompt( name, params ):
     steptime = 50
 
     CaStim.expr += ' + x2 * (t > 100+' + str( runtime ) + ' ) * ( t < 100+' + str( runtime + steptime ) +  ' )'
-    print(CaStim.expr)
+    print('Calcium Expression %s' % CaStim.expr)
     tab = moose.Table2( '/model/' + name + '/Atab' )
     ampl = moose.element( mod.path + '/ampl' )
     phase = moose.element( mod.path + '/phase' )
@@ -161,6 +161,9 @@ def plotPanelDEFG( seq, row ):
 if __name__ == '__main__':
     moose.Neutral( '/library' )
     moose.Neutral( '/model' )
+    print( 'A' )
     plotPanelC()
+    print( 'B' )
     plotPanelDEFG( [0,1,2,3,4], 3 )
+    print( 'C')
     plotPanelDEFG( [4,1,0,3,2], 4 )
