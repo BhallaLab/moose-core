@@ -131,3 +131,13 @@ set_tests_properties(pymoose-test-kkit
     PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
     )
 
+
+# Test muparser support.
+ADD_TEST( NAME pymoose-test-muparser 
+    COMMAND ${TEST_COMMAND} 
+    ${PROJECT_SOURCE_DIR}/tests/python/test_muparser.py
+    )
+set_tests_properties(pymoose-test-muparser
+    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+    )
+
