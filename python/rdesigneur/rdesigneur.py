@@ -73,8 +73,8 @@ class rdesigneur:
             diffusionLength= 2e-6,
             meshLambda = -1.0,    #This is a backward compatibility hack
             temperature = 32,
-            chemDt= 0.001,          # Much finer than MOOSE, for multiscale
-            diffDt= 0.001,          # 10x finer than MOOSE, for multiscale
+            chemDt= 0.1,            # Much finer than MOOSE, for multiscale
+            diffDt= 0.01,           # 10x finer than MOOSE, for multiscale
             elecDt= 50e-6,          # Same default as from MOOSE
             chemPlotDt = 1.0,       # Same default as from MOOSE
             elecPlotDt = 0.1e-3,    # Same default as from MOOSE
