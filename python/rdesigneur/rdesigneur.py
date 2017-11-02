@@ -22,7 +22,6 @@ import imp
 import os
 import moose
 import numpy as np
-import pylab
 import math
 
 import rdesigneur.rmoogli
@@ -637,29 +636,31 @@ class rdesigneur:
         rmoogli.displayMoogli( self, moogliDt, runtime, rotation )
 
     def display( self ):
+        import matplotlib.pyplot as plt
         for i in self.plotNames:
-
-            pylab.figure( i[2] )
-            pylab.title( i[1] )
-            pylab.xlabel( "Time (s)" )
-            pylab.ylabel( i[4] )
+            plt.figure( i[2] )
+            plt.title( i[1] )
+            plt.xlabel( "Time (s)" )
+            plt.ylabel( i[4] )
             vtab = moose.vec( i[0] )
             if i[5] == 'spikeTime':
                 k = 0
                 tmax = moose.element( '/clock' ).currentTime
                 for j in vtab: # Plot a raster
                     y = [k] * len( j.vector )
-                    pylab.plot( j.vector * i[3], y, linestyle = 'None', marker = '.', markersize = 10 )
-                    pylab.xlim( 0, tmax )
+                    plt.plot( j.vector * i[3], y, linestyle = 'None', marker = '.', markersize = 10 )
+                    plt.xlim( 0, tmax )
                 
             else:
                 t = np.arange( 0, vtab[0].vector.size, 1 ) * vtab[0].dt
                 for j in vtab:
-                    pylab.plot( t, j.vector * i[3] )
+                    plt.plot( t, j.vector * i[3] )
         if len( self.moogList ) > 0:
-            pylab.ion()
-        pylab.show(block=True)
-        self._save()                                             #This calls the _save function which saves only if the filenames have been specified
+            plt.ion()
+        plt.show(block=True)
+        
+        #This calls the _save function which saves only if the filenames have been specified
+        self._save()                                            
 
     ################################################################
     # Here we get the time-series data and write to various formats
