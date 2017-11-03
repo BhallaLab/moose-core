@@ -16,39 +16,27 @@
 ## latter in the former, including mapping entities like calcium and
 ## channel conductances, between them.
 ##########################################################################
-from __future__ import print_function
+from __future__ import print_function, absolute_import 
+
 import imp
 import os
 import moose
 import numpy as np
 import pylab
 import math
-import rmoogli
-#import rdesigneurProtos
-from rdesigneurProtos import *
+
+import rdesigneur.rmoogli
+from rdesigneur.rdesigneurProtos import *
+
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
 
+# In python3, cElementTree is deprecated. We do not plan to support python <2.7
+# in future, so other imports have been removed.
 try:
   from lxml import etree
 except ImportError:
-  try:
-    # Python 2.5
-    import xml.etree.cElementTree as etree
-  except ImportError:
-    try:
-      # Python 2.5
-      import xml.etree.ElementTree as etree
-    except ImportError:
-      try:
-        # normal cElementTree install
-        import cElementTree as etree
-      except ImportError:
-        try:
-          # normal ElementTree install
-          import elementtree.ElementTree as etree
-        except ImportError:
-          print("Failed to import ElementTree from any known place")
+  import xml.etree.ElementTree as etree
 
 import csv
 
@@ -85,8 +73,8 @@ class rdesigneur:
             diffusionLength= 2e-6,
             meshLambda = -1.0,    #This is a backward compatibility hack
             temperature = 32,
-            chemDt= 0.001,          # Much finer than MOOSE, for multiscale
-            diffDt= 0.001,          # 10x finer than MOOSE, for multiscale
+            chemDt= 0.1,            # Much finer than MOOSE, for multiscale
+            diffDt= 0.01,           # 10x finer than MOOSE, for multiscale
             elecDt= 50e-6,          # Same default as from MOOSE
             chemPlotDt = 1.0,       # Same default as from MOOSE
             elecPlotDt = 0.1e-3,    # Same default as from MOOSE
@@ -560,6 +548,7 @@ class rdesigneur:
     def _buildPlots( self ):
         knownFields = {
             'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)' ),
+            'spikeTime':('CompartmentBase', 'getVm', 1, 'Spike Times (s)'),
             'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)' ),
             'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)' ),
             'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)' ),
@@ -583,17 +572,21 @@ class rdesigneur:
             plotObj2, plotField2 = self._parseComptField( spineCompts, i, knownFields )
             assert( plotField == plotField2 )
             plotObj3 = plotObj + plotObj2
-            numPlots = sum( i != dummy for i in plotObj3 )
+            numPlots = sum( q != dummy for q in plotObj3 )
             if numPlots > 0:
                 tabname = graphs.path + '/plot' + str(k)
                 scale = knownFields[i[3]][2]
                 units = knownFields[i[3]][3]
-                self.plotNames.append( ( tabname, i[4], k, scale, units ) )
+                self.plotNames.append( ( tabname, i[4], k, scale, units, i[3] ) )
                 k += 1
-                if i[3] == 'n' or i[3] == 'conc' or i[3] == 'volume':
+                if i[3] == 'n' or i[3] == 'conc' or i[3] == 'volume' or i[3] == 'Gbar':
                     tabs = moose.Table2( tabname, numPlots )
                 else:
                     tabs = moose.Table( tabname, numPlots )
+                    if i[3] == 'spikeTime':
+                        tabs.vec.threshold = -0.02 # Threshold for classifying Vm as a spike.
+                        tabs.vec.useSpikeMode = True # spike detect mode on
+
                 vtabs = moose.vec( tabs )
                 q = 0
                 for p in [ x for x in plotObj3 if x != dummy ]:
@@ -645,14 +638,24 @@ class rdesigneur:
 
     def display( self ):
         for i in self.plotNames:
+
             pylab.figure( i[2] )
             pylab.title( i[1] )
             pylab.xlabel( "Time (s)" )
             pylab.ylabel( i[4] )
             vtab = moose.vec( i[0] )
-            t = np.arange( 0, vtab[0].vector.size, 1 ) * vtab[0].dt
-            for j in vtab:
-                pylab.plot( t, j.vector * i[3] )
+            if i[5] == 'spikeTime':
+                k = 0
+                tmax = moose.element( '/clock' ).currentTime
+                for j in vtab: # Plot a raster
+                    y = [k] * len( j.vector )
+                    pylab.plot( j.vector * i[3], y, linestyle = 'None', marker = '.', markersize = 10 )
+                    pylab.xlim( 0, tmax )
+                
+            else:
+                t = np.arange( 0, vtab[0].vector.size, 1 ) * vtab[0].dt
+                for j in vtab:
+                    pylab.plot( t, j.vector * i[3] )
         if len( self.moogList ) > 0:
             pylab.ion()
         pylab.show(block=True)
@@ -672,9 +675,11 @@ class rdesigneur:
 
         knownFields = {
             'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)' ),
+            'spikeTime':('CompartmentBase', 'getVm', 1, 'Spike Times (s)'),
             'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)' ),
             'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)' ),
             'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)' ),
+            'modulation':('ChanBase', 'getModulation', 1, 'chan modulation (unitless)' ),
             'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)' ),
             'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)' ),
             'ICa':('NMDAChan', 'getICa', 1e9, 'Ca current (nA)' ),
@@ -703,11 +708,15 @@ class rdesigneur:
                 units = knownFields[i[3]][3]
                 self.saveNames.append( ( save_tabname, i[4], k, scale, units ) )
                 k += 1
-                if i[3] == 'n' or i[3] == 'conc' or i[3] == 'volume':
+                if i[3] == 'n' or i[3] == 'conc' or i[3] == 'volume' or i[3] == 'Gbar':
                     save_tabs = moose.Table2( save_tabname, numPlots )
+                    save_vtabs = moose.vec( save_tabs )
                 else:
                     save_tabs = moose.Table( save_tabname, numPlots )
-                save_vtabs = moose.vec( save_tabs )
+                    save_vtabs = moose.vec( save_tabs )
+                    if i[3] == 'spikeTime':
+                        save_vtabs.threshold = -0.02 # Threshold for classifying Vm as a spike.
+                        save_vtabs.useSpikeMode = True # spike detect mode on
                 q = 0
                 for p in [ x for x in plotObj3 if x != dummy ]:
                     moose.connect( save_vtabs[q], 'requestOut', p, plotField )
@@ -724,6 +733,7 @@ class rdesigneur:
 
         knownFields = {
             'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)' ),
+            'spikeTime':('CompartmentBase', 'getVm', 1, 'Spike Times (s)'),
             'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)' ),
             'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)' ),
             'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)' ),
