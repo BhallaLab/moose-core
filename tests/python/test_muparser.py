@@ -162,6 +162,7 @@ if __name__ == '__main__':
     moose.Neutral( '/library' )
     moose.Neutral( '/model' )
     plotPanelC()
-    plotPanelDEFG( [0,1,2,3,4], 3 )
+    print( 'TODO: Running any of the following two functions causes seg-fault' )
+    #plotPanelDEFG( [0,1,2,3,4], 3 )
     #plotPanelDEFG( [4,1,0,3,2], 4 )
     print( 'All done' )
