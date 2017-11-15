@@ -10,9 +10,7 @@ os:
 notifications:
     email:
         recipients:
-            - bhalla@ncbs.res.in
             - hrani@ncbs.res.in
-            - dilawar.s.rajput@gmail.com
         on_success: change
         on_failure: always
 
