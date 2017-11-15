@@ -25,7 +25,7 @@ import numpy as np
 import pylab
 import math
 
-import rdesigneur.rmoogli
+import rdesigneur.rmoogli as rmoogli
 from rdesigneur.rdesigneurProtos import *
 
 from moose.neuroml.NeuroML import NeuroML
