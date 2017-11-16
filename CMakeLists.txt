@@ -67,7 +67,6 @@ endif()
 option(DEBUG "Build with debug support" OFF)
 option(GPROF "Build for profiling using gprof" OFF)
 option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
-option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_BOOST "Use boost library instead of GSL" OFF)
 option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
@@ -107,7 +106,10 @@ endif()
 ################################### TARGETS ####################################
 
 add_library(libmoose SHARED basecode/main.cpp)
-add_executable(moose.bin basecode/main.cpp)
+
+if(DEBUG)
+    add_executable(moose.bin basecode/main.cpp)
+endif( )
 
 ################################### SETUP BUILD ################################
 
@@ -365,20 +367,33 @@ ELSE(MACOSX)
         )
 endif(MACOSX)
 
-add_dependencies(moose.bin libmoose)
-
-target_link_libraries(moose.bin moose ${CMAKE_DL_LIBS})
-if( WITH_BOOST )
-    target_link_libraries( moose.bin ${Boost_LIBRARIES} )
-endif( WITH_BOOST )
+if(DEBUG)
+    add_dependencies(moose.bin libmoose)
+    target_link_libraries(moose.bin moose ${CMAKE_DL_LIBS})
+    if( WITH_BOOST )
+        target_link_libraries( moose.bin ${Boost_LIBRARIES} )
+    endif( WITH_BOOST )
+endif()
 
 ######################### BUILD PYMOOSE ########################################
-# Root of all python module.
-if(WITH_PYTHON)
-    add_subdirectory( pymoose )
-endif(WITH_PYTHON)
+add_subdirectory( pymoose )
 
 ######################### INSTALL ##############################################
+
+if(DEBUG)
+    install(TARGETS moose.bin
+        DESTINATION bin
+        )
+
+    install(TARGETS libmoose
+        DESTINATION lib
+        )
+
+    install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
+        DESTINATION bin
+        )
+endif( )
+
 # INSTALL python module.
 # This target is built by pymoose/CMakeLists.txt file. Using the --prefix option
 # always override debian default installation directory. It will be installed in
@@ -390,22 +405,21 @@ execute_process(
     )
 message( STATUS "Platform ${_platform_desc}" )
 
-if(WITH_PYTHON)
 
-    set(EXTRA_ARGS "" )
-    if( ${_platform_desc} MATCHES ".*(Ubuntu|Debian).*" )
-        list( APPEND EXTRA_ARGS "--install-layout=deb" )
-    endif( )
+set(EXTRA_ARGS "--prefix ${CMAKE_INSTALL_PREFIX}")
 
-    # If make is called with sudo, install in system directories. Otherwise use
-    # --user to install in user home. Set setup.cmake.py handle the logic.
-    install(CODE
-        "execute_process(
-            COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py install ${EXTRA_ARGS}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
-            )"
-            )
-endif(WITH_PYTHON)
+if( ${_platform_desc} MATCHES ".*(Ubuntu|Debian).*" )
+    list( APPEND EXTRA_ARGS "--install-layout=deb" )
+endif( )
+
+# If make is called with sudo, install in system directories. Otherwise use
+# --user to install in user home.
+install(CODE
+    "execute_process(
+        COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py install ${EXTRA_ARGS}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
+        )"
+        )
 
 # Print message to start build process
 if(${CMAKE_BUILD_TOOL} MATCHES "make")
@@ -418,16 +432,19 @@ if(${CMAKE_BUILD_TOOL} MATCHES "make")
 endif()
 
 
+
+
 ############################ CTEST ######################################
 include( CTest )
 # If CTEST_OUTPUT_ON_FAILURE environment variable is set, the output is printed
 # onto the console if a test fails.
 set(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
 
-# Run this test in debug mode. In Release mode, this does not do anything.
-set(MOOSE_BIN_LOCATION $<TARGET_FILE:moose.bin>)
-message(STATUS "Executable moose.bin will be at ${MOOSE_BIN_LOCATION}" )
 if(DEBUG)
+    # Run this test in debug mode. In Release mode, this does not do anything.
+    set(MOOSE_BIN_LOCATION $<TARGET_FILE:moose.bin>)
+    message(STATUS "Executable moose.bin will be at ${MOOSE_BIN_LOCATION}" )
+
     add_test(NAME moose.bin-raw-run COMMAND moose.bin -u -q)
 endif(DEBUG)
 
