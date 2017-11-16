@@ -4,7 +4,7 @@ project(MOOSE)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
-    cmake_policy(SET CMP0004 OLD)
+    cmake_policy(SET CMP0004 NEW)
     if(POLICY CMP0050)
         cmake_policy(SET CMP0050 OLD)
     endif(POLICY CMP0050)
@@ -379,19 +379,6 @@ if(WITH_PYTHON)
 endif(WITH_PYTHON)
 
 ######################### INSTALL ##############################################
-
-install(TARGETS moose.bin
-    DESTINATION bin
-    )
-
-install(TARGETS libmoose
-    DESTINATION lib
-    )
-
-install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
-    DESTINATION bin
-    )
-
 # INSTALL python module.
 # This target is built by pymoose/CMakeLists.txt file. Using the --prefix option
 # always override debian default installation directory. It will be installed in
@@ -404,14 +391,17 @@ execute_process(
 message( STATUS "Platform ${_platform_desc}" )
 
 if(WITH_PYTHON)
-    set(EXTRA_ARGS "--prefix ${CMAKE_INSTALL_PREFIX}")
+
+    set(EXTRA_ARGS "" )
     if( ${_platform_desc} MATCHES ".*(Ubuntu|Debian).*" )
         list( APPEND EXTRA_ARGS "--install-layout=deb" )
     endif( )
 
+    # If make is called with sudo, install in system directories. Otherwise use
+    # --user to install in user home. Set setup.cmake.py handle the logic.
     install(CODE
         "execute_process(
-            COMMAND ${PYTHON_EXECUTABLE} setup.py install ${EXTRA_ARGS}
+            COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py install ${EXTRA_ARGS}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
             )"
             )
