@@ -133,3 +133,4 @@ Session.vim
 *.clean
 
 /VERSION
+/_build
