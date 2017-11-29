@@ -1,5 +1,3 @@
-
-
 class Example {
 
     private:
@@ -10,7 +8,7 @@ class Example {
     public:
 
         Example();
-        
+
         double getX() const;
         void setX( double x );
         double getY() const;
@@ -21,9 +19,9 @@ class Example {
 
         void handleX(double arg);
         void handleY(double arg);
-        
+
         vector< Id > getNeighbors( const Eref& e, string field ) const;
 
         static const Cinfo* initCinfo();
 
-}; 
+};

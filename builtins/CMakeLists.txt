@@ -1,6 +1,8 @@
-include_directories(../msg)
-include_directories(../basecode)
-include_directories(../external/muparser/include)
+include_directories( ${CMAKE_SOURCE_DIR}/msg )
+include_directories( ${CMAKE_SOURCE_DIR}/basecode )
+include_directories( ${CMAKE_SOURCE_DIR}/external/muparser/include )
+include_directories( ${CMAKE_SOURCE_DIR}/scheduling )
+
 add_library(moose_builtins
     Arith.cpp
     Group.cpp
@@ -14,6 +16,8 @@ add_library(moose_builtins
     Interpol.cpp
     StimulusTable.cpp
     TimeTable.cpp
+    StreamerBase.cpp
+    Streamer.cpp
     Stats.cpp
     Interpol2D.cpp
     HDF5WriterBase.cpp
