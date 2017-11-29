@@ -21,6 +21,10 @@
             <segmentGroup id="soma_group">
                 <member segment="0"/>
             </segmentGroup>
+            
+            <segmentGroup id="all">
+                <member segment="0"/>
+            </segmentGroup>
 
         </morphology>
 
