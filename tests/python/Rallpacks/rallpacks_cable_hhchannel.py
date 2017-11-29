@@ -1,13 +1,12 @@
-#!/usr/bin/env python
-
-"""rallpacks_cable_hhchannel.py: 
+# -*- coding: utf-8 -*-
+"""rallpacks_cable_hhchannel.py:
 
     A cable with 1000 compartments with HH-type channels in it.
 
 Last modified: Wed May 21, 2014  09:51AM
 
 """
-    
+
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2013, NCBS Bangalore"
 __credits__          = ["NCBS Bangalore", "Bhalla Lab"]
@@ -20,6 +19,7 @@ __status__           = "Development"
 import moose
 from moose import utils
 
+import time
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -34,12 +34,12 @@ cable = []
 def alphaM(A, B, V0, v):
     '''Compute alpha_m at point v
 
-    aplha_m = A(v - v0 ) / (exp((v-V0)/B) - 1) 
+    aplha_m = A(v - v0 ) / (exp((v-V0)/B) - 1)
     '''
     return (A*(v-V0) / (np.exp((v - V0)/B) -1 ))
 
 def alphaN(A, B, V0, v):
-    '''Compute alpha_n at point v 
+    '''Compute alpha_n at point v
     aplha_n = A(v-V0) / (exp((v-V0)/B) -1 )
     '''
     return alphaM(A, B, V0, v)
@@ -53,12 +53,12 @@ def betaN(A, B, V0, v):
     return betaM(A, B, V0, v)
 
 def alphaH(A, B, V0, v):
-    '''Compute alpha_h at point v 
+    '''Compute alpha_h at point v
     '''
     return (A * np.exp(( v - V0) / B))
 
 def behaH(A, B, V0, v):
-    '''Compute beta_h at point v 
+    '''Compute beta_h at point v
     '''
     return (A * np.exp((v-V0)/B) + 1)
 
@@ -74,9 +74,9 @@ def createChannel(species, path, **kwargs):
 
 def create_na_chan(parent='/library', name='na', vmin=-110e-3, vmax=50e-3, vdivs=3000):
     """Create a Hodhkin-Huxley Na channel under `parent`.
-    
+
     vmin, vmax, vdivs: voltage range and number of divisions for gate tables
-    
+
     """
     na = moose.HHChannel('%s/%s' % (parent, name))
     na.Xpower = 3
@@ -102,9 +102,9 @@ def create_na_chan(parent='/library', name='na', vmin=-110e-3, vmax=50e-3, vdivs
 
 def create_k_chan(parent='/library', name='k', vmin=-120e-3, vmax=40e-3, vdivs=3000):
     """Create a Hodhkin-Huxley K channel under `parent`.
-    
+
     vmin, vmax, vdivs: voltage range and number of divisions for gate tables
-    
+
     """
     k = moose.HHChannel('%s/%s' % (parent, name))
     k.Xpower = 4
@@ -118,7 +118,7 @@ def create_k_chan(parent='/library', name='k', vmin=-120e-3, vmax=40e-3, vdivs=3
     n_gate.tableA = n_alpha
     n_gate.tableB = n_alpha + n_beta
     return k
-    
+
 def creaetHHComp(parent='/library', name='hhcomp', diameter=1e-6, length=1e-6):
     """Create a compartment with Hodgkin-Huxley type ion channels (Na and
     K).
@@ -139,7 +139,7 @@ def creaetHHComp(parent='/library', name='hhcomp', diameter=1e-6, length=1e-6):
     na = moose.element('%s/na' % (c.path))
 
     # Na-conductance 120 mS/cm^2
-    na.Gbar = 120e-3 * sarea * 1e4 
+    na.Gbar = 120e-3 * sarea * 1e4
     na.Ek = 115e-3 + EREST_ACT
 
     moose.connect(c, 'channel', na, 'channel')
@@ -150,7 +150,7 @@ def creaetHHComp(parent='/library', name='hhcomp', diameter=1e-6, length=1e-6):
 
     k = moose.element('%s/k' % (c.path))
     # K-conductance 36 mS/cm^2
-    k.Gbar = 36e-3 * sarea * 1e4 
+    k.Gbar = 36e-3 * sarea * 1e4
     k.Ek = -12e-3 + EREST_ACT
     moose.connect(c, 'channel', k, 'channel')
     return (c, na, k)
@@ -178,7 +178,7 @@ def setupDUT( dt ):
     pg.firstLevel = 1e-10
     moose.connect(pg, 'output', comp, 'injectMsg')
     setupClocks( dt )
-    
+
 def setupClocks( dt ):
     moose.setClock(0, dt)
     moose.setClock(1, dt)
@@ -192,12 +192,8 @@ def setupSolver( hsolveDt ):
 
 def simulate( runTime, dt):
     """ Simulate the cable """
-    moose.useClock(0, '/cable/##', 'process')
-    moose.useClock(0, '/cable/##', 'init')
-    moose.useClock(1, '/##', 'process')
     moose.reinit()
     setupSolver( hsolveDt = dt )
-    utils.verify()
     moose.start( runTime )
 
 def main(args):
@@ -205,10 +201,9 @@ def main(args):
     dt = args['dt']
     makeCable(args)
     setupDUT( dt )
-    table0 = utils.recordAt( '/table0', cable[0], 'vm')
-    table1 = utils.recordAt( '/table1', cable[-1], 'vm')
+    t = time.time()
     simulate( args['run_time'], dt )
-    utils.plotTables( [ table0, table1 ], file = args['output'], xscale = dt )
+    print( 'Time to run %f seconds ' % ( time.time() - t ) )
 
 if __name__ == '__main__':
     import argparse
@@ -249,7 +244,7 @@ if __name__ == '__main__':
             , default = 1e-3
             , type = float
             , help = 'You should record membrane potential somewhere, right?'
-            ) 
+            )
     parser.add_argument( '--length'
             , default = 1e-3
             , type = float

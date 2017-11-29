@@ -7,27 +7,27 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+
 #include <functional>
 #include <algorithm>
 #include <vector>
 #include <iostream>
 #include <cassert>
-#include <math.h> // used for isnan
-//#include "../utility/utility.h" // isnan is undefined in VC++ and BC5, utility.h contains a workaround macro
-using namespace std;
+#include <cmath>
 #include "SparseMatrix.h"
 #include "utility/numutil.h"
 #include "KinSparseMatrix.h"
 
+using namespace std;
 
-/** 
+/**
  * Returns the dot product of the specified row with the
  * vector v. v corresponds to the vector of reaction rates.
  * v must have nColumns entries.
  */
-double KinSparseMatrix::computeRowRate( 
+double KinSparseMatrix::computeRowRate(
 	unsigned int row, const vector< double >& v
-) const
+        ) const
 {
 	assert( nColumns() == 0 || row < nRows() );
 	assert( v.size() == nColumns() );
@@ -51,13 +51,14 @@ double KinSparseMatrix::computeRowRate(
 	unsigned int rs = rowStart_[ row ];
 	vector< unsigned int >::const_iterator j = colIndex_.begin() + rs;
 	vector< int >::const_iterator end = N_.begin() + rowStart_[ row + 1 ];
-	
+
 	double ret = 0.0;
 	for ( i = N_.begin() + rs; i != end; i++ )
 		ret += *i * v[ *j++ ];
 
 	// assert ( !( ret !<>= 0.0 ) );
 	*/
+
 	assert ( !( std::isnan( ret ) ) );
 	return ret;
 }
@@ -69,7 +70,7 @@ double KinSparseMatrix::computeRowRate(
  * Fills up 'deps' with reac#s that depend on the row argument.
  * Does NOT ensure that list is unique.
  */
-void KinSparseMatrix::getGillespieDependence( 
+void KinSparseMatrix::getGillespieDependence(
 	unsigned int row, vector< unsigned int >& deps
 ) const
 {
@@ -81,7 +82,7 @@ void KinSparseMatrix::getGillespieDependence(
 		unsigned int jend = rowStart_[ row + 1 ];
 		unsigned int k = rowStart_[ i ];
 		unsigned int kend = rowStart_[ i + 1 ];
-		
+
 		while ( j < jend && k < kend ) {
 			if ( colIndex_[ j ] == colIndex_[ k ] ) {
 				/* Pre 28 Nov 2015. Why below zero? Shouldn't it be any?
@@ -109,17 +110,17 @@ void KinSparseMatrix::getGillespieDependence(
  * the molecules for a given reac: a column in the original N matrix.
  * Direction [-1,+1] specifies whether the reaction is forward or backward.
  */
-void KinSparseMatrix::fireReac( unsigned int reacIndex, vector< double >& S, double direction ) 
+void KinSparseMatrix::fireReac( unsigned int reacIndex, vector< double >& S, double direction )
 	const
 {
 	assert( ncolumns_ == S.size() && reacIndex < nrows_ );
 	unsigned int rowBeginIndex = rowStart_[ reacIndex ];
 	// vector< int >::const_iterator rowEnd = N_.begin() + rowStart_[ reacIndex + 1];
-	vector< int >::const_iterator rowBegin = 
+	vector< int >::const_iterator rowBegin =
 		N_.begin() + rowBeginIndex;
-	vector< int >::const_iterator rowEnd = 
+	vector< int >::const_iterator rowEnd =
 		N_.begin() + rowTruncated_[ reacIndex ];
-	vector< unsigned int >::const_iterator molIndex = 
+	vector< unsigned int >::const_iterator molIndex =
 		colIndex_.begin() + rowBeginIndex;
 
 	for ( vector< int >::const_iterator i = rowBegin; i != rowEnd; ++i ) {
@@ -134,7 +135,7 @@ void KinSparseMatrix::fireReac( unsigned int reacIndex, vector< double >& S, dou
 /**
  * This function generates a new internal list of rowEnds, such that
  * they are all less than the maxColumnIndex.
- * It is used because in fireReac we don't want to update all the 
+ * It is used because in fireReac we don't want to update all the
  * molecules, only those that are variable.
  */
 void KinSparseMatrix::truncateRow( unsigned int maxColumnIndex )
@@ -144,7 +145,7 @@ void KinSparseMatrix::truncateRow( unsigned int maxColumnIndex )
 		return;
 	for ( unsigned int i = 0; i < nrows_; ++i ) {
 		unsigned int endCol = rowStart_[ i ];
-		for ( unsigned int j = rowStart_[ i ]; 
+		for ( unsigned int j = rowStart_[ i ];
 			j < rowStart_[ i + 1 ]; ++j ) {
 			if ( colIndex_[ j ] < maxColumnIndex ) {
 				endCol = j + 1;
@@ -163,21 +164,6 @@ void makeVecUnique( vector< unsigned int >& v )
 	v.resize( pos - v.begin() );
 }
 
-vector< int > KinSparseMatrix::matrixEntry() const 
-{
-	return N_;
-}
-
-vector< unsigned int > KinSparseMatrix::colIndex() const
-{
-	return colIndex_;
-}
-
-vector< unsigned int > KinSparseMatrix::rowStart() const
-{
-	return rowStart_;
-}
-
 
 #ifdef DO_UNIT_TESTS
 #include "header.h"
@@ -194,7 +180,7 @@ void testKinSparseMatrix()
 	//
 	// When halfreac 0 fires, it affects 0, 1, 2, 4, 6.
 	// and so on.
-	static int transposon[][ 8 ] = { 
+	static int transposon[][ 8 ] = {
 		{ -1,  1,  0,  0, -1,  1, -1,  1 },
 		{ -1,  1,  0,  0,  0,  0,  0,  0 },
 		{  1, -1, -1,  1,  0,  0,  0,  0 },
@@ -256,7 +242,7 @@ void testKinSparseMatrix()
 	////////////////////////////////////////////////////////////////
 	// Checking generation of dependency graphs.
 	////////////////////////////////////////////////////////////////
-	
+
 	KinSparseMatrix trans;
 	vector< unsigned int > deps;
 	trans.getGillespieDependence( 0, deps );

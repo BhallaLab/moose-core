@@ -12,8 +12,8 @@
 
 #include "../basecode/header.h"
 #include "../basecode/global.h"
-#include "../external/debug/print_function.hpp"
-#include "../external/debug/simple_test.hpp"
+#include "../utility/print_function.hpp"
+#include "../utility/simple_test.hpp"
 
 #include "../biophysics/HHGate.h"
 #include "../biophysics/ChanBase.h"

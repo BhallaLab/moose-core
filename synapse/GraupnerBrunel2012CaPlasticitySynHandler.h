@@ -10,6 +10,7 @@
 #ifndef _GRAUPNER_BRUNEL_2012_CA_PLASTICITY_SYN_HANDLER_H
 #define _GRAUPNER_BRUNEL_2012_CA_PLASTICITY_SYN_HANDLER_H
 
+/*
 class PreSynEvent: public SynEvent
 {
 	public:
@@ -50,6 +51,7 @@ struct ComparePostSynEvent
 		return lhs.time > rhs.time;
 	}
 };
+*/
 
 // see pg 13 of Higgins et al | October 2014 | Volume 10 | Issue 10 | e1003834 | PLOS Comp Biol
 // tP and tD are times spent above potentiation and depression thresholds
@@ -70,12 +72,12 @@ struct weightFactors {
 
 /**
  * This handles simple synapses without plasticity. It uses a priority
- * queue to manage them. This gets inefficient for large numbers of 
+ * queue to manage them. This gets inefficient for large numbers of
  * synapses but is pretty robust.
  */
 class GraupnerBrunel2012CaPlasticitySynHandler: public SynHandlerBase
 {
-	public: 
+	public:
 		GraupnerBrunel2012CaPlasticitySynHandler();
 		~GraupnerBrunel2012CaPlasticitySynHandler();
 		GraupnerBrunel2012CaPlasticitySynHandler& operator \

@@ -10,6 +10,7 @@
 #ifndef _SIMPLE_SYN_HANDLER_H
 #define _SIMPLE_SYN_HANDLER_H
 
+/*
 class SynEvent
 {
 	public:
@@ -34,15 +35,16 @@ struct CompareSynEvent
 		return lhs.time > rhs.time;
 	}
 };
+*/
 
 /**
  * This handles simple synapses without plasticity. It uses a priority
- * queue to manage them. This gets inefficient for large numbers of 
+ * queue to manage them. This gets inefficient for large numbers of
  * synapses but is pretty robust.
  */
 class SimpleSynHandler: public SynHandlerBase
 {
-	public: 
+	public:
 		SimpleSynHandler();
 		~SimpleSynHandler();
 		SimpleSynHandler& operator=( const SimpleSynHandler& other );

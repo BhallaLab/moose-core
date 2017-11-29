@@ -1,3 +1,2 @@
-from _main import write
-
-__all__ = ["write"]
+# -*- coding: utf-8 -*-
+from  .writeKkit import mooseWriteKkit

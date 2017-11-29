@@ -1,13 +1,14 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-"""moose_sim.py: 
+"""moose_sim.py:
 
     A cable with 1000 compartments with HH-type channels in it.
 
 Last modified: Wed May 21, 2014  09:51AM
 
 """
-    
+
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2013, NCBS Bangalore"
 __credits__          = ["NCBS Bangalore", "Bhalla Lab"]
@@ -21,6 +22,7 @@ import numpy as np
 
 import moose
 from moose import utils
+import time
 
 EREST_ACT = -65e-3
 per_ms = 1e3
@@ -54,7 +56,7 @@ class MooseCompartment():
             self.mc_.Cm = self.Cm
             self.mc_.Em = self.Em
             self.mc_.initVm = self.Em
-            
+
         except Exception as e:
             utils.dump("ERROR"
                     , [ "Can't create compartment with path %s " % path
@@ -67,13 +69,13 @@ class MooseCompartment():
 
     def __repr__( self ):
         msg = '{}: '.format( self.mc_.path )
-        msg += '\n\t|- Length: {:1.4e}, Diameter: {:1.4e}'.format( 
+        msg += '\n\t|- Length: {:1.4e}, Diameter: {:1.4e}'.format(
                 self.mc_.length, self.mc_.diameter
                 )
 #        msg += '\n\t|- Cross-section: {:1.4e}, SurfaceArea: {:1.4e}'.format(
 #                self.crossSection, self.surfaceArea
 #                )
-        msg += '\n\t|- Ra: {:1.3e}, Rm: {:1.3e}, Cm: {:1.3e}, Em: {:1.3e}'.format( 
+        msg += '\n\t|- Ra: {:1.3e}, Rm: {:1.3e}, Cm: {:1.3e}, Em: {:1.3e}'.format(
                 self.mc_.Ra, self.mc_.Rm, self.mc_.Cm, self.mc_.Em
                 )
         return msg
@@ -88,17 +90,17 @@ class MooseCompartment():
         self.crossSection = ( np.pi * self.diameter * self.diameter ) / 4.0
         self.Ra = ( self.RA * self.compLength ) / self.crossSection
         self.Rm = ( self.RM / self.surfaceArea )
-        self.Cm = ( self.CM * self.surfaceArea ) 
+        self.Cm = ( self.CM * self.surfaceArea )
 
 def alphaM(A, B, V0, v):
     '''Compute alpha_m at point v
 
-    aplha_m = A(v - v0 ) / (exp((v-V0)/B) - 1) 
+    aplha_m = A(v - v0 ) / (exp((v-V0)/B) - 1)
     '''
     return (A*(v-V0) / (np.exp((v - V0)/B) -1 ))
 
 def alphaN(A, B, V0, v):
-    '''Compute alpha_n at point v 
+    '''Compute alpha_n at point v
     aplha_n = A(v-V0) / (exp((v-V0)/B) -1 )
     '''
     return alphaM(A, B, V0, v)
@@ -112,12 +114,12 @@ def betaN(A, B, V0, v):
     return betaM(A, B, V0, v)
 
 def alphaH(A, B, V0, v):
-    '''Compute alpha_h at point v 
+    '''Compute alpha_h at point v
     '''
     return (A * np.exp(( v - V0) / B))
 
 def behaH(A, B, V0, v):
-    '''Compute beta_h at point v 
+    '''Compute beta_h at point v
     '''
     return (A * np.exp((v-V0)/B) + 1)
 
@@ -133,9 +135,9 @@ def createChannel(species, path, **kwargs):
 
 def create_na_chan(parent='/library', name='na', vmin=-110e-3, vmax=50e-3, vdivs=3000):
     """Create a Hodhkin-Huxley Na channel under `parent`.
-    
+
     vmin, vmax, vdivs: voltage range and number of divisions for gate tables
-    
+
     """
     na = moose.HHChannel('%s/%s' % (parent, name))
     na.Xpower = 3
@@ -161,9 +163,9 @@ def create_na_chan(parent='/library', name='na', vmin=-110e-3, vmax=50e-3, vdivs
 
 def create_k_chan(parent='/library', name='k', vmin=-120e-3, vmax=40e-3, vdivs=3000):
     """Create a Hodhkin-Huxley K channel under `parent`.
-    
+
     vmin, vmax, vdivs: voltage range and number of divisions for gate tables
-    
+
     """
     k = moose.HHChannel('%s/%s' % (parent, name))
     k.Xpower = 4
@@ -177,7 +179,7 @@ def create_k_chan(parent='/library', name='k', vmin=-120e-3, vmax=40e-3, vdivs=3
     n_gate.tableA = n_alpha
     n_gate.tableB = n_alpha + n_beta
     return k
-    
+
 def creaetHHComp(parent='/library', name='hhcomp', diameter=1e-6, length=1e-6):
     """Create a compartment with Hodgkin-Huxley type ion channels (Na and
     K).
@@ -198,7 +200,7 @@ def creaetHHComp(parent='/library', name='hhcomp', diameter=1e-6, length=1e-6):
     na = moose.element('%s/na' % (c.path))
 
     # Na-conductance 120 mS/cm^2
-    na.Gbar = 120e-3 * sarea * 1e4 
+    na.Gbar = 120e-3 * sarea * 1e4
     na.Ek = 115e-3 + EREST_ACT
 
     moose.connect(c, 'channel', na, 'channel')
@@ -209,7 +211,7 @@ def creaetHHComp(parent='/library', name='hhcomp', diameter=1e-6, length=1e-6):
 
     k = moose.element('%s/k' % (c.path))
     # K-conductance 36 mS/cm^2
-    k.Gbar = 36e-3 * sarea * 1e4 
+    k.Gbar = 36e-3 * sarea * 1e4
     k.Ek = -12e-3 + EREST_ACT
     moose.connect(c, 'channel', k, 'channel')
     return (c, na, k)
@@ -237,7 +239,7 @@ def setupDUT( dt ):
     pg.firstLevel = 1e-10
     moose.connect(pg, 'output', comp, 'injectMsg')
     setupClocks( dt )
-    
+
 def setupClocks( dt ):
     moose.setClock(0, dt)
     moose.setClock(1, dt)
@@ -256,18 +258,16 @@ def simulate( runTime, dt):
     moose.useClock(1, '/##', 'process')
     moose.reinit()
     setupSolver( hsolveDt = dt )
-    utils.verify()
+    t = time.time( )
     moose.start( runTime )
+    print( 'Time taken to simulate %f = %f' % (  runTime, time.time() - t ) )
 
 def main(args):
     global cable
     dt = args['dt']
     makeCable(args)
     setupDUT( dt )
-    table0 = utils.recordAt( '/table0', cable[0], 'vm')
-    table1 = utils.recordAt( '/table1', cable[-1], 'vm')
     simulate( args['run_time'], dt )
-    utils.saveTables( [ table0, table1 ], file = args['output'], xscale = dt )
 
 if __name__ == '__main__':
     import argparse
@@ -308,7 +308,7 @@ if __name__ == '__main__':
             , default = 1e-3
             , type = float
             , help = 'You should record membrane potential somewhere, right?'
-            ) 
+            )
     parser.add_argument( '--length'
             , default = 1e-3
             , type = float

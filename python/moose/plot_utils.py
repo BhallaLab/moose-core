@@ -1,11 +1,9 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# plot_utils.py: Some utility function for plotting data in moose.
 
-"""plot_utils.py: Some utility function for plotting data in moose.
+from __future__ import print_function, division, absolute_import
 
-Last modified: Sun Jan 10, 2016  04:04PM
-
-"""
-    
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2013, NCBS Bangalore"
 __credits__          = ["NCBS Bangalore", "Bhalla Lab"]
@@ -15,10 +13,15 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-import matplotlib.pyplot as plt
-from . import _moose as moose
-from . import print_utils as pu 
 import numpy as np
+import matplotlib.pyplot as plt
+import moose
+import moose.print_utils as pu
+import re
+
+# To support python 2.6. On Python3.6+, dictionaries are ordered by default.
+# This is here to fill this gap.
+from moose.OrderedDict import OrderedDict
 
 def plotAscii(yvec, xvec = None, file=None):
     """Plot two list-like object in terminal using gnuplot.
@@ -47,7 +50,7 @@ def plotInTerminal(yvec, xvec = None, file=None):
     g.stdin.flush()
 
 def xyToString( yvec, xvec, sepby = ' '):
-    """ Given two list-like objects, returns a text string. 
+    """ Given two list-like objects, returns a text string.
     """
     textLines = []
     for y, x in zip( yvec, xvec ):
@@ -57,7 +60,7 @@ def xyToString( yvec, xvec, sepby = ' '):
 
 def saveNumpyVec( yvec, xvec, file):
     """save the numpy vectors to a data-file
-    
+
     """
     if file is None:
         return
@@ -100,7 +103,7 @@ def reformatTable(table, kwargs):
     """ Given a table return x and y vectors with proper scaling """
     clock = moose.Clock('/clock')
     if type(table) == moose.Table:
-        vecY = table.vector 
+        vecY = table.vector
         vecX = np.arange(0, clock.currentTime, len(vecY))
     elif type(table) == tuple:
         vecX, vecY = table
@@ -110,10 +113,10 @@ def plotTable(table, **kwargs):
     """Plot a given table. It plots table.vector
 
     This function can scale the x-axis. By default, y-axis and x-axis scaling is
-    done by a factor of 1.  
+    done by a factor of 1.
 
     Pass 'xscale' and/or 'yscale' argument to function to modify scales.
-    
+
     """
     if not type(table) == moose.Table:
         msg = "Expected moose.Table, got {}".format( type(table) )
@@ -135,8 +138,8 @@ def plotTables(tables, outfile=None, **kwargs):
     subplot = kwargs.get('subplot', True)
     for i, tname in enumerate(tables):
         if subplot:
-            plt.subplot(len(tables), 1, i)
-        yvec = tables[tname].vector 
+            plt.subplot(len(tables), 1, i+1)
+        yvec = tables[tname].vector
         xvec = np.linspace(0, moose.Clock('/clock').currentTime, len(yvec))
         plt.plot(xvec, yvec, label=tname)
 
@@ -145,7 +148,7 @@ def plotTables(tables, outfile=None, **kwargs):
             plt.legend(loc='best', framealpha=0.4)
         except:
             plt.legend(loc = 'best')
-    
+
     plt.tight_layout()
     if outfile:
         pu.dump("PLOT", "Saving plots to file {}".format(outfile))
@@ -189,7 +192,7 @@ def plotVector(vec, xvec = None, **options):
         plt.xlabel('Time (sec)')
     else:
         plt.xlabel(options.get('xlabel', ''))
-    
+
     plt.ylabel = options.get('ylabel', '')
     plt.title(options.get('title', ''))
 
@@ -201,7 +204,7 @@ def plotVector(vec, xvec = None, **options):
 
 
 def saveRecords(records, xvec = None, **kwargs):
-    """saveRecords 
+    """saveRecords
     Given a dictionary of data with (key, numpy array) pair, it saves them to a
     file 'outfile'
 
@@ -233,13 +236,9 @@ def saveRecords(records, xvec = None, **kwargs):
     pu.info("Done writing data to %s" % outfile)
 
 def plotRecords(records, xvec = None, **kwargs):
-    """plotRecords Plot given records in dictionary.
-
-    :param records:
-    :param xvec: If None, use moose.Clock to generate xvec.
-    :param **kwargs:
+    """Wrapper
     """
-    dataDict = {}
+    dataDict = OrderedDict( )
     try:
         for k in sorted(records.keys(), key=str.lower):
             dataDict[k] = records[k]
@@ -258,16 +257,16 @@ def plotRecords(records, xvec = None, **kwargs):
         plotThis = False
         if not filters: plotThis = True
         for accept in filters:
-            if accept in k.lower(): 
+            if accept in k.lower():
                 plotThis = True
                 break
-                
+
         if plotThis:
-            if not subplot: 
+            if not subplot:
                 yvec = dataDict[k].vector
                 plotVector(yvec, xvec, label=k, **kwargs)
             else:
-                plt.subplot(len(dataDict), 1, i)
+                plt.subplot(len(dataDict), 1, i+1)
                 yvec = dataDict[k].vector
                 plotVector(yvec, xvec, label=k, **kwargs)
 
@@ -285,47 +284,24 @@ def plotRecords(records, xvec = None, **kwargs):
         plt.savefig("%s" % outfile, transparent=True)
     else:
         plt.show()
+    plt.close( )
 
 
-def plot_records(data_dict, xvec = None, **kwargs):
-    """plot_records Plot given dictionary.
+def plotTables( regex = '.*', **kwargs ):
+    """plotTables Plot all moose.Table/moose.Table2 matching given regex. By
+    default plot all tables. Table names must be unique. Table name are used as
+    legend.
 
-    :param data_dict:
-    :param xvec: If None, use moose.Clock to generate xvec.
+    :param regex: Python regular expression to be matched.
     :param **kwargs:
+        - subplot = True/False; if True, each Table is plotted in a subplot.
+        - outfile = filepath; If given, plot will be saved to this path.
     """
 
-    legend = kwargs.get('legend', True)
-    outfile = kwargs.get('outfile', None)
-    subplot = kwargs.get('subplot', False)
-    filters = [ x.lower() for x in kwargs.get('filter', [])]
-
-    plt.figure(figsize=(10, 1.5*len(data_dict)))
-    for i, k in enumerate(data_dict):
-        pu.info("+ Plotting for %s" % k)
-        plotThis = False
-        if not filters: plotThis = True
-        for accept in filters:
-            if accept in k.lower(): 
-                plotThis = True
-                break
-                
-        if plotThis:
-            if not subplot: 
-                yvec = data_dict[k]
-                plotVector(yvec, xvec, label=k, **kwargs)
-            else:
-                plt.subplot(len(data_dict), 1, i)
-                yvec = data_dict[k]
-                plotVector(yvec, xvec, label=k, **kwargs)
-    if subplot:
-        try:
-            plt.tight_layout()
-        except: pass
-
-    if outfile:
-        pu.info("Writing plot to %s" % outfile)
-        plt.savefig("%s" % outfile, transparent=True)
-    else:
-        plt.show()
-
+    tables = moose.wildcardFind( '/##[TYPE=Table]' )
+    tables += moose.wildcardFind( '/##[TYPE=Table2]' )
+    toPlot = OrderedDict( )
+    for t in sorted(tables, key = lambda x: x.name):
+        if re.search( regex, t.name ):
+            toPlot[ t.name ] = t
+    return plotRecords( toPlot, None, **kwargs )

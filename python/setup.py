@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # This file is part of MOOSE simulator: http://moose.ncbs.res.in.
 
 # MOOSE is free software: you can redistribute it and/or modify
@@ -13,12 +14,12 @@
 # along with MOOSE.  If not, see <http://www.gnu.org/licenses/>.
 
 
-"""setup.py: 
+"""setup.py:
 
     Script to install python targets.
 
 """
-    
+
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2013, Dilawar Singh and NCBS Bangalore"
 __credits__          = ["NCBS Bangalore"]
@@ -31,30 +32,43 @@ __status__           = "Development"
 import os
 from distutils.core import setup
 
+script_dir = os.path.dirname( os.path.abspath( __file__ ) )
+
+version = '3.1'
+try:
+    with open( os.path.join( script_dir, '..', 'VERSION'), 'r' ) as f:
+        version = f.read( )
+except Exception as e:
+    print( 'Failed to read VERSION %s' % e )
+    print( 'Using default 3.1' )
+
 try:
     import importlib.machinery
     suffix = importlib.machinery.EXTENSION_SUFFIXES[0]
-except Exception:
+except Exception as e:
     suffix = '.so'
-
-import moose
-VERSION = moose.__version__
 
 setup(
         name='moose',
-        version=VERSION,
+        version=version,
         description='MOOSE python scripting module.',
-        author='Dilwar Singh',
-        author_email='dilawars@ncbs.res.in',
+        author='MOOSERes',
+        author_email='bhalla@ncbs.res.in',
+        maintainer='Dilawar Singh',
+        maintainer_email='dilawars@ncbs.res.in',
         url='http://moose.ncbs.res.in',
-        packages=['libmumbl'
-            , 'rdesigneur'
-            , 'moose', 'moose.kkit', 'moose.neuroml'
+        packages=[
+            'rdesigneur'
+            , 'moose'
+            , 'moose.SBML'
+            , 'moose.neuroml'
             , 'moose.genesis'
+            , 'moose.chemUtil'
+            , 'moose.chemMerge'
             ],
-        package_dir = { 'moose' : 'moose' 
+        package_dir = {
+            'moose' : 'moose'
             , 'rdesigneur' : 'rdesigneur'
-            , 'genesis' : 'genesis'
             },
         package_data = { 'moose' : ['_moose' + suffix] },
-    ) 
+    )

@@ -25,71 +25,74 @@ class MsgDigest;
 
 class Eref
 {
-	public:
+public:
 
-		friend ostream& operator <<( ostream& s, const Eref& e );
-		Eref();
-		Eref( Element* e, unsigned int index, unsigned int field = 0 );
+    friend ostream& operator <<( ostream& s, const Eref& e );
+    Eref();
+    Eref( Element* e, unsigned int index, unsigned int field = 0 );
 
-		/**
-		 * Returns data entry.
-		 */
-		char* data() const;
+    /**
+     * Returns data entry.
+     */
+    char* data() const;
 
-		/**
-		 * Returns Element part
-		 */
-		Element* element() const {
-			return e_;
-		}
+    /**
+     * Returns Element part
+     */
+    Element* element() const
+    {
+        return e_;
+    }
 
-		/**
-		 * Returns data index, for now typecast to unsigned int.
-		 */
-		unsigned int dataIndex() const {
-			return i_;
-		}
+    /**
+     * Returns data index, for now typecast to unsigned int.
+     */
+    unsigned int dataIndex() const
+    {
+        return i_;
+    }
 
-		/**
-		 * Returns field index, for now typecast to unsigned int.
-		 * This is really an extra bit of baggage used here not for
-		 * immediate lookup, but to pass to EpFuncs that know
-		 * how to use this for lookup.
-		 */
-		unsigned int fieldIndex() const {
-			return f_;
-		}
+    /**
+     * Returns field index, for now typecast to unsigned int.
+     * This is really an extra bit of baggage used here not for
+     * immediate lookup, but to pass to EpFuncs that know
+     * how to use this for lookup.
+     */
+    unsigned int fieldIndex() const
+    {
+        return f_;
+    }
 
-		/**
-		 * Returns the ObjId corresponding to the Eref. All info is kept.
-		 */
-		ObjId objId() const;
+    /**
+     * Returns the ObjId corresponding to the Eref. All info is kept.
+     */
+    ObjId objId() const;
 
-		/**
-		 * Returns the Id corresponding to the Eref. Loses information.
-		 */
-		Id id() const;
+    /**
+     * Returns the Id corresponding to the Eref. Loses information.
+     */
+    Id id() const;
 
-		/**
-		 * Returns the digested version of the specified msgsrc. If the
-		 * message has changed, this call triggers the digestion operation.
-		 */
-		const vector< MsgDigest >& msgDigest(unsigned int bindIndex ) const;
+    /**
+     * Returns the digested version of the specified msgsrc. If the
+     * message has changed, this call triggers the digestion operation.
+     */
+    const vector< MsgDigest >& msgDigest(unsigned int bindIndex ) const;
 
-		/**
-		 * True if the data are on the current node
-		 */
-		bool isDataHere() const;
+    /**
+     * True if the data are on the current node
+     */
+    bool isDataHere() const;
 
-		/**
-		 * Returns node upon which specified data entry resides .
-		 * If this is a GlobalElement then it returns the local node.
-		 */
-		unsigned int getNode() const;
-	private:
-		Element* e_;
-		unsigned int i_;
-		unsigned int f_;
+    /**
+     * Returns node upon which specified data entry resides .
+     * If this is a GlobalElement then it returns the local node.
+     */
+    unsigned int getNode() const;
+private:
+    Element* e_;
+    unsigned int i_;
+    unsigned int f_;
 };
 
 #endif // _EREF_H
