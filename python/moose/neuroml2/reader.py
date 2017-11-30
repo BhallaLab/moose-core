@@ -130,7 +130,8 @@ def getSegments(nmlcell, component, sg_to_segments):
         segments = [seg for seglist in sg_to_segments.values() for seg in seglist]
     else:
         segments = sg_to_segments[sg]
-    return segments
+        
+    return list(set(segments))
 
 rate_fn_map = {
     'HHExpRate': hhfit.exponential,
@@ -341,7 +342,7 @@ class NML2Reader(object):
                 continue
                 
             if self.verbose:
-                print('Setting density of channel %s in %s to %s, erev=%s'%(chdens.id, segments, condDensity,erev))
+                print('Setting density of channel %s in %s to %s; erev=%s'%(chdens.id, segments, condDensity,erev))
             
             if ionChannel.type_ == 'ionChannelPassive':
                 for seg in segments:
@@ -350,9 +351,9 @@ class NML2Reader(object):
                     setEk(self.nml_to_moose[seg], erev)
             else:
                 for seg in segments:
-                    self.copyChannel(chdens, self.nml_to_moose[seg], condDensity)
+                    self.copyChannel(chdens, self.nml_to_moose[seg], condDensity, erev)
 
-    def copyChannel(self, chdens, comp, condDensity):
+    def copyChannel(self, chdens, comp, condDensity, erev):
         """Copy moose prototype for `chdens` condutcance density to `comp`
         compartment.
 
@@ -367,10 +368,15 @@ class NML2Reader(object):
                     break
         if not proto_chan:
             raise Exception('No prototype channel for %s referred to by %s' % (chdens.ionChannel, chdens.id))
+
+        if self.verbose:
+            print('Copying %s to %s, %s; erev=%s'%(chdens.id, comp, condDensity, erev))
+            
         chid = moose.copy(proto_chan, comp, chdens.id)
         chan = moose.element(chid)
-        #chan.Gbar = sarea(comp) * condDensity
-        #moose.connect(chan, 'channel', comp, 'channel')
+        chan.Gbar = sarea(comp) * condDensity
+        chan.Ek = erev
+        moose.connect(chan, 'channel', comp, 'channel')
         return chan    
 
     def importIncludes(self, doc):        

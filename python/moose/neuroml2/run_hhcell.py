@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# run_cell.py ---
+# run_hhcell.py ---
 #
-# Filename: run_cell.py
+# Filename: run_hhcell.py
 # Description:
 # Author:
 # Maintainer: P Gleeson
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     reader = NML2Reader(verbose=True)
 
     lib = moose.Neutral('/library')
-    filename = 'test_files/passiveCell.nml'
+    filename = 'test_files/NML2_SingleCompHHCell.nml'
     print('Loading: %s'%filename)
     reader.read(filename)
     
@@ -70,9 +70,9 @@ if __name__ == '__main__':
     
     data = moose.Neutral('/data')
     pg = moose.PulseGen('%s/pg' % (lib.path))
-    pg.firstDelay = 50e-3
-    pg.firstWidth = 50e-3
-    pg.firstLevel = 0.1e-9
+    pg.firstDelay = 100e-3
+    pg.firstWidth = 100e-3
+    pg.firstLevel = 0.08e-9
     pg.secondDelay = 1e9
     moose.connect(pg, 'output', msoma, 'injectMsg')
     inj = moose.Table('%s/pulse' % (data.path))
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     
     simdt = 1e-6
     plotdt = 1e-4
-    simtime = 150e-3
+    simtime = 300e-3
     if (1):
         moose.showmsg( '/clock' )
         for i in range(8):
@@ -97,6 +97,12 @@ if __name__ == '__main__':
     moose.start(simtime)
     
     t = np.linspace(0, simtime, len(vm.vector))
+    vfile = open('moose_v_hh.dat','w')
+    
+    for i in range(len(t)):
+        vfile.write('%s\t%s\n'%(t[i],vm.vector[i]))
+    vfile.close()
+    
     plt.subplot(211)
     plt.plot(t, vm.vector * 1e3, label='Vm (mV)')
     plt.plot(t, inj.vector * 1e9, label='injected (nA)')

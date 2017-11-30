@@ -52,7 +52,6 @@ in NeuroMLCoreDimensions.xml) to SI
 """
 from __future__ import print_function
 import os
-import numpy as np
 import re
 from xml.etree import ElementTree
 
@@ -69,6 +68,7 @@ units = dict([(el.attrib['symbol'], el) for el in unitsdoc.getroot() if el.tag =
 magnitude_regex = re.compile(r'^[\+-]?\d*\.?\d*([eE][\+-]?\d+)?')
 
 def SI(expression):
+    expression=expression.replace(" ", "")
     match = magnitude_regex.match(expression)
     magnitude = float(match.group(0))
     unitstr = re.split(magnitude_regex, expression)[-1]
