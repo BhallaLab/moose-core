@@ -60,12 +60,18 @@ class TestPassiveCell(unittest.TestCase):
             if isinstance(ncell, nml.Cell):
                 self.ncell = ncell
                 break
-                
+        self.mcell = moose.element('/library/%s'%self.ncell.id)
+        self.soma = moose.element(self.mcell.path + '/soma')
+        
                 
     def test_basicLoading(self):
         pass
-        #self.assertEqual(self.reader.filename, self.filename, 'filename was not set')
-        #self.assertIsNotNone(self.reader.doc, 'doc is None')
+        self.assertEqual(self.reader.filename, self.filename, 'filename was not set')
+        self.assertIsNotNone(self.reader.doc, 'doc is None')
+        
+    def test_createCellPrototype(self):
+        self.assertIsInstance(self.mcell, moose.Neuron)
+        self.assertEqual(self.mcell.name, self.ncell.id)
 
 if __name__ == '__main__':
     unittest.main()

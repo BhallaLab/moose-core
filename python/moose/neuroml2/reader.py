@@ -438,6 +438,8 @@ class NML2Reader(object):
                 mchan = self.createHHChannel(chan)
             elif chan.type_ == 'ionChannelPassive':
                 mchan = self.createPassiveChannel(chan)
+            else:
+                mchan = self.createHHChannel(chan)
             self.id_to_ionChannel[chan.id] = chan
             self.nml_to_moose[chan] = mchan
             self.proto_chans[chan.id] = mchan

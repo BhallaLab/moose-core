@@ -6,9 +6,9 @@
          id="NML2_SingleCompHHCell">
 
     
-    <ionChannelHH id="passiveChan" conductance="10pS">
+    <ionChannel type="ionChannelPassive" id="passiveChan" conductance="10pS">
         <notes>Leak conductance</notes>
-    </ionChannelHH>
+    </ionChannel>
     
     <cell id="passiveCell">
 
