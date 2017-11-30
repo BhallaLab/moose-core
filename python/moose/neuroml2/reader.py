@@ -134,9 +134,9 @@ def getSegments(nmlcell, component, sg_to_segments):
     return list(set(segments))
 
 rate_fn_map = {
-    'HHExpRate': hhfit.exponential,
-    'HHSigmoidRate': hhfit.sigmoid,
-    'HHExpLinearRate': hhfit.linoid }
+    'HHExpRate': hhfit.exponential2,
+    'HHSigmoidRate': hhfit.sigmoid2,
+    'HHExpLinearRate': hhfit.linoid2 }
 
 def calculateRateFn(ratefn, vmin, vmax, tablen=3000):
     """Returns A / B table from ngate."""
@@ -408,7 +408,10 @@ class NML2Reader(object):
         mchan = moose.HHChannel('%s/%s' % (self.lib.path, chan.id))
         mgates = map(moose.element, (mchan.gateX, mchan.gateY, mchan.gateZ))
         assert(len(chan.gate) <= 3) # We handle only up to 3 gates in HHCHannel
-        for ngate, mgate in zip(chan.gate, mgates):
+        
+        if self.verbose:
+            print('== Creating channel: %s (%s) -> %s (%s)'%(chan.id, chan.gateHHrates, mchan, mgates))
+        for ngate, mgate in zip(chan.gateHHrates,mgates):
             if mgate.name.endswith('X'):
                 mchan.Xpower = ngate.instances
             elif mgate.name.endswith('Y'):
@@ -428,23 +431,27 @@ class NML2Reader(object):
             # refering to tau_inf and m_inf??
             fwd = ngate.forwardRate
             rev = ngate.reverseRate
+            
+            if self.verbose:
+                print('== Gate: %s; %s; %s; %s'%(mgate, mchan.Xpower, fwd, rev))
+                
             if (fwd is not None) and (rev is not None):
-                beta = calculateRateFn(fwd, vmin, vmax, vdivs)
-                alpha = calculateRateFn(rev, vmin, vmax, vdivs)
+                alpha = calculateRateFn(fwd, vmin, vmax, vdivs)
+                beta = calculateRateFn(rev, vmin, vmax, vdivs)
                 mgate.tableA = alpha
                 mgate.tableB = alpha + beta
-                break
             # Assuming the meaning of the elements in GateHHTauInf ...
-            tau = ngate.timeCourse
-            inf = ngate.steadyState
-            if (tau is not None) and (inf is not None):
-                tau = calculateRateFn(tau, vmin, vmax, vdivs)
-                inf = calculateRateFn(inf, vmin, vmax, vdivs)
-                mgate.tableA = inf / tau
-                mgate.tableB = 1 / tau
-                break
+            if hasattr(ngate,'timeCourse') and hasattr(ngate,'steadyState'):
+                tau = ngate.timeCourse
+                inf = ngate.steadyState
+                if (tau is not None) and (inf is not None):
+                    tau = calculateRateFn(tau, vmin, vmax, vdivs)
+                    inf = calculateRateFn(inf, vmin, vmax, vdivs)
+                    mgate.tableA = inf / tau
+                    mgate.tableB = 1 / tau
+                
         if self.verbose:
-            print(self.filename, 'Created', mchan.path, 'for', chan.id)
+            print(self.filename, '== Created', mchan.path, 'for', chan.id)
         return mchan
 
     def createPassiveChannel(self, chan):

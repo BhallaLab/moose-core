@@ -80,7 +80,7 @@ def SI(expression):
         return magnitude
     try:
         si = magnitude * 10**int(unit.attrib['power'])
-        print("Converting %s: %s"%(expression, si))
+        #print("Converting %s: %s"%(expression, si))
         return si
     except AttributeError: # degC has offset in stead of magnitude
         si = magnitude + float(unit.attrib['offset'])

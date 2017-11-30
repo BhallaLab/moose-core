@@ -47,6 +47,50 @@ from reader import NML2Reader
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+def test_channel_gates():
+    """Creates prototype channels under `/library` and plots the time
+    constants (tau) and activation (minf, hinf, ninf) parameters for the
+    channel gates.
+
+    """
+    lib = moose.Neutral('/library')
+    m = moose.element('/library[0]/naChan[0]/gateX')
+    h = moose.element('/library[0]/naChan[0]/gateY')
+    n = moose.element('/library[0]/kChan[0]/gateX')
+    v = np.linspace(n.min,n.max, n.divs+1)
+    
+    plt.subplot(221)
+    plt.plot(v, 1/m.tableB, label='tau_m')
+    plt.plot(v, 1/h.tableB, label='tau_h')
+    plt.plot(v, 1/n.tableB, label='tau_n')
+    plt.legend()
+    
+    plt.subplot(222)
+    plt.plot(v, m.tableA/m.tableB, label='m_inf')
+    plt.plot(v, h.tableA/h.tableB, label='h_inf')
+    plt.plot(v, n.tableA/n.tableB, label='n_inf')
+    plt.legend()
+    
+    plt.subplot(223)
+    plt.plot(v, m.tableA, label='mA(alpha)')
+    plt.plot(v, h.tableA, label='hA(alpha)')
+    plt.plot(v, n.tableA, label='nA(alpha)')
+    plt.legend()
+    plt.subplot(224)
+    
+    plt.plot(v, m.tableB, label='mB')
+    plt.plot(v, m.tableB-m.tableA, label='mB-A(beta)')
+    
+    plt.plot(v, h.tableB, label='hB')
+    plt.plot(v, h.tableB-h.tableA, label='hB-A(beta)')
+    
+    plt.plot(v, n.tableB, label='nB')
+    plt.plot(v, n.tableB-n.tableA, label='nB-nA(beta)')
+    plt.legend()
+    
+    plt.show()
+
 if __name__ == '__main__':
     
     reader = NML2Reader(verbose=True)
@@ -102,7 +146,6 @@ if __name__ == '__main__':
     for i in range(len(t)):
         vfile.write('%s\t%s\n'%(t[i],vm.vector[i]))
     vfile.close()
-    
     plt.subplot(211)
     plt.plot(t, vm.vector * 1e3, label='Vm (mV)')
     plt.plot(t, inj.vector * 1e9, label='injected (nA)')
@@ -113,6 +156,8 @@ if __name__ == '__main__':
     #plt.plot(t, gK.vector * 1e6, label='K')
     #plt.plot(t, gNa.vector * 1e6, label='Na')
     plt.legend()
+    plt.figure()
+    test_channel_gates()
     plt.show()
     plt.close()
 
