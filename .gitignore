@@ -134,3 +134,5 @@ Session.vim
 
 /VERSION
 /_build
+/python/moose/neuroml2/*.dat
+/python/moose/neuroml2/test_files/*.dat

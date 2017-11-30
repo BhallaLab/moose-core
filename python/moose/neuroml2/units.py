@@ -59,8 +59,8 @@ from xml.etree import ElementTree
 # The units and dimensions used in NeuroML2 are defined in this file:
 # https://github.com/NeuroML/NeuroML2/blob/master/NeuroML2CoreTypes/NeuroMLCoreDimensions.xml
 unitsdoc = ElementTree.parse(os.path.join(os.path.dirname(__file__),'schema', 'NeuroMLCoreDimensions.xml'))
-dims = dict([(el.name, el) for el in unitsdoc.getroot() if el.tag == 'Dimension'])
-units = dict([(el.symbol, el) for el in unitsdoc.getroot() if el.tag == 'Unit'])
+dims = dict([(el.attrib['name'], el) for el in unitsdoc.getroot() if el.tag == '{http://www.neuroml.org/lems/0.7.4}Dimension'])
+units = dict([(el.attrib['symbol'], el) for el in unitsdoc.getroot() if el.tag == '{http://www.neuroml.org/lems/0.7.4}Unit'])
 
 # optional +/- followed by 0 or more digits followed by optional
 # decimal point followed by optional digits followed by optional
@@ -72,14 +72,21 @@ def SI(expression):
     match = magnitude_regex.match(expression)
     magnitude = float(match.group(0))
     unitstr = re.split(magnitude_regex, expression)[-1]
+    
     try:
         unit = units[unitstr]
-    except KeyError:
+    except KeyError as ke:
+        print("Error in converting %s: %s, using %s"%(expression, ke, magnitude))
         return magnitude
     try:
-        return magnitude * np.power(10, int(unit.power))
+        si = magnitude * 10**int(unit.attrib['power'])
+        print("Converting %s: %s"%(expression, si))
+        return si
     except AttributeError: # degC has offset in stead of magnitude
-        return magnitude + float(unit.offset)
+        si = magnitude + float(unit.attrib['offset'])
+        print("Converting %s: %s"%(expression, si))
+        return si
+    
 
 #
 # units.py ends here

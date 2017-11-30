@@ -14,7 +14,7 @@
 
     <include href="SimpleIonChannel.xml"/> <!-- Contains ionChannel NaConductance -->
     
-    <ionChannelHH id="pas" conductance="10pS"/> <!--For use in example cell below-->
+    <ionChannel type="ionChannelPassive" id="pas" conductance="10pS"/> <!--For use in example cell below-->
 
     <!-- Note, no <cells> element...  -->
     

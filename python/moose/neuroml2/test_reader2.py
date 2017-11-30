@@ -72,6 +72,30 @@ class TestPassiveCell(unittest.TestCase):
     def test_createCellPrototype(self):
         self.assertIsInstance(self.mcell, moose.Neuron)
         self.assertEqual(self.mcell.name, self.ncell.id)
+        
+    def test_createMorphology(self):
+        for comp_id in moose.wildcardFind(self.mcell.path + '/##[ISA=Compartment]'):
+            comp = moose.element(comp_id)
+            p0 = self.reader.moose_to_nml[comp].proximal
+            if p0:
+                self.assertAlmostEqual(comp.x0, float(p0.x)*1e-6) # Assume micron unit for length
+                self.assertAlmostEqual(comp.y0, float(p0.y)*1e-6)
+                self.assertAlmostEqual(comp.z0, float(p0.z)*1e-6)
+            p1 = self.reader.moose_to_nml[comp].distal
+            self.assertAlmostEqual(comp.x, float(p1.x)*1e-6)
+            self.assertAlmostEqual(comp.y, float(p1.y)*1e-6)
+            self.assertAlmostEqual(comp.z, float(p1.z)*1e-6)
+
+    def test_capacitance(self):
+        for comp_id in moose.wildcardFind(self.mcell.path + '/##[ISA=Compartment]'):
+            comp = moose.element(comp_id)
+            # We know that a few um^2 compartment with uF/cm^2 specific capacitance must be around a pico Farad.
+            self.assertTrue((comp.Cm > 0) and (comp.Cm < 1e-6))
+            
+    def test_protochans(self):
+        """TODO: verify the prototype cahnnel."""
+        for chan_id in moose.wildcardFind('/library/##[ISA=HHChannel]'):
+            print(moose.element(chan_id))
 
 if __name__ == '__main__':
     unittest.main()

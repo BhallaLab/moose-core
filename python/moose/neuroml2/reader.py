@@ -108,9 +108,13 @@ def setRa(comp, resistivity):
     else:
         comp.Ra = resistivity * 8.0 / (comp.diameter * np.pi)
 
-def setRm(comp, resistivity):
+def setRm(comp, condDensity):
     """Set membrane resistance"""
-    comp.Rm = resistivity / sarea(comp)
+    comp.Rm = 1/(condDensity * sarea(comp))
+
+def setEk(comp, erev):
+    """Set reversal potential"""
+    comp.setEm(erev)
 
 
 def getSegments(nmlcell, component, sg_to_segments):
@@ -265,6 +269,7 @@ class NML2Reader(object):
             print('Importing membrane properties')
         self.importCapacitances(nmlcell, moosecell, mp.specificCapacitance)
         self.importChannelsToCell(nmlcell, moosecell, mp)
+        self.importInitMembPotential(nmlcell, moosecell, mp)
 
     def importCapacitances(self, nmlcell, moosecell, specificCapacitances):
         sg_to_segments = self._cell_to_sg[nmlcell]
@@ -272,7 +277,15 @@ class NML2Reader(object):
             cm = SI(specific_cm.value)
             for seg in sg_to_segments[specific_cm.segmentGroup]:
                 comp = self.nml_to_moose[seg]
-                comp.Cm = np.pi * sarea(comp) 
+                comp.Cm = sarea(comp) * cm
+                
+    def importInitMembPotential(self, nmlcell, moosecell, membraneProperties):
+        sg_to_segments = self._cell_to_sg[nmlcell]
+        for imp in membraneProperties.initMembPotential:
+            initv = SI(imp.value)
+            for seg in sg_to_segments[imp.segmentGroup]:
+                comp = self.nml_to_moose[seg]
+                comp.initVm = initv 
 
     def importIntracellularProperties(self, nmlcell, moosecell, properties):
         self.importAxialResistance(nmlcell, properties)
@@ -320,14 +333,21 @@ class NML2Reader(object):
         for chdens in membraneProperties.channelDensity:
             segments = getSegments(nmlcell, chdens, sg_to_segments)
             condDensity = SI(chdens.condDensity)
+            erev = SI(chdens.erev)
             try:
                 ionChannel = self.id_to_ionChannel[chdens.ionChannel]
             except KeyError:
                 print('No channel with id', chdens.ionChannel)                
                 continue
+                
+            if self.verbose:
+                print('Setting density of channel %s in %s to %s, erev=%s'%(chdens.id, segments, condDensity,erev))
+            
             if ionChannel.type_ == 'ionChannelPassive':
                 for seg in segments:
+                    comp = self.nml_to_moose[seg]
                     setRm(self.nml_to_moose[seg], condDensity)
+                    setEk(self.nml_to_moose[seg], erev)
             else:
                 for seg in segments:
                     self.copyChannel(chdens, self.nml_to_moose[seg], condDensity)
@@ -349,7 +369,6 @@ class NML2Reader(object):
             raise Exception('No prototype channel for %s referred to by %s' % (chdens.ionChannel, chdens.id))
         chid = moose.copy(proto_chan, comp, chdens.id)
         chan = moose.element(chid)
-        print(dir(chan))
         #chan.Gbar = sarea(comp) * condDensity
         #moose.connect(chan, 'channel', comp, 'channel')
         return chan    

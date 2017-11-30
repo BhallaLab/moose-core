@@ -71,9 +71,9 @@ if __name__ == '__main__':
     
     data = moose.Neutral('/data')
     pg = moose.PulseGen('%s/pg' % (lib.path))
-    pg.firstDelay = 30e-3
+    pg.firstDelay = 50e-3
     pg.firstWidth = 50e-3
-    pg.firstLevel = 1e-9
+    pg.firstLevel = 0.1e-9
     pg.secondDelay = 1e9
     moose.connect(pg, 'output', msoma, 'injectMsg')
     inj = moose.Table('%s/pulse' % (data.path))
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     
     simdt = 1e-6
     plotdt = 1e-4
-    simtime = 100e-3
+    simtime = 150e-3
     if (1):
         moose.showmsg( '/clock' )
         for i in range(8):
