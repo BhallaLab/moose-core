@@ -101,9 +101,9 @@ if __name__ == '__main__':
     reader.read(filename)
     
     print(reader.doc.id)
-    cell = reader.doc.cell[0]
+    cell = reader.doc.cells[0]
     cell_id = cell.id
-    soma = cell.morphology.segment[0]
+    soma = cell.morphology.segments[0]
     print(cell_id)
     print(soma.id)
     print(reader.proto_cells[cell_id])

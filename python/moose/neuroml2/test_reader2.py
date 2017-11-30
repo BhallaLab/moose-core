@@ -46,7 +46,7 @@ from __future__ import print_function
 import unittest
 import moose
 from reader import NML2Reader
-import generated_neuroml as nml
+import neuroml as nml
 
 class TestPassiveCell(unittest.TestCase):
     def setUp(self):
@@ -68,7 +68,7 @@ class TestPassiveCell(unittest.TestCase):
         pass
         self.assertEqual(self.reader.filename, self.filename, 'filename was not set')
         self.assertIsNotNone(self.reader.doc, 'doc is None')
-        
+    
     def test_createCellPrototype(self):
         self.assertIsInstance(self.mcell, moose.Neuron)
         self.assertEqual(self.mcell.name, self.ncell.id)
