@@ -24,12 +24,12 @@ brew update
 #brew outdated cmake || brew install cmake
 brew install gsl
 brew install hdf5
-brew install homebrew/science/libsbml
 #brew outdated python || brew install python
 #brew outdated numpy || brew install homebrew/python/numpy
 #brew unlink numpy && brew link numpy || echo "Failed to link numpy"
 # Numpy caveats
 mkdir -p $HOME/Library/Python/2.7/lib/python/site-packages
 echo 'import sys; sys.path.insert(1, "/usr/local/lib/python2.7/site-packages")' >> $HOME/Library/Python/2.7/lib/python/site-packages/homebrew.pth
+# ensurepip
+python -m ensurepip
 pip install matplotlib
-
