@@ -179,16 +179,65 @@ class NML2Reader(object):
         self.lib = moose.Neutral('/library')
         self.id_to_ionChannel = {}
         self._cell_to_sg = {} # nml cell to dict - the dict maps segment groups to segments
+        
+        self.cells_in_populations = {}
+        self.pop_to_cell_type = {}
+        self.seg_id_to_comp_name = {}
 
     def read(self, filename):
         self.doc = loaders.read_neuroml2_file(filename, include_includes=True, verbose=self.verbose)
+        self.network = self.doc.networks[0]
         if self.verbose:
             print('Parsed NeuroML2 file: %s'% filename)
         self.filename = filename
         self.importConcentrationModels(self.doc)
         self.importIonChannels(self.doc)
+        self.importInputs(self.doc)
+        
         for cell in self.doc.cells:
             self.createCellPrototype(cell)
+        self.createPopulations()
+        self.createInputs()
+        print("Read all from %s"%filename)
+        
+    def getCellInPopulation(self, pop_id, index):
+        return self.cells_in_populations[pop_id][index]
+    
+    def getComp(self, pop_id, cellIndex, segId):
+        return moose.element('%s/%s/%s/%s' % (self.lib.path, pop_id, cellIndex, self.seg_id_to_comp_name[self.pop_to_cell_type[pop_id]][segId]))
+            
+    def createPopulations(self):
+        for pop in self.network.populations:
+            moose.le(self.lib)
+            mpop = moose.Neutral('%s/%s' % (self.lib.path, pop.id))
+            self.cells_in_populations[pop.id] ={}
+            moose.le(mpop)
+            for i in range(pop.size):
+                print("Creating %s/%s instances of %s under %s"%(i,pop.size,pop.component, mpop))
+                self.pop_to_cell_type[pop.id]=pop.component
+                chid = moose.copy(self.proto_cells[pop.component], mpop, '%s'%(i))
+                moose.le(mpop)
+                moose.le(chid)
+                self.cells_in_populations[pop.id][i]=chid
+                
+                
+    def getInput(self, input_id):
+        return moose.element('%s/inputs/%s'%(self.lib.path,input_id))
+                
+    def createInputs(self):
+        for el in self.network.explicit_inputs:
+            pop_id = el.target.split('[')[0]
+            i = el.target.split('[')[1].split(']')[0]
+            seg_id = 0
+            if '/' in el.target:
+                seg_id = el.target.split('/')[1]
+            input = self.getInput(el.input)
+            moose.connect(input, 'output', self.getComp(pop_id,i,seg_id), 'injectMsg')
+            
+        for il in self.network.input_lists:
+            pass
+            
+        
 
     def createCellPrototype(self, cell, symmetric=False):
         """To be completed - create the morphology, channels in prototype"""
@@ -217,11 +266,15 @@ class NML2Reader(object):
         # naming convention does not clash with that in MOOSE
         cellpath = moosecell.path
         id_to_comp = {}
+        self.seg_id_to_comp_name[nmlcell.id]={}
         for seg in segments:
             if seg.name is not None:
                 id_to_comp[seg.id] = compclass('%s/%s' % (cellpath, seg.name))
+                self.seg_id_to_comp_name[nmlcell.id][seg.id] = seg.name
             else:
-                id_to_comp[seg.id] = compclass('%s/comp_%s' % (cellpath, seg.id))
+                name = 'comp_%s'%seg.id
+                id_to_comp[seg.id] = compclass('%s/%s' % (cellpath, name))
+                self.seg_id_to_comp_name[nmlcell.id][seg.id] = name
         # Now assign the positions and connect up axial resistance
         if not symmetric:
             src, dst = 'axial', 'raxial'
@@ -466,6 +519,17 @@ class NML2Reader(object):
         if self.verbose:
             print(self.filename, 'Created', mchan.path, 'for', chan.id)
         return mchan
+
+    def importInputs(self, doc):
+        minputs = moose.Neutral('%s/inputs' % (self.lib.path))
+        for pg_nml in doc.pulse_generators:
+
+            pg = moose.PulseGen('%s/%s' % (minputs.path, pg_nml.id))
+            pg.firstDelay = SI(pg_nml.delay)
+            pg.firstWidth = SI(pg_nml.duration)
+            pg.firstLevel = SI(pg_nml.amplitude)
+            pg.secondDelay = 1e9
+        
 
     def importIonChannels(self, doc, vmin=-120e-3, vmax=40e-3, vdivs=3000):
         if self.verbose:

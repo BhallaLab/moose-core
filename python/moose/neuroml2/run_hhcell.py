@@ -97,30 +97,19 @@ def run(nogui):
     
     reader = NML2Reader(verbose=True)
 
-    lib = moose.Neutral('/library')
     filename = 'test_files/NML2_SingleCompHHCell.nml'
     print('Loading: %s'%filename)
     reader.read(filename)
     
-    print(reader.doc.id)
-    cell = reader.doc.cells[0]
-    cell_id = cell.id
-    soma = cell.morphology.segments[0]
-    print(cell_id)
-    print(soma.id)
-    print(reader.proto_cells[cell_id])
-    print(reader.nml_to_moose)
-    msoma = reader.nml_to_moose[soma]
+    
+    msoma = reader.getComp(reader.doc.networks[0].populations[0].id,0,0)
     print(msoma)
     
     
     data = moose.Neutral('/data')
-    pg = moose.PulseGen('%s/pg' % (lib.path))
-    pg.firstDelay = 100e-3
-    pg.firstWidth = 100e-3
-    pg.firstLevel = 0.08e-9
-    pg.secondDelay = 1e9
-    moose.connect(pg, 'output', msoma, 'injectMsg')
+    
+    pg = reader.getInput('pulseGen1')
+    
     inj = moose.Table('%s/pulse' % (data.path))
     moose.connect(inj, 'requestOut', pg, 'getOutputValue')
     

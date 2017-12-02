@@ -45,4 +45,12 @@
 
     </cell>
     
+    <pulseGenerator id="pulseGen1" delay="50ms" duration="50ms" amplitude="0.08nA"/>
+
+
+    <network id="net1">
+        <population id="pop0" component="passiveCell" size="1"/>
+        <explicitInput target="pop0[0]" input="pulseGen1"/>
+    </network>
+    
 </neuroml>
