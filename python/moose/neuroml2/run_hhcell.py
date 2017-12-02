@@ -43,9 +43,9 @@
 # Code:
 
 import moose
+import sys
 from reader import NML2Reader
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 def test_channel_gates():
@@ -54,6 +54,7 @@ def test_channel_gates():
     channel gates.
 
     """
+    import matplotlib.pyplot as plt
     lib = moose.Neutral('/library')
     m = moose.element('/library[0]/naChan[0]/gateX')
     h = moose.element('/library[0]/naChan[0]/gateY')
@@ -91,7 +92,8 @@ def test_channel_gates():
     
     plt.show()
 
-if __name__ == '__main__':
+
+def run(nogui):
     
     reader = NML2Reader(verbose=True)
 
@@ -140,26 +142,37 @@ if __name__ == '__main__':
         moose.showmsg( '/clock' )
     moose.start(simtime)
     
+    print("Finished simulation!")
+    
     t = np.linspace(0, simtime, len(vm.vector))
-    vfile = open('moose_v_hh.dat','w')
     
-    for i in range(len(t)):
-        vfile.write('%s\t%s\n'%(t[i],vm.vector[i]))
-    vfile.close()
-    plt.subplot(211)
-    plt.plot(t, vm.vector * 1e3, label='Vm (mV)')
-    plt.plot(t, inj.vector * 1e9, label='injected (nA)')
-    plt.legend()
-    plt.title('Vm')
-    plt.subplot(212)
-    plt.title('Conductance (uS)')
-    #plt.plot(t, gK.vector * 1e6, label='K')
-    #plt.plot(t, gNa.vector * 1e6, label='Na')
-    plt.legend()
-    plt.figure()
-    test_channel_gates()
-    plt.show()
-    plt.close()
+    if not nogui:
+        import matplotlib.pyplot as plt
 
+        vfile = open('moose_v_hh.dat','w')
+
+        for i in range(len(t)):
+            vfile.write('%s\t%s\n'%(t[i],vm.vector[i]))
+        vfile.close()
+        plt.subplot(211)
+        plt.plot(t, vm.vector * 1e3, label='Vm (mV)')
+        plt.plot(t, inj.vector * 1e9, label='injected (nA)')
+        plt.legend()
+        plt.title('Vm')
+        plt.subplot(212)
+        plt.title('Conductance (uS)')
+        #plt.plot(t, gK.vector * 1e6, label='K')
+        #plt.plot(t, gNa.vector * 1e6, label='Na')
+        plt.legend()
+        plt.figure()
+        test_channel_gates()
+        plt.show()
+        plt.close()
+        
     
+if __name__ == '__main__':
+    
+    nogui = '-nogui' in sys.argv
+    
+    run(nogui)
     

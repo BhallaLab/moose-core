@@ -43,11 +43,12 @@
 # Code:
 
 import moose
+import sys
 from reader import NML2Reader
 import numpy as np
-import matplotlib.pyplot as plt
 
-if __name__ == '__main__':
+    
+def run(nogui):
     
     reader = NML2Reader(verbose=True)
 
@@ -96,19 +97,29 @@ if __name__ == '__main__':
         moose.showmsg( '/clock' )
     moose.start(simtime)
     
+    print("Finished simulation!")
+    
     t = np.linspace(0, simtime, len(vm.vector))
-    plt.subplot(211)
-    plt.plot(t, vm.vector * 1e3, label='Vm (mV)')
-    plt.plot(t, inj.vector * 1e9, label='injected (nA)')
-    plt.legend()
-    plt.title('Vm')
-    plt.subplot(212)
-    plt.title('Conductance (uS)')
-    #plt.plot(t, gK.vector * 1e6, label='K')
-    #plt.plot(t, gNa.vector * 1e6, label='Na')
-    plt.legend()
-    plt.show()
-    plt.close()
+    
+    if not nogui:
+        import matplotlib.pyplot as plt
+
+        plt.subplot(211)
+        plt.plot(t, vm.vector * 1e3, label='Vm (mV)')
+        plt.plot(t, inj.vector * 1e9, label='injected (nA)')
+        plt.legend()
+        plt.title('Vm')
+        plt.subplot(212)
+        plt.title('Conductance (uS)')
+        #plt.plot(t, gK.vector * 1e6, label='K')
+        #plt.plot(t, gNa.vector * 1e6, label='Na')
+        plt.legend()
+        plt.show()
+        plt.close()
 
     
+if __name__ == '__main__':
     
+    nogui = '-nogui' in sys.argv
+    
+    run(nogui)
