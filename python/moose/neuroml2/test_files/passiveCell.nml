@@ -22,10 +22,6 @@
                 <member segment="0"/>
             </segmentGroup>
             
-            <segmentGroup id="all">
-                <member segment="0"/>
-            </segmentGroup>
-
         </morphology>
 
         <biophysicalProperties id="bioPhys1">

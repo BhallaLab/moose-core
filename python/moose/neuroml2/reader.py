@@ -186,7 +186,7 @@ class NML2Reader(object):
 
     def read(self, filename):
         self.doc = loaders.read_neuroml2_file(filename, include_includes=True, verbose=self.verbose)
-        self.network = self.doc.networks[0]
+        
         if self.verbose:
             print('Parsed NeuroML2 file: %s'% filename)
         self.filename = filename
@@ -196,8 +196,10 @@ class NML2Reader(object):
         
         for cell in self.doc.cells:
             self.createCellPrototype(cell)
-        self.createPopulations()
-        self.createInputs()
+        if len(self.doc.networks)>=1:
+            self.network = self.doc.networks[0]
+            self.createPopulations()
+            self.createInputs()
         print("Read all from %s"%filename)
         
     def getCellInPopulation(self, pop_id, index):
@@ -208,16 +210,12 @@ class NML2Reader(object):
             
     def createPopulations(self):
         for pop in self.network.populations:
-            moose.le(self.lib)
             mpop = moose.Neutral('%s/%s' % (self.lib.path, pop.id))
             self.cells_in_populations[pop.id] ={}
-            moose.le(mpop)
             for i in range(pop.size):
                 print("Creating %s/%s instances of %s under %s"%(i,pop.size,pop.component, mpop))
                 self.pop_to_cell_type[pop.id]=pop.component
                 chid = moose.copy(self.proto_cells[pop.component], mpop, '%s'%(i))
-                moose.le(mpop)
-                moose.le(chid)
                 self.cells_in_populations[pop.id][i]=chid
                 
                 
@@ -310,6 +308,10 @@ class NML2Reader(object):
         sg_to_segments = {}        
         for sg in morphology.segment_groups:
             sg_to_segments[sg.id] = [id_to_segment[m.segments] for m in sg.members]
+            
+        if not 'all' in sg_to_segments:
+            sg_to_segments['all'] = [ s for s in segments ]
+            
         self._cell_to_sg[nmlcell] = sg_to_segments
         return id_to_comp, id_to_segment, sg_to_segments
 
@@ -534,9 +536,8 @@ class NML2Reader(object):
     def importIonChannels(self, doc, vmin=-120e-3, vmax=40e-3, vdivs=3000):
         if self.verbose:
             print(self.filename, 'Importing ion channels')
-            print(self.filename, doc.ion_channel)
-        for chan in doc.ion_channel:
-            print(self.filename, chan.id)
+            
+        for chan in doc.ion_channel+doc.ion_channel_hhs:
             if chan.type == 'ionChannelHH':
                 mchan = self.createHHChannel(chan)
             elif chan.type == 'ionChannelPassive':
