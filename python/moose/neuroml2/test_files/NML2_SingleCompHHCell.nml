@@ -10,9 +10,9 @@
     <!-- This is a "pure" NeuroML 2 file. It can be included in a LEMS file for use in a simulaton 
     by the LEMS interpreter, see LEMS_NML2_Ex5_DetCell.xml -->     
 
-    <ionChannel type="ionChannelPassive"  id="passiveChan" conductance="10pS">
+    <ionChannelHH id="passiveChan" conductance="10pS">
         <notes>Leak conductance</notes>
-    </ionChannel>
+    </ionChannelHH>
 
 
     <ionChannelHH id="naChan" conductance="10pS" species="na">
@@ -53,10 +53,6 @@
             <segmentGroup id="soma_group">
                 <member segment="0"/>
             </segmentGroup>
-            
-            <segmentGroup id="all">
-                <member segment="0"/>
-            </segmentGroup>
 
         </morphology>
 
@@ -70,7 +66,7 @@
 
                 <spikeThresh value="-20mV"/>
                 <specificCapacitance value="1.0 uF_per_cm2"/>
-                <initMembPotential value="-77mV"/>
+                <initMembPotential value="-65mV"/>
 
             </membraneProperties>
 

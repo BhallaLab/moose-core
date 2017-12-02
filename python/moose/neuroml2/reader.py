@@ -388,7 +388,11 @@ class NML2Reader(object):
             segments = getSegments(nmlcell, r, sg_to_segments)
             for seg in segments:
                 comp = self.nml_to_moose[seg]
-                setRa(comp, SI(r.value))                    
+                setRa(comp, SI(r.value))     
+                
+    def isPassiveChan(self,chan):
+        return chan.type == 'ionChannelPassive' or \
+               hasattr(chan,'gate_hh_rates') and (len(chan.gate_hh_rates)==0)
 
     def importChannelsToCell(self, nmlcell, moosecell, membrane_properties):
         sg_to_segments = self._cell_to_sg[nmlcell]
@@ -405,7 +409,7 @@ class NML2Reader(object):
             if self.verbose:
                 print('Setting density of channel %s in %s to %s; erev=%s'%(chdens.id, segments, condDensity,erev))
             
-            if ionChannel.type == 'ionChannelPassive':
+            if self.isPassiveChan(ionChannel):
                 for seg in segments:
                     comp = self.nml_to_moose[seg]
                     setRm(self.nml_to_moose[seg], condDensity)
@@ -540,10 +544,11 @@ class NML2Reader(object):
         for chan in doc.ion_channel+doc.ion_channel_hhs:
             if chan.type == 'ionChannelHH':
                 mchan = self.createHHChannel(chan)
-            elif chan.type == 'ionChannelPassive':
+            elif self.isPassiveChan(chan):
                 mchan = self.createPassiveChannel(chan)
             else:
                 mchan = self.createHHChannel(chan)
+                
             self.id_to_ionChannel[chan.id] = chan
             self.nml_to_moose[chan] = mchan
             self.proto_chans[chan.id] = mchan
