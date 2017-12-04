@@ -74,12 +74,16 @@ logger.addHandler(logstream)
 try:
     import neuroml as nml
     import neuroml.loaders as loaders
+    from pyneuroml import pynml
 except:
     print("********************************************************************")
     print("* ")
-    print("*  Please install libNeuroML: pip install libneuroml")
+    print("*  Please install libNeuroML & pyNeuroML: ")
+    print("*    pip install libneuroml")
+    print("*    pip install pyNeuroML")
     print("* ")
-    print("*  Requirement for this is lxml: apt-get install python-lxml")
+    print("*  Requirement for this is lxml: ")
+    print("*    apt-get install python-lxml")
     print("* ")
     print("********************************************************************")
 
@@ -140,16 +144,6 @@ def getSegments(nmlcell, component, sg_to_segments):
         
     return list(set(segments))
 
-rate_fn_map = {
-    'HHExpRate': hhfit.exponential2,
-    'HHSigmoidRate': hhfit.sigmoid2,
-    'HHExpLinearRate': hhfit.linoid2 }
-
-def calculateRateFn(ratefn, vmin, vmax, tablen=3000):
-    """Returns A / B table from ngate."""
-    midpoint, rate, scale = map(SI, (ratefn.midpoint, ratefn.rate, ratefn.scale))
-    tab = np.linspace(vmin, vmax, tablen)
-    return rate_fn_map[ratefn.type](tab, rate, scale, midpoint)
 
 class NML2Reader(object):
     """Reads NeuroML2 and creates MOOSE model. 
@@ -183,6 +177,7 @@ class NML2Reader(object):
         self.cells_in_populations = {}
         self.pop_to_cell_type = {}
         self.seg_id_to_comp_name = {}
+        self.paths_to_chan_elements = {}
 
     def read(self, filename):
         self.doc = loaders.read_neuroml2_file(filename, include_includes=True, verbose=self.verbose)
@@ -221,6 +216,7 @@ class NML2Reader(object):
                 
     def getInput(self, input_id):
         return moose.element('%s/inputs/%s'%(self.lib.path,input_id))
+               
                 
     def createInputs(self):
         for el in self.network.explicit_inputs:
@@ -233,9 +229,10 @@ class NML2Reader(object):
             moose.connect(input, 'output', self.getComp(pop_id,i,seg_id), 'injectMsg')
             
         for il in self.network.input_lists:
-            pass
+            for ii in il.input:
+                input = self.getInput(il.component)
+                moose.connect(input, 'output', self.getComp(il.populations,ii.get_target_cell_id(),ii.get_segment_id()), 'injectMsg')
             
-        
 
     def createCellPrototype(self, cell, symmetric=False):
         """To be completed - create the morphology, channels in prototype"""
@@ -246,6 +243,7 @@ class NML2Reader(object):
         self.createMorphology(cell, nrn, symmetric=symmetric)
         self.importBiophysics(cell, nrn)
         return cell, nrn
+
 
     def createMorphology(self, nmlcell, moosecell, symmetric=False):
         """Create the MOOSE compartmental morphology in `moosecell` using the
@@ -308,6 +306,12 @@ class NML2Reader(object):
         sg_to_segments = {}        
         for sg in morphology.segment_groups:
             sg_to_segments[sg.id] = [id_to_segment[m.segments] for m in sg.members]
+        for sg in morphology.segment_groups:
+            if not sg.id in sg_to_segments:
+                sg_to_segments[sg.id] = []
+            for inc in sg.includes:
+                for cseg in sg_to_segments[inc.segment_groups]:
+                    sg_to_segments[sg.id].append(cseg)
             
         if not 'all' in sg_to_segments:
             sg_to_segments['all'] = [ s for s in segments ]
@@ -391,8 +395,39 @@ class NML2Reader(object):
                 setRa(comp, SI(r.value))     
                 
     def isPassiveChan(self,chan):
-        return chan.type == 'ionChannelPassive' or \
-               hasattr(chan,'gate_hh_rates') and (len(chan.gate_hh_rates)==0)
+        if chan.type == 'ionChannelPassive':
+            return True
+        if hasattr(chan,'gates'):
+            return len(chan.gate_hh_rates)+len(chan.gates)==0
+        return False
+    
+
+    rate_fn_map = {
+        'HHExpRate': hhfit.exponential2,
+        'HHSigmoidRate': hhfit.sigmoid2,
+        'HHExpLinearRate': hhfit.linoid2 }
+
+    def calculateRateFn(self, ratefn, vmin, vmax, tablen=3000, vShift='0mV'):
+        """Returns A / B table from ngate."""
+        tab = np.linspace(vmin, vmax, tablen)
+        if self._is_standard_nml_rate(ratefn):
+            midpoint, rate, scale = map(SI, (ratefn.midpoint, ratefn.rate, ratefn.scale))
+            return self.rate_fn_map[ratefn.type](tab, rate, scale, midpoint)
+        else:
+            for ct in self.doc.ComponentType:
+                if ratefn.type == ct.name:
+                    print("Using %s to evaluate rate"%ct.name)
+                    rate = []
+                    for v in tab:
+                        vals = pynml.evaluate_component(ct,req_variables={'v':'%sV'%v,'vShift':vShift})
+                        '''print vals'''
+                        if 'x' in vals:
+                            rate.append(vals['x'])
+                        if 't' in vals:
+                            rate.append(vals['t'])
+                        if 'r' in vals:
+                            rate.append(vals['r'])
+                    return np.array(rate)
 
     def importChannelsToCell(self, nmlcell, moosecell, membrane_properties):
         sg_to_segments = self._cell_to_sg[nmlcell]
@@ -407,7 +442,7 @@ class NML2Reader(object):
                 continue
                 
             if self.verbose:
-                print('Setting density of channel %s in %s to %s; erev=%s'%(chdens.id, segments, condDensity,erev))
+                print('Setting density of channel %s in %s to %s; erev=%s (passive: %s)'%(chdens.id, segments, condDensity,erev,self.isPassiveChan(ionChannel)))
             
             if self.isPassiveChan(ionChannel):
                 for seg in segments:
@@ -417,6 +452,8 @@ class NML2Reader(object):
             else:
                 for seg in segments:
                     self.copyChannel(chdens, self.nml_to_moose[seg], condDensity, erev)
+            '''moose.le(self.nml_to_moose[seg])
+            moose.showfield(self.nml_to_moose[seg], field="*", showtype=True)'''
 
     def copyChannel(self, chdens, comp, condDensity, erev):
         """Copy moose prototype for `chdens` condutcance density to `comp`
@@ -436,9 +473,13 @@ class NML2Reader(object):
 
         if self.verbose:
             print('Copying %s to %s, %s; erev=%s'%(chdens.id, comp, condDensity, erev))
-            
+        orig = chdens.id
         chid = moose.copy(proto_chan, comp, chdens.id)
         chan = moose.element(chid)
+        for p in self.paths_to_chan_elements.keys():
+            pp = p.replace('%s/'%chdens.ion_channel,'%s/'%orig)
+            self.paths_to_chan_elements[pp] = self.paths_to_chan_elements[p].replace('%s/'%chdens.ion_channel,'%s/'%orig)
+        #print(self.paths_to_chan_elements)
         chan.Gbar = sarea(comp) * condDensity
         chan.Ek = erev
         moose.connect(chan, 'channel', comp, 'channel')
@@ -469,6 +510,9 @@ class NML2Reader(object):
             if error:
                 print(self.filename, 'Last exception:', error)
                 raise IOError('Could not read any of the locations: %s' % (paths))'''
+                
+    def _is_standard_nml_rate(self, rate):
+        return rate.type=='HHExpLinearRate' or rate.type=='HHExpRate' or rate.type=='HHSigmoidRate'
 
     def createHHChannel(self, chan, vmin=-120e-3, vmax=40e-3, vdivs=3000):
         mchan = moose.HHChannel('%s/%s' % (self.lib.path, chan.id))
@@ -477,7 +521,8 @@ class NML2Reader(object):
         
         if self.verbose:
             print('== Creating channel: %s (%s) -> %s (%s)'%(chan.id, chan.gate_hh_rates, mchan, mgates))
-        for ngate, mgate in zip(chan.gate_hh_rates,mgates):
+        all_gates = chan.gates + chan.gate_hh_rates
+        for ngate, mgate in zip(all_gates,mgates):
             if mgate.name.endswith('X'):
                 mchan.Xpower = ngate.instances
             elif mgate.name.endswith('Y'):
@@ -498,12 +543,13 @@ class NML2Reader(object):
             fwd = ngate.forward_rate
             rev = ngate.reverse_rate
             
+            self.paths_to_chan_elements['%s/%s'%(chan.id,ngate.id)] = '%s/%s'%(chan.id,mgate.name)
             if self.verbose:
                 print('== Gate: %s; %s; %s; %s'%(mgate, mchan.Xpower, fwd, rev))
                 
             if (fwd is not None) and (rev is not None):
-                alpha = calculateRateFn(fwd, vmin, vmax, vdivs)
-                beta = calculateRateFn(rev, vmin, vmax, vdivs)
+                alpha = self.calculateRateFn(fwd, vmin, vmax, vdivs)
+                beta = self.calculateRateFn(rev, vmin, vmax, vdivs)
                 mgate.tableA = alpha
                 mgate.tableB = alpha + beta
             # Assuming the meaning of the elements in GateHHTauInf ...
@@ -511,8 +557,8 @@ class NML2Reader(object):
                 tau = ngate.time_course
                 inf = ngate.steady_state
                 if (tau is not None) and (inf is not None):
-                    tau = calculateRateFn(tau, vmin, vmax, vdivs)
-                    inf = calculateRateFn(inf, vmin, vmax, vdivs)
+                    tau = self.calculateRateFn(tau, vmin, vmax, vdivs)
+                    inf = self.calculateRateFn(inf, vmin, vmax, vdivs)
                     mgate.tableA = inf / tau
                     mgate.tableB = 1 / tau
                 

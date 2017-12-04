@@ -77,7 +77,7 @@ def run(nogui):
     simtime = 150e-3
     
     if (1):
-        moose.showmsg( '/clock' )
+        #moose.showmsg( '/clock' )
         for i in range(8):
             moose.setClock( i, simdt )
         moose.setClock( 8, plotdt )
@@ -97,11 +97,11 @@ def run(nogui):
 
         plt.subplot(211)
         plt.plot(t, vm.vector * 1e3, label='Vm (mV)')
-        plt.plot(t, inj.vector * 1e9, label='injected (nA)')
         plt.legend()
         plt.title('Vm')
         plt.subplot(212)
-        plt.title('Conductance (uS)')
+        plt.title('Input')
+        plt.plot(t, inj.vector * 1e9, label='injected (nA)')
         #plt.plot(t, gK.vector * 1e6, label='K')
         #plt.plot(t, gNa.vector * 1e6, label='Na')
         plt.legend()

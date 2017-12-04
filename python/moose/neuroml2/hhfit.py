@@ -53,10 +53,8 @@
 
 import traceback
 import warnings
-from collections import deque
 import numpy as np
 from scipy.optimize import curve_fit
-from matplotlib import pyplot as plt
 
 def exponential2(x, a, scale, x0, y0=0):
     res = a * np.exp((x - x0)/scale) + y0
