@@ -431,7 +431,7 @@ class NML2Reader(object):
 
     def importChannelsToCell(self, nmlcell, moosecell, membrane_properties):
         sg_to_segments = self._cell_to_sg[nmlcell]
-        for chdens in membrane_properties.channel_densities:
+        for chdens in membrane_properties.channel_densities + membrane_properties.channel_density_v_shifts:
             segments = getSegments(nmlcell, chdens, sg_to_segments)
             condDensity = SI(chdens.cond_density)
             erev = SI(chdens.erev)
@@ -514,7 +514,7 @@ class NML2Reader(object):
     def _is_standard_nml_rate(self, rate):
         return rate.type=='HHExpLinearRate' or rate.type=='HHExpRate' or rate.type=='HHSigmoidRate'
 
-    def createHHChannel(self, chan, vmin=-120e-3, vmax=40e-3, vdivs=3000):
+    def createHHChannel(self, chan, vmin=-150e-3, vmax=100e-3, vdivs=5000):
         mchan = moose.HHChannel('%s/%s' % (self.lib.path, chan.id))
         mgates = map(moose.element, (mchan.gateX, mchan.gateY, mchan.gateZ))
         assert(len(chan.gate_hh_rates) <= 3) # We handle only up to 3 gates in HHCHannel
@@ -544,14 +544,20 @@ class NML2Reader(object):
             rev = ngate.reverse_rate
             
             self.paths_to_chan_elements['%s/%s'%(chan.id,ngate.id)] = '%s/%s'%(chan.id,mgate.name)
+                
+            q10_scale = 1
+            if ngate.q10_settings:
+                if ngate.q10_settings.type == 'q10Fixed':
+                    q10_scale= float(ngate.q10_settings.fixed_q10)
+                    
             if self.verbose:
-                print('== Gate: %s; %s; %s; %s'%(mgate, mchan.Xpower, fwd, rev))
+                print(' === Gate: %s; %s; %s; %s; %s; scale=%s'%(ngate.id, mgate.path, mchan.Xpower, fwd, rev, q10_scale))
                 
             if (fwd is not None) and (rev is not None):
                 alpha = self.calculateRateFn(fwd, vmin, vmax, vdivs)
                 beta = self.calculateRateFn(rev, vmin, vmax, vdivs)
-                mgate.tableA = alpha
-                mgate.tableB = alpha + beta
+                mgate.tableA = q10_scale * (alpha)
+                mgate.tableB = q10_scale * (alpha + beta)
             # Assuming the meaning of the elements in GateHHTauInf ...
             if hasattr(ngate,'time_course') and hasattr(ngate,'steady_state'):
                 tau = ngate.time_course
@@ -559,8 +565,8 @@ class NML2Reader(object):
                 if (tau is not None) and (inf is not None):
                     tau = self.calculateRateFn(tau, vmin, vmax, vdivs)
                     inf = self.calculateRateFn(inf, vmin, vmax, vdivs)
-                    mgate.tableA = inf / tau
-                    mgate.tableB = 1 / tau
+                    mgate.tableA = q10_scale * (inf / tau)
+                    mgate.tableB = q10_scale * (1 / tau)
                 
         if self.verbose:
             print(self.filename, '== Created', mchan.path, 'for', chan.id)
@@ -583,7 +589,7 @@ class NML2Reader(object):
             pg.secondDelay = 1e9
         
 
-    def importIonChannels(self, doc, vmin=-120e-3, vmax=40e-3, vdivs=3000):
+    def importIonChannels(self, doc, vmin=-150e-3, vmax=100e-3, vdivs=5000):
         if self.verbose:
             print(self.filename, 'Importing ion channels')
             
