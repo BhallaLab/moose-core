@@ -410,7 +410,7 @@ def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
                     else:
                         groupInfo[groupName].append(enzsetIdP)
             else:
-                print cplxeperror
+                print (cplxeperror)
         elif(enz.className == "MMenz" or enz.className == "ZombieMMenz"):
 
             enzSub = enz.neighbors["sub"]
