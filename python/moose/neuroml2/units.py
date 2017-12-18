@@ -73,20 +73,26 @@ def SI(expression):
     magnitude = float(match.group(0))
     unitstr = re.split(magnitude_regex, expression)[-1]
     
+    #print("Converting %s: mag: %s, unitstr: %s"%(expression, magnitude, unitstr))
     try:
         unit = units[unitstr]
+        #print('Unit: %s'%unit.attrib)
     except KeyError as ke:
         print("Error in converting %s: %s, using %s"%(expression, ke, magnitude))
         return magnitude
-    try:
-        si = magnitude * 10**int(unit.attrib['power'])
-        #print("Converting %s: %s"%(expression, si))
-        return si
-    except AttributeError: # degC has offset in stead of magnitude
-        si = magnitude + float(unit.attrib['offset'])
-        print("Converting %s: %s"%(expression, si))
-        return si
-    
 
+    power = int(unit.attrib['power']) if 'power' in unit.attrib else 0
+    offset = float(unit.attrib['offset']) if 'offset' in unit.attrib else 0
+    scale = float(unit.attrib['scale']) if 'scale' in unit.attrib else 1
+    
+    si = (magnitude + offset) * scale * 10**power 
+
+    return si
+
+
+if __name__ == "__main__":
+    examples = ['-70mV','5 V','1', '330mM','15K','0 degC','-300degC','1min']
+    for e in examples:
+        print(SI(e))
 #
 # units.py ends here
