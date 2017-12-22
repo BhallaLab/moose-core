@@ -22,12 +22,15 @@
 #include <cstdio>
 #include <string>
 
+
 typedef unsigned int u32;
 typedef unsigned long long u64;
 
 #define cudaSafeCall( err ) __cudaSafeCall( err, __FILE__, __LINE__ )
 #define cudaCheckError()    __cudaCheckError( __FILE__, __LINE__ )
+
 #define cusparseSafeCall( err ) __cusparseSafeCall( err, __FILE__, __LINE__ )
+
  
 inline void __cudaSafeCall( cudaError err, const char *file, const int line )
 {
@@ -112,6 +115,7 @@ inline void __cusparseSafeCall( cusparseStatus_t err, const char *file, const in
  
     return;
 }
+
 
 #endif //USE_CUDA
 
