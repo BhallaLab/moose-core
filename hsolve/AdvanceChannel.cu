@@ -27,26 +27,24 @@ void get_lookup_rows_and_fractions_cuda(
     double* table,
     double min, double max, double dx,
     int* rows, double* fracs,
-    unsigned int nColumns, unsigned int size)
-{
+    unsigned int nColumns, unsigned int size){
 
-    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
-    if(tid < size)
-    {
-        double x = lookups[tid];
+	if(tid < size){
+		double x = lookups[tid];
 
-        if ( x < min )
-            x = min;
-        else if ( x > max )
-            x = max;
+		if ( x < min )
+			x = min;
+		else if ( x > max )
+			x = max;
 
-        double div = ( x - min ) / dx;
-        unsigned int integer = ( unsigned int )( div );
+		double div = ( x - min ) / dx;
+		unsigned int integer = ( unsigned int )( div );
 
-        rows[tid] = integer*nColumns;
-        fracs[tid] = div-integer;
-    }
+		rows[tid] = integer*nColumns;
+		fracs[tid] = div-integer;
+	}
 }
 
 /*
