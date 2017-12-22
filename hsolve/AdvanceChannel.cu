@@ -49,8 +49,8 @@ void get_lookup_rows_and_fractions_cuda(
 
 /*
  * Based on the near lookup value and fraction value, the function
- * interpolates the value and uses it to update appropriate state variables
- * "indices" array is a subset which either represents
+  * interpolates the value and uses it to update appropriate state variables.
+ * "indices" array is a subset of compartment id's which are
  * voltage dependent gate indices or Calcium dependent gate indices
  */
 __global__
