@@ -23,11 +23,11 @@
  */
 __global__
 void get_lookup_rows_and_fractions_cuda(
-    double* lookups,
-    double* table,
-    double min, double max, double dx,
-    int* rows, double* fracs,
-    unsigned int nColumns, unsigned int size){
+		double* lookups,
+		double* table,
+		double min, double max, double dx,
+		int* rows, double* fracs,
+		unsigned int nColumns, unsigned int size){
 
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
