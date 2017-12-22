@@ -68,6 +68,10 @@ units = dict([(el.attrib['symbol'], el) for el in unitsdoc.getroot() if el.tag =
 magnitude_regex = re.compile(r'^[\+-]?\d*\.?\d*([eE][\+-]?\d+)?')
 
 def SI(expression):
+    try:
+        return float(expression)
+    except:
+        pass
     expression=expression.replace(" ", "")
     match = magnitude_regex.match(expression)
     magnitude = float(match.group(0))
@@ -91,7 +95,7 @@ def SI(expression):
 
 
 if __name__ == "__main__":
-    examples = ['-70mV','5 V','1', '330mM','15K','0 degC','-300degC','1min']
+    examples = ['-70mV','5 V','1',2,3.3, '330mM','15K','0 degC','-300degC','1min']
     for e in examples:
         print(SI(e))
 #

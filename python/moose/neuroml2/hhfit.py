@@ -58,7 +58,7 @@ from scipy.optimize import curve_fit
 
 def exponential2(x, a, scale, x0, y0=0):
     res = a * np.exp((x - x0)/scale) + y0
-    print('============   Calculating exponential2 for %s, a=%s, scale=%s, x0=%s, y0=%s; = %s'%(x, a, scale, x0, y0, res))
+    #print('============   Calculating exponential2 for %s, a=%s, scale=%s, x0=%s, y0=%s; = %s'%(x, a, scale, x0, y0, res))
     return res
 
 def exponential(x, a, k, x0, y0=0):
@@ -68,7 +68,7 @@ def exponential(x, a, k, x0, y0=0):
 
 def sigmoid2(x, a, scale, x0, y0=0):
     res = a / (np.exp(-1*(x - x0)/scale) + 1.0) + y0
-    print('============   Calculating sigmoid for %s, a=%s, scale=%s, x0=%s, y0=%s; = %s'%(x, a, scale, x0, y0, res))
+    #print('============   Calculating sigmoid for %s, a=%s, scale=%s, x0=%s, y0=%s; = %s'%(x, a, scale, x0, y0, res))
     return res
 
 def sigmoid(x, a, k, x0, y0=0):
@@ -94,7 +94,7 @@ def linoid2(x, a, scale, x0, y0=0):
             else:
                 ret[ii] = (ret[ii+1] + ret[ii+2]) * 0.5
     res = ret + y0
-    print('============   Calculating linoid2 for %s, a=%s, scale=%s, x0=%s, y0=%s; res=%s'%(x, a, scale, x0, y0,res))
+    #print('============   Calculating linoid2 for %s, a=%s, scale=%s, x0=%s, y0=%s; res=%s'%(x, a, scale, x0, y0,res))
     return res
 
 def linoid(x, a, k, x0, y0=0):

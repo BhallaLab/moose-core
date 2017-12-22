@@ -63,6 +63,7 @@ import moose
 from units import SI
 import hhfit
 import logging
+import math
 
 loglevel = logging.DEBUG
 logstream = logging.StreamHandler()
@@ -179,23 +180,36 @@ class NML2Reader(object):
         self.seg_id_to_comp_name = {}
         self.paths_to_chan_elements = {}
 
-    def read(self, filename):
+    def read(self, filename, symmetric=True):
         self.doc = loaders.read_neuroml2_file(filename, include_includes=True, verbose=self.verbose)
         
         if self.verbose:
             print('Parsed NeuroML2 file: %s'% filename)
         self.filename = filename
+        
+        if len(self.doc.networks)>=1:
+            self.network = self.doc.networks[0]
+            
+            moose.celsius = self._getTemperature()
+            
         self.importConcentrationModels(self.doc)
         self.importIonChannels(self.doc)
         self.importInputs(self.doc)
         
+        
         for cell in self.doc.cells:
-            self.createCellPrototype(cell)
+            self.createCellPrototype(cell, symmetric=symmetric)
+            
         if len(self.doc.networks)>=1:
-            self.network = self.doc.networks[0]
             self.createPopulations()
             self.createInputs()
         print("Read all from %s"%filename)
+        
+    def _getTemperature(self):
+        if self.network.type=="networkWithTemperature":
+            return SI(self.network.temperature)
+        else:
+            return 0 # Why not, if there's no temp dependence in nml..?
         
     def getCellInPopulation(self, pop_id, index):
         return self.cells_in_populations[pop_id][index]
@@ -234,7 +248,7 @@ class NML2Reader(object):
                 moose.connect(input, 'output', self.getComp(il.populations,ii.get_target_cell_id(),ii.get_segment_id()), 'injectMsg')
             
 
-    def createCellPrototype(self, cell, symmetric=False):
+    def createCellPrototype(self, cell, symmetric=True):
         """To be completed - create the morphology, channels in prototype"""
         nrn = moose.Neuron('%s/%s' % (self.lib.path, cell.id))
         self.proto_cells[cell.id] = nrn
@@ -245,7 +259,7 @@ class NML2Reader(object):
         return cell, nrn
 
 
-    def createMorphology(self, nmlcell, moosecell, symmetric=False):
+    def createMorphology(self, nmlcell, moosecell, symmetric=True):
         """Create the MOOSE compartmental morphology in `moosecell` using the
         segments in NeuroML2 cell `nmlcell`. Create symmetric
         compartments if `symmetric` is True.
@@ -405,6 +419,7 @@ class NML2Reader(object):
     rate_fn_map = {
         'HHExpRate': hhfit.exponential2,
         'HHSigmoidRate': hhfit.sigmoid2,
+        'HHSigmoidVariable': hhfit.sigmoid2,
         'HHExpLinearRate': hhfit.linoid2 }
 
     def calculateRateFn(self, ratefn, vmin, vmax, tablen=3000, vShift='0mV'):
@@ -419,7 +434,7 @@ class NML2Reader(object):
                     print("Using %s to evaluate rate"%ct.name)
                     rate = []
                     for v in tab:
-                        vals = pynml.evaluate_component(ct,req_variables={'v':'%sV'%v,'vShift':vShift})
+                        vals = pynml.evaluate_component(ct,req_variables={'v':'%sV'%v,'vShift':vShift,'temperature':self._getTemperature()})
                         '''print vals'''
                         if 'x' in vals:
                             rate.append(vals['x'])
@@ -512,7 +527,10 @@ class NML2Reader(object):
                 raise IOError('Could not read any of the locations: %s' % (paths))'''
                 
     def _is_standard_nml_rate(self, rate):
-        return rate.type=='HHExpLinearRate' or rate.type=='HHExpRate' or rate.type=='HHSigmoidRate'
+        return rate.type=='HHExpLinearRate' \
+               or rate.type=='HHExpRate' or \
+               rate.type=='HHSigmoidRate' or \
+               rate.type=='HHSigmoidVariable'
 
     def createHHChannel(self, chan, vmin=-150e-3, vmax=100e-3, vdivs=5000):
         mchan = moose.HHChannel('%s/%s' % (self.lib.path, chan.id))
@@ -549,6 +567,11 @@ class NML2Reader(object):
             if ngate.q10_settings:
                 if ngate.q10_settings.type == 'q10Fixed':
                     q10_scale= float(ngate.q10_settings.fixed_q10)
+                elif ngate.q10_settings.type == 'q10ExpTemp':
+                    q10_scale = math.pow(float(ngate.q10_settings.q10_factor),(self._getTemperature()- SI(ngate.q10_settings.experimental_temp))/10)
+                    #print('Q10: %s; %s; %s; %s'%(ngate.q10_settings.q10_factor, self._getTemperature(),SI(ngate.q10_settings.experimental_temp),q10_scale))
+                else:
+                    raise Exception('Unknown Q10 scaling type %s: %s'%(ngate.q10_settings.type,ngate.q10_settings))
                     
             if self.verbose:
                 print(' === Gate: %s; %s; %s; %s; %s; scale=%s'%(ngate.id, mgate.path, mchan.Xpower, fwd, rev, q10_scale))
@@ -559,11 +582,19 @@ class NML2Reader(object):
                 mgate.tableA = q10_scale * (alpha)
                 mgate.tableB = q10_scale * (alpha + beta)
             # Assuming the meaning of the elements in GateHHTauInf ...
-            if hasattr(ngate,'time_course') and hasattr(ngate,'steady_state'):
+            if hasattr(ngate,'time_course') and hasattr(ngate,'steady_state') \
+               and (ngate.time_course is not None) and (ngate.steady_state is not None):
                 tau = ngate.time_course
                 inf = ngate.steady_state
-                if (tau is not None) and (inf is not None):
-                    tau = self.calculateRateFn(tau, vmin, vmax, vdivs)
+                tau = self.calculateRateFn(tau, vmin, vmax, vdivs)
+                inf = self.calculateRateFn(inf, vmin, vmax, vdivs)
+                mgate.tableA = q10_scale * (inf / tau)
+                mgate.tableB = q10_scale * (1 / tau)
+            print(ngate)
+            if hasattr(ngate,'steady_state') and (ngate.time_course is None) and (ngate.steady_state is not None):
+                inf = ngate.steady_state
+                tau = 1 / (alpha + beta)
+                if (inf is not None):
                     inf = self.calculateRateFn(inf, vmin, vmax, vdivs)
                     mgate.tableA = q10_scale * (inf / tau)
                     mgate.tableB = q10_scale * (1 / tau)
