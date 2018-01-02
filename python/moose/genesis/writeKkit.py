@@ -324,15 +324,45 @@ def trimPath(mobj):
         s = splitpath.replace("_dash_",'-')
         return s
 
-def writeSumtotal( modelpath,f):
+def writeSumtotal( modelpath,f, error):
     funclist = moose.wildcardFind(modelpath+'/##[ISA=Function]')
+    s = ""
     for func in funclist:
+        fInfound  = True
+        fOutfound = True
         funcInputs = moose.element(func.path+'/x[0]')
-        s = ""
-        for funcInput in funcInputs.neighbors["input"]:
-            s = s+ "addmsg /kinetics/" + trimPath(funcInput)+ " /kinetics/" + trimPath(moose.element(func.parent)) + " SUMTOTAL n nInit\n"
-        f.write(s)
+        if not len(funcInputs.neighbors["input"]):
+            fInfound = False
+            error = error +'\n/'+ (moose.element(func)).parent.name+ '/'+moose.element(func).name + ' function doesn\'t have input which is not allowed in genesis. \n This function is not written down into genesis file\n'
 
+        if not len(func.neighbors["valueOut"]):
+            error = error +'Function'+func.path+' has not been connected to any output, this function is not written to genesis file'
+            fOutfound = False
+        else:
+            for srcfunc in func.neighbors["valueOut"]:
+                if srcfunc.className in ["ZombiePool","ZombieBufPool","Pool","BufPool"]:
+                    functionOut = moose.element(srcfunc)
+                else:
+                    error = error +'Function output connected to '+srcfunc.name+ ' which is a '+ srcfunc.className+' which is not allowed in genesis, this function '+(moose.element(func)).path+' is not written to file'
+                    fOutfound = False
+
+        if fInfound and fOutfound:
+            srcPool = []
+            for funcInput in funcInputs.neighbors["input"]:
+                if funcInput not in srcPool:
+                    srcPool.append(funcInput)
+                    s = "addmsg /kinetics/" + trimPath(funcInput)+ " /kinetics/"+ trimPath(functionOut)+ " SUMTOTAL n nInit\n"
+                    f.write(s)
+                else:
+                    error = error + '\n Genesis doesn\'t allow same moluecule connect to function mutiple times. \n Pool \''+ moose.element(funcInput).name + '\' connected to '+ (moose.element(func)).path
+    return error
+
+def writeStimulus(modelpath,f,error):
+    
+    if len(moose.wildcardFind(modelpath+'/##[ISA=StimulusTable]')):
+        error = error +'\n StimulusTable is not written into genesis. This is in Todo List'
+
+    return error
 def storePlotMsgs( tgraphs,f):
     s = ""
     if tgraphs:

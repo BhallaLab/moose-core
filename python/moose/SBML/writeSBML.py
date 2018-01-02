@@ -422,11 +422,13 @@ def parmUnit(rct_order, cremodel_):
     return unit_stream
 
 
+def Counter(items):
+    return dict((i, items.count(i)) for i in items)
+
 def getSubprd(cremodel_, mobjEnz, type, neighborslist):
     if type == "sub":
         reacSub = neighborslist
         reacSubCou = Counter(reacSub)
-
         # print " reacSubCou ",reacSubCou,"()",len(reacSubCou)
         noofSub = len(reacSubCou)
         rate_law = " "

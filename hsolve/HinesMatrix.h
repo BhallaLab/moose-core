@@ -10,6 +10,8 @@
 #ifndef _HINES_MATRIX_H
 #define _HINES_MATRIX_H
 
+#include "StorageFormats.h"
+
 #ifdef DO_UNIT_TESTS
 # define ASSERT( isOK, message ) \
 	if ( !(isOK) ) { \
@@ -21,6 +23,8 @@
 #else
 # define ASSERT( unused, message ) do {} while ( false )
 #endif
+
+#include "CudaGlobal.h"
 
 struct JunctionStruct
 {
@@ -87,6 +91,72 @@ protected:
     int                       stage_;		///< Which stage the simulation has
     ///< reached. Used in getA.
 
+#ifdef USE_CUDA
+    /*
+     * Data structures for storing matrix in CSR format
+     * Refer( https://en.wikipedia.org/wiki/Sparse_matrix#Compressed_sparse_row_.28CSR.2C_CRS_or_Yale_format.29) .
+     */
+    double* h_mat_values;
+    int* h_mat_colIndex;
+    int* h_mat_rowPtr;
+    int* h_main_diag_map; // Stores the index of diagonal element in csr element array.
+
+    double* h_main_diag_passive; // Passive component of main diagonal
+    double* h_b; // RHS matrix
+
+    // Corresponding device pointer
+    double* d_mat_values;
+    int* d_mat_colIndex;
+    int* d_mat_rowPtr;
+    int* d_main_diag_map;
+
+    double* d_main_diag_passive;
+    double* d_b;
+
+    int mat_nnz; // Number of non-zeros in the matrix.
+#endif
+
+    /*
+     * Forward Flow matrix :
+     * When circuit of a compartment has only one Ra component instead of two Ra/2 on either side, the corresponding matrix
+     * of multi-compartment model is a forward flow matrix.
+     * *** There is only one non-zero element after main diagonal element.
+     * *** Symmetric
+     */
+
+    //// Forward flow matrix data structure description
+	/*
+	 * ff_system stores the tri-diagonal system as an array of size (4*num_comp)
+	 * Column1 - lower diagonal elements
+	 * Column2 - main diagonal elements
+	 * Column3 - Passive main diagonal elements.
+	 * Column4 - RHS
+	 */
+	double* ff_system;
+	int* ff_offdiag_mapping;// Stores the row values of lower off-diagonal elements ordered column wise.
+
+
+	/*
+	 * Pervasive Flow matrix :
+	 * When circuit of a compartment has two Ra/2 on either side instead of one Ra, then the corresponding matrix
+	 * of multi-compartment model is a forward flow matrix.
+	 * *** Symmetric
+	 */
+	//// Pervasive flow matrix data structures.
+	coosr_matrix qfull_mat;
+	double* per_rhs, *per_mainDiag_passive; // RHS of matrix and passive part of main diagonal.
+	vector<int> eliminfo_r1, eliminfo_r2; // For a given elimination e(r,c), we store overlapping elements in row c and row r
+	// For a given elimination e(r,c), overlapping element of A[r][r] is A[c][r] and (A[c][r] != 0).
+	// This array stores the index position of A[c][r] in qfull_mat elements.
+	int* eliminfo_diag;
+	int* elim_rowPtr; // Pointer to elimination information for each elimination.
+	int* upper_triang_offsets; // Positions of first non-zero upper triangular element in qfull_mat elements.
+	double* perv_mat_values_copy; // Used for storing a copy of values array in qfull_mat.
+	double* perv_dynamic; // Array of size 2*nCompt. First part is main diagonal, second part is RHS.
+
+	// Helper functions
+	void print_csr_matrix(coosr_matrix &matrix);
+
 private:
     void clear();
     void makeJunctions();
@@ -124,6 +194,28 @@ private:
     map< unsigned int, unsigned int >  groupNumber_;
     /**< Tells you the index of a compartment's group within coupled_,
      *   given the compartment's Hines index. */
+
+#ifdef USE_CUDA
+    /*
+     * Creates hines matrix and stores it in CSR format in both CPU and GPU.
+     */
+    void makeCsrMatrixGpu();
+#endif
+    /*
+	 * Create forward flow hines matrix
+	 */
+    void makeForwardFlowMatrix();
+    /*
+     * Create pervasive flow hines matrix
+     */
+    void makePervasiveFlowMatrix();
+    void storePervasiveMatrix(vector<vector<int> > &child_list);
+
+    // helpers for pervasive matrix
+    void exclusive_scan(int* data, int rows);
+    void generate_coosr_matrix(int num_comp, const vector<pair<long long int,double> > &full_tri, coosr_matrix &full_mat);
+    void construct_elimination_information_opt(coosr_matrix qfull_mat, vector<int> &eliminfo_r1, vector<int> &eliminfo_r2,
+    		int* eliminfo_diag,	int* elim_rowPtr, int* upper_triang_offsets, int num_elims);
 };
 
 #endif // _HINES_MATRIX_H

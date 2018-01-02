@@ -31,6 +31,7 @@ import mtypes
 
 from moose.chemUtil.chemConnectUtil import *
 from moose.chemUtil.graphUtils import *
+from moose.genesis import mooseWriteKkit
 
 def mergeChemModel(A,B):
     """ Merges two model or the path """
