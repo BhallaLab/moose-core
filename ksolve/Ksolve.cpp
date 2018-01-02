@@ -257,6 +257,9 @@ Ksolve::Ksolve()
 #endif
     epsAbs_( 1e-7 ),
     epsRel_( 1e-7 ),
+#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
+    numThreads_( 3 ),
+#endif
     pools_( 1 ),
 #if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     numThreads_( 3 ),

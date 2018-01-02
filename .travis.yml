@@ -11,7 +11,6 @@ notifications:
     email:
         recipients:
             - dilawar.s.rajput@gmail.com
-            - dharmatv@instem.res.in
         on_success: change
         on_failure: always
 
@@ -34,11 +33,6 @@ before_script:
     - sudo dpkg -i cuda-repo*.deb
     - sudo apt-get update 
     - sudo apt-get install -qq cuda-toolkit-7-5
-
-before_install:
-    - sbmlurl="http://sourceforge.net/projects/sbml/files/libsbml/5.9.0/stable/Linux/64-bit/libSBML-5.9.0-Linux-x64.deb"
-    - wget "$sbmlurl" -O libsbml.deb && sudo dpkg -i libsbml.deb 
-    - sudo apt-get install -f
 
 install:
     - echo "nothing to do here"

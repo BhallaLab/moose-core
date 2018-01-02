@@ -384,7 +384,6 @@ bool Gsolve::getClockedUpdate() const
 void Gsolve::setClockedUpdate( bool val )
 {
     useClockedUpdate_ = val;
-
 }
 
 
@@ -456,7 +455,6 @@ void Gsolve::process( const Eref& e, ProcPtr p )
                 *i = base;
             else
                 *i = base + 1.0;
-
 #endif
         }
         setBlock( dvalues );

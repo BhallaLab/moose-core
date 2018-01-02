@@ -40,6 +40,3 @@ add_library(hsolve
 if(WITH_CUDA)
     TARGET_LINK_LIBRARIES(hsolve hsolve_cuda)
 endif(WITH_CUDA)
-
-
-

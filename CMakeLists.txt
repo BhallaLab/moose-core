@@ -4,7 +4,7 @@ project(MOOSE)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
-    cmake_policy(SET CMP0004 OLD)
+    cmake_policy(SET CMP0004 NEW)
     if(POLICY CMP0050)
         cmake_policy(SET CMP0050 OLD)
     endif(POLICY CMP0050)
@@ -19,28 +19,8 @@ include(GetRevision)
 
 # If from command line, version info is not passed, use the git to generate a
 # version file. If GIT fails, use the previous known version.
-set(VERSION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/VERSION)
-find_program(GIT_EXEC "git")
-message( STATUS "Looking for git ${GIT_EXEC}" )
-if( (NOT MOOSE_VERSION) AND GIT_EXEC)
-    execute_process(
-        COMMAND ${GIT_EXEC} describe --tags --long
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE MOOSE_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-endif( )
-
-# Default to current date.
-if( (NOT MOOSE_VERSION)  )
-    NOW(TIMESTAMP)
-    set(MOOSE_VERSION "nightly-${TIMESTAMP}" )
-elseif(MOOSE_VERSION)
-    message(STATUS "+ Using user specified VERSION = ${MOOSE_VERSION}" )
-else()
-    message(FATAL_ERROR "Could not determine MOOSE_VERSION" )
-endif( )
-
+set(MOOSE_VERSION 3.2-git)
+add_definitions( -DMOOSE_VERSION="${MOOSE_VERSION}")
 message( STATUS "MOOSE Version ${MOOSE_VERSION}" )
 
 # Write VERSION to a file VERSION so that setup.py can use it.
@@ -95,7 +75,6 @@ option(VERBOSITY "Set MOOSE verbosity level (deprecated)" 0)
 option(DEBUG "Build with debug support" ON)
 option(GPROF "Build for profiling using gprof" ON)
 option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
-option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_BOOST "Use boost library instead of GSL" ON)
 option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
@@ -149,7 +128,10 @@ endif()
 ################################### TARGETS ####################################
 
 add_library(libmoose SHARED basecode/main.cpp)
-add_executable(moose.bin basecode/main.cpp)
+
+if(DEBUG)
+    add_executable(moose.bin basecode/main.cpp)
+endif( )
 
 ################################### SETUP BUILD ################################
 
@@ -171,11 +153,11 @@ set(STATIC_LIBRARIES "" )
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 
 if(WITH_GSL)
-    find_package(GSL 1.16)
+    find_package(GSL 1.16 REQUIRED)
     if(NOT GSL_FOUND)
         message(FATAL_ERROR
             "=====================================================================\n"
-            " FATAL gsl(>1.16) not found.\n\n"
+            " FATAL gsl(>=1.16) not found.\n\n"
             " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
             " Please install the `dev` or `devel` package e.g. \n"
             "     $ sudo apt-get install libgsl0-dev \n"
@@ -400,32 +382,32 @@ ELSE(MACOSX)
         )
 endif(MACOSX)
 
-add_dependencies(moose.bin libmoose)
-
-target_link_libraries(moose.bin moose ${CMAKE_DL_LIBS})
-if( WITH_BOOST )
-    target_link_libraries( moose.bin ${Boost_LIBRARIES} )
-endif( WITH_BOOST )
+if(DEBUG)
+    add_dependencies(moose.bin libmoose)
+    target_link_libraries(moose.bin moose ${CMAKE_DL_LIBS})
+    if( WITH_BOOST )
+        target_link_libraries( moose.bin ${Boost_LIBRARIES} )
+    endif( WITH_BOOST )
+endif()
 
 ######################### BUILD PYMOOSE ########################################
-# Root of all python module.
-if(WITH_PYTHON)
-    add_subdirectory( pymoose )
-endif(WITH_PYTHON)
+add_subdirectory( pymoose )
 
 ######################### INSTALL ##############################################
 
-install(TARGETS moose.bin
-    DESTINATION bin
-    )
+if(DEBUG)
+    install(TARGETS moose.bin
+        DESTINATION bin
+        )
 
-install(TARGETS libmoose
-    DESTINATION lib
-    )
+    install(TARGETS libmoose
+        DESTINATION lib
+        )
 
-install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
-    DESTINATION bin
-    )
+    install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
+        DESTINATION bin
+        )
+endif( )
 
 # INSTALL python module.
 # This target is built by pymoose/CMakeLists.txt file. Using the --prefix option
@@ -438,19 +420,24 @@ execute_process(
     )
 message( STATUS "Platform ${_platform_desc}" )
 
-if(WITH_PYTHON)
-    set(EXTRA_ARGS "--prefix ${CMAKE_INSTALL_PREFIX}")
-    if( ${_platform_desc} MATCHES ".*(Ubuntu|Debian).*" )
-        list( APPEND EXTRA_ARGS "--install-layout=deb" )
-    endif( )
 
-    install(CODE
-        "execute_process(
-            COMMAND ${PYTHON_EXECUTABLE} setup.py install ${EXTRA_ARGS}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
-            )"
-            )
-endif(WITH_PYTHON)
+set(EXTRA_ARGS "--prefix ${CMAKE_INSTALL_PREFIX}")
+
+## NOTE: Disable it here. It must be handled by moose repository CMakeLists.txt
+## which is used in created packages. For normal user, it should install in
+## site-packages.
+#if( ${_platform_desc} MATCHES ".*(Ubuntu|Debian).*" )
+#    list( APPEND EXTRA_ARGS "--install-layout=deb" )
+#endif( )
+
+# If make is called with sudo, install in system directories. Otherwise use
+# --user to install in user home.
+install(CODE
+    "execute_process(
+        COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py install ${EXTRA_ARGS}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
+        )"
+        )
 
 # Print message to start build process
 if(${CMAKE_BUILD_TOOL} MATCHES "make")
@@ -463,9 +450,39 @@ if(${CMAKE_BUILD_TOOL} MATCHES "make")
 endif()
 
 
-############################ CTEST ######################################
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/MooseTests.cmake)
+
+############################ CTEST ######################################
+include( CTest )
+# If CTEST_OUTPUT_ON_FAILURE environment variable is set, the output is printed
+# onto the console if a test fails.
+set(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
+
+if(DEBUG)
+    # Run this test in debug mode. In Release mode, this does not do anything.
+    set(MOOSE_BIN_LOCATION $<TARGET_FILE:moose.bin>)
+    message(STATUS "Executable moose.bin will be at ${MOOSE_BIN_LOCATION}" )
+
+    add_test(NAME moose.bin-raw-run COMMAND moose.bin -u -q)
+endif(DEBUG)
+
+## PyMOOSE tests.
+set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)
+
+# Collect all python script in tests folder and run them.
+file(GLOB PY_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.py" )
+
+# Run python tests.
+foreach( _test_script ${PY_TEST_SCRIPTS} )
+    get_filename_component( _test_name ${_test_script} NAME_WE)
+    add_test( NAME ${_test_name}
+        COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
+        WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+        )
+     set_tests_properties( ${_test_name}
+        PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+        )
+endforeach( )
 
 ############################ CPACK ######################################
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_cpack.cmake)

@@ -20,7 +20,7 @@ elseif(WITH_GSL)
     include_directories( ${GSL_INCLUDE_DIRS} )
 endif(WITH_BOOST)
 
-option(DEBUG_CUDA "Enable CUDA debug macros" OFF)
+option(DEBUG_CUDA "Enable CUDA debug macros" ON)
 if(DEBUG_CUDA)
     add_definitions(-DDEBUG_CUDA)
 endif()
@@ -36,6 +36,7 @@ if(WITH_CUDA)
         ${CUDA_LIBRARIES} ${CUDA_cusparse_LIBRARY} ${CUDA_cublas_LIBRARY} 
         )
 endif()
+
 if(PARALLELIZED_SOLVERS)
     message( STATUS "Parallel version of KSolve and Gsolve" )
     add_definitions( -DPARALLELIZE_KSOLVE_WITH_CPP11_ASYNC )

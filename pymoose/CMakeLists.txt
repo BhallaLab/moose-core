@@ -1,10 +1,7 @@
 add_definitions(-DPYMOOSE)
 include_directories(../basecode ../msg)
 
-find_package( PythonInterp REQUIRED )
-
-add_definitions( -DMOOSE_VERSION=${MOOSE_VERSION} )
-set(PYMOOSE_SRCS 
+set(PYMOOSE_SRCS
     moosemodule.cpp
     vec.cpp
     mfield.cpp
@@ -16,10 +13,12 @@ set(PYMOOSE_SRCS
 add_library( _moose MODULE ${PYMOOSE_SRCS} )
 
 set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
-EXEC_PROGRAM(${PYTHON_EXECUTABLE}
-    ARGS "-c 'try: import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])
-except Exception: pass'"
+
+execute_process( COMMAND ${PYTHON_EXECUTABLE} -c
+    "try: import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])
+except Exception: pass"
     OUTPUT_VARIABLE PYTHON_SO_EXTENSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 message( STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
 
@@ -83,13 +82,23 @@ ELSE(MACOSX)
 endif(MACOSX)
 
 # Make this target dependant on all python files in python folder.
-add_custom_target(copy_python_files ALL
+add_custom_target(copy_python_files
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/python ${CMAKE_BINARY_DIR}/python
-    COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_SOURCE_DIR}/VERSION ${CMAKE_BINARY_DIR}/VERSION
     COMMENT "Copying required python files and other files to build directory"
     VERBATIM
     )
 
 add_dependencies(_moose copy_python_files)
+
+
+# Print message at the end of build process.
+add_custom_command( TARGET _moose POST_BUILD 
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan
+    "MOOSE python extention is successfully built. Now "
+    " 1. Run 'make install' to install it single user. "
+    " 2. Run 'sudo make install' to install it system-wide. "
+    " "
+    " After installation, 'pip uninstall moose' will uninstall moose. "
+    VERBATIM
+    )
