@@ -125,3 +125,21 @@ set_tests_properties(pymoose-test-kkit
     PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
     )
 
+# Test Calcium hsolve support.
+ADD_TEST( NAME pymoose-test-calcium-hsolve 
+    COMMAND ${TEST_COMMAND} 
+    ${PROJECT_SOURCE_DIR}/tests/python/test_hsolve_externalCalcium.py
+    )
+set_tests_properties(pymoose-test-calcium-hsolve
+    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+    )
+
+# # NOTE: These tests are not enabled yet. They take lot of time. Not all scripts
+# # are fixed yet.
+# # Test moose-examples with very short timeout. 
+# ADD_TEST( NAME pymoose-test-moose-examples
+#     COMMAND ${TEST_COMMAND} -c "import moose; moose.test( timeout = 10 );"
+#     )
+# set_tests_properties(pymoose-test-moose-examples
+#    PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+#    )

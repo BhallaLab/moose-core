@@ -2,9 +2,10 @@ cmake_minimum_required(VERSION 2.6)
 include(CheckIncludeFileCXX)
 
 include_directories(../builtins ../basecode ../utility ../kinetics)
-include_directories(../ )
+include_directories(../)
 include_directories(../mesh)
-include_directories(../external/muparser/include )
+include_directories(../external/muparser/include)
+include_directories(../external/cuda)
 
 IF(WITH_BOOST)
     check_include_file_cxx( ${Boost_INCLUDE_DIRS}/boost/numeric/odeint.hpp
@@ -19,21 +20,43 @@ elseif(WITH_GSL)
     include_directories( ${GSL_INCLUDE_DIRS} )
 endif(WITH_BOOST)
 
+option(DEBUG_CUDA "Enable CUDA debug macros" OFF)
+if(DEBUG_CUDA)
+    add_definitions(-DDEBUG_CUDA)
+endif()
+
+if(WITH_CUDA)
+    SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_30,code=sm_30)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )
+    FILE(GLOB CUDA_SRC *.cu)
+    INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS})
+    CUDA_COMPILE(KSOLVE_CUDA_OBJS ${CUDA_SRC})
+    CUDA_ADD_LIBRARY(ksolve_cuda ${KSOLVE_CUDA_OBJS})
+    TARGET_LINK_LIBRARIES(ksolve_cuda 
+        ${CUDA_LIBRARIES} ${CUDA_cusparse_LIBRARY} ${CUDA_cublas_LIBRARY} 
+        )
+endif()
+if(PARALLELIZED_SOLVERS)
+    message( STATUS "Parallel version of KSolve and Gsolve" )
+    add_definitions( -DPARALLELIZE_KSOLVE_WITH_CPP11_ASYNC )
+    add_definitions( -DPARALLELIZE_GSOLVE_WITH_CPP11_ASYNC )
+endif(PARALLELIZED_SOLVERS)
+
 set(KSOLVE_SRCS
-	KinSparseMatrix.cpp	
-	ZombiePool.cpp 
+	KinSparseMatrix.cpp
+	ZombiePool.cpp
         ZombieFunction.cpp
-        ZombieBufPool.cpp 
-	ZombieReac.cpp 
-	ZombieEnz.cpp 
-	ZombieMMenz.cpp 
+        ZombieBufPool.cpp
+	ZombieReac.cpp
+	ZombieEnz.cpp
+	ZombieMMenz.cpp
         VoxelPoolsBase.cpp
-	VoxelPools.cpp 
+	VoxelPools.cpp
         GssaVoxelPools.cpp
-	RateTerm.cpp 
+	RateTerm.cpp
         FuncTerm.cpp
-	Stoich.cpp 
-	Ksolve.cpp 
+	Stoich.cpp
+	Ksolve.cpp
         Gsolve.cpp
         ZombiePoolInterface.cpp
         testKsolve.cpp
@@ -47,3 +70,6 @@ elseif(WITH_BOOST)
 endif(WITH_GSL)
 
 add_library( ksolve ${KSOLVE_SRCS} )
+if(WITH_CUDA)
+    target_link_libraries( ksolve ksolve_cuda )
+endif( WITH_CUDA )

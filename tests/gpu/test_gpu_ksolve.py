@@ -2,7 +2,7 @@ import moose
 import moose.utils as mu
 import numpy as np
 import matplotlib.pyplot as plt
-
+import time
 #to know the path from where the files are taken
 print( '[INFO] Using moose from %s' % moose.__file__ )
 
@@ -20,7 +20,7 @@ def create_cylinder( name ):
 #Setting the length of the cyliinder
     c.x1 = 1e-3
 #Setting the number of voxels
-    c.diffLength = c.x1 / 2.0
+    c.diffLength = c.x1 / 1
 #radius of the cylinder at both the faces, in here its kept same at both the faces
     c.r0 = c.r1 = 1e-3
     print( 'Volume of cylinder %s is %g' % (c.name,  c.volume) )
@@ -68,7 +68,7 @@ def make_model( ):
     # A + 2B <-- kf, kb --> C + D 
 #defining the reaction in the comapartment(a)
     r1 = moose.Reac( '/model/a/r1' )
-#connect is used here for connecting the species the different species in a reaction, like tis reaction consisits if 'A' as the substrate and 'C ' as the product, see the syntax, it also describes which reaction they are part of!! 
+#connect is used here for connecting the species the different species in a reaction, like tis reaction consisits of 'A' as the substrate and 'C ' as the product, see the syntax, it also describes which reaction they are part of!! 
     moose.connect( r1, 'sub', pools['A'], 'reac' )
     # moose.connect( r1, 'sub', pools['B'], 'reac' )
     # moose.connect( r1, 'sub', pools['B'], 'reac' )
@@ -92,4 +92,6 @@ def main( ):
 
 #running the function!
 if __name__ == '__main__':
+    start = time.clock()
     main()
+    print(time.clock()-start)

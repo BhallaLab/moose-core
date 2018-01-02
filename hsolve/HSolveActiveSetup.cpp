@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+
 #include "HSolveActive.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -18,6 +19,11 @@ void HSolveActive::setup( Id seed, double dt )
     //~ cout << ".. HA.setup()" << endl;
 
     this->HSolvePassive::setup( seed, dt );
+
+#ifdef USE_CUDA
+    // CPU related setup for CUDA
+    allocate_cpu_memory();
+#endif
 
     readHHChannels();
     readGates();
@@ -32,7 +38,6 @@ void HSolveActive::setup( Id seed, double dt )
     allocate_hsolve_memory_cuda();
     copy_table_data_cuda();
     copy_hsolve_information_cuda();
-
 #endif
 
 
@@ -96,23 +101,32 @@ void HSolveActive::reinitChannels()
     vector< LookupColumn >::iterator icolumn = column_.begin();
     vector< LookupRow >::iterator icarowcompt;
     vector< LookupRow* >::iterator icarow = caRow_.begin();
-
+    vector< double>::iterator iextca = externalCalcium_.begin();
+    
     LookupRow vRow;
+    LookupRow dRow;
     double C1, C2;
     for ( iv = V_.begin(); iv != V_.end(); ++iv )
     {
+      
         vTable_.row( *iv, vRow );
         icarowcompt = caRowCompt_.begin();
+	
         caBoundary = ica + *icacount;
         for ( ; ica < caBoundary; ++ica )
         {
             caTable_.row( *ica, *icarowcompt );
+	    
             ++icarowcompt;
+	    
         }
 
         chanBoundary = ichan + *ichannelcount;
         for ( ; ichan < chanBoundary; ++ichan )
         {
+	  
+	  caTable_.row( *iextca, dRow );
+
             if ( ichan->Xpower_ > 0.0 )
             {
                 vTable_.lookup( *icolumn, vRow, C1, C2 );
@@ -134,10 +148,13 @@ void HSolveActive::reinitChannels()
             if ( ichan->Zpower_ > 0.0 )
             {
                 LookupRow* caRow = *icarow;
+	       
                 if ( caRow )
                 {
                     caTable_.lookup( *icolumn, *caRow, C1, C2 );
                 }
+		else if (*iextca>0)
+		  caTable_.lookup( *icolumn, dRow, C1, C2 );
                 else
                 {
                     vTable_.lookup( *icolumn, vRow, C1, C2 );
@@ -147,6 +164,8 @@ void HSolveActive::reinitChannels()
 
                 ++icolumn, ++istate, ++icarow;
             }
+
+	    ++iextca;
         }
 
         ++ichannelcount, ++icacount;
@@ -201,11 +220,12 @@ void HSolveActive::readHHChannels()
              * Map channel index to state index. This is useful in the
              * interface to find gate values.
              */
-            chan2state_.push_back( state_.size() );        
+            chan2state_.push_back( state_.size() );
+
             if ( Xpower > 0.0 )
                 state_.push_back( X );
             if ( Ypower > 0.0 )
-                state_.push_back( Y );  
+                state_.push_back( Y );
             if ( Zpower > 0.0 )
                 state_.push_back( Z );
 
@@ -214,7 +234,7 @@ void HSolveActive::readHHChannels()
              * interface to generate channel Ik values (since we then need the
              * compartment Vm).
              */
-            chan2compt_.push_back( icompt - compartmentId_.begin() );            
+            chan2compt_.push_back( icompt - compartmentId_.begin() );
         }
     }
 
@@ -248,16 +268,18 @@ void HSolveActive::readCalcium()
     vector< Id > caConcId;
     vector< int > caTargetIndex;
     map< Id, int > caConcIndex;
-    int nTarget, nDepend;
+    int nTarget, nDepend = 0;
     vector< Id >::iterator iconc;
 
     caCount_.resize( nCompt_ );
     unsigned int ichan = 0;
+    
     for ( unsigned int ic = 0; ic < nCompt_; ++ic )
     {
+
         unsigned int chanBoundary = ichan + channelCount_[ ic ];
         unsigned int nCa = caConc_.size();
-
+	
         for ( ; ichan < chanBoundary; ++ichan )
         {
             caConcId.clear();
@@ -268,16 +290,20 @@ void HSolveActive::readCalcium()
                 caTargetIndex.push_back( -1 );
 
             nDepend = HSolveUtils::caDepend( channelId_[ ichan ], caConcId );
-            if ( nDepend == 0 )
+	    
+	    if ( nDepend == 0)
                 // Channel does not depend on calcium.
-                caDependIndex_.push_back( -1 );
+	      caDependIndex_.push_back( -1 );
 
+
+	    externalCalcium_.push_back(0);
+ 	    
             for ( iconc = caConcId.begin(); iconc != caConcId.end(); ++iconc )
                 if ( caConcIndex.find( *iconc ) == caConcIndex.end() )
                 {
                     caConcIndex[ *iconc ] = caCount_[ ic ];
                     ++caCount_[ ic ];
-
+		    
                     Ca = Field< double >::get( *iconc, "Ca" );
                     CaBasal = Field< double >::get( *iconc, "CaBasal" );
                     tau = Field< double >::get( *iconc, "tau" );
@@ -300,9 +326,13 @@ void HSolveActive::readCalcium()
                 caTargetIndex.push_back( caConcIndex[ caConcId.front() ] + nCa );
             if ( nDepend != 0 )
                 caDependIndex_.push_back( caConcIndex[ caConcId.back() ] );
+	
+	   
         }
     }
-
+  
+  
+   
     caTarget_.resize( channel_.size() );
     ca_.resize( caConc_.size() );
     caActivation_.resize( caConc_.size() );
@@ -445,8 +475,8 @@ void HSolveActive::createLookupTables()
 
             // *ia = ( 2.0 - dt_ * b ) / ( 2.0 + dt_ * b );
             // *ib = dt_ * a / ( 1.0 + dt_ * b / 2.0 );
-            // *ia = dt_ * a;
-            // *ib = 1.0 + dt_ * b / 2.0;
+            // *ia = dt_ * a; 
+           // *ib = 1.0 + dt_ * b / 2.0;
             ++ia, ++ib;
         }
 
@@ -462,6 +492,7 @@ void HSolveActive::createLookupTables()
     //~ for ( int igrid = 0; igrid <= vDiv_; ++igrid )
     //~ grid[ igrid ] = vMin_ + igrid * dv;
     //~ }
+  
 
     for ( unsigned int ig = 0; ig < vGate.size(); ++ig )
     {
@@ -494,7 +525,7 @@ void HSolveActive::createLookupTables()
     for ( unsigned int ig = 0; ig < gateId_.size(); ++ig )
     {
         unsigned int species = gateSpecies[ gateId_[ ig ] ];
-
+	
         LookupColumn column;
         if ( gCaDepend_[ ig ] )
             caTable_.column( species, column );
@@ -507,23 +538,27 @@ void HSolveActive::createLookupTables()
     ///////////////////!!!!!!!!!!
     unsigned int maxN = *( max_element( caCount_.begin(), caCount_.end() ) );
     caRowCompt_.resize( maxN );
+    
     for ( unsigned int ichan = 0; ichan < channel_.size(); ++ichan )
     {
         if ( channel_[ ichan ].Zpower_ > 0.0 )
         {
             int index = caDependIndex_[ ichan ];
+	   
             if ( index == -1 )
                 caRow_.push_back( 0 );
             else
                 caRow_.push_back( &caRowCompt_[ index ] );
         }
     }
+
+   
 }
 
 /**
  * Reads in SynChans and SpikeGens.
- *
- * Unlike Compartments, HHChannels, etc., neither of these are zombified.
+ * 
+* Unlike Compartments, HHChannels, etc., neither of these are zombified.
  * In other words, their fields are not managed by HSolve, and their "process"
  * functions are invoked to do their calculations. For SynChans, the process
  * calls are made by their respective clocks, and hence the process message is
@@ -642,6 +677,30 @@ void HSolveActive::manageOutgoingMessages()
         if ( nTargets )
             outCa_.push_back( ica );
     }
+
+    filter.clear();
+    filter.push_back( "CaConc" );
+   
+    for ( unsigned int ik = 0; ik < channelId_.size(); ++ik )
+    {
+        targets.clear();
+
+        int nTargets = HSolveUtils::targets(
+                           channelId_[ ik ],
+                           "IkOut",
+                           targets,
+                           filter,
+                           false    // include = false. That is, use filter to exclude.
+                       );
+ 
+        if ( nTargets )
+            outIk_.push_back( ik );
+
+	
+    }
+    
+    
+
 }
 
 void HSolveActive::cleanup()

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ## Description: class NetworkML for loading NetworkML from file or xml element into MOOSE
 ## Version 1.0 by Aditya Gilra, NCBS, Bangalore, India, 2011 for serial MOOSE
 ## Version 1.5 by Niraj Dudani, NCBS, Bangalore, India, 2012, ported to parallel MOOSE
@@ -42,7 +43,7 @@ class NetworkML():
         self.model_dir = nml_params['model_dir']
 
     def readNetworkMLFromFile(self,filename,cellSegmentDict,params={}):
-        """ 
+        """
         specify tweak params = {'excludePopulations':[popname1,...], 'excludeProjections':[projname1,...], \
             'onlyInclude':{'includePopulation':(popname,[id1,...]),'includeProjections':(projname1,...)} }
         If excludePopulations is present, then excludeProjections must also be present:
@@ -88,7 +89,7 @@ class NetworkML():
         self.params = params
 
         self.populationDict = {}
-        [ self.createPopulation(pop) for pop in 
+        [ self.createPopulation(pop) for pop in
                 self.network.findall(".//{"+nml_ns+"}population")
                 ]
 
@@ -96,7 +97,7 @@ class NetworkML():
         projections = self.network.find(".//{"+nml_ns+"}projections")
         if projections:
             # see pg 219 (sec 13.2) of Book of Genesis
-            if projections.attrib["units"] == 'Physiological Units': 
+            if projections.attrib["units"] == 'Physiological Units':
                 Efactor = 1e-3 # V from mV
                 Tfactor = 1e-3 # s from ms
             else:
@@ -109,12 +110,12 @@ class NetworkML():
             _logger.info("Creating input under /elec ")
             units = inputs.attrib['units']
             # see pg 219 (sec 13.2) of Book of Genesis
-            if units == 'Physiological Units': 
-                Vfactor, Tfactor, Ifactor = 1e-3, 1e-3, 1e-6 
+            if units == 'Physiological Units':
+                Vfactor, Tfactor, Ifactor = 1e-3, 1e-3, 1e-6
             else:
                 Vfactor, Tfactor, Ifactor = 1.0, 1.0, 1.0
             [ self.createInput(inputelem, Vfactor, Tfactor, Ifactor) for
-                    inputelem in self.network.findall(".//{"+nml_ns+"}input") 
+                    inputelem in self.network.findall(".//{"+nml_ns+"}input")
                     ]
 
         return (self.populationDict,self.projectionDict)
@@ -156,11 +157,11 @@ class NetworkML():
                 cell_name = self.populationDict[population][0]
                 segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
                     self.cellSegmentDict[cell_name][0][segment_id][0]
-                compartment = moose.Compartment(segment_path)
+                compartment = moose.element(segment_path)
                 _logger.debug("Adding pulse at {0}: {1}".format(
                     segment_path, pulsegen.firstLevel )
                     )
-                    
+
                 _logger.debug("Connecting {0}:output to {1}:injectMst".format(
                     iclamp, compartment)
                     )
@@ -218,7 +219,7 @@ class NetworkML():
             y = float(location.attrib['y'])*self.length_factor
             z = float(location.attrib['z'])*self.length_factor
             self.translate_rotate(cell,x,y,z,zrotation)
-            
+
     def translate_rotate(self,obj,x,y,z,ztheta): # recursively translate all compartments under obj
         for childId in obj.children:
             try:
@@ -226,7 +227,7 @@ class NetworkML():
                 if childobj.className in ['Compartment','SymCompartment']:
                     ## SymCompartment inherits from Compartment,
                     ## so below wrapping by Compartment() is fine for both Compartment and SymCompartment
-                    child = moose.Compartment(childId)
+                    child = moose.element(childId)
                     x0 = child.x0
                     y0 = child.y0
                     x0new = x0*cos(ztheta)-y0*sin(ztheta)
@@ -316,7 +317,7 @@ class NetworkML():
                                     weight_override, threshold, delay_override)
 
     def connect(self, syn_name, pre_path, post_path, weight, threshold, delay):
-        postcomp = moose.Compartment(post_path)
+        postcomp = moose.element(post_path)
         ## We usually try to reuse an existing SynChan & SynHandler -
         ## event based SynHandlers have an array of weights and delays and can represent multiple synapses,
         ## so a new element of the weights and delays array is created
@@ -349,7 +350,7 @@ class NetworkML():
         if gradedchild is not None and gradedchild.value=='True': # graded synapse
             interpol = moose.element(syn.path+"/graded_table")
             #### always connect source to input - else 'cannot create message' error.
-            precomp = moose.Compartment(pre_path)
+            precomp = moose.element(pre_path)
             moose.connect(precomp,"VmOut",interpol,"input")
             try:
                 tau_table = moose.element(syn.path+'/tau_table')
@@ -394,7 +395,7 @@ class NetworkML():
                 ## wrap Synapse element by moose.Synapse(synhandler.path+'/synapse') or synhandler.synapse
                 ## Synpase is an array element, first add to it, to addSpike-s, get/set weights, etc.
                 synhandler.numSynapses += 1
-                ## see Demos/snippets/synapse.py for an example of 
+                ## see Demos/snippets/synapse.py for an example of
                 ## how to connect multiple SpikeGens to the same SynChan
                 m = moose.connect(spikegen, 'spikeOut',
                                     synhandler.synapse[-1], 'addSpike', 'Single')

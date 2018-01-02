@@ -11,14 +11,14 @@
 #define _POOL_H
 #include "PoolBase.h"
 /**
- * The Pool class is a molecular pool. This is a set of molecules of a 
+ * The Pool class is a molecular pool. This is a set of molecules of a
  * given species, in a uniform chemical context. Note that the same
  * species might be present in other compartments, or be handled by
  * other solvers.
  */
 class Pool: public PoolBase
 {
-	public: 
+	public:
 		Pool();
 		~Pool();
 
@@ -57,11 +57,11 @@ class Pool: public PoolBase
 		/**
 		 * Functions to examine and change class between Pool and BufPool.
 		 */
-		void vSetIsBuffered( const Eref& e, bool v );
-		bool vGetIsBuffered( const Eref& e) const;
+		void setIsBuffered( const Eref& e, bool v );
+		bool getIsBuffered( const Eref& e ) const;
 
 		//////////////////////////////////////////////////////////////////
-		// Dest funcs. These too override virtual funcs in the Pool base 
+		// Dest funcs. These too override virtual funcs in the Pool base
 		// class.
 		//////////////////////////////////////////////////////////////////
 
@@ -69,13 +69,13 @@ class Pool: public PoolBase
 		void vProcess( const Eref& e, ProcPtr p );
 		void vReinit( const Eref& e, ProcPtr p );
 		void vReac( double A, double B );
-		void vIncrement( double val );
-		void vDecrement( double val );
-        void vnIn( double val );
 
 		//////////////////////////////////////////////////////////////////
 		// Novel Dest funcs not present in Pool base class.
 		//////////////////////////////////////////////////////////////////
+		void increment( double val );
+		void decrement( double val );
+                void nIn( double val );
 
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
@@ -91,7 +91,7 @@ class Pool: public PoolBase
 		 * System wide identifier for all mol pools that are chemically
 		 * the same species.
 		 */
-		unsigned int species_; 
+		unsigned int species_;
 };
 
 #endif	// _POOL_H

@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 import moose
 import numpy as np
 import matplotlib.pyplot as plt
 import chan_proto
-
+import param_chan
 from params import *
 
 
@@ -47,13 +48,13 @@ def add_difbuffer_to_dishell(comp, i, j, shell_thickness, shell_radius):
     return buf
 
 
-def add_difshells_and_buffers(comp):
+def add_difshells_and_buffers(comp,difshell_no,difbuff_no):
 
     if difshell_no < 1:
         return [], []
 
     difshell = []
-    shell_thickness = dend.diameter / difshell_no / 2.
+    shell_thickness = comp.diameter / difshell_no / 2.
     difbuffer = []
     for i in range(difshell_no):
         shell_radius = comp.diameter / 2 - i * shell_thickness
@@ -84,7 +85,7 @@ def add_difshells_and_buffers(comp):
     return difshell, difbuffer
 
 
-def addOneChan(chanpath, gbar, comp):
+def addOneChan(chanpath, gbar,comp):
 
     SA = np.pi * comp.length * comp.diameter
     proto = moose.element('/library/' + chanpath)
@@ -97,7 +98,7 @@ def addOneChan(chanpath, gbar, comp):
 
 
 if __name__ == '__main__':
-
+    lib = moose.Neutral('/library')
     for tick in range(0, 7):
         moose.setClock(tick, dt)
     moose.setClock(8, 0.005)  # set output clock
@@ -115,23 +116,26 @@ if __name__ == '__main__':
     dend.initVm = Vm_0
     dend.diameter = dend_diameter
     dend.length = dend_length
+
     pulse.delay[0] = 8.
     pulse.width[0] = 500e-3
     pulse.level[0] = inject
     pulse.delay[1] = 1e9
 
+    chan = chan_proto.chan_proto('/library/CaL12',param_chan.Cal)
+
     m = moose.connect(pulse, 'output', dend, 'injectMsg')
 
     moose.connect(vmtab, 'requestOut', dend, 'getVm')
 
-    chan_proto.chanlib()
-    chan = addOneChan('CaT', gbar, dend)
+
+    chan = addOneChan('CaL12', gbar, dend)
 
     moose.connect(gktab, 'requestOut', chan, 'getGk')
     moose.connect(iktab, 'requestOut', chan, 'getIk')
     diftab = []
     buftab = []
-    difs, difb = add_difshells_and_buffers(dend)
+    difs, difb = add_difshells_and_buffers(dend,difshell_no,difbuff_no)
     if pumps:
         pump = moose.MMPump('/model/dend/pump')
         pump.Vmax = kcat

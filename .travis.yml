@@ -1,17 +1,15 @@
 language: cpp
 dist: trusty
-sudo: required 
-compiler:
-    - gcc
-    - clang
+sudo: required
+group: edge
+
 os:
     - linux
     - osx
+
 notifications:
     email:
         recipients:
-            - bhalla@ncbs.res.in
-            - dharmatv@instem.res.in
             - dilawar.s.rajput@gmail.com
             - dharmatv@instem.res.in
         on_success: change

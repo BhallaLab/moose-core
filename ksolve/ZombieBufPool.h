@@ -12,7 +12,7 @@
 
 class ZombieBufPool: public ZombiePool
 {
-	public: 
+	public:
 		ZombieBufPool();
 		~ZombieBufPool();
 
@@ -21,7 +21,6 @@ class ZombieBufPool: public ZombiePool
 		void vSetNinit( const Eref& e, double v );
 		void vSetConc( const Eref& e, double v );
 		void vSetConcInit( const Eref& e, double v );
-		bool vGetIsBuffered( const Eref& e ) const;
 
 		static const Cinfo* initCinfo();
 	private:

@@ -13,7 +13,7 @@
 
 /**
  * This set of templates defines converters. The conversions are from
- * string to object, object to string, and 
+ * string to object, object to string, and
  * binary buffer to object, object to binary buffer.
  * Many classes convert through a single template. Strings and other things
  * with additional data need special converters.
@@ -162,7 +162,7 @@ template<> class Conv< string >
 
 /**
  * The template specialization of Conv< unsigned int > sets up alignment on
- * word boundaries by storing the data as a double. 
+ * word boundaries by storing the data as a double.
  */
 template<> class Conv< double >
 {
@@ -175,14 +175,18 @@ template<> class Conv< double >
             return 1;
         }
 
+#if USE_CUDA
+        static double buf2val( double** buf ) {
+#else
         static const double buf2val( double** buf ) {
+#endif
             double ret = **buf;
             (*buf)++;
             return ret;
         }
         static void val2buf( double val, double** buf ) {
             **buf = val;
-            (*buf)++; 
+            (*buf)++;
         }
 
         static void str2val( double &val, const string& s ) {
@@ -203,7 +207,7 @@ template<> class Conv< double >
 
 /**
  * The template specialization of Conv< unsigned int > sets up alignment on
- * word boundaries by storing the data as a double. 
+ * word boundaries by storing the data as a double.
  */
 template<> class Conv< float >
 {
@@ -216,14 +220,19 @@ template<> class Conv< float >
             return 1;
         }
 
-        static const float buf2val( double** buf ) {
+#if USE_CUDA
+        static float buf2val( double** buf ) 
+#else
+        static const float buf2val( double** buf ) 
+#endif
+        {
             float ret = **buf;
             (*buf)++;
             return ret;
         }
         static void val2buf( float val, double** buf ) {
             **buf = val;
-            (*buf)++; 
+            (*buf)++;
         }
 
         static void str2val( float& val, const string& s ) {
@@ -244,7 +253,7 @@ template<> class Conv< float >
 
 /**
  * The template specialization of Conv< unsigned int > sets up alignment on
- * word boundaries by storing the data as a double. 
+ * word boundaries by storing the data as a double.
  */
 template<> class Conv< unsigned int >
 {
@@ -257,14 +266,18 @@ template<> class Conv< unsigned int >
             return 1;
         }
 
+#if USE_CUDA
+        static unsigned int buf2val( double** buf ) {
+#else
         static const unsigned int buf2val( double** buf ) {
+#endif
             unsigned int ret = (unsigned int)**buf;
             (*buf)++;
             return ret;
         }
         static void val2buf( unsigned int val, double** buf ) {
             **buf = val;
-            (*buf)++; 
+            (*buf)++;
         }
 
         static void str2val( unsigned int& val, const string& s ) {
@@ -285,7 +298,7 @@ template<> class Conv< unsigned int >
 
 /**
  * The template specialization of Conv< int > sets up alignment on
- * word boundaries by storing the data as a double. 
+ * word boundaries by storing the data as a double.
  */
 template<> class Conv< int >
 {
@@ -298,14 +311,18 @@ template<> class Conv< int >
             return 1;
         }
 
+#if USE_CUDA
+        static int buf2val( double** buf ) {
+#else
         static const int buf2val( double** buf ) {
+#endif
             int ret = (int)**buf;
             (*buf)++;
             return ret;
         }
         static void val2buf( int val, double** buf ) {
             **buf = val;
-            (*buf)++; 
+            (*buf)++;
         }
 
         static void str2val( int& val, const string& s ) {
@@ -335,14 +352,18 @@ template<> class Conv< unsigned short >
             return 1;
         }
 
+#if USE_CUDA
+        static unsigned short buf2val( double** buf ) {
+#else
         static const unsigned short buf2val( double** buf ) {
+#endif
             unsigned short ret = (unsigned int)**buf;
             (*buf)++;
             return ret;
         }
         static void val2buf( unsigned short val, double** buf ) {
             **buf = (double)val;
-            (*buf)++; 
+            (*buf)++;
         }
 
         static void str2val( unsigned short& val, const string& s ) {
@@ -372,14 +393,18 @@ template<> class Conv< short >
             return 1;
         }
 
+#if USE_CUDA
+        static short buf2val( double** buf ) {
+#else
         static const short buf2val( double** buf ) {
+#endif
             short ret = (short)**buf;
             (*buf)++;
             return ret;
         }
         static void val2buf( short val, double** buf ) {
             **buf = val;
-            (*buf)++; 
+            (*buf)++;
         }
 
         static void str2val( short& val, const string& s ) {
@@ -409,14 +434,18 @@ template<> class Conv< bool >
             return 1;
         }
 
+#if USE_CUDA
+        static bool buf2val( double** buf ) {
+#else
         static const bool buf2val( double** buf ) {
+#endif
             bool ret = (**buf > 0.5);
             (*buf)++;
             return ret;
         }
         static void val2buf( bool val, double** buf ) {
             **buf = val;
-            (*buf)++; 
+            (*buf)++;
         }
 
         static void str2val( bool& val, const string& s ) {
@@ -441,7 +470,7 @@ template<> class Conv< bool >
 
 /**
  * The template specialization of Conv< Id > sets up alignment on
- * word boundaries by storing the Id as a double. It also deals with 
+ * word boundaries by storing the Id as a double. It also deals with
  * the string conversion issues.
  */
 
@@ -456,14 +485,18 @@ template<> class Conv< Id >
             return 1;
         }
 
+#if USE_CUDA
+        static Id buf2val( double** buf ) {
+#else
         static const Id buf2val( double** buf ) {
+#endif
             Id ret( (unsigned int)**buf );
             (*buf)++;
             return ret;
         }
         static void val2buf( Id id, double** buf ) {
             **buf = id.value();
-            (*buf)++; 
+            (*buf)++;
         }
 
         static void str2val( Id& val, const string& s ) {
@@ -510,6 +543,7 @@ template< class T > class Conv< vector< vector< T > > >
             }
             return ret;
         }
+
 
         static const vector< vector< T > > buf2val( double** buf )
         {
@@ -564,7 +598,7 @@ template< class T > class Conv< vector< vector< T > > >
 template< class T > class Conv< vector< T > >
 {
     public:
-        /** 
+        /**
          * Size of returned array in doubles.
          */
         static unsigned int size( const vector< T >& val )

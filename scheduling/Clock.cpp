@@ -51,6 +51,11 @@
 #include "header.h"
 #include "Clock.h"
 #include "../utility/numutil.h"
+#include "../utility/print_function.hpp"
+
+#if PARALLELIZE_CLOCK_USING_CPP11_ASYNC
+#include <future>
+#endif
 
 // Declaration of some static variables.
 const unsigned int Clock::numTicks = 32;
@@ -327,7 +332,7 @@ const Cinfo* Clock::initCinfo()
         "The clock also starts up with some default timesteps for each "
         "of these ticks, and this can be overridden using the shell "
         "command setClock, or by directly assigning tickStep values on the "
-        "clock object. \n"
+        "clock object."
         "Which objects use which tick? As a rule of thumb, try this: \n"
         "Electrical/compartmental model calculations: Ticks 0-7 \n"
         "Tables and output objects for electrical output: Tick 8 \n"
@@ -342,57 +347,57 @@ const Cinfo* Clock::initCinfo()
         "clock ticks for the tables/fileIO objects handling output at "
         "different time-resolutions. Typically one uses tick 8 and 18.\n"
         "Here are the detailed mappings of class to tick.\n"
-        "	Class				Tick		dt \n"
-        "	DiffAmp				0		50e-6\n"
-        "	Interpol			0		50e-6\n"
-        "	PIDController			0		50e-6\n"
-        "	PulseGen			0		50e-6\n"
-        "	StimulusTable			0		50e-6\n"
-        "	testSched			0		50e-6\n"
-        "	VClamp				0		50e-6\n"
-        "	SynHandlerBase			1		50e-6\n"
-        "	SimpleSynHandler		1		50e-6\n"
-        "   STDPSynHandler		1		50e-6\n"
-        "   GraupnerBrunel2012CaPlasticitySynHandler    1		50e-6\n"
-        "   SeqSynHandler		1		50e-6\n"
+        "   Class              Tick       dt \n"
+        "   DiffAmp             0       50e-6\n"
+        "   Interpol            0       50e-6\n"
+        "   PIDController       0       50e-6\n"
+        "   PulseGen            0       50e-6\n"
+        "   StimulusTable       0       50e-6\n"
+        "   testSched           0       50e-6\n"
+        "   VClamp              0       50e-6\n"
+        "   SynHandlerBase      1       50e-6\n"
+        "   SimpleSynHandler    1       50e-6\n"
+        "   STDPSynHandler      1       50e-6\n"
+        "   GraupnerBrunel2012CaPlasticitySynHandler    1        50e-6\n"
+        "   SeqSynHandler       1       50e-6\n"
         "	CaConc				1		50e-6\n"
         "	CaConcBase			1		50e-6\n"
         "	DifShell			1		50e-6\n"
-	"	DifShellBase			1		50e-6\n"
-	"       MMPump                          1               50e-6\n"
-	"	DifBuffer			1		50e-6\n"
-	"	DifBufferBase			1		50e-6\n"
+	    "	DifShellBase		1		50e-6\n"
+	    "   MMPump              1       50e-6\n"
+	    "	DifBuffer			1		50e-6\n"
+	    "	DifBufferBase		1		50e-6\n"
         "	MgBlock				1		50e-6\n"
         "	Nernst				1		50e-6\n"
         "	RandSpike			1		50e-6\n"
         "	ChanBase			2		50e-6\n"
         "	IntFire				2		50e-6\n"
         "	IntFireBase			2		50e-6\n"
-        "	LIF				2		50e-6\n"
-        "	QIF				2		50e-6\n"
+        "	LIF					2		50e-6\n"
+        "	QIF					2		50e-6\n"
         "	ExIF				2		50e-6\n"
         "	AdExIF				2		50e-6\n"
-        "	AdThreshIF				2		50e-6\n"
+        "	AdThreshIF			2		50e-6\n"
         "	IzhIF				2		50e-6\n"
-        "	IzhikevichNrn			2		50e-6\n"
+        "	IzhikevichNrn		2		50e-6\n"
         "	SynChan				2		50e-6\n"
-        "	NMDAChan				2		50e-6\n"
+        "	NMDAChan			2		50e-6\n"
         "	GapJunction			2		50e-6\n"
         "	HHChannel			2		50e-6\n"
         "	HHChannel2D			2		50e-6\n"
         "	Leakage				2		50e-6\n"
-        "	MarkovChannel			2		50e-6\n"
-        "	MarkovGslSolver			2		50e-6\n"
-        "	MarkovRateTable			2		50e-6\n"
-        "	MarkovSolver			2		50e-6\n"
-        "	MarkovSolverBase		2		50e-6\n"
-        "	RC				2		50e-6\n"
-        "	Compartment (init)		3		50e-6\n"
+        "	MarkovChannel		2		50e-6\n"
+        "	MarkovGslSolver		2		50e-6\n"
+        "	MarkovRateTable		2		50e-6\n"
+        "	MarkovSolver		2		50e-6\n"
+        "	MarkovSolverBase	2		50e-6\n"
+        "	RC					2		50e-6\n"
+        "	Compartment (init)	3		50e-6\n"
         "	CompartmentBase (init )		3		50e-6\n"
         "	SymCompartment	(init)		3		50e-6\n"
-        "	Compartment 			4		50e-6\n"
-        "	CompartmentBase			4		50e-6\n"
-        "	SymCompartment			4		50e-6\n"
+        "	Compartment 		4		50e-6\n"
+        "	CompartmentBase		4		50e-6\n"
+        "	SymCompartment		4		50e-6\n"
         "	SpikeGen			5		50e-6\n"
         "	HSolve				6		50e-6\n"
         "	SpikeStats			7		50e-6\n"
@@ -408,23 +413,23 @@ const Cinfo* Clock::initCinfo()
         "	Pool				13		0.1\n"
         "	PoolBase			13		0.1\n"
         "	CplxEnzBase			14		0.1\n"
-        "	Enz				14		0.1\n"
+        "	Enz					14		0.1\n"
         "	EnzBase				14		0.1\n"
         "	MMenz				14		0.1\n"
         "	Reac				14		0.1\n"
         "	ReacBase			14		0.1\n"
-        "	Gsolve	(init)			15		0.1\n"
-        "	Ksolve	(init)			15		0.1\n"
+        "	Gsolve	(init)		15		0.1\n"
+        "	Ksolve	(init)		15		0.1\n"
         "	Gsolve				16		0.1\n"
         "	Ksolve				16		0.1\n"
         "	Stats				17		0.1\n"
         "	Table2				18		1\n"
         "	Streamer			19		10\n"
 
-        "	HDF5DataWriter			30		1\n"
-        "	HDF5WriterBase			30		1\n"
+        "	HDF5DataWriter		30		1\n"
+        "	HDF5WriterBase		30		1\n"
         "	NSDFWriter			30		1\n"
-        "       PyRun                           30              1\n"
+        "   PyRun           	30      1\n"
         "	PostMaster			31		0.01\n"
         "	\n"
         "	Note that the other classes are not scheduled at all.",
@@ -698,7 +703,9 @@ void Clock::handleStart( const Eref& e, double runtime, bool notify )
     if ( stride_ == 0 || stride_ == ~0U )
         stride_ = 1;
     unsigned long n = round( runtime / ( stride_ * dt_ ) );
+
     handleStep( e, n );
+
 }
 
 void Clock::handleStep( const Eref& e, unsigned long numSteps )
@@ -725,6 +732,40 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
         // Curr time is end of current step.
         unsigned long endStep = currentStep_ + stride_;
         currentTime_ = info_.currTime = dt_ * endStep;
+
+#if PARALLELIZE_CLOCK_USING_CPP11_ASYNC
+
+        // NOTE: It does not produce very promising results. The challenge here
+        // is doing load-balancing.
+        // TODO: To start with, we can put one solver on one thread and everything
+        // else onto 1 thread. Each Hsove, Ksolve, and Gsolve can take its own
+        // thread and rest are on different threads.
+
+        unsigned int nTasks = activeTicks_.size( );
+        unsigned int numThreads_ = 3;
+        unsigned int blockSize = 1 + (nTasks / numThreads_);
+
+        for( unsigned int i = 0; i < numThreads_; ++i  )
+        {
+            std::async( std::launch::async
+                , [this,blockSize,i,nTasks,endStep,e]
+                {
+                    unsigned int mapI = i * blockSize;
+                    // Get the block we want to run in paralle.
+                    for( unsigned int ii = i * blockSize; ii < min((i+1) * blockSize, nTasks); ii++ )
+                    {
+                        unsigned int j = activeTicks_[ ii ];
+                        if( endStep % j == 0  )
+                        {
+                             info_.dt = j * dt_;
+                             processVec( )[ activeTicksMap_[mapI] ]->send( e, &info_ );
+                        }
+                        mapI++;
+                    }
+                }
+            );
+        }
+#else
         vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
         for ( vector< unsigned int>::iterator j =
                     activeTicks_.begin(); j != activeTicks_.end(); ++j )
@@ -736,6 +777,7 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
             }
             ++k;
         }
+#endif
 
         // When 10% of simulation is over, notify user when notify_ is set to
         // true.
@@ -746,13 +788,14 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
                 time( &rawtime );
                 timeinfo = localtime( &rawtime );
                 strftime(now, 80, "%c", timeinfo);
-                cout << "@ " << now << ": " << 100 * currentTime_ / runTime_ 
+                cout << "@ " << now << ": " << 100 * currentTime_ / runTime_
                     << "% of total " << runTime_ << " seconds is over." << endl;
             }
         }
+
+        if ( activeTicks_.size() == 0 )
+            currentTime_ = runTime_;
     }
-	if ( activeTicks_.size() == 0 )
-		currentTime_ = runTime_;
 
     info_.dt = dt_;
     isRunning_ = false;
@@ -999,5 +1042,3 @@ unsigned int Clock::lookupDefaultTick( const string& className )
     }
     return i->second;
 }
-
-

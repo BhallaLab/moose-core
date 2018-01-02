@@ -1,12 +1,12 @@
-#!/bin/bash - 
+#!/bin/bash -
 #===============================================================================
 #
 #          FILE: travis_prepare_linux.sh
-# 
-#         USAGE: ./travis_prepare_linux.sh 
-# 
+#
+#         USAGE: ./travis_prepare_linux.sh
+#
 #   DESCRIPTION:  Prepare linux build environment on travis.
-# 
+#
 #       OPTIONS: ---
 #  REQUIREMENTS: ---
 #          BUGS: ---
@@ -18,7 +18,7 @@
 #===============================================================================
 
 set -o nounset                              # Treat unset variables as an error
-set +e  # Let installation fail in some command 
+set +e  # Let installation fail in some command
 
 apt-get install -qq libxml2-dev libbz2-dev
 apt-get install -qq libhdf5-serial-dev
@@ -29,4 +29,3 @@ apt-get install -qq libboost-all-dev
 apt-get install -qq libgsl0-dev
 apt-get install -qq python-pip python3-pip
 apt-get install -qq libgraphviz-dev
-pip3 install numpy

@@ -19,7 +19,7 @@
 
 // Minimum allowed radius of segment, in microns
 // Believe it or not, some otherwise reasonable files do have smaller radii
-static const double MinRadius = 0.04; 
+static const double MinRadius = 0.04;
 
 ReadSwc::ReadSwc( const string& fname )
 {
@@ -33,7 +33,7 @@ ReadSwc::ReadSwc( const string& fname )
 	string temp;
 	int badSegs = 0;
 	while( getline( fin, temp ) ) {
-		if ( temp.length() == 0 ) 
+		if ( temp.length() == 0 )
 			continue;
 		string::size_type pos = temp.find_first_not_of( "\t " );
 		if ( pos == string::npos )
@@ -53,6 +53,7 @@ ReadSwc::ReadSwc( const string& fname )
 		cleanZeroLength();
 		parseBranches();
 	}
+
 	if ( verbose || !valid || (badSegs > 0) )
 		cout << "ReadSwc: " << fname << 
 			"	: " << (valid ? "OK" : "FAILED" )<<
@@ -87,10 +88,10 @@ bool ReadSwc::validate() const
 	}
 	bool valid = ( numStart == 1 && numOrphans == 0 && badRadius == 0 );
 	if ( !valid ) {
-		cout << "ReadSwc::validate() failed: \nNumSegs = " << 
-				segs_.size() << 
+		cout << "ReadSwc::validate() failed: \nNumSegs = " <<
+				segs_.size() <<
 				", numStart = " << numStart <<
-				", orphans = " << numOrphans << 
+				", orphans = " << numOrphans <<
 				", badIndex = " << badIndex <<
 				", badRadius = " << badRadius <<
 				", numBranches = " << branches_.size() <<
@@ -139,7 +140,7 @@ void ReadSwc::cleanZeroLength()
 	}
 }
 
-void ReadSwc::traverseBranch( const SwcSegment& s, 
+void ReadSwc::traverseBranch( const SwcSegment& s,
 		double& len, double& L, vector< int >& cable ) const
 {
 	const SwcSegment* prev = &s;
@@ -212,7 +213,7 @@ void ReadSwc::diagnostics() const
 		*/
 }
 
-static Id makeCompt( Id parent, 
+static Id makeCompt( Id parent,
 		const SwcSegment& seg, const SwcSegment& pa,
 		double RM, double RA, double CM,
 		unsigned int i, unsigned int j	)
@@ -257,7 +258,7 @@ static Id makeCompt( Id parent,
 	return compt;
 }
 
-bool ReadSwc::build( Id parent, 
+bool ReadSwc::build( Id parent,
 				double lambda, double RM, double RA, double CM )
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
@@ -275,7 +276,7 @@ bool ReadSwc::build( Id parent,
 				compt = makeCompt( parent, seg, pa, RM, RA, CM, i, j );
 				assert( compt != Id() );
 				assert( compts[ paIndex -1 ] != Id() );
-				shell->doAddMsg( "Single", 
+				shell->doAddMsg( "Single",
 					compts[paIndex-1], "axial", compt, "raxial" );
 			}
 			assert( compt != Id() );

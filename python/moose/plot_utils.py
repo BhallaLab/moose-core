@@ -1,11 +1,10 @@
-
-
+# -*- coding: utf-8 -*-
 """plot_utils.py: Some utility function for plotting data in moose.
 
 Last modified: Sun Jan 10, 2016  04:04PM
 
 """
-    
+
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2013, NCBS Bangalore"
 __credits__          = ["NCBS Bangalore", "Bhalla Lab"]
@@ -15,10 +14,11 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-import matplotlib.pyplot as plt
-from . import _moose as moose
-from . import print_utils as pu 
 import numpy as np
+import moose
+import print_utils as pu
+
+import matplotlib.pyplot as plt
 
 def plotAscii(yvec, xvec = None, file=None):
     """Plot two list-like object in terminal using gnuplot.
@@ -47,7 +47,7 @@ def plotInTerminal(yvec, xvec = None, file=None):
     g.stdin.flush()
 
 def xyToString( yvec, xvec, sepby = ' '):
-    """ Given two list-like objects, returns a text string. 
+    """ Given two list-like objects, returns a text string.
     """
     textLines = []
     for y, x in zip( yvec, xvec ):
@@ -57,7 +57,7 @@ def xyToString( yvec, xvec, sepby = ' '):
 
 def saveNumpyVec( yvec, xvec, file):
     """save the numpy vectors to a data-file
-    
+
     """
     if file is None:
         return
@@ -100,7 +100,7 @@ def reformatTable(table, kwargs):
     """ Given a table return x and y vectors with proper scaling """
     clock = moose.Clock('/clock')
     if type(table) == moose.Table:
-        vecY = table.vector 
+        vecY = table.vector
         vecX = np.arange(0, clock.currentTime, len(vecY))
     elif type(table) == tuple:
         vecX, vecY = table
@@ -110,10 +110,10 @@ def plotTable(table, **kwargs):
     """Plot a given table. It plots table.vector
 
     This function can scale the x-axis. By default, y-axis and x-axis scaling is
-    done by a factor of 1.  
+    done by a factor of 1.
 
     Pass 'xscale' and/or 'yscale' argument to function to modify scales.
-    
+
     """
     if not type(table) == moose.Table:
         msg = "Expected moose.Table, got {}".format( type(table) )
@@ -136,7 +136,7 @@ def plotTables(tables, outfile=None, **kwargs):
     for i, tname in enumerate(tables):
         if subplot:
             plt.subplot(len(tables), 1, i+1)
-        yvec = tables[tname].vector 
+        yvec = tables[tname].vector
         xvec = np.linspace(0, moose.Clock('/clock').currentTime, len(yvec))
         plt.plot(xvec, yvec, label=tname)
 
@@ -145,7 +145,7 @@ def plotTables(tables, outfile=None, **kwargs):
             plt.legend(loc='best', framealpha=0.4)
         except:
             plt.legend(loc = 'best')
-    
+
     plt.tight_layout()
     if outfile:
         pu.dump("PLOT", "Saving plots to file {}".format(outfile))
@@ -165,7 +165,7 @@ def plotVector(vec, xvec = None, **options):
     :param vec: Given vector.
     :param **kwargs: Optional to pass to maplotlib.
     """
-    ax = options[ 'ax' ]
+
     assert type(vec) == np.ndarray, "Expected type %s" % type(vec)
     legend = options.get('legend', True)
 
@@ -176,33 +176,32 @@ def plotVector(vec, xvec = None, **options):
         xx = xvec[:]
 
     assert len(xx) == len(vec), "Expecting %s got %s" % (len(vec), len(xvec))
-    ax.plot(xx, vec, label=options.get('label', ''))
 
+    plt.plot(xx, vec, label=options.get('label', ''))
     if legend:
         # This may not be available on older version of matplotlib.
         try:
-            ax.legend(loc='best', framealpha=0.4)
+            plt.legend(loc='best', framealpha=0.4)
         except:
-            ax.legend(loc='best')
+            plt.legend(loc='best')
 
     if xvec is None:
-        ax.set_xlabel('Time (sec)')
+        plt.xlabel('Time (sec)')
     else:
-        ax.set_xlabel(options.get('xlabel', ''))
-    
-    ax.set_ylabel = options.get('ylabel', '')
-    ax.set_title(options.get('title', ''))
+        plt.xlabel(options.get('xlabel', ''))
+
+    plt.ylabel = options.get('ylabel', '')
+    plt.title(options.get('title', ''))
 
     if(options.get('legend', True)):
         try:
-            ax.legend(loc='best', framealpha=0.4, prop={'size' : 9})
+            plt.legend(loc='best', framealpha=0.4, prop={'size' : 9})
         except:
-            ax.legend(loc='best', prop={'size' : 9})
-    return ax
+            plt.legend(loc='best', prop={'size' : 9})
 
 
 def saveRecords(records, xvec = None, **kwargs):
-    """saveRecords 
+    """saveRecords
     Given a dictionary of data with (key, numpy array) pair, it saves them to a
     file 'outfile'
 
@@ -234,11 +233,7 @@ def saveRecords(records, xvec = None, **kwargs):
     pu.info("Done writing data to %s" % outfile)
 
 def plotRecords(records, xvec = None, **kwargs):
-    """plotRecords Plot given records in dictionary.
-
-    :param records:
-    :param xvec: If None, use moose.Clock to generate xvec.
-    :param **kwargs:
+    """Wrapper
     """
     dataDict = {}
     try:
@@ -259,12 +254,12 @@ def plotRecords(records, xvec = None, **kwargs):
         plotThis = False
         if not filters: plotThis = True
         for accept in filters:
-            if accept in k.lower(): 
+            if accept in k.lower():
                 plotThis = True
                 break
-                
+
         if plotThis:
-            if not subplot: 
+            if not subplot:
                 yvec = dataDict[k].vector
                 plotVector(yvec, xvec, label=k, **kwargs)
             else:
@@ -286,58 +281,15 @@ def plotRecords(records, xvec = None, **kwargs):
         plt.savefig("%s" % outfile, transparent=True)
     else:
         plt.show()
+    plt.close( )
 
-def plot_records( data_dict, xvec = None, **kwargs ):
-    """Renamed (deprecated)
-    """
-    return plot_tables( data_dict, xvec, **kwargs )
 
-def plot_tables(data_dict, xvec = None, **kwargs):
-    """plot_tables plots moose.Table stored in a dictionary.
+def plotTables( records, xvec = None, **kwargs ):
+    """Plot dictionary of moose.Table/moose.Table2
 
-    :param data_dict:
-    :param xvec: If None, use moose.Clock to generate xvec.
+    :param records: A dictionary of moose.Table. All tables must have same
+    length.
+    :param xvec: If None, moose.Clock is used to generate time-vector.
     :param **kwargs:
     """
-
-    legend = kwargs.get('legend', True)
-    outfile = kwargs.get('outfile', None)
-    subplot = kwargs.get('subplot', False)
-    filters = [ x.lower() for x in kwargs.get('filter', [])]
-
-    ax = kwargs.get( 'ax', None )
-    if ax is None:
-        plt.figure(figsize=(10, 1.5*len(data_dict)))
-        if not subplot:
-            ax = plt.subplot( 1, 1, 1 )
-            kwargs[ 'ax' ] = ax
-
-    for i, k in enumerate(data_dict):
-        pu.info("+ Plotting for %s" % k)
-        plotThis = False
-        if not filters: plotThis = True
-        for accept in filters:
-            if accept in k.lower(): 
-                plotThis = True
-                break
-                
-        if plotThis:
-            if not subplot: 
-                yvec = data_dict[k].vector
-                plotVector(yvec, xvec, label=k, **kwargs)
-            else:
-                ax = plt.subplot(len(data_dict), 1, i+1)
-                kwargs['ax'] = ax
-                yvec = data_dict[k].vector
-                plotVector(yvec, xvec, label=k, **kwargs)
-    if subplot:
-        try:
-            plt.tight_layout()
-        except: pass
-
-    if outfile:
-        pu.info("Writing plot to %s" % outfile)
-        plt.savefig("%s" % outfile, transparent=True)
-    else:
-        plt.show()
-
+    return plotRecords( records, xvec, **kwargs )
