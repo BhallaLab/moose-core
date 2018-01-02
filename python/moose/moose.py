@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import
 
 # Author: Subhasis Ray
@@ -6,7 +5,9 @@ from __future__ import print_function, division, absolute_import
 
 from contextlib import closing
 import warnings
+import platform
 import pydoc
+import os
 from io import StringIO
 
 import moose.SBML.readSBML as _readSBML
@@ -18,7 +19,7 @@ try:
     import moose.genesis.writeKkit as _writeKkit
 except ImportError as e:
     kkitImport_ = False
-    kkitImport_err_ = '%s' % e
+    kkitImport_err_ = '%s' % e 
 
 # Import function from C++ module into moose namespace.
 from moose._moose import *
