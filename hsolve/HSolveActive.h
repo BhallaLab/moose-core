@@ -26,6 +26,11 @@
 #include "HSolvePassive.h"
 #include "RateLookup.h"
 
+#ifdef USE_CUDA
+#include "CudaGlobal.h"
+#endif
+
+
 class HSolveActive: public HSolvePassive
 {
     typedef vector< CurrentStruct >::iterator currentVecIter;
@@ -132,7 +137,111 @@ protected:
 		*   Tells you which compartments have external calcium-dependent
 		*   channels so that you can send out Calcium concentrations in only
 		*   those compartments. */
-     vector< unsigned int >    outIk_;
+     vector< unsigned int >    outIk_;	
+#ifdef USE_CUDA    
+    int step_num;
+
+    // Optimized data
+	vector<int> h_vgate_indices;
+	vector<int> h_vgate_compIds;
+
+	vector<int> h_cagate_indices;
+	vector<int> h_cagate_capoolIds;
+
+	vector<int> h_catarget_channel_indices; // Stores the indices of channel which are ca targets in order
+	vector<int> h_catarget_capool_indices; // Store the index of calcium pool
+
+	// LookUp Tables
+	double* d_V_table;
+	double* d_Ca_table;
+
+	// Optimized version
+	double* d_state_; // state of gate values, such as (m,h,n...)
+	double* d_state_powers; // Powers of gate values, such as (3 for m^3)
+	int* d_state_rowPtr; // RowPtr on valid gates where rows = num_channels
+	int* d_state2chanId; // Channel Id to which this gate belongs to.
+	int* d_state2column; // Corresponding column in lookup table.
+	int* d_vgate_indices; // Set of gates that are voltage dependent
+	int* d_vgate_compIds; // Corresponding compartment id of voltage dependent gate
+
+	int* d_cagate_indices; // Set of gates that are calcium dependent.
+	int* d_cagate_capoolIds; // Corresponding calcium pool id of calcium dependent gate
+
+	// advanceCalcium related.
+	int* d_catarget_channel_indices;
+	double* d_caActivation_values; // Stores ca currents for that pool.
+
+	int* d_capool_rowPtr;
+	int* d_capool_colIndex;
+	double* d_capool_values;
+	double* d_capool_onex;
+
+
+	// Channel related
+	int* d_chan_instant;
+	double* d_chan_modulation;
+	double* d_chan_Gbar;
+	int* d_chan_to_comp; // Which compartment does a Channel belong to.
+
+	double* d_chan_Gk;
+	double* d_chan_Ek;
+	double* d_chan_GkEk;
+	double* d_comp_Gksum;
+	double* d_comp_GkEksum;
+	double* d_externalCurrent_;
+	CurrentStruct* d_current_;
+	InjectStruct* d_inject_;
+	CompartmentStruct* d_compartment_;
+	CaConcStruct* d_caConc_;
+
+	// Hines Matrix related
+	double* d_HS_;
+	double* d_perv_dynamic;
+	double* d_perv_static;
+
+	double* d_chan_x;
+	int* d_chan_colIndex;
+	int* d_chan_rowPtr;
+	int UPDATE_MATRIX_APPROACH;
+	int UPDATE_MATRIX_WPT_APPROACH = 0;
+	int UPDATE_MATRIX_SPMV_APPROACH = 1;
+
+	// Conjugate Gradient based GPU solver
+	double* d_Vmid;
+
+	/* Get handle to the CUSPARSE context */
+	cusparseHandle_t cusparse_handle;
+	cusparseMatDescr_t cusparse_descr;
+
+	// caConc_ Array of structures to structure of arrays.
+	double* d_CaConcStruct_c_; // Dynamic array
+	double* d_CaConcStruct_CaBasal_, *d_CaConcStruct_factor1_, *d_CaConcStruct_factor2_, *d_CaConcStruct_ceiling_, *d_CaConcStruct_floor_; // Static array
+	int ADVANCE_CALCIUM_APPROACH;
+	int ADVANCE_CALCIUM_WPT_APPROACH = 0;
+	int ADVANCE_CALCIUM_SPMV_APPROACH = 1;
+
+	// CUDA Active Permanent data
+	double* d_V;
+	double* d_ca;
+
+
+	// CUDA Active helper data
+	int* d_V_rows;
+	double* d_V_fractions;
+	int* d_Ca_rows;
+	double* d_Ca_fractions;
+
+	bool is_initialized; // Initializing device memory data
+
+	//// Variables for event based optimization for update_matrix method.
+	int* hits; // Number of times setInject method is called in zero time-step.
+	double* stim_basal_values, *d_stim_basal_values; // Basal value for stimulated compartments.
+	int* stim_comp_indices, *d_stim_comp_indices; // Compartment id's which have an injectCurrent stimulation;
+	int* stim_map, *d_stim_map; // An array of size nCompt, which stores the id in stim_comp_indices array if it is a stem, else -1.
+	int num_stim_comp; // Number of compartment with an injectCurrent stimlation.
+
+#endif
+
 
 private:
     /**
@@ -172,6 +281,39 @@ private:
     static const int INSTANT_X;
     static const int INSTANT_Y;
     static const int INSTANT_Z;
+
+    void updateForwardFlowMatrix();
+    void forwardFlowSolver();
+
+    void updatePervasiveFlowMatrixOpt();
+    void pervasiveFlowSolverOpt();
+
+#ifdef USE_CUDA
+    // Allocate buffer memory required for optimizations.
+    void allocate_cpu_memory();
+    // Hsolve GPU set up kernels
+    void allocate_hsolve_memory_cuda();
+    void copy_table_data_cuda();
+    void copy_hsolve_information_cuda();
+    void transfer_memory2cpu_cuda();
+
+    void get_lookup_rows_and_fractions_cuda_wrapper(double dt);
+    void advance_channels_cuda_wrapper(double dt);
+
+    void calculate_channel_currents_cuda_wrapper();
+
+    void update_matrix_cuda_wrapper();
+    void update_perv_matrix_cuda_wrapper();
+    void update_csrmatrix_cuda_wrapper();
+    int choose_update_matrix_approach();
+    int choose_advance_calcium_approach();
+
+    void calculate_V_from_Vmid_wrapper();
+
+    void advance_calcium_cuda_wrapper();
+
+#endif
+
 };
 
 #endif // _HSOLVE_ACTIVE_H
