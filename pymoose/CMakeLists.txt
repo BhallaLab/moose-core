@@ -1,13 +1,16 @@
 add_definitions(-DPYMOOSE)
 include_directories(../basecode ../msg)
 
+find_package( PythonInterp REQUIRED )
+
+add_definitions( -DMOOSE_VERSION=${MOOSE_VERSION} )
 set(PYMOOSE_SRCS 
     moosemodule.cpp
     vec.cpp
     mfield.cpp
     pymooseinit.cpp
     melement.cpp
-    test_moosemodule.cpp 
+    test_moosemodule.cpp
     PyRun.cpp
     )
 add_library( _moose MODULE ${PYMOOSE_SRCS} )
@@ -35,7 +38,7 @@ execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --libs
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 message( STATUS "Python include flags: ${PYTHON_INCLUDE_FLAGS}" )
-set_target_properties(_moose PROPERTIES 
+set_target_properties(_moose PROPERTIES
     COMPILE_DEFINITIONS "PYMOOSE"
     COMPILE_FLAGS "${PYTHON_INCLUDE_FLAGS}"
     LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
@@ -60,7 +63,7 @@ if(MACOSX)
 endif(MACOSX)
 
 if(MACOSX)
-    target_link_libraries( _moose 
+    target_link_libraries( _moose
         "-Wl,-all_load"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
@@ -69,7 +72,7 @@ if(MACOSX)
         ${SYSTEM_SHARED_LIBS}
         )
 ELSE(MACOSX)
-    target_link_libraries(_moose 
+    target_link_libraries(_moose
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
@@ -83,6 +86,8 @@ endif(MACOSX)
 add_custom_target(copy_python_files ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/python ${CMAKE_BINARY_DIR}/python
+    COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/VERSION ${CMAKE_BINARY_DIR}/VERSION
     COMMENT "Copying required python files and other files to build directory"
     VERBATIM
     )

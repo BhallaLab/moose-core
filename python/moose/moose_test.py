@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 """
 Test MOOSE installation with moose-examples.
 
 """
 
 from __future__ import print_function
-    
+
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2016, Dilawar Singh"
 __credits__          = ["NCBS Bangalore"]
@@ -40,7 +41,7 @@ _logger = logging.getLogger('moose.test')
 _logger.addHandler(console)
 
 test_data_url_ = 'https://github.com/BhallaLab/moose-examples/archive/master.zip'
-test_repo_url_ = 'https://github.com/BhallaLab/moose-examples' 
+test_repo_url_ = 'https://github.com/BhallaLab/moose-examples'
 test_dir_ = os.path.join( tempfile.gettempdir( ), 'moose-examples' )
 
 ignored_dict_ = defaultdict( list )
@@ -73,7 +74,7 @@ class Command(object):
     def run(self, timeout):
         def target():
             _logger.info( "Running %s" % self )
-            self.process = subprocess.Popen( 
+            self.process = subprocess.Popen(
                     self.cmd, shell=False
                     , stdout = self.fnull, stderr = subprocess.STDOUT
                     )
@@ -94,7 +95,7 @@ def init_test_dir( ):
     if( not os.path.exists( test_dir_ ) ):
         os.makedirs( test_dir_ )
         _logger.info( "Donwloading test repository" )
-        subprocess.call( 
+        subprocess.call(
                 [ 'git', 'clone', '--depth=10', test_repo_url_, test_dir_ ]
                 )
     os.chdir( test_dir_ )
@@ -110,37 +111,45 @@ def suitable_for_testing( script ):
             return False, 'waits for user input'
     return True, 'OK'
 
-def run_test( index, testfile ):
+def run_test( index, testfile, timeout,  **kwargs):
     """Run a given test
     """
     global test_status_
     global total_
     pyExec = os.environ.get( 'PYTHON_EXECUTABLE', '/usr/bin/python' )
     cmd = Command( [ pyExec, testfile ] )
+
     ti = time.time( )
-    status = cmd.run( timeout = 60 )
     name = os.path.basename( testfile )
+    out = (name + '.' * 50)[:40]
+    print( '[TEST %3d/%d] %41s ' % (index, total_, out), end='' )
+    sys.stdout.flush( )
+
+    # Run the test.
+    status = cmd.run( timeout = timeout )
     t = time.time( ) - ti
+    print( '% 7.2f ' % t, end='' )
+    sys.stdout.flush( )
+
+    # Change to directory and copy before running then test.
     cwd = os.path.dirname( testfile )
     os.chdir( cwd )
     with open( os.path.join( cwd, 'matplotlibrc' ), 'w' ) as f:
         _logger.debug( 'Writing matplotlibrc to %s' % cwd )
         f.write( matplotlibrc_ )
 
-    out = (name + '.' * 50)[:50]
-    print( '[TEST %3d/%d] %50s %.2f sec ' % (index, total_, out, t), end='' )
-    sys.stdout.flush( )
     if status != 0:
         if status == -15:
-            msg = '%2d TIMEOUT' % status
+            msg = '% 4d TIMEOUT' % status
             test_status_[ 'TIMED-OUT' ].append( testfile )
         else:
-            msg = '%2d FAILED' % status
+            msg = '% 4d FAILED' % status
             test_status_[ 'FAILED' ].append( testfile )
         print( msg )
     else:
-        print( '%2d PASSED' % status )
+        print( '% 4d PASSED' % status )
         test_status_[ 'PASSED' ].append( testfile )
+
     sys.stdout.flush( )
 
 def print_test_stat( ):
@@ -148,8 +157,8 @@ def print_test_stat( ):
     for status in test_status_:
         print( 'Total %d tests %s' % (len( test_status_[status] ), status ) )
 
-def test_all( ):
-    global test_dir_ 
+def test_all( timeout, **kwargs ):
+    global test_dir_
     global total_
     scripts = [ ]
     for d, ds, fs in os.walk( test_dir_ ):
@@ -171,20 +180,21 @@ def test_all( ):
     total_ = len( scripts )
     for i, s in enumerate( scripts ):
         _logger.info( 'Running test : %s' % s )
-        run_test(i, s )
+        run_test(i, s, timeout, **kwargs )
 
 
-def test( ):
+def test( timeout = 60, **kwargs ):
     """Download and run tests.
 
     """
+    print( '[INFO] Running test with timeout %d sec' % timeout )
     try:
         init_test_dir( )
     except Exception as e:
         print( '[INFO] Failed to clone moose-examples. Error was %s' % e )
         quit( )
 
-    test_all( )
+    test_all( timeout = timeout, **kwargs  )
     print_test_stat( )
 
 if __name__ == '__main__':

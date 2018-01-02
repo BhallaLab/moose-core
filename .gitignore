@@ -1,4 +1,5 @@
 #  Build folder 
+_build/*
 .svn
 tags
 *.plot

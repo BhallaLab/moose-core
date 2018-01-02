@@ -8,7 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
-    
+
 #ifndef WIN32
 #include <sys/time.h>
 #else
@@ -51,6 +51,7 @@ extern void testScheduling();
 extern void testSchedulingProcess();
 extern void testBuiltins();
 extern void testSynapse();
+
 extern void testBuiltinsProcess();
 
 extern void testMpiScheduling();

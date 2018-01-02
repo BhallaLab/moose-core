@@ -10,6 +10,13 @@
 #ifndef _KSOLVE_H
 #define _KSOLVE_H
 
+#include <thread>
+
+#ifdef USE_CUDA
+#include "../ksolve/ZombiePoolInterface.h"
+#include "../mesh/VoxelJunction.h"
+#endif
+
 class Stoich;
 
 class Ksolve: public ZombiePoolInterface
@@ -41,6 +48,7 @@ public:
     Id getDsolve() const;
     void setDsolve( Id dsolve ); /// Inherited from ZombiePoolInterface.
 
+
     unsigned int getNumLocalVoxels() const;
     unsigned int getNumAllVoxels() const;
     /**
@@ -52,6 +60,15 @@ public:
     /// Returns the vector of pool Num at the specified voxel.
     vector< double > getNvec( unsigned int voxel) const;
     void setNvec( unsigned int voxel, vector< double > vec );
+
+#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
+    // Set number of threads to use (for deterministic case only).
+    unsigned int getNumThreads( ) const;
+    void setNumThreads( unsigned int x );
+
+    // Parallel advance().
+    void parallel_advance(int begin, int end, size_t nWorkers, ProcPtr p);
+#endif
 
     /**
      * This does a quick and dirty estimate of the timestep suitable
@@ -100,14 +117,15 @@ public:
      */
     void setNumPools( unsigned int num );
     unsigned int getNumPools() const;
+
     VoxelPoolsBase* pools( unsigned int i );
+
     double volume( unsigned int i ) const;
 
     void getBlock( vector< double >& values ) const;
     void setBlock( const vector< double >& values );
 
-    void matchJunctionVols( vector< double >& vols, Id otherCompt )
-    const;
+    void matchJunctionVols( vector< double >& vols, Id otherCompt ) const;
 
     /**
      * Rescale specified voxel rate term following rate constant change
@@ -133,6 +151,9 @@ public:
 
     void buildCrossReacVolScaling( Id otherKsolve,
                                    const vector< VoxelJunction >& vj );
+
+    vector<VoxelPools> getVoxelPools( );
+
     //////////////////////////////////////////////////////////////////
     // for debugging
     void print() const;
@@ -146,6 +167,14 @@ private:
     string method_;
     double epsAbs_;
     double epsRel_;
+
+#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
+    /**
+     * @brief Number of threads to use. Only applicable for deterministic case.
+     */
+    unsigned int numThreads_;
+#endif
+
     /**
      * Each VoxelPools entry handles all the pools in a single voxel.
      * Each entry knows how to update itself in order to complete
@@ -168,6 +197,9 @@ private:
 
     /// Pointer to diffusion solver
     ZombiePoolInterface* dsolvePtr_;
+
+    size_t num_threads_;
+    std::vector< std::thread* > threads_;
 };
 
 #endif	// _KSOLVE_H
