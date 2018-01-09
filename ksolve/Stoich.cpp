@@ -233,6 +233,7 @@ const Cinfo* Stoich::initCinfo()
         &ksolve,			// Value
         &dsolve,			// Value
         &compartment,		// Value
+        &allowNegative,		// Value
         &numVarPools,		// ReadOnlyValue
         &numBufPools,		// ReadOnlyValue
         &numAllPools,		// ReadOnlyValue
