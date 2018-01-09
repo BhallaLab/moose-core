@@ -219,7 +219,7 @@ void VoxelPools::advance( const ProcInfo* p )
 		unsigned int nv = stoichPtr_->getNumVarPools();
 		double* vs = varS();
 		for ( unsigned int i = 0; i < nv; ++i ) {
-			if ( signbit(*vs) )
+			if ( signbit(vs[i]) )
 				vs[i] = 0.0;
 		}
 	}
