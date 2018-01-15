@@ -1,31 +1,32 @@
-# reader.py --- 
+# -*- coding: utf-8 -*-
+# reader.py ---
 # 
 # Filename: reader.py
-# Description: 
-# Author: Subhasis Ray
+# Description:
+# Author: Subhasis Ray, Padraig Gleeson
 # Maintainer: 
 # Created: Wed Jul 24 15:55:54 2013 (+0530)
 # Version: 
-# Last-Updated: Sun Apr 17 16:32:59 2016 (-0400)
-#           By: subha
-#     Update #: 455
-# URL: 
-# Keywords: 
-# Compatibility: 
-# 
-# 
+# Last-Updated: 15 Jan 2018
+#           By: pgleeson
+#     Update #: --
+# URL:
+# Keywords:
+# Compatibility:
+#
+#
 
-# Commentary: 
-# 
-# 
-# 
-# 
+# Commentary:
+#
+#
+#
+#
 
 # Change log:
-# 
-# 
-# 
-# 
+#
+#
+#
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 3, or
@@ -40,15 +41,14 @@
 # along with this program; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 # Floor, Boston, MA 02110-1301, USA.
-# 
-# 
+#
+#
 
 # Code:
 """Implementation of reader for NeuroML 2 models.
 
 
-TODO: handle include statements (start with simple ion channel
-prototype includes.
+TODO: handle morphologies of more than one segment...
 
 """
 
@@ -102,7 +102,7 @@ def sarea(comp):
     Returns
     -------
     s : float
-        surface area of `comp`. 
+        surface area of `comp`.
 
     """
     if comp.length > 0:
@@ -590,7 +590,7 @@ class NML2Reader(object):
                 inf = self.calculateRateFn(inf, vmin, vmax, vdivs)
                 mgate.tableA = q10_scale * (inf / tau)
                 mgate.tableB = q10_scale * (1 / tau)
-            print(ngate)
+                
             if hasattr(ngate,'steady_state') and (ngate.time_course is None) and (ngate.steady_state is not None):
                 inf = ngate.steady_state
                 tau = 1 / (alpha + beta)
@@ -622,7 +622,7 @@ class NML2Reader(object):
 
     def importIonChannels(self, doc, vmin=-150e-3, vmax=100e-3, vdivs=5000):
         if self.verbose:
-            print(self.filename, 'Importing ion channels')
+            print(self.filename, 'Importing the ion channels')
             
         for chan in doc.ion_channel+doc.ion_channel_hhs:
             if chan.type == 'ionChannelHH':
