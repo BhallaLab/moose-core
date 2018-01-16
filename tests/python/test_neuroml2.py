@@ -45,19 +45,23 @@ from __future__ import absolute_import, print_function, division
 import moose
 import moose.utils as mu
 import sys
+import os
 import numpy as np
+
+SCRIPT_DIR = os.path.dirname( os.path.realpath( __file__ ) )
     
-def run(nogui):
-    filename = 'test_files/passiveCell.nml'
-    mu.info('Loading: %s'%filename)
+def run( nogui = True ):
+    global SCRIPT_DIR
+    filename = os.path.join(SCRIPT_DIR, 'test_files/passiveCell.nml' )
+    mu.info('Loading: %s' % filename )
     nml = moose.mooseReadNML2( filename )
+    if not nml:
+        mu.warn( "Failed to parse NML2 file" )
+        return 
+
     assert nml, "Expecting NML2 object"
-    
     msoma = nml.getComp(nml.doc.networks[0].populations[0].id,0,0)
-    mu.debug(msoma)
-    
     data = moose.Neutral('/data')
-    
     pg = nml.getInput('pulseGen1')
     
     inj = moose.Table('%s/pulse' % (data.path))
@@ -67,42 +71,20 @@ def run(nogui):
     vm = moose.Table('%s/Vm' % (data.path))
     moose.connect(vm, 'requestOut', msoma, 'getVm')
     
-    simdt = 1e-6
-    plotdt = 1e-4
     simtime = 150e-3
-    
-    if (1):
-        #moose.showmsg( '/clock' )
-        for i in range(8):
-            moose.setClock( i, simdt )
-        moose.setClock( 8, plotdt )
-        moose.reinit()
-    else:
-        utils.resetSim([model.path, data.path], simdt, plotdt, simmethod='ee')
-        moose.showmsg( '/clock' )
-        
+    moose.reinit()
     moose.start(simtime)
-    
     print("Finished simulation!")
-    
     t = np.linspace(0, simtime, len(vm.vector))
-    
-    if not nogui:
-        import matplotlib.pyplot as plt
-        plt.subplot(211)
-        plt.plot(t, vm.vector * 1e3, label='Vm (mV)')
-        plt.legend()
-        plt.title('Vm')
-        plt.subplot(212)
-        plt.title('Input')
-        plt.plot(t, inj.vector * 1e9, label='injected (nA)')
-        #plt.plot(t, gK.vector * 1e6, label='K')
-        #plt.plot(t, gNa.vector * 1e6, label='Na')
-        plt.legend()
-        plt.show()
-        plt.close()
+    yvec = vm.vector 
+    injvec = inj.vector * 1e12
+    m1, u1 = np.mean( yvec ), np.std( yvec )
+    m2, u2 = np.mean( injvec ), np.std( injvec )
+    assert np.isclose( m1, -0.0456943 ), m1
+    assert np.isclose( u1, 0.0121968 ), u1
+    assert np.isclose( m2, 26.64890 ), m2
+    assert np.isclose( u2, 37.70607574 ), u2
+    quit( 0 )
 
-    
 if __name__ == '__main__':
-    nogui = '-nogui' in sys.argv
-    run(nogui)
+    run( )

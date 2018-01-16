@@ -52,8 +52,6 @@ except Exception as e:
     mergechemError_ = '%s' % e
 
 
-
-
 # Import function from C++ module into moose namespace.
 from moose._moose import *
 
@@ -187,6 +185,9 @@ def mergeChemModel(src, des):
 
 # NML2 reader and writer function.
 def mooseReadNML2( modelpath ):
+    """Read NeuroML model (version 2).
+
+    """
     global nml2Import_
     if nml2Import_:
         reader = _neuroml2.NML2Reader( )

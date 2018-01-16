@@ -62,28 +62,6 @@ import moose.utils as mu
 
 __author__ = 'Subhasis Ray'
 
-import neuroml as nml
-import neuroml.loaders as loaders
-from pyneuroml import pynml
-
-# try:
-#     import neuroml as nml
-#     import neuroml.loaders as loaders
-#     from pyneuroml import pynml
-# except Exception as e:
-#     mu.info("********************************************************************")
-#     mu.info("* ")
-#     mu.info("*  Please install libNeuroML & pyNeuroML: ")
-#     mu.info("*    pip install libneuroml")
-#     mu.info("*    pip install pyNeuroML")
-#     mu.info("* ")
-#     mu.info("*  Requirement for this is lxml: ")
-#     mu.info("*    apt-get install python-lxml")
-#     mu.info("* ")
-#     mu.info("********************************************************************")
-#     mu.error( str(e) )
-#     raise e
-
-from ..reader import NML2Reader
+from .reader import NML2Reader
 
 # __init__.py ends here

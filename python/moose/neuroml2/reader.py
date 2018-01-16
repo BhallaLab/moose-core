@@ -51,7 +51,7 @@ TODO: handle morphologies of more than one segment...
 
 """
 
-from __future__ import print_function, division
+from __future__ import print_function, division, absolute_import
 
 try:
     from future_builtins import zip, map
@@ -62,16 +62,14 @@ import sys
 import os
 import math
 import numpy as np
+import neuroml as nml
+from pyneuroml import pynml
 
 import moose
 import moose.utils as mu
-import neuroml as nml
-import neuroml.loaders as loaders
-from pyneuroml import pynml
-from . import units
-from . import hhfit
 
-# Utility functions
+from .units import SI
+from . import hhfit
 
 def sarea(comp):
     """
@@ -137,8 +135,8 @@ class NML2Reader(object):
 
     Example:
 
-    >>> from moose import neuroml2 as nml
-    >>> reader = nml.NML2Reader()
+    >>> import moose
+    >>> reader = moose.NML2Reader()
     >>> reader.read('moose/neuroml2/test_files/Purk2M9s.nml')
 
     creates a passive neuronal morphology `/library/Purk2M9s`.
@@ -164,7 +162,9 @@ class NML2Reader(object):
         self.paths_to_chan_elements = {}
 
     def read(self, filename, symmetric=True):
-        self.doc = loaders.read_neuroml2_file(filename, include_includes=True, verbose=self.verbose)
+        filename = os.path.realpath( filename )
+        self.doc = nml.loaders.read_neuroml2_file( 
+                filename, include_includes=True, verbose=self.verbose)
         
         if self.verbose:
             mu.info('Parsed NeuroML2 file: %s'% filename)
