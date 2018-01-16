@@ -62,6 +62,7 @@ setup(
             , 'moose'
             , 'moose.SBML'
             , 'moose.neuroml'
+            , 'moose.neuroml2'
             , 'moose.genesis'
             , 'moose.chemUtil'
             , 'moose.chemMerge'
@@ -70,5 +71,5 @@ setup(
             'moose' : 'moose'
             , 'rdesigneur' : 'rdesigneur'
             },
-        package_data = { 'moose' : ['_moose' + suffix] },
+        package_data = { 'moose' : ['_moose' + suffix, 'neuroml2/schema/NeuroMLCoreDimensions.xml'] },
     )
