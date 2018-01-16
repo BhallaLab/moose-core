@@ -57,11 +57,33 @@ available in converter.py. But the complete cell-model writing is not
 fully implemented. Hence this is not included in __all__.
 
 """
+from __future__ import absolute_import, division, print_function
+import moose.utils as mu
+
 __author__ = 'Subhasis Ray'
-from reader import NML2Reader
 
-__all__ = ['NML2Reader']
+import neuroml as nml
+import neuroml.loaders as loaders
+from pyneuroml import pynml
 
+# try:
+#     import neuroml as nml
+#     import neuroml.loaders as loaders
+#     from pyneuroml import pynml
+# except Exception as e:
+#     mu.info("********************************************************************")
+#     mu.info("* ")
+#     mu.info("*  Please install libNeuroML & pyNeuroML: ")
+#     mu.info("*    pip install libneuroml")
+#     mu.info("*    pip install pyNeuroML")
+#     mu.info("* ")
+#     mu.info("*  Requirement for this is lxml: ")
+#     mu.info("*    apt-get install python-lxml")
+#     mu.info("* ")
+#     mu.info("********************************************************************")
+#     mu.error( str(e) )
+#     raise e
 
-#
+from ..reader import NML2Reader
+
 # __init__.py ends here
