@@ -53,8 +53,14 @@
 
 import traceback
 import warnings
+import moose.utils as mu
 import numpy as np
-from scipy.optimize import curve_fit
+
+try:
+    from scipy.optimize import curve_fit
+except ImportError as e:
+    mu.error( "To use this feature/module, please install python-scipy" )
+    raise e
 
 def exponential2(x, a, scale, x0, y0=0):
     res = a * np.exp((x - x0)/scale) + y0
