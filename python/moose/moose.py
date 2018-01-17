@@ -27,8 +27,13 @@ nml2Import_, nml2ImportError_ = True, ''
 try:
     import moose.neuroml2 as _neuroml2
 except Exception as e:
-    mu.warn( "Failed to import NML2 support. Error was %s" % e )
     nml2Import_ = False
+    nml2ImportError_ = '\n'.join( [ 
+        "NML2 support is disabled because `libneuroml` and "
+        , "`pyneuroml` modules are not found."
+        , "     pip install pyneuroml libneuroml "
+        , " should fix it." ]
+        )
 
 chemImport_, chemError_ = True, ''
 try:
@@ -194,6 +199,7 @@ def mooseReadNML2( modelpath ):
         reader.read( modelpath )
         return reader
     else:
+        mu.info( nml2ImportError_ )
         mu.warn( "Could not load NML2 support. Doing nothing" )
         return False
 

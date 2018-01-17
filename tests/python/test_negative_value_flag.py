@@ -9,6 +9,9 @@
 import moose
 import numpy
 import sys
+import os
+
+scriptDir = os.path.dirname( os.path.realpath( __file__ ) )
 
 def main():
     """
@@ -21,7 +24,7 @@ def main():
     """
 
     solver = "gsl"  # Pick any of gsl, gssa, ee..
-    mfile = './genesis/acc11.g'
+    mfile = os.path.join( scriptDir, './genesis/acc11.g' )
     runtime = 1000.0
     if ( len( sys.argv ) >= 3 ):
         if sys.argv[1][0] == '/':
