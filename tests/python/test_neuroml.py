@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 from __future__ import absolute_import, print_function, division
 
 __author__           = "Dilawar Singh"
@@ -15,6 +16,7 @@ import os
 # the model lives in the same directory as the test script
 modeldir = os.path.dirname(__file__)
 
+import _neuroml
 from _neuroml.FvsI_CA1 import ca1_main, loadModel
 from _neuroml.CA1 import loadGran98NeuroML_L123
 
