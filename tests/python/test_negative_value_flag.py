@@ -7,7 +7,7 @@
 # Created: Sat Oct 04 12:14:15 2014 (+0530)
 
 import moose
-import numpy
+import numpy as np
 import sys
 import os
 
@@ -42,7 +42,8 @@ def main():
 
     # Display all plots.
     for x in moose.wildcardFind( '/model/#graphs/conc#/#' ):
-        t = numpy.arange( 0, x.vector.size, 1 ) * x.dt
+        t = np.arange( 0, x.vector.size, 1 ) * x.dt
+        print( x.vector )
         if x.vector.size > 0:
             assert min( x.vector ) >= 0.0, min(x.vector)
         assert x.vector.size in [0, 10001], x.vector.size
@@ -55,10 +56,10 @@ def main():
     oneValIsBelowZero = False
     allVals = [ ]
     for x in moose.wildcardFind( '/model/#graphs/conc#/#' ):
-        t = numpy.arange( 0, x.vector.size, 1 ) * x.dt
+        t = np.arange( 0, x.vector.size, 1 ) * x.dt
         if x.vector.size > 0:
             allVals.append( min( x.vector ) )
-            if min( x.vector ) < 0.0:
+            if min( x.vector ) <= 0.0:
                 oneValIsBelowZero = True
 
         if allVals:
