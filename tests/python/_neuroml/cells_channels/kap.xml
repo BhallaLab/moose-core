@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<channelml xmlns="http://morphml.org/channelml/schema" 
+<channelml xmlns="http://morphml.org/channelml/schema"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:meta="http://morphml.org/metadata/schema"
     xsi:schemaLocation="http://morphml.org/channelml/schema  http://www.neuroml.org/NeuroMLValidator/NeuroMLFiles/Schemata/v1.8.0/Level2/ChannelML_v1.8.0.xsd"
