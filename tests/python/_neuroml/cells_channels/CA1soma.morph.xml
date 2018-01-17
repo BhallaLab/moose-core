@@ -15,7 +15,7 @@
                     <mml:distal x="0.0" y="7.4909997" z="0.0" diameter="7.491"/>
                 </mml:segment>
 
-                
+
             </mml:segments>
 
             <mml:cables>
@@ -110,7 +110,7 @@
                         <bio:group>all</bio:group>
                     </bio:parameter>
                 </bio:ion_props>
-            
+
 
                 <bio:ion_props name="na">
                     <bio:parameter name="e" value="50.0">
