@@ -7,11 +7,8 @@
 
 from __future__ import print_function, division, absolute_import
 
-__author__           = 'Subhasis Ray, Aditya Gilra, Dilawar Singh'
-__copyright__        = "Copyright 2013, NCBS Bangalore"
-__credits__          = ["NCBS Bangalore", "Bhalla Lab"]
-__license__          = "GPL"
-__version__          = "1.0.0"
+from __future__ import print_function, division
+from __future__ import absolute_import
 
 import types
 import parser
