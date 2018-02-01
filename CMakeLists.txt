@@ -419,7 +419,7 @@ set(EXTRA_ARGS "--prefix ${CMAKE_INSTALL_PREFIX}")
 # --user to install in user home.
 install(CODE
     "execute_process(
-        COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py install ${EXTRA_ARGS}
+        COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py install ${EXTRA_ARGS} ${PYMOOSE_EXTRA_INSTALL_ARGS}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
         )"
         )
