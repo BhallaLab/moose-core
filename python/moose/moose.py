@@ -32,7 +32,8 @@ except Exception as e:
         "NML2 support is disabled because `libneuroml` and "
         , "`pyneuroml` modules are not found."
         , "     pip install pyneuroml libneuroml "
-        , " should fix it." ]
+        , " should fix it." 
+        , " Actual error: %s " % e ]
         )
 
 chemImport_, chemError_ = True, ''
