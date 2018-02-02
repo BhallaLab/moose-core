@@ -11,6 +11,7 @@ fi
 
 # Try to link statically.
 GSL_STATIC_LIBS=/usr/local/lib/libgsl.a
+CMAKE=/usr/bin/cmake28
 
 WHEELHOUSE=$HOME/wheelhouse
 mkdir -p $WHEELHOUSE
@@ -28,7 +29,7 @@ for PYDIR in /opt/python/*; do
         echo "Building using $PYDIR in $PYVER"
         PYTHON=$(ls $PYDIR/bin/python?.?)
         $PYTHON -m pip install numpy
-        cmake -DPYTHON_EXECUTABLE=$PYTHON  \
+        $CMAKE -DPYTHON_EXECUTABLE=$PYTHON  \
             -DGSL_STATIC_LIBRARIES=$GSL_STATIC_LIBS \
             ../..
         make -j4
