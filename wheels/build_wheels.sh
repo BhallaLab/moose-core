@@ -31,6 +31,7 @@ for PYDIR in /opt/python/*; do
         $PYTHON -m pip install numpy
         $CMAKE -DPYTHON_EXECUTABLE=$PYTHON  \
             -DGSL_STATIC_LIBRARIES=$GSL_STATIC_LIBS \
+            -DVERSION_MOOSE=3.2.0 \
             ../..
         make -j4
 
