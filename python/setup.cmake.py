@@ -60,5 +60,5 @@ setup(
             'moose' : 'moose'
             , 'rdesigneur' : 'rdesigneur'
             },
-        package_data = { 'moose' : ['_moose' + suffix] },
+        package_data = { 'moose' : ['_moose' + suffix, 'neuroml2/schema/NeuroMLCoreDimensions.xml'] },
     )
