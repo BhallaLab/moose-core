@@ -150,7 +150,7 @@ setup(
         , description = description
         , license = "LGPL"
         , url = url
-        , long_description = read('README')
+        , long_description = read('../README.md')
         , ext_modules = [
             Extension('_moose', [ '*' ])
             ]
