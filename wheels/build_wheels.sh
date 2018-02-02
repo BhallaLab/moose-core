@@ -4,9 +4,9 @@ set -x
 
 # Clone git or update.
 if [ ! -d /tmp/moose-core ]; then
-    git clone https://github.com/BhallaLab/moose-core --depth 10 /tmp/moose-core
+    git clone -b wheels https://github.com/BhallaLab/moose-core --depth 10 /tmp/moose-core
 else
-    cd /tmp/moose-core && git pull && cd -
+    cd /tmp/moose-core && git pull && git merge master -X theirs && cd -
 fi
 
 # Try to link statically.
