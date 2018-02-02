@@ -4,7 +4,7 @@ set -x
 
 # Clone git or update.
 if [ ! -d /tmp/moose-core ]; then
-    git clone -b manylinux https://github.com/BhallaLab/moose-core --depth 10 /tmp/moose-core
+    git clone https://github.com/BhallaLab/moose-core --depth 10 /tmp/moose-core
 else
     cd /tmp/moose-core && git pull && cd -
 fi
@@ -34,7 +34,7 @@ for PYDIR in /opt/python/*; do
         make -j4
 
         # Now build bdist_wheel
-        cd python 
+        cd python
         cp setup.cmake.py setup.py
         $PYDIR/bin/pip wheel . -w $WHEELHOUSE
     )
