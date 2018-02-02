@@ -267,19 +267,24 @@ endif(WITH_BOOST)
 # these two types because of --whole-archive option. See
 # BhallaLab/moose-core#66,
 if(WITH_GSL)
-    message(STATUS "Using gsl libraries: ${GSL_LIBRARIES}")
-    foreach(GSL_LIB ${GSL_LIBRARIES} )
-        if(GSL_LIB)
-            get_filename_component( GSL_LIB_EXT ${GSL_LIB} EXT )
-            if(GSL_LIB_EXT)
-                if(GSL_LIB_EXT STREQUAL ".a" )
-                    list(APPEND STATIC_LIBRARIES ${GSL_LIB})
-                else()
-                    list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIB})
-                endif( )
-            endif( )
-        endif( )
-    endforeach( )
+    if(GSL_STATIC_LIBRARIES)
+       message( STATUS "Using static libraries ${GSL_STATIC_LIBRARIES}" )
+       list(APPEND STATIC_LIBRARIES ${GSL_STATIC_LIBRARIES})
+    else( )
+       message(STATUS "Using gsl libraries: ${GSL_LIBRARIES}")
+       foreach(GSL_LIB ${GSL_LIBRARIES} )
+           if(GSL_LIB)
+               get_filename_component( GSL_LIB_EXT ${GSL_LIB} EXT )
+               if(GSL_LIB_EXT)
+                   if(GSL_LIB_EXT STREQUAL ".a" )
+                       list(APPEND STATIC_LIBRARIES ${GSL_LIB})
+                   else()
+                       list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIB})
+                   endif( )
+               endif( )
+           endif( )
+       endforeach( )
+   endif( )
 endif()
 
 if(WITH_MPI)
@@ -373,6 +378,7 @@ if(DEBUG)
     endif( WITH_BOOST )
 endif()
 
+
 ######################### BUILD PYMOOSE ########################################
 add_subdirectory( pymoose )
 
@@ -429,8 +435,6 @@ if(${CMAKE_BUILD_TOOL} MATCHES "make")
         "=======================================\n"
         )
 endif()
-
-
 
 
 ############################ CTEST ######################################
