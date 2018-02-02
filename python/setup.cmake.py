@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """setup.py:
-Script to install python targets. 
+Script to install python targets.
 
 NOTE: This script is to be called by CMake. Not intended to be used standalone.
 
@@ -38,7 +38,7 @@ except Exception as e:
     suffix = '.so'
 
 setup(
-        name='moose',
+        name='pymoose',
         version=version,
         description='MOOSE python scripting module.',
         author='MOOSERes',
@@ -57,8 +57,7 @@ setup(
             , 'moose.chemMerge'
             ],
         package_dir = {
-            'moose' : 'moose'
-            , 'rdesigneur' : 'rdesigneur'
+            'moose' : 'moose', 'rdesigneur' : 'rdesigneur'
             },
         package_data = { 'moose' : ['_moose' + suffix, 'neuroml2/schema/NeuroMLCoreDimensions.xml'] },
     )
