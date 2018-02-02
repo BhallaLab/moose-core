@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x
 
 # Clone git or update.
 if [ ! -d /tmp/moose-core ]; then
@@ -11,6 +12,8 @@ fi
 # Try to link statically.
 GSL_STATIC_LIBS=/usr/local/lib/libgsl.a
 
+WHEELHOUSE=$HOME/wheelhouse
+mkdir -p $WHEELHOUSE
 for PYDIR in /opt/python/*; do
     PYVER=$(basename $PYDIR)
     if [[ $PYVER = *"cpython"* ]]; then
@@ -23,11 +26,22 @@ for PYDIR in /opt/python/*; do
     (
         cd $PYVER
         echo "Building using $PYDIR in $PYVER"
-        PYTHON=$PYDIR/bin/python
+        PYTHON=$(ls $PYDIR/bin/python?.?)
         $PYTHON -m pip install numpy
         cmake -DPYTHON_EXECUTABLE=$PYTHON  \
             -DGSL_STATIC_LIBRARIES=$GSL_STATIC_LIBS \
             ../..
         make -j4
+
+        # Now build bdist_wheel
+        cd python 
+        cp setup.cmake.py setup.py
+        $PYDIR/bin/pip wheel . -w $WHEELHOUSE
     )
+done
+
+# now check the wheels.
+for whl in $WHEELHOUSE/*.whl; do
+    #auditwheel repair "$whl" -w $WHEELHOUSE
+    auditwheel show "$whl"
 done
