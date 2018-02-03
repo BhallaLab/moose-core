@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """setup.py:
-Script to install python targets. 
+Script to install python targets.
 
 NOTE: This script is to be called by CMake. Not intended to be used standalone.
 
@@ -21,10 +21,11 @@ import sys
 
 from distutils.core import setup
 script_dir = os.path.dirname( os.path.abspath( __file__ ) )
-version = '3.2.0'
+version = '3.2pre1'
+
 
 try:
-    with open( os.path.join( script_dir, '..', '..', 'VERSION'), 'r' ) as f:
+    with open( os.path.join( script_dir, 'VERSION'), 'r' ) as f:
         version = f.read( )
 except Exception as e:
     print( 'Failed to read VERSION %s' % e )
@@ -40,7 +41,7 @@ except Exception as e:
 setup(
         name='pymoose',
         version=version,
-        description='MOOSE python scripting module.',
+        description='Python scripting interface of MOOSE Simulator (https://moose.ncbs.res.in)',
         author='MOOSERes',
         author_email='bhalla@ncbs.res.in',
         maintainer='Dilawar Singh',
@@ -56,9 +57,9 @@ setup(
             , 'moose.chemUtil'
             , 'moose.chemMerge'
             ],
+	install_requires = [ 'python-libsbml', 'numpy' ],
         package_dir = {
-            'moose' : 'moose'
-            , 'rdesigneur' : 'rdesigneur'
+            'moose' : 'moose', 'rdesigneur' : 'rdesigneur'
             },
         package_data = { 'moose' : ['_moose' + suffix, 'neuroml2/schema/NeuroMLCoreDimensions.xml'] },
     )
