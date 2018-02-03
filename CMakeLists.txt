@@ -20,7 +20,7 @@ include(GetRevision)
 
 # If from command line, version info is not passed, use the git to generate a
 # version file. If GIT fails, use the previous known version.
-set(MOOSE_VERSION 3.2-git)
+set(MOOSE_VERSION 3.2.0-nightly)
 add_definitions( -DMOOSE_VERSION="${MOOSE_VERSION}")
 message( STATUS "MOOSE Version ${MOOSE_VERSION}" )
 
