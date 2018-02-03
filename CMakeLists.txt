@@ -18,16 +18,22 @@ include(CheckIncludeFileCXX)
 include(FindPkgConfig)
 include(GetRevision)
 
+# getgit revision number
+find_program( GIT_EXEC git )
+if(GIT_EXEC)
+    execute_process(COMMAND ${GIT_EXEC} rev-parse --short HEAD OUTPUT_VARIABLE GIT_HEAD)
+endif()
+
 # If from command line, version info is not passed, use the git to generate a
 # version file. If GIT fails, use the previous known version.
-set(MOOSE_VERSION 3.2.0-nightly)
-add_definitions( -DMOOSE_VERSION="${MOOSE_VERSION}")
-message( STATUS "MOOSE Version ${MOOSE_VERSION}" )
+set(VERSION_MOOSE 3.2.rc1-${GIT_HEAD})
+add_definitions( -DVERSION_MOOSE="${VERSION_MOOSE}")
+message( STATUS "MOOSE Version ${VERSION_MOOSE}" )
 
 # Write VERSION to a file VERSION so that setup.py can use it.
 set(VERSION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/python/VERSION)
-message(STATUS "+ Writing ${MOOSE_VERSION} to ${VERSION_FILE}" )
-file(WRITE ${VERSION_FILE} ${MOOSE_VERSION} )
+message(STATUS "+ Writing ${VERSION_MOOSE} to ${VERSION_FILE}" )
+file(WRITE ${VERSION_FILE} ${VERSION_MOOSE} )
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
