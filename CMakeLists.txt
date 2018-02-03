@@ -16,18 +16,20 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 include(FindPkgConfig)
-include(GetRevision)
 
 # getgit revision number
 find_program( GIT_EXEC git )
 if(GIT_EXEC)
-    execute_process(COMMAND ${GIT_EXEC} rev-parse --short HEAD OUTPUT_VARIABLE GIT_HEAD)
+    execute_process(COMMAND ${GIT_EXEC} rev-parse --short HEAD 
+        OUTPUT_VARIABLE GIT_HEAD
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
 endif()
 
 # If from command line, version info is not passed, use the git to generate a
 # version file. If GIT fails, use the previous known version.
-set(VERSION_MOOSE 3.2.rc1-${GIT_HEAD})
-add_definitions( -DVERSION_MOOSE="${VERSION_MOOSE}")
+set(VERSION_MOOSE "3.2.rc1-${GIT_HEAD}")
+add_definitions( -DMOOSE_VERSION="${VERSION_MOOSE}")
 message( STATUS "MOOSE Version ${VERSION_MOOSE}" )
 
 # Write VERSION to a file VERSION so that setup.py can use it.
