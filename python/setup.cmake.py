@@ -49,7 +49,7 @@ setup(
         name='pymoose',
         version=version,
         description='Python scripting interface of MOOSE Simulator (https://moose.ncbs.res.in)',
-        long_description = read( os.path.join( script_dir, '..', '..', 'README.md' ) )
+        long_description = read( os.path.join( script_dir, '..', '..', 'README.md' ) ),
         author='MOOSERes',
         author_email='bhalla@ncbs.res.in',
         maintainer='Dilawar Singh',
