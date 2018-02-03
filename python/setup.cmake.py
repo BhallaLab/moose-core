@@ -57,7 +57,7 @@ setup(
             , 'moose.chemUtil'
             , 'moose.chemMerge'
             ],
-	install_requires = [ 'python-libsbml', 'pyneuroml', 'numpy' ],
+	install_requires = [ 'python-libsbml', 'numpy' ],
         package_dir = {
             'moose' : 'moose', 'rdesigneur' : 'rdesigneur'
             },
