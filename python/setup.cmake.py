@@ -38,7 +38,7 @@ except Exception as e:
     suffix = '.so'
 
 setup(
-        name='moose',
+        name='pymoose',
         version=version,
         description='MOOSE python scripting module.',
         author='MOOSERes',
