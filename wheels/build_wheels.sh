@@ -6,11 +6,12 @@ set -x
 if [ ! -d /tmp/moose-core ]; then
     git clone -b wheels https://github.com/BhallaLab/moose-core --depth 10 /tmp/moose-core
 else
-    cd /tmp/moose-core && git pull && cd -
+    cd /tmp/moose-core && git pull && git merge master -X theirs && cd -
 fi
 
 # Try to link statically.
 GSL_STATIC_LIBS="/usr/local/lib/libgsl.a;/usr/local/lib/libgslcblas.a"
+CMAKE=/usr/bin/cmake28
 
 WHEELHOUSE=$HOME/wheelhouse
 mkdir -p $WHEELHOUSE
@@ -22,9 +23,9 @@ for PYDIR in /opt/python/cp27-cp27m/ /opt/python/cp34-cp34m/ /opt/python/cp36-cp
         echo "Building using $PYDIR in $PYVER"
         PYTHON=$(ls $PYDIR/bin/python?.?)
         $PYTHON -m pip install numpy
-        cmake -DPYTHON_EXECUTABLE=$PYTHON  \
+        $CMAKE -DPYTHON_EXECUTABLE=$PYTHON  \
             -DGSL_STATIC_LIBRARIES=$GSL_STATIC_LIBS \
-	    -DMOOSE_VERSION=3.2.0 \
+            -DVERSION_MOOSE=3.2.0 \
             ../..
         make -j4
 
