@@ -10,7 +10,7 @@ else
 fi
 
 # Try to link statically.
-GSL_STATIC_LIBS="/usr/local/lib/libgsl.a;/usr/local/bin/libgslcblas.a"
+GSL_STATIC_LIBS="/usr/local/lib/libgsl.a;/usr/local/lib/libgslcblas.a"
 
 WHEELHOUSE=$HOME/wheelhouse
 mkdir -p $WHEELHOUSE
