@@ -10,7 +10,7 @@ RUN yum update
 RUN yum install -y cmake28 && ln -s /usr/lib/cmake28 /usr/local/bin/cmake
 RUN yum install -y wget 
 RUN wget --no-check-certificate ftp://ftp.gnu.org/gnu/gsl/gsl-2.4.tar.gz 
-RUN tar xvf gsl-2.4.tar.gz && cd gsl-2.4 && ./configure && make -j2 &&  make install && cd 
+RUN tar xvf gsl-2.4.tar.gz && cd gsl-2.4 && CFLAGS=-fPIC ./configure --enable-static --with-pic && make -j2 &&  make install && cd 
 RUN yum install -y git
 RUN git clone --depth 10 https://github.com/BhallaLab/moose-core 
 RUN cd moose-core && git pull && cd wheels && ./build_wheels.sh
