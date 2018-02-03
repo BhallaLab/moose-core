@@ -21,18 +21,11 @@ import sys
 
 from distutils.core import setup
 script_dir = os.path.dirname( os.path.abspath( __file__ ) )
-version = '3.2.0'
-
-def read( filename ):
-    txt = ''
-    with open( filename ) as f:
-        txt = f.read()
-    return txt
-                                                                                
+version = '3.2pre1'
 
 
 try:
-    with open( os.path.join( script_dir, '..', '..', 'VERSION'), 'r' ) as f:
+    with open( os.path.join( script_dir, 'VERSION'), 'r' ) as f:
         version = f.read( )
 except Exception as e:
     print( 'Failed to read VERSION %s' % e )
@@ -49,7 +42,6 @@ setup(
         name='pymoose',
         version=version,
         description='Python scripting interface of MOOSE Simulator (https://moose.ncbs.res.in)',
-        long_description = read( os.path.join( script_dir, '..', '..', 'README.md' ) ),
         author='MOOSERes',
         author_email='bhalla@ncbs.res.in',
         maintainer='Dilawar Singh',
@@ -65,6 +57,7 @@ setup(
             , 'moose.chemUtil'
             , 'moose.chemMerge'
             ],
+	install_requires = [ 'python-libsbml', 'pyneuroml', 'numpy' ],
         package_dir = {
             'moose' : 'moose', 'rdesigneur' : 'rdesigneur'
             },

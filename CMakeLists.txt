@@ -25,7 +25,7 @@ add_definitions( -DMOOSE_VERSION="${MOOSE_VERSION}")
 message( STATUS "MOOSE Version ${MOOSE_VERSION}" )
 
 # Write VERSION to a file VERSION so that setup.py can use it.
-set(VERSION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/VERSION)
+set(VERSION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/python/VERSION)
 message(STATUS "+ Writing ${MOOSE_VERSION} to ${VERSION_FILE}" )
 file(WRITE ${VERSION_FILE} ${MOOSE_VERSION} )
 
