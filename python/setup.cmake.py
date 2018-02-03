@@ -23,6 +23,14 @@ from distutils.core import setup
 script_dir = os.path.dirname( os.path.abspath( __file__ ) )
 version = '3.2.0'
 
+def read( filename ):
+    txt = ''
+    with open( filename ) as f:
+        txt = f.read()
+    return txt
+                                                                                
+
+
 try:
     with open( os.path.join( script_dir, '..', '..', 'VERSION'), 'r' ) as f:
         version = f.read( )
@@ -40,7 +48,8 @@ except Exception as e:
 setup(
         name='pymoose',
         version=version,
-        description='MOOSE python scripting module.',
+        description='Python scripting interface of MOOSE Simulator (https://moose.ncbs.res.in)',
+        long_description = read( os.path.join( script_dir, '..', '..', 'README.md' ) )
         author='MOOSERes',
         author_email='bhalla@ncbs.res.in',
         maintainer='Dilawar Singh',

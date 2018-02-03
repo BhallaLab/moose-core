@@ -25,7 +25,7 @@ for PYDIR in /opt/python/cp27-cp27m/ /opt/python/cp34-cp34m/ /opt/python/cp36-cp
         $PYTHON -m pip install numpy
         $CMAKE -DPYTHON_EXECUTABLE=$PYTHON  \
             -DGSL_STATIC_LIBRARIES=$GSL_STATIC_LIBS \
-            -DVERSION_MOOSE=3.2.0 \
+            -DMOOSE_VERSION=3.2.0 \
             ../..
         make -j4
 
