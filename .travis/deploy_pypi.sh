@@ -18,4 +18,5 @@
 #===============================================================================
 set -o nounset                                  # Treat unset variables as an error
 
-git clone https://github.com/BhallaLab/moose-wheels
+git clone https://github.com/BhallaLab/pymoose-wheels
+cd pymoose-wheels && docker build -t bhallalab/wheels .
