@@ -1,7 +1,10 @@
 language: cpp
-dist: trusty
 sudo: required
 group: edge
+
+services: 
+    - docker
+
 os:
 - linux
 - osx
@@ -13,6 +16,7 @@ notifications:
     - hrani@ncbs.res.in
     on_success: change
     on_failure: always
+
 before_script:
 - echo "OSX related"
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then nvm get head || true; fi
@@ -29,7 +33,5 @@ script:
 
 deploy:
   on: tags
-  provider: pypi
-  user: bhallalab
-  password:
-    secure: iEqhuL0MsKnXsXBLLcEK4oLMQHISKLroV1BYxFDlmKyBFkYo4kp9ttr6VOuaSSmAhsn1qCzfTXyGrC8/oEIkP6RyX1wv/ySwPJOe/bRG96guYmcqAlWRzm29loOFGWjQE36u0E6V6irvPhrRl8N51fc/Lz2XlI8bWn7ZihhD7Hc=
+  provider: script
+  script: ./.travis/deploy_pypi.sh
