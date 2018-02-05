@@ -9,7 +9,7 @@ This repository is sufficient for using MOOSE as a python module. We provide pyt
 
     $ pip install pymoose --user 
 
-`pymoose` is simulation engine of [MOOSE simulator](https://github.com/BhallaLab/moose). We also provide linux package of 
+`pymoose` is part of [MOOSE simulator](https://github.com/BhallaLab/moose). We also provide linux packages of 
 MOOSE simlulator. It can be downloaded from [Open Build Service](https://software.opensuse.org//download.html?project=home%3Amoose&package=moose). 
 In addition to `pymoose`, it also contain a `GUI` to create and visualize chemical network, and `moogli`, a visualizer of neural activity.  
 
