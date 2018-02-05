@@ -95,7 +95,7 @@ class InstallCommand(_install):
         self.new_dir = os.path.join(os.path.split(__file__)[0], 'python')
         os.chdir(self.new_dir)
         try:
-            ds.spawn(["python", "setup.py", "install"])
+            ds.spawn(["python", "setup.cmake.py", "install"])
         except ds.DistutilsExecError as e:
             print("Can't install PyMOOSE")
             print(e)
