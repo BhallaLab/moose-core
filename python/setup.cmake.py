@@ -19,7 +19,11 @@ __status__           = "Development"
 import os
 import sys
 
-from distutils.core import setup
+try:
+	from setuptools import setup
+except Exception as e:
+	from distutils.core import setup
+
 script_dir = os.path.dirname( os.path.abspath( __file__ ) )
 version = '3.2pre1'
 
