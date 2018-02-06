@@ -640,8 +640,8 @@ class rdesigneur:
     ################################################################
     # Here we display the plots and moogli
     ################################################################
-    def displayMoogli( self, moogliDt, runtime, rotation = math.pi/500.0):
-        rmoogli.displayMoogli( self, moogliDt, runtime, rotation )
+    def displayMoogli( self, moogliDt, runtime, rotation = math.pi/500.0, fullscreen = False):
+        rmoogli.displayMoogli( self, moogliDt, runtime, rotation, fullscreen )
 
     def display( self ):
         import matplotlib.pyplot as plt
