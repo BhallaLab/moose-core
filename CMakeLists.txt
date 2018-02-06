@@ -1,6 +1,7 @@
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-project(MOOSE)
+
+project(moose-core)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
@@ -11,15 +12,32 @@ if(COMMAND cmake_policy)
 endif(COMMAND cmake_policy)
 
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 include(FindPkgConfig)
 
+# getgit revision number
+find_program( GIT_EXEC git )
+if(GIT_EXEC)
+    execute_process(COMMAND ${GIT_EXEC} rev-parse --short HEAD 
+        OUTPUT_VARIABLE GIT_HEAD
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+endif()
+
 # If from command line, version info is not passed, use the git to generate a
 # version file. If GIT fails, use the previous known version.
-set(MOOSE_VERSION 3.2-git)
-add_definitions( -DMOOSE_VERSION="${MOOSE_VERSION}")
-message( STATUS "MOOSE Version ${MOOSE_VERSION}" )
+if(NOT VERSION_MOOSE)
+    set(VERSION_MOOSE "3.2.0rc1-${GIT_HEAD}")
+endif( )
+add_definitions( -DMOOSE_VERSION="${VERSION_MOOSE}")
+message( STATUS "MOOSE Version ${VERSION_MOOSE}" )
+
+# Write VERSION to a file VERSION so that setup.cmake.py can use it.
+set(VERSION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/python/VERSION)
+message(STATUS "+ Writing ${VERSION_MOOSE} to ${VERSION_FILE}" )
+file(WRITE ${VERSION_FILE} ${VERSION_MOOSE} )
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -73,9 +91,6 @@ option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
 option(PARALLELIZED_SOLVERS "Use parallel version of GSOLVE. (alpha)" OFF )
 option(PARALLELIZED_CLOCK "High level parallelization of moose::Clock (alpha)" OFF )
 
-################################# CMKAE MACROS #################################
-
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 
 ############################ BUILD CONFIGURATION #################################
 
@@ -263,19 +278,24 @@ endif(WITH_BOOST)
 # these two types because of --whole-archive option. See
 # BhallaLab/moose-core#66,
 if(WITH_GSL)
-    message(STATUS "Using gsl libraries: ${GSL_LIBRARIES}")
-    foreach(GSL_LIB ${GSL_LIBRARIES} )
-        if(GSL_LIB)
-            get_filename_component( GSL_LIB_EXT ${GSL_LIB} EXT )
-            if(GSL_LIB_EXT)
-                if(GSL_LIB_EXT STREQUAL ".a" )
-                    list(APPEND STATIC_LIBRARIES ${GSL_LIB})
-                else()
-                    list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIB})
-                endif( )
-            endif( )
-        endif( )
-    endforeach( )
+    if(GSL_STATIC_LIBRARIES)
+       message( STATUS "Using static libraries ${GSL_STATIC_LIBRARIES}" )
+       list(APPEND STATIC_LIBRARIES ${GSL_STATIC_LIBRARIES})
+    else( )
+       message(STATUS "Using gsl libraries: ${GSL_LIBRARIES}")
+       foreach(GSL_LIB ${GSL_LIBRARIES} )
+           if(GSL_LIB)
+               get_filename_component( GSL_LIB_EXT ${GSL_LIB} EXT )
+               if(GSL_LIB_EXT)
+                   if(GSL_LIB_EXT STREQUAL ".a" )
+                       list(APPEND STATIC_LIBRARIES ${GSL_LIB})
+                   else()
+                       list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIB})
+                   endif( )
+               endif( )
+           endif( )
+       endforeach( )
+   endif( )
 endif()
 
 if(WITH_MPI)
@@ -284,15 +304,9 @@ if(WITH_MPI)
     endif()
 endif(WITH_MPI)
 
-pkg_check_modules(MUPARSER muparser)
-if(MUPARSER_FOUND)
-    message(STATUS "Using system muparser ${MUPARSER_VERSION}")
-    list(APPEND SYSTEM_SHARED_LIBS ${MUPARSER_LIBRARIES})
-else()
-    message(STATUS "Using private muparser")
-    add_subdirectory(external/muparser)
-    list(APPEND MOOSE_LIBRARIES muparser)
-endif()
+# Always use private version of muparser. We have some custom edits.
+add_subdirectory(external/muparser)
+list(APPEND MOOSE_LIBRARIES muparser)
 
 # Add subdirectroeis
 add_subdirectory(basecode)
@@ -375,6 +389,7 @@ if(DEBUG)
     endif( WITH_BOOST )
 endif()
 
+
 ######################### BUILD PYMOOSE ########################################
 add_subdirectory( pymoose )
 
@@ -408,18 +423,16 @@ message( STATUS "Platform ${_platform_desc}" )
 
 set(EXTRA_ARGS "--prefix ${CMAKE_INSTALL_PREFIX}")
 
-## NOTE: Disable it here. It must be handled by moose repository CMakeLists.txt
-## which is used in created packages. For normal user, it should install in
-## site-packages.
-#if( ${_platform_desc} MATCHES ".*(Ubuntu|Debian).*" )
-#    list( APPEND EXTRA_ARGS "--install-layout=deb" )
-#endif( )
+# On Debian/Ubuntu install using debian layout
+if( ${_platform_desc} MATCHES ".*(Ubuntu|Debian).*" )
+    list( APPEND EXTRA_ARGS "--install-layout=deb" )
+endif( )
 
 # If make is called with sudo, install in system directories. Otherwise use
 # --user to install in user home.
 install(CODE
     "execute_process(
-        COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py install ${EXTRA_ARGS}
+        COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py install ${EXTRA_ARGS} ${PYMOOSE_EXTRA_INSTALL_ARGS}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
         )"
         )
@@ -433,8 +446,6 @@ if(${CMAKE_BUILD_TOOL} MATCHES "make")
         "=======================================\n"
         )
 endif()
-
-
 
 
 ############################ CTEST ######################################
