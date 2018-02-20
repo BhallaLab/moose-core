@@ -223,13 +223,26 @@ const Cinfo* CubeMesh::initCinfo()
 		&surface,		// Value
 	};
 
+	static string doc[] =
+	{
+		"Name", "CubeMesh",
+		"Author", "Upi Bhalla",
+		"Description", "Chemical compartment with cuboid grid. "
+				"Defaults to a cube of size 10 microns, with mesh size "
+				"also 10 microns, so that there is just 1 cubic voxel. "
+				"These defaults are similar to that of a typical cell. "
+				"Can be configured to have different x,y,z dimensions and "
+				"also different dx,dy,dz voxel sizes. ",
+	};
 	static Dinfo< CubeMesh > dinfo;
 	static Cinfo cubeMeshCinfo (
 		"CubeMesh",
 		ChemCompt::initCinfo(),
 		cubeMeshFinfos,
 		sizeof( cubeMeshFinfos ) / sizeof ( Finfo* ),
-		&dinfo
+		&dinfo,
+		doc,
+        sizeof(doc)/sizeof(string)
 	);
 
 	return &cubeMeshCinfo;
@@ -252,12 +265,12 @@ CubeMesh::CubeMesh()
 		x0_( 0.0 ),
 		y0_( 0.0 ),
 		z0_( 0.0 ),
-		x1_( 1.0 ),
-		y1_( 1.0 ),
-		z1_( 1.0 ),
-		dx_( 1.0 ),
-		dy_( 1.0 ),
-		dz_( 1.0 ),
+		x1_( 10e-6 ),
+		y1_( 10e-6 ),
+		z1_( 10e-6 ),
+		dx_( 10e-6 ),
+		dy_( 10e-6 ),
+		dz_( 10e-6 ),
 		nx_( 1 ),
 		ny_( 1 ),
 		nz_( 1 ),
@@ -928,7 +941,12 @@ const vector< double >& CubeMesh::getVoxelArea() const
 const vector< double >& CubeMesh::getVoxelLength() const
 {
 	static vector< double > length;
-	assert( 0 ); // Not yet operational
+	if ( dx_ > dy_ && dx_ > dz_ )
+		length.assign( innerGetNumEntries(), dx_ );
+	else if ( dy_ > dz_ )
+		length.assign( innerGetNumEntries(), dy_ );
+	else
+		length.assign( innerGetNumEntries(), dz_ );
 	return length;
 }
 

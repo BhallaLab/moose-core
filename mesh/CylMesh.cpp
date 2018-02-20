@@ -131,13 +131,26 @@ const Cinfo* CylMesh::initCinfo()
 		&totLength,		// ReadOnlyValue
 	};
 
+	static string doc[] =
+	{
+		"Name", "CylMesh",
+		"Author", "Upi Bhalla",
+		"Description", "Chemical compartment with cylindrical geometry. "
+				"Defaults to a uniform cylinder of radius 1 micron, "
+				"length 100 microns, and voxel length 1 micron so there "
+				"are 100 voxels in the cylinder. "
+				"The cylinder can be given a linear taper, by assigning "
+				"different radii r0 and r1 to the two ends. ",
+	};
 	static Dinfo< CylMesh > dinfo;
 	static Cinfo cylMeshCinfo (
 		"CylMesh",
 		ChemCompt::initCinfo(),
 		cylMeshFinfos,
 		sizeof( cylMeshFinfos ) / sizeof ( Finfo* ),
-		&dinfo
+		&dinfo,
+		doc,
+        sizeof(doc)/sizeof(string)
 	);
 
 	return &cylMeshCinfo;
@@ -154,20 +167,20 @@ static const Cinfo* cylMeshCinfo = CylMesh::initCinfo();
 //////////////////////////////////////////////////////////////////
 CylMesh::CylMesh()
 	:
-		numEntries_( 1 ),
+		numEntries_( 100 ),
 		useCaps_( 0 ),
 		isToroid_( false ),
 		x0_( 0.0 ),
 		y0_( 0.0 ),
 		z0_( 0.0 ),
-		x1_( 1.0 ),
+		x1_( 100.0e-6 ),
 		y1_( 0.0 ),
 		z1_( 0.0 ),
-		r0_( 1.0 ),
-		r1_( 1.0 ),
-		diffLength_( 1.0 ),
+		r0_( 1.0e-6 ),
+		r1_( 1.0e-6 ),
+		diffLength_( 1.0e-6 ),
 		surfaceGranularity_( 0.1 ),
-		totLen_( 1.0 ),
+		totLen_( 100.0e-6 ),
 		rSlope_( 0.0 ),
 		lenSlope_( 0.0 )
 {
