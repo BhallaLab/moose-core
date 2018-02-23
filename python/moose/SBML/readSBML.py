@@ -970,7 +970,7 @@ def createRules(model, specInfoMap, globparameterIdValue):
         if (rule.isAssignment()):
             rule_variable = rule.getVariable()
         
-            if specInfoMap.has_key(rule_variable):
+            if rule_variable in specInfoMap:
                 #In assignment rule only if pool exist, then that is conveted to moose as 
                 # this can be used as summation of pool's, P1+P2+P3 etc 
                 rule_variable = parentSp = str(idBeginWith(rule_variable))
@@ -993,7 +993,7 @@ def createRules(model, specInfoMap, globparameterIdValue):
                     if found:
                         allPools = True
                         for i in ruleMemlist:
-                            if specInfoMap.has_key(i):
+                            if i in specInfoMap:
                                 pass
                             else:
                                 allPools = False
