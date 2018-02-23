@@ -2,37 +2,35 @@
 set -e
 set -x
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+MOOSE_SOURCE_DIR=/tmp/moose-core
 # Clone git or update.
-if [ ! -d /tmp/moose-core ]; then
-    git clone https://github.com/BhallaLab/moose-core --depth 10 /tmp/moose-core
+if [ ! -d $MOOSE_SOURCE_DIR ]; then
+    git clone -b wheels https://github.com/BhallaLab/moose-core --depth 10 $MOOSE_SOURCE_DIR
 else
-    cd /tmp/moose-core && git pull && cd -
+    cd $MOOSE_SOURCE_DIR && git pull && git merge master -X theirs && cd -
 fi
 
 # Try to link statically.
-GSL_STATIC_LIBS=/usr/local/lib/libgsl.a
+GSL_STATIC_LIBS="/usr/local/lib/libgsl.a;/usr/local/lib/libgslcblas.a"
+CMAKE=/usr/bin/cmake28
 
 WHEELHOUSE=$HOME/wheelhouse
 mkdir -p $WHEELHOUSE
-for PYDIR in /opt/python/*; do
+for PYDIR in /opt/python/cp27-cp27m/ /opt/python/cp34-cp34m/ /opt/python/cp36-cp36m/; do
     PYVER=$(basename $PYDIR)
-    if [[ $PYVER = *"cpython"* ]]; then
-        continue
-    fi
-    if [[ $PYVER = *"cp33"* ]]; then
-        continue
-    fi
     mkdir -p $PYVER
     (
         cd $PYVER
         echo "Building using $PYDIR in $PYVER"
         PYTHON=$(ls $PYDIR/bin/python?.?)
         $PYTHON -m pip install numpy
-        cmake -DPYTHON_EXECUTABLE=$PYTHON  \
+        $CMAKE -DPYTHON_EXECUTABLE=$PYTHON  \
             -DGSL_STATIC_LIBRARIES=$GSL_STATIC_LIBS \
-            ../..
+            -DMOOSE_VERSION="3.2rc1" ${MOOSE_SOURCE_DIR}
         make -j4
-
+        
         # Now build bdist_wheel
         cd python
         cp setup.cmake.py setup.py
@@ -45,3 +43,4 @@ for whl in $WHEELHOUSE/*.whl; do
     #auditwheel repair "$whl" -w $WHEELHOUSE
     auditwheel show "$whl"
 done
+ls -lh $WHEELHOUSE/*.whl
