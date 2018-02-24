@@ -993,10 +993,9 @@ def createRules(model, specInfoMap, globparameterIdValue):
                     if found:
                         allPools = True
                         for i in ruleMemlist:
-                            if i in specInfoMap:
-                                pass
-                            else:
+                            if i not in specInfoMap:
                                 allPools = False
+                                break
                         if allPools:
                             #only if addition then summation works, only then I create a function in moose
                             # which is need to get the summation's output to a pool
