@@ -29,7 +29,7 @@ endif()
 # If from command line, version info is not passed, use the git to generate a
 # version file. If GIT fails, use the previous known version.
 if(NOT VERSION_MOOSE)
-    set(VERSION_MOOSE "3.2.0rc1-${GIT_HEAD}")
+    set(VERSION_MOOSE "3.2.0-${GIT_HEAD}")
 endif( )
 add_definitions( -DMOOSE_VERSION="${VERSION_MOOSE}")
 message( STATUS "MOOSE Version ${VERSION_MOOSE}" )
@@ -243,14 +243,6 @@ endif( HDF5_FOUND )
 # headers in non-standard path. issue #80.
 if(HDF5_LIBRARY_DIRS)
     set_target_properties( libmoose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
-endif()
-
-find_package(Termcap)
-find_package(Readline)
-
-if(READLINE_FOUND AND TERMCAP_FOUND)
-    add_definitions(-DUSE_READLINE)
-    include_directories(${Readline_INCLUDE_DIR})
 endif()
 
 # Openmpi

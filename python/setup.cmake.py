@@ -37,7 +37,7 @@ except Exception as e:
 
 try:
     import importlib.machinery
-    suffix = importlib.machinery.EXTENSION_SUFFIXES[0]
+    suffix = importlib.machinery.EXTENSION_SUFFIXES[0].split('.')[-1]
 except Exception as e:
     print( '[WARN] Failed to determine importlib suffix' )
     suffix = '.so'
