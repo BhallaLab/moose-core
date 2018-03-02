@@ -1,18 +1,25 @@
 #!/bin/bash
+
+# NOTE: Use this script only on manylinux docker image. This builds pymoose
+# wheels.
+echo "[INFO] Make sure to use it on manylinux docker image else it may \
+    not work"
+
 set -e
 set -x
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-MOOSE_SOURCE_DIR=/tmp/moose-core
+MOOSE_SOURCE_DIR=${SCRIPT_DIR}/..
+
 # Clone git or update.
 if [ ! -d $MOOSE_SOURCE_DIR ]; then
-    git clone -b wheels https://github.com/BhallaLab/moose-core --depth 10 $MOOSE_SOURCE_DIR
+    git clone -b chennapoda https://github.com/BhallaLab/moose-core --depth 10 $MOOSE_SOURCE_DIR
 else
-    cd $MOOSE_SOURCE_DIR && git pull && git merge master -X theirs && cd -
+    git pull
 fi
 
-# Try to link statically.
+# This library much be available as static built.
 GSL_STATIC_LIBS="/usr/local/lib/libgsl.a;/usr/local/lib/libgslcblas.a"
 CMAKE=/usr/bin/cmake28
 
