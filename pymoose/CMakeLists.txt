@@ -15,9 +15,11 @@ add_library( _moose MODULE ${PYMOOSE_SRCS} )
 set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
 
 find_package(PythonInterp REQUIRED)
-execute_process( COMMAND ${PYTHON_EXECUTABLE} -c
-    "try: import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])
-except Exception: pass"
+set(PYTHON_SO_EXTENSION ".so")
+execute_process( COMMAND 
+    ${PYTHON_EXECUTABLE} -c
+        "import importlib.machinery
+print('.%s' % importlib.machinery.EXTENSION_SUFFIXES[0].split('.')[-1] )"
     OUTPUT_VARIABLE PYTHON_SO_EXTENSION
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
