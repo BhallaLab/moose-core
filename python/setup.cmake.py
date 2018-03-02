@@ -35,7 +35,7 @@ with open( os.path.join( script_dir, 'VERSION'), 'r' ) as f:
 
 try:
     import importlib.machinery
-    suffix = importlib.machinery.EXTENSION_SUFFIXES[0].split('.')[-1]
+    suffix = '.%s' % importlib.machinery.EXTENSION_SUFFIXES[0].split('.')[-1]
 except Exception as e:
     print( '[WARN] Failed to determine importlib suffix due to %s' % e )
     suffix = '.so'
