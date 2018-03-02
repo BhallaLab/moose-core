@@ -12,6 +12,6 @@ RUN yum install -y cmake28 && ln -sf /usr/bin/cmake28 /usr/bin/cmake
 RUN yum install -y wget
 RUN if [ ! -f /usr/local/lib/libgsl.a ]; then \
     wget --no-check-certificate ftp://ftp.gnu.org/gnu/gsl/gsl-2.4.tar.gz && \
-    tar xvf gsl-2.4.tar.gz && cd gsl-2.4 && ./configure && make -j2 && \
+    tar xvf gsl-2.4.tar.gz && cd gsl-2.4 && ./configure && make -j4 && \
     make install && cd; fi
 RUN ./build_wheels.sh

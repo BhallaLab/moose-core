@@ -10,7 +10,7 @@ set -x
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-MOOSE_SOURCE_DIR=${SCRIPT_DIR}/..
+MOOSE_SOURCE_DIR=/tmp/moose
 
 # Clone git or update.
 if [ ! -d $MOOSE_SOURCE_DIR ]; then
