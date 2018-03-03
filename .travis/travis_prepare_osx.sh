@@ -34,7 +34,7 @@ brew unlink numpy && brew link numpy || echo "Failed to link numpy"
 mkdir -p $HOME/Library/Python/2.7/lib/python/site-packages
 echo 'import sys; sys.path.insert(1, "/usr/local/lib/python2.7/site-packages")' >> $HOME/Library/Python/2.7/lib/python/site-packages/homebrew.pth
 # ensurepip
-#python -m ensurepip
-pip2 install matplotlib --user
-pip2 install pyNeuroML libNeuroML --user
-pip2 install scipy --user
+python -m ensurepip
+python -m pip install matplotlib --user
+python -m pip install pyNeuroML libNeuroML --user
+python -m pip install scipy --user
