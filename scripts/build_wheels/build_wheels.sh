@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# NOTE: Use this script only on manylinux docker image. This builds pymoose
-# wheels.
-echo "[INFO] Make sure to use it on manylinux docker image else it may \
-    not work"
-
 set -e
 set -x
+
+
+# NOTE: Use this script only on manylinux docker image. This builds pymoose
+# wheels.
+echo "[INFO] Make sure to use it on manylinux docker image else it may not work"
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 

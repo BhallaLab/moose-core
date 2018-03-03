@@ -14,4 +14,7 @@ RUN if [ ! -f /usr/local/lib/libgsl.a ]; then \
     wget --no-check-certificate ftp://ftp.gnu.org/gnu/gsl/gsl-2.4.tar.gz && \
     tar xvf gsl-2.4.tar.gz && cd gsl-2.4 && ./configure && make -j4 && \
     make install && cd; fi
-RUN ./build_wheels.sh
+RUN curl -O http://github.com/BhallaLab/moose/raw/master/scripts/build_wheels/build_wheels.sh
+RUN ls -la
+RUN cat build_wheels.sh
+RUN bash -c build_wheels.sh
