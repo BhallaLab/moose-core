@@ -17,6 +17,7 @@
 #include "ChemCompt.h"
 #include "MeshCompt.h"
 #include "CubeMesh.h"
+#include "EndoMesh.h"
 
 const unsigned int CubeMesh::EMPTY = ~0;
 const unsigned int CubeMesh::SURFACE = ~1;
@@ -1118,9 +1119,15 @@ void CubeMesh::matchMeshEntries( const ChemCompt* other,
 				cout << "Warning:CubeMesh::matchMeshEntries: cannot yet handle unequal meshes\n";
 		}
 		*/
-	} else {
-		cout << "Warning:CubeMesh::matchMeshEntries: cannot yet handle Neuro or Cyl meshes.\n";
+		return;
 	}
+	const EndoMesh* em = dynamic_cast< const EndoMesh* >( other );
+	if ( em ) {
+        em->matchMeshEntries( this, ret );
+        flipRet( ret );
+		return;
+	}
+	cout << "Warning:CubeMesh::matchMeshEntries: cannot yet handle Neuro or Cyl meshes.\n";
 }
 
 unsigned int CubeMesh::numDims() const

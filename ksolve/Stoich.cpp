@@ -141,7 +141,7 @@ const Cinfo* Stoich::initCinfo()
         "matrixEntry",
         "The non-zero matrix entries in the sparse matrix. Their"
         "column indices are in a separate vector and the row"
-        "informatino in a third",
+        "information in a third",
         &Stoich::getMatrixEntry
     );
     // Stuff here for getting Stoichiometry matrix to manipulate in

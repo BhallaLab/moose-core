@@ -15,7 +15,9 @@
 #include "../mesh/VoxelJunction.h"
 #include "XferInfo.h"
 #include "ZombiePoolInterface.h"
+#include "../kinetics/ConcChan.h"
 #include "DiffPoolVec.h"
+#include "ConcChanInfo.h"
 #include "FastMatrixElim.h"
 #include "../mesh/VoxelJunction.h"
 #include "DiffJunction.h"
@@ -365,6 +367,74 @@ void Dsolve::calcJnXfer( const DiffJunction& jn,
 
 void Dsolve::calcJnChan( const DiffJunction& jn, Dsolve* other, double dt )
 {
+	// Each jn has some channels
+	// Each channel has a chanPool, an intPool and an extPool.
+	// intPool is on self, extPool is on other, but we have a problem
+	// because the chanPool could be a third compartment, such as the memb
+	// If we stipulate it is is on self, that is easy but not general.
+	// Other alternative is to have a message to update the N of the chan,
+	// so it isn't in the domain of the solver at all except for here.
+	// In which case we will want to point to the Moose object for it.
+	//
+	//
+	
+	for ( unsigned int i = 0; i < jn.myChannels.size(); ++i ) {
+		ConcChanInfo& myChan = channels_[ jn.myChannels[i] ];
+		DiffPoolVec& myDv = pools_[ jn.myPools[myChan.myPool] ];
+		DiffPoolVec& otherDv = 
+				other->pools_[ jn.otherPools[myChan.otherPool] ];
+		DiffPoolVec& chanDv = pools_[ jn.myPools[myChan.chanPool] ];
+		for ( vector< VoxelJunction >::const_iterator
+			j = jn.vj.begin(); j != jn.vj.end(); ++j ) {
+
+			double myN = myDv.getN( j->first );
+			double lastN = myN;
+			double otherN = otherDv.getN( j->second );
+			double perm = myChan.permeability * chanDv.getN( j->first );
+			myN = integ( myN, perm * myN/j->firstVol, 
+							perm * otherN/j->secondVol, dt );
+			otherN += lastN - myN;	// Mass consv
+			if ( otherN < 0.0 ) { // Avoid negatives
+				myN += otherN;
+				otherN = 0.0;
+			}
+			myDv.setN( j->first, myN );
+			otherDv.setN( j->second, otherN );
+		}
+	}
+}
+
+// Same as above, but now go through channels on other Dsolve.
+void Dsolve::calcOtherJnChan( const DiffJunction& jn, Dsolve* other, double dt )
+{
+	for ( unsigned int i = 0; i < jn.otherChannels.size(); ++i ) {
+		ConcChanInfo& otherChan = other->channels_[ jn.otherChannels[i] ];
+		// This is the DiffPoolVec for the pools on the other Dsolve,
+		// the one with the channel.
+		// DiffPoolVec& otherDv = other->pools_[ jn.otherPools[otherChan.myPool] ];
+		DiffPoolVec& otherDv = other->pools_[ otherChan.myPool ];
+		// Local diffPoolVec.
+		// DiffPoolVec& myDv = pools_[ jn.myPools[otherChan.otherPool] ];
+		DiffPoolVec& myDv = pools_[ otherChan.otherPool ];
+		DiffPoolVec& chanDv = other->pools_[ otherChan.chanPool ];
+		for ( vector< VoxelJunction >::const_iterator
+			j = jn.vj.begin(); j != jn.vj.end(); ++j ) {
+
+			double myN = myDv.getN( j->first );
+			double lastN = myN;
+			double otherN = otherDv.getN( j->second );
+			double perm = otherChan.permeability * chanDv.getN(j->second);
+			myN = integ( myN, perm * myN/j->firstVol, 
+							perm * otherN/j->secondVol, dt );
+			otherN += lastN - myN;	// Mass consv
+			if ( otherN < 0.0 ) { // Avoid negatives
+				myN += otherN;
+				otherN = 0.0;
+			}
+			myDv.setN( j->first, myN );
+			otherDv.setN( j->second, otherN );
+		}
+	}
 }
 
 /**
@@ -387,6 +457,7 @@ void Dsolve::calcJunction( const DiffJunction& jn, double dt )
 	calcJnXfer( jn, jn.otherXferSrc, jn.myXferDest, other, this );
 
 	calcJnChan( jn, other, dt );
+	calcOtherJnChan( jn, other, dt );
 }
 
 void Dsolve::process( const Eref& e, ProcPtr p )
@@ -449,6 +520,54 @@ void Dsolve::setStoich( Id id )
 					*/
 		}
 	}
+	string chanpath = path_ + "[ISA=ConcChan]";
+	vector< ObjId > chans;
+	wildcardFind( chanpath, chans );
+	fillConcChans( chans );
+}
+
+void Dsolve::fillConcChans( const vector< ObjId >& chans )
+{
+	static const Cinfo* ccc = Cinfo::find( "ConcChan" );
+	static const Finfo* inPoolFinfo = ccc->findFinfo( "inPool" );
+	static const Finfo* outPoolFinfo = ccc->findFinfo( "outPool" );
+	static const Finfo* chanPoolFinfo = ccc->findFinfo( "setNumChan" );
+	FuncId fin = static_cast< const DestFinfo* >( inPoolFinfo )->getFid();
+	FuncId fout = static_cast< const DestFinfo* >(outPoolFinfo )->getFid();
+	FuncId fchan = 
+			static_cast< const DestFinfo* >(chanPoolFinfo )->getFid();
+
+	// Find the in pools and the chan pools on the current compt.
+	// Save the Id of the outPool as an integer.
+	// Use these and the permeability to create the ConcChanInfo.
+	for ( auto i = chans.begin(); i != chans.end(); ++i ) {
+		vector< Id > ret;
+		if (i->element()->getNeighbors( ret, inPoolFinfo ) == 0 ) return;
+		ObjId inPool( ret[0] );
+		ret.clear();
+		if (i->element()->getNeighbors( ret, outPoolFinfo ) == 0 ) return;
+		ObjId outPool( ret[0] );
+		ret.clear();
+		if (i->element()->getNeighbors( ret, chanPoolFinfo ) == 0 ) return;
+		ObjId chanPool( ret[0] );
+		ret.clear();
+		/*
+		ObjId inPool = i->element()->findCaller( fin );
+		ObjId chanPool = i->element()->findCaller( fchan );
+		ObjId outPool = i->element()->findCaller( fout );
+		*/
+		if ( !( inPool.bad() or chanPool.bad() ) ) {
+			unsigned int inPoolIndex = convertIdToPoolIndex( inPool.id );
+			unsigned int chanPoolIndex = convertIdToPoolIndex(chanPool.id);
+			if ( inPoolIndex != ~0U && chanPoolIndex != ~0U ) {
+				ConcChanInfo cci( inPoolIndex, outPool.id.value(), 
+					chanPoolIndex, 
+					Field< double >::get( *i, "permeability" ) 
+				);
+				channels_.push_back( cci );
+			}
+		}
+	}
 }
 
 Id Dsolve::getStoich() const
@@ -508,6 +627,8 @@ void Dsolve::makePoolMapFromElist( const vector< ObjId >& elist,
 	stoich_ = Id();
 	poolMapStart_ = minId;
 	poolMap_.resize( 1 + maxId - minId );
+	for ( auto i = poolMap_.begin(); i != poolMap_.end(); ++i )
+		*i = ~0U;
 	for ( unsigned int i = 0; i < temp.size(); ++i ) {
 		unsigned int idValue = temp[i].value();
 		assert( idValue >= minId );
@@ -746,8 +867,28 @@ void Dsolve::mapXfersBetweenDsolves(
 	}
 }
 
-static void mapChansBetweenDsolves( DiffJunction& jn, Id self, Id other)
+void Dsolve::mapChansBetweenDsolves( DiffJunction& jn, Id self, Id other)
 {
+	Dsolve* otherSolve = reinterpret_cast< Dsolve* >(
+					other.eref().data() );
+	vector< ConcChanInfo >& ch = channels_;
+	unsigned int outIndex;
+	for ( unsigned int i = 0; i < ch.size(); ++i ) {
+		outIndex = otherSolve->convertIdToPoolIndex( ch[i].otherPool );
+		if ( outIndex != ~0U ) {
+			jn.myChannels.push_back(i);
+			ch[i].otherPool = outIndex;	// replace the Id with the index.
+		}
+	}
+	// Now set up the other Dsolve.
+	vector< ConcChanInfo >& ch2 = otherSolve->channels_;
+	for ( unsigned int i = 0; i < ch2.size(); ++i ) {
+		outIndex = convertIdToPoolIndex( ch2[i].otherPool );
+		if ( outIndex != ~0U ) {
+			jn.otherChannels.push_back(i);
+			ch2[i].otherPool = outIndex;  // replace the Id with the index
+		}
+	}
 }
 
 static void mapVoxelsBetweenMeshes( DiffJunction& jn, Id self, Id other)
@@ -785,8 +926,7 @@ void Dsolve::innerBuildMeshJunctions( Id self, Id other, bool selfIsMembraneBoun
 	mapVoxelsBetweenMeshes( jn, self, other );
 
 	// printJunction( self, other, jn );
-	Dsolve* mySolve = reinterpret_cast< Dsolve* >( self.eref().data() );
-	mySolve->junctions_.push_back( jn );
+	junctions_.push_back( jn );
 }
 
 /////////////////////////////////////////////////////////////
@@ -810,16 +950,21 @@ void Dsolve::setNumAllVoxels( unsigned int num )
 		pools_[i].setNumVoxels( numVoxels_ );
 }
 
-unsigned int Dsolve::convertIdToPoolIndex( const Eref& e ) const
+unsigned int Dsolve::convertIdToPoolIndex( const Id id ) const
 {
-	unsigned int i  = e.id().value() - poolMapStart_;
+	unsigned int i  = id.value() - poolMapStart_;
 	if ( i < poolMap_.size() ) {
 		return poolMap_[i];
 	}
 	cout << "Warning: Dsolve::convertIdToPoollndex: Id out of range, (" <<
-		poolMapStart_ << ", " << e.id() << ", " <<
+		poolMapStart_ << ", " << id << ", " << id.path() << ", " <<
 		poolMap_.size() + poolMapStart_ << "\n";
 	return 0;
+}
+
+unsigned int Dsolve::convertIdToPoolIndex( const Eref& e ) const
+{
+	return convertIdToPoolIndex( e.id() );
 }
 
 void Dsolve::setN( const Eref& e, double v )

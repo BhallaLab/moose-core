@@ -93,7 +93,7 @@ class Dsolve: public ZombiePoolInterface
 		 * the junction between any specified pair of Dsolves.
 		 * Note that it builds the junction on the 'self' Dsolve.
 		 */
-		static void innerBuildMeshJunctions( Id self, Id other, 
+		void innerBuildMeshJunctions( Id self, Id other, 
 						bool isMembraneBound );
 
 		/// Sets up map of matching pools for diffusion.
@@ -104,6 +104,7 @@ class Dsolve: public ZombiePoolInterface
 						vector< unsigned int >& srcPools, 
 						vector< unsigned int >& destPools,
 						Id src, Id dest );
+		void mapChansBetweenDsolves( DiffJunction& jn, Id self, Id other);
 
 		/**
 		 * Computes flux through a junction between diffusion solvers.
@@ -147,6 +148,7 @@ class Dsolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////
+		unsigned int convertIdToPoolIndex( Id id ) const;
 		unsigned int convertIdToPoolIndex( const Eref& e ) const;
 		unsigned int getPoolIndex( const Eref& e ) const;
 
@@ -172,6 +174,9 @@ class Dsolve: public ZombiePoolInterface
 						const vector< unsigned int >& destXfer, 
 						Dsolve* srcDsolve, Dsolve* destDsolve );
 		void calcJnChan( const DiffJunction& jn, Dsolve* other, double dt );
+		void calcOtherJnChan( const DiffJunction& jn, Dsolve* other, 
+						double dt );
+		void fillConcChans( const vector< ObjId >& chans );
 
 		/**
 		 * Utility func for debugging: Prints N_ matrix
@@ -195,6 +200,8 @@ class Dsolve: public ZombiePoolInterface
 
 		/// Internal vector, one for each pool species managed by Dsolve.
 		vector< DiffPoolVec > pools_;
+		/// Internal vector, one for each ConcChan managed by Dsolve.
+		vector< ConcChanInfo > channels_;
 
 		/// smallest Id value for poolMap_
 		unsigned int poolMapStart_;

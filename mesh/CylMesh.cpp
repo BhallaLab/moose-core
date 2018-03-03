@@ -22,6 +22,7 @@
 // #include "NeuroStencil.h"
 #include "NeuroMesh.h"
 #include "CylMesh.h"
+#include "EndoMesh.h"
 #include "../utility/numutil.h"
 const Cinfo* CylMesh::initCinfo()
 {
@@ -831,20 +832,27 @@ void CylMesh::matchMeshEntries( const ChemCompt* other,
 	const CylMesh* cyl = dynamic_cast< const CylMesh* >( other );
 	if ( cyl ) {
 		matchCylMeshEntries( cyl, ret );
-	} else {
-		const CubeMesh* cube = dynamic_cast< const CubeMesh* >( other );
-		if ( cube ) {
-			matchCubeMeshEntries( cube, ret );
-		} else {
-			const NeuroMesh* nm = dynamic_cast< const NeuroMesh* >( other );
-			if ( nm ) {
-				matchNeuroMeshEntries( nm, ret );
-			} else {
-				cout << "Warning:CylMesh::matchMeshEntries: "  <<
-						" unknown mesh type\n";
-			}
-		}
+		return;
 	}
+    const EndoMesh* em = dynamic_cast< const EndoMesh* >( other );
+    if ( em )
+    {
+        em->matchMeshEntries( this, ret );
+        flipRet( ret );
+        return;
+    }
+	const CubeMesh* cube = dynamic_cast< const CubeMesh* >( other );
+	if ( cube ) {
+		matchCubeMeshEntries( cube, ret );
+		return;
+	}
+	const NeuroMesh* nm = dynamic_cast< const NeuroMesh* >( other );
+	if ( nm ) {
+		matchNeuroMeshEntries( nm, ret );
+		return;
+	}
+	cout << "Warning:CylMesh::matchMeshEntries: "  << 
+			" unknown mesh type\n";
 }
 
 // Look for end-to-end diffusion, not sideways for now.

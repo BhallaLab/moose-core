@@ -958,6 +958,7 @@ void Clock::buildDefaultTick()
     defaultTick_["ChemCompt"] = ~0U;
     defaultTick_["Cinfo"] = ~0U;
     defaultTick_["Clock"] = ~0U;
+    defaultTick_["ConcChan"] = ~0U;
     defaultTick_["CubeMesh"] = ~0U;
     defaultTick_["CylMesh"] = ~0U;
     defaultTick_["DiagonalMsg"] = ~0U;
