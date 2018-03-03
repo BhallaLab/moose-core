@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This module contain functions to test
-https://github.com/BhallaLab/moose-examples .
+This module contain functions to test https://github.com/BhallaLab/moose-examples .
 
 To run:
 
@@ -10,7 +9,7 @@ To run:
 
 """
 
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2017-, Dilawar Singh"
@@ -30,6 +29,7 @@ import threading
 import signal
 import logging
 import time
+import moose
 import moose.utils as mu
 from collections import defaultdict
 
