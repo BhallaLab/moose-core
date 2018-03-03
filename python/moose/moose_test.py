@@ -1,13 +1,19 @@
 # -*- coding: utf-8 -*-
 """
-Test MOOSE installation with moose-examples.
+This module contain functions to test
+https://github.com/BhallaLab/moose-examples .
+
+To run:
+
+    moose.test( )
+
 
 """
 
 from __future__ import print_function
 
 __author__           = "Dilawar Singh"
-__copyright__        = "Copyright 2016, Dilawar Singh"
+__copyright__        = "Copyright 2017-, Dilawar Singh"
 __credits__          = ["NCBS Bangalore"]
 __license__          = "GNU GPL"
 __version__          = "1.0.0"
@@ -23,9 +29,11 @@ import subprocess
 import threading
 import signal
 import logging
-from collections import defaultdict
 import time
+import moose.utils as mu
+from collections import defaultdict
 
+# Create temporary log file.
 logfile_ = tempfile.NamedTemporaryFile( )
 logging.basicConfig(
         level=logging.DEBUG,
@@ -34,6 +42,8 @@ logging.basicConfig(
         filename = logfile_.name,
         filemode='w'
         )
+
+# Add a console logger.
 console = logging.StreamHandler()
 console.setLevel(logging.WARNING)
 formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
@@ -49,6 +59,8 @@ ignored_dict_ = defaultdict( list )
 test_status_ = defaultdict( list )
 total_ = 0
 
+# Custom matplotlibrc file. Needs to be written to the working directory from
+# where tests are being run.
 matplotlibrc_ = '''
 backend : agg
 interactive : True
@@ -56,7 +68,7 @@ interactive : True
 
 # Handle CTRL+C
 def signal_handler(signal, frame):
-    print( 'You pressed Ctrl+C!' )
+    print( 'You pressed Ctrl+C! Quitting.' )
     print_test_stat( )
     quit(-1)
 
@@ -91,6 +103,10 @@ class Command(object):
         return self.process.returncode
 
 def init_test_dir( ):
+    """
+    Initialize test directory.
+    If git is not found, download the zip file.
+    """
     global test_dir_
     global test_url_
     if( not os.path.exists( test_dir_ ) ):
@@ -192,7 +208,7 @@ def test( timeout = 60, **kwargs ):
     try:
         init_test_dir( )
     except Exception as e:
-        print( '[INFO] Failed to clone moose-examples. Error was %s' % e )
+        mu.warn( 'Failed to clone moose-examples. Error was %s' % e )
         quit( )
 
     test_all( timeout = timeout, **kwargs  )
