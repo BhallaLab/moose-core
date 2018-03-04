@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # This file is part of MOOSE simulator: http://moose.ncbs.res.in.
 
 # MOOSE is free software: you can redistribute it and/or modify
@@ -28,7 +29,7 @@ version = '3.1.2'
 
 try:
     import importlib.machinery
-    suffix = importlib.machinery.EXTENSION_SUFFIXES[0]
+    suffix = importlib.machinery.EXTENSION_SUFFIXES[-1]
 except Exception as e:
     suffix = '.so'
 
@@ -49,9 +50,9 @@ setup(
             , 'moose.genesis'
             , 'moose.chemUtil'
             ],
-        package_dir = { 
-            'moose' : 'moose' 
+        package_dir = {
+            'moose' : 'moose'
             , 'rdesigneur' : 'rdesigneur'
             },
         package_data = { 'moose' : ['_moose' + suffix] },
-    ) 
+    )
