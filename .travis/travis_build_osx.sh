@@ -31,4 +31,7 @@ set -e
         -DPYTHON_EXECUTABLE=`which python` ..
     make && ctest --output-on-failure
     cd ..
+    set +e
 )
+set +e
+
