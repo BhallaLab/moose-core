@@ -20,9 +20,9 @@ import os
 import sys
 
 try:
-	from setuptools import setup
+    from setuptools import setup
 except Exception as e:
-	from distutils.core import setup
+    from distutils.core import setup
 
 script_dir = os.path.dirname( os.path.abspath( __file__ ) )
 version = '3.1.3'
@@ -34,12 +34,8 @@ except Exception as e:
     print( 'Failed to read VERSION %s' % e )
     print( 'Using default %s' % version )
 
-try:
-    import importlib.machinery
-    suffix = importlib.machinery.EXTENSION_SUFFIXES[0]
-except Exception as e:
-    print( '[WARN] Failed to determine importlib suffix' )
-    suffix = '.so'
+import importlib.machinery
+suffix = importlib.machinery.EXTENSION_SUFFIXES[-1]
 
 setup(
         name='pymoose',
@@ -60,8 +56,6 @@ setup(
             , 'moose.chemMerge'
             ],
 	install_requires = [ 'python-libsbml', 'numpy' ],
-        package_dir = {
-            'moose' : 'moose', 'rdesigneur' : 'rdesigneur'
-            },
-        package_data = { 'moose' : ['_moose' + suffix ] },
+        package_dir = { 'moose' : 'moose', 'rdesigneur' : 'rdesigneur' },
+        package_data = { 'moose' : ['_moose*%s' % suffix ] },
     )

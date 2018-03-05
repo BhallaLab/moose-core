@@ -11,18 +11,22 @@ set(PYMOOSE_SRCS
     PyRun.cpp
     )
 
+# Build _moose.so in source directory and them copy everything to
+# current binary directory using cmake.
 add_library( _moose MODULE ${PYMOOSE_SRCS} )
-set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
+set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/python/moose")
 
 find_package(PythonInterp REQUIRED)
-set(PYTHON_SO_EXTENSION ".so")
 execute_process( COMMAND
     ${PYTHON_EXECUTABLE} -c
         "import importlib.machinery
-print('.%s' % importlib.machinery.EXTENSION_SUFFIXES[0].split('.')[-1] )"
+print(importlib.machinery.EXTENSION_SUFFIXES[-1])"
     OUTPUT_VARIABLE PYTHON_SO_EXTENSION
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
+if(NOT PYTHON_SO_EXTENSION)
+    set(PYTHON_SO_EXTENSION ".so")
+endif()
 message( STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
 
 find_package(NumPy REQUIRED)
