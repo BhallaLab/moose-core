@@ -53,7 +53,6 @@ setup(
             , 'moose.neuroml'
             , 'moose.genesis'
             , 'moose.chemUtil'
-            , 'moose.chemMerge'
             ],
 	install_requires = [ 'python-libsbml', 'numpy' ],
         package_dir = { 'moose' : 'moose', 'rdesigneur' : 'rdesigneur' },
