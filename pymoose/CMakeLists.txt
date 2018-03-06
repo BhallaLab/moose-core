@@ -77,7 +77,7 @@ if(MACOSX)
     target_link_libraries(_moose
         ${SYSTEM_SHARED_LIBS}
         )
-ELSE(MACOSX)
+else(MACOSX)
     target_link_libraries(_moose
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
@@ -87,21 +87,12 @@ ELSE(MACOSX)
         ${SYSTEM_SHARED_LIBS}
         )
 endif(MACOSX)
-
-# Make this target dependant on all python files in python folder.
 add_custom_command(TARGET _moose POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/python ${CMAKE_BINARY_DIR}/python
-    COMMENT "Copying required python files and other files to build directory"
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan
+        "MOOSE python extention is successfully built. Now "
+        " Run 'sudo make install' to install it. "
+        " "
+        "NOTE: Run 'pip uninstall moose' to uninstall moose."
     VERBATIM
     )
 
-# Print message at the end of build process.
-add_custom_command( TARGET _moose POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan
-    "MOOSE python extention is successfully built. Now "
-    " Run 'sudo make install' to install it. "
-    " "
-    "NOTE: Run 'pip uninstall moose' to uninstall moose."
-    VERBATIM
-    )
