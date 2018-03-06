@@ -27,6 +27,7 @@ brew install hdf5
 brew install python
 brew install numpy
 brew install boost
+
 #brew outdated python || brew install python
 #brew outdated numpy || brew install homebrew/python/numpy
 brew unlink numpy && brew link numpy || echo "Failed to link numpy"

@@ -1,3 +1,24 @@
+# -*- coding: utf-8 -*-
+'''
+*******************************************************************
+ * File:            validation.py
+ * Description:
+ * Author:          HarshaRani
+ * E-mail:          hrani@ncbs.res.in
+ ********************************************************************/
+
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
+Created : Thu May 12 10:19:00 2016(+0530)
+Version
+Last-Updated: Fri Jul 28 15:50:00 2017(+0530)
+          By:
+**********************************************************************/
+
+'''
 foundLibSBML_ = False
 try:
     from libsbml import *
@@ -10,7 +31,7 @@ def validateModel(sbmlDoc):
         tobecontinued = False
         for i in range(0,sbmlDoc.getNumErrors()):
             print (sbmlDoc.getError(i).getMessage())
-            return False        
+            return False
 
     if (not sbmlDoc):
         print("validateModel: given a null SBML Document")
@@ -39,11 +60,11 @@ def validateModel(sbmlDoc):
         constStr = sbmlDoc.printErrors()
         if sbmlDoc.printErrors():
             consistencyMessages = constStr
-    
+
     # If the internal checks fail, it makes little sense to attempt
     # further validation, because the model may be too compromised to
     # be properly interpreted.
-    
+
     if (numConsistencyErrors > 0):
         consistencyMessages += "Further validation aborted."
     else:
@@ -63,7 +84,7 @@ def validateModel(sbmlDoc):
         warning = sbmlDoc.getErrorLog().toString()
         oss = sbmlDoc.printErrors()
         validationMessages = oss
-    
+
     if (noProblems):
         return True
     else:

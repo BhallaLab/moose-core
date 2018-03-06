@@ -1,6 +1,7 @@
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
+
 project(pymoose)
 
 if(COMMAND cmake_policy)
@@ -29,7 +30,7 @@ endif()
 # If from command line, version info is not passed, use the git to generate a
 # version file. If GIT fails, use the previous known version.
 if(NOT VERSION_MOOSE)
-    set(VERSION_MOOSE "3.1.3-${GIT_HEAD}")
+    set(VERSION_MOOSE "3.2.0-${GIT_HEAD}")
 endif( )
 add_definitions( -DMOOSE_VERSION="${VERSION_MOOSE}")
 message( STATUS "MOOSE Version ${VERSION_MOOSE}" )
@@ -121,7 +122,10 @@ endif()
 ################################### TARGETS ####################################
 
 add_library(libmoose SHARED basecode/main.cpp)
-add_executable(moose.bin basecode/main.cpp)
+
+if(DEBUG)
+    add_executable(moose.bin basecode/main.cpp)
+endif( )
 
 ################################### SETUP BUILD ################################
 

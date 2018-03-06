@@ -1,3 +1,26 @@
+# -*- coding: utf-8 -*-
+'''
+*******************************************************************
+ * File:            chemConnectUtil.py
+ * Description:
+ * Author:          HarshaRani
+ * E-mail:          hrani@ncbs.res.in
+ ********************************************************************/
+/**********************************************************************
+** This program is part of 'MOOSE', the
+** Messaging Object Oriented Simulation Environment,
+** also known as GENESIS 3 base code.
+**           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
+Created : Friday May 27 12:19:00 2016(+0530)
+Version
+Last-Updated: Mon Aug 7 17:02:00 2017(+0530)
+          By: HarshaRani
+**********************************************************************/
+/****************************
+
+Aug 7: cleaned up space
+'''
+
 import moose
 
 pygraphvizFound_ = True
@@ -7,7 +30,7 @@ except Exception as e:
     pygraphvizFound_ = False
 
 def autoCoordinates(meshEntry,srcdesConnection):
-    global pygraphvizFound_ 
+    global pygraphvizFound_
     positionInfo = {}
 
     if not pygraphvizFound_:
@@ -34,7 +57,7 @@ def autoCoordinates(meshEntry,srcdesConnection):
             for reaObj in find_index(memb,'reaction'):
                 #G.add_node(reaObj.path)
                 G.add_node(reaObj.path,label='',shape='circle',color='')
-            
+
         for inn,out in list(srcdesConnection.items()):
             if (inn.className =='ZombieReac'): arrowcolor = 'green'
             elif(inn.className =='ZombieEnz'): arrowcolor = 'red'
@@ -46,7 +69,7 @@ def autoCoordinates(meshEntry,srcdesConnection):
                     for items in (items for items in out[0] ):
                         G.add_edge(moose.element(items[0]).path,inn.path)
                 if len(out[1]) == 0:
-                    print(inn.className + ':' + inn.name + "doesn't have output mssg")
+                    print(inn.className + ':' + inn.name + " doesn't have output mssg")
                 else:
                     for items in (items for items in out[1] ):
                         G.add_edge(inn.path,moose.element(items[0]).path)
@@ -56,18 +79,18 @@ def autoCoordinates(meshEntry,srcdesConnection):
                 else:
                     for items in (items for items in out ):
                         G.add_edge(moose.element(items[0]).path,inn.path)
-        
+
         # if int( nx.__version__.split( '.' )[-1] ) >= 11:
         #     position = nx.spring_layout( G )
         # else:
-        #     position = nx.graphviz_layout(G, prog = 'dot')    
+        #     position = nx.graphviz_layout(G, prog = 'dot')
         # for item in position.items():
         #     xy = item[1]
         #     ann = moose.Annotator(item[0]+'/info')
         #     ann.x = xy[0]
         #     ann.y = xy[1]
         #     positioninfo[(moose.element(item[0]))] ={'x':float(xy[0]),'y':float(xy[1])}
-        
+
         G.layout()
         for n in G.nodes():
             value = str(n.attr['pos'])

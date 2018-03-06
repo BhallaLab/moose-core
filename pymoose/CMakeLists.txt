@@ -103,8 +103,7 @@ add_dependencies(_moose copy_python_files)
 add_custom_command( TARGET _moose POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan
     "MOOSE python extention is successfully built. Now "
-    " 1. Run 'make install' to install it for single user. "
-    " 2. Run 'sudo make install' to install it system-wide. "
+    " Run 'sudo make install' to install it. "
     " "
     "NOTE: Run 'pip uninstall moose' to uninstall moose."
     VERBATIM
