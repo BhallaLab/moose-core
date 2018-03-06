@@ -122,10 +122,7 @@ endif()
 ################################### TARGETS ####################################
 
 add_library(libmoose SHARED basecode/main.cpp)
-
-if(DEBUG)
-    add_executable(moose.bin basecode/main.cpp)
-endif( )
+add_executable(moose.bin basecode/main.cpp)
 
 ################################### SETUP BUILD ################################
 
@@ -421,8 +418,10 @@ set(_platform "CMAKE" )
 set(PYMOOSE_BDIST_FILE ${PYMOOSE_BDIST_DIR}/pymoose-${VERSION_MOOSE}.${_platform}.tar.gz)
 message(STATUS "binary distribution file ${PYMOOSE_BDIST_FILE}")
 add_custom_target(bdist ALL DEPENDS  ${PYMOOSE_BDIST_FILE} )
+
+# Any command using setup.cmake.py must run in the same directory.
 add_custom_command( OUTPUT ${PYMOOSE_BDIST_FILE}
-    COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py bdist -p ${_platform} -d ${PYMOOSE_BDIST_DIR}
+    COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py bdist_dumb -p ${_platform} -d ${PYMOOSE_BDIST_DIR}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
     COMMENT "bdist is saved to ${PYMOOSE_BDIST_DIR}"
     VERBATIM
@@ -489,7 +488,7 @@ foreach( _test_script ${PY_TEST_SCRIPTS} )
         WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
         )
      set_tests_properties( ${_test_name}
-        PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+         PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python"
         )
 endforeach( )
 

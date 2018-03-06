@@ -63,8 +63,6 @@ setup(
             , 'moose.chemMerge'
             ],
 	      install_requires = [ 'python-libsbml', 'numpy' ],
-        package_dir = {
-            'moose' : 'moose', 'rdesigneur' : 'rdesigneur'
-            },
+        package_dir = { 'moose' : 'moose', 'rdesigneur' : 'rdesigneur' },
         package_data = { 'moose' : ['_moose' + suffix, 'neuroml2/schema/NeuroMLCoreDimensions.xml'] },
     )
