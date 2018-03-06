@@ -418,8 +418,10 @@ set(_platform "CMAKE" )
 set(PYMOOSE_BDIST_FILE ${PYMOOSE_BDIST_DIR}/pymoose-${VERSION_MOOSE}.${_platform}.tar.gz)
 message(STATUS "binary distribution file ${PYMOOSE_BDIST_FILE}")
 add_custom_target(bdist ALL DEPENDS  ${PYMOOSE_BDIST_FILE} )
+
+# Any command using setup.cmake.py must run in the same directory.
 add_custom_command( OUTPUT ${PYMOOSE_BDIST_FILE}
-    COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py bdist -p ${_platform} -d ${PYMOOSE_BDIST_DIR}
+    COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py bdist_dumb -p ${_platform} -d ${PYMOOSE_BDIST_DIR}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
     COMMENT "bdist is saved to ${PYMOOSE_BDIST_DIR}"
     VERBATIM
@@ -430,14 +432,19 @@ add_custom_command(TARGET bdist POST_BUILD
     VERBATIM
     )
 
+add_dependencies( bdist _moose )
+
+
 ######################### INSTALL ##############################################
 
 install(TARGETS moose.bin DESTINATION bin CONFIGURATIONS Debug)
+
 install(TARGETS libmoose DESTINATION lib CONFIGURATIONS Debug)
 
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     DESTINATION bin CONFIGURATIONS Debug
     )
+
 
 # install pymoose bdist.
 install(DIRECTORY ${PYMOOSE_BDIST_INSTALL_DIR}/
@@ -482,7 +489,7 @@ foreach( _test_script ${PY_TEST_SCRIPTS} )
         WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
         )
      set_tests_properties( ${_test_name}
-        PROPERTIES ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/python"
+         PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python"
         )
 endforeach( )
 

@@ -19,12 +19,7 @@ __status__           = "Development"
 
 import os
 import sys
-
-try:
-    from setuptools import setup
-except Exception as e:
-    from distutils.core import setup
-
+from distutils.core import setup
 
 # Read version from VERSION created by cmake file. This file must be present for
 # setup.cmake.py to work perfectly.
@@ -60,11 +55,7 @@ setup(
             , 'moose.chemUtil'
             , 'moose.chemMerge'
             ],
-        install_requires = [ 'python-libsbml', 'numpy' ],
-        package_dir = {
-            'moose' : 'moose', 'rdesigneur' : 'rdesigneur'
-            },
-        package_data = { 
-            'moose' : ['_moose' + suffix, 'neuroml2/schema/NeuroMLCoreDimensions.xml'] 
-            },
-        )
+	      install_requires = [ 'python-libsbml', 'numpy' ],
+        package_dir = { 'moose' : 'moose', 'rdesigneur' : 'rdesigneur' },
+        package_data = { 'moose' : ['_moose' + suffix, 'neuroml2/schema/NeuroMLCoreDimensions.xml'] },
+    )
