@@ -121,10 +121,7 @@ endif()
 ################################### TARGETS ####################################
 
 add_library(libmoose SHARED basecode/main.cpp)
-
-if(DEBUG)
-    add_executable(moose.bin basecode/main.cpp)
-endif( )
+add_executable(moose.bin basecode/main.cpp)
 
 ################################### SETUP BUILD ################################
 
@@ -415,6 +412,7 @@ endif( )
 set(PYMOOSE_BDIST_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/pymoose_bdist_install)
 file(MAKE_DIRECTORY ${PYMOOSE_BDIST_INSTALL_DIR})
 
+# BDIST
 # We need a custom name for bdist; same on all platform.
 set(_platform "CMAKE" )
 set(PYMOOSE_BDIST_FILE ${PYMOOSE_BDIST_DIR}/pymoose-${VERSION_MOOSE}.${_platform}.tar.gz)
@@ -431,12 +429,10 @@ add_custom_command(TARGET bdist POST_BUILD
     COMMENT "Unarchiving bdist file ${PYMOOSE_BDIST_FILE} to ${PYMOOSE_BDIST_INSTALL_DIR}"
     VERBATIM
     )
-add_dependencies( bdist _moose )
 
 ######################### INSTALL ##############################################
 
 install(TARGETS moose.bin DESTINATION bin CONFIGURATIONS Debug)
-
 install(TARGETS libmoose DESTINATION lib CONFIGURATIONS Debug)
 
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
@@ -459,26 +455,6 @@ if(${CMAKE_BUILD_TOOL} MATCHES "make")
         )
 endif()
 
-# Target for creating bdist. This is handy for creating bdist for packaging.
-# Save the binary distribution (tar.gz) to PYMOOSE_BDIST_DIR. Note that this
-# target is only useful when creating packages on Open Build Service i.e. if you
-# use this target on distribution X, it may not work on distrbutions other than
-# X. See python-wheels for making portable distributions.
-if(NOT PYMOOSE_BDIST_DIR)
-    set(PYMOOSE_BDIST_DIR ${CMAKE_BINARY_DIR}/pymoose_bdist)
-endif( )
-
-# get platform and arch using python.
-# NOTE: creating bdist or bdist_dump uses /usr and /usr/local on rpm and deb
-# based unix respectively. Not a great situation to be in. Need to write a
-# setup.cfg file to fix the prefix in all cases. 
-find_package( PythonInterp REQUIRED)
-add_custom_target( bdist 
-    COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py bdist_dumb -d ${PYMOOSE_BDIST_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
-    COMMENT "Genearating bdist using setup.cmake.py." 
-    VERBATIM
-    )
 
 
 ############################ CTEST ######################################
@@ -487,13 +463,10 @@ include( CTest )
 # onto the console if a test fails.
 set(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
 
-if(DEBUG)
-    # Run this test in debug mode. In Release mode, this does not do anything.
-    set(MOOSE_BIN_LOCATION $<TARGET_FILE:moose.bin>)
-    message(STATUS "Executable moose.bin will be at ${MOOSE_BIN_LOCATION}" )
-
-    add_test(NAME moose.bin-raw-run COMMAND moose.bin -u -q)
-endif(DEBUG)
+# Run this test in debug mode. In Release mode, this does not do anything.
+set(MOOSE_BIN_LOCATION $<TARGET_FILE:moose.bin>)
+message(STATUS "Executable moose.bin will be at ${MOOSE_BIN_LOCATION}" )
+add_test(NAME moose.bin-raw-run COMMAND moose.bin -u -q)
 
 ## PyMOOSE tests.
 set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)
