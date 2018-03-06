@@ -33,6 +33,7 @@ version = None
 with open( os.path.join( script_dir, 'VERSION'), 'r' ) as f:
     version = f.read( )
 
+suffix = '.so'
 try:
     import importlib.machinery
     suffix = '.%s' % importlib.machinery.EXTENSION_SUFFIXES[0].split('.')[-1]
