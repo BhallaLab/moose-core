@@ -1,7 +1,6 @@
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
-
 project(pymoose)
 
 if(COMMAND cmake_policy)
@@ -30,7 +29,7 @@ endif()
 # If from command line, version info is not passed, use the git to generate a
 # version file. If GIT fails, use the previous known version.
 if(NOT VERSION_MOOSE)
-    set(VERSION_MOOSE "3.2.0-${GIT_HEAD}")
+    set(VERSION_MOOSE "3.1.3-${GIT_HEAD}")
 endif( )
 add_definitions( -DMOOSE_VERSION="${VERSION_MOOSE}")
 message( STATUS "MOOSE Version ${VERSION_MOOSE}" )
@@ -413,6 +412,7 @@ endif( )
 set(PYMOOSE_BDIST_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/pymoose_bdist_install)
 file(MAKE_DIRECTORY ${PYMOOSE_BDIST_INSTALL_DIR})
 
+# BDIST
 # We need a custom name for bdist; same on all platform.
 set(_platform "CMAKE" )
 set(PYMOOSE_BDIST_FILE ${PYMOOSE_BDIST_DIR}/pymoose-${VERSION_MOOSE}.${_platform}.tar.gz)
@@ -431,7 +431,9 @@ add_custom_command(TARGET bdist POST_BUILD
     COMMENT "Unarchiving bdist file ${PYMOOSE_BDIST_FILE} to ${PYMOOSE_BDIST_INSTALL_DIR}"
     VERBATIM
     )
+
 add_dependencies( bdist _moose )
+
 
 ######################### INSTALL ##############################################
 
@@ -442,6 +444,7 @@ install(TARGETS libmoose DESTINATION lib CONFIGURATIONS Debug)
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     DESTINATION bin CONFIGURATIONS Debug
     )
+
 
 # install pymoose bdist.
 install(DIRECTORY ${PYMOOSE_BDIST_INSTALL_DIR}/
@@ -460,19 +463,17 @@ if(${CMAKE_BUILD_TOOL} MATCHES "make")
 endif()
 
 
+
 ############################ CTEST ######################################
 include( CTest )
 # If CTEST_OUTPUT_ON_FAILURE environment variable is set, the output is printed
 # onto the console if a test fails.
 set(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
 
-if(DEBUG)
-    # Run this test in debug mode. In Release mode, this does not do anything.
-    set(MOOSE_BIN_LOCATION $<TARGET_FILE:moose.bin>)
-    message(STATUS "Executable moose.bin will be at ${MOOSE_BIN_LOCATION}" )
-
-    add_test(NAME moose.bin-raw-run COMMAND moose.bin -u -q)
-endif(DEBUG)
+# Run this test in debug mode. In Release mode, this does not do anything.
+set(MOOSE_BIN_LOCATION $<TARGET_FILE:moose.bin>)
+message(STATUS "Executable moose.bin will be at ${MOOSE_BIN_LOCATION}" )
+add_test(NAME moose.bin-raw-run COMMAND moose.bin -u -q)
 
 ## PyMOOSE tests.
 set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)

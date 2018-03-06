@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-"""setup.py:
-Script to install python targets.
+"""
+setup.cmake.py:
 
-NOTE: This script is to be called by CMake. Not intended to be used standalone.
+Script to install python targets by cmake. 
 
+DO NOT USE IT DIRECTLY. Only `cmake` build system should use it directly.
 """
 
 __author__           = "Dilawar Singh"
@@ -18,36 +19,28 @@ __status__           = "Development"
 
 import os
 import sys
+from distutils.core import setup
 
-try:
-	from setuptools import setup
-except Exception as e:
-	from distutils.core import setup
-
+# Read version from VERSION created by cmake file. This file must be present for
+# setup.cmake.py to work perfectly.
 script_dir = os.path.dirname( os.path.abspath( __file__ ) )
-version = '3.2pre1'
+version = None
+with open( os.path.join( script_dir, 'VERSION'), 'r' ) as f:
+    version = f.read( )
 
-try:
-    with open( os.path.join( script_dir, 'VERSION'), 'r' ) as f:
-        version = f.read( )
-except Exception as e:
-    print( 'Failed to read VERSION %s' % e )
-    print( 'Using default %s' % version )
-
-# importlib is available only for python3.
 suffix = '.so'
 try:
     import importlib.machinery
-    suffix = importlib.machinery.EXTENSION_SUFFIXES[0].split('.')[-1]
+    suffix = '.%s' % importlib.machinery.EXTENSION_SUFFIXES[0].split('.')[-1]
 except Exception as e:
-    print( '[WARN] Failed to determine importlib suffix' )
+    print( '[WARN] Failed to determine importlib suffix due to %s' % e )
     suffix = '.so'
 
 setup(
         name='pymoose',
         version=version,
         description='Python scripting interface of MOOSE Simulator (https://moose.ncbs.res.in)',
-        author='MOOSERes',
+        author='See AUTHORS.md at https://github.com/BhallaLab/moose',
         author_email='bhalla@ncbs.res.in',
         maintainer='Dilawar Singh',
         maintainer_email='dilawars@ncbs.res.in',

@@ -37,7 +37,6 @@ set -e
     make -j3 && ctest --output-on-failure
     cd ..
     set +e
-
 )
 set +e
 
