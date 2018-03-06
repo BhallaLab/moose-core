@@ -39,12 +39,12 @@ struct CompareSynEvent
 
 /**
  * This handles simple synapses without plasticity. It uses a priority
- * queue to manage them. This gets inefficient for large numbers of 
+ * queue to manage them. This gets inefficient for large numbers of
  * synapses but is pretty robust.
  */
 class SimpleSynHandler: public SynHandlerBase
 {
-	public: 
+	public:
 		SimpleSynHandler();
 		~SimpleSynHandler();
 		SimpleSynHandler& operator=( const SimpleSynHandler& other );
@@ -61,6 +61,7 @@ class SimpleSynHandler: public SynHandlerBase
 		unsigned int addSynapse();
 		void dropSynapse( unsigned int droppedSynNumber );
 		void addSpike( unsigned int index, double time, double weight );
+		double getTopSpike( unsigned int index ) const;
 		////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	private:

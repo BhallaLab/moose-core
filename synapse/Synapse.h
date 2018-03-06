@@ -26,15 +26,16 @@ class Synapse
 		double getDelay() const;
 
 		void addSpike( const Eref& e, double time );
+		double getTopSpike( const Eref& e ) const;
 
 		void setHandler( SynHandlerBase* h );
 
 		///////////////////////////////////////////////////////////////
-		static void addMsgCallback( 
-					const Eref& e, const string& finfoName, 
+		static void addMsgCallback(
+					const Eref& e, const string& finfoName,
 					ObjId msg, unsigned int msgLookup );
-		static void dropMsgCallback( 
-					const Eref& e, const string& finfoName, 
+		static void dropMsgCallback(
+					const Eref& e, const string& finfoName,
 					ObjId msg, unsigned int msgLookup );
 		static const Cinfo* initCinfo();
 	private:

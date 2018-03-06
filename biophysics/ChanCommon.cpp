@@ -17,7 +17,7 @@
 ChanCommon::ChanCommon()
 			:
 			Vm_( 0.0 ),
-			Gbar_( 0.0 ), modulation_( 1.0 ), 
+			Gbar_( 0.0 ), modulation_( 1.0 ),
 			Ek_( 0.0 ),
 			Gk_( 0.0 ), Ik_( 0.0 )
 {
@@ -111,6 +111,7 @@ void ChanCommon::sendProcessMsgs(  const Eref& e, const ProcPtr info )
 void ChanCommon::sendReinitMsgs(  const Eref& e, const ProcPtr info )
 {
 		ChanBase::channelOut()->send( e, Gk_, Ek_ );
+		ChanBase::IkOut()->send( e, Ik_ );
 	// Needed by GHK-type objects
 		ChanBase::permeability()->send( e, Gk_ );
 }

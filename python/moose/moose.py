@@ -4,18 +4,60 @@ from __future__ import print_function, division, absolute_import
 # Author: Subhasis Ray
 # Maintainer: Dilawar Singh, Harsha Rani, Upi Bhalla
 
+from __future__ import print_function, division, absolute_import
+
 from contextlib import closing
 import warnings
-import platform
 import pydoc
-import os
 from io import StringIO
 
 import moose
-import moose.SBML.readSBML as _readSBML
-import moose.SBML.writeSBML as _writeSBML
-import moose.genesis.writeKkit as _writeKkit
-import moose.chemUtil as _chemUtil
+import moose.utils as mu
+
+sbmlImport_, sbmlError_ = True, ''
+
+try:
+    import moose.SBML.readSBML as _readSBML
+    import moose.SBML.writeSBML as _writeSBML
+except Exception as e:
+    sbmlImport_ = False
+    sbmlError_ = '%s' % e
+
+# NeuroML2 import.
+nml2Import_, nml2ImportError_ = True, ''
+try:
+    import moose.neuroml2 as _neuroml2
+except Exception as e:
+    nml2Import_ = False
+    nml2ImportError_ = '\n'.join( [ 
+        "NML2 support is disabled because `libneuroml` and "
+        , "`pyneuroml` modules are not found."
+        , "     pip install pyneuroml libneuroml "
+        , " should fix it." 
+        , " Actual error: %s " % e ]
+        )
+
+chemImport_, chemError_ = True, ''
+try:
+    import moose.chemUtil as _chemUtil
+except Exception as e:
+    chemImport_ = False
+    chemError_ = '%s' % e
+
+kkitImport_, kkitImport_error_ = True, ''
+try:
+    import moose.genesis.writeKkit as _writeKkit
+except ImportError as e:
+    kkitImport_ = False
+    kkitImport_err_ = '%s' % e
+
+mergechemImport_, mergechemError_ = True, ''
+try:
+    import moose.chemMerge as _chemMerge
+except Exception as e:
+    mergechemImport_ = False
+    mergechemError_ = '%s' % e
+
 
 # Import function from C++ module into moose namespace.
 from moose._moose import *
@@ -50,8 +92,6 @@ known_types = ['void',
                'melement'] + sequence_types
 
 # SBML related functions.
-
-
 def mooseReadSBML(filepath, loadpath, solver='ee'):
     """Load SBML model.
 
@@ -62,7 +102,12 @@ def mooseReadSBML(filepath, loadpath, solver='ee'):
     solver   -- Solver to use (default 'ee' ) \n
 
     """
-    return _readSBML.mooseReadSBML( filepath, loadpath, solver )
+    global sbmlImport_
+    if sbmlImport_:
+        return _readSBML.mooseReadSBML( filepath, loadpath, solver )
+    else:
+        print( sbmlError_ )
+        return False
 
 
 def mooseWriteSBML(modelpath, filepath, sceneitems={}):
@@ -81,7 +126,11 @@ def mooseWriteSBML(modelpath, filepath, sceneitems={}):
                             --- else, auto-coordinates is used for layout position and passed
 
     """
-    return _writeSBML.mooseWriteSBML(modelpath, filepath, sceneitems)
+    if sbmlImport_:
+        return _writeSBML.mooseWriteSBML(modelpath, filepath, sceneitems)
+    else:
+        print( sbmlError_ )
+        return False
 
 
 def mooseWriteKkit(modelpath, filepath,sceneitems={}):
@@ -92,6 +141,11 @@ def mooseWriteKkit(modelpath, filepath,sceneitems={}):
     modelpath -- model path in moose \n
     filepath -- Path of output file.
     """
+    global kkitImport_, kkitImport_err_
+    if not kkitImport_:
+        print( '[WARN] Could not import module to enable this function' )
+        print( '\tError was %s' % kkitImport_error_ )
+        return False
     return _writeKkit.mooseWriteKkit(modelpath, filepath,sceneitems)
 
 
@@ -101,7 +155,11 @@ def moosedeleteChemSolver(modelpath):
         this should be followed by mooseaddChemSolver for add solvers on to compartment to simulate else
         default is Exponential Euler (ee)
     """
-    return _chemUtil.add_Delete_ChemicalSolver.moosedeleteChemSolver(modelpath)
+    if chemImport_:
+        return _chemUtil.add_Delete_ChemicalSolver.moosedeleteChemSolver(modelpath)
+    else:
+        print( chemError_ )
+        return False
 
 
 def mooseaddChemSolver(modelpath, solver):
@@ -115,7 +173,40 @@ def mooseaddChemSolver(modelpath, solver):
               "Runge Kutta"       ("gsl")
 
     """
-    return _chemUtil.add_Delete_ChemicalSolver.mooseaddChemSolver(modelpath, solver)
+    if chemImport_:
+        return _chemUtil.add_Delete_ChemicalSolver.mooseaddChemSolver(modelpath, solver)
+    else:
+        print( chemError_ )
+        return False
+
+def mergeChemModel(src, des):
+    """ Merges two chemical model, \n
+        File or filepath can be passed
+        source is merged to destination
+    """
+    #global mergechemImport_
+    if mergechemImport_:
+        return _chemMerge.merge.mergeChemModel(src,des)
+    else:
+        return False
+
+# NML2 reader and writer function.
+def mooseReadNML2( modelpath ):
+    """Read NeuroML model (version 2).
+
+    """
+    global nml2Import_
+    if nml2Import_:
+        reader = _neuroml2.NML2Reader( )
+        reader.read( modelpath )
+        return reader
+    else:
+        mu.info( nml2ImportError_ )
+        mu.warn( "Could not load NML2 support. Doing nothing" )
+        return False
+
+def mooseWriteNML2( outfile ):
+    mu.warn( "Writing to NML2 is not supported yet" )
 
 ################################################################
 # Wrappers for global functions
@@ -128,7 +219,7 @@ def pwe():
     the path, use moose.getCwe()
 
     """
-    pwe_ = _moose.getCwe()
+    pwe_ = moose.getCwe()
     print(pwe_.getPath())
     return pwe_
 
@@ -185,10 +276,10 @@ def syncDataHandler(target):
     raise NotImplementedError('The implementation is not working for IntFire - goes to invalid objects. \
 First fix that issue with SynBase or something in that line.')
     if isinstance(target, str):
-        if not _moose.exists(target):
+        if not moose.exists(target):
             raise ValueError('%s: element does not exist.' % (target))
         target = vec(target)
-        _moose.syncDataHandler(target)
+        moose.syncDataHandler(target)
 
 
 def showfield(el, field='*', showtype=False):
@@ -343,7 +434,7 @@ def getfielddoc(tokens, indent=''):
     fieldname = tokens[1]
     while True:
         try:
-            classelement = _moose.element('/classes/' + classname)
+            classelement = moose.element('/classes/' + classname)
             for finfo in classelement.children:
                 for fieldelement in finfo:
                     baseinfo = ''
@@ -406,7 +497,7 @@ def getmoosedoc(tokens, inherited=False):
         if not tokens:
             return ""
         try:
-            class_element = _moose.element('/classes/%s' % (tokens[0]))
+            class_element = moose.element('/classes/%s' % (tokens[0]))
         except ValueError:
             raise NameError('name \'%s\' not defined.' % (tokens[0]))
         if len(tokens) > 1:
@@ -415,14 +506,14 @@ def getmoosedoc(tokens, inherited=False):
             docstring.write(toUnicode('%s\n' % (class_element.docs)))
             append_finfodocs(tokens[0], docstring, indent)
             if inherited:
-                mro = eval('_moose.%s' % (tokens[0])).mro()
+                mro = eval('moose.%s' % (tokens[0])).mro()
                 for class_ in mro[1:]:
-                    if class_ == _moose.melement:
+                    if class_ == moose.melement:
                         break
                     docstring.write(toUnicode(
                         '\n\n#Inherited from %s#\n' % (class_.__name__)))
                     append_finfodocs(class_.__name__, docstring, indent)
-                    if class_ == _moose.Neutral:    # Neutral is the toplevel moose class
+                    if class_ == moose.Neutral:    # Neutral is the toplevel moose class
                         break
         return docstring.getvalue()
 
@@ -430,13 +521,13 @@ def getmoosedoc(tokens, inherited=False):
 def append_finfodocs(classname, docstring, indent):
     """Append list of finfos in class name to docstring"""
     try:
-        class_element = _moose.element('/classes/%s' % (classname))
+        class_element = moose.element('/classes/%s' % (classname))
     except ValueError:
         raise NameError('class \'%s\' not defined.' % (classname))
     for ftype, rname in finfotypes:
         docstring.write(toUnicode('\n*%s*\n' % (rname.capitalize())))
         try:
-            finfo = _moose.element('%s/%s' % (class_element.path, ftype))
+            finfo = moose.element('%s/%s' % (class_element.path, ftype))
             for field in finfo.vec:
                 docstring.write(toUnicode(
                     '%s%s: %s\n' % (indent, field.fieldName, field.type)))

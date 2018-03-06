@@ -20,12 +20,12 @@ import os
 import sys
 
 try:
-    from setuptools import setup
+	from setuptools import setup
 except Exception as e:
-    from distutils.core import setup
+	from distutils.core import setup
 
 script_dir = os.path.dirname( os.path.abspath( __file__ ) )
-version = '3.1.3'
+version = '3.2pre1'
 
 try:
     with open( os.path.join( script_dir, 'VERSION'), 'r' ) as f:
@@ -38,9 +38,10 @@ except Exception as e:
 suffix = '.so'
 try:
     import importlib.machinery
-    suffix = importlib.machinery.EXTENSION_SUFFIXES[-1]
-except ImportError as e:
-    pass
+    suffix = importlib.machinery.EXTENSION_SUFFIXES[0].split('.')[-1]
+except Exception as e:
+    print( '[WARN] Failed to determine importlib suffix' )
+    suffix = '.so'
 
 setup(
         name='pymoose',
@@ -56,10 +57,14 @@ setup(
             , 'moose'
             , 'moose.SBML'
             , 'moose.neuroml'
+            , 'moose.neuroml2'
             , 'moose.genesis'
             , 'moose.chemUtil'
+            , 'moose.chemMerge'
             ],
-	install_requires = [ 'python-libsbml', 'numpy' ],
-        package_dir = { 'moose' : 'moose', 'rdesigneur' : 'rdesigneur' },
-        package_data = { 'moose' : ['_moose*%s' % suffix ] },
+	      install_requires = [ 'python-libsbml', 'numpy' ],
+        package_dir = {
+            'moose' : 'moose', 'rdesigneur' : 'rdesigneur'
+            },
+        package_data = { 'moose' : ['_moose' + suffix, 'neuroml2/schema/NeuroMLCoreDimensions.xml'] },
     )

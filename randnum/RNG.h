@@ -43,7 +43,7 @@ using namespace std;
 
 namespace moose {
 
-/* 
+/*
  * =====================================================================================
  *        Class:  RNG
  *  Description:  Random number generator class.
@@ -57,7 +57,15 @@ class RNG
         RNG ()                                  /* constructor      */
         {
             // Setup a random seed if possible.
-#if defined(USE_BOOST) 
+            setRandomSeed( );
+        }
+
+        ~RNG ()                                 /* destructor       */
+        { ; }
+
+        void setRandomSeed( )
+        {
+#if defined(USE_BOOST)
 #if defined(BOOST_RANDOM_DEVICE_EXISTS)
             boost::random::random_device rd;
             setSeed( rd() );
@@ -68,12 +76,6 @@ class RNG
 #else
             mtseed( time(NULL) );
 #endif     /* -----  not ENABLE_CPP11  ----- */
-
-        }
-
-        ~RNG ()                                 /* destructor       */
-        {
-
         }
 
         /* ====================  ACCESSORS     ======================================= */
@@ -83,9 +85,21 @@ class RNG
         }
 
         /* ====================  MUTATORS      ======================================= */
+        /**
+         * @brief If seed if 0 then set seed to a random number else set seed to
+         * the given number.
+         *
+         * @param seed
+         */
         void setSeed( const unsigned long int seed )
         {
             seed_ = seed;
+            if( seed == 0 )
+            {
+                setRandomSeed( );
+                return;
+            }
+
 #if defined(USE_BOOST) || defined(ENABLE_CPP11)
             rng_.seed( seed_ );
 #else
@@ -116,8 +130,8 @@ class RNG
          */
         T uniform( void )
         {
-#if defined(USE_BOOST) || defined(ENABLE_CPP11) 
-            return dist_( rng_ ); 
+#if defined(USE_BOOST) || defined(ENABLE_CPP11)
+            return dist_( rng_ );
 #else
             return mtrand();
 #endif
