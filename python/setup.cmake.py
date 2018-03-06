@@ -27,7 +27,6 @@ except Exception as e:
 script_dir = os.path.dirname( os.path.abspath( __file__ ) )
 version = '3.2pre1'
 
-
 try:
     with open( os.path.join( script_dir, 'VERSION'), 'r' ) as f:
         version = f.read( )
@@ -35,6 +34,8 @@ except Exception as e:
     print( 'Failed to read VERSION %s' % e )
     print( 'Using default %s' % version )
 
+# importlib is available only for python3.
+suffix = '.so'
 try:
     import importlib.machinery
     suffix = importlib.machinery.EXTENSION_SUFFIXES[0].split('.')[-1]
@@ -61,9 +62,7 @@ setup(
             , 'moose.chemUtil'
             , 'moose.chemMerge'
             ],
-	install_requires = [ 'python-libsbml', 'numpy' ],
-        package_dir = {
-            'moose' : 'moose', 'rdesigneur' : 'rdesigneur'
-            },
+	      install_requires = [ 'python-libsbml', 'numpy' ],
+        package_dir = { 'moose' : 'moose', 'rdesigneur' : 'rdesigneur' },
         package_data = { 'moose' : ['_moose' + suffix, 'neuroml2/schema/NeuroMLCoreDimensions.xml'] },
     )
