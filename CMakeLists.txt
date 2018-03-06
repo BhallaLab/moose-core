@@ -454,9 +454,7 @@ add_dependencies( copy_pymoose _moose )
 ######################### INSTALL ##############################################
 
 install(TARGETS moose.bin DESTINATION bin CONFIGURATIONS Debug)
-
 install(TARGETS libmoose DESTINATION lib CONFIGURATIONS Debug)
-
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     DESTINATION bin CONFIGURATIONS Debug
     )
