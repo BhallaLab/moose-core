@@ -582,20 +582,18 @@ void Dsolve::setDsolve( Id dsolve )
 void Dsolve::setCompartment( Id id )
 {
 	const Cinfo* c = id.element()->cinfo();
-	if ( c->isA( "NeuroMesh" ) || c->isA( "SpineMesh" ) ||
-					c->isA( "PsdMesh" ) || c->isA( "CylMesh" ) ||
-	  		c->isA( "EndoMesh" ) ) {
-		compartment_ = id;
-		numVoxels_ = Field< unsigned int >::get( id, "numMesh" );
-		/*
-		const MeshCompt* m = reinterpret_cast< const MeshCompt* >(
-						id.eref().data() );
-		numVoxels_ = m->getStencil().nRows();
-		*/
-	} else {
-		cout << "Warning: Dsolve::setCompartment:: compartment must be "
-			"NeuroMesh, CylMesh, or EndoMesh. You tried :" << 
-			c->name() << endl;
+	compartment_ = id;
+	numVoxels_ = Field< unsigned int >::get( id, "numMesh" );
+	if ( c->isA( "CubeMesh" ) ) { // we do only linear diffusion for now
+		unsigned int nx = Field< unsigned int >::get( id, "nx" );
+		unsigned int ny = Field< unsigned int >::get( id, "nx" );
+		unsigned int nz = Field< unsigned int >::get( id, "nx" );
+		if ( !( nx*ny == 1 || nx*nz == 1 || ny*nz == 1 ) ) {
+			cout << "Warning: Dsolve::setCompartment:: Cube mesh: " <<
+			c->name() << " found with >1 dimension of voxels. " <<
+			"Only 1-D diffusion supported for now.\n";
+			return;
+		}
 	}
 }
 

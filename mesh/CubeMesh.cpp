@@ -901,9 +901,16 @@ void CubeMesh::innerSetNumEntries( unsigned int n )
 	cout << "Warning: CubeMesh::innerSetNumEntries is readonly.\n";
 }
 
+// We assume this is linear diffusion for now. Fails for 2 or 3-D diffusion
 vector< unsigned int > CubeMesh::getParentVoxel() const
 {
-	static vector< unsigned int > ret;
+	unsigned int numEntries = innerGetNumEntries();
+	vector< unsigned int > ret( numEntries );
+	if ( numEntries > 0 )
+		ret[0] = static_cast< unsigned int >( -1 );
+	for (unsigned int i = 1; i < numEntries; ++i )
+		ret[i] = i-1;
+
 	return ret;
 }
 
@@ -935,7 +942,15 @@ const vector< double >& CubeMesh::vGetVoxelMidpoint() const
 const vector< double >& CubeMesh::getVoxelArea() const
 {
 	static vector< double > area;
-	assert( 0 ); // Not yet operational
+	if ( nx_ * ny_ == 1 ) 
+		area.resize( nz_, dx_ * dy_ );
+	else if ( nx_ * nz_ == 1 ) 
+		area.resize( ny_, dx_ * dz_ );
+	else if ( ny_ * nz_ == 1 ) 
+		area.resize( nx_, dy_ * dz_ );
+	else
+		area.resize( nx_, dy_ * dz_ ); // Just put in a number.
+	assert( area.size() == nx_ * ny_ * nz_ );
 	return area;
 }
 
