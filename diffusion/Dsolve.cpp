@@ -380,10 +380,15 @@ void Dsolve::calcJnChan( const DiffJunction& jn, Dsolve* other, double dt )
 	
 	for ( unsigned int i = 0; i < jn.myChannels.size(); ++i ) {
 		ConcChanInfo& myChan = channels_[ jn.myChannels[i] ];
+		DiffPoolVec& myDv = pools_[ myChan.myPool ];
+		DiffPoolVec& otherDv = other->pools_[ myChan.otherPool ];
+		DiffPoolVec& chanDv = pools_[ myChan.chanPool ];
+		/*
 		DiffPoolVec& myDv = pools_[ jn.myPools[myChan.myPool] ];
 		DiffPoolVec& otherDv = 
 				other->pools_[ jn.otherPools[myChan.otherPool] ];
 		DiffPoolVec& chanDv = pools_[ jn.myPools[myChan.chanPool] ];
+		*/
 		for ( vector< VoxelJunction >::const_iterator
 			j = jn.vj.begin(); j != jn.vj.end(); ++j ) {
 
