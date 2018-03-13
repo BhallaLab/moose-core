@@ -462,7 +462,7 @@ install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
     )
 
 # install pymoose bdist.
-install(DIRECTORY ${PYMOOSE_BDIST_INSTALL_DIR}/
+install(DIRECTORY ${PYMOOSE_BDIST_INSTALL_DIR}/usr/
     DESTINATION ${CMAKE_INSTALL_PREFIX}
     CONFIGURATIONS Release
     )
