@@ -542,22 +542,15 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         dvalues[1] = getNumLocalVoxels();
         dvalues[2] = 0;
         dvalues[3] = stoichPtr_->getNumVarPools();
-        dsolvePtr_->getBlock( dvalues );
 
-        /*
-        vector< double >::iterator i = dvalues.begin() + 4;
-        for ( ; i != dvalues.end(); ++i )
-        	cout << *i << "	" << round( *i ) << endl;
-        getBlock( kvalues );
-        vector< double >::iterator d = dvalues.begin() + 4;
-        for ( vector< double >::iterator
-        		k = kvalues.begin() + 4; k != kvalues.end(); ++k )
-        		*k++ = ( *k + *d )/2.0
-        setBlock( kvalues );
-        */
-        setBlock( dvalues );
+		// this now sets the prev_ value in DiffPoolVec
+        dsolvePtr_->getBlock( dvalues );
+		dsolvePtr_->setPrev();
+        setBlock( dvalues ); 
     }
 
+	/**
+	 * Skip all the xreac stuff, now handled in Dsolve.
     // Second, take the arrived xCompt reac values and update S with them.
     for ( unsigned int i = 0; i < xfer_.size(); ++i )
     {
@@ -578,6 +571,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         for ( unsigned int j = 0; j < xf.xferVoxel.size(); ++j )
             pools_[xf.xferVoxel[j]].xferOut( j, xf.lastValues, xf.xferPoolIdx );
     }
+	*/
 
     size_t nvPools = pools_.size( );
 
@@ -615,7 +609,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 #endif
 
 
-    // Finally, assemble and send the integrated values off for the Dsolve.
+    // Assemble and send the integrated values off for the Dsolve.
     if ( dsolvePtr_ )
     {
         vector< double > kvalues( 4 );
@@ -625,6 +619,10 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         kvalues[3] = stoichPtr_->getNumVarPools();
         getBlock( kvalues );
         dsolvePtr_->setBlock( kvalues );
+
+		// Now use the values in the Dsolve to update junction fluxes
+		// for diffusion, channels, and xreacs
+        dsolvePtr_->updateJunctions( p->dt );
     }
 }
 

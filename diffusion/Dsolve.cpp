@@ -357,6 +357,32 @@ void Dsolve::calcJnXfer( const DiffJunction& jn,
 		DiffPoolVec& destDv = destDsolve->pools_[ destXfer[i] ];
 		for ( vector< VoxelJunction >::const_iterator
 			j = jn.vj.begin(); j != jn.vj.end(); ++j ) {
+			double prevSrc = srcDv.getPrev( j->first );
+			double prevDest = destDv.getPrev( j->second );
+			double srcN = srcDv.getN( j->first );
+			double destN = destDv.getN( j->second );
+			// Consider delta as sum of local dN, and reference as prevDest
+			// newN = (srcN - prevSrc + destN - prevDest)  + prevDest
+			double newN = srcN + destN - prevSrc;
+			// double mean = (srcDv.getN(j->first) + destDv.getN(j->second)) / 2.0;
+			srcDv.setN( j->first, newN );
+			destDv.setN( j->second, newN );
+		}
+	}
+}
+
+/*
+void Dsolve::calcJnXfer( const DiffJunction& jn, 
+				const vector< unsigned int >& srcXfer, 
+				const vector< unsigned int >& destXfer, 
+				Dsolve* srcDsolve, Dsolve* destDsolve )
+{
+	assert( destXfer.size() == srcXfer.size() );
+	for ( unsigned int i = 0; i < srcXfer.size(); ++i ) {
+		DiffPoolVec& srcDv = srcDsolve->pools_[ srcXfer[i] ];
+		DiffPoolVec& destDv = destDsolve->pools_[ destXfer[i] ];
+		for ( vector< VoxelJunction >::const_iterator
+			j = jn.vj.begin(); j != jn.vj.end(); ++j ) {
 			double srcN = srcDv.getN( j->first );
 			double destN = destDv.getN( j->second );
 			srcDv.setN( j->first, 0 );
@@ -364,6 +390,7 @@ void Dsolve::calcJnXfer( const DiffJunction& jn,
 		}
 	}
 }
+*/
 
 void Dsolve::calcJnChan( const DiffJunction& jn, Dsolve* other, double dt )
 {
@@ -471,11 +498,6 @@ void Dsolve::process( const Eref& e, ProcPtr p )
 					i = pools_.begin(); i != pools_.end(); ++i ) {
 		i->advance( p->dt );
 	}
-
-	for ( vector< DiffJunction >::const_iterator
-			i = junctions_.begin(); i != junctions_.end(); ++i ) {
-		calcJunction( *i, p->dt );
-	}
 }
 
 void Dsolve::reinit( const Eref& e, ProcPtr p )
@@ -484,6 +506,14 @@ void Dsolve::reinit( const Eref& e, ProcPtr p )
 	for ( vector< DiffPoolVec >::iterator
 					i = pools_.begin(); i != pools_.end(); ++i ) {
 		i->reinit();
+	}
+}
+
+void Dsolve::updateJunctions( double dt )
+{
+	for ( vector< DiffJunction >::const_iterator
+			i = junctions_.begin(); i != junctions_.end(); ++i ) {
+		calcJunction( *i, dt );
 	}
 }
 //////////////////////////////////////////////////////////////
@@ -1091,6 +1121,15 @@ void Dsolve::getBlock( vector< double >& values ) const
 			values.insert( values.end(),
 				q + startVoxel, q + startVoxel + numVoxels );
 		}
+	}
+}
+
+// Inefficient but easy to set up. Optimize later.
+void Dsolve::setPrev()
+{
+	for ( auto i = pools_.begin(); i != pools_.end(); ++i ) {
+		// if (i->getDiffConst() > 0.0 )
+			i->setPrevVec();
 	}
 }
 

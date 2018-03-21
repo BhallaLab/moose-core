@@ -34,6 +34,11 @@ ZombiePoolInterface::ZombiePoolInterface()
 		isBuilt_( false )
 {;}
 
+void ZombiePoolInterface::updateJunctions( double dt )
+{;}
+void ZombiePoolInterface::setPrev()
+{;}
+
 //////////////////////////////////////////////////////////////////////////
 // cross-compartment reaction stuff.
 //////////////////////////////////////////////////////////////////////////

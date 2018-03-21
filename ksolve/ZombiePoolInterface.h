@@ -96,6 +96,10 @@ class ZombiePoolInterface
 		virtual void setCompartment( Id compartment );
 		Id getCompartment() const;
 
+		/// Used for telling Dsolver to handle all ops across Junctions
+		virtual void updateJunctions( double dt );
+		/// Used to tell Dsolver to assign 'prev' values.
+		virtual void setPrev();
 		/// Sets up cross-solver reactions.
 		void setupCrossSolverReacs(
 			const map< Id, vector< Id > >& xr,

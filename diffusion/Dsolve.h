@@ -67,6 +67,9 @@ class Dsolve: public ZombiePoolInterface
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
 
+		//////////////////////////////////////////////////////////////////
+		void updateJunctions( double dt );
+
 		/**
 		 * Builds junctions between Dsolves handling NeuroMesh, SpineMesh,
 		 * and PsdMesh. Must only be called from the one handling the
@@ -134,6 +137,7 @@ class Dsolve: public ZombiePoolInterface
 
 		void getBlock( vector< double >& values ) const;
 		void setBlock( const vector< double >& values );
+		void setPrev();
 
 		// This one isn't used in Dsolve, but is defined as a dummy.
 		void setupCrossSolverReacs(
