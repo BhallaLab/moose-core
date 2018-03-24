@@ -289,12 +289,14 @@ vector< double > EndoMesh::getCoordinates( unsigned int fid ) const
 }
 
 /// Virtual function to return diffusion X-section area for each neighbor
+/// This applies if we have endo mesh voxels diffusing with each other 
 vector< double > EndoMesh::getDiffusionArea( unsigned int fid ) const
 {
 	return vector< double >( parent_->getNumEntries(), 0.0 );
 }
 
 /// Virtual function to return scale factor for diffusion. 1 here.
+/// This applies if we have endo mesh voxels diffusing with each other 
 vector< double > EndoMesh::getDiffusionScaling( unsigned int fid ) const
 {
 	return vector< double >( parent_->getNumEntries(), 0.0 );

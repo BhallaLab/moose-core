@@ -364,33 +364,11 @@ void Dsolve::calcJnXfer( const DiffJunction& jn,
 			// Consider delta as sum of local dN, and reference as prevDest
 			// newN = (srcN - prevSrc + destN - prevDest)  + prevDest
 			double newN = srcN + destN - prevSrc;
-			// double mean = (srcDv.getN(j->first) + destDv.getN(j->second)) / 2.0;
 			srcDv.setN( j->first, newN );
 			destDv.setN( j->second, newN );
 		}
 	}
 }
-
-/*
-void Dsolve::calcJnXfer( const DiffJunction& jn, 
-				const vector< unsigned int >& srcXfer, 
-				const vector< unsigned int >& destXfer, 
-				Dsolve* srcDsolve, Dsolve* destDsolve )
-{
-	assert( destXfer.size() == srcXfer.size() );
-	for ( unsigned int i = 0; i < srcXfer.size(); ++i ) {
-		DiffPoolVec& srcDv = srcDsolve->pools_[ srcXfer[i] ];
-		DiffPoolVec& destDv = destDsolve->pools_[ destXfer[i] ];
-		for ( vector< VoxelJunction >::const_iterator
-			j = jn.vj.begin(); j != jn.vj.end(); ++j ) {
-			double srcN = srcDv.getN( j->first );
-			double destN = destDv.getN( j->second );
-			srcDv.setN( j->first, 0 );
-			destDv.setN( j->second, destN + srcN );
-		}
-	}
-}
-*/
 
 void Dsolve::calcJnChan( const DiffJunction& jn, Dsolve* other, double dt )
 {
@@ -475,6 +453,8 @@ void Dsolve::calcOtherJnChan( const DiffJunction& jn, Dsolve* other, double dt )
  * when a given diff solver is decomposed. At present the lookups
  * on the other diffusion solver assume that the data is on the local
  * node. Once this works well I can figure out how to do across nodes.
+ * Note that we split the diffusion and channel calculations before and
+ * after then calcJnXfer calculations. This improves accuracy by 5x.
  */
 void Dsolve::calcJunction( const DiffJunction& jn, double dt )
 {
@@ -483,13 +463,18 @@ void Dsolve::calcJunction( const DiffJunction& jn, double dt )
 	assert ( oid.element()->cinfo()->isA( "Dsolve" ) );
 
 	Dsolve* other = reinterpret_cast< Dsolve* >( oid.eref().data() );
-	calcJnDiff( jn, other, dt );
+	calcJnDiff( jn, other, dt/2.0 );
+
+	calcJnChan( jn, other, dt/2.0 );
+	calcOtherJnChan( jn, other, dt/2.0 );
 
 	calcJnXfer( jn, jn.myXferSrc, jn.otherXferDest, this, other );
 	calcJnXfer( jn, jn.otherXferSrc, jn.myXferDest, other, this );
 
-	calcJnChan( jn, other, dt );
-	calcOtherJnChan( jn, other, dt );
+	calcJnDiff( jn, other, dt/2.0 );
+
+	calcJnChan( jn, other, dt/2.0 );
+	calcOtherJnChan( jn, other, dt/2.0 );
 }
 
 void Dsolve::process( const Eref& e, ProcPtr p )
