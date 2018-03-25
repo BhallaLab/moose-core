@@ -28,6 +28,7 @@ import sys
 import time
 
 import rdesigneur.rmoogli as rmoogli
+import rdesigneur.fixXreacs as fixXreacs
 from rdesigneur.rdesigneurProtos import *
 
 from moose.neuroml.NeuroML import NeuroML
@@ -1184,6 +1185,7 @@ class rdesigneur:
             return
         if not hasattr( self, 'dendCompt' ):
             raise BuildError( "configureSolvers: no chem meshes defined." )
+        fixXreacs.fixXreacs( self.modelPath )
         dmksolve = moose.Ksolve( self.dendCompt.path + '/ksolve' )
         dmdsolve = moose.Dsolve( self.dendCompt.path + '/dsolve' )
         dmstoich = moose.Stoich( self.dendCompt.path + '/stoich' )
@@ -1216,15 +1218,10 @@ class rdesigneur:
             pmstoich.dsolve = pmdsolve
             pmstoich.path = self.psdCompt.path + "/##"
 
+            # Here we should test what kind of geom we have to use
             # Put in cross-compartment diffusion between ksolvers
             dmdsolve.buildNeuroMeshJunctions( smdsolve, pmdsolve )
-            # Put in cross-compartment reactions between ksolvers
-            smstoich.buildXreacs( pmstoich )
-            #pmstoich.buildXreacs( smstoich )
-            smstoich.buildXreacs( dmstoich )
-            dmstoich.filterXreacs()
-            smstoich.filterXreacs()
-            pmstoich.filterXreacs()
+            # All the Xreac stuff in the solvers is now eliminated.
 
             # set up the connections so that the spine volume scaling can happen
             self.elecid.setSpineAndPsdMesh( self.spineCompt, self.psdCompt)
