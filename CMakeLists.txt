@@ -450,7 +450,6 @@ add_custom_target(copy_pymoose DEPENDS ${PYTHON_SRCS}
     )
 
 add_dependencies( bdist copy_pymoose )
-add_dependencies( _moose bdist )
 
 ######################### INSTALL ##############################################
 
