@@ -81,9 +81,9 @@ const Cinfo* Stoich::initCinfo()
         " This is used to protect the chemical system from going unstable"
         " in cases where the numerical integration gives a negative value."
         " Typically it is a small negative value but is obviously"
-        " physically impossible. In some cases we want to use the " 
+        " physically impossible. In some cases we want to use the "
         " solvers to handle general systems of equations (not purely "
-		" chemical ones), so we have this flag to allow it.",
+        " chemical ones), so we have this flag to allow it.",
         &Stoich::setAllowNegative,
         &Stoich::getAllowNegative
     );
@@ -658,8 +658,8 @@ const FuncTerm* Stoich::funcs( unsigned int i ) const
 
 bool Stoich::isFuncTarget( unsigned int poolIndex ) const
 {
-	assert( poolIndex < funcTarget_.size() );
-	return ( funcTarget_[poolIndex] != ~0U );
+    assert( poolIndex < funcTarget_.size() );
+    return ( funcTarget_[poolIndex] != ~0U );
 }
 
 vector< int > Stoich::getMatrixEntry() const
@@ -999,9 +999,9 @@ void Stoich::resizeArrays()
 
     species_.resize( totNumPools, 0 );
 
-	funcTarget_.clear();
-	// Only the pools controlled by a func (targets) have positive indices.
-	funcTarget_.resize( totNumPools, ~0 ); 
+    funcTarget_.clear();
+    // Only the pools controlled by a func (targets) have positive indices.
+    funcTarget_.resize( totNumPools, ~0 );
 
     unsigned int totNumRates =
         ( reacVec_.size() + offSolverReacVec_.size() ) * (1+useOneWay_) +
@@ -1153,13 +1153,13 @@ void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
     string expr = Field< string >::get( func, "expr" );
     ft->setExpr( expr );
     // Tie the output of the FuncTerm to the pool it controls.
-	unsigned int targetIndex = convertIdToPoolIndex( pool );
+    unsigned int targetIndex = convertIdToPoolIndex( pool );
     ft->setTarget( targetIndex );
     ft->setVolScale( volScale );
     unsigned int funcIndex = convertIdToFuncIndex( func );
     assert( funcIndex != ~0U );
-	// funcTarget_ vector tracks which pools are controlled by which func.
-	funcTarget_[targetIndex] = funcIndex;
+    // funcTarget_ vector tracks which pools are controlled by which func.
+    funcTarget_[targetIndex] = funcIndex;
     funcs_[ funcIndex ] = ft;
 }
 
@@ -1278,17 +1278,18 @@ const KinSparseMatrix& Stoich::getStoichiometryMatrix() const
 
 void Stoich::buildXreacs( const Eref& e, Id otherStoich )
 {
-	if ( status_ == 0 )
-    	kinterface_->setupCrossSolverReacs( offSolverPoolMap_,otherStoich);
+    if ( status_ == 0 )
+        kinterface_->setupCrossSolverReacs( offSolverPoolMap_,otherStoich);
 }
 
 void Stoich::filterXreacs()
 {
-	if ( status_ == 0 ) {
-    	kinterface_->filterCrossRateTerms( offSolverReacVec_, offSolverReacCompts_ );
-    	kinterface_->filterCrossRateTerms( offSolverEnzVec_, offSolverEnzCompts_ );
-    	kinterface_->filterCrossRateTerms( offSolverMMenzVec_, offSolverMMenzCompts_ );
-	}
+    if ( status_ == 0 )
+    {
+        kinterface_->filterCrossRateTerms( offSolverReacVec_, offSolverReacCompts_ );
+        kinterface_->filterCrossRateTerms( offSolverEnzVec_, offSolverEnzCompts_ );
+        kinterface_->filterCrossRateTerms( offSolverMMenzVec_, offSolverMMenzCompts_ );
+    }
 }
 
 /*
@@ -1532,8 +1533,9 @@ void Stoich::unZombifyModel()
 
     unZombifyPools();
 
-	vector< Id > temp = reacVec_; temp.insert( temp.end(),
-					offSolverReacVec_.begin(), offSolverReacVec_.end() );
+    vector< Id > temp = reacVec_;
+    temp.insert( temp.end(),
+                 offSolverReacVec_.begin(), offSolverReacVec_.end() );
     for ( vector< Id >::iterator i = temp.begin(); i != temp.end(); ++i )
     {
         Element* e = i->element();
@@ -1541,8 +1543,9 @@ void Stoich::unZombifyModel()
             ReacBase::zombify( e, reacCinfo, Id() );
     }
 
-	temp = mmEnzVec_; temp.insert( temp.end(),
-					offSolverMMenzVec_.begin(), offSolverMMenzVec_.end() );
+    temp = mmEnzVec_;
+    temp.insert( temp.end(),
+                 offSolverMMenzVec_.begin(), offSolverMMenzVec_.end() );
     for ( vector< Id >::iterator i = temp.begin(); i != temp.end(); ++i )
     {
         Element* e = i->element();
@@ -1550,8 +1553,9 @@ void Stoich::unZombifyModel()
             EnzBase::zombify( e, mmEnzCinfo, Id() );
     }
 
-	temp = enzVec_; temp.insert( temp.end(),
-					offSolverEnzVec_.begin(), offSolverEnzVec_.end() );
+    temp = enzVec_;
+    temp.insert( temp.end(),
+                 offSolverEnzVec_.begin(), offSolverEnzVec_.end() );
     for ( vector< Id >::iterator i = temp.begin(); i != temp.end(); ++i )
     {
         Element* e = i->element();
@@ -1559,8 +1563,9 @@ void Stoich::unZombifyModel()
             CplxEnzBase::zombify( e, enzCinfo, Id() );
     }
 
-	temp = poolFuncVec_; temp.insert( temp.end(),
-		incrementFuncVec_.begin(), incrementFuncVec_.end() );
+    temp = poolFuncVec_;
+    temp.insert( temp.end(),
+                 incrementFuncVec_.begin(), incrementFuncVec_.end() );
     for ( vector< Id >::iterator i = temp.begin(); i != temp.end(); ++i )
     {
         Element* e = i->element();

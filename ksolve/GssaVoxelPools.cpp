@@ -48,7 +48,7 @@ const double SAFETY_FACTOR = 1.0 + 1.0e-9;
 //////////////////////////////////////////////////////////////
 
 GssaVoxelPools::GssaVoxelPools() :
-     VoxelPoolsBase(), t_( 0.0 ), atot_( 0.0 )
+    VoxelPoolsBase(), t_( 0.0 ), atot_( 0.0 )
 { ; }
 
 GssaVoxelPools::~GssaVoxelPools()
@@ -78,15 +78,15 @@ void GssaVoxelPools::updateDependentMathExpn(
     		g->stoich->funcs( *i )->evalPool( varS(), time );
     }
     */
-	/*
+    /*
     unsigned int numFuncs = g->stoich->getNumFuncs();
     for( unsigned int i = 0; i < numFuncs; ++i )
     {
         g->stoich->funcs( i )->evalPool( varS(), time );
     }
-	*/
-	// This function is equivalent to the loop above.
-	g->stoich->updateFuncs( varS(), time );
+    */
+    // This function is equivalent to the loop above.
+    g->stoich->updateFuncs( varS(), time );
 }
 
 void GssaVoxelPools::updateDependentRates(
@@ -139,7 +139,7 @@ void GssaVoxelPools::setNumReac( unsigned int n )
  */
 bool GssaVoxelPools::refreshAtot( const GssaSystem* g )
 {
-	g->stoich->updateFuncs( varS(), t_ );
+    g->stoich->updateFuncs( varS(), t_ );
     updateReacVelocities( g, S(), v_ );
     atot_ = 0;
     for ( vector< double >::const_iterator
@@ -178,8 +178,8 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
         if ( atot_ <= 0.0 )   // reac system is stuck, will not advance.
         {
             t_ = nextt;
-    		g->stoich->updateFuncs( varS(), t_ );
-        	// updateDependentMathExpn( g, 0, t_ );
+            g->stoich->updateFuncs( varS(), t_ );
+            // updateDependentMathExpn( g, 0, t_ );
             return;
         }
         unsigned int rindex = pickReac();
@@ -191,8 +191,8 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
             if ( !refreshAtot( g ) )   // Stuck state.
             {
                 t_ = nextt;
-    			g->stoich->updateFuncs( varS(), t_ );
-        		// updateDependentMathExpn( g, 0, t_ );
+                g->stoich->updateFuncs( varS(), t_ );
+                // updateDependentMathExpn( g, 0, t_ );
                 return;
             }
             // We had a roundoff error, fixed it, but now need to be sure
@@ -208,9 +208,10 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
             assert( rindex < v_.size() );
         }
 
-        double sign = double(v_[rindex] >= 0) - double(0 > v_[rindex] );
+        // double sign = double(v_[rindex] >= 0) - double(0 > v_[rindex] );
+        double sign = std::copysign( 1, v_[rindex] );
         g->transposeN.fireReac( rindex, Svec(), sign );
-		numFire_[rindex]++;
+        numFire_[rindex]++;
 
         double r = rng_.uniform();
         while ( r <= 0.0 )
@@ -218,7 +219,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
             r = rng_.uniform();
         }
         t_ -= ( 1.0 / atot_ ) * log( r );
-		g->stoich->updateFuncs( varS(), t_ );
+        g->stoich->updateFuncs( varS(), t_ );
         // updateDependentMathExpn( g, rindex, t_ );
         updateDependentRates( g->dependency[ rindex ], g->stoich );
     }
@@ -257,12 +258,12 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
     }
     t_ = 0.0;
     refreshAtot( g );
-	numFire_.assign( v_.size(), 0 );
+    numFire_.assign( v_.size(), 0 );
 }
 
 vector< unsigned int > GssaVoxelPools::numFire() const
 {
-	return numFire_;
+    return numFire_;
 }
 
 /////////////////////////////////////////////////////////////////////////
