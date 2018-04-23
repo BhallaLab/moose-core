@@ -183,6 +183,18 @@ namespace moose
      */
     string moosePathToUserPath( string path );
 
+
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Generate random number between low and high.
+     *
+     * @Param low
+     * @Param high
+     *
+     * @Returns Return a random number x such that low <= x <= high.
+     */
+    /* ----------------------------------------------------------------------------*/
+    int random_integer( int low, int high);
 }
 
 #endif   /* ----- #ifndef __MOOSE_GLOBAL_INC_  ----- */

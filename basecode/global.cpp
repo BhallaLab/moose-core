@@ -221,4 +221,16 @@ namespace moose {
         return string( buffer );
     }
 
+    int random_integer( int low, int high)
+    {
+#if ENABLE_CPP11
+        static std::random_device r;
+        static std::default_random_engine e1(r());
+        static std::uniform_int_distribution<int> uniform_dist(low, high);
+        return uniform_dist(e1);
+#else 
+        return low + rand() % (high - low);
+#endif
+    }
+
 }

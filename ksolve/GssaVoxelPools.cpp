@@ -238,8 +238,35 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 
     double* n = varS();
 
-#if 0
-    if ( true ) // g->useRandInit )
+    if( g->honorMassConservation )
+    {
+        double sumOfAllN = 0;
+        double approximationOfAllN = 0;
+        for ( unsigned int i = 0; i < numVarPools; ++i )
+        {
+            sumOfAllN += n[i];
+            double base = std::floor( n[i] );
+            assert( base >= 0.0 );
+            double frac = n[i] - base;
+            if ( rng_.uniform() >= frac )
+                n[i] = base;
+            else
+                n[i] = base + 1.0;
+            approximationOfAllN += n[i];
+        }
+
+        // Now check that we do not violate mass-conservation. If we do, select
+        // voxels randomly and reduce/add molecules.
+        int nDiff = std::rint( sumOfAllN - approximationOfAllN );
+        cerr << "Error " << nDiff << endl;
+        for ( unsigned int i = 0; i < abs(nDiff); ++i )
+        {
+            unsigned int voxelIndex = moose::random_integer(0, numVarPools);
+            n[i] += std::copysign(1, nDiff );
+        }
+
+    }
+    else if( g->useRandInit )
     {
         // round up or down probabilistically depending on fractional
         // num molecules.
@@ -268,7 +295,6 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 #endif
         }
     }
-#endif
 
     t_ = 0.0;
     refreshAtot( g );
