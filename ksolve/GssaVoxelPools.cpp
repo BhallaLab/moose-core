@@ -208,16 +208,20 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
             assert( rindex < v_.size() );
         }
 
-        // double sign = double(v_[rindex] >= 0) - double(0 > v_[rindex] );
+#if ENABLE_CPP11
         double sign = std::copysign( 1, v_[rindex] );
+#else
+        double sign = double(v_[rindex] >= 0) - double(0 > v_[rindex] );
+#endif
+
         g->transposeN.fireReac( rindex, Svec(), sign );
         numFire_[rindex]++;
 
         double r = rng_.uniform();
+
         while ( r <= 0.0 )
-        {
             r = rng_.uniform();
-        }
+
         t_ -= ( 1.0 / atot_ ) * log( r );
         g->stoich->updateFuncs( varS(), t_ );
         // updateDependentMathExpn( g, rindex, t_ );
@@ -234,16 +238,18 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 
     double* n = varS();
 
+    // NOTE: This does not violate mass-conservation in stochastic simulations.
+    // This should be the default method.
     if ( g->useRandInit )
     {
         // round up or down probabilistically depending on fractional
         // num molecules.
         for ( unsigned int i = 0; i < numVarPools; ++i )
         {
-            double base = floor( n[i] );
+            double base = std::floor( n[i] );
             assert( base >= 0.0 );
             double frac = n[i] - base;
-            if ( rng_.uniform() > frac )
+            if ( rng_.uniform() >= frac )
                 n[i] = base;
             else
                 n[i] = base + 1.0;
@@ -253,9 +259,17 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
     {
         for ( unsigned int i = 0; i < numVarPools; ++i )
         {
+#if ENABLE_CPP11
+            // Just like rint but does not raise exception. 
+            // See http://en.cppreference.com/w/cpp/numeric/math/nearbyint for
+            // details.
+            n[i] = std::nearbyint(n[i]);
+#else
             n[i] = round( n[i] );
+#endif
         }
     }
+
     t_ = 0.0;
     refreshAtot( g );
     numFire_.assign( v_.size(), 0 );
