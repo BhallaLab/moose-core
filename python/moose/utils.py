@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
-# utils.py:
-#
 # Utility functions for moose.
-#
-# NOTE: Some function might break because unicode is default string in python3.
 
 from __future__ import print_function, division, absolute_import
-
 from __future__ import print_function, division
 from __future__ import absolute_import
 

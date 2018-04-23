@@ -238,13 +238,14 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 
     double* n = varS();
 
-#if 0
-    if ( true ) // g->useRandInit )
+    if( g->useRandInit )
     {
-        // round up or down probabilistically depending on fractional
-        // num molecules.
+        vector<double> error(numVarPools, 0.0);
+        map<double, vector<Eref>> groupByVal;
+
         for ( unsigned int i = 0; i < numVarPools; ++i )
         {
+            error[i] = n[i];
             double base = std::floor( n[i] );
             assert( base >= 0.0 );
             double frac = n[i] - base;
@@ -252,7 +253,25 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
                 n[i] = base;
             else
                 n[i] = base + 1.0;
+
+            error[i] -= n[i];
+
+            //if( true )
+            //{
+            //    //NOTE: Thats how I get the name of the pool at this index.
+            //    Eref e = g->stoich->getPoolByIndex( i ).eref();
+            //    groupByVal[n[i]].push_back( e );
+
+            //    // Guess the fix the error.
+            //}
+
+
         }
+
+
+        cout << "Warning: Extra " << std::accumulate(error.begin(),error.end(),0.0) 
+            << " molecules in system after approximating "
+            " fractional values to integers." << endl;
     }
     else     // Just round to the nearest int.
     {
@@ -268,7 +287,6 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 #endif
         }
     }
-#endif
 
     t_ = 0.0;
     refreshAtot( g );

@@ -20,7 +20,7 @@ class GssaSystem
 {
 public:
     GssaSystem()
-        : stoich( 0 ), useRandInit( true ), isReady( false )
+        : stoich(0), useRandInit(true), isReady(false), honorMassConservation(true)
     {;}
     vector< vector< unsigned int > > dependency;
     vector< vector< unsigned int > > dependentMathExpn;
@@ -47,6 +47,11 @@ public:
      * Flag: True when all initialization is done.
      */
     bool isReady = false;
+
+    /* When set to true, it makes sure that after rounding number of molecules,
+     * the sum of molecules is does not differ more than 1.0 molecules.
+     */
+    bool honorMassConservation = true;
 };
 
 #endif	// _GSSA_SYSTEM_H

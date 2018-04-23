@@ -91,6 +91,8 @@ public:
      */
     vector< unsigned int > getPoolIdMap() const;
 
+    Id getPoolByIndex( unsigned int index ) const;
+
     /**
      * Take the provided wildcard path to build the list of elements
      * managed by this solver.
