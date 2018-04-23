@@ -240,7 +240,7 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 
     // NOTE: This does not violate mass-conservation in stochastic simulations.
     // This should be the default method.
-    if ( g->useRandInit )
+    if ( true ) //if ( g->useRandInit )
     {
         // round up or down probabilistically depending on fractional
         // num molecules.

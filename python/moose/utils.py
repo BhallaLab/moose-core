@@ -28,9 +28,7 @@ from moose.print_utils import *
 try:
     from moose.plot_utils import *
 except Exception as e:
-    info( "Plot utilities are not loaded due to '%s'" )
-    pass
-
+    info( "Plot utilities are not loaded due to '%s'" % e )
 
 def create_table_path(model, graph, element, field):
 
