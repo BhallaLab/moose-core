@@ -618,6 +618,17 @@ vector< unsigned int > Stoich::getPoolIdMap() const
     return ret;
 }
 
+Id Stoich::getPoolByIndex( unsigned int index ) const
+{
+    map< Id, unsigned int >::const_iterator i;
+    for ( i = poolLookup_.begin(); i != poolLookup_.end(); ++i )
+    {
+        if( i->second == index )
+            return i->first;
+    }
+    return Id();
+}
+
 unsigned int Stoich::getNumRates() const
 {
     return rates_.size();

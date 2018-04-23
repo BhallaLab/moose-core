@@ -69,7 +69,7 @@ const Cinfo* Ksolve::initCinfo()
         "rk4: The Runge-Kutta 4th order fixed dt method"
         "rk2: The Runge-Kutta 2,3 embedded fixed dt method"
         "rkck: The Runge-Kutta Cash-Karp (4,5) method"
-        "rk8: The Runge-Kutta Prince-Dormand (8,9) method",
+        "rk8: The Runge-Kutta Prince-Dormand (8,9) method" ,
         &Ksolve::setMethod,
         &Ksolve::getMethod
     );
@@ -213,7 +213,7 @@ const Cinfo* Ksolve::initCinfo()
     {
         &method,			// Value
         &epsAbs,			// Value
-        &epsRel,			// Value
+        &epsRel ,			// Value
 #if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
         &numThreads,                    // Value
 #endif
@@ -400,11 +400,10 @@ void Ksolve::setStoich( Id stoich )
         ode.method = method_;
 #ifdef USE_GSL
         ode.gslSys.dimension = stoichPtr_->getNumAllPools();
-        if ( ode.gslSys.dimension == 0 )
-        {
-            stoichPtr_ = 0;
+        if ( ode.gslSys.dimension == 0 ) {
+			stoichPtr_ = 0;
             return; // No pools, so don't bother.
-        }
+		}
         innerSetMethod( ode, method_ );
         ode.gslSys.function = &VoxelPools::gslFunc;
         ode.gslSys.jacobian = 0;
@@ -644,17 +643,16 @@ void Ksolve::parallel_advance(int begin, int end, size_t nWorkers, ProcPtr p)
     for (size_t cpu = 0; cpu != nWorkers; ++cpu)
     {
         std::async( std::launch::async
-                    , [this, &idx, end, p]()
-        {
-            for (;;)
-            {
-                int i = idx++;
-                if (i >= end)
-                    break;
-                pools_[i].advance( p );
-            }
-        }
-                  );
+                , [this, &idx, end, p]() {
+                    for (;;)
+                    {
+                        int i = idx++;
+                        if (i >= end)
+                            break;
+                        pools_[i].advance( p );
+                    }
+                }
+            );
     }
 }
 #endif

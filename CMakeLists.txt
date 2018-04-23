@@ -94,7 +94,7 @@ option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_BOOST "Use boost library instead of GSL" OFF)
 option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
-option(PARALLELIZED_SOLVERS "Use parallel version of GSOLVE. (alpha)" OFF )
+option(PARALLELIZED_SOLVERS "Use parallel version of GSOLVE. (alpha)" ON )
 option(PARALLELIZED_CLOCK "High level parallelization of moose::Clock (alpha)" OFF )
 
 

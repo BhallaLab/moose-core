@@ -238,13 +238,14 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 
     double* n = varS();
 
-    if( g->honorMassConservation )
+    if( g->useRandInit )
     {
-        double sumOfAllN = 0;
-        double approximationOfAllN = 0;
+        vector<double> error(numVarPools, 0.0);
+        map<double, vector<Eref>> groupByVal;
+
         for ( unsigned int i = 0; i < numVarPools; ++i )
         {
-            sumOfAllN += n[i];
+            error[i] = n[i];
             double base = std::floor( n[i] );
             assert( base >= 0.0 );
             double frac = n[i] - base;
@@ -252,34 +253,25 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
                 n[i] = base;
             else
                 n[i] = base + 1.0;
-            approximationOfAllN += n[i];
+
+            error[i] -= n[i];
+
+            //if( true )
+            //{
+            //    //NOTE: Thats how I get the name of the pool at this index.
+            //    Eref e = g->stoich->getPoolByIndex( i ).eref();
+            //    groupByVal[n[i]].push_back( e );
+
+            //    // Guess the fix the error.
+            //}
+
+
         }
 
-        // Now check that we do not violate mass-conservation. If we do, select
-        // voxels randomly and reduce/add molecules.
-        int nDiff = std::rint( sumOfAllN - approximationOfAllN );
-        cerr << "Error " << nDiff << endl;
-        for ( unsigned int i = 0; i < abs(nDiff); ++i )
-        {
-            unsigned int voxelIndex = moose::random_integer(0, numVarPools);
-            n[i] += std::copysign(1, nDiff );
-        }
 
-    }
-    else if( g->useRandInit )
-    {
-        // round up or down probabilistically depending on fractional
-        // num molecules.
-        for ( unsigned int i = 0; i < numVarPools; ++i )
-        {
-            double base = std::floor( n[i] );
-            assert( base >= 0.0 );
-            double frac = n[i] - base;
-            if ( rng_.uniform() >= frac )
-                n[i] = base;
-            else
-                n[i] = base + 1.0;
-        }
+        cout << "Warning: Extra " << std::accumulate(error.begin(),error.end(),0.0) 
+            << " molecules in system after approximating "
+            " fractional values to integers." << endl;
     }
     else     // Just round to the nearest int.
     {
