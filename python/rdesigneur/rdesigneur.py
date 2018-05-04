@@ -897,7 +897,7 @@ class rdesigneur:
                 'inject':('CompartmentBase', 'setInject'),
                 'Ca':('CaConcBase', 'getCa'),
                 'n':('PoolBase', 'setN'),
-                'conc':('PoolBase''setConc')
+                'conc':('PoolBase', 'setConc')
         }
         stims = moose.Neutral( self.modelPath + '/stims' )
         k = 0
