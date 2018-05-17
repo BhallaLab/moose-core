@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -* coding: utf-8 -*-
 # Utility functions for moose.
 
 from __future__ import print_function, division, absolute_import
