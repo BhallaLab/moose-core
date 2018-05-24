@@ -248,15 +248,21 @@ void HSolve::unzombify() const
     vector< Id >::const_iterator i;
 
     for ( i = compartmentId_.begin(); i != compartmentId_.end(); ++i )
-        CompartmentBase::zombify( i->eref().element(),
+		if ( i->element() ) {
+        	CompartmentBase::zombify( i->eref().element(),
 					   Compartment::initCinfo(), Id() );
+		}
 
     for ( i = caConcId_.begin(); i != caConcId_.end(); ++i )
-        CaConcBase::zombify( i->eref().element(), CaConc::initCinfo(), Id() );
+		if ( i->element() ) {
+        	CaConcBase::zombify( i->eref().element(), CaConc::initCinfo(), Id() );
+		}
 
     for ( i = channelId_.begin(); i != channelId_.end(); ++i )
-        HHChannelBase::zombify( i->eref().element(),
+		if ( i->element() ) {
+        	HHChannelBase::zombify( i->eref().element(),
 						HHChannel::initCinfo(), Id() );
+		}
 }
 
 void HSolve::setup( Eref hsolve )

@@ -197,6 +197,7 @@ class rdesigneur:
             self._buildPlots()
             self._buildMoogli()
             self._buildStims()
+            self._configureHSolve()
             self._configureClocks()
             if self.verbose:
                 self._printModelStats()
@@ -919,7 +920,13 @@ class rdesigneur:
                     moose.connect( func, 'valueOut', q, stimField )
 
     ################################################################
-    # Utility function for setting up clocks.
+    def _configureHSolve( self ):
+        if not self.turnOffElec:
+            hsolve = moose.HSolve( self.elecid.path + '/hsolve' )
+            hsolve.dt = self.elecDt
+            hsolve.target = self.soma.path
+
+# Utility function for setting up clocks.
     def _configureClocks( self ):
         if self.turnOffElec:
             elecDt = 1e6
@@ -938,9 +945,6 @@ class rdesigneur:
         if not self.turnOffElec:    # Assign the Function clock
             moose.setClock( 12, self.funcDt )
         moose.setClock( 18, self.chemPlotDt )
-        hsolve = moose.HSolve( self.elecid.path + '/hsolve' )
-        hsolve.dt = elecDt
-        hsolve.target = self.soma.path
         sys.stdout.flush()
     ################################################################
     ################################################################
