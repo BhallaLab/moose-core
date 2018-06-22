@@ -269,7 +269,7 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
         }
 
 
-        cout << "Warning: Extra " << std::accumulate(error.begin(),error.end(),0.0) 
+        cout << "Warning: Extra " << std::accumulate(error.begin(),error.end(),0.0)
             << " molecules in system after approximating "
             " fractional values to integers." << endl;
     }
@@ -278,7 +278,7 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
         for ( unsigned int i = 0; i < numVarPools; ++i )
         {
 #if ENABLE_CPP11
-            // Just like rint but does not raise exception. 
+            // Just like rint but does not raise exception.
             // See http://en.cppreference.com/w/cpp/numeric/math/nearbyint for
             // details.
             n[i] = std::nearbyint(n[i]);
@@ -376,7 +376,6 @@ void GssaVoxelPools::setStoich( const Stoich* stoichPtr )
 void GssaVoxelPools::setVolumeAndDependencies( double vol )
 {
     VoxelPoolsBase::setVolumeAndDependencies( vol );
-    stoichPtr_->setupCrossSolverReacVols();
     updateAllRateTerms( stoichPtr_->getRateTerms(),
                         stoichPtr_->getNumCoreRates() );
 }
@@ -447,31 +446,4 @@ void GssaVoxelPools::xferIn( XferInfo& xf,
     */
     // Does this fix the problem of negative concs?
     refreshAtot( g );
-}
-
-void GssaVoxelPools::xferInOnlyProxies(
-    const vector< unsigned int >& poolIndex,
-    const vector< double >& values,
-    unsigned int numProxyPools,
-    unsigned int voxelIndex	)
-{
-    unsigned int offset = voxelIndex * poolIndex.size();
-    vector< double >::const_iterator i = values.begin() + offset;
-    unsigned int proxyEndIndex = stoichPtr_->getNumVarPools() +
-                                 stoichPtr_->getNumProxyPools();
-    for ( vector< unsigned int >::const_iterator
-            k = poolIndex.begin(); k != poolIndex.end(); ++k )
-    {
-        // if ( *k >= size() - numProxyPools )
-        if ( *k >= stoichPtr_->getNumVarPools() && *k < proxyEndIndex )
-        {
-            double base = floor( *i );
-            if ( rng_.uniform() >= (*i - base) )
-                varSinit()[*k] = (varS()[*k] += base );
-            else
-                varSinit()[*k] = (varS()[*k] += base + 1.0 );
-            // varSinit()[*k] = (varS()[*k] += round( *i ));
-        }
-        i++;
-    }
 }
