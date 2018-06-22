@@ -7,9 +7,7 @@ project(pymoose)
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
     cmake_policy(SET CMP0004 NEW)
-    if(POLICY CMP0050)
-        cmake_policy(SET CMP0050 OLD)
-    endif(POLICY CMP0050)
+    cmake_policy(SET CMP0050 NEW)
 endif(COMMAND cmake_policy)
 
 
@@ -103,7 +101,7 @@ option(PARALLELIZED_CLOCK "High level parallelization of moose::Clock (alpha)" O
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-if(DEBUG)
+if(DEBUG OR (CMAKE_BUILD_TYPE STREQUAL Debug))
     message(STATUS "Building for Debug/Unit testing")
     add_definitions(-DDO_UNIT_TESTS)
     set(CMAKE_BUILD_TYPE Debug)
@@ -121,6 +119,10 @@ if(GPROF AND DEBUG)
     message(STATUS "Compiling with profiling with gprof")
     add_definitions(-pg)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
+endif()
+
+if(PARALLELIZED_SOLVERS)
+    find_package(Threads)
 endif()
 
 
@@ -268,6 +270,10 @@ if(WITH_BOOST)
     list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES})
     list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
 endif(WITH_BOOST)
+
+if(PARALLELIZED_SOLVERS)
+    list(APPEND SYSTEM_SHARED_LIBS ${CMAKE_THREAD_LIBS_INIT})
+endif()
 
 # These libraries could be static of dynamic. We need to discrimate between
 # these two types because of --whole-archive option. See
