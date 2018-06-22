@@ -268,10 +268,12 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 
         }
 
-
-        cout << "Warning: Extra " << std::accumulate(error.begin(),error.end(),0.0)
-            << " molecules in system after approximating "
-            " fractional values to integers." << endl;
+        double extra = std::accumulate( error.begin(), error.end(), 0.0 );
+        if( std::abs(extra) > 0.1 )
+        {
+            cout << "WARNING: Extra " << extra
+                << " molecules in system after converting fractional to integer e.g. 1.1 = 1 (~90% of times) or 2 (~10% of times)." << endl;
+        }
     }
     else     // Just round to the nearest int.
     {
