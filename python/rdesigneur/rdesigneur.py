@@ -28,7 +28,7 @@ import sys
 import time
 
 import rdesigneur.rmoogli as rmoogli
-import fixXreacs
+import moose.fixXreacs
 from rdesigneur.rdesigneurProtos import *
 
 from moose.neuroml.NeuroML import NeuroML
