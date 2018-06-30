@@ -84,7 +84,22 @@ def mooseaddChemSolver(modelRoot, solver):
 
 def setCompartmentSolver(modelRoot, solver):
     comptlist = dict((c, c.volume) for c in moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]'))
-    compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))]
+    comptVol = {}
+    compts = []
+    vol  = [v for k,v in comptlist.items()]
+    print " vol ", vol, " soreted ",sorted(vol)
+    volumeSort = sorted(vol)
+    for k,v in comptlist.items():
+        comptVol[k]= v
+    for volSor in volumeSort:
+        for a,b in comptVol.items():
+            print b, volSor
+            if b == volSor:
+                compts.append(a)
+    
+    #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))]
+    # print compt
+    # print "#" ,compts 
     if ( len(compts) == '0'):
         print "Atleast one compartment is required "
         return
