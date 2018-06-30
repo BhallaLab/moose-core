@@ -87,13 +87,11 @@ def setCompartmentSolver(modelRoot, solver):
     comptVol = {}
     compts = []
     vol  = [v for k,v in comptlist.items()]
-    print " vol ", vol, " soreted ",sorted(vol)
     volumeSort = sorted(vol)
     for k,v in comptlist.items():
         comptVol[k]= v
     for volSor in volumeSort:
         for a,b in comptVol.items():
-            print b, volSor
             if b == volSor:
                 compts.append(a)
     
