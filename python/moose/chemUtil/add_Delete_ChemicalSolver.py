@@ -95,15 +95,13 @@ def setCompartmentSolver(modelRoot, solver):
             if b == volSor:
                 compts.append(a)
     
-    #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))]
-    # print compt
-    # print "#" ,compts 
+    #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))] 
     if ( len(compts) == '0'):
-        print "Atleast one compartment is required "
+        print ("Atleast one compartment is required ")
         return
     else:
         if ( len(compts) > 3 ):
-            print "Warning: setSolverOnCompt Cannot handle " ,  len(compts) , " chemical compartments\n"
+            print ("Warning: setSolverOnCompt Cannot handle " ,  len(compts) , " chemical compartments\n")
             return;
 
         elif (len(compts) >1 ):
