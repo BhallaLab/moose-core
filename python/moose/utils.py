@@ -341,7 +341,7 @@ def autoposition(root):
     return ret
 
 def loadModel(filename, target,method='ee'):
-        moose.loadModel(filename,target)
+    moose.loadModel(filename,target)
 	moose.mooseaddChemSolver(target,method)
 	
 def readcell_scrambled(filename, target, method='ee'):
