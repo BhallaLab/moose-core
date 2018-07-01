@@ -665,7 +665,6 @@ rmoogli.updateMoogliViewer()
     def display( self, startIndex = 0 ):
         import matplotlib.pyplot as plt
         for i in self.plotNames:
-            print( "###############" + str( i[2] + startIndex ) )
             plt.figure( i[2] + startIndex )
             plt.title( i[1] )
             plt.xlabel( "Time (s)" )
