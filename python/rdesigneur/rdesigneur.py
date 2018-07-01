@@ -27,9 +27,12 @@ import itertools
 import sys
 import time
 
-import rdesigneur.rmoogli as rmoogli
+#import rdesigneur.rmoogli as rmoogli
+#from . import fixXreacs
+#from rdesigneur.rdesigneurProtos import *
+import rmoogli
 import fixXreacs
-from rdesigneur.rdesigneurProtos import *
+from rdesigneurProtos import *
 
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
@@ -645,13 +648,25 @@ class rdesigneur:
     ################################################################
     # Here we display the plots and moogli
     ################################################################
+
     def displayMoogli( self, moogliDt, runtime, rotation = math.pi/500.0, fullscreen = False):
         rmoogli.displayMoogli( self, moogliDt, runtime, rotation, fullscreen )
+        pr = moose.PyRun( '/model/updateMoogli' )
 
-    def display( self ):
+        pr.runString = '''
+import rmoogli
+rmoogli.updateMoogliViewer()
+'''
+        moose.setClock( pr.tick, moogliDt )
+        moose.reinit()
+        moose.start( runtime )
+        self.display( len( self.moogNames ) + 1 )
+
+    def display( self, startIndex = 0 ):
         import matplotlib.pyplot as plt
         for i in self.plotNames:
-            plt.figure( i[2] )
+            print( "###############" + str( i[2] + startIndex ) )
+            plt.figure( i[2] + startIndex )
             plt.title( i[1] )
             plt.xlabel( "Time (s)" )
             plt.ylabel( i[4] )
