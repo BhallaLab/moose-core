@@ -59,7 +59,8 @@ class MooView:
         self.ax.set_ylim3d( self.coordMin, self.coordMax )
         self.ax.set_zlim3d( self.coordMin, self.coordMax )
         #self.ax.view_init( elev = -80.0, azim = 90.0 )
-        self.colorbar = plt.colorbar( self.drawables_[0].segments )
+        #self.colorbar = plt.colorbar( self.drawables_[0].segments )
+        self.colorbar = self.fig_.colorbar( self.drawables_[0].segments )
         self.colorbar.set_label( self.drawables_[0].fieldInfo[3])
         self.timeStr = self.ax.text2D( 0.05, 0.05, 
                 "Time= 0.0", transform=self.ax.transAxes)
@@ -71,7 +72,7 @@ class MooView:
         self.timeStr.set_text( "Time= " + str(time) )
         for i in self.drawables_:
             i.updateValues()
-        self.fig_.canvas.draw()
+        #self.fig_.canvas.draw()
         plt.pause(0.001)
 
     def moveView(self, event):

@@ -27,12 +27,13 @@ import itertools
 import sys
 import time
 
-#import rdesigneur.rmoogli as rmoogli
-#from . import fixXreacs
-#from rdesigneur.rdesigneurProtos import *
-import rmoogli
+import rdesigneur.rmoogli as rmoogli
+from rdesigneur.rdesigneurProtos import *
 import fixXreacs
-from rdesigneurProtos import *
+#from . import fixXreacs
+#from rdesigneur.rmoogli import *
+#import rmoogli
+#from rdesigneurProtos import *
 
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
@@ -654,8 +655,8 @@ class rdesigneur:
         pr = moose.PyRun( '/model/updateMoogli' )
 
         pr.runString = '''
-import rmoogli
-rmoogli.updateMoogliViewer()
+import rdesigneur.rmoogli
+rdesigneur.rmoogli.updateMoogliViewer()
 '''
         moose.setClock( pr.tick, moogliDt )
         moose.reinit()
