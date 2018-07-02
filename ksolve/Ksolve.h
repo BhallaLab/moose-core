@@ -41,6 +41,7 @@ public:
     Id getDsolve() const;
     void setDsolve( Id dsolve ); /// Inherited from ZombiePoolInterface.
 
+
     unsigned int getNumLocalVoxels() const;
     unsigned int getNumAllVoxels() const;
     /**
@@ -52,6 +53,15 @@ public:
     /// Returns the vector of pool Num at the specified voxel.
     vector< double > getNvec( unsigned int voxel) const;
     void setNvec( unsigned int voxel, vector< double > vec );
+
+#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
+    // Set number of threads to use (for deterministic case only).
+    unsigned int getNumThreads( ) const;
+    void setNumThreads( unsigned int x );
+
+    // Parallel advance().
+    void parallel_advance(int begin, int end, size_t nWorkers, ProcPtr p);
+#endif
 
     /**
      * This does a quick and dirty estimate of the timestep suitable
@@ -100,6 +110,7 @@ public:
      */
     void setNumPools( unsigned int num );
     unsigned int getNumPools() const;
+
     VoxelPoolsBase* pools( unsigned int i );
     double volume( unsigned int i ) const;
 
@@ -116,29 +127,10 @@ public:
     void updateRateTerms( unsigned int index );
 
     //////////////////////////////////////////////////////////////////
-    // Functions for cross-compartment transfer
-    //////////////////////////////////////////////////////////////////
-    void setupXfer( Id myKsolve, Id otherKsolve,
-                    unsigned int numProxyMols,
-                    const vector< VoxelJunction >& vj );
-
-    void assignXferIndex( unsigned int numProxyMols,
-                          unsigned int xferCompt,
-                          const vector< vector< unsigned int > >& voxy );
-
-    void assignXferVoxels( unsigned int xferCompt );
-
-    unsigned int assignProxyPools( const map< Id, vector< Id > >& xr,
-                                   Id myKsolve, Id otherKsolve, Id otherComptId );
-
-    void buildCrossReacVolScaling( Id otherKsolve,
-                                   const vector< VoxelJunction >& vj );
-    //////////////////////////////////////////////////////////////////
     // for debugging
     void print() const;
 
     //////////////////////////////////////////////////////////////////
-    static SrcFinfo2< Id, vector< double > >* xComptOut();
     static const Cinfo* initCinfo();
 
 private:
@@ -146,6 +138,14 @@ private:
     string method_;
     double epsAbs_;
     double epsRel_;
+
+#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
+    /**
+     * @brief Number of threads to use. Only applicable for deterministic case.
+     */
+    unsigned int numThreads_;
+#endif
+
     /**
      * Each VoxelPools entry handles all the pools in a single voxel.
      * Each entry knows how to update itself in order to complete
@@ -168,6 +168,7 @@ private:
 
     /// Pointer to diffusion solver
     ZombiePoolInterface* dsolvePtr_;
+
 };
 
 #endif	// _KSOLVE_H

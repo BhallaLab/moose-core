@@ -1,17 +1,14 @@
-"""utils.py:
-Utility functions for moose.
+# -*- coding: utf-8 -*-
+# utils.py:
+#
+# Utility functions for moose.
+#
+# NOTE: Some function might break because unicode is default string in python3.
 
-NOTE: Some function might break because unicode is default string in python3.
-
-"""
+from __future__ import print_function, division, absolute_import
 
 from __future__ import print_function, division
 from __future__ import absolute_import
-
-__author__           = 'Subhasis Ray, Aditya Gilra, Dilawar Singh'
-__copyright__        = "Copyright 2013-, NCBS Bangalore"
-__credits__          = ["NCBS Bangalore"]
-__license__          = "GPLv3"
 
 import types
 import parser
@@ -25,16 +22,12 @@ from collections import defaultdict
 import re
 
 from moose.moose_constants import *
-
-# Make these import non-important.
+from moose.print_utils import *
+# Print and Plot utilities.
 try:
     from moose.plot_utils import *
 except Exception as e:
-    pass
-
-try:
-    from moose.print_utils import *
-except Exception as e:
+    info( "Plot utilities are not loaded due to '%s'" )
     pass
 
 
@@ -75,7 +68,7 @@ def create_table(tablePath, element, field,tableType):
         table = moose.element(tablePath)
     else:
         if tableType == "Table2":
-            table = moose.Table2(tablePath)            
+            table = moose.Table2(tablePath)
         elif tableType == "Table":
             table = moose.Table(tablePath)
         moose.connect(table, 'requestOut', element, 'get%s' % (field))
@@ -347,7 +340,10 @@ def autoposition(root):
         stack.extend([childcomp for childcomp in map(moose.element, comp.neighbors['raxial']) if childcomp.z == 0])
     return ret
 
-
+def loadModel(filename, target,method='ee'):
+    moose.loadModel(filename,target)
+    moose.mooseaddChemSolver(target,method)
+	
 def readcell_scrambled(filename, target, method='ee'):
     """A special version for handling cases where a .p file has a line
     with specified parent yet to be defined.

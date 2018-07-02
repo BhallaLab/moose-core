@@ -1,6 +1,22 @@
+# -*- coding: utf-8 -*-
+""" ChemconnectUtil.py Some of the command function are written """
+
+#Created : Friday May 27 12:19:00 2016(+0530)
+
+__author__           = "Harsha Rani"
+__copyright__        = "Copyright 2017, Harsha Rani and NCBS Bangalore"
+__credits__          = ["NCBS Bangalore"]
+__license__          = "GNU GPL"
+__version__          = "1.0.0"
+__maintainer__       = "Harsha Rani"
+__email__            = "hrani@ncbs.res.in"
+__status__           = "Development"
+__updated__          = "Aug 8 2017"
+
+#Aug 8 : added findCompartment function here
+
 import moose
 import numpy as np
-from collections import Counter
 
 def xyPosition(objInfo,xory):
     try:
@@ -9,8 +25,8 @@ def xyPosition(objInfo,xory):
         return (float(0))
 
 def setupMeshObj(modelRoot):
-    ''' Setup compartment and its members pool,reaction,enz cplx under self.meshEntry dictionaries \ 
-    self.meshEntry with "key" as compartment, 
+    ''' Setup compartment and its members pool,reaction,enz cplx under self.meshEntry dictionaries \
+    self.meshEntry with "key" as compartment,
     value is key2:list where key2 represents moose object type,list of objects of a perticular type
     e.g self.meshEntry[meshEnt] = { 'reaction': reaction_list,'enzyme':enzyme_list,'pool':poollist,'cplx': cplxlist }
     '''
@@ -53,9 +69,9 @@ def setupMeshObj(modelRoot):
                     objInfo =m.path+'/info'
                 if moose.exists(objInfo):
                     listOfitems[moose.element(moose.element(objInfo).parent)]={'x':xyPosition(objInfo,'x'),'y':xyPosition(objInfo,'y')}
-                
+
                 xcord.append(xyPosition(objInfo,'x'))
-                ycord.append(xyPosition(objInfo,'y')) 
+                ycord.append(xyPosition(objInfo,'y'))
 
             getxyCord(xcord,ycord,funclist,listOfitems)
             getxyCord(xcord,ycord,enzlist,listOfitems)
@@ -112,22 +128,22 @@ def setupItem(modelPath,cntDict):
                 prdlist = []
                 uniqItem,countuniqItem = countitems(items,'subOut')
                 subNo = uniqItem
-                for sub in uniqItem: 
+                for sub in uniqItem:
                     sublist.append((moose.element(sub),'s',countuniqItem[sub]))
 
                 uniqItem,countuniqItem = countitems(items,'prd')
                 prdNo = uniqItem
                 if (len(subNo) == 0 or len(prdNo) == 0):
-                    print ("Substrate Product is empty ",path, " ",items)
-                    
+                    print ("\nSubstrate Product is empty for "+items.path)
+
                 for prd in uniqItem:
                     prdlist.append((moose.element(prd),'p',countuniqItem[prd]))
-                
+
                 if (baseObj == 'CplxEnzBase') :
                     uniqItem,countuniqItem = countitems(items,'toEnz')
                     for enzpar in uniqItem:
                         sublist.append((moose.element(enzpar),'t',countuniqItem[enzpar]))
-                    
+
                     uniqItem,countuniqItem = countitems(items,'cplxDest')
                     for cplx in uniqItem:
                         prdlist.append((moose.element(cplx),'cplx',countuniqItem[cplx]))
@@ -145,7 +161,7 @@ def setupItem(modelPath,cntDict):
                 uniqItem,countuniqItem = countitems(item,'input')
                 for funcpar in uniqItem:
                     sublist.append((moose.element(funcpar),'sts',countuniqItem[funcpar]))
-                
+
                 uniqItem,countuniqItem = countitems(items,'valueOut')
                 for funcpar in uniqItem:
                     prdlist.append((moose.element(funcpar),'stp',countuniqItem[funcpar]))
@@ -177,5 +193,18 @@ def countitems(mitems,objtype):
     items = []
     items = moose.element(mitems).neighbors[objtype]
     uniqItems = set(items)
-    countuniqItems = Counter(items)
+    #countuniqItems = Counter(items)
+    countuniqItems = dict((i, items.count(i)) for i in items)
     return(uniqItems,countuniqItems)
+
+def findCompartment(element):
+    if element.path == '/':
+        return moose.element('/')
+    elif mooseIsInstance(element, ["CubeMesh", "CyclMesh"]):
+        return (element)
+    else:
+        return findCompartment(moose.element(element.parent))
+    
+
+def mooseIsInstance(element, classNames):
+    return moose.element(element).__class__.__name__ in classNames

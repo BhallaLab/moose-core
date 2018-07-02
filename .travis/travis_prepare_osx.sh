@@ -27,6 +27,7 @@ brew install hdf5
 brew install python
 brew install numpy
 brew install boost
+
 #brew outdated python || brew install python
 #brew outdated numpy || brew install homebrew/python/numpy
 brew unlink numpy && brew link numpy || echo "Failed to link numpy"
@@ -38,6 +39,6 @@ echo 'import sys; sys.path.insert(1, "/usr/local/lib/python2.7/site-packages")' 
 PATH=/usr/local/bin:/usr/bin:$PATH
 # ensurepip
 python -m ensurepip
-python -m pip install matplotlib --user --upgrade
+python -m pip install matplotlib --user
 python -m pip install pyNeuroML libNeuroML --user
 python -m pip install scipy --user

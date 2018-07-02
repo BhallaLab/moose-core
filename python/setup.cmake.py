@@ -21,6 +21,9 @@ import sys
 # guidelines. This caused havoc on our OBS build.
 from distutils.core import setup
 
+
+# Read version from VERSION created by cmake file. This file must be present for
+# setup.cmake.py to work perfectly.
 script_dir = os.path.dirname( os.path.abspath( __file__ ) )
 
 # Version file must be available. It MUST be written by cmake. Or create
@@ -31,14 +34,13 @@ print( 'Got %s from VERSION file' % version )
 
 
 # importlib is available only for python3.
-suffix = 'so'
+suffix = '.so'
 try:
     import importlib.machinery
     suffix = importlib.machinery.EXTENSION_SUFFIXES[0].split('.')[-1]
-    print( '[INFO] Suffix is %s' % suffix )
 except Exception as e:
     print( '[WARN] Failed to determine importlib suffix' )
-    suffix = 'so'
+    suffix = '.so'
 
 setup(
         name                   = 'pymoose',
@@ -52,12 +54,9 @@ setup(
         packages               = [ 'rdesigneur', 'moose'
                                     , 'moose.SBML', 'moose.genesis'
                                     , 'moose.neuroml', 'moose.neuroml2'
-                                    , 'moose.chemUtil'
+                                    , 'moose.chemUtil', 'moose.chemMerge' 
                                 ],
-				# install_requires is `setuptool` specific keyword. Don't use it here
-				# else wheel won't build for OSX. Let use install the dependencies
-				# by themselves. We notify them when they try to import SBML.
-        # install_requires       = [ 'python-libsbml', 'numpy' ],
+        install_requires       = [ 'python-libsbml', 'numpy' ],
         package_dir            = { 'moose' : 'moose', 'rdesigneur' : 'rdesigneur' },
-        package_data           = { 'moose' : ['_moose.' + suffix ] },
+        package_data           = { 'moose' : ['_moose' + suffix, 'neuroml2/schema/NeuroMLCoreDimensions.xml'] },
         )

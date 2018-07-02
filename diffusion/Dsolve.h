@@ -12,11 +12,11 @@
 
 /**
  * The Dsolve manages a large number of pools, each inhabiting a large
- * number of voxels that are shared for all the pools. 
+ * number of voxels that are shared for all the pools.
  * Each pool is represented by an array of concs, one for each voxel.
  * Each such array is kept on a single node for efficient solution.
  * The different pool arrays are assigned to different nodes for balance.
- * All pool arrays 
+ * All pool arrays
  * We have the parent Dsolve as a global. It constructs the diffusion
  * matrix from the NeuroMesh and generates the opvecs.
  * We have the child DiffPoolVec as a local. Each one contains a
@@ -28,7 +28,7 @@
  */
 class Dsolve: public ZombiePoolInterface
 {
-	public: 
+	public:
 		Dsolve();
 		~Dsolve();
 
@@ -67,15 +67,18 @@ class Dsolve: public ZombiePoolInterface
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
 
+		//////////////////////////////////////////////////////////////////
+		void updateJunctions( double dt );
+
 		/**
 		 * Builds junctions between Dsolves handling NeuroMesh, SpineMesh,
-		 * and PsdMesh. Must only be called from the one handling the 
-		 * NeuroMesh. 
+		 * and PsdMesh. Must only be called from the one handling the
+		 * NeuroMesh.
 		 * These junctions handle diffusion between different meshes.
 		 * Note that a single NeuroMesh may contact many spines which are
 		 * all in a single SpineMesh. Likewise each spine has a single
 		 * PSD, but there are many spines in the SpineMesh and matching
-		 * psds in the PsdMesh. Finally, note that 
+		 * psds in the PsdMesh. Finally, note that
 		 * there may be many molecules which diffuse across each diffusion
 		 * junction.
 		 */
@@ -89,17 +92,28 @@ class Dsolve: public ZombiePoolInterface
 		void buildMeshJunctions( const Eref& e, Id other );
 
 		/**
-		 * buildMeshJunctions is the inner utility function for building 
+		 * buildMeshJunctions is the inner utility function for building
 		 * the junction between any specified pair of Dsolves.
 		 * Note that it builds the junction on the 'self' Dsolve.
 		 */
-		static void innerBuildMeshJunctions( Id self, Id other );
+		void innerBuildMeshJunctions( Id self, Id other, 
+						bool isMembraneBound );
+
+		/// Sets up map of matching pools for diffusion.
+		static void mapDiffPoolsBetweenDsolves( DiffJunction& jn, 
+						Id self, Id other);
+
+		static void mapXfersBetweenDsolves(
+						vector< unsigned int >& srcPools, 
+						vector< unsigned int >& destPools,
+						Id src, Id dest );
+		void mapChansBetweenDsolves( DiffJunction& jn, Id self, Id other);
 
 		/**
 		 * Computes flux through a junction between diffusion solvers.
 		 * Most used at junctions on spines and PSDs, but can also be used
 		 * when a given diff solver is decomposed. At present the lookups
-		 * on the other diffusion solver assume that the data is on the 
+		 * on the other diffusion solver assume that the data is on the
 		 * local node. Once this works well I can figure out how to do
 		 * across nodes.
 		 */
@@ -123,11 +137,12 @@ class Dsolve: public ZombiePoolInterface
 
 		void getBlock( vector< double >& values ) const;
 		void setBlock( const vector< double >& values );
+		void setPrev();
 
 		// This one isn't used in Dsolve, but is defined as a dummy.
-		void setupCrossSolverReacs( 
+		void setupCrossSolverReacs(
 					const map< Id, vector< Id > >& xr, Id otherStoich );
-		void setupCrossSolverReacVols( 
+		void setupCrossSolverReacVols(
 			const vector< vector< Id > >& subCompts,
 			const vector< vector< Id > >& prdCompts );
 		void filterCrossRateTerms( const vector< pair< Id, Id > >& xrt );
@@ -137,25 +152,35 @@ class Dsolve: public ZombiePoolInterface
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////
+		unsigned int convertIdToPoolIndex( Id id ) const;
 		unsigned int convertIdToPoolIndex( const Eref& e ) const;
 		unsigned int getPoolIndex( const Eref& e ) const;
 
-		/** 
-		 * Fills in poolMap_ using elist of objects found when the 
+		/**
+		 * Fills in poolMap_ using elist of objects found when the
 		 * 'setPath' function is executed. temp is returned with the
 		 * list of PoolBase objects that exist on the path.
 		 */
 		void makePoolMapFromElist( const vector< ObjId >& elist,
 						vector< Id >& temp );
 
-		/** 
-		 * This key function does the work of setting up the Dsolve. 
+		/**
+		 * This key function does the work of setting up the Dsolve.
 		 * Should be called after the compartment has been attached to
 		 * the Dsolve, and the stoich is assigned.
 		 * Called during the setStoich function.
 		 */
 		void build( double dt );
 		void rebuildPools();
+		void calcJnDiff( const DiffJunction& jn, Dsolve* other, double dt );
+		void calcJnXfer( const DiffJunction& jn, 
+						const vector< unsigned int >& srcXfer, 
+						const vector< unsigned int >& destXfer, 
+						Dsolve* srcDsolve, Dsolve* destDsolve );
+		void calcJnChan( const DiffJunction& jn, Dsolve* other, double dt );
+		void calcOtherJnChan( const DiffJunction& jn, Dsolve* other, 
+						double dt );
+		void fillConcChans( const vector< ObjId >& chans );
 
 		/**
 		 * Utility func for debugging: Prints N_ matrix
@@ -167,7 +192,7 @@ class Dsolve: public ZombiePoolInterface
 	private:
 
 		/// Path of pools managed by Dsolve, may include other classes too.
-		string path_; 
+		string path_;
 
 		/// Timestep used by diffusion calculations.
 		double dt_;
@@ -179,6 +204,8 @@ class Dsolve: public ZombiePoolInterface
 
 		/// Internal vector, one for each pool species managed by Dsolve.
 		vector< DiffPoolVec > pools_;
+		/// Internal vector, one for each ConcChan managed by Dsolve.
+		vector< ConcChanInfo > channels_;
 
 		/// smallest Id value for poolMap_
 		unsigned int poolMapStart_;
@@ -188,7 +215,7 @@ class Dsolve: public ZombiePoolInterface
 
 		/**
 		 * Lists all the diffusion junctions managed by this Dsolve.
-		 * Each junction entry provides the info needed to do the 
+		 * Each junction entry provides the info needed to do the
 		 * numerical integration for flux between the Dsolves.
 		 */
 		vector< DiffJunction > junctions_;

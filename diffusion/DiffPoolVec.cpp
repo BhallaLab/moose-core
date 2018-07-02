@@ -23,7 +23,7 @@ using namespace std;
  * work on in single-compartment models.
  */
 DiffPoolVec::DiffPoolVec()
-	: id_( 0 ), n_( 1, 0.0 ), nInit_( 1, 0.0 ), 
+	: id_( 0 ), n_( 1, 0.0 ), nInit_( 1, 0.0 ),
 		diffConst_( 1.0e-12 ), motorConst_( 0.0 )
 {;}
 
@@ -51,6 +51,12 @@ void DiffPoolVec::setN( unsigned int voxel, double v )
 	n_[ voxel ] = v;
 }
 
+double DiffPoolVec::getPrev( unsigned int voxel ) const
+{
+	assert( voxel < n_.size() );
+	return prev_[ voxel ];
+}
+
 const vector< double >& DiffPoolVec::getNvec() const
 {
 	return n_;
@@ -69,6 +75,11 @@ void DiffPoolVec::setNvec( unsigned int start, unsigned int num,
 	vector< double >::iterator p = n_.begin() + start;
 	for ( unsigned int i = 0; i < num; ++i )
 		*p++ = *q++;
+}
+
+void DiffPoolVec::setPrevVec()
+{
+	prev_ = n_;
 }
 
 double DiffPoolVec::getDiffConst() const
@@ -91,7 +102,7 @@ void DiffPoolVec::setMotorConst( double v )
 	motorConst_ = v;
 }
 
-void DiffPoolVec::setNumVoxels( unsigned int num ) 
+void DiffPoolVec::setNumVoxels( unsigned int num )
 {
 	nInit_.resize( num, 0.0 );
 	n_.resize( num, 0.0 );
@@ -102,7 +113,7 @@ unsigned int DiffPoolVec::getNumVoxels() const
 	return n_.size();
 }
 
-void DiffPoolVec::setId( unsigned int id ) 
+void DiffPoolVec::setId( unsigned int id )
 {
 	id_ = id;
 }
@@ -142,5 +153,5 @@ void DiffPoolVec::advance( double dt )
 void DiffPoolVec::reinit() // Not called by the clock, but by parent.
 {
 	assert( n_.size() == nInit_.size() );
-	n_ = nInit_;
+	prev_ = n_ = nInit_;
 }

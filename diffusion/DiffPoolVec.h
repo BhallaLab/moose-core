@@ -26,6 +26,7 @@ class DiffPoolVec
 		void setNinit( unsigned int vox, double value );
 		double getN( unsigned int vox ) const;
 		void setN( unsigned int vox, double value );
+		double getPrev( unsigned int vox ) const;
 
 		double getDiffConst() const;
 		void setDiffConst( double value );
@@ -41,18 +42,20 @@ class DiffPoolVec
 
 		/////////////////////////////////////////////////
 		/// Used by parent solver to manipulate 'n'
-		const vector< double >& getNvec() const; 
+		const vector< double >& getNvec() const;
 		/// Used by parent solver to manipulate 'n'
-		void setNvec( const vector< double >& n ); 
-		void setNvec( unsigned int start, unsigned int num, 
-						vector< double >::const_iterator q ); 
-		void setOps( const vector< Triplet< double > >& ops_, 
+		void setNvec( const vector< double >& n );
+		void setNvec( unsigned int start, unsigned int num,
+						vector< double >::const_iterator q );
+		void setPrevVec(); /// Assigns prev_ = n_
+		void setOps( const vector< Triplet< double > >& ops_,
 				const vector< double >& diagVal_ ); /// Assign operations.
 
 		// static const Cinfo* initCinfo();
 	private:
 		unsigned int id_; /// Integer conversion of Id of pool handled.
 		vector< double > n_; /// Number of molecules of pool in each voxel
+		vector< double > prev_; /// # molecules of pool on previous timestep
 		vector< double > nInit_; /// Boundary condition: Initial 'n'.
 		double diffConst_; /// Diffusion const, assumed uniform
 		double motorConst_; /// Motor const, ie, transport rate.
