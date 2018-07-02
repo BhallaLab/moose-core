@@ -37,7 +37,8 @@ class MooView:
         plt.rcParams['keymap.all_axes'] = ''
         if hideAxis:
             self.ax.set_axis_off()
-        self.ax.margins( tight = True )
+        #self.ax.margins( tight = True )
+        self.ax.margins()
         self.sensitivity = 7.0 # degrees rotation
         self.zoom = 1.05
 
