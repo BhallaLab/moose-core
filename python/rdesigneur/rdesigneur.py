@@ -650,8 +650,8 @@ class rdesigneur:
     # Here we display the plots and moogli
     ################################################################
 
-    def displayMoogli( self, moogliDt, runtime, rotation = math.pi/500.0, fullscreen = False):
-        rmoogli.displayMoogli( self, moogliDt, runtime, rotation, fullscreen )
+    def displayMoogli( self, moogliDt, runtime, rotation = math.pi/500.0, fullscreen = False, block = True, azim = 0.0, elev = 0.0 ):
+        rmoogli.displayMoogli( self, moogliDt, runtime, rotation = rotation, fullscreen = fullscreen, azim = azim, elev = elev )
         pr = moose.PyRun( '/model/updateMoogli' )
 
         pr.runString = '''
@@ -661,7 +661,8 @@ rdesigneur.rmoogli.updateMoogliViewer()
         moose.setClock( pr.tick, moogliDt )
         moose.reinit()
         moose.start( runtime )
-        self.display( len( self.moogNames ) + 1 )
+        if block:
+            self.display( len( self.moogNames ) + 1 )
 
     def display( self, startIndex = 0 ):
         import matplotlib.pyplot as plt
@@ -685,7 +686,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
                     plt.plot( t, j.vector * i[3] )
         if len( self.moogList ) > 0:
             plt.ion()
-        plt.show(block=True)
+        plt.show( block=True )
         
         #This calls the _save function which saves only if the filenames have been specified
         self._save()                                            
