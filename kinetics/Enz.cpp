@@ -136,7 +136,7 @@ void Enz::vRemesh( const Eref& e )
 void Enz::vSetK1( const Eref& e, double v )
 {
 	r1_ = k1_ = v;
-	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
+	double volScale = convertConcToNumRateUsingMesh( e, enzOut, 1 );
 	Km_ = ( k2_ + k3_ ) / ( k1_ * volScale );
 }
 
@@ -186,7 +186,7 @@ void Enz::vSetKm( const Eref& e, double v )
 {
 	Km_ = v;
 	double volScale =
-		convertConcToNumRateUsingMesh( e, subOut, 1 );
+		convertConcToNumRateUsingMesh( e, enzOut, 1 );
 	k1_ = ( k2_ + k3_ ) / ( v * volScale );
 }
 
@@ -197,14 +197,14 @@ double Enz::vGetKm( const Eref& e ) const
 
 void Enz::vSetNumKm( const Eref& e, double v )
 {
-	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
+	double volScale = convertConcToNumRateUsingMesh( e, enzOut, 1 );
 	k1_ = ( k2_ + k3_ ) / v;
 	Km_ = v / volScale;
 }
 
 double Enz::vGetNumKm( const Eref& e ) const
 {
-	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
+	double volScale = convertConcToNumRateUsingMesh( e, enzOut, 1 );
 	return Km_ * volScale;
 }
 
@@ -212,7 +212,7 @@ void Enz::vSetRatio( const Eref& e, double v )
 {
 	k2_ = v * k3_;
 	double volScale =
-		convertConcToNumRateUsingMesh( e, subOut, 1 );
+		convertConcToNumRateUsingMesh( e, enzOut, 1 );
 
 	k1_ = ( k2_ + k3_ ) / ( Km_ * volScale );
 }
@@ -228,7 +228,7 @@ void Enz::vSetConcK1( const Eref& e, double v )
 		cout << "Enz::vSetConcK1: Warning: value " << v << " too small\n";
 		return;
 	}
-	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
+	double volScale = convertConcToNumRateUsingMesh( e, enzOut, 1 );
 	r1_ = k1_ = v * volScale;
 	Km_ = ( k2_ + k3_ ) / ( v );
 }
