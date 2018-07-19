@@ -160,7 +160,11 @@ double Enz::vGetK2( const Eref& e ) const
 
 void Enz::vSetKcat( const Eref& e, double v )
 {
-	double ratio = k2_ / k3_;
+	double ratio = 4.0;
+	if ( v < EPSILON )
+			v = EPSILON;
+	if (k3_ > EPSILON)
+		ratio = k2_ / k3_;
 	k3_ = v;
 	k2_ = v * ratio;
 	vSetKm( e, Km_ ); // Update k1_ here as well.

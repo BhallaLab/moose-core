@@ -35,7 +35,8 @@ class MooView:
         plt.rcParams['keymap.home'] = ''
         plt.rcParams['keymap.forward'] = ''
         plt.rcParams['keymap.all_axes'] = ''
-        if hideAxis:
+        self.hideAxis = hideAxis
+        if self.hideAxis:
             self.ax.set_axis_off()
         #self.ax.margins( tight = True )
         self.ax.margins()
@@ -45,9 +46,18 @@ class MooView:
     def addDrawable( self, n ):
         self.drawables_.append( n )
 
-    def firstDraw( self ):
+    def firstDraw( self, rotation = 0.0, elev = 0.0, azim = 0.0 ):
         self.coordMax = 0.0 
         self.coordMin = 0.0
+        if rotation == 0.0:
+            self.doRotation = False
+            self.rotation = 7 # default rotation per frame, in degrees.
+        else:
+            self.doRotation = True
+            self.rotation = rotation * 180/np.pi # arg units: radians/frame
+        
+        self.azim = azim * 180/np.pi
+        self.elev = elev * 180/np.pi
         for i in self.drawables_:
             cmax, cmin = i.drawForTheFirstTime( self.ax )
             self.coordMax = max( cmax, self.coordMax )
@@ -59,6 +69,7 @@ class MooView:
         self.ax.set_xlim3d( self.coordMin, self.coordMax )
         self.ax.set_ylim3d( self.coordMin, self.coordMax )
         self.ax.set_zlim3d( self.coordMin, self.coordMax )
+        self.ax.view_init( elev = self.elev, azim = self.azim )
         #self.ax.view_init( elev = -80.0, azim = 90.0 )
         #self.colorbar = plt.colorbar( self.drawables_[0].segments )
         self.colorbar = self.fig_.colorbar( self.drawables_[0].segments )
@@ -73,6 +84,8 @@ class MooView:
         self.timeStr.set_text( "Time= " + str(time) )
         for i in self.drawables_:
             i.updateValues()
+        if self.doRotation and abs( self.rotation ) < 120:
+            self.ax.azim += self.rotation
         #self.fig_.canvas.draw()
         plt.pause(0.001)
 
@@ -86,7 +99,6 @@ class MooView:
         z0 = self.ax.get_zbound()[0]
         z1 = self.ax.get_zbound()[1]
         zk = (z0 - z1) / self.sensitivity
-        #print self.ax.azim, self.ax.elev, self.ax.dist
 
         if event.key == "up" or event.key == "k":
             self.ax.set_ybound( y0 + yk, y1 + yk )
@@ -100,27 +112,58 @@ class MooView:
             self.ax.set_zbound( z0 + zk, z1 + zk )
         if event.key == "ctrl+down":
             self.ax.set_zbound( z0 - zk, z1 - zk )
-        if event.key == "." or event.key == ">":
+        if event.key == "." or event.key == ">": # zoom in, bigger
             self.ax.set_xbound( x0/self.zoom, x1/self.zoom )
             self.ax.set_ybound( y0/self.zoom, y1/self.zoom )
             self.ax.set_zbound( z0/self.zoom, z1/self.zoom )
-        if event.key == "," or event.key == "<":
+        if event.key == "," or event.key == "<": # zoom out, smaller
             self.ax.set_xbound( x0*self.zoom, x1*self.zoom )
             self.ax.set_ybound( y0*self.zoom, y1*self.zoom )
             self.ax.set_zbound( z0*self.zoom, z1*self.zoom )
-        if event.key == "a":
+        if event.key == "a": # autoscale to fill view.
             self.ax.set_xlim3d( self.coordMin, self.coordMax )
             self.ax.set_ylim3d( self.coordMin, self.coordMax )
             self.ax.set_zlim3d( self.coordMin, self.coordMax )
-        if event.key == "p":
+        if event.key == "p": # pitch
             self.ax.elev += self.sensitivity
         if event.key == "P":
             self.ax.elev -= self.sensitivity
-        if event.key == "y":
+        if event.key == "y": # yaw
             self.ax.azim += self.sensitivity
         if event.key == "Y":
             self.ax.azim -= self.sensitivity
+        # Don't have anything for roll
+        if event.key == "g":
+            self.hideAxis = not self.hideAxis
+            if self.hideAxis:
+                self.ax.set_axis_off()
+            else:
+                self.ax.set_axis_on()
+        if event.key == "t": # Turn on/off twisting/autorotate
+            self.doRotation = not self.doRotation
+        if event.key == "?": # Print out help for these commands
+            self.printMoogulHelp()
+
         self.fig_.canvas.draw()
+
+    def printMoogulHelp( self ):
+        print( '''
+            Key bindings for Moogul:
+            Up or k:    pan object up
+            Down or j:  pan object down
+            left or h:  pan object left. Bug: direction depends on azimuth.
+            right or l:  pan object right Bug: direction depends on azimuth
+            . or >:     Zoom in: make object appear bigger
+            , or <:     Zoom out: make object appear smaller
+            a:          Autoscale to fill view
+            p:          Pitch down
+            P:          Pitch up
+            y:          Yaw counterclockwise
+            Y:          Yaw counterclockwise
+            g:          Toggle visibility of grid
+            t:          Toggle turn (rotation along long axis of cell)
+            ?:          Print this help page.
+        ''')
 
 #####################################################################
 
@@ -197,7 +240,10 @@ class MooNeuron( MooDrawable ):
 
     def updateCoords( self ):
         ''' Obtains coords from the associated cell'''
-        self.compts_ = self.neuronId.compartments
+        self.compts_ = moose.wildcardFind( self.neuronId.path + "/#[ISA=CompartmentBase]" )
+        # Matplotlib3d isn't able to do full rotations about an y axis,
+        # which is what the NeuroMorpho models use, so
+        # here we shuffle the axes around. Should be an option.
         #coords = np.array([[[i.x0,i.y0,i.z0],[i.x,i.y,i.z]] 
             #for i in self.compts_])
         coords = np.array([[[i.z0,i.x0,i.y0],[i.z,i.x,i.y]] 
@@ -212,7 +258,6 @@ class MooNeuron( MooDrawable ):
             self.activeCoords = []
             self.activeDia = []
             for i,j,k in zip( self.compts_, coords, dia ):
-                #print i.path, self.relativeObj
                 if moose.exists( i.path + '/' + self.relativeObj ):
                     elm = moose.element( i.path + '/' + self.relativeObj )
                     self.activeObjs.append( elm )

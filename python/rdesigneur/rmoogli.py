@@ -44,9 +44,10 @@ def updateMoogliViewer():
         i.updateValues()
     
 
-def displayMoogli( rd, _dt, _runtime, _rotation, fullscreen = False ):
+def displayMoogli( rd, _dt, _runtime, rotation = 0.0, fullscreen = False, azim = 0.0, elev = 0.0 ):
     global mooViews
     mooViews = rd.moogNames
     for i in rd.moogNames:
-        i.firstDraw()
+        i.firstDraw( rotation = rotation, azim = azim, elev = elev ) 
+        # rotation in radians/frame, azim, elev in radians.
 
