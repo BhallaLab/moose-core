@@ -248,7 +248,7 @@ def transformNMDAR( path ):
     # compartment, it builds it on 'pa'. It places the compartment
     # on the end of 'prev', and at 0,0,0 otherwise.
 
-def buildCompt( pa, name, RM = 1.0, RA = 1.0, CM = 0.01, dia = 1.0e-6, x = 0.0, y = 0.0, z = 0.0, dx = 10e-6, dy = 0.0, dz = 0.0 ):
+def buildCompt( pa, name, RM = 1.0, RA = 1.0, CM = 0.01, dia = 1.0e-6, x = 0.0, y = 0.0, z = 0.0, dx = 10e-6, dy = 0.0, dz = 0.0, Em = -0.065, initVm = -0.065 ):
     length = np.sqrt( dx * dx + dy * dy + dz * dz )
     compt = moose.Compartment( pa.path + '/' + name )
     compt.x0 = x
@@ -264,6 +264,8 @@ def buildCompt( pa, name, RM = 1.0, RA = 1.0, CM = 0.01, dia = 1.0e-6, x = 0.0, 
     compt.Ra = length * RA / xa
     compt.Rm = RM / sa
     compt.Cm = CM * sa
+    compt.Em = Em
+    compt.initVm = initVm
     return compt
 
 def buildComptWrapper( pa, name, length, dia, xoffset, RM, RA, CM ):
