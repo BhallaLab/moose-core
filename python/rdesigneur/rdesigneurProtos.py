@@ -329,80 +329,40 @@ def make_LCa( name = 'LCa', parent = '/library' ):
         return Ca
 ######################################################################
 
-# Derived from : squid/electronics.py
-# Description: 
-# Author: Subhasis Ray
-# Maintainer: 
-# Created: Wed Feb 22 00:53:38 2012 (+0530)
-# Version: 
-# Last-Updated: Fri May 04 16:35:40 2018 (+0530)
-#           By: Upi
-#     Update #: 221
-
-# Change log:
-# 
-# 2012-02-22 23:22:30 (+0530) Subha - the circuitry put in a class.
-# 2018-05-04 23:22:30 (+0530) Upi - Adapted for Rdesigneur
-# 
-
-# Code:
-
-class ClampCircuit(moose.Neutral):
-    """Container for a Voltage-Clamp/Current clamp circuit."""
-    defaults = {
-        'level1': 25.0e-3,
-        'width1': 50.0e-3,
-        'delay1': 2.0e-3,
-        'delay2': 1e3,
-        'trigMode': 0,
-        'delay3': 1e6
-        }
-    def __init__(self, path ):
-        moose.Neutral.__init__(self, path)        
-        '''
-        self.pulsegen = moose.PulseGen(path+"/pulse") # holding voltage/current generator
-        self.pulsegen.count = 2
-        self.pulsegen.baseLevel = -65.0e-3
-        self.pulsegen.firstLevel = -40.0e-3
-        self.pulsegen.firstWidth = 50.0e-3
-        self.pulsegen.firstDelay = 2.0e-3
-        self.pulsegen.secondDelay = 0.0
-        self.pulsegen.trigMode = 2
-        self.gate = moose.PulseGen(path+"/gate") # holding voltage/current generator
-        self.gate.level[0] = 1.0
-        self.gate.delay[0] = 0.0
-        self.gate.width[0] = 1e3
-        moose.connect(self.gate, 'output', self.pulsegen, 'input')
-        '''
-        self.lowpass = moose.RC(path+"/lowpass") # lowpass filter
-        self.lowpass.R = 1.0
-        self.lowpass.C = 0.03
-        self.vclamp = moose.DiffAmp(path+"/vclamp")
-        self.vclamp.gain = 1.0
-        self.vclamp.saturation = 1e10
-        self.iclamp = moose.DiffAmp(path+"/iclamp")
-        self.iclamp.gain = 0.0
-        self.iclamp.saturation = 1e10
-        self.pid = moose.PIDController(path+"/pid")
-        self.pid.gain = 0.5
-        self.pid.tauI = 0.02e-3
-        self.pid.tauD = 0.005e-3
-        self.pid.saturation = 1e7
-        # Connect voltage clamp circuitry
-        #moose.connect(self.pulsegen, "output", self.lowpass, "injectIn")
-        moose.connect(self.lowpass, "output", self.vclamp, "plusIn")
-        moose.connect(self.vclamp, "output", self.pid, "commandIn")
-        #moose.connect(compartment, "VmOut", self.pid, "sensedIn")
-        #moose.connect(self.pid, "output", compartment, "injectMsg")
-        addmsg1 = moose.Mstring( path + '/addmsg1' )
-        addmsg1.value = './pid  output  ..  injectMsg'
-        addmsg2 = moose.Mstring( path + '/addmsg2' )
-        addmsg2.value = '.. VmOut ./pid  sensedIn'
-
 def make_vclamp( name = 'Vclamp', parent = '/library' ):
     if moose.exists( '/library/' + name ):
         return
-    vclamp = ClampCircuit( parent + '/' + name )
+    vclamp = moose.VClamp( parent + '/' + name )
+    vclamp.mode = 0     # Default. could try 1, 2 as well
+    vclamp.tau = 0.2e-3 # lowpass filter for command voltage input
+    vclamp.ti = 20e-6   # Integral time
+    vclamp.td = 5e-6    # Differential time. Should it be >= dt?
+    vclamp.gain = 0.00005   # Gain of vclamp ckt.
+
+    # Connect voltage clamp circuitry
+    addmsg1 = moose.Mstring( vclamp.path + '/addmsg1' )
+    addmsg1.value = '.  currentOut  ..  injectMsg'
+    addmsg2 = moose.Mstring( vclamp.path + '/addmsg2' )
+    addmsg2.value = '.. VmOut . sensedIn'
+
+    return vclamp
+
+######################################################################
+
+def make_synInput( name = 'RandSpike', parent = '/library' ):
+    if moose.exists( '/library/' + name ):
+        return
+    rs = moose.RandSpike( parent + '/' + name + '_rs' )
+    rs.rate = 0     # mean firing rate
+    rs.refractT = 5e-3 # 5 ms.
+    
+
+    # Connect rand spike to channel that it is sitting on.
+    addmsg1 = moose.Mstring( path + '/addmsg1' )
+    addmsg1.value = '.  spikeOut  ../sh/synapse[0]  addSpike'
+
+    return rs
+
 
 ######################################################################
 

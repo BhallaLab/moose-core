@@ -198,9 +198,9 @@ class rdesigneur:
             self.buildChemDistrib()
             self._configureSolvers()
             self.buildAdaptors()
+            self._buildStims()
             self._buildPlots()
             self._buildMoogli()
-            self._buildStims()
             self._configureHSolve()
             self._configureClocks()
             if self.verbose:
@@ -445,6 +445,28 @@ class rdesigneur:
         self.elecid = cell
         return cell
 
+    ################################################################
+    def _buildVclampOnCompt( self, dendCompts, spineCompts, stimInfo ):
+        # stimInfo = [path, geomExpr, relPath, field, expr_string]
+        stimObj = []
+        for i in dendCompts + spineCompts:
+            vclamp = make_vclamp( name = 'vclamp', parent = i.path )
+            moose.connect( i, 'VmOut', vclamp, 'sensedIn' )
+            moose.connect( vclamp, 'currentOut', i, 'injectMsg' )
+            stimObj.append( vclamp )
+
+        return stimObj
+
+    def _buildSynInputOnCompt( self, dendCompts, spineCompts, stimInfo ):
+        # stimInfo = [path, geomExpr, relPath, field, expr_string]
+        stimObj = []
+        for i in dendCompts + spineCompts:
+            path = i.path + '/' + stimInfo[2] + '/sh/synapse[0]'
+            if moose.exists( path ):
+                synInput = make_synInput( name='synInput', parent=path )
+                moose.connect( synInput, 'spikeOut', path, 'addSpike' )
+                stimObj.append( synInput )
+        return stimObj
         
     ################################################################
     # Here we set up the distributions
@@ -566,11 +588,11 @@ class rdesigneur:
         # Put in stuff to go through fields if the target is a chem object
         field = plotSpec[3]
         if not field in knownFields:
-            print("Warning: Rdesigneur::_parseComptField: Unknown field '", field, "'")
+            print("Warning: Rdesigneur::_parseComptField: Unknown field '{}'".format( field ) )
             return (), ""
 
         kf = knownFields[field] # Find the field to decide type.
-        if ( kf[0] == 'CaConcBase' or kf[0] == 'ChanBase' or kf[0] == 'NMDAChan' ):
+        if ( kf[0] == 'CaConcBase' or kf[0] == 'ChanBase' or kf[0] == 'NMDAChan' or kf[0] == 'VClamp' ):
             objList = self._collapseElistToPathAndClass( comptList, plotSpec[2], kf[0] )
             return objList, kf[1]
         elif (field == 'n' or field == 'conc' or field == 'volume'  ):
@@ -621,7 +643,8 @@ class rdesigneur:
             'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)' ),
             'n':('PoolBase', 'getN', 1, '# of molecules'),
             'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' ),
-            'volume':('PoolBase', 'getVolume', 1e18, 'Volume (um^3)' )
+            'volume':('PoolBase', 'getVolume', 1e18, 'Volume (um^3)' ),
+            'current':('VClamp', 'getCurrent', 1e9, 'Holding Current (nA)')
         }
         graphs = moose.Neutral( self.modelPath + '/graphs' )
         dummy = moose.element( '/' )
@@ -763,7 +786,8 @@ rdesigneur.rmoogli.updateMoogliViewer()
             'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)' ),
             'n':('PoolBase', 'getN', 1, '# of molecules'),
             'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' ),
-            'volume':('PoolBase', 'getVolume', 1e18, 'Volume (um^3)' )
+            'volume':('PoolBase', 'getVolume', 1e18, 'Volume (um^3)' ),
+            'current':('VClamp', 'getCurrent', 1e9, 'Holding Current (nA)')
         }
 
         save_graphs = moose.Neutral( self.modelPath + '/save_graphs' )
@@ -961,24 +985,38 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 'inject':('CompartmentBase', 'setInject'),
                 'Ca':('CaConcBase', 'getCa'),
                 'n':('PoolBase', 'setN'),
-                'conc':('PoolBase', 'setConc')
+                'conc':('PoolBase', 'setConc'),
+                'vclamp':('CompartmentBase', 'setInject'),
+                'randsyn':('SynChan', 'addSpike')
         }
         stims = moose.Neutral( self.modelPath + '/stims' )
         k = 0
+        # Stimlist = [path, geomExpr, relPath, field, expr_string]
         for i in self.stimList:
             pair = i[0] + " " + i[1]
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
             spineCompts = self.elecid.spinesFromExpression[ pair ]
-            stimObj, stimField = self._parseComptField( dendCompts, i, knownFields )
-            stimObj2, stimField2 = self._parseComptField( spineCompts, i, knownFields )
-            assert( stimField == stimField2 )
-            stimObj3 = stimObj + stimObj2
+            #print( "pair = {}, numcompts = {},{} ".format( pair, len( dendCompts), len( spineCompts ) ) )
+            #print( "IN BUILD STIMS with {}".format( i ) )
+            if i[3] == 'vclamp':
+                stimObj3 = self._buildVclampOnCompt( dendCompts, spineCompts, i )
+                stimField = 'commandIn'
+            elif i[3] == 'randsyn':
+                stimObj3 = self._builddSynInputOnCompt( dendCompts, spineCompts, i )
+                stimField = 'setRate'
+            else:
+                stimObj, stimField = self._parseComptField( dendCompts, i, knownFields )
+                stimObj2, stimField2 = self._parseComptField( spineCompts, i, knownFields )
+                assert( stimField == stimField2 )
+                stimObj3 = stimObj + stimObj2
             numStim = len( stimObj3 )
             if numStim > 0:
                 funcname = stims.path + '/stim' + str(k)
                 k += 1
                 func = moose.Function( funcname )
                 func.expr = i[4]
+                if i[3] == 'vclamp': # Hack to clean up initial condition
+                    func.doEvalAtReinit = 1
                 for q in stimObj3:
                     moose.connect( func, 'valueOut', q, stimField )
 
