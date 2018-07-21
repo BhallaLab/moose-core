@@ -457,13 +457,14 @@ class rdesigneur:
 
         return stimObj
 
-    def _buildSynInputOnCompt( self, dendCompts, spineCompts, stimInfo ):
+    def _buildSynInputOnCompt( self, dendCompts, spineCompts, stimInfo, doPeriodic = False ):
         # stimInfo = [path, geomExpr, relPath, field, expr_string]
         stimObj = []
         for i in dendCompts + spineCompts:
             path = i.path + '/' + stimInfo[2] + '/sh/synapse[0]'
             if moose.exists( path ):
                 synInput = make_synInput( name='synInput', parent=path )
+                synInput.doPeriodic = doPeriodic
                 moose.connect( synInput, 'spikeOut', path, 'addSpike' )
                 stimObj.append( synInput )
         return stimObj
@@ -987,7 +988,8 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 'n':('PoolBase', 'setN'),
                 'conc':('PoolBase', 'setConc'),
                 'vclamp':('CompartmentBase', 'setInject'),
-                'randsyn':('SynChan', 'addSpike')
+                'randsyn':('SynChan', 'addSpike'),
+                'periodicsyn':('SynChan', 'addSpike')
         }
         stims = moose.Neutral( self.modelPath + '/stims' )
         k = 0
@@ -1002,7 +1004,10 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 stimObj3 = self._buildVclampOnCompt( dendCompts, spineCompts, i )
                 stimField = 'commandIn'
             elif i[3] == 'randsyn':
-                stimObj3 = self._builddSynInputOnCompt( dendCompts, spineCompts, i )
+                stimObj3 = self._buildSynInputOnCompt( dendCompts, spineCompts, i )
+                stimField = 'setRate'
+            elif i[3] == 'periodicsyn':
+                stimObj3 = self._buildSynInputOnCompt( dendCompts, spineCompts, i, doPeriodic = True )
                 stimField = 'setRate'
             else:
                 stimObj, stimField = self._parseComptField( dendCompts, i, knownFields )

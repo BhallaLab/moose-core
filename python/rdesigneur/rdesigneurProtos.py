@@ -358,7 +358,7 @@ def make_synInput( name = 'RandSpike', parent = '/library' ):
     
 
     # Connect rand spike to channel that it is sitting on.
-    addmsg1 = moose.Mstring( path + '/addmsg1' )
+    addmsg1 = moose.Mstring( rs.path + '/addmsg1' )
     addmsg1.value = '.  spikeOut  ../sh/synapse[0]  addSpike'
 
     return rs
