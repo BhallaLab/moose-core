@@ -62,6 +62,19 @@ except Exception as e:
 # Import function from C++ module into moose namespace.
 from moose._moose import *
 
+#Here deleting `loadModel` which is imported from C++ module, this is to bypass  
+#function bcos now method `gsl` or `gssa` is not set in the loadModel function since 
+#`fixXreacs()` is now in python function
+ 
+del globals()['loadModel']
+
+def loadModel(filename, target,method='ee'):
+    
+    moose._moose.loadModel(filename,target)
+    if method != "ee":
+        moose.mooseaddChemSolver(target,method)
+    
+
 def version( ):
     return VERSION
 

@@ -23,11 +23,11 @@ def moosedeleteChemSolver(modelRoot):
             
             moose.delete(st)
             if moose.exists((st_ksolve).path):
+                print("KSolver is deleted for modelpath %s " % st_ksolve)
                 moose.delete(st_ksolve)
-                print("KSolver is deleted for modelpath %s " % modelRoot)
             if moose.exists((st_dsolve).path):
+                print("DSolver is deleted for modelpath %s " % st_dsolve)
                 moose.delete(st_dsolve)
-                print("DSolver is deleted for modelpath %s " % modelRoot)
     '''
     compts = moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]')
     for compt in compts:
@@ -106,8 +106,7 @@ def setCompartmentSolver(modelRoot, solver):
 
         elif (len(compts) >1 ):
             positionCompt(compts)
-
-        fixXreacs( modelRoot )
+            fixXreacs( modelRoot )
 
         for compt in compts:
             if solver != 'ee':
@@ -116,21 +115,24 @@ def setCompartmentSolver(modelRoot, solver):
                 if (solver == 'gssa') or (solver == 'Gillespie'):
                     ksolve = moose.Gsolve(compt.path + '/gsolve')
                 
-                dsolve = moose.Dsolve(compt.path+'/dsolve')
                 stoich = moose.Stoich(compt.path + '/stoich')
                 stoich.compartment = compt
                 stoich.ksolve = ksolve
-                stoich.dsolve = dsolve
+                
+                if len(compts) > 1:
+                    dsolve = moose.Dsolve(compt.path+'/dsolve')
+                    stoich.dsolve = dsolve
                 stoich.path = compt.path + "/##"
         ksolveList = moose.wildcardFind(modelRoot+'/##[ISA=Ksolve]')
         dsolveList = moose.wildcardFind(modelRoot+'/##[ISA=Dsolve]')
         stoichList = moose.wildcardFind(modelRoot+'/##[ISA=Stoich]')
         
-        i = 0
-        while(i < len(dsolveList)-1):
-            dsolveList[i+1].buildMeshJunctions(dsolveList[i])
-            i += 1
-        
+        if len(compts) > 1:
+            i = 0
+            while(i < len(dsolveList)-1):   
+                dsolveList[i+1].buildMeshJunctions(dsolveList[i])
+                i += 1
+
         print( " Solver is added to model path %s" % modelRoot )
     '''
     compts = moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]')
