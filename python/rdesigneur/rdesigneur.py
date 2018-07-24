@@ -28,8 +28,12 @@ import sys
 import time
 
 import rdesigneur.rmoogli as rmoogli
-import rdesigneur.fixXreacs as fixXreacs
 from rdesigneur.rdesigneurProtos import *
+import fixXreacs
+#from . import fixXreacs
+#from rdesigneur.rmoogli import *
+#import rmoogli
+#from rdesigneurProtos import *
 
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
@@ -332,6 +336,19 @@ class rdesigneur:
     # Here are the functions to build the type-specific prototypes.
     ################################################################
     def buildCellProto( self ):
+        # cellProtoList args:
+        # Option 1: zero args: make standard soma, len and dia 500 um.
+        # Option 2: [name, library_proto_name]: uses library proto
+        # Option 3: [fname.suffix, cellname ]: Loads cell from file
+        # Option 4: [moose<Classname>, cellname]: Makes proto of class
+        # Option 5: [funcname, cellname]: Calls named function with specified name of cell to be made.
+        # Option 6: [path, cellname]: Copies path to library as proto
+        # Option 7: [libraryName, cellname]: Renames library entry as proto
+        # Below two options only need the first two args, rest are optional
+        # Defailt values are given.
+        # Option 8: [somaProto,name, somaDia=5e-4, somaLen=5e-4]
+        # Option 9: [ballAndStick,name, somaDia=10e-6, somaLen=10e-6, 
+        #       dendDia=4e-6, dendLen=200e-6, numDendSeg=1]
         if len( self.cellProtoList ) == 0:
             ''' Make HH squid model sized compartment:
             len and dia 500 microns. CM = 0.01 F/m^2, RA =
@@ -339,6 +356,7 @@ class rdesigneur:
             self.elecid = makePassiveHHsoma( name = 'cell' )
             assert( moose.exists( '/library/cell/soma' ) )
             self.soma = moose.element( '/library/cell/soma' )
+            return
 
             '''
             self.elecid = moose.Neuron( '/library/cell' )
@@ -350,7 +368,11 @@ class rdesigneur:
             '''
 
         for i in self.cellProtoList:
-            if self.checkAndBuildProto( "cell", i, \
+            if i[0] == 'somaProto':
+                self._buildElecSoma( i )
+            elif i[0] == 'ballAndStick':
+                self._buildElecBallAndStick( i )
+            elif self.checkAndBuildProto( "cell", i, \
                 ["Compartment", "SymCompartment"], ["swc", "p", "nml", "xml"] ):
                 self.elecid = moose.element( '/library/' + i[1] )
             else:
@@ -394,7 +416,36 @@ class rdesigneur:
                 ["Pool"], ["g", "sbml", "xml" ] ):
                 self._loadChem( i[0], i[1] )
             self.chemid = moose.element( '/library/' + i[1] )
+    ################################################################
+    def _buildElecSoma( self, args ):
+        parms = [ 'somaProto', 'soma', 5e-4, 5e-4 ] # somaDia, somaLen
+        for i in range( len(args) ):
+            parms[i] = args[i]
+        cell = moose.Neuron( '/library/' + parms[1] )
+        buildCompt( cell, 'soma', dia = parms[2], dx = parms[3] )
+        self.elecid = cell
+        return cell
+        
+    ################################################################
+    def _buildElecBallAndStick( self, args ):
+        parms = [ 'ballAndStick', 'cell', 10e-6, 10e-6, 4e-6, 200e-6, 1 ] # somaDia, somaLen, dendDia, dendLen, dendNumSeg
+        for i in range( len(args) ):
+            parms[i] = args[i]
+        if parms[6] <= 0:
+            return _self.buildElecSoma( parms[:4] )
+        cell = moose.Neuron( '/library/' + parms[1] )
+        prev = buildCompt( cell, 'soma', dia = args[2], dx = args[3] )
+        dx = parms[5]/parms[6]
+        x = prev.x
+        for i in range( parms[6] ):
+            compt = buildCompt( cell, 'dend' + str(i), x = x, dx = dx, dia = args[4] )
+            moose.connect( prev, 'axial', compt, 'raxial' )
+            prev = compt
+            x += dx
+        self.elecid = cell
+        return cell
 
+        
     ################################################################
     # Here we set up the distributions
     ################################################################
@@ -645,13 +696,25 @@ class rdesigneur:
     ################################################################
     # Here we display the plots and moogli
     ################################################################
-    def displayMoogli( self, moogliDt, runtime, rotation = math.pi/500.0, fullscreen = False):
-        rmoogli.displayMoogli( self, moogliDt, runtime, rotation, fullscreen )
 
-    def display( self ):
+    def displayMoogli( self, moogliDt, runtime, rotation = math.pi/500.0, fullscreen = False, block = True, azim = 0.0, elev = 0.0 ):
+        rmoogli.displayMoogli( self, moogliDt, runtime, rotation = rotation, fullscreen = fullscreen, azim = azim, elev = elev )
+        pr = moose.PyRun( '/model/updateMoogli' )
+
+        pr.runString = '''
+import rdesigneur.rmoogli
+rdesigneur.rmoogli.updateMoogliViewer()
+'''
+        moose.setClock( pr.tick, moogliDt )
+        moose.reinit()
+        moose.start( runtime )
+        if block:
+            self.display( len( self.moogNames ) + 1 )
+
+    def display( self, startIndex = 0 ):
         import matplotlib.pyplot as plt
         for i in self.plotNames:
-            plt.figure( i[2] )
+            plt.figure( i[2] + startIndex )
             plt.title( i[1] )
             plt.xlabel( "Time (s)" )
             plt.ylabel( i[4] )
@@ -670,7 +733,7 @@ class rdesigneur:
                     plt.plot( t, j.vector * i[3] )
         if len( self.moogList ) > 0:
             plt.ion()
-        plt.show(block=True)
+        plt.show( block=True )
         
         #This calls the _save function which saves only if the filenames have been specified
         self._save()                                            

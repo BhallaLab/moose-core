@@ -867,9 +867,11 @@ void Dsolve::mapXfersBetweenDsolves(
 			Id pool( srcSolve->pools_[i].getId() );
 			assert( pool != Id() );
 			string poolName = pool.element()->getName();
-			size_t prefixLen = poolName.length() - xlen;
-			if ( poolName.rfind( xferPost ) == prefixLen )
-				srcMap[ poolName.substr( 0, prefixLen) ] = i;
+			if ( poolName.length() > xlen ) {
+				size_t prefixLen = poolName.length() - xlen;
+				if ( poolName.rfind( xferPost ) == prefixLen )
+					srcMap[ poolName.substr( 0, prefixLen) ] = i;
+			}
 	}
 
 	const Dsolve* destSolve = reinterpret_cast< const Dsolve* >(
