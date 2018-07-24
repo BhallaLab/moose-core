@@ -473,6 +473,11 @@ class rdesigneur:
     # Here we set up the distributions
     ################################################################
     def buildPassiveDistrib( self ):
+	# [. path field expr [field expr]...]
+        # RM, RA, CM set specific values, per unit area etc.
+        # Ra, Ra, Cm set absolute values.
+        # Also does Em, Ek, initVm
+	# Expression can use p, g, L, len, dia, maxP, maxG, maxL.
         temp = []
         for i in self.passiveDistrib:
             temp.extend( i )
@@ -999,7 +1004,6 @@ rdesigneur.rmoogli.updateMoogliViewer()
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
             spineCompts = self.elecid.spinesFromExpression[ pair ]
             #print( "pair = {}, numcompts = {},{} ".format( pair, len( dendCompts), len( spineCompts ) ) )
-            #print( "IN BUILD STIMS with {}".format( i ) )
             if i[3] == 'vclamp':
                 stimObj3 = self._buildVclampOnCompt( dendCompts, spineCompts, i )
                 stimField = 'commandIn'
@@ -1347,13 +1351,12 @@ rdesigneur.rmoogli.updateMoogliViewer()
             return
         # Sort comptlist in decreasing order of volume
         sortedComptlist = sorted( comptlist, key=lambda x: -x.volume )
-        if ( len( sortedComptlist ) != 3 ):
-            print("loadChem: Require 3 chem compartments, have: ",\
-                len( sortedComptlist ))
-            return False
-        sortedComptlist[0].name = 'dend'
-        sortedComptlist[1].name = 'spine'
-        sortedComptlist[2].name = 'psd'
+        if ( len( sortedComptlist ) >= 1 ):
+            sortedComptlist[0].name = 'dend'
+        if ( len( sortedComptlist ) >= 2 ):
+            sortedComptlist[0].name = 'spine'
+        if ( len( sortedComptlist ) >= 3 ):
+            sortedComptlist[2].name = 'psd'
 
     ################################################################
 
