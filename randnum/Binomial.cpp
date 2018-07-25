@@ -17,13 +17,15 @@
 
 #ifndef _BINOMIAL_CPP
 #define _BINOMIAL_CPP
-#include <cmath>
-#include "randnum.h"
+#include "../basecode/global.h"
 #include "utility/numutil.h"
 #include "Binomial.h"
+
 #include <vector>
 #include <iostream>
 #include <climits>
+#include <cmath>
+
 using namespace std;
 
 // First 10 entries in lookup table
@@ -197,7 +199,7 @@ double Binomial::getNextSample() const
         {
             for ( unsigned int i = 0; i < n_; ++i)
             {
-                double myRand = mtrand();
+                double myRand = moose::mtrand();
                 if ( myRand < p_ )
                 {
                     sample+=1;
@@ -234,7 +236,7 @@ double Binomial::generateTrd() const
     while ( true )
     {
         // 1a: generate a uniform random number v
-        varV = mtrand();
+        varV = moose::mtrand();
         if ( varV <= paramUrVr_ )
         {
             // 1b: if v <= urvr then u = v/vr - 0.43
@@ -245,7 +247,7 @@ double Binomial::generateTrd() const
         // 2a: if ( v >= vr ) then generate a uniform random number u in (-0.5,+0.5)
         if ( varV >= paramVr_ )
         {
-            varU = mtrand() - 0.5;
+            varU = moose::mtrand() - 0.5;
         }
         else  // 2b: otherwise
         {
@@ -254,7 +256,7 @@ double Binomial::generateTrd() const
             // 2b(ii): set u = sign(u)*0.5 - u
             varU = (varU > 0)? 0.5 - varU : - 0.5 - varU;
             // 2b(iii) generate a uniform random number v in (0,vr)
-            varV = mtrand()*paramVr_;
+            varV = moose::mtrand()*paramVr_;
         }
         // 3.0a: us = 0.5 - |u|
         varUs = (varU < 0) ? 0.5 + varU : 0.5 - varU;

@@ -21,6 +21,9 @@
  ******************************************************************/
 #ifndef _POISSON_CPP
 #define _POISSON_CPP
+
+#include "../basecode/global.h"
+
 #include "Poisson.h"
 #include "randnum.h"
 #include "utility/numutil.h"
@@ -121,7 +124,7 @@ double Poisson::poissonSmall(const Poisson& poisson)
     int i = 0;
     while ( product > poisson.mValue_ )
     {
-        product *= mtrand();
+        product *= moose::mtrand();
         ++i;
     }
     return i;

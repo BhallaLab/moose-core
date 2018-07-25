@@ -25,6 +25,8 @@
 #include "Uniform.h"
 #include "randnum.h"
 #include "utility/numutil.h"
+#include "../basecode/global.h"
+
 using namespace std;
 
 Uniform::Uniform()
@@ -72,7 +74,7 @@ void Uniform::setMax(double max)
 double Uniform::getNextSample() const
 {
     assert( max_ > min_ );
-    return mtrand()*(max_-min_)+min_;
+    return moose::mtrand()*(max_-min_)+min_;
 }
 
 #ifdef DO_UNIT_TESTS

@@ -17,9 +17,13 @@
 
 #ifndef _EXPONENTIAL_CPP
 #define _EXPONENTIAL_CPP
+
+#include "../basecode/global.h"
+
 #include "Exponential.h"
 #include "randnum.h"
 #include "utility/numutil.h"
+
 #include <iostream>
 #include <cmath>
 
@@ -60,7 +64,7 @@ double Exponential::getNextSample() const
 
 double Exponential::logarithmic(double mean)
 {
-    double uniform = mtrand();
+    double uniform = moose::mtrand();
     if ( uniform <= 0 )
     {
         uniform = 1.0e-6;

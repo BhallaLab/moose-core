@@ -7,7 +7,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
+#include "../basecode/header.h"
+#include "../basecode/global.h"
 #include "../randnum/randnum.h"
 #include "CompartmentBase.h"
 #include "Compartment.h"
@@ -254,7 +255,7 @@ void Compartment::vInjectMsg( const Eref& e, double current)
 
 void Compartment::vRandInject( const Eref& e, double prob, double current)
 {
-	if ( mtrand() < prob * dt_ ) {
+	if ( moose::mtrand() < prob * dt_ ) {
 		sumInject_ += current;
 		Im_ += current;
 	}
