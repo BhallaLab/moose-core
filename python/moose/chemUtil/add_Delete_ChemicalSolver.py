@@ -124,8 +124,8 @@ def setCompartmentSolver(modelRoot, solver):
                 stoich.path = compt.path + "/##"
 
         #stoichList = moose.wildcardFind(modelRoot+'/##[ISA=Stoich]')
-        if len(compts) > 1:
-            dsolveList = moose.wildcardFind(modelRoot+'/##[ISA=Dsolve]')
+        dsolveList = moose.wildcardFind(modelRoot+'/##[ISA=Dsolve]')
+        if len(dsolveList) > 1:
             i = 0
             while(i < len(dsolveList)-1):
                 dsolveList[i+1].buildMeshJunctions(dsolveList[i])
