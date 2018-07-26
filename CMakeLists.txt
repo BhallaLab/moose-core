@@ -1,17 +1,10 @@
-set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-
-
 project(pymoose)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
     cmake_policy(SET CMP0004 NEW)
-    if(POLICY CMP0050)
-        cmake_policy(SET CMP0050 OLD)
-    endif(POLICY CMP0050)
 endif(COMMAND cmake_policy)
-
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 include(CheckCXXCompiler.cmake)
@@ -103,7 +96,7 @@ option(PARALLELIZED_CLOCK "High level parallelization of moose::Clock (alpha)" O
 # Default macros
 add_definitions(-DUSE_GENESIS_PARSER)
 
-if(DEBUG)
+if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     message(STATUS "Building for Debug/Unit testing")
     add_definitions(-DDO_UNIT_TESTS)
     set(CMAKE_BUILD_TYPE Debug)
@@ -117,7 +110,7 @@ else()
     add_definitions(-UDO_UNIT_TESTS -DQUIET_MODE -O3)
 endif()
 
-if(GPROF AND DEBUG)
+if(GPROF AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     message(STATUS "Compiling with profiling with gprof")
     add_definitions(-pg)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
@@ -483,13 +476,13 @@ include( CTest )
 # onto the console if a test fails.
 set(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
 
-if(DEBUG)
+if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     # Run this test in debug mode. In Release mode, this does not do anything.
     set(MOOSE_BIN_LOCATION $<TARGET_FILE:moose.bin>)
     message(STATUS "Executable moose.bin will be at ${MOOSE_BIN_LOCATION}" )
 
     add_test(NAME moose.bin-raw-run COMMAND moose.bin -u -q)
-endif(DEBUG)
+endif()
 
 ## PyMOOSE tests.
 set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)
