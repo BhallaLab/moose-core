@@ -56,9 +56,7 @@ def mooseaddChemSolver(modelRoot, solver):
             currentSolver = "gsl"
         elif solver == "Exponential Euler" or solver == "ee":
             currentSolver = "ee"
-
         if previousSolver != currentSolver:
-            # if previousSolver != currentSolver
             comptinfo.solver = currentSolver
             if (moose.exists(compt[0].path + '/stoich')):
                 # "A: and stoich exists then delete the stoich add solver"
@@ -94,7 +92,7 @@ def setCompartmentSolver(modelRoot, solver):
         for a,b in comptVol.items():
             if b == volSor:
                 compts.append(a)
-    
+
     #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))] 
     if ( len(compts) == '0'):
         print ("Atleast one compartment is required ")
@@ -107,29 +105,29 @@ def setCompartmentSolver(modelRoot, solver):
         elif (len(compts) >1 ):
             positionCompt(compts)
             fixXreacs( modelRoot )
-
+    
         for compt in compts:
             if solver != 'ee':
                 if (solver == 'gsl') or (solver == 'Runge Kutta'):
                     ksolve = moose.Ksolve(compt.path + '/ksolve')
                 if (solver == 'gssa') or (solver == 'Gillespie'):
                     ksolve = moose.Gsolve(compt.path + '/gsolve')
-                
+      
                 stoich = moose.Stoich(compt.path + '/stoich')
-                stoich.compartment = compt
-                stoich.ksolve = ksolve
-                
+    
                 if len(compts) > 1:
                     dsolve = moose.Dsolve(compt.path+'/dsolve')
                     stoich.dsolve = dsolve
+
+                stoich.compartment = compt
+                stoich.ksolve = ksolve
                 stoich.path = compt.path + "/##"
-        ksolveList = moose.wildcardFind(modelRoot+'/##[ISA=Ksolve]')
-        dsolveList = moose.wildcardFind(modelRoot+'/##[ISA=Dsolve]')
-        stoichList = moose.wildcardFind(modelRoot+'/##[ISA=Stoich]')
-        
+
+        #stoichList = moose.wildcardFind(modelRoot+'/##[ISA=Stoich]')
         if len(compts) > 1:
+            dsolveList = moose.wildcardFind(modelRoot+'/##[ISA=Dsolve]')
             i = 0
-            while(i < len(dsolveList)-1):   
+            while(i < len(dsolveList)-1):
                 dsolveList[i+1].buildMeshJunctions(dsolveList[i])
                 i += 1
 

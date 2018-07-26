@@ -228,13 +228,13 @@ void setMethod( Shell* s, Id mgr, double simdt, double plotdt,
 	string simpath2 = mgr.path() + "/##[ISA=StimulusTable]," +
 			mgr.path() + "/##[ISA=PulseGen]";
 	string m = lower( method );
-
+    /*
 	if ( m == "ksolve" || m =="gsl" ||  m == "gssa" || m == "gsolve" ||
 		m == "gillespie" || m == "stochastic" )
 	{
 		cout << " Warning:  Default solver set is Exponential Euler. To set  \'gsl\' or \'gssa\' solver use function mooseaddChemSolver(modelpath,\'solverType\')"<<"\n";
 	}
-	/*
+	
 	
 	if ( m == "rk4" ) {
 		cout << "Warning, not yet implemented. Using rk5 instead\n";
@@ -312,7 +312,7 @@ Id ReadKkit::read(
 	assert(kinetics != Id());
 	Id cInfo = s->doCreate( "Annotator", basePath_, "info", 1 );
 	assert( cInfo != Id() );
-	Field< string > ::set(cInfo, "solver", method);
+	Field< string > ::set(cInfo, "solver", "ee");
 	Field< double > ::set(cInfo, "runtime", maxtime_);
 	s->doReinit();
 	return mgr;

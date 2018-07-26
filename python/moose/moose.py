@@ -10,7 +10,7 @@ from contextlib import closing
 import warnings
 import pydoc
 from io import StringIO
-
+from os.path import splitext
 import moose
 import moose.utils as mu
 
@@ -62,19 +62,41 @@ except Exception as e:
 # Import function from C++ module into moose namespace.
 from moose._moose import *
 
-#Here deleting `loadModel` which is imported from C++ module, this is to bypass  
-#function bcos now method `gsl` or `gssa` is not set in the loadModel function since 
-#`fixXreacs()` is now in python function
- 
+#`loadModel` is deleted from global import,
+# this is to bypass the call from c++ module which is due to fixXreacs() which is
+# now written in python and readKkit.cpp will not be possible to set/call the solver due to this
+'''
 del globals()['loadModel']
 
-def loadModel(filename, target,method='ee'):
-    
-    moose._moose.loadModel(filename,target)
-    if method != "ee":
-        moose.mooseaddChemSolver(target,method)
-    
-
+def loadModel(filename, target,method=None):
+    solverClass = 'Neutral'
+    if method != None:
+        solverClass = method
+    try:
+        f = open(filename,'r')
+        f.close()
+    except IOError as e:
+        print (e)
+        return
+    else:
+        file_name,extension = splitext(filename)
+        if extension in [".swc",".p"]:
+            moose._moose.loadModel(filename,target,"Neutral")
+        elif extension in [".g",".cspace"]:
+            #only if genesis or cspace file, then mooseaddChemSolver is called
+            moose._moose.loadModel(filename,target,"ee")
+          
+            method = "ee"
+            if solverClass.lower() in ["gssa","gillespie","stochastic","gsolve"]:
+                method = "gssa"
+            elif solverClass.lower() in ["gsl","runge kutta","deterministic","ksolve","rungekutta","rk5","rkf","rk"]:
+                method = "gsl"
+            elif solverClass.lower() in ["exponential euler","exponentialeuler","neutral"]:
+                method = "ee"
+            moose.mooseaddChemSolver(target,method)
+            #t = target+'/##[ISA=Gsolve],'+target+'/##[ISA=Ksolve],'+target+'/##[ISA=Dsolve],'+target+'/##[ISA=Stoich]'
+            #print ("Solvers---->",moose.wildcardFind(t))
+'''
 def version( ):
     return VERSION
 
