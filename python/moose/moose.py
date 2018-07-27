@@ -65,7 +65,7 @@ from moose._moose import *
 #`loadModel` is deleted from global import,
 # this is to bypass the call from c++ module which is due to fixXreacs() which is
 # now written in python and readKkit.cpp will not be possible to set/call the solver due to this
-'''
+
 del globals()['loadModel']
 
 def loadModel(filename, target,method=None):
@@ -94,9 +94,7 @@ def loadModel(filename, target,method=None):
             elif solverClass.lower() in ["exponential euler","exponentialeuler","neutral"]:
                 method = "ee"
             moose.mooseaddChemSolver(target,method)
-            #t = target+'/##[ISA=Gsolve],'+target+'/##[ISA=Ksolve],'+target+'/##[ISA=Dsolve],'+target+'/##[ISA=Stoich]'
-            #print ("Solvers---->",moose.wildcardFind(t))
-'''
+
 def version( ):
     return VERSION
 

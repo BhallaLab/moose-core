@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import moose
 from fixXreacs import fixXreacs
+from sys import version_info
 
 def positionCompt( compt ):
     i = 0
@@ -19,15 +20,17 @@ def moosedeleteChemSolver(modelRoot):
         if moose.exists(compt.path + '/stoich'):
             st = moose.element(compt.path + '/stoich')
             st_ksolve = st.ksolve
-            st_dsolve = st.dsolve
-            
+            if len(compts) >1:
+                st_dsolve = st.dsolve
+                
             moose.delete(st)
             if moose.exists((st_ksolve).path):
                 print("KSolver is deleted for modelpath %s " % st_ksolve)
                 moose.delete(st_ksolve)
-            if moose.exists((st_dsolve).path):
-                print("DSolver is deleted for modelpath %s " % st_dsolve)
-                moose.delete(st_dsolve)
+            if len(compts) >1:
+                if  moose.exists((st_dsolve).path):
+                    print("DSolver is deleted for modelpath %s " % st_dsolve)
+                    moose.delete(st_dsolve)
     '''
     compts = moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]')
     for compt in compts:
@@ -60,7 +63,7 @@ def mooseaddChemSolver(modelRoot, solver):
             comptinfo.solver = currentSolver
             if (moose.exists(compt[0].path + '/stoich')):
                 # "A: and stoich exists then delete the stoich add solver"
-                deleteSolver(modelRoot)
+                moosedeleteChemSolver(modelRoot)
                 setCompartmentSolver(modelRoot, currentSolver)
                 return True
             else:
@@ -82,6 +85,7 @@ def mooseaddChemSolver(modelRoot, solver):
 
 def setCompartmentSolver(modelRoot, solver):
     comptlist = dict((c, c.volume) for c in moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]'))
+    '''
     comptVol = {}
     compts = []
     vol  = [v for k,v in comptlist.items()]
@@ -92,7 +96,12 @@ def setCompartmentSolver(modelRoot, solver):
         for a,b in comptVol.items():
             if b == volSor:
                 compts.append(a)
-
+    '''
+    if version_info[0] < 3:
+        compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))]
+    else:
+        compts = [key for key, value in sorted(comptlist.items(), lambda kv: (-kv[1], kv[0]))]
+    
     #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))] 
     if ( len(compts) == '0'):
         print ("Atleast one compartment is required ")
