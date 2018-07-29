@@ -459,12 +459,17 @@ class rdesigneur:
 
     def _buildSynInputOnCompt( self, dendCompts, spineCompts, stimInfo, doPeriodic = False ):
         # stimInfo = [path, geomExpr, relPath, field, expr_string]
+        # Here we hack geomExpr to use it for the syn weight. We assume it
+        # is just a number. In due course
+        # it should be possible to actually evaluate it according to geom.
+        synWeight = float( stimInfo[1] )
         stimObj = []
         for i in dendCompts + spineCompts:
             path = i.path + '/' + stimInfo[2] + '/sh/synapse[0]'
             if moose.exists( path ):
                 synInput = make_synInput( name='synInput', parent=path )
                 synInput.doPeriodic = doPeriodic
+                moose.element(path).weight = synWeight
                 moose.connect( synInput, 'spikeOut', path, 'addSpike' )
                 stimObj.append( synInput )
         return stimObj
@@ -523,6 +528,14 @@ class rdesigneur:
         self.elecid.spineDistribution = temp
 
     def buildChemDistrib( self ):
+        # Orig format [chem, elecPath, install, expr]
+        #   where chem and install were not being used.
+        # Modified format [chemLibPath, elecPath, newChemName, expr]
+        # chemLibPath is name of chemCompt or even group on library
+        # If chemLibPath has multiple compts on it, then the smaller ones
+        # become endoMeshes, scaled as per original.
+        # As a backward compatibility hack, if the newChemName == 'install'
+        # we use the default naming.
         for i in self.chemDistrib:
             pair = i[1] + " " + i[3]
             # Assign any other params. Possibly the first param should
@@ -1299,7 +1312,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             return
         if not hasattr( self, 'dendCompt' ):
             raise BuildError( "configureSolvers: no chem meshes defined." )
-        fixXreacs.fixXreacs( self.modelPath )
+        fixXreacs.fixXreacs( self.chemid.path )
         dmksolve = moose.Ksolve( self.dendCompt.path + '/ksolve' )
         dmdsolve = moose.Dsolve( self.dendCompt.path + '/dsolve' )
         dmstoich = moose.Stoich( self.dendCompt.path + '/stoich' )
@@ -1354,7 +1367,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
         if ( len( sortedComptlist ) >= 1 ):
             sortedComptlist[0].name = 'dend'
         if ( len( sortedComptlist ) >= 2 ):
-            sortedComptlist[0].name = 'spine'
+            sortedComptlist[1].name = 'spine'
         if ( len( sortedComptlist ) >= 3 ):
             sortedComptlist[2].name = 'psd'
 
