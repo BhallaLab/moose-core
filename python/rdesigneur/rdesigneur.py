@@ -653,6 +653,9 @@ class rdesigneur:
             'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)' ),
             'spikeTime':('CompartmentBase', 'getVm', 1, 'Spike Times (s)'),
             'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)' ),
+            'Cm':('CompartmentBase', 'getCm', 1e12, 'Memb. capacitance (pF)' ),
+            'Rm':('CompartmentBase', 'getRm', 1e-9, 'Memb. Res (GOhm)' ),
+            'Ra':('CompartmentBase', 'getRa', 1e-6, 'Axial Res (MOhm)' ),
             'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)' ),
             'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)' ),
             'modulation':('ChanBase', 'getModulation', 1, 'chan modulation (unitless)' ),
@@ -794,6 +797,9 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
         knownFields = {
             'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)' ),
+            'Cm':('CompartmentBase', 'getCm', 1e12, 'Memb. capacitance (pF)' ),
+            'Rm':('CompartmentBase', 'getRm', 1e-9, 'Memb. Res (GOhm)' ),
+            'Ra':('CompartmentBase', 'getRa', 1e-6, 'Axial Res (MOhm)' ),
             'spikeTime':('CompartmentBase', 'getVm', 1, 'Spike Times (s)'),
             'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)' ),
             'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)' ),
