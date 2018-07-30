@@ -17,11 +17,14 @@
 
 #ifndef _GAMMA_CPP
 #define _GAMMA_CPP
-#include <cmath>
-#include "utility/numutil.h"
+
+#include "../basecode/global.h"
 #include "Gamma.h"
 #include "Exponential.h"
-#include "randnum.h"
+#include "utility/numutil.h"
+
+#include <cmath>
+
 Gamma::Gamma(double alpha, double theta):alpha_(alpha), theta_(theta)
 {
     if (( alpha < 0 ) || (theta < 0 ))
@@ -84,14 +87,14 @@ double Gamma::gammaLarge() const// alpha > 1
 
     while (true)
     {
-        uniformU = mtrand();
+        uniformU = moose::mtrand();
         yValue = tan(M_PI*uniformU);
         tmp = sqrt(2*alpha_ - 1)*yValue;
 
         result = tmp + alpha_ - 1;
         if (result > 0)
         {
-            uniformV = mtrand();
+            uniformV = moose::mtrand();
             check = ( 1 + yValue*yValue )*exp((alpha_ - 1.0)*log(result/(alpha_ - 1.0)) - tmp);
             if (uniformV < check )
             {
@@ -119,7 +122,7 @@ double Gamma::gammaSmall() const // 0 < alpha < 1
     while ( true )
     {
         // G2. generate G deviate
-        uniformU = mtrand();
+        uniformU = moose::mtrand();
         expSample = expGen.getNextSample();
         while (expSample == 0 )
         {

@@ -18,7 +18,9 @@
  * Likewise, if you want to carry out a dose-response calculation.
  */
 
-#include "header.h"
+#include "../basecode/header.h"
+#include "../basecode/global.h"
+
 #include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "RateTerm.h"
@@ -1100,7 +1102,7 @@ void SteadyState::fitConservationRules(
 				// double ytot = calcTot( g, i, j, lastJ );
 				double ytot = 0.0;
 				for ( int k = j; k < lastJ; ++k ) {
-					y[k] = mtrand();
+					y[k] = moose::mtrand();
 					ytot += y[k] * gsl_matrix_get( U, i, k );
 				}
 				assert( fabs( ytot ) > EPSILON );

@@ -7,8 +7,10 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
+#include "../basecode/header.h"
+#include "../basecode/global.h"
 #include "../randnum/randnum.h"
+
 #include "RandSpike.h"
 
 	///////////////////////////////////////////////////////
@@ -182,6 +184,7 @@ void RandSpike::process( const Eref& e, ProcPtr p )
 {
 	if ( refractT_ > p->currTime - lastEvent_  || rate_ <= 0.0 )
 		return;
+
 	fired_ = false;
 	if (doPeriodic_) {
 		if ( (p->currTime - lastEvent_) > 1.0/rate_ ) {
@@ -207,7 +210,7 @@ void RandSpike::reinit( const Eref& e, ProcPtr p )
 		lastEvent_ = 0.0;
 		realRate_ = 0.0;
 	} else {
-		double prob = mtrand();
+		double prob = moose::mtrand();
 		double m = 1.0 / rate_;
 		lastEvent_ = m * log( prob );
 	}

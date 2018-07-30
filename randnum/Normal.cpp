@@ -17,6 +17,9 @@
 
 #ifndef _NORMAL_CPP
 #define _NORMAL_CPP
+
+#include "../basecode/global.h"
+
 #include "Normal.h"
 #include "randnum.h"
 #include "../utility/numutil.h"
@@ -157,8 +160,8 @@ double Normal::BoxMueller()
     double a, b, r;
     do
     {
-        a = 2.0 * mtrand() - 1.0;
-        b = 2.0 * mtrand() - 1.0;
+        a = 2.0 * moose::mtrand() - 1.0;
+        b = 2.0 * moose::mtrand() - 1.0;
         r = a * a + b * b;
     } while ( r >= 1.0 );
     r = sqrt( - 2.0 * log(r) / r );
@@ -307,8 +310,7 @@ double Normal::aliasMethod()
 
         x_num = (unsigned long)( 3.75 + (1.0*0x40000000UL)/divider);
         // 12a) t = x*x/2-8, v = d*u*u*u'
-        t_num = x_num*x_num/2 - 0x8UL;
-        v_num = (unsigned long)(d*uniform*uniform*uniform_prime);
+        t_num = x_num*x_num/2 - 0x8UL; v_num = (unsigned long)(d*uniform*uniform*uniform_prime);
 
         // 12b) goto 10
         // 10) v > exp(-t)? goto 1: goto 8

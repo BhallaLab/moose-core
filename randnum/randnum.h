@@ -9,6 +9,7 @@
 ** Biophase Simulations Inc, http://www.bpsims.com
 ** See the file BIOPHASE.INFO for details.
 **********************************************************************/
+
 extern double mtrand(void);
 extern void mtseed(long seed);
 extern unsigned long genrand_int32(void);
