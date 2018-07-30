@@ -69,6 +69,14 @@ const Cinfo* RandSpike::initCinfo()
 		&RandSpike::setRefractT,
 		&RandSpike::getRefractT
 	);
+	static ValueFinfo< RandSpike, bool > doPeriodic( "doPeriodic",
+		"Flag: when false, do Poisson process with specified mean rate.\n"
+		"When true, fire periodically at specified rate.\n"
+		"Defaults to false. Note that refractory time overrides this: "
+		"Rate cannot exceed 1/refractT.",
+		&RandSpike::setDoPeriodic,
+		&RandSpike::getDoPeriodic
+	);
 	static ReadOnlyValueFinfo< RandSpike, bool > hasFired( "hasFired",
 		"True if RandSpike has just fired",
 		&RandSpike::getFired
@@ -81,6 +89,7 @@ const Cinfo* RandSpike::initCinfo()
 		&rate,		// Value
 		&refractT,	// Value
 		&absRefract,	// Value
+		&doPeriodic,	// Value 
 		&hasFired,	// ReadOnlyValue
 	};
 
@@ -88,7 +97,8 @@ const Cinfo* RandSpike::initCinfo()
 	{
 		"Name", "RandSpike",
 		"Author", "Upi Bhalla",
-		"Description", "RandSpike object, generates random spikes at."
+		"Description", "RandSpike object, generates random or regular "
+		"spikes at "
 		"specified mean rate. Based closely on GENESIS randspike. "
 	};
 	static Dinfo< RandSpike > dinfo;
@@ -113,7 +123,8 @@ RandSpike::RandSpike()
       refractT_(0.0),
       lastEvent_(0.0),
 	  threshold_(0.0),
-	  fired_( 0 )
+	  fired_( false ),
+	  doPeriodic_( false )
 {;}
 
 //////////////////////////////////////////////////////////////////
@@ -123,6 +134,10 @@ RandSpike::RandSpike()
 // Value Field access function definitions.
 void RandSpike::setRate( double rate )
 {
+	if ( rate < 0.0 ) {
+		cout <<"Warning: RandSpike::setRate: Rate must be >= 0. Using 0.\n";
+		rate = 0.0;
+	}
 	rate_ = rate;
 	double prob = 1.0 - rate * refractT_;
 	if ( prob <= 0.0 ) {
@@ -151,6 +166,15 @@ bool RandSpike::getFired() const
 	return fired_;
 }
 
+void RandSpike::setDoPeriodic( bool val )
+{
+	doPeriodic_ = val;
+}
+bool RandSpike::getDoPeriodic() const
+{
+	return doPeriodic_;
+}
+
 
 //////////////////////////////////////////////////////////////////
 // RandSpike::Dest function definitions.
@@ -158,16 +182,23 @@ bool RandSpike::getFired() const
 
 void RandSpike::process( const Eref& e, ProcPtr p )
 {
-	if ( refractT_ > p->currTime - lastEvent_ )
+	if ( refractT_ > p->currTime - lastEvent_  || rate_ <= 0.0 )
 		return;
-	double prob = realRate_ * p->dt;
-	if ( prob >= 1.0 || prob >= moose::mtrand() )
-	{
-		lastEvent_ = p->currTime;
-		spikeOut()->send( e, p->currTime );
-		fired_ = true;
+	fired_ = false;
+	if (doPeriodic_) {
+		if ( (p->currTime - lastEvent_) > 1.0/rate_ ) {
+			lastEvent_ = p->currTime;
+			spikeOut()->send( e, p->currTime );
+			fired_ = true;
+		}
 	} else {
-        fired_ = false;
+		double prob = realRate_ * p->dt;
+		if ( prob >= 1.0 || prob >= mtrand() )
+		{
+			lastEvent_ = p->currTime;
+			spikeOut()->send( e, p->currTime );
+			fired_ = true;
+		}
 	}
 }
 
