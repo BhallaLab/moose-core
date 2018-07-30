@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import moose
 from fixXreacs import fixXreacs
-from sys import version_info
+import sys
 
 def positionCompt( compt ):
     i = 0
@@ -97,10 +97,10 @@ def setCompartmentSolver(modelRoot, solver):
             if b == volSor:
                 compts.append(a)
     '''
-    if version_info[0] < 3:
-        compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))]
-    else:
+    if sys.version_info[0] > (3, 0)):
         compts = [key for key, value in sorted(comptlist.items(), lambda kv: (-kv[1], kv[0]))]
+    else:
+        compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))]
     
     #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))] 
     if ( len(compts) == '0'):
