@@ -85,7 +85,7 @@ def mooseaddChemSolver(modelRoot, solver):
 
 def setCompartmentSolver(modelRoot, solver):
     comptlist = dict((c, c.volume) for c in moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]'))
-    '''
+
     comptVol = {}
     compts = []
     vol  = [v for k,v in comptlist.items()]
@@ -104,7 +104,8 @@ def setCompartmentSolver(modelRoot, solver):
     else:
         compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))]
     
-    #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))] 
+    #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))]
+    '''
     if ( len(compts) == '0'):
         print ("Atleast one compartment is required ")
         return
@@ -123,15 +124,16 @@ def setCompartmentSolver(modelRoot, solver):
                     ksolve = moose.Ksolve(compt.path + '/ksolve')
                 if (solver == 'gssa') or (solver == 'Gillespie'):
                     ksolve = moose.Gsolve(compt.path + '/gsolve')
-      
-                stoich = moose.Stoich(compt.path + '/stoich')
-    
                 if len(compts) > 1:
                     dsolve = moose.Dsolve(compt.path+'/dsolve')
-                    stoich.dsolve = dsolve
-
+                    
+                stoich = moose.Stoich(compt.path + '/stoich')
                 stoich.compartment = compt
                 stoich.ksolve = ksolve
+                
+                if len(compts) > 1:                              
+                    stoich.dsolve = dsolve
+
                 stoich.path = compt.path + "/##"
 
         #stoichList = moose.wildcardFind(modelRoot+'/##[ISA=Stoich]')
