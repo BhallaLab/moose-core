@@ -193,7 +193,7 @@ void RandSpike::process( const Eref& e, ProcPtr p )
 		}
 	} else {
 		double prob = realRate_ * p->dt;
-		if ( prob >= 1.0 || prob >= mtrand() )
+		if ( prob >= 1.0 || prob >= moose::mtrand() )
 		{
 			lastEvent_ = p->currTime;
 			spikeOut()->send( e, p->currTime );

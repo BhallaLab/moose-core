@@ -8,12 +8,13 @@
 **********************************************************************/
 
 
-#include "header.h"
+#include "../basecode/header.h"
+#include "../basecode/global.h"
 #include "../shell/Shell.h"
 #include "../randnum/randnum.h"
-#include "CompartmentBase.h"
 #include "../utility/testing_macros.hpp"
 
+#include "CompartmentBase.h"
 #include "Compartment.h"
 /*
 #include "HHGate.h"
@@ -115,7 +116,7 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
 
     vector< double > origVm( size, 0.0 );
     for ( unsigned int i = 0; i < size; ++i )
-        origVm[i] = mtrand() * Vmax;
+        origVm[i] = moose::mtrand() * Vmax;
 
     double origVm100 = origVm[100];
     double origVm900 = origVm[900];
@@ -146,11 +147,10 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
         vector< double > delay( numSynVec[i], 0.0 );
         for ( unsigned int j = 0; j < numSynVec[i]; ++j )
         {
-            weight[i][ j ] = mtrand() * weightMax;
-            delay[ j ] = delayMin + mtrand() * ( delayMax - delayMin );
+            weight[i][ j ] = moose::mtrand() * weightMax;
+            delay[ j ] = delayMin + moose::mtrand() * ( delayMax - delayMin );
         }
-        ret = Field< double >::
-              setVec( ObjId( synId, i ), "weight", weight[i] );
+        ret = Field< double >::setVec( ObjId( synId, i ), "weight", weight[i] );
         assert( ret );
         ret = Field< double >::setVec( ObjId( synId, i ), "delay", delay );
         assert( ret );
