@@ -184,6 +184,7 @@ void RandSpike::process( const Eref& e, ProcPtr p )
 {
 	if ( refractT_ > p->currTime - lastEvent_  || rate_ <= 0.0 )
 		return;
+
 	fired_ = false;
 	if (doPeriodic_) {
 		if ( (p->currTime - lastEvent_) > 1.0/rate_ ) {
