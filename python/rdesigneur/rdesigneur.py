@@ -198,9 +198,9 @@ class rdesigneur:
             self.buildChemDistrib()
             self._configureSolvers()
             self.buildAdaptors()
+            self._buildStims()
             self._buildPlots()
             self._buildMoogli()
-            self._buildStims()
             self._configureHSolve()
             self._configureClocks()
             if self.verbose:
@@ -445,11 +445,44 @@ class rdesigneur:
         self.elecid = cell
         return cell
 
+    ################################################################
+    def _buildVclampOnCompt( self, dendCompts, spineCompts, stimInfo ):
+        # stimInfo = [path, geomExpr, relPath, field, expr_string]
+        stimObj = []
+        for i in dendCompts + spineCompts:
+            vclamp = make_vclamp( name = 'vclamp', parent = i.path )
+            moose.connect( i, 'VmOut', vclamp, 'sensedIn' )
+            moose.connect( vclamp, 'currentOut', i, 'injectMsg' )
+            stimObj.append( vclamp )
+
+        return stimObj
+
+    def _buildSynInputOnCompt( self, dendCompts, spineCompts, stimInfo, doPeriodic = False ):
+        # stimInfo = [path, geomExpr, relPath, field, expr_string]
+        # Here we hack geomExpr to use it for the syn weight. We assume it
+        # is just a number. In due course
+        # it should be possible to actually evaluate it according to geom.
+        synWeight = float( stimInfo[1] )
+        stimObj = []
+        for i in dendCompts + spineCompts:
+            path = i.path + '/' + stimInfo[2] + '/sh/synapse[0]'
+            if moose.exists( path ):
+                synInput = make_synInput( name='synInput', parent=path )
+                synInput.doPeriodic = doPeriodic
+                moose.element(path).weight = synWeight
+                moose.connect( synInput, 'spikeOut', path, 'addSpike' )
+                stimObj.append( synInput )
+        return stimObj
         
     ################################################################
     # Here we set up the distributions
     ################################################################
     def buildPassiveDistrib( self ):
+	# [. path field expr [field expr]...]
+        # RM, RA, CM set specific values, per unit area etc.
+        # Ra, Ra, Cm set absolute values.
+        # Also does Em, Ek, initVm
+	# Expression can use p, g, L, len, dia, maxP, maxG, maxL.
         temp = []
         for i in self.passiveDistrib:
             temp.extend( i )
@@ -495,6 +528,14 @@ class rdesigneur:
         self.elecid.spineDistribution = temp
 
     def buildChemDistrib( self ):
+        # Orig format [chem, elecPath, install, expr]
+        #   where chem and install were not being used.
+        # Modified format [chemLibPath, elecPath, newChemName, expr]
+        # chemLibPath is name of chemCompt or even group on library
+        # If chemLibPath has multiple compts on it, then the smaller ones
+        # become endoMeshes, scaled as per original.
+        # As a backward compatibility hack, if the newChemName == 'install'
+        # we use the default naming.
         for i in self.chemDistrib:
             pair = i[1] + " " + i[3]
             # Assign any other params. Possibly the first param should
@@ -566,11 +607,11 @@ class rdesigneur:
         # Put in stuff to go through fields if the target is a chem object
         field = plotSpec[3]
         if not field in knownFields:
-            print("Warning: Rdesigneur::_parseComptField: Unknown field '", field, "'")
+            print("Warning: Rdesigneur::_parseComptField: Unknown field '{}'".format( field ) )
             return (), ""
 
         kf = knownFields[field] # Find the field to decide type.
-        if ( kf[0] == 'CaConcBase' or kf[0] == 'ChanBase' or kf[0] == 'NMDAChan' ):
+        if ( kf[0] == 'CaConcBase' or kf[0] == 'ChanBase' or kf[0] == 'NMDAChan' or kf[0] == 'VClamp' ):
             objList = self._collapseElistToPathAndClass( comptList, plotSpec[2], kf[0] )
             return objList, kf[1]
         elif (field == 'n' or field == 'conc' or field == 'volume'  ):
@@ -612,6 +653,9 @@ class rdesigneur:
             'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)' ),
             'spikeTime':('CompartmentBase', 'getVm', 1, 'Spike Times (s)'),
             'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)' ),
+            'Cm':('CompartmentBase', 'getCm', 1e12, 'Memb. capacitance (pF)' ),
+            'Rm':('CompartmentBase', 'getRm', 1e-9, 'Memb. Res (GOhm)' ),
+            'Ra':('CompartmentBase', 'getRa', 1e-6, 'Axial Res (MOhm)' ),
             'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)' ),
             'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)' ),
             'modulation':('ChanBase', 'getModulation', 1, 'chan modulation (unitless)' ),
@@ -621,7 +665,8 @@ class rdesigneur:
             'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)' ),
             'n':('PoolBase', 'getN', 1, '# of molecules'),
             'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' ),
-            'volume':('PoolBase', 'getVolume', 1e18, 'Volume (um^3)' )
+            'volume':('PoolBase', 'getVolume', 1e18, 'Volume (um^3)' ),
+            'current':('VClamp', 'getCurrent', 1e9, 'Holding Current (nA)')
         }
         graphs = moose.Neutral( self.modelPath + '/graphs' )
         dummy = moose.element( '/' )
@@ -752,6 +797,9 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
         knownFields = {
             'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)' ),
+            'Cm':('CompartmentBase', 'getCm', 1e12, 'Memb. capacitance (pF)' ),
+            'Rm':('CompartmentBase', 'getRm', 1e-9, 'Memb. Res (GOhm)' ),
+            'Ra':('CompartmentBase', 'getRa', 1e-6, 'Axial Res (MOhm)' ),
             'spikeTime':('CompartmentBase', 'getVm', 1, 'Spike Times (s)'),
             'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)' ),
             'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)' ),
@@ -763,7 +811,8 @@ rdesigneur.rmoogli.updateMoogliViewer()
             'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)' ),
             'n':('PoolBase', 'getN', 1, '# of molecules'),
             'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)' ),
-            'volume':('PoolBase', 'getVolume', 1e18, 'Volume (um^3)' )
+            'volume':('PoolBase', 'getVolume', 1e18, 'Volume (um^3)' ),
+            'current':('VClamp', 'getCurrent', 1e9, 'Holding Current (nA)')
         }
 
         save_graphs = moose.Neutral( self.modelPath + '/save_graphs' )
@@ -961,24 +1010,41 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 'inject':('CompartmentBase', 'setInject'),
                 'Ca':('CaConcBase', 'getCa'),
                 'n':('PoolBase', 'setN'),
-                'conc':('PoolBase', 'setConc')
+                'conc':('PoolBase', 'setConc'),
+                'vclamp':('CompartmentBase', 'setInject'),
+                'randsyn':('SynChan', 'addSpike'),
+                'periodicsyn':('SynChan', 'addSpike')
         }
         stims = moose.Neutral( self.modelPath + '/stims' )
         k = 0
+        # Stimlist = [path, geomExpr, relPath, field, expr_string]
         for i in self.stimList:
             pair = i[0] + " " + i[1]
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
             spineCompts = self.elecid.spinesFromExpression[ pair ]
-            stimObj, stimField = self._parseComptField( dendCompts, i, knownFields )
-            stimObj2, stimField2 = self._parseComptField( spineCompts, i, knownFields )
-            assert( stimField == stimField2 )
-            stimObj3 = stimObj + stimObj2
+            #print( "pair = {}, numcompts = {},{} ".format( pair, len( dendCompts), len( spineCompts ) ) )
+            if i[3] == 'vclamp':
+                stimObj3 = self._buildVclampOnCompt( dendCompts, spineCompts, i )
+                stimField = 'commandIn'
+            elif i[3] == 'randsyn':
+                stimObj3 = self._buildSynInputOnCompt( dendCompts, spineCompts, i )
+                stimField = 'setRate'
+            elif i[3] == 'periodicsyn':
+                stimObj3 = self._buildSynInputOnCompt( dendCompts, spineCompts, i, doPeriodic = True )
+                stimField = 'setRate'
+            else:
+                stimObj, stimField = self._parseComptField( dendCompts, i, knownFields )
+                stimObj2, stimField2 = self._parseComptField( spineCompts, i, knownFields )
+                assert( stimField == stimField2 )
+                stimObj3 = stimObj + stimObj2
             numStim = len( stimObj3 )
             if numStim > 0:
                 funcname = stims.path + '/stim' + str(k)
                 k += 1
                 func = moose.Function( funcname )
                 func.expr = i[4]
+                if i[3] == 'vclamp': # Hack to clean up initial condition
+                    func.doEvalAtReinit = 1
                 for q in stimObj3:
                     moose.connect( func, 'valueOut', q, stimField )
 
@@ -1252,7 +1318,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             return
         if not hasattr( self, 'dendCompt' ):
             raise BuildError( "configureSolvers: no chem meshes defined." )
-        fixXreacs.fixXreacs( self.modelPath )
+        fixXreacs.fixXreacs( self.chemid.path )
         dmksolve = moose.Ksolve( self.dendCompt.path + '/ksolve' )
         dmdsolve = moose.Dsolve( self.dendCompt.path + '/dsolve' )
         dmstoich = moose.Stoich( self.dendCompt.path + '/stoich' )
@@ -1304,13 +1370,12 @@ rdesigneur.rmoogli.updateMoogliViewer()
             return
         # Sort comptlist in decreasing order of volume
         sortedComptlist = sorted( comptlist, key=lambda x: -x.volume )
-        if ( len( sortedComptlist ) != 3 ):
-            print("loadChem: Require 3 chem compartments, have: ",\
-                len( sortedComptlist ))
-            return False
-        sortedComptlist[0].name = 'dend'
-        sortedComptlist[1].name = 'spine'
-        sortedComptlist[2].name = 'psd'
+        if ( len( sortedComptlist ) >= 1 ):
+            sortedComptlist[0].name = 'dend'
+        if ( len( sortedComptlist ) >= 2 ):
+            sortedComptlist[1].name = 'spine'
+        if ( len( sortedComptlist ) >= 3 ):
+            sortedComptlist[2].name = 'psd'
 
     ################################################################
 
