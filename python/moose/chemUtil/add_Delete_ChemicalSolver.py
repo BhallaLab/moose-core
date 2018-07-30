@@ -97,6 +97,8 @@ def setCompartmentSolver(modelRoot, solver):
             if b == volSor:
                 compts.append(a)
     '''
+    print ("python version ")
+    print (sys.version_info[0])
     if (sys.version_info[0] > (3, 0)):
         compts = [key for key, value in sorted(comptlist.items(), lambda kv: (-kv[1], kv[0]))]
     else:
