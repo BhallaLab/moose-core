@@ -65,15 +65,14 @@ class RNG
 
         void setRandomSeed( )
         {
-#if defined(USE_BOOST)
+#if defined(ENABLE_CPP11)
+            std::random_device rd;
+            setSeed( rd() );
+#elif defined(USE_BOOST)
 #if defined(BOOST_RANDOM_DEVICE_EXISTS)
             boost::random::random_device rd;
             setSeed( rd() );
 #endif
-#elif defined(ENABLE_CPP11)
-            std::random_device rd;
-            setSeed( rd() );
-#else
             mtseed( time(NULL) );
 #endif     /* -----  not ENABLE_CPP11  ----- */
         }
@@ -143,12 +142,12 @@ class RNG
         T res_;
         T seed_;
 
-#if USE_BOOST
-        boost::random::mt19937 rng_;
-        boost::random::uniform_01<T> dist_;
-#elif ENABLE_CPP11
+#if ENABLE_CPP11
         std::mt19937 rng_;
         std::uniform_real_distribution<> dist_;
+#elif USE_BOOST
+        boost::random::mt19937 rng_;
+        boost::random::uniform_01<T> dist_;
 #endif     /* -----  not ENABLE_CPP11  ----- */
 
 }; /* -----  end of template class RNG  ----- */
