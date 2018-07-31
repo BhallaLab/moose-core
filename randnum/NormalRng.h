@@ -17,6 +17,7 @@
 
 #ifndef _NORMALRNG_H
 #define _NORMALRNG_H
+
 #include "randnum.h"
 #include "basecode/header.h"
 #include "RandGenerator.h"

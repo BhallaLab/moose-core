@@ -18,7 +18,13 @@
 
 #ifndef _NORMAL_H
 #define _NORMAL_H
+
 #include "Probability.h"
+
+#include <random>
+
+using namespace std;
+
 enum NormalGenerator
 {
     ALIAS,
@@ -38,6 +44,7 @@ class Normal : public Probability
     NormalGenerator getMethod(void);
     void setMethod(NormalGenerator method);
     double getNextSample() const;
+
   private:
     double mean_;
     double variance_;
@@ -48,6 +55,7 @@ class Normal : public Probability
     static double aliasMethod();
     static double gslZiggurat();
     static bool testAcceptance(unsigned long t, unsigned long v);
+
 };
 
 

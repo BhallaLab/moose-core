@@ -891,7 +891,8 @@ void Dsolve::mapChansBetweenDsolves( DiffJunction& jn, Id self, Id other)
 {
 	Dsolve* otherSolve = reinterpret_cast< Dsolve* >(
 					other.eref().data() );
-	vector< ConcChanInfo >& ch = channels_;
+	Dsolve* selfSolve = reinterpret_cast< Dsolve* >( self.eref().data() );
+	vector< ConcChanInfo >& ch = selfSolve->channels_;
 	unsigned int outIndex;
 	for ( unsigned int i = 0; i < ch.size(); ++i ) {
 		outIndex = otherSolve->convertIdToPoolIndex( ch[i].otherPool );
@@ -903,7 +904,7 @@ void Dsolve::mapChansBetweenDsolves( DiffJunction& jn, Id self, Id other)
 	// Now set up the other Dsolve.
 	vector< ConcChanInfo >& ch2 = otherSolve->channels_;
 	for ( unsigned int i = 0; i < ch2.size(); ++i ) {
-		outIndex = convertIdToPoolIndex( ch2[i].otherPool );
+		outIndex = selfSolve->convertIdToPoolIndex( ch2[i].otherPool );
 		if ( outIndex != ~0U ) {
 			jn.otherChannels.push_back(i);
 			ch2[i].otherPool = outIndex;  // replace the Id with the index
@@ -935,6 +936,7 @@ void Dsolve::innerBuildMeshJunctions( Id self, Id other, bool selfIsMembraneBoun
 {
 	DiffJunction jn; // This is based on the Spine Dsolver.
 	jn.otherDsolve = other.value();
+	Dsolve* dself = reinterpret_cast< Dsolve* >( self.eref().data() );
 	if ( selfIsMembraneBound ) {
 		mapChansBetweenDsolves( jn, self, other );
 	} else {
@@ -945,8 +947,9 @@ void Dsolve::innerBuildMeshJunctions( Id self, Id other, bool selfIsMembraneBoun
 
 	mapVoxelsBetweenMeshes( jn, self, other );
 
+
 	// printJunction( self, other, jn );
-	junctions_.push_back( jn );
+	dself->junctions_.push_back( jn );
 }
 
 /////////////////////////////////////////////////////////////
