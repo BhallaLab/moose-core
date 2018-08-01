@@ -73,8 +73,6 @@ double Exponential::logarithmic(double mean)
     return - mean*log(uniform);
 }
 
-extern unsigned long genrand_int32(void);
-
 /**
    successive entries in the series
    {Qk} = {(ln2/1! + (ln2)^2/2! + (ln2)^3/3! + ... + (ln2)^k/k!)}
@@ -104,7 +102,7 @@ double Exponential::randomMinimization(double mean)
 {
     double result;
 
-    unsigned long uniform = genrand_int32(); // 1) generate t+1 (=32) bit uniform random binary fraction .b0..bt
+    unsigned long uniform = moose::mtrand();
     int j = 0;
 
     if ( uniform == 0 )
@@ -137,7 +135,7 @@ double Exponential::randomMinimization(double mean)
         }
         for ( unsigned int i = 0; i < k; ++i )
         {
-            u = genrand_int32();
+            u = moose::mtrand();
             if ( u < v )
             {
                 v = u;
@@ -149,53 +147,6 @@ double Exponential::randomMinimization(double mean)
 
     return result;
 }
-#if 0 // test main
-#include <vector>
-int main(void)
-{
-    double mean = .25;
-    double sum = 0.0;
-    double sd = 0.0;
-    vector <unsigned> classes;
-    Exponential ex(mean);
-    int MAX_SAMPLE = 100000;
-    int MAX_CLASSES = 1000;
-
-
-    for ( int i = 0; i < MAX_CLASSES; ++i )
-    {
-        classes.push_back(0);
-    }
-
-    for ( int i = 0; i < MAX_SAMPLE; ++i )
-    {
-        double p = ex.getNextSample();//aliasMethod();
-        int index = (int)(p*MAX_CLASSES);
-//        cout << index << " ] " << p << endl;
-
-        if ( index < MAX_CLASSES){
-            classes[index]++;
-        }
-        else
-        {
-            classes[MAX_CLASSES-1]++;
-        }
-
-
-        sum += p;
-        sd += (p - mean)*(p - mean);
-    }
-    mean = sum/MAX_SAMPLE;
-    sd = sqrt(sd/MAX_SAMPLE);
-    cout << "mean = " << mean << " sd = " << sd << endl;
-    for ( int i = 0; i < MAX_CLASSES; ++i )
-    {
-        cout << classes[i] << endl;
-    }
-
-    return 0;
-}
-#endif // test main
 
 
 #endif

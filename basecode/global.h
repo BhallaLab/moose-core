@@ -17,7 +17,7 @@
 #include <sstream>
 
 
-#ifdef  USE_BOOST
+#ifdef  USE_BOOST_ODE
 //#ifdef BOOST_FILESYSTEM_EXISTS
 #include <boost/filesystem.hpp>
 //#endif                                          /* BOOST_FILESYSTEM_EXISTS */

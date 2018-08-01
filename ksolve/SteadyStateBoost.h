@@ -127,7 +127,7 @@ private:
 
     moose::RNG<double> rng;
 
-#if USE_BOOST
+#if USE_BOOST_ODE
     NonlinearSystem* ss;
 #endif
 

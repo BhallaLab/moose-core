@@ -11,9 +11,9 @@
 #define _TABLE_H
 
 
-#if  USE_BOOST
+#if  USE_BOOST_ODE
 #include <boost/filesystem.hpp>
-#endif     /* -----  USE_BOOST  ----- */
+#endif     /* -----  USE_BOOST_ODE  ----- */
 #include <fstream>
 
 /**

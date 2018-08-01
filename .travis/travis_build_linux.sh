@@ -42,17 +42,17 @@ if type $PYTHON3 > /dev/null; then $PYTHON3 -m compileall -q . ; fi
 
 echo "Currently in `pwd`"
 (
-    mkdir -p _GSL_BUILD && cd _GSL_BUILD 
+    mkdir -p _GSL_BUILD && cd _GSL_BUILD
     cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
     $MAKE && ctest --output-on-failure
-    sudo make install 
+    sudo make install
     $PYTHON2 -c 'import moose;print(moose.__file__);print(moose.version())'
 )
 
 (
     # Now with boost.
     mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && \
-        cmake -DWITH_BOOST=ON -DDEBUG=ON -DQUIET_MODE=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
+        cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
     $MAKE && ctest --output-on-failure
 )
 
@@ -68,7 +68,7 @@ if type $PYTHON3 > /dev/null; then
     )
     (
         mkdir -p _BOOST_BUILD2 && cd _BOOST_BUILD2 && \
-            cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
+            cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
         $MAKE && ctest --output-on-failure
     )
     echo "All done"

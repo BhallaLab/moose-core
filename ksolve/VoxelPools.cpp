@@ -12,7 +12,7 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
-#elif USE_BOOST
+#elif USE_BOOST_ODE
 #include <boost/numeric/odeint.hpp>
 using namespace boost::numeric;
 #endif
@@ -76,7 +76,7 @@ void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
                 &sys_, ode->gslStep, ode->initStepSize,
                 ode->epsAbs, ode->epsRel );
     }
-#elif USE_BOOST
+#elif USE_BOOST_ODE
     if( ode )
         sys_ = ode->boostSys;
 #endif
@@ -102,7 +102,7 @@ void VoxelPools::advance( const ProcInfo* p )
         assert( 0 );
     }
 
-#elif USE_BOOST
+#elif USE_BOOST_ODE
 
 
     // NOTE: Make sure to assing vp to BoostSys vp. In next call, it will be used by
@@ -260,7 +260,7 @@ int VoxelPools::gslFunc( double t, const double* y, double *dydt,
 #endif
 }
 
-#elif USE_BOOST
+#elif USE_BOOST_ODE
 void VoxelPools::evalRates(
     const vector_type_& y,  vector_type_& dydt,  const double t, VoxelPools* vp
     )

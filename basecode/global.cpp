@@ -134,7 +134,7 @@ namespace moose {
         if( p.size() == 0 )
             return true;
 
-#ifdef  USE_BOOST
+#ifdef  USE_BOOST_FILESYSTEM
         try
         {
             boost::filesystem::path pdirs( p );
@@ -149,7 +149,7 @@ namespace moose {
                );
             return false;
         }
-#else      /* -----  not USE_BOOST  ----- */
+#else    // NOT USING USE_BOOST_FILESYSTEM
         string command( "mkdir -p ");
         command += p;
         int ret = system( command.c_str() );
@@ -170,7 +170,7 @@ namespace moose {
             LOG( moose::warning, p << " is no directory" );
             return false;
         }
-#endif     /* -----  not USE_BOOST  ----- */
+#endif     /* -----  not USE_BOOST_FILESYSTEM  ----- */
         return true;
     }
 

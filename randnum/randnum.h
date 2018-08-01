@@ -12,5 +12,3 @@
 
 extern double _mtrand(void);
 extern void _mtseed(long seed);
-extern unsigned long genrand_int32(void);
-

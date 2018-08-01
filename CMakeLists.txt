@@ -85,7 +85,8 @@ option(DEBUG "Build with debug support" OFF)
 option(GPROF "Build for profiling using gprof" OFF)
 option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_MPI  "Enable Openmpi support" OFF)
-option(WITH_BOOST "Use boost library instead of GSL" OFF)
+option(WITH_BOOST_ODE "Use boost library ode2 library instead of GSL" OFF)
+option(WITH_BOOST_RNG "Use boost library RNG instead of c++11 stl. " OFF)
 option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
 option(PARALLELIZED_SOLVERS "Use parallel version of GSOLVE. (alpha)" OFF )
 option(PARALLELIZED_CLOCK "High level parallelization of moose::Clock (alpha)" OFF )
@@ -93,7 +94,7 @@ option(PARALLELIZED_CLOCK "High level parallelization of moose::Clock (alpha)" O
 
 ############################ BUILD CONFIGURATION #################################
 
-# Default macros
+# Default definitions.
 add_definitions(-DUSE_GENESIS_PARSER)
 
 if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
@@ -107,7 +108,10 @@ elseif(ENABLE_UNIT_TESTS)
 else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
-    add_definitions(-UDO_UNIT_TESTS -DQUIET_MODE -O3)
+    add_definitions(-UDO_UNIT_TESTS -O3)
+    # Treat all warnings as errors. Some the warnings are disabled in
+    #  CheckCXXCompiler.cmake .
+    add_definitions(-Werror)
 endif()
 
 if(GPROF AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
@@ -127,9 +131,10 @@ add_executable(moose.bin basecode/main.cpp)
 # default include paths.
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
-if(WITH_BOOST)
+# If using BOOST ODE2 library to solve ODE system, then don't use GSL.
+if(WITH_BOOST_ODE)
     set(WITH_GSL OFF)
-endif(WITH_BOOST)
+endif(WITH_BOOST_ODE)
 
 include_directories(msg basecode)
 
@@ -164,10 +169,10 @@ if(WITH_GSL)
     # GSL is also used in RNG (whenever applicable), therefore include paths are
     # top level.
     include_directories( ${GSL_INCLUDE_DIRS} )
-elseif(WITH_BOOST)
-    find_package(Boost 1.44 COMPONENTS system filesystem random REQUIRED)
+elseif(WITH_BOOST_RNG OR WITH_BOOST_ODE)
+    find_package(Boost 1.44 COMPONENTS random REQUIRED)
     find_package( LAPACK REQUIRED )
-    add_definitions( -DUSE_BOOST -UUSE_GSL )
+    add_definitions( -DUSE_BOOST_RNG )
     include_directories( ${Boost_INCLUDE_DIRS} )
     check_include_file_cxx(
         ${Boost_INCLUDE_DIRS}/boost/random/random_device.hpp
@@ -176,6 +181,11 @@ elseif(WITH_BOOST)
     if(BOOST_RANDOM_DEVICE_EXISTS)
         add_definitions(-DBOOST_RANDOM_DEVICE_EXISTS)
     endif(BOOST_RANDOM_DEVICE_EXISTS)
+
+    # if boost ode is being used.
+    if(WITH_BOOST_ODE)
+        add_definitions(-DUSE_BOOST_ODE -UUSE_GSL)
+    endif()
 endif()
 
 
@@ -257,10 +267,12 @@ if(WITH_MPI)
     endif()
 endif(WITH_MPI)
 
-if(WITH_BOOST)
+if(WITH_BOOST_ODE)
     list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES})
+endif()
+if(WITH_BOOST_RNG)
     list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
-endif(WITH_BOOST)
+endif(WITH_BOOST_RNG)
 
 # These libraries could be static of dynamic. We need to discrimate between
 # these two types because of --whole-archive option. See

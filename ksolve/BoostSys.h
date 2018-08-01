@@ -1,7 +1,7 @@
 #ifndef BOOSTSYSTEM_H
 #define BOOSTSYSTEM_H
 
-#ifdef USE_BOOST
+#ifdef USE_BOOST_ODE
 
 #include <vector>
 #include <string>
@@ -50,7 +50,7 @@ class BoostSys
         std::string method;
 };
 
-#endif // USE_BOOST
+#endif // USE_BOOST_ODE
 
 #endif /* end of include guard: BOOSTSYSTEM_H */
 

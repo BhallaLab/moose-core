@@ -27,7 +27,6 @@
 #include <iostream>
 using namespace std;
 
-extern unsigned long genrand_int32(void);
 Normal::Normal(double mean, double variance, NormalGenerator method):mean_(mean), variance_(variance), method_(method)
 {
     if (variance <= 0.0 )
@@ -202,21 +201,21 @@ const double d = 1.861970434352886050;
 /*********************************************************************************************************************************/
 double Normal::aliasMethod()
 {
-    double result;
+    double result = 0.0;
 
-    unsigned long uniform;
-    unsigned long uniform_prime;
-    unsigned long x_num;
-    unsigned long t_num;
-    unsigned long v_num;
+    unsigned long uniform = 0;
+    unsigned long uniform_prime = 0;
+    unsigned long x_num = 0;
+    unsigned long t_num = 0;
+    unsigned long v_num = 0;
 
-    unsigned long i_num, k_num, sgn;
+    unsigned long i_num, k_num, sgn = 0;
 
     while (true)
     {
 
         // 1) u = .B1..B7 (base 256) - we take the little endian approach
-        uniform = genrand_int32(); // .B1B2B3B4 - limited by precision
+        uniform = moose::mtrand(); // .B1B2B3B4 - limited by precision
 
         // 1a) s = B1[0]
         sgn = uniform  & 0x80000000UL;
@@ -270,7 +269,7 @@ double Normal::aliasMethod()
             }
 
             // 9) u' = .B1'..B7' .. using B1-B4 for precision limitation
-            uniform_prime = genrand_int32();
+            uniform_prime = moose::mtrand();
             // 9a) t = x*x/2
             t_num = x_num*(x_num/2);
 
@@ -294,7 +293,7 @@ double Normal::aliasMethod()
         }
 
         // 11) u = .B1..B7
-        uniform = genrand_int32();
+        uniform = moose::mtrand();
 
         // 11a) u < 1/9? goto 1
         if ( uniform/4294967296.0 < 1.0/9.0)
