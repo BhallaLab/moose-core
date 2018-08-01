@@ -83,7 +83,7 @@ def loadModel(filename, target,method=None):
         if extension in [".swc",".p"]:
             moose._moose.loadModel(filename,target,"Neutral")
         elif extension in [".g",".cspace"]:
-            #only if genesis or cspace file, then mooseaddChemSolver is called
+            #only if genesis or cspace file, then mooseAddChemSolver is called
             moose._moose.loadModel(filename,target,"ee")
           
             method = "ee"
@@ -93,7 +93,7 @@ def loadModel(filename, target,method=None):
                 method = "gsl"
             elif solverClass.lower() in ["exponential euler","exponentialeuler","neutral"]:
                 method = "ee"
-            moose.mooseaddChemSolver(target,method)
+            moose.mooseAddChemSolver(target,method)
 
 def version( ):
     return VERSION
@@ -182,20 +182,20 @@ def mooseWriteKkit(modelpath, filepath,sceneitems={}):
     return _writeKkit.mooseWriteKkit(modelpath, filepath,sceneitems)
 
 
-def moosedeleteChemSolver(modelpath):
+def mooseDeleteChemSolver(modelpath):
     """ deletes solver on all the compartment and its children.
         This is neccesary while created a new moose object on a pre-existing modelpath,\n
-        this should be followed by mooseaddChemSolver for add solvers on to compartment to simulate else
+        this should be followed by mooseAddChemSolver for add solvers on to compartment to simulate else
         default is Exponential Euler (ee)
     """
     if chemImport_:
-        return _chemUtil.add_Delete_ChemicalSolver.moosedeleteChemSolver(modelpath)
+        return _chemUtil.add_Delete_ChemicalSolver.mooseDeleteChemSolver(modelpath)
     else:
         print( chemError_ )
         return False
 
 
-def mooseaddChemSolver(modelpath, solver):
+def mooseAddChemSolver(modelpath, solver):
     """ Add solver on chemical compartment and its children for calculation
 
     keyword arguments:\n
@@ -207,7 +207,8 @@ def mooseaddChemSolver(modelpath, solver):
 
     """
     if chemImport_:
-        return _chemUtil.add_Delete_ChemicalSolver.mooseaddChemSolver(modelpath, solver)
+        chemError_ = _chemUtil.add_Delete_ChemicalSolver.mooseAddChemSolver(modelpath, solver)
+        return chemError_
     else:
         print( chemError_ )
         return False
