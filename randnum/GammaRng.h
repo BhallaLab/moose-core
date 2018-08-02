@@ -1,7 +1,7 @@
 /*******************************************************************
  * File:            GammaRng.h
  * Description:
- * Author:          Subhasis Ray
+ * Author:          Subhasis Ray, Dilawar Singh
  * E-mail:          ray.subhasis@gmail.com
  * Created:         2007-11-08 11:53:29
  ********************************************************************/
@@ -20,7 +20,6 @@
 #include "randnum.h"
 #include "basecode/header.h"
 #include "RandGenerator.h"
-#include "Gamma.h"
 
 /**
    This is MOOSE wrapper for Gammaly distributed random number generator class, Gamma.

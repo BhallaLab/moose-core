@@ -64,12 +64,7 @@ PoissonRng::PoissonRng()
 */
 void PoissonRng::setMean(double mean)
 {
-    Poisson * prng = static_cast<Poisson*>(rng_);
-    if ( !prng ){
-        rng_ = new Poisson(mean);
-    } else {
-        prng->setMean(mean);
-    }
+    mean_ = mean;
 }
 /**
    reports error in case the parameter mean has not been set.

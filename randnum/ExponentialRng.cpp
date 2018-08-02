@@ -27,32 +27,29 @@ const Cinfo* ExponentialRng::initCinfo()
         "mean",
         "Mean of the exponential distribution.",
         &ExponentialRng::setMean,
-        &ExponentialRng::getMean);
+        &ExponentialRng::getMean
+        );
 
-    static ValueFinfo< ExponentialRng, int > method(
-        "method",
-        "The algorithm to use for computing the sample. Two methods are"
-        " supported: 0 - logarithmic and 1 - random minimization."
-        " The logarithmic method is slower (it computes a"
-        " logarithm). Default is random minimization. See Knuth, Vol II Sec"
-        " 3.4.1 : Algorithm S.",
-        &ExponentialRng::setMethod,
-        &ExponentialRng::getMethod);
+    static ValueFinfo< ExponentialRng, int > seed(
+        "seed",
+        "Set the seed for RNG. If not set, it uses value passed to moose.seed( ) function.",
+        &ExponentialRng::setSeed,
+        &ExponentialRng::getSeed
+        );
 
     static Finfo* exponentialRngFinfos[] = {
         &mean,
-        &method,
+        &seed,
     };
 
     static string doc[] = {
         "Name", "ExponentialRng",
-        "Author", "Subhasis Ray",
+        "Author", "Subhasis Ray, Dilawar Singh",
         "Description", "Exponentially distributed random number generator.\n"
         "Exponential distribution with mean k is defined by the probability"
         " density function p(x; k) = k * exp(-k * x) if x >= 0, else 0."
-        " By default this class uses the random minimization method"
-        " described in Knuth's TAOCP Vol II Sec 3.4.1 (Algorithm S).",
     };
+
     static Dinfo< ExponentialRng > dinfo;
     static Cinfo exponentialRngCinfo(
         "ExponentialRng",
@@ -70,10 +67,16 @@ static const Cinfo* exponentialRngCinfo = ExponentialRng::initCinfo();
 
 ExponentialRng::ExponentialRng()
 {
-    mean_ = 0;
-    isMeanSet_ = false;
-    method_ = RANDOM_MINIMIZATION;
+    mean_ = 0; isMeanSet_ = false;
 }
+
+ExponentialRng& ExponentialRng::operator=(const ExponentialRng& r)
+{
+    seed_ = r.seed_;
+    return *this;
+}
+
+
 /**
    Replaces the same method in base class.  Returns the mean as
    stored in this object independent of the actual generator object.
@@ -89,10 +92,7 @@ double ExponentialRng::getMean() const
 */
 void ExponentialRng::setMean(double mean)
 {
-    if ( !rng_ ){
-        rng_ = new Exponential(mean);
-        isMeanSet_ = true;
-    }
+    mean_ = mean;
 }
 
 /**
@@ -100,47 +100,7 @@ void ExponentialRng::setMean(double mean)
  */
 void ExponentialRng::vReinit(const Eref& e, ProcPtr p)
 {
-    Exponential * erng = static_cast<Exponential *>(rng_);
-    if (!erng){
-        cerr << "ERROR: ExponentialRng::vReinit - mean must be set before using the Exponential distribution generator." << endl;
-    }
-}
-
-/**
-   Returns the algorithm used for sample generation.
-   0 for logarithmic method.
-   1 for random minimization method.
- */
-int ExponentialRng::getMethod() const
-{
-   return method_;
-}
-
-/**
-   Sets the algorithm used for sample generation.
-   0 for logarithmic method.
-   1 for random minimization method.
-   Default is random minimization.
- */
-void ExponentialRng::setMethod(int method)
-{
-    Exponential * erng = static_cast< Exponential * >(rng_);
-    if (!erng){
-        switch ( method ){
-            case 0:
-                method_ = LOGARITHMIC;
-                break;
-            default:
-                method_ = RANDOM_MINIMIZATION;
-                break;
-        }
-    } else {
-        cerr << "Warning: Will not change method after generator object has been"
-             << " created. Method in use:"
-             << method << " ("
-             << (method == 0? "logarithmic": "random minimization")
-             << ")" << endl;
-    }
+    // Reinit <random>
 }
 
 #endif

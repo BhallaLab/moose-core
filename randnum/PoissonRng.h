@@ -17,7 +17,6 @@
 
 #ifndef _POISSONRNG_H
 #define _POISSONRNG_H
-#include "Poisson.h"
 #include "RandGenerator.h"
 class PoissonRng:public RandGenerator
 {
@@ -27,6 +26,9 @@ class PoissonRng:public RandGenerator
      void setMean(double mean);
     virtual void vReinit(const Eref& e, ProcPtr p);
     static const Cinfo * initCinfo();
+
+  private:
+    double mean_;
 };
 
 

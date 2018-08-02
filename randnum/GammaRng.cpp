@@ -78,22 +78,7 @@ double GammaRng::getAlpha() const
 */
 void GammaRng::setAlpha(double alpha)
 {
-
-    if (fabs(alpha) < DBL_MIN)
-    {
-        cerr << "ERROR: Shape parameter alpha must be non-zero." << endl;
-        return;
-    }
-    Gamma * grng = static_cast< Gamma * >(rng_);
-    if ( grng ) {
-        alpha_ = grng->getAlpha();
-    } else {
-        alpha_ = alpha;
-        isAlphaSet_ = true;
-        if ( isThetaSet_ ){
-            rng_ = new Gamma(alpha_, theta_);
-        }
-    }
+    alpha_ = alpha;
 }
 /**
    returns the scale parameter.
@@ -108,23 +93,9 @@ double GammaRng::getTheta()const
 */
 void GammaRng::setTheta(double theta)
 {
-
-    if (fabs(theta) < DBL_MIN)
-    {
-        cerr << "ERROR: Scale parameter theta must be non-zero." << endl;
-        return;
-    }
-    Gamma* grng = static_cast<Gamma*>(rng_);
-    if ( grng ){
-        theta_ = grng->getTheta();
-    } else {
-        theta_ = theta;
-        isThetaSet_ = true;
-        if (isAlphaSet_ ){
-            rng_ = new Gamma(alpha_, theta_);
-        }
-    }
+    theta_ = theta;
 }
+
 /**
    reports error if parameters have not been set properly.
 */

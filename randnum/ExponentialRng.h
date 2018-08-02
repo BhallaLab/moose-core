@@ -17,31 +17,39 @@
 
 #ifndef _EXPONENTIALRNG_H
 #define _EXPONENTIALRNG_H
-#include "randnum.h"
+
 #include "../basecode/header.h"
-#include "RandGenerator.h"
-#include "Exponential.h"
+#include "randnum.h"
+#include <random>
 
 /**
    This is MOOSE wrapper for Exponentially distributed random number generator class, Exponential.
    The default
  */
-class ExponentialRng: public RandGenerator
+class ExponentialRng
 {
   public:
+
     ExponentialRng();
+
+    ExponentialRng& operator=(const ExponentialRng&);
+
     double getMean() const;
     void setMean(double mean);
-    int getMethod() const;
-    void setMethod(int method);
-    virtual void vReinit( const Eref& e, ProcPtr p);
 
+    void setSeed( int seed );
+    int getSeed( ) const;
+
+    virtual void vReinit( const Eref& e, ProcPtr p);
     static const Cinfo* initCinfo();
 
   private:
     double mean_;
     bool isMeanSet_;
-    int method_;
+    double seed_;
+
+    std::mt19937 rng_;
+    std::random_device rd_;
 
 };
 

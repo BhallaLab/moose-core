@@ -9,8 +9,3 @@ if(WITH_GSL)
 endif(WITH_GSL)
 
 add_library(randnum ${random_SRC})
-
-add_executable(test_randnum test_randnum.cpp ../basecode/global.cpp)
-target_link_libraries( test_randnum randnum )
-
-enable_testing()
