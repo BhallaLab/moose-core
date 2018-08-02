@@ -274,6 +274,7 @@ def main():
     un, sn = np.mean( dwlist_neg ), np.std( dwlist_neg )
 
 
+    got = (up, sp, un, sn)
     if not syn.noisy:
         assert up == 0.03631000318268854, up
         assert sp == 0.03660570442651176, sp
@@ -282,10 +283,9 @@ def main():
     else:
         expOld = (0.0836845810215151, 0.23783506224575554, -0.05282120739225806,
                 0.23856004540029008)
-        expNew = (0.03631000318268854, 0.03660570442651176, -0.05388814799889599,
-                0.04251905785109328)
-        assert (up, sp, un, sn) == expNew, 'Expected %s' % str(expNew)
-
+        expNew = (0.07231921702088451, 0.25312803357325664,
+                -0.017281989140996257, 0.26524827796949435)
+        assert got == expNew, 'Expected: %s, Got: %s' % (str(expNew), str(got))
 
     ax.plot(np.arange(-t_extent,0,ddt)*200, np.array(dwlist_neg),'.-r')
     ax.plot(np.arange(ddt,(t_extent+ddt),ddt)*200, np.array(dwlist_pos),'.-b')
