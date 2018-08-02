@@ -23,6 +23,9 @@
 
 #include <boost/random.hpp>
 #include <boost/random/uniform_01.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_real_distribution.hpp>
+#include <boost/random/normal_distribution.hpp>
 
 #if  defined(BOOST_RANDOM_DEVICE_EXISTS)
 #include <boost/random/random_device.hpp>
@@ -47,6 +50,13 @@ namespace moose {
     /* ----------------------------------------------------------------------------*/
 #ifdef USE_BOOST_RNG
     typedef boost::random::mt19937 MOOSE_RNG_DEFAULT_ENGINE;
+    typedef boost::random::uniform_real_distribution<> MOOSE_UNIFORM_DISTRIBUTION;
+    typedef boost::random::normal_distribution<> MOOSE_NORMAL_DISTRIBUTION;
+    typedef boost::random::lognormal_distribution<> MOOSE_LOGNORMAL_DISTRIBUTION;
+    typedef boost::random::binomial_distribution<> MOOSE_BINOMIAL_DISTRIBUTION;
+    typedef boost::random::exponential_distribution<> MOOSE_EXPONENTIAL_DISTRIBUTION;
+    typedef boost::random::poisson_distribution<> MOOSE_POISSON_DISTRIBUTION;
+    typedef boost::random::gamma_distribution<> MOOSE_GAMMA_DISTRIBUTION;
 #ifdef BOOST_RANDOM_DEVICE_EXISTS
     typedef boost::random::random_device MOOSE_RANDOM_DEVICE;
 #else
@@ -55,7 +65,14 @@ namespace moose {
 #else
     typedef std::mt19937 MOOSE_RNG_DEFAULT_ENGINE;
     typedef std::random_device MOOSE_RANDOM_DEVICE;
-    typedef std::normal_distribution<double> MOOSE_NORMAL_DISTRIBUTION;
+
+    typedef std::uniform_real_distribution<> MOOSE_UNIFORM_DISTRIBUTION;
+    typedef std::normal_distribution<> MOOSE_NORMAL_DISTRIBUTION;
+    typedef std::binomial_distribution<> MOOSE_BINOMIAL_DISTRIBUTION;
+    typedef std::lognormal_distribution<> MOOSE_LOGNORMAL_DISTRIBUTION;
+    typedef std::exponential_distribution<> MOOSE_EXPONENTIAL_DISTRIBUTION;
+    typedef std::poisson_distribution<> MOOSE_POISSON_DISTRIBUTION;
+    typedef std::gamma_distribution<> MOOSE_GAMMA_DISTRIBUTION;
 #endif
 
 /*

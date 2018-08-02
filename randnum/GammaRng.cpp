@@ -33,26 +33,28 @@ const Cinfo* GammaRng::initCinfo()
         "Parameter theta of the Gamma distribution.",
         &GammaRng::setTheta,
         &GammaRng::getTheta);
-    static Finfo* gammaRngFinfos[] = {
+    static Finfo* gammaRngFinfos[] =
+    {
         &alpha,
         &theta,
     };
 
-    static string doc[] = {
+    static string doc[] =
+    {
         "Name", "GammaRng",
-        "Author", "Subhasis Ray",
+        "Author", "Subhasis Ray, Dilawar Singh",
         "Description", "Gamma distributed random number generator.",
     };
 
     Dinfo < GammaRng > dinfo;
-    static Cinfo gammaRngCinfo(
-        "GammaRng",
-        RandGenerator::initCinfo(),
-        gammaRngFinfos,
-        sizeof(gammaRngFinfos)/sizeof(Finfo*),
-        &dinfo,
-        doc,
-        sizeof( doc ) / sizeof( string ));
+
+    static Cinfo gammaRngCinfo( "GammaRng"
+        , Neutral::initCinfo()
+        , gammaRngFinfos, sizeof(gammaRngFinfos)/sizeof(Finfo*)
+        , &dinfo
+        , doc, sizeof( doc ) / sizeof( string )
+    );
+
     return &gammaRngCinfo;
 }
 
@@ -99,12 +101,8 @@ void GammaRng::setTheta(double theta)
 /**
    reports error if parameters have not been set properly.
 */
-void GammaRng::vReinit(const Eref& e, ProcPtr p)
+void GammaRng::reinit(const Eref& e, ProcPtr p)
 {
-    if (! rng_ )
-    {
-        cerr << "ERROR: GammaRng::vReinit - parameters alpha and theta must be set before using the Gamma distribution generator." << endl;
-    }
 }
 
 #endif

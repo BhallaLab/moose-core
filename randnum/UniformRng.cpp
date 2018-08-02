@@ -1,26 +1,14 @@
-/*******************************************************************
+/*
  * File:            UniformRng.cpp
  * Description:
  * Author:          Subhasis Ray
  * E-mail:          ray.subhasis@gmail.com
  * Created:         2008-02-01 11:30:20
- ********************************************************************/
-/**********************************************************************
-** This program is part of 'MOOSE', the
-** Messaging Object Oriented Simulation Environment,
-** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
-** It is made available under the terms of the
-** GNU General Public License version 2
-** See the file COPYING.LIB for the full notice.
-**********************************************************************/
+ */
 
-#ifndef _UNIFORMRNG_CPP
-#define _UNIFORMRNG_CPP
 #include "../basecode/header.h"
 #include "randnum.h"
 #include "UniformRng.h"
-#include "Uniform.h"
 
 const Cinfo* UniformRng::initCinfo()
 {
@@ -35,79 +23,68 @@ const Cinfo* UniformRng::initCinfo()
         &UniformRng::setMax,
         &UniformRng::getMax);
 
-    static Finfo * uniformRngFinfos[] = {
+    static Finfo * uniformRngFinfos[] =
+    {
         &min,
         &max,
     };
+
     static string doc[] =
-	{
-		"Name", "UniformRng",
-		"Author", "Subhasis Ray",
-		"Description", "Generates pseudorandom number from a unform distribution.",
-	};
+    {
+        "Name", "UniformRng",
+        "Author", "Subhasis Ray",
+        "Description", "Generates pseudorandom number from a unform distribution.",
+    };
+
     static Dinfo< UniformRng > dinfo;
+
     static Cinfo uniformRngCinfo(
         "UniformRng",
-        RandGenerator::initCinfo(),
+        Neutral::initCinfo(),
         uniformRngFinfos,
         sizeof( uniformRngFinfos ) / sizeof( Finfo* ),
         &dinfo,
         doc,
-        sizeof( doc ) / sizeof( string ));
+        sizeof( doc ) / sizeof( string )
+    );
+
     return &uniformRngCinfo;
 }
 
 static const Cinfo* uniformRngCinfo = UniformRng::initCinfo();
 
+UniformRng::UniformRng( )
+{
+}
+
+UniformRng& UniformRng::operator=( const UniformRng& r )
+{
+    return *this;
+}
+
 double UniformRng::getMin()const
 {
-    Uniform * urng = static_cast< Uniform * >(rng_);
-    if (urng){
-        return urng->getMin();
-    }
-    return 0.0;
+    return dist_.min();
 }
 
 double UniformRng::getMax() const
 {
-    Uniform * urng = static_cast< Uniform * >(rng_);
-    if (urng){
-        return urng->getMax();
-    }
-    return 0.0;
+    return dist_.max();
 }
 
 void UniformRng::setMin(double min)
 {
-    Uniform * urng = static_cast<Uniform *> (rng_);
-    if (urng){
-        urng->setMin(min);
-    }
+    min_ = min;
+    dist_ = moose::MOOSE_UNIFORM_DISTRIBUTION(min_, max_);
 }
 
 void UniformRng::setMax(double max)
 {
-    Uniform * urng = static_cast<Uniform *> (rng_);
-    if (urng){
-        urng->setMax(max);
-    }
+    max_ = max;
+    dist_ = moose::MOOSE_UNIFORM_DISTRIBUTION(min_, max_);
 }
 
-UniformRng::UniformRng():RandGenerator()
+void UniformRng::reinit(const Eref& e, ProcPtr p)
 {
-    rng_ = new Uniform();
+    dist_ = moose::MOOSE_UNIFORM_DISTRIBUTION(min_, max_);
 }
-
-void UniformRng::vReinit(const Eref& e, ProcPtr p)
-{
-    ;    /* no use */
-}
-
-#ifdef DO_UNIT_TESTS
-void testUniformRng()
-{
-    cout << "testUniformRng(): yet to be implemented" << endl;
-}
-
-#endif
-#endif

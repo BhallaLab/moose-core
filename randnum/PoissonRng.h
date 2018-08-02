@@ -17,18 +17,31 @@
 
 #ifndef _POISSONRNG_H
 #define _POISSONRNG_H
-#include "RandGenerator.h"
-class PoissonRng:public RandGenerator
+
+class PoissonRng
 {
-  public:
+public:
+
     PoissonRng();
-    virtual ~PoissonRng() { ; }
-     void setMean(double mean);
-    virtual void vReinit(const Eref& e, ProcPtr p);
+    ~PoissonRng() { ; }
+
+    PoissonRng& operator=(const PoissonRng& );
+
+    void setMean(double mean);
+    double getMean( ) const;
+
+    void reinitSeed( void );
+    void reinit(const Eref& e, ProcPtr p);
+
     static const Cinfo * initCinfo();
 
-  private:
+private:
+
     double mean_;
+
+    moose::MOOSE_RANDOM_DEVICE rd_;
+    moose::MOOSE_POISSON_DISTRIBUTION dist_;
+    moose::MOOSE_RNG_DEFAULT_ENGINE rng_;
 };
 
 

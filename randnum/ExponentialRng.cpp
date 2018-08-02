@@ -18,16 +18,15 @@
 #ifndef _EXPONENTIALRNG_CPP
 #define _EXPONENTIALRNG_CPP
 
-#include "RandGenerator.h"
 #include "ExponentialRng.h"
 
 const Cinfo* ExponentialRng::initCinfo()
 {
-    static ValueFinfo< ExponentialRng, double > mean(
-        "mean",
-        "Mean of the exponential distribution.",
-        &ExponentialRng::setMean,
-        &ExponentialRng::getMean
+    static ValueFinfo< ExponentialRng, double > rate(
+        "rate",
+        "Rate parameter (ƛ) of the exponential distribution.",
+        &ExponentialRng::setRate,
+        &ExponentialRng::getRate
         );
 
     static ValueFinfo< ExponentialRng, int > seed(
@@ -38,7 +37,7 @@ const Cinfo* ExponentialRng::initCinfo()
         );
 
     static Finfo* exponentialRngFinfos[] = {
-        &mean,
+        &rate,
         &seed,
     };
 
@@ -53,7 +52,7 @@ const Cinfo* ExponentialRng::initCinfo()
     static Dinfo< ExponentialRng > dinfo;
     static Cinfo exponentialRngCinfo(
         "ExponentialRng",
-        RandGenerator::initCinfo(),
+        Neutral::initCinfo(),
         exponentialRngFinfos,
         sizeof(exponentialRngFinfos)/sizeof(Finfo*),
         &dinfo,
@@ -67,12 +66,13 @@ static const Cinfo* exponentialRngCinfo = ExponentialRng::initCinfo();
 
 ExponentialRng::ExponentialRng()
 {
-    mean_ = 0; isMeanSet_ = false;
+    rate_ = 0;
 }
 
 ExponentialRng& ExponentialRng::operator=(const ExponentialRng& r)
 {
     seed_ = r.seed_;
+    rate_ = r.rate_;
     return *this;
 }
 
@@ -91,25 +91,43 @@ void ExponentialRng::setSeed( int seed )
    Replaces the same method in base class.  Returns the mean as
    stored in this object independent of the actual generator object.
  */
-double ExponentialRng::getMean() const
+double ExponentialRng::getRate() const
 {
-    return mean_;
+    return rate_;
 }
 /**
    Sets the mean. Since exponential distribution is defined in terms
    of this parameter, it is stored locally independent of the
    instantiation of the internal generator object.
 */
-void ExponentialRng::setMean(double mean)
+void ExponentialRng::setRate(double mean)
 {
-    mean_ = mean;
+    rate_ = mean;
+}
+
+void ExponentialRng::reinitSeed()
+{
+    if( seed_ >= 0 )
+    {
+        rng_.seed( seed_ );
+        return;
+    }
+
+    if( moose::getGlobalSeed() >= 0 )
+    {
+        rng_.seed( moose::getGlobalSeed() );
+        return;
+    }
+
+    rng_.seed( rd_() );
 }
 
 /**
    Reports error in case the parameter mean has not been set.
  */
-void ExponentialRng::vReinit(const Eref& e, ProcPtr p)
+void ExponentialRng::reinit(const Eref& e, ProcPtr p)
 {
+    reinitSeed();
     // Reinit <random>
 }
 

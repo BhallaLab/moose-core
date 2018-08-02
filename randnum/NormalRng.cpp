@@ -6,18 +6,13 @@
  * Author:          Subhasis Ray
  * E-mail:          ray.subhasis@gmail.com
  * Created:         2007-11-03 22:07:04
+ * LOGS:
+ *  Thursday 02 August 2018 05:04:15 PM IST, Dilawar Singh
+ *      - use <random> or boost to generate the distributions.
  ********************************************************************/
-/**********************************************************************
-** This program is part of 'MOOSE', the
-** Messaging Object Oriented Simulation Environment,
-** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2005 Upinder S. Bhalla. and NCBS
-** It is made available under the terms of the
-** GNU General Public License version 2
-** See the file COPYING.LIB for the full notice.
-**********************************************************************/
 
 #include "NormalRng.h"
+#include "../basecode/global.h"
 
 const Cinfo* NormalRng::initCinfo()
 {
@@ -28,6 +23,13 @@ const Cinfo* NormalRng::initCinfo()
         &NormalRng::getMean
     );
 
+    static ValueFinfo< NormalRng, unsigned long > seed(
+        "seed",
+        "Set the seed of random number generator.",
+        &NormalRng::setSeed,
+        &NormalRng::getSeed
+    );
+
     static ValueFinfo< NormalRng, double > variance(
         "variance",
         "Variance of the normal distribution",
@@ -35,16 +37,22 @@ const Cinfo* NormalRng::initCinfo()
         &NormalRng::getVariance
     );
 
+    static DestFinfo reinit( "reinit",
+        "Handles reinit call from Clock"
+        , new ProcOpFunc< NormalRng >( &NormalRng::reinit )
+    );
+
     static Finfo* normalRngFinfos[] =
     {
         &mean,
+        &seed,
         &variance
     };
 
     static string doc[] =
     {
         "Name", "NormalRng",
-        "Author", "Subhasis Ray",
+        "Author", "Subhasis Ray, Dilawar Singh",
         "Description", "Normally distributed random number generator.",
     };
 
@@ -71,9 +79,7 @@ NormalRng& NormalRng::operator=( const NormalRng& rng )
     return *this;
 }
 
-/**
-   Set the mean of the internal generator object.
- */
+/** Set the mean of the internal generator object.  */
 void NormalRng::setMean(double mean)
 {
     mean_ = mean;
@@ -84,6 +90,19 @@ double NormalRng::getMean( void ) const
 {
     return mean_;
 }
+
+/** Set the seed for random number generator.  */
+void NormalRng::setSeed(unsigned long seed)
+{
+    seed_ = seed;
+    rng_.seed( seed_ );
+}
+
+unsigned long NormalRng::getSeed( void ) const
+{
+    return seed_;
+}
+
 
 /**
    Since normal distribution is defined in terms of mean and variance, we
@@ -96,6 +115,7 @@ void NormalRng::setVariance(double variance)
         cerr << "ERROR: variance cannot be negative." << endl;
         return;
     }
+    cerr << "Info: Variance is " << variance << endl;
     variance_ = variance;
     dist_ = moose::MOOSE_NORMAL_DISTRIBUTION(mean_, variance);
 }
@@ -105,9 +125,27 @@ double NormalRng::getVariance( void ) const
     return variance_;
 }
 
-void NormalRng::vReinit(const Eref& e, ProcPtr p)
+void NormalRng::reinitSeed( void )
+{
+    if( seed_ >= 0 )
+    {
+        rng_.seed( seed_ );
+        return;
+    }
+
+    if( moose::getGlobalSeed() >= 0 )
+    {
+        rng_.seed( moose::getGlobalSeed() );
+        return;
+    }
+
+    rng_.seed( rd_() );
+}
+
+void NormalRng::reinit(const Eref& e, ProcPtr p)
 {
     // Just in case; to be safe.
+    reinitSeed();
     dist_ = moose::MOOSE_NORMAL_DISTRIBUTION(mean_, variance_);
 }
 
@@ -122,6 +160,14 @@ void NormalRng::vReinit(const Eref& e, ProcPtr p)
  */
 NormalRng::NormalRng()
 {
+    mean_ = 0.0;
+    variance_ = 1.0;
+    seed_ = moose::getGlobalSeed( );
+
+    if( seed_ >= 0 )
+        rng_.seed( seed_ );
+    else
+        rng_.seed( rd_() );
 }
 
 double NormalRng::getNextSample()

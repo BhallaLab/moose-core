@@ -8,9 +8,11 @@
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 
-import moose
 import matplotlib as mpl
 mpl.use( 'Agg' )
+
+import moose
+print( 'Using moose from %s' % moose.__file__ )
 from matplotlib.pyplot import *
 import numpy as np
 
@@ -50,40 +52,6 @@ def main():
     network.vec.inject = 0.
     network.vec.initVm = Vrest
 
-    #############################################
-    # Ca Plasticity parameters: synapses (not for ExcInhNetBase)
-    #############################################
-
-    ### Cortical slice values -- Table Suppl 2 in Graupner & Brunel 2012
-    ### Also used in Higgins et al 2014
-    #tauCa = 22.6936e-3      # s # Ca decay time scale
-    #tauSyn = 346.3615       # s # synaptic plasticity time scale
-    ### in vitro values in Higgins et al 2014, faster plasticity
-    #CaPre = 0.56175         # mM
-    #CaPost = 1.2964         # mM
-    ### in vivo values in Higgins et al 2014, slower plasticity
-    ##CaPre = 0.33705         # mM
-    ##CaPost = 0.74378        # mM
-    #delayD = 4.6098e-3      # s # CaPre is added to Ca after this delay
-                            ## proxy for rise-time of NMDA
-    #thetaD = 1.0            # mM # depression threshold for Ca
-    #thetaP = 1.3            # mM # potentiation threshold for Ca
-    #gammaD = 331.909        # factor for depression term
-    #gammaP = 725.085        # factor for potentiation term
-
-    #J = 5e-3 # V            # delta function synapse, adds to Vm
-    #weight = 0.43           # initial synaptic weight
-                            ## gammaP/(gammaP+gammaD) = eq weight w/o noise
-                            ## see eqn (22), noiseSD also appears
-                            ## but doesn't work here,
-                            ## weights away from 0.4 - 0.5 screw up the STDP rule!!
-
-    #bistable = True        # if bistable is True, use bistable potential for weights
-    #noisy = False          # use noisy weight updates given by noiseSD
-    #noiseSD = 3.3501        # if noisy, use noiseSD (3.3501 from Higgins et al 2014)
-
-    ########################################
-
     ## DP STDP curve (Fig 2C) values -- Table Suppl 1 in Graupner & Brunel 2012
     tauCa = 20e-3           # s # Ca decay time scale
     tauSyn = 150.0          # s # synaptic plasticity time scale
@@ -104,7 +72,7 @@ def main():
                             # weights away from 0.4 - 0.5 screw up the STDP rule!!
 
     bistable = True        # if bistable is True, use bistable potential for weights
-    noisy = False          # use noisy weight updates given by noiseSD
+    noisy = True          # use noisy weight updates given by noiseSD
     noiseSD = 2.8284        # if noisy, use noiseSD (3.3501 in Higgins et al 2014)
 
     ##########################################
@@ -271,7 +239,7 @@ def main():
     for t in spikes.vec[1].vector:
         Vmseries1[int(t/dt)-1] = 30e-3 # V
 
-    timeseries = np.linspace(0.,1000*numsteps*dt,numsteps)
+    timeseries = np.linspace(0.,200*numsteps*dt,numsteps)
     # Voltage plots
     figure(facecolor='w')
     plot(timeseries,Vmseries0,color='r') # pre neuron's vm
@@ -305,14 +273,22 @@ def main():
     up, sp = np.mean( dwlist_pos ), np.std( dwlist_pos )
     un, sn = np.mean( dwlist_neg ), np.std( dwlist_neg )
 
-    assert up == 0.03631000318268854, un
-    assert sp == 0.03660570442651176, sp
-    assert un == -0.05388814799889599, un
-    assert sn == 0.04251905785109328, sn
+
+    if not syn.noisy:
+        assert up == 0.03631000318268854, up
+        assert sp == 0.03660570442651176, sp
+        assert un == -0.05388814799889599, un
+        assert sn == 0.04251905785109328, sn
+    else:
+        expOld = (0.0836845810215151, 0.23783506224575554, -0.05282120739225806,
+                0.23856004540029008)
+        expNew = (0.03631000318268854, 0.03660570442651176, -0.05388814799889599,
+                0.04251905785109328)
+        assert (up, sp, un, sn) == expNew, 'Expected %s' % str(expNew)
 
 
-    ax.plot(np.arange(-t_extent,0,ddt)*1000, np.array(dwlist_neg),'.-r')
-    ax.plot(np.arange(ddt,(t_extent+ddt),ddt)*1000, np.array(dwlist_pos),'.-b')
+    ax.plot(np.arange(-t_extent,0,ddt)*200, np.array(dwlist_neg),'.-r')
+    ax.plot(np.arange(ddt,(t_extent+ddt),ddt)*200, np.array(dwlist_pos),'.-b')
     xmin,xmax = ax.get_xlim()
     ymin,ymax = ax.get_ylim()
     ax.set_xticks([xmin,0,xmax])

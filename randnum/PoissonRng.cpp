@@ -18,7 +18,10 @@
 
 #ifndef _POISSONRNG_CPP
 #define _POISSONRNG_CPP
+
 #include "../basecode/header.h"
+
+#include "RNG.h"
 #include "PoissonRng.h"
 
 const Cinfo* PoissonRng::initCinfo()
@@ -27,24 +30,29 @@ const Cinfo* PoissonRng::initCinfo()
         "mean",
         "Mean of the Poisson distribution.",
         &PoissonRng::setMean,
-        &PoissonRng::getMean);
+        &PoissonRng::getMean
+        );
+
     static Finfo* poissonRngFinfos[] = {
         &mean,
     };
+
     static string doc[] = {
         "Name", "PoissonRng",
-        "Author", "Subhasis Ray",
+        "Author", "Subhasis Ray, Dilawar Singh",
         "Description", "Poisson distributed random number generator.",
     };
+
     static Dinfo< PoissonRng > dinfo;
     static Cinfo poissonRngCinfo(
         "PoissonRng",
-        RandGenerator::initCinfo(),
+        Neutral::initCinfo(),
         poissonRngFinfos,
         sizeof(poissonRngFinfos)/sizeof(Finfo*),
         &dinfo,
         doc,
-        sizeof( doc ) / sizeof( string ));
+        sizeof( doc ) / sizeof( string )
+        );
 
     return &poissonRngCinfo;
 }
@@ -57,6 +65,11 @@ PoissonRng::PoissonRng()
     //do nothing. should not try to get mean
 }
 
+PoissonRng& PoissonRng::operator=(const PoissonRng& rng)
+{
+    return *this;
+}
+
 /**
    Sets the mean. Since poisson distribution is defined in terms of
    the rate parameter or the mean, it is mandatory to set this before
@@ -66,15 +79,21 @@ void PoissonRng::setMean(double mean)
 {
     mean_ = mean;
 }
-/**
-   reports error in case the parameter mean has not been set.
-*/
-void PoissonRng::vReinit(const Eref& e, ProcPtr p)
+
+double PoissonRng::getMean( void ) const
 {
-    if ( !rng_ )
-    {
-        cerr << "ERROR: PoissonRng::vReinit - mean must be set before using the Poisson distribution generator." << endl;
-    }
+    return mean_;
+}
+
+void PoissonRng::reinitSeed( void )
+{
+
+}
+
+void PoissonRng::reinit(const Eref& e, ProcPtr p)
+{
+    reinitSeed();
+    dist_ = moose::MOOSE_POISSON_DISTRIBUTION(mean_);
 }
 
 

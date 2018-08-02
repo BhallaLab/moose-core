@@ -16,7 +16,6 @@
 #include <map>
 #include <sstream>
 
-
 #ifdef  USE_BOOST_ODE
 //#ifdef BOOST_FILESYSTEM_EXISTS
 #include <boost/filesystem.hpp>
@@ -70,7 +69,7 @@ namespace moose
      * initialize them. By default it is initialized by random_device (see
      * global.cpp).
      */
-    extern int __rng_seed__;
+    extern unsigned long __rng_seed__;
 
     /**
      * @brief Fix a path. For testing purpose.
@@ -183,6 +182,24 @@ namespace moose
      */
     string moosePathToUserPath( string path );
 
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Get the global seed set by call of moose.seed( X )
+     *
+     * @Returns  seed (int).
+     */
+    /* ----------------------------------------------------------------------------*/
+    int getGlobalSeed( );
+
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Set the seed for all random generator. When seed of a RNG is
+     * not set, this seed it used. It is set to -1 by default.
+     *
+     * @Param seed
+     */
+    /* ----------------------------------------------------------------------------*/
+    void setGlobalSeed( int seed );
 }
 
 #endif   /* ----- #ifndef __MOOSE_GLOBAL_INC_  ----- */

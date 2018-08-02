@@ -18,24 +18,33 @@
 #ifndef _UNIFORMRNG_H
 #define _UNIFORMRNG_H
 
-#include "randnum.h"
-#include "RandGenerator.h"
+#include "RNG.h"
 
-class UniformRng: public RandGenerator
+class UniformRng
 {
   public:
     UniformRng();
-    virtual ~UniformRng() { ; }
+    ~UniformRng() { ; }
+
+    UniformRng& operator=( const UniformRng& r );
+
     double getMin() const;
     double getMax() const;
     void setMin(double min);
     void setMax(double max);
-    virtual void vReinit(const Eref& e, ProcPtr p);
 
+    void reinit(const Eref& e, ProcPtr p);
     static const Cinfo * initCinfo();
+
   private:
+
     double min_;
     double max_;
+
+    moose::MOOSE_RANDOM_DEVICE rd_;
+    moose::MOOSE_RNG_DEFAULT_ENGINE rng_;
+    moose::MOOSE_UNIFORM_DISTRIBUTION dist_;
+
 };
 
 

@@ -15,11 +15,13 @@
  ** See the file COPYING.LIB for the full notice.
  **********************************************************************/
 
-#ifndef _BINOMIALRNG_CPP
-#define _BINOMIALRNG_CPP
-#include "BinomialRng.h"
+#include "../basecode/global.h"
 #include "utility/numutil.h"
+#include "BinomialRng.h"
+#include "RNG.h"
+
 #include <cmath>
+
 extern const Cinfo* initRandGeneratorCinfo();
 
 const Cinfo* BinomialRng::initCinfo()
@@ -29,14 +31,18 @@ const Cinfo* BinomialRng::initCinfo()
         "Parameter n of the binomial distribution. In a coin toss experiment,"
         " this is the number of tosses.",
         &BinomialRng::setN,
-        &BinomialRng::getN);
+        &BinomialRng::getN
+        );
+
     static ValueFinfo < BinomialRng, double > p(
         "p",
         "Parameter p of the binomial distribution. In a coin toss experiment,"
         " this is the probability of one of the two sides of the coin being on"
         " top.",
         &BinomialRng::setP,
-        &BinomialRng::getP);
+        &BinomialRng::getP
+        );
+
     static Finfo* binomialRngFinfos[] =
     {
         &n,
@@ -46,13 +52,15 @@ const Cinfo* BinomialRng::initCinfo()
     static string doc[] =
     {
         "Name", "BinomialRng",
-        "Author", "Subhasis Ray",
+        "Author", "Subhasis Ray, Dilawar Singh",
         "Description", "Binomially distributed random number generator.",
     };
+
     Dinfo < BinomialRng> dinfo;
+
     static Cinfo binomialRngCinfo(
         "BinomialRng",
-        RandGenerator::initCinfo(),
+        Neutral::initCinfo(),
         binomialRngFinfos,
         sizeof(binomialRngFinfos)/sizeof(Finfo*),
         &dinfo,
@@ -61,17 +69,19 @@ const Cinfo* BinomialRng::initCinfo()
     return &binomialRngCinfo;
 }
 
-
 static const Cinfo* binomialRngCinfo = BinomialRng::initCinfo();
+
 
 BinomialRng::BinomialRng()
 {
-    isNSet_ = false;
-    isPSet_ = false;
-    isModified_ = true;
-
     n_ = 0;
     p_ = 0;
+    dist_ = moose::MOOSE_BINOMIAL_DISTRIBUTION( n_, p_ );
+}
+
+BinomialRng& BinomialRng::operator=( const BinomialRng&)
+{
+    return *this;
 }
 
 /**
@@ -80,14 +90,8 @@ BinomialRng::BinomialRng()
  */
 void BinomialRng::setN(double value)
 {
-    unsigned long n = (unsigned long)value;
-    if ( n <= 0 )
-    {
-        cerr << "ERROR: BinomialRng::innerSetN - n must be a positive integer." << endl;
-        return;
-    }
-    n_ = n;
-
+    n_ = (unsigned long)value;
+    dist_ = moose::MOOSE_BINOMIAL_DISTRIBUTION( n_, p_ );
 }
 
 /**
@@ -109,20 +113,8 @@ void BinomialRng::setP(double p)
         cerr << "ERROR: BinomialRng::setP - p must be in (0,1) range." << endl;
         return;
     }
-
-    if ( !isPSet_)
-    {
-        p_ = p;
-        isPSet_ = true;
-    }
-    else
-    {
-        if (!isClose< double >(p_,p, DBL_EPSILON))
-        {
-            p_ = p;
-            isModified_ = true;
-        }
-    }
+    p_ = p;
+    dist_ = moose::MOOSE_BINOMIAL_DISTRIBUTION( n_, p_ );
 }
 
 /**
@@ -133,27 +125,29 @@ double BinomialRng::getP() const
     return p_;
 }
 
+void BinomialRng::reinitSeed()
+{
+    if( seed_ >= 0 )
+    {
+        rng_.seed( seed_ );
+        return;
+    }
+
+    if( moose::getGlobalSeed() >= 0 )
+    {
+        rng_.seed( moose::getGlobalSeed() );
+        return;
+    }
+    rng_.seed( rd_() );
+    dist_ = moose::MOOSE_BINOMIAL_DISTRIBUTION( n_, p_ );
+}
 
 /**
    reports error if one or more of the parameters are not set.
 */
-void BinomialRng::vReinit( const Eref& e, ProcPtr p)
+void BinomialRng::reinit( const Eref& e, ProcPtr p)
 {
-    if ( isNSet_ )
-    {
-        if ( isPSet_ )
-        {
-        }
-        else
-        {
-            cerr << "ERROR: BinomialRng::reinit - first set value of p." << endl;
-        }
-    }
-    else
-    {
-        cerr << "ERROR: BinomialRng::reinit - first set value of n." << endl;
-    }
+    reinitSeed( );
+    dist_ = moose::MOOSE_BINOMIAL_DISTRIBUTION( n_, p_ );
 }
 
-
-#endif

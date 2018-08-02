@@ -43,7 +43,7 @@ extern string dumpStats( int  );
 
 namespace moose {
 
-    int __rng_seed__ = 0;
+    unsigned long __rng_seed__ = 0;
 
     moose::RNG<double> rng;
 
@@ -221,4 +221,13 @@ namespace moose {
         return string( buffer );
     }
 
+    int getGlobalSeed( )
+    {
+        return __rng_seed__;
+    }
+
+    void setGlobalSeed( int seed )
+    {
+        __rng_seed__ = seed;
+    }
 }

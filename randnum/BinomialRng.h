@@ -18,27 +18,38 @@
 #ifndef _BINOMIALRNG_H
 #define _BINOMIALRNG_H
 
-#include "randnum.h"
+#include "RNG.h"
 #include "../basecode/header.h"
-#include "RandGenerator.h"
 
-class BinomialRng: public RandGenerator
+class BinomialRng
 {
-  public:
+public:
     BinomialRng();
+    ~BinomialRng(){;}
+
+    BinomialRng& operator=( const BinomialRng&);
+
     void setN(double n);
     double getN() const;
+
     void setP(double p);
     double getP() const;
-    virtual void vReinit( const Eref& e, ProcPtr p);
+
+    void reinitSeed( void );
+    void reinit( const Eref& e, ProcPtr p);
 
     static const Cinfo * initCinfo();
-  private:
-    bool isNSet_;
+
+private:
     unsigned long n_;
-    bool isPSet_;
     double p_;
-    bool isModified_;
+
+    unsigned long seed_;
+
+    moose::MOOSE_RANDOM_DEVICE rd_;
+    moose::MOOSE_RNG_DEFAULT_ENGINE rng_;
+    moose::MOOSE_BINOMIAL_DISTRIBUTION dist_;
+
 };
 
 #endif

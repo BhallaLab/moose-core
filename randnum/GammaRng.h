@@ -19,13 +19,12 @@
 #define _GAMMARNG_H
 #include "randnum.h"
 #include "basecode/header.h"
-#include "RandGenerator.h"
 
 /**
    This is MOOSE wrapper for Gammaly distributed random number generator class, Gamma.
    The default
  */
-class GammaRng: public RandGenerator
+class GammaRng
 {
   public:
     GammaRng();
@@ -35,7 +34,7 @@ class GammaRng: public RandGenerator
     void setAlpha(double alpha);
     void setTheta(double theta);
 
-    virtual void vReinit( const Eref& e, ProcPtr p);
+    void reinit( const Eref& e, ProcPtr p);
 
     static const Cinfo * initCinfo();
 
