@@ -19,27 +19,42 @@
 #define _NORMALRNG_H
 
 #include "randnum.h"
+#include "RNG.h"
 #include "basecode/header.h"
-#include "RandGenerator.h"
-#include "Normal.h"
 
 /**
    This is MOOSE wrapper for normally distributed random number generator class, Normal.
    The default
  */
-class NormalRng: public RandGenerator
+class NormalRng
 {
   public:
     NormalRng();
-    virtual ~NormalRng() { ; }
+    ~NormalRng() { ; }
+
+    NormalRng& operator=( const NormalRng& );
+
     void setMean(double mean);
+    double getMean( void ) const;
+
     void setVariance(double variance);
-    void setMethod(int method);
-    int getMethod() const;
+    double getVariance( ) const;
+
+    double getNextSample( );
+
     virtual void vReinit( const Eref& e, ProcPtr p);
 
     static const Cinfo * initCinfo();
-};
 
+  private:
+    double mean_;
+    double variance_;
+
+    moose::MOOSE_RANDOM_DEVICE rd_;
+    moose::MOOSE_RNG_DEFAULT_ENGINE rng_;
+
+    moose::MOOSE_NORMAL_DISTRIBUTION dist_;
+
+};
 
 #endif

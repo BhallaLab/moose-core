@@ -39,6 +39,25 @@ using namespace std;
 
 namespace moose {
 
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Global random number generator engine. Everywhere we use this
+     * engine.
+     */
+    /* ----------------------------------------------------------------------------*/
+#ifdef USE_BOOST_RNG
+    typedef boost::random::mt19937 MOOSE_RNG_DEFAULT_ENGINE;
+#ifdef BOOST_RANDOM_DEVICE_EXISTS
+    typedef boost::random::random_device MOOSE_RANDOM_DEVICE;
+#else
+    typedef std::random_device MOOSE_RANDOM_DEVICE;
+#endif
+#else
+    typedef std::mt19937 MOOSE_RNG_DEFAULT_ENGINE;
+    typedef std::random_device MOOSE_RANDOM_DEVICE;
+    typedef std::normal_distribution<double> MOOSE_NORMAL_DISTRIBUTION;
+#endif
+
 /*
  * =====================================================================================
  *        Class:  RNG
@@ -61,16 +80,7 @@ class RNG
 
         void setRandomSeed( )
         {
-
-#ifdef USE_BOOST_RNG
-#ifdef BOOST_RANDOM_DEVICE_EXISTS
-            boost::random::random_device rd;
-#else
-            std::random_device rd;
-#endif                                // BOOST_RANDOM_DEVICE_EXISTS
-#else                                 // USE C++11
-            std::random_device rd;
-#endif
+            MOOSE_RANDOM_DEVICE rd;
             setSeed( rd() );
         }
 
@@ -128,11 +138,11 @@ class RNG
         T seed_;
 
         // By default use <random>.
+        MOOSE_RNG_DEFAULT_ENGINE rng_;
+
 #if USE_BOOST_RNG
-        boost::random::mt19937 rng_;
         boost::random::uniform_01<T> dist_;
 #else
-        std::mt19937 rng_;
         std::uniform_real_distribution<> dist_;
 #endif
 

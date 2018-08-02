@@ -7,13 +7,13 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include <queue>
-#include "header.h"
+#include "../basecode/header.h"
 #include "Synapse.h"
 #include "SynEvent.h" // only using the SynEvent class from this
 #include "SynHandlerBase.h"
-#include "../randnum/Normal.h" // generate normal randum numbers for noisy weight update
 #include "GraupnerBrunel2012CaPlasticitySynHandler.h"
+
+#include <queue>
 
 const Cinfo* GraupnerBrunel2012CaPlasticitySynHandler::initCinfo()
 {
@@ -249,7 +249,6 @@ GraupnerBrunel2012CaPlasticitySynHandler::GraupnerBrunel2012CaPlasticitySynHandl
     noisy_ = false;
     noiseSD_ = 0.0;
     bistable_ = true;
-    normalGenerator_.setMethod(BOX_MUELLER); // the default ALIAS method is 1000x slower!
 }
 
 GraupnerBrunel2012CaPlasticitySynHandler::~GraupnerBrunel2012CaPlasticitySynHandler()
@@ -305,7 +304,7 @@ void GraupnerBrunel2012CaPlasticitySynHandler::addSpike(
 	delayDPreEvents_.push( PreSynEvent( index, time+delayD_, weight ) );
 }
 
-double GraupnerBrunel2012CaPlasticitySynHandler::getTopSpike( 
+double GraupnerBrunel2012CaPlasticitySynHandler::getTopSpike(
 				unsigned int index ) const
 {
 	if ( events_.empty() )

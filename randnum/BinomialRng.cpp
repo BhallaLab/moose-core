@@ -18,7 +18,6 @@
 #ifndef _BINOMIALRNG_CPP
 #define _BINOMIALRNG_CPP
 #include "BinomialRng.h"
-#include "Binomial.h"
 #include "utility/numutil.h"
 #include <cmath>
 extern const Cinfo* initRandGeneratorCinfo();
@@ -34,16 +33,18 @@ const Cinfo* BinomialRng::initCinfo()
     static ValueFinfo < BinomialRng, double > p(
         "p",
         "Parameter p of the binomial distribution. In a coin toss experiment,"
-" this is the probability of one of the two sides of the coin being on"
-" top.",
+        " this is the probability of one of the two sides of the coin being on"
+        " top.",
         &BinomialRng::setP,
         &BinomialRng::getP);
-    static Finfo* binomialRngFinfos[] = {
+    static Finfo* binomialRngFinfos[] =
+    {
         &n,
         &p,
     };
 
-    static string doc[] = {
+    static string doc[] =
+    {
         "Name", "BinomialRng",
         "Author", "Subhasis Ray",
         "Description", "Binomially distributed random number generator.",
@@ -85,31 +86,8 @@ void BinomialRng::setN(double value)
         cerr << "ERROR: BinomialRng::innerSetN - n must be a positive integer." << endl;
         return;
     }
+    n_ = n;
 
-    if(!isNSet_)
-    {
-        isNSet_ = true;
-        n_ = n;
-    }
-    else
-    {
-        if (n_!= n  )
-        {
-            n_ = n;
-            isModified_ = true;
-        }
-    }
-
-    if ( isNSet_ && isPSet_ && isModified_)
-    {   {
-            if ( rng_ )
-            {
-                delete rng_;
-            }
-            rng_ = new Binomial((unsigned long)n_,p_);
-            isModified_ = false;
-        }
-    }
 }
 
 /**
@@ -126,26 +104,24 @@ double BinomialRng::getN() const
  */
 void BinomialRng::setP(double p)
 {
-    if ( p < 0 || p > 1) {
+    if ( p < 0 || p > 1)
+    {
         cerr << "ERROR: BinomialRng::setP - p must be in (0,1) range." << endl;
         return;
     }
-    if ( !isPSet_) {
+
+    if ( !isPSet_)
+    {
         p_ = p;
         isPSet_ = true;
-    } else {
-        if (!isClose< double >(p_,p, DBL_EPSILON)) {
+    }
+    else
+    {
+        if (!isClose< double >(p_,p, DBL_EPSILON))
+        {
             p_ = p;
             isModified_ = true;
         }
-    }
-
-    if ( isNSet_ && isPSet_ && isModified_ ){
-        if ( rng_ ){
-            delete rng_;
-        }
-        rng_ = new Binomial((long)(n_),p_);
-        isModified_ = false;
     }
 }
 
@@ -163,15 +139,18 @@ double BinomialRng::getP() const
 */
 void BinomialRng::vReinit( const Eref& e, ProcPtr p)
 {
-    if ( isNSet_ ){
-        if ( isPSet_ ){
-            if ( !rng_ ){
-                rng_ = new Binomial((unsigned long)(n_), p_);
-            }
-        } else {
+    if ( isNSet_ )
+    {
+        if ( isPSet_ )
+        {
+        }
+        else
+        {
             cerr << "ERROR: BinomialRng::reinit - first set value of p." << endl;
         }
-    } else {
+    }
+    else
+    {
         cerr << "ERROR: BinomialRng::reinit - first set value of n." << endl;
     }
 }

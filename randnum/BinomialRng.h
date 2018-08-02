@@ -21,7 +21,6 @@
 #include "randnum.h"
 #include "../basecode/header.h"
 #include "RandGenerator.h"
-#include "Binomial.h"
 
 class BinomialRng: public RandGenerator
 {

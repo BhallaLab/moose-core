@@ -76,6 +76,16 @@ ExponentialRng& ExponentialRng::operator=(const ExponentialRng& r)
     return *this;
 }
 
+int ExponentialRng::getSeed( void ) const
+{
+    return seed_;
+}
+
+void ExponentialRng::setSeed( int seed )
+{
+    seed_ = seed;
+}
+
 
 /**
    Replaces the same method in base class.  Returns the mean as

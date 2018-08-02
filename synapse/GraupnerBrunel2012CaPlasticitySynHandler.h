@@ -10,6 +10,11 @@
 #ifndef _GRAUPNER_BRUNEL_2012_CA_PLASTICITY_SYN_HANDLER_H
 #define _GRAUPNER_BRUNEL_2012_CA_PLASTICITY_SYN_HANDLER_H
 
+#include "../randnum/NormalRng.h"
+
+#include <queue>
+using namespace std;
+
 /*
 class PreSynEvent: public SynEvent
 {
@@ -164,7 +169,7 @@ class GraupnerBrunel2012CaPlasticitySynHandler: public SynHandlerBase
         double weightMin_;
         double weightScale_;
         double lastCaUpdateTime_;
-        Normal normalGenerator_;
+        NormalRng normalGenerator_;
 };
 
 #endif // _GRAUPNER_BRUNEL_2012_CA_PLASTICITY_SYN_HANDLER_H
