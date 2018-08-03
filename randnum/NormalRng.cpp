@@ -127,13 +127,13 @@ double NormalRng::getVariance( void ) const
 
 void NormalRng::reinitSeed( void )
 {
-    if( seed_ >= 0 )
+    if( seed_ > 0 )
     {
         rng_.seed( seed_ );
         return;
     }
 
-    if( moose::getGlobalSeed() >= 0 )
+    if( moose::getGlobalSeed() > 0 )
     {
         rng_.seed( moose::getGlobalSeed() );
         return;
@@ -164,7 +164,7 @@ NormalRng::NormalRng()
     variance_ = 1.0;
     seed_ = moose::getGlobalSeed( );
 
-    if( seed_ >= 0 )
+    if( seed_ > 0 )
         rng_.seed( seed_ );
     else
         rng_.seed( rd_() );

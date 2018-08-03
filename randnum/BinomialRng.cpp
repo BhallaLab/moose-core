@@ -127,13 +127,13 @@ double BinomialRng::getP() const
 
 void BinomialRng::reinitSeed()
 {
-    if( seed_ >= 0 )
+    if( seed_ > 0 )
     {
         rng_.seed( seed_ );
         return;
     }
 
-    if( moose::getGlobalSeed() >= 0 )
+    if( moose::getGlobalSeed() > 0 )
     {
         rng_.seed( moose::getGlobalSeed() );
         return;

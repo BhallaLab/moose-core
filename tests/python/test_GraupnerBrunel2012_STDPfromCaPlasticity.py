@@ -16,6 +16,8 @@ print( 'Using moose from %s' % moose.__file__ )
 from matplotlib.pyplot import *
 import numpy as np
 
+moose.seed( 10 )
+
 def main():
     """
     Simulate a pseudo-STDP protocol and plot the STDP kernel
@@ -281,11 +283,9 @@ def main():
         assert un == -0.05388814799889599, un
         assert sn == 0.04251905785109328, sn
     else:
-        expOld = (0.0836845810215151, 0.23783506224575554, -0.05282120739225806,
-                0.23856004540029008)
-        expNew = (0.07231921702088451, 0.25312803357325664,
-                -0.017281989140996257, 0.26524827796949435)
-        assert got == expNew, 'Expected: %s, Got: %s' % (str(expNew), str(got))
+        expNew = (0.027729616253047665, 0.27137102058058016, -0.032703258354598204,
+             0.2482198106101603)
+        assert np.isclose(got, expNew).all(), 'Expected: %s, Got: %s' % (str(expNew), str(got))
 
     ax.plot(np.arange(-t_extent,0,ddt)*200, np.array(dwlist_neg),'.-r')
     ax.plot(np.arange(ddt,(t_extent+ddt),ddt)*200, np.array(dwlist_pos),'.-b')
