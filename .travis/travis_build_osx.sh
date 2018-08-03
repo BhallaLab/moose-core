@@ -34,7 +34,7 @@ set -e
         && cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON \
         -DPYTHON_EXECUTABLE=`which python` ..
 
-    make -j`nproc` && ctest --output-on-failure -j`nproc
+    make -j`nproc` && ctest --output-on-failure -j`nproc`
     cd ..
     set +e
 
