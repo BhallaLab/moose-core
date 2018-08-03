@@ -84,7 +84,7 @@ const Cinfo* SparseMsg::initCinfo()
         &SparseMsg::getProbability
     );
 
-    static ValueFinfo< SparseMsg, long > seed(
+    static ValueFinfo< SparseMsg, unsigned long > seed(
         "seed",
         "Random number seed for generating probabilistic connectivity.",
         &SparseMsg::setSeed,
@@ -188,7 +188,6 @@ static const Cinfo* sparseMsgCinfo = SparseMsg::initCinfo();
 void SparseMsg::setProbability ( double probability )
 {
     p_ = probability;
-    moose::mtseed( seed_ );
     randomConnect( probability );
 }
 
@@ -197,14 +196,17 @@ double SparseMsg::getProbability ( ) const
     return p_;
 }
 
-void SparseMsg::setSeed ( long seed )
+void SparseMsg::setSeed ( unsigned long seed )
 {
-    seed_ = seed;
-    moose::mtseed( seed_ );
+    if( seed > 0 )
+    {
+        seed_ = seed;
+        rng_.seed( seed_ );
+    }
     randomConnect( p_ );
 }
 
-long SparseMsg::getSeed () const
+unsigned long SparseMsg::getSeed () const
 {
     return seed_;
 }
@@ -268,9 +270,11 @@ vector< unsigned int > SparseMsg::getEntryPairs() const
 
 void SparseMsg::setRandomConnectivity( double probability, long seed )
 {
+    cerr << "Setting random connectivity with prob " << probability << " and seed "
+        << seed << endl;
+
     p_ = probability;
-    seed_ = seed;
-    moose::mtseed( seed );
+    rng_.seed( seed );
     randomConnect( probability );
 }
 
@@ -409,6 +413,10 @@ SparseMsg::SparseMsg( Element* e1, Element* e2, unsigned int msgIndex )
     }
 
     // cout << Shell::myNode() << ": SparseMsg constructor between " << e1->getName() << " and " << e2->getName() << endl;
+
+    // Init rng with random device.
+    if( seed_ == 0 )
+        rng_.seed( rd_() );
 }
 
 SparseMsg::~SparseMsg()
@@ -480,7 +488,7 @@ unsigned int SparseMsg::randomConnect( double probability )
         unsigned int synNum = 0;
         for ( unsigned int j = 0; j < nRows; ++j )
         {
-            double r = moose::mtrand(); // Want to ensure it is called each time round the loop.
+            double r = dist_( rng_ ); // Want to ensure it is called each time round the loop.
             if ( r < probability )
             {
                 synIndex.push_back( synNum );

@@ -117,6 +117,9 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
     // by multiple threads if the above Set call is not complete.
 
     vector< double > origVm( size, 0.0 );
+    
+    // NOTE: From 
+    moose::mtseed( 5489UL );
     for ( unsigned int i = 0; i < size; ++i )
         origVm[i] = moose::mtrand() * Vmax;
 
@@ -231,15 +234,13 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
         cout << std::setprecision(12) <<  retVm901 << endl;
         cout << std::setprecision(12) <<  retVm902 << endl;
 #endif
-
-
-        ASSERT_DOUBLE_EQ("", retVm100, 0.290482603326 );
-        ASSERT_DOUBLE_EQ("", retVm101, 0.0962383585185);
-        ASSERT_DOUBLE_EQ("", retVm102, 0.373960530983 );
-        ASSERT_DOUBLE_EQ("", retVm99,  0.163201372268 );
-        ASSERT_DOUBLE_EQ("", retVm900, 0.379825627569 );
-        ASSERT_DOUBLE_EQ("", retVm901, 0.115552625459 );
-        ASSERT_DOUBLE_EQ("", retVm902, 0.186233468715 );
+        ASSERT_DOUBLE_EQ("", retVm100,  0.0752853031478);
+        ASSERT_DOUBLE_EQ("", retVm101,  0.226731547886 );
+        ASSERT_DOUBLE_EQ("", retVm102,  0.204294350789 );
+        ASSERT_DOUBLE_EQ("", retVm99,   0.2814616871   );
+        ASSERT_DOUBLE_EQ("", retVm900,  0.194820080944 );
+        ASSERT_DOUBLE_EQ("", retVm901,  0.0490452677121);
+        ASSERT_DOUBLE_EQ("", retVm902,  0.214295483534 );
 
     }
     /*

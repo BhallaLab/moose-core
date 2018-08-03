@@ -86,7 +86,6 @@ option(GPROF "Build for profiling using gprof" OFF)
 option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_BOOST_ODE "Use boost library ode2 library instead of GSL" OFF)
-option(WITH_BOOST_RNG "Use boost library RNG instead of c++11 stl. " OFF)
 option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
 option(PARALLELIZED_SOLVERS "Use parallel version of GSOLVE. (alpha)" OFF )
 option(PARALLELIZED_CLOCK "High level parallelization of moose::Clock (alpha)" OFF )
@@ -146,6 +145,12 @@ set(STATIC_LIBRARIES "" )
 # Collect all shared libraries here.
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 
+# BOOST ode library performs better than GSL and ideally should be made default.
+# Making boost default means that we get rid of gsl. Boost does not have a very
+# good matrix library; it has ublas which is not well maintained and emit a lot
+# of warning during compilation. Nonetheless, WITH_BOOST_ODE works fine and
+# produce results quicker than GSL. Both boost ode and ublas are in moose source
+# tree ./external/odeint-v2 and ./external/boost-numeric-bindings
 if(WITH_GSL)
     find_package(GSL 1.16 REQUIRED)
     if(NOT GSL_FOUND)
@@ -169,23 +174,14 @@ if(WITH_GSL)
     # GSL is also used in RNG (whenever applicable), therefore include paths are
     # top level.
     include_directories( ${GSL_INCLUDE_DIRS} )
-elseif(WITH_BOOST_RNG OR WITH_BOOST_ODE)
+elseif(WITH_BOOST_ODE)
     find_package(Boost 1.44 COMPONENTS random REQUIRED)
     find_package( LAPACK REQUIRED )
-    add_definitions( -DUSE_BOOST_RNG )
-    include_directories( ${Boost_INCLUDE_DIRS} )
-    check_include_file_cxx(
-        ${Boost_INCLUDE_DIRS}/boost/random/random_device.hpp
-        BOOST_RANDOM_DEVICE_EXISTS
-        )
-    if(BOOST_RANDOM_DEVICE_EXISTS)
-        add_definitions(-DBOOST_RANDOM_DEVICE_EXISTS)
-    endif(BOOST_RANDOM_DEVICE_EXISTS)
+endif()
 
-    # if boost ode is being used.
-    if(WITH_BOOST_ODE)
-        add_definitions(-DUSE_BOOST_ODE -UUSE_GSL)
-    endif()
+# if boost ode is being used, don't use GSL.
+if(WITH_BOOST_ODE)
+    add_definitions(-DUSE_BOOST_ODE -UUSE_GSL)
 endif()
 
 
@@ -269,10 +265,8 @@ endif(WITH_MPI)
 
 if(WITH_BOOST_ODE)
     list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES})
-endif()
-if(WITH_BOOST_RNG)
     list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
-endif(WITH_BOOST_RNG)
+endif(WITH_BOOST_ODE)
 
 # These libraries could be static of dynamic. We need to discrimate between
 # these two types because of --whole-archive option. See

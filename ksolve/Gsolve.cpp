@@ -217,6 +217,11 @@ Gsolve::Gsolve() :
     ;
 }
 
+Gsolve& Gsolve::operator=(const Gsolve& )
+{
+    return *this;
+}
+
 Gsolve::~Gsolve()
 {
     ;
