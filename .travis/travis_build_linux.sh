@@ -44,7 +44,7 @@ echo "Currently in `pwd`"
 (
     mkdir -p _GSL_BUILD && cd _GSL_BUILD
     cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
-    $MAKE && ctest --output-on-failure
+    $MAKE && ctest --output-on-failure -j4
     sudo make install
     $PYTHON2 -c 'import moose;print(moose.__file__);print(moose.version())'
 )
@@ -53,7 +53,7 @@ echo "Currently in `pwd`"
     # Now with boost.
     mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && \
         cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
-    $MAKE && ctest --output-on-failure
+    $MAKE && ctest --output-on-failure -j4
 )
 
 # This is only applicable on linux build.
@@ -64,12 +64,12 @@ if type $PYTHON3 > /dev/null; then
     (
         mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && \
             cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
-        $MAKE && ctest --output-on-failure
+        $MAKE && ctest --output-on-failure -j4
     )
     (
         mkdir -p _BOOST_BUILD2 && cd _BOOST_BUILD2 && \
             cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
-        $MAKE && ctest --output-on-failure
+        $MAKE && ctest --output-on-failure -j4
     )
     echo "All done"
 else

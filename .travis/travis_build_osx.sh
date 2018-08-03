@@ -27,14 +27,14 @@ set -e
     mkdir -p _GSL_BUILD && cd _GSL_BUILD \
         && cmake -DDEBUG=ON \
         -DPYTHON_EXECUTABLE=`which python` ..
-    make -j3 && ctest --output-on-failure
+    make -j`nproc` && ctest --output-on-failure -j`nproc`
 
     cd .. # Now with boost.
     mkdir -p _BOOST_BUILD && cd _BOOST_BUILD \
         && cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON \
         -DPYTHON_EXECUTABLE=`which python` ..
 
-    make -j3 && ctest --output-on-failure
+    make -j`nproc` && ctest --output-on-failure -j`nproc
     cd ..
     set +e
 
