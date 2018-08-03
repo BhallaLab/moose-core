@@ -276,15 +276,12 @@ def main():
     un, sn = np.mean( dwlist_neg ), np.std( dwlist_neg )
 
 
-    got = (up, sp, un, sn)
+    got = (up, sp)
     if not syn.noisy:
         assert up == 0.03631000318268854, up
         assert sp == 0.03660570442651176, sp
-        assert un == -0.05388814799889599, un
-        assert sn == 0.04251905785109328, sn
     else:
-        expNew = (0.027729616253047665, 0.27137102058058016, -0.032703258354598204,
-             0.2482198106101603)
+        expNew = (0.027729616253047665, 0.27137102058058016)
         assert np.isclose(got, expNew).all(), 'Expected: %s, Got: %s' % (str(expNew), str(got))
 
     ax.plot(np.arange(-t_extent,0,ddt)*200, np.array(dwlist_neg),'.-r')
