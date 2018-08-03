@@ -35,4 +35,5 @@ void BoostSys::operator()( const vector_type_ y
 }
 
 #else      /* -----  not USE_BOOST_ODE  ----- */
+
 #endif     /* -----  not USE_BOOST_ODE  ----- */

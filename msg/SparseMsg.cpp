@@ -270,9 +270,6 @@ vector< unsigned int > SparseMsg::getEntryPairs() const
 
 void SparseMsg::setRandomConnectivity( double probability, long seed )
 {
-    cerr << "Setting random connectivity with prob " << probability << " and seed "
-        << seed << endl;
-
     p_ = probability;
     rng_.seed( seed );
     randomConnect( probability );

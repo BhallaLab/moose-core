@@ -5,7 +5,6 @@
 
 #include <vector>
 #include <string>
-
 #include <boost/numeric/odeint.hpp>
 
 typedef double value_type_;
@@ -34,20 +33,20 @@ class VoxelPools;
  */
 class BoostSys
 {
-    public:
-        BoostSys( );
-        ~BoostSys();
+public:
+    BoostSys( );
+    ~BoostSys( );
 
-        /* Operator is called by boost ode-solver */
-        void operator()( const vector_type_ y , vector_type_& dydt, const double t );
+    /* Operator is called by boost ode-solver */
+    void operator()( const vector_type_ y , vector_type_& dydt, const double t );
 
-        /* Pointer to the arbitrary parameters of the system */
-        VoxelPools* vp;
-        void* params;
+    /* Pointer to the arbitrary parameters of the system */
+    VoxelPools* vp;
+    void* params;
 
-        double epsAbs;
-        double epsRel;
-        std::string method;
+    double epsAbs;
+    double epsRel;
+    std::string method;
 };
 
 #endif // USE_BOOST_ODE

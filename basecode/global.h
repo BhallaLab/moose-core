@@ -16,12 +16,6 @@
 #include <map>
 #include <sstream>
 
-#ifdef  USE_BOOST_ODE
-//#ifdef BOOST_FILESYSTEM_EXISTS
-#include <boost/filesystem.hpp>
-//#endif                                          /* BOOST_FILESYSTEM_EXISTS */
-#endif
-
 #include "randnum/RNG.h"                        /* Use inbuilt rng */
 #include "../utility/print_function.hpp"
 

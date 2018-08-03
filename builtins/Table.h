@@ -10,10 +10,6 @@
 #ifndef _TABLE_H
 #define _TABLE_H
 
-
-#if  USE_BOOST_ODE
-#include <boost/filesystem.hpp>
-#endif     /* -----  USE_BOOST_ODE  ----- */
 #include <fstream>
 
 /**
