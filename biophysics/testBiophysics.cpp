@@ -16,23 +16,12 @@
 
 #include "CompartmentBase.h"
 #include "Compartment.h"
-/*
-#include "HHGate.h"
-#include "ChanBase.h"
-#include "HHChannel.h"
-*/
+
 extern void testCompartment(); // Defined in Compartment.cpp
 extern void testCompartmentProcess(); // Defined in Compartment.cpp
 extern void testMarkovRateTable(); //Defined in MarkovRateTable.cpp
 extern void testVectorTable();	//Defined in VectorTable.cpp
 
-/*
-extern void testSpikeGen(); // Defined in SpikeGen.cpp
-extern void testCaConc(); // Defined in CaConc.cpp
-extern void testNernst(); // Defined in Nernst.cpp
-extern void testMarkovSolverBase();	//Defined in MarkovSolverBase.cpp
-extern void testMarkovSolver();		//Defined in MarkovSolver.cpp
-*/
 
 #ifdef DO_UNIT_TESTS
 

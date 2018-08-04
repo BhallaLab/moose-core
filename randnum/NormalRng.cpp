@@ -13,6 +13,7 @@
 
 #include "NormalRng.h"
 #include "../basecode/global.h"
+#include "../utility/print_function.hpp"
 
 const Cinfo* NormalRng::initCinfo()
 {
@@ -127,19 +128,16 @@ double NormalRng::getVariance( void ) const
 
 void NormalRng::reinitSeed( void )
 {
-    if( seed_ > 0 )
+    if( seed_ == 0)
     {
-        rng_.seed( seed_ );
-        return;
+        if(moose::getGlobalSeed() > 0 )
+            seed_ = moose::getGlobalSeed();
+        else
+            seed_ = rd_();
     }
 
-    if( moose::getGlobalSeed() > 0 )
-    {
-        rng_.seed( moose::getGlobalSeed() );
-        return;
-    }
-
-    rng_.seed( rd_() );
+    MOOSE_DEBUG( "Using seed " << seed_ );
+    rng_.seed( seed_ );
 }
 
 void NormalRng::reinit(const Eref& e, ProcPtr p)
@@ -149,25 +147,16 @@ void NormalRng::reinit(const Eref& e, ProcPtr p)
     dist_ = moose::MOOSE_NORMAL_DISTRIBUTION(mean_, variance_);
 }
 
-/**
-   By default the method used for normal distribution is alias method
-   by Ahrens and Dieter. In order to use some method other than the
-   default Alias method, one should call setMethod with a proper
-   method index before calling reset ( reinit ). Since different
-   methods create different random sequences, the combined sequence
-   may not have the intended distribution. By default mean and
-   variance are set to 0.0 and 1.0 respectively.
+/** 
+ * By default mean and variance are set to 0.0 and 1.0 respectively.
  */
 NormalRng::NormalRng()
 {
     mean_ = 0.0;
     variance_ = 1.0;
-    seed_ = moose::getGlobalSeed( );
-
-    if( seed_ > 0 )
-        rng_.seed( seed_ );
-    else
-        rng_.seed( rd_() );
+    seed_ = 0;
+    reinitSeed();
+    dist_ = moose::MOOSE_NORMAL_DISTRIBUTION(mean_, variance_);
 }
 
 double NormalRng::getNextSample()

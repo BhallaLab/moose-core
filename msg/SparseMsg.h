@@ -29,6 +29,7 @@
  * Synapses, which are array fields of IntFire objects.
  * The sparse connectivity maps between the source IntFire and target
  * Synapses.
+ *
  * The location of the entry in the sparse matrix provides the index of
  * the target IntFire.
  * The data value in the sparse matrix provides the index of the Synapse
@@ -41,6 +42,7 @@
  * BiSparseMsg.
  * It can be modified after creation to add or remove message entries.
  */
+
 class SparseMsg: public Msg
 {
     friend unsigned int Msg::initMsgManagers(); // for initializing Id.
@@ -76,14 +78,11 @@ public:
 
     // Uses default addToQ function.
 
-    /////////////////////////////////////////////////////////////////
     // Here we define the Element interface functions for SparseMsg
-    /////////////////////////////////////////////////////////////////
     void setRandomConnectivity( double probability, long seed );
     double getProbability() const;
     void setProbability( double value );
 
-    //
     vector< unsigned int > getMatrixEntry() const;
     vector< unsigned int > getColIndex() const;
     vector< unsigned int > getRowStart() const;
@@ -100,7 +99,6 @@ public:
     void unsetEntry( unsigned int row, unsigned int column );
 
     // Still need to implement array field gets.
-
     unsigned int getNumRows() const;
     unsigned int getNumColumns() const;
     unsigned int getNumEntries() const;

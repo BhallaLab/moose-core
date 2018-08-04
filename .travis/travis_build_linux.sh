@@ -18,12 +18,11 @@
 #      REVISION:  ---
 #===============================================================================
 
-set -e -x
+set -e
 
 PYTHON2="/usr/bin/python2"
 PYTHON3="/usr/bin/python3"
 MAKEFLAGS="-j`nproc`"
-
 
 if [ ! -n "$MAKE" ]; then
     MAKE="make -j`nproc`"

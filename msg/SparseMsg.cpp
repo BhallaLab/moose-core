@@ -199,10 +199,11 @@ double SparseMsg::getProbability ( ) const
 void SparseMsg::setSeed ( unsigned long seed )
 {
     if( seed > 0 )
-    {
         seed_ = seed;
-        rng_.seed( seed_ );
-    }
+		else
+			  seed_ = rd_();
+
+		rng_.seed( seed_ );
     randomConnect( p_ );
 }
 

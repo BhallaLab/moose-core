@@ -53,8 +53,22 @@
 
 using namespace std;
 
-namespace moose {
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Macros
+ */
+/* ----------------------------------------------------------------------------*/
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+#ifdef NDEBUG
+#define MOOSE_DEBUG( a ) { \
+    stringstream ss; ss << a; \
+    cout << "DEBUG: " << __FILENAME__ << ":" << __LINE__ << "| " << ss.str();
+#else
+#define MOOSE_DEBUG( a ) {}
+#endif
+
+namespace moose {
 
     /**
      * @brief Enumerate type for debug and log.

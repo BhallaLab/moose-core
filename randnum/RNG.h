@@ -26,8 +26,8 @@
 
 using namespace std;
 
-namespace moose {
-
+namespace moose 
+{
 
     /* --------------------------------------------------------------------------*/
     /**
@@ -35,7 +35,14 @@ namespace moose {
      * engine.
      */
     /* ----------------------------------------------------------------------------*/
-    typedef std::mt19937 MOOSE_RNG_DEFAULT_ENGINE;
+
+    typedef std::mersenne_twister_engine< 
+					std::uint_fast32_t, 32, 624, 397, 31
+					, 0x9908b0df, 11
+					, 0xffffffff, 7
+					, 0x9d2c5680, 15
+					, 0xefc60000, 18, 1812433253> MOOSE_RNG_DEFAULT_ENGINE;
+
     typedef std::random_device MOOSE_RANDOM_DEVICE;
 
     typedef std::uniform_real_distribution<> MOOSE_UNIFORM_DISTRIBUTION;

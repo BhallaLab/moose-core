@@ -177,10 +177,11 @@ const Cinfo* GraupnerBrunel2012CaPlasticitySynHandler::initCinfo()
         &GraupnerBrunel2012CaPlasticitySynHandler::getWeightScale
     );
 
-    static DestFinfo addPostSpike( "addPostSpike",
-                                   "Handles arriving spike messages from post-synaptic neuron, inserts into postEvent queue.",
-                                   new EpFunc1< GraupnerBrunel2012CaPlasticitySynHandler, \
-                                   double >( &GraupnerBrunel2012CaPlasticitySynHandler::addPostSpike ) );
+    static DestFinfo addPostSpike(
+        "addPostSpike",
+        "Handles arriving spike messages from post-synaptic neuron, inserts into postEvent queue.",
+        new EpFunc1< GraupnerBrunel2012CaPlasticitySynHandler, \
+        double >( &GraupnerBrunel2012CaPlasticitySynHandler::addPostSpike ) );
 
     static FieldElementFinfo< SynHandlerBase, Synapse > synFinfo(
         "synapse",
@@ -193,25 +194,25 @@ const Cinfo* GraupnerBrunel2012CaPlasticitySynHandler::initCinfo()
 
     static Finfo* GraupnerBrunel2012CaPlasticitySynHandlerFinfos[] =
     {
-        &synFinfo,			// FieldElement
-        &addPostSpike,		// DestFinfo
-        &Ca,    		    // Field
-        &CaInit,    		// Field
-        &tauCa, 		    // Field
-        &tauSyn, 		    // Field
-        &CaPre,        	    // Field
-        &CaPost,	        // Field
-        &delayD,	        // Field
-        &thetaP,	        // Field
-        &thetaD,	        // Field
-        &gammaP,	        // Field
-        &gammaD,	        // Field
-        &weightMax,         // Field
-        &weightMin,         // Field
-        &weightScale,       // Field
-        &noisy,             // Field
-        &noiseSD,           // Field
-        &bistable           // Field
+        &synFinfo,     // FieldElement
+        &addPostSpike, // DestFinfo
+        &Ca,           // Field
+        &CaInit,       // Field
+        &tauCa,        // Field
+        &tauSyn,       // Field
+        &CaPre,        // Field
+        &CaPost,       // Field
+        &delayD,       // Field
+        &thetaP,       // Field
+        &thetaD,       // Field
+        &gammaP,       // Field
+        &gammaD,       // Field
+        &weightMax,    // Field
+        &weightMin,    // Field
+        &weightScale,  // Field
+        &noisy,        // Field
+        &noiseSD,      // Field
+        &bistable      // Field
     };
 
     static Dinfo< GraupnerBrunel2012CaPlasticitySynHandler > dinfo;
@@ -233,30 +234,34 @@ static const Cinfo* GraupnerBrunel2012CaPlasticitySynHandlerCinfo =\
 
 GraupnerBrunel2012CaPlasticitySynHandler::GraupnerBrunel2012CaPlasticitySynHandler()
 {
-    Ca_ = 0.0;
-    CaInit_ = 0.0;
-    tauCa_ = 1.0;
-    tauSyn_ = 1.0;
-    CaPre_ = 0.0;
-    CaPost_ = 0.0;
-    thetaD_ = 0.0;
-    thetaP_ = 0.0;
-    gammaD_ = 0.0;
-    gammaP_ = 0.0;
-    delayD_ = 0.0;
-    weightMin_ = 0.0;
-    weightMax_ = 0.0;
+    Ca_          = 0.0;
+    CaInit_      = 0.0;
+    tauCa_       = 1.0;
+    tauSyn_      = 1.0;
+    CaPre_       = 0.0;
+    CaPost_      = 0.0;
+    thetaD_      = 0.0;
+    thetaP_      = 0.0;
+    gammaD_      = 0.0;
+    gammaP_      = 0.0;
+    delayD_      = 0.0;
+    weightMin_   = 0.0;
+    weightMax_   = 0.0;
     weightScale_ = 1.0;
-    noisy_ = false;
-    noiseSD_ = 0.0;
-    bistable_ = true;
+    noisy_       = false;
+    noiseSD_     = 0.0;
+    bistable_    = true;
 }
 
 GraupnerBrunel2012CaPlasticitySynHandler::~GraupnerBrunel2012CaPlasticitySynHandler()
-{ ; }
+{
+    ;
+}
 
-GraupnerBrunel2012CaPlasticitySynHandler& GraupnerBrunel2012CaPlasticitySynHandler::operator=\
-( const GraupnerBrunel2012CaPlasticitySynHandler& ssh)
+GraupnerBrunel2012CaPlasticitySynHandler& 
+    GraupnerBrunel2012CaPlasticitySynHandler::operator=( 
+            const GraupnerBrunel2012CaPlasticitySynHandler& ssh
+        )
 {
     synapses_ = ssh.synapses_;
     for ( vector< Synapse >::iterator
