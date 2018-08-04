@@ -10,7 +10,6 @@
 #include "../basecode/global.h"
 
 #include "../mesh/VoxelJunction.h"
-#include "../randnum/randnum.h"
 
 #include "VoxelPoolsBase.h"
 #include "XferInfo.h"
@@ -426,6 +425,8 @@ void Gsolve::process( const Eref& e, ProcPtr p )
             *i = round( *i );
 #else
             double base = floor( *i );
+
+            // Use global RNG.
             if ( moose::mtrand() >= (*i - base) )
                 *i = base;
             else

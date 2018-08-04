@@ -10,8 +10,10 @@
 #ifndef _GRAUPNER_BRUNEL_2012_CA_PLASTICITY_SYN_HANDLER_H
 #define _GRAUPNER_BRUNEL_2012_CA_PLASTICITY_SYN_HANDLER_H
 
+#include "../basecode/global.h"
+#include "../randnum/RNG.h"
+
 #include <queue>
-#include "../randnum/NormalRng.h"
 
 using namespace std;
 
@@ -103,6 +105,8 @@ public:
     weightFactors updateCaWeightFactors( double currTime );
     void updateWeight( Synapse* synPtr, weightFactors *wFacPtr );
 
+    void reinitSeed( );
+
     static const Cinfo* initCinfo();
 
 private:
@@ -132,7 +136,11 @@ private:
     double weightScale_;
     double lastCaUpdateTime_;
 
-    NormalRng normalGenerator_;
+    // NormalRng normalGenerator_;
+    unsigned long seed_;
+    moose::MOOSE_RANDOM_DEVICE rd_;
+    moose::MOOSE_NORMAL_DISTRIBUTION dist_;
+    moose::MOOSE_RNG_DEFAULT_ENGINE rng_;
 
 };
 
