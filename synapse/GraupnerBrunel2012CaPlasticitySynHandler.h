@@ -139,7 +139,7 @@ private:
     // NormalRng normalGenerator_;
     unsigned long seed_;
     moose::MOOSE_RANDOM_DEVICE rd_;
-    moose::MOOSE_NORMAL_DISTRIBUTION dist_;
+    moose::MOOSE_NORMAL_DISTRIBUTION<double> dist_;
     moose::MOOSE_RNG_DEFAULT_ENGINE rng_;
 
 };

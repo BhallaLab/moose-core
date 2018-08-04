@@ -1,8 +1,9 @@
 /***
  *       Filename:  NormalDistribution.hpp
  *
- *    Description:  Generates normally distributed numbers. Based on
- *    boost::random library.
+ *    Description:  Generates normally distributed numbers. Based on GSL
+ *    implementation.
+ *
  *
  *        Version:  0.0.1
  *        Created:  2018-08-04
@@ -12,326 +13,192 @@
  *         Author:  Dilawar Singh <dilawars@ncbs.res.in>
  *   Organization:  NCBS Bangalore
  *
- *        License:  GNU GPL2
+ *        License:  GNU GPL3
  */
 
 #ifndef NORMALDISTRIBUTION_H
 #define NORMALDISTRIBUTION_H
 
-#include <random>
+#include "Definitions.h"
 
-// tables for the ziggurat algorithm
-template<class RealType>
-struct normal_table {
-    static const RealType table_x[129];
-    static const RealType table_y[129];
-};
+/* position of right-most step */
+#define PARAM_R 3.44428647676
 
-template<class RealType>
-const RealType normal_table<RealType>::table_x[129] = {
-    3.7130862467403632609, 3.4426198558966521214, 3.2230849845786185446, 3.0832288582142137009,
-    2.9786962526450169606, 2.8943440070186706210, 2.8231253505459664379, 2.7611693723841538514,
-    2.7061135731187223371, 2.6564064112581924999, 2.6109722484286132035, 2.5690336259216391328,
-    2.5300096723854666170, 2.4934545220919507609, 2.4590181774083500943, 2.4264206455302115930,
-    2.3954342780074673425, 2.3658713701139875435, 2.3375752413355307354, 2.3104136836950021558,
-    2.2842740596736568056, 2.2590595738653295251, 2.2346863955870569803, 2.2110814088747278106,
-    2.1881804320720206093, 2.1659267937448407377, 2.1442701823562613518, 2.1231657086697899595,
-    2.1025731351849988838, 2.0824562379877246441, 2.0627822745039633575, 2.0435215366506694976,
-    2.0246469733729338782, 2.0061338699589668403, 1.9879595741230607243, 1.9701032608497132242,
-    1.9525457295488889058, 1.9352692282919002011, 1.9182573008597320303, 1.9014946531003176140,
-    1.8849670357028692380, 1.8686611409895420085, 1.8525645117230870617, 1.8366654602533840447,
-    1.8209529965910050740, 1.8054167642140487420, 1.7900469825946189862, 1.7748343955807692457,
-    1.7597702248942318749, 1.7448461281083765085, 1.7300541605582435350, 1.7153867407081165482,
-    1.7008366185643009437, 1.6863968467734863258, 1.6720607540918522072, 1.6578219209482075462,
-    1.6436741568569826489, 1.6296114794646783962, 1.6156280950371329644, 1.6017183802152770587,
-    1.5878768648844007019, 1.5740982160167497219, 1.5603772223598406870, 1.5467087798535034608,
-    1.5330878776675560787, 1.5195095847593707806, 1.5059690368565502602, 1.4924614237746154081,
-    1.4789819769830978546, 1.4655259573357946276, 1.4520886428822164926, 1.4386653166774613138,
-    1.4252512545068615734, 1.4118417124397602509, 1.3984319141236063517, 1.3850170377251486449,
-    1.3715922024197322698, 1.3581524543224228739, 1.3446927517457130432, 1.3312079496576765017,
-    1.3176927832013429910, 1.3041418501204215390, 1.2905495919178731508, 1.2769102735516997175,
-    1.2632179614460282310, 1.2494664995643337480, 1.2356494832544811749, 1.2217602305309625678,
-    1.2077917504067576028, 1.1937367078237721994, 1.1795873846544607035, 1.1653356361550469083,
-    1.1509728421389760651, 1.1364898520030755352, 1.1218769225722540661, 1.1071236475235353980,
-    1.0922188768965537614, 1.0771506248819376573, 1.0619059636836193998, 1.0464709007525802629,
-    1.0308302360564555907, 1.0149673952392994716, 0.99886423348064351303, 0.98250080350276038481,
-    0.96585507938813059489, 0.94890262549791195381, 0.93161619660135381056, 0.91396525100880177644,
-    0.89591535256623852894, 0.87742742909771569142, 0.85845684317805086354, 0.83895221428120745572,
-    0.81885390668331772331, 0.79809206062627480454, 0.77658398787614838598, 0.75423066443451007146,
-    0.73091191062188128150, 0.70647961131360803456, 0.68074791864590421664, 0.65347863871504238702,
-    0.62435859730908822111, 0.59296294244197797913, 0.55869217837551797140, 0.52065603872514491759,
-    0.47743783725378787681, 0.42654798630330512490, 0.36287143102841830424, 0.27232086470466385065,
-    0
-};
+namespace moose {
+namespace details {
 
-template<class RealType>
-const RealType normal_table<RealType>::table_y[129] = {
-    0, 0.0026696290839025035092, 0.0055489952208164705392, 0.0086244844129304709682,
-    0.011839478657982313715, 0.015167298010672042468, 0.018592102737165812650, 0.022103304616111592615,
-    0.025693291936149616572, 0.029356317440253829618, 0.033087886146505155566, 0.036884388786968774128,
-    0.040742868074790604632, 0.044660862200872429800, 0.048636295860284051878, 0.052667401903503169793,
-    0.056752663481538584188, 0.060890770348566375972, 0.065080585213631873753, 0.069321117394180252601,
-    0.073611501884754893389, 0.077950982514654714188, 0.082338898242957408243, 0.086774671895542968998,
-    0.091257800827634710201, 0.09578784912257815216, 0.10036444102954554013, 0.10498725541035453978,
-    0.10965602101581776100, 0.11437051244988827452, 0.11913054670871858767, 0.12393598020398174246,
-    0.12878670619710396109, 0.13368265258464764118, 0.13862377998585103702, 0.14361008009193299469,
-    0.14864157424369696566, 0.15371831220958657066, 0.15884037114093507813, 0.16400785468492774791,
-    0.16922089223892475176, 0.17447963833240232295, 0.17978427212496211424, 0.18513499701071343216,
-    0.19053204032091372112, 0.19597565311811041399, 0.20146611007620324118, 0.20700370944187380064,
-    0.21258877307373610060, 0.21822164655637059599, 0.22390269938713388747, 0.22963232523430270355,
-    0.23541094226572765600, 0.24123899354775131610, 0.24711694751469673582, 0.25304529850976585934,
-    0.25902456739871074263, 0.26505530225816194029, 0.27113807914102527343, 0.27727350292189771153,
-    0.28346220822601251779, 0.28970486044581049771, 0.29600215684985583659, 0.30235482778947976274,
-    0.30876363800925192282, 0.31522938806815752222, 0.32175291587920862031, 0.32833509837615239609,
-    0.33497685331697116147, 0.34167914123501368412, 0.34844296754987246935, 0.35526938485154714435,
-    0.36215949537303321162, 0.36911445366827513952, 0.37613546951445442947, 0.38322381105988364587,
-    0.39038080824138948916, 0.39760785649804255208, 0.40490642081148835099, 0.41227804010702462062,
-    0.41972433205403823467, 0.42724699830956239880, 0.43484783025466189638, 0.44252871528024661483,
-    0.45029164368692696086, 0.45813871627287196483, 0.46607215269457097924, 0.47409430069824960453,
-    0.48220764633483869062, 0.49041482528932163741, 0.49871863547658432422, 0.50712205108130458951,
-    0.51562823824987205196, 0.52424057267899279809, 0.53296265938998758838, 0.54179835503172412311,
-    0.55075179312105527738, 0.55982741271069481791, 0.56902999107472161225, 0.57836468112670231279,
-    0.58783705444182052571, 0.59745315095181228217, 0.60721953663260488551, 0.61714337082656248870,
-    0.62723248525781456578, 0.63749547734314487428, 0.64794182111855080873, 0.65858200005865368016,
-    0.66942766735770616891, 0.68049184100641433355, 0.69178914344603585279, 0.70333609902581741633,
-    0.71515150742047704368, 0.72725691835450587793, 0.73967724368333814856, 0.75244155918570380145,
-    0.76558417390923599480, 0.77914608594170316563, 0.79317701178385921053, 0.80773829469612111340,
-    0.82290721139526200050, 0.83878360531064722379, 0.85550060788506428418, 0.87324304892685358879,
-    0.89228165080230272301, 0.91304364799203805999, 0.93628268170837107547, 0.96359969315576759960,
-    1
-};
-
-
-template<class RealType = double>
-struct unit_normal_distribution
+/* tabulated values for the heigt of the Ziggurat levels */
+static const double ytab[128] =
 {
-    template<class Engine>
-    RealType operator()(Engine& eng) {
-        const double * const table_x = normal_table<double>::table_x;
-        const double * const table_y = normal_table<double>::table_y;
-        for(;;) {
-            std::pair<RealType, int> vals = generate_int_float_pair<RealType, 8>(eng);
-            int i = vals.second;
-            int sign = (i & 1) * 2 - 1;
-            i = i >> 1;
-            RealType x = vals.first * RealType(table_x[i]);
-            if(x < table_x[i + 1]) return x * sign;
-            if(i == 0) return generate_tail(eng) * sign;
-
-            RealType y01 = uniform_01<RealType>()(eng);
-            RealType y = RealType(table_y[i]) + y01 * RealType(table_y[i + 1] - table_y[i]);
-
-            // These store the value y - bound, or something proportional to that difference:
-            RealType y_above_ubound, y_above_lbound;
-
-            if (table_x[i] >= 1) {
-                // convex (incl. inflection)
-                y_above_ubound = RealType(table_x[i] - table_x[i+1]) * y01 - (RealType(table_x[i]) - x);
-                y_above_lbound = y - (RealType(table_y[i]) + (RealType(table_x[i]) - x) * RealType(table_y[i]) * RealType(table_x[i]));
-            }
-            else { // concave
-                y_above_lbound = RealType(table_x[i] - table_x[i+1]) * y01 - (RealType(table_x[i]) - x);
-                y_above_ubound = y - (RealType(table_y[i]) + (RealType(table_x[i]) - x) * RealType(table_y[i]) * RealType(table_x[i]));
-            }
-
-            if (y_above_ubound < 0 // if above the upper bound reject immediately
-                    &&
-                    (
-                     y_above_lbound < 0 // If below the lower bound accept immediately
-                     ||
-                     y < f(x) // Otherwise it's between the bounds and we need a full check
-                    )
-               ) {
-                return x * sign;
-            }
-        }
-    }
-    static RealType f(RealType x) {
-        using std::exp;
-        return exp(-(x*x/2));
-    }
-    // Generate from the tail using rejection sampling from the exponential(x_1) distribution,
-    // shifted by x_1.  This looks a little different from the usual rejection sampling because it
-    // transforms the condition by taking the log of both sides, thus avoiding the costly exp() call
-    // on the RHS, then takes advantage of the fact that -log(unif01) is simply generating an
-    // exponential (by inverse cdf sampling) by replacing the log(unif01) on the LHS with a
-    // exponential(1) draw, y.
-    template<class Engine>
-    RealType generate_tail(Engine& eng) {
-        const RealType tail_start = RealType(normal_table<double>::table_x[1]);
-        std::exponential_distribution<RealType> exp_x(tail_start);
-        std::exponential_distribution<RealType> exp_y;
-        for(;;) {
-            RealType x = exp_x(eng);
-            RealType y = exp_y(eng);
-            // If we were doing non-transformed rejection sampling, this condition would be:
-            // if (unif01 < exp(-.5*x*x)) return x + tail_start;
-            if(2*y > x*x) return x + tail_start;
-        }
-    }
+    1, 0.963598623011, 0.936280813353, 0.913041104253,
+    0.892278506696, 0.873239356919, 0.855496407634, 0.838778928349,
+    0.822902083699, 0.807732738234, 0.793171045519, 0.779139726505,
+    0.765577436082, 0.752434456248, 0.739669787677, 0.727249120285,
+    0.715143377413, 0.703327646455, 0.691780377035, 0.68048276891,
+    0.669418297233, 0.65857233912, 0.647931876189, 0.637485254896,
+    0.62722199145, 0.617132611532, 0.607208517467, 0.597441877296,
+    0.587825531465, 0.578352913803, 0.569017984198, 0.559815170911,
+    0.550739320877, 0.541785656682, 0.532949739145, 0.524227434628,
+    0.515614886373, 0.507108489253, 0.498704867478, 0.490400854812,
+    0.482193476986, 0.47407993601, 0.466057596125, 0.458123971214,
+    0.450276713467, 0.442513603171, 0.434832539473, 0.427231532022,
+    0.419708693379, 0.41226223212, 0.404890446548, 0.397591718955,
+    0.390364510382, 0.383207355816, 0.376118859788, 0.369097692334,
+    0.362142585282, 0.355252328834, 0.348425768415, 0.341661801776,
+    0.334959376311, 0.328317486588, 0.321735172063, 0.31521151497,
+    0.308745638367, 0.302336704338, 0.29598391232, 0.289686497571,
+    0.283443729739, 0.27725491156, 0.271119377649, 0.265036493387,
+    0.259005653912, 0.253026283183, 0.247097833139, 0.241219782932,
+    0.235391638239, 0.229612930649, 0.223883217122, 0.218202079518,
+    0.212569124201, 0.206983981709, 0.201446306496, 0.195955776745,
+    0.190512094256, 0.185114984406, 0.179764196185, 0.174459502324,
+    0.169200699492, 0.1639876086, 0.158820075195, 0.153697969964,
+    0.148621189348, 0.143589656295, 0.138603321143, 0.133662162669,
+    0.128766189309, 0.123915440582, 0.119109988745, 0.114349940703,
+    0.10963544023, 0.104966670533, 0.100343857232, 0.0957672718266,
+    0.0912372357329, 0.0867541250127, 0.082318375932, 0.0779304915295,
+    0.0735910494266, 0.0693007111742, 0.065060233529, 0.0608704821745,
+    0.056732448584, 0.05264727098, 0.0486162607163, 0.0446409359769,
+    0.0407230655415, 0.0368647267386, 0.0330683839378, 0.0293369977411,
+    0.0256741818288, 0.0220844372634, 0.0185735200577, 0.0151490552854,
+    0.0118216532614, 0.00860719483079, 0.00553245272614, 0.00265435214565
 };
 
+/* tabulated values for 2^24 times x[i]/x[i+1],
+ * used to accept for U*x[i+1]<=x[i] without any floating point operations */
+static const unsigned long ktab[128] =
+{
+    0, 12590644, 14272653, 14988939,
+    15384584, 15635009, 15807561, 15933577,
+    16029594, 16105155, 16166147, 16216399,
+    16258508, 16294295, 16325078, 16351831,
+    16375291, 16396026, 16414479, 16431002,
+    16445880, 16459343, 16471578, 16482744,
+    16492970, 16502368, 16511031, 16519039,
+    16526459, 16533352, 16539769, 16545755,
+    16551348, 16556584, 16561493, 16566101,
+    16570433, 16574511, 16578353, 16581977,
+    16585398, 16588629, 16591685, 16594575,
+    16597311, 16599901, 16602354, 16604679,
+    16606881, 16608968, 16610945, 16612818,
+    16614592, 16616272, 16617861, 16619363,
+    16620782, 16622121, 16623383, 16624570,
+    16625685, 16626730, 16627708, 16628619,
+    16629465, 16630248, 16630969, 16631628,
+    16632228, 16632768, 16633248, 16633671,
+    16634034, 16634340, 16634586, 16634774,
+    16634903, 16634972, 16634980, 16634926,
+    16634810, 16634628, 16634381, 16634066,
+    16633680, 16633222, 16632688, 16632075,
+    16631380, 16630598, 16629726, 16628757,
+    16627686, 16626507, 16625212, 16623794,
+    16622243, 16620548, 16618698, 16616679,
+    16614476, 16612071, 16609444, 16606571,
+    16603425, 16599973, 16596178, 16591995,
+    16587369, 16582237, 16576520, 16570120,
+    16562917, 16554758, 16545450, 16534739,
+    16522287, 16507638, 16490152, 16468907,
+    16442518, 16408804, 16364095, 16301683,
+    16207738, 16047994, 15704248, 15472926
+};
+
+/* tabulated values of 2^{-24}*x[i] */
+static const double wtab[128] =
+{
+    1.62318314817e-08, 2.16291505214e-08, 2.54246305087e-08, 2.84579525938e-08,
+    3.10340022482e-08, 3.33011726243e-08, 3.53439060345e-08, 3.72152672658e-08,
+    3.8950989572e-08, 4.05763964764e-08, 4.21101548915e-08, 4.35664624904e-08,
+    4.49563968336e-08, 4.62887864029e-08, 4.75707945735e-08, 4.88083237257e-08,
+    5.00063025384e-08, 5.11688950428e-08, 5.22996558616e-08, 5.34016475624e-08,
+    5.44775307871e-08, 5.55296344581e-08, 5.65600111659e-08, 5.75704813695e-08,
+    5.85626690412e-08, 5.95380306862e-08, 6.04978791776e-08, 6.14434034901e-08,
+    6.23756851626e-08, 6.32957121259e-08, 6.42043903937e-08, 6.51025540077e-08,
+    6.59909735447e-08, 6.68703634341e-08, 6.77413882848e-08, 6.8604668381e-08,
+    6.94607844804e-08, 7.03102820203e-08, 7.11536748229e-08, 7.1991448372e-08,
+    7.2824062723e-08, 7.36519550992e-08, 7.44755422158e-08, 7.52952223703e-08,
+    7.61113773308e-08, 7.69243740467e-08, 7.77345662086e-08, 7.85422956743e-08,
+    7.93478937793e-08, 8.01516825471e-08, 8.09539758128e-08, 8.17550802699e-08,
+    8.25552964535e-08, 8.33549196661e-08, 8.41542408569e-08, 8.49535474601e-08,
+    8.57531242006e-08, 8.65532538723e-08, 8.73542180955e-08, 8.8156298059e-08,
+    8.89597752521e-08, 8.97649321908e-08, 9.05720531451e-08, 9.138142487e-08,
+    9.21933373471e-08, 9.30080845407e-08, 9.38259651738e-08, 9.46472835298e-08,
+    9.54723502847e-08, 9.63014833769e-08, 9.71350089201e-08, 9.79732621669e-08,
+    9.88165885297e-08, 9.96653446693e-08, 1.00519899658e-07, 1.0138063623e-07,
+    1.02247952126e-07, 1.03122261554e-07, 1.04003996769e-07, 1.04893609795e-07,
+    1.05791574313e-07, 1.06698387725e-07, 1.07614573423e-07, 1.08540683296e-07,
+    1.09477300508e-07, 1.1042504257e-07, 1.11384564771e-07, 1.12356564007e-07,
+    1.13341783071e-07, 1.14341015475e-07, 1.15355110887e-07, 1.16384981291e-07,
+    1.17431607977e-07, 1.18496049514e-07, 1.19579450872e-07, 1.20683053909e-07,
+    1.21808209468e-07, 1.2295639141e-07, 1.24129212952e-07, 1.25328445797e-07,
+    1.26556042658e-07, 1.27814163916e-07, 1.29105209375e-07, 1.30431856341e-07,
+    1.31797105598e-07, 1.3320433736e-07, 1.34657379914e-07, 1.36160594606e-07,
+    1.37718982103e-07, 1.39338316679e-07, 1.41025317971e-07, 1.42787873535e-07,
+    1.44635331499e-07, 1.4657889173e-07, 1.48632138436e-07, 1.50811780719e-07,
+    1.53138707402e-07, 1.55639532047e-07, 1.58348931426e-07, 1.61313325908e-07,
+    1.64596952856e-07, 1.68292495203e-07, 1.72541128694e-07, 1.77574279496e-07,
+    1.83813550477e-07, 1.92166040885e-07, 2.05295471952e-07, 2.22600839893e-07
+};
+
+} // namespace moose::details
+
+/* --------------------------------------------------------------------------*/
 /**
- * Instantiations of class template normal_distribution model a
- * \random_distribution. Such a distribution produces random numbers
- * @c x distributed with probability density function
- * \f$\displaystyle p(x) =
- *   \frac{1}{\sqrt{2\pi}\sigma} e^{-\frac{(x-\mu)^2}{2\sigma^2}}
- * \f$,
- * where mean and sigma are the parameters of the distribution.
+ * @Synopsis  Get a Normally Distribution value from a given RNG.
  *
- * The implementation uses the "ziggurat" algorithm, as described in
- *
- *  @blockquote
- *  "The Ziggurat Method for Generating Random Variables",
- *  George Marsaglia and Wai Wan Tsang, Journal of Statistical Software,
- *  Volume 5, Number 8 (2000), 1-7.
- *  @endblockquote
+ * @tparam T
  */
-template<class RealType = double>
+/* ----------------------------------------------------------------------------*/
+template<typename T = double>
 class normal_distribution
 {
+
 public:
-    typedef RealType input_type;
-    typedef RealType result_type;
 
-    class param_type {
-    public:
-        typedef normal_distribution distribution_type;
-
-        /**
-         * Constructs a @c param_type with a given mean and
-         * standard deviation.
-         *
-         * Requires: sigma >= 0
-         */
-        explicit param_type(RealType mean_arg = RealType(0.0),
-                            RealType sigma_arg = RealType(1.0))
-          : _mean(mean_arg),
-            _sigma(sigma_arg)
-        {}
-
-        /** Returns the mean of the distribution. */
-        RealType mean() const { return _mean; }
-
-        /** Returns the standand deviation of the distribution. */
-        RealType sigma() const { return _sigma; }
-
-        /** Writes a @c param_type to a @c std::ostream. */
-        BOOST_RANDOM_DETAIL_OSTREAM_OPERATOR(os, param_type, parm)
-        { os << parm._mean << " " << parm._sigma ; return os; }
-
-        /** Reads a @c param_type from a @c std::istream. */
-        BOOST_RANDOM_DETAIL_ISTREAM_OPERATOR(is, param_type, parm)
-        { is >> parm._mean >> std::ws >> parm._sigma; return is; }
-
-        /** Returns true if the two sets of parameters are the same. */
-        BOOST_RANDOM_DETAIL_EQUALITY_OPERATOR(param_type, lhs, rhs)
-        { return lhs._mean == rhs._mean && lhs._sigma == rhs._sigma; }
-
-        /** Returns true if the two sets of parameters are the different. */
-        BOOST_RANDOM_DETAIL_INEQUALITY_OPERATOR(param_type)
-
-    private:
-        RealType _mean;
-        RealType _sigma;
-    };
-
-    /**
-     * Constructs a @c normal_distribution object. @c mean and @c sigma are
-     * the parameters for the distribution.
-     *
-     * Requires: sigma >= 0
-     */
-    explicit normal_distribution(const RealType& mean_arg = RealType(0.0),
-                                 const RealType& sigma_arg = RealType(1.0))
-      : _mean(mean_arg), _sigma(sigma_arg)
+    normal_distribution( T mean = 0.0, T sigma = 1.0) :
+        mean_(mean), sigma_(sigma)
     {
-        BOOST_ASSERT(_sigma >= RealType(0));
     }
 
-    /**
-     * Constructs a @c normal_distribution object from its parameters.
-     */
-    explicit normal_distribution(const param_type& parm)
-      : _mean(parm.mean()), _sigma(parm.sigma())
-    {}
+    ~normal_distribution() { ; }
 
-    /**  Returns the mean of the distribution. */
-    RealType mean() const { return _mean; }
-    /** Returns the standard deviation of the distribution. */
-    RealType sigma() const { return _sigma; }
-
-    /** Returns the smallest value that the distribution can produce. */
-    RealType min BOOST_PREVENT_MACRO_SUBSTITUTION () const
-    { return -std::numeric_limits<RealType>::infinity(); }
-    /** Returns the largest value that the distribution can produce. */
-    RealType max BOOST_PREVENT_MACRO_SUBSTITUTION () const
-    { return std::numeric_limits<RealType>::infinity(); }
-
-    /** Returns the parameters of the distribution. */
-    param_type param() const { return param_type(_mean, _sigma); }
-    /** Sets the parameters of the distribution. */
-    void param(const param_type& parm)
+    double operator()( moose::MOOSE_RNG_DEFAULT_ENGINE& r )
     {
-        _mean = parm.mean();
-        _sigma = parm.sigma();
+        unsigned long  U, sign, i, j  = 0;
+        T  x, y = 0.0;
+
+        while (1)
+        {
+            U = r();
+            i = U & 0x0000007F;		/* 7 bit to choose the step */
+            sign = U & 0x00000080;	/* 1 bit for the sign */
+            j = U>>8;			/* 24 bit for the x-value */
+
+            x = j*details::wtab[i];
+            if (j < details::ktab[i])  break;
+
+            if (i<127)
+            {
+                double  y0, y1;
+                y0 = details::ytab[i];
+                y1 = details::ytab[i+1];
+                y = y1+(y0-y1)*r();
+            }
+            else
+            {
+                x = PARAM_R - std::log(1.0 - r()) / PARAM_R;
+                y = exp( - PARAM_R*(x-0.5* PARAM_R)) * r();
+            }
+            if (y < std::exp(-0.5*x*x))  break;
+        }
+        return  sign ? sigma_*x : -sigma_*x;
     }
 
-    /**
-     * Effects: Subsequent uses of the distribution do not depend
-     * on values produced by any engine prior to invoking reset.
-     */
-    void reset() { }
+public:
 
-    /**  Returns a normal variate. */
-    template<class Engine>
-    result_type operator()(Engine& eng)
-    {
-        unit_normal_distribution<RealType> impl;
-        return impl(eng) * _sigma + _mean;
-    }
-
-    /** Returns a normal variate with parameters specified by @c param. */
-    template<class URNG>
-    result_type operator()(URNG& urng, const param_type& parm)
-    {
-        return normal_distribution(parm)(urng);
-    }
-
-    /** Writes a @c normal_distribution to a @c std::ostream. */
-    BOOST_RANDOM_DETAIL_OSTREAM_OPERATOR(os, normal_distribution, nd)
-    {
-        os << nd._mean << " " << nd._sigma;
-        return os;
-    }
-
-    /** Reads a @c normal_distribution from a @c std::istream. */
-    BOOST_RANDOM_DETAIL_ISTREAM_OPERATOR(is, normal_distribution, nd)
-    {
-        is >> std::ws >> nd._mean >> std::ws >> nd._sigma;
-        return is;
-    }
-
-    /**
-     * Returns true if the two instances of @c normal_distribution will
-     * return identical sequences of values given equal generators.
-     */
-    BOOST_RANDOM_DETAIL_EQUALITY_OPERATOR(normal_distribution, lhs, rhs)
-    {
-        return lhs._mean == rhs._mean && lhs._sigma == rhs._sigma;
-    }
-
-    /**
-     * Returns true if the two instances of @c normal_distribution will
-     * return different sequences of values given equal generators.
-     */
-    BOOST_RANDOM_DETAIL_INEQUALITY_OPERATOR(normal_distribution)
-
-private:
-    RealType _mean, _sigma;
-
+    T mean_;
+    T sigma_;
 };
 
+} // namespace moose
 
 #endif /* end of include guard: NORMALDISTRIBUTION_H */

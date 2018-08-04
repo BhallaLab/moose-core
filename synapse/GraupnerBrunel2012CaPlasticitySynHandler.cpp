@@ -252,7 +252,7 @@ GraupnerBrunel2012CaPlasticitySynHandler::GraupnerBrunel2012CaPlasticitySynHandl
     noiseSD_     = 0.0;
     bistable_    = true;
     seed_        = 0;
-    dist_ = moose::MOOSE_NORMAL_DISTRIBUTION{0, 1};
+    dist_ = moose::MOOSE_NORMAL_DISTRIBUTION<double>{0, 1};
     reinitSeed();
 
     // std::cout << " Mean " << dist_.mean() << " std " << dist_.stddev() << std::endl;
@@ -273,8 +273,8 @@ void GraupnerBrunel2012CaPlasticitySynHandler::reinitSeed( void )
     rng_.seed( seed_ );
 }
 
-GraupnerBrunel2012CaPlasticitySynHandler& 
-    GraupnerBrunel2012CaPlasticitySynHandler::operator=( 
+GraupnerBrunel2012CaPlasticitySynHandler&
+    GraupnerBrunel2012CaPlasticitySynHandler::operator=(
             const GraupnerBrunel2012CaPlasticitySynHandler& ssh
         )
 {

@@ -152,7 +152,7 @@ private:
     unsigned long seed_;
     moose::MOOSE_RANDOM_DEVICE rd_;
     moose::MOOSE_RNG_DEFAULT_ENGINE rng_;
-    moose::MOOSE_UNIFORM_DISTRIBUTION dist_;
+    moose::MOOSE_UNIFORM_DISTRIBUTION<double> dist_;
 };
 
 #endif // _SPARSE_MSG_H
