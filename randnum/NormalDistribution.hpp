@@ -1,18 +1,9 @@
 /***
- *       Filename:  NormalDistribution.hpp
+ *    Generates normally distributed numbers. Based on GSL implementation.
  *
- *    Description:  Generates normally distributed numbers. Based on GSL
- *    implementation.
- *
- *
- *        Version:  0.0.1
  *        Created:  2018-08-04
-
- *       Revision:  none
- *
  *         Author:  Dilawar Singh <dilawars@ncbs.res.in>
  *   Organization:  NCBS Bangalore
- *
  *        License:  GNU GPL3
  */
 
@@ -157,14 +148,16 @@ public:
     normal_distribution( T mean = 0.0, T sigma = 1.0) :
         mean_(mean), sigma_(sigma)
     {
+        mean_ = mean;
+        sigma_ = sigma;
     }
 
     ~normal_distribution() { ; }
 
     double operator()( moose::MOOSE_RNG_DEFAULT_ENGINE& r )
     {
-        unsigned long  U, sign, i, j  = 0;
-        T  x, y = 0.0;
+        unsigned long  U=0, sign=0, i=0, j=0;
+        T  x=0, y=0;
 
         while (1)
         {
@@ -178,7 +171,7 @@ public:
 
             if (i<127)
             {
-                double  y0, y1;
+                double  y0 = 0, y1 = 0;
                 y0 = details::ytab[i];
                 y1 = details::ytab[i+1];
                 y = y1+(y0-y1)*r();

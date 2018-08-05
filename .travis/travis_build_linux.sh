@@ -45,6 +45,8 @@ echo "Currently in `pwd`"
     mkdir -p _GSL_BUILD && cd _GSL_BUILD
     cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
     $MAKE && ctest --output-on-failure -j4
+    sudo make install && cd  /tmp
+    $PYTHON2 -c 'import moose;print(moose.__file__);print(moose.version())'
 )
 
 (
