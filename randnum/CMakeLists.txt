@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 
-add_definitions( -std=c++11 -g -Wall )
+if( ${CMAKE_SOURCE_DIR} EQUAL ${CMAKE_CURRENT_SOURCE_DIR} )
+    add_definitions( -std=c++11 -g -Wall )
+endif()
+
 add_executable( normal_dist
     ${CMAKE_CURRENT_SOURCE_DIR}/test_normal_dist.cpp)
 

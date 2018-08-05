@@ -177,7 +177,7 @@ if(WITH_GSL)
     # top level.
     include_directories( ${GSL_INCLUDE_DIRS} )
 elseif(WITH_BOOST_ODE)
-    find_package(Boost 1.44 COMPONENTS random REQUIRED)
+    find_package(Boost 1.44 REQUIRED)
     find_package( LAPACK REQUIRED )
 endif()
 
@@ -308,7 +308,7 @@ list(APPEND MOOSE_LIBRARIES muparser)
 add_subdirectory(basecode)
 add_subdirectory(msg)
 add_subdirectory(shell)
-# add_subdirectory(randnum)
+add_subdirectory(randnum)
 add_subdirectory(scheduling)
 add_subdirectory(biophysics)
 add_subdirectory(builtins)
@@ -331,7 +331,6 @@ list(APPEND MOOSE_LIBRARIES
     msg
     benchmarks
     shell
-    # randnum
     scheduling
     moose_mpi
     biophysics

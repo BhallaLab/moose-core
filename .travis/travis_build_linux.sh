@@ -19,6 +19,7 @@
 #===============================================================================
 
 set -e
+set -x
 
 PYTHON2="/usr/bin/python2"
 PYTHON3="/usr/bin/python3"
@@ -44,8 +45,6 @@ echo "Currently in `pwd`"
     mkdir -p _GSL_BUILD && cd _GSL_BUILD
     cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
     $MAKE && ctest --output-on-failure -j4
-    sudo make install
-    $PYTHON2 -c 'import moose;print(moose.__file__);print(moose.version())'
 )
 
 (
@@ -58,8 +57,8 @@ echo "Currently in `pwd`"
 # This is only applicable on linux build.
 echo "Python3: Removed python2-networkx and install python3"
 if type $PYTHON3 > /dev/null; then
-    sudo apt-get remove -qq python-networkx
-    sudo apt-get install -qq python3-networkx
+    sudo apt-get remove -qq python-networkx || echo "Error with apt"
+    sudo apt-get install -qq python3-networkx || echo "Error with apt"
     (
         mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && \
             cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..

@@ -206,15 +206,18 @@ def main():
     up, sp = np.mean( dwlist_pos ), np.std( dwlist_pos )
     un, sn = np.mean( dwlist_neg ), np.std( dwlist_neg )
 
-    assert dwlist_pos == [0.32476025611655324, 0.22658173497286094,
+    expected = [0.32476025611655324, 0.22658173497286094,
             0.02706212384326734, -0.2176119329016457, -0.17349820098625146,
             -0.049000627347906, 0.10942145078777199, 0.015381955378225953,
             0.004742824127517586, -0.12298343312253879]
+    assert np.isclose(dwlist_pos, expected).all(), "Got %s \nexpected %s" % (dwlist_pos, expected)
 
-    assert dwlist_neg == [-0.07871282492831622, 0.11915009122888964,
+    expected = [-0.07871282492831622, 0.11915009122888964,
             -0.028510348966579557, 0.11812233585111875, 0.05098143255634335,
             -0.2303047508248669, 0.18033418630802123, -0.019377885225611347,
             -0.06038610826728241, 0.06575882890278106]
+    assert np.isclose(dwlist_neg, expected).all(), "Got %s\nexpected %s" % (dwlist_neg,
+            expected)
 
 
     got = (up, sp)
