@@ -29,29 +29,29 @@ using namespace std;
 namespace moose
 {
 
-    /* --------------------------------------------------------------------------*/
-    /**
-     * @Synopsis  Global random number generator engine. Everywhere we use this
-     * engine.
-     */
-    /* ----------------------------------------------------------------------------*/
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Global random number generator engine. Everywhere we use this
+ * engine.
+ */
+/* ----------------------------------------------------------------------------*/
 
-    typedef std::mersenne_twister_engine<
-					std::uint_fast32_t, 32, 624, 397, 31
-					, 0x9908b0df, 11
-					, 0xffffffff, 7
-					, 0x9d2c5680, 15
-					, 0xefc60000, 18, 1812433253> MOOSE_RNG_DEFAULT_ENGINE;
+typedef std::mersenne_twister_engine< std::uint_fast32_t, 32, 624, 397, 31
+            , 0x9908b0df, 11
+            , 0xffffffff, 7
+            , 0x9d2c5680, 15
+            , 0xefc60000, 18, 1812433253
+        > MOOSE_RNG_DEFAULT_ENGINE;
 
-    typedef std::random_device MOOSE_RANDOM_DEVICE;
+typedef std::random_device MOOSE_RANDOM_DEVICE;
 
-    typedef std::uniform_real_distribution<> MOOSE_UNIFORM_DISTRIBUTION;
-    typedef std::normal_distribution<double> MOOSE_NORMAL_DISTRIBUTION;
-    typedef std::binomial_distribution<double> MOOSE_BINOMIAL_DISTRIBUTION;
-    typedef std::lognormal_distribution<double> MOOSE_LOGNORMAL_DISTRIBUTION;
-    typedef std::exponential_distribution<double> MOOSE_EXPONENTIAL_DISTRIBUTION;
-    typedef std::poisson_distribution<double> MOOSE_POISSON_DISTRIBUTION;
-    typedef std::gamma_distribution<double> MOOSE_GAMMA_DISTRIBUTION;
+typedef std::uniform_real_distribution<> MOOSE_UNIFORM_DISTRIBUTION;
+typedef std::normal_distribution<> MOOSE_NORMAL_DISTRIBUTION;
+typedef std::binomial_distribution<> MOOSE_BINOMIAL_DISTRIBUTION;
+typedef std::lognormal_distribution<> MOOSE_LOGNORMAL_DISTRIBUTION;
+typedef std::exponential_distribution<> MOOSE_EXPONENTIAL_DISTRIBUTION;
+typedef std::poisson_distribution<> MOOSE_POISSON_DISTRIBUTION;
+typedef std::gamma_distribution<> MOOSE_GAMMA_DISTRIBUTION;
 
 /*
  * =====================================================================================

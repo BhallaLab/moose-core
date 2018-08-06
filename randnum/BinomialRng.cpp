@@ -20,8 +20,6 @@
 #include "BinomialRng.h"
 #include "RNG.h"
 
-#include <cmath>
-
 extern const Cinfo* initRandGeneratorCinfo();
 
 const Cinfo* BinomialRng::initCinfo()
@@ -140,6 +138,7 @@ void BinomialRng::reinitSeed()
     }
     rng_.seed( rd_() );
     dist_ = moose::MOOSE_BINOMIAL_DISTRIBUTION( n_, p_ );
+    return;
 }
 
 /**
