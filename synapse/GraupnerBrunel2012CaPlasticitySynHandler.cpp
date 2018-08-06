@@ -266,6 +266,7 @@ void GraupnerBrunel2012CaPlasticitySynHandler::reinitSeed( void )
 {
     if( 0 == seed_ )
         seed_ = moose::getGlobalSeed();
+
     if( 0 == seed_ )
         seed_ = rd_();
 

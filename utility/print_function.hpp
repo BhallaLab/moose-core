@@ -53,23 +53,6 @@
 
 using namespace std;
 
-/* Macros */
-
-// Macro to just print the filename and not the whole path.
-#define __FILENAME__ (std::strrchr(__FILE__, '/') ? std::strrchr(__FILE__, '/') + 1 : __FILE__)
-#ifdef DISABLE_DEBUG
-#define MOOSE_DEBUG( a ) { }
-#else
-#define MOOSE_DEBUG( a ) { \
-	std::stringstream ss; ss << a << endl; \
-	std::cout << __FILENAME__ << ":" << __LINE__ << "| " << ss.str() << std::endl; \
-}
-
-#endif
-
-
-namespace moose {
-
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis  Macros
@@ -79,7 +62,8 @@ namespace moose {
 #ifdef NDEBUG
 #define MOOSE_DEBUG( a ) { \
     stringstream ss; ss << a; \
-    cout << "DEBUG: " << __FILENAME__ << ":" << __LINE__ << "| " << ss.str();
+    cout << "DEBUG: " << __FILENAME__ << ":" << __LINE__ << "| " << ss.str(); \
+    }
 #else
 #define MOOSE_DEBUG( a ) {}
 #endif

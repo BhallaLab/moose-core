@@ -16,7 +16,7 @@
 #include <map>
 #include <sstream>
 
-#include "randnum/RNG.h"                        /* Use inbuilt rng */
+#include "../randnum/RNG.h"                        /* Use inbuilt rng */
 #include "../utility/print_function.hpp"
 
 using namespace std;

@@ -45,8 +45,8 @@ class GraupnerBrunel2012CaPlasticitySynHandler: public SynHandlerBase
 public:
     GraupnerBrunel2012CaPlasticitySynHandler();
     ~GraupnerBrunel2012CaPlasticitySynHandler();
-    GraupnerBrunel2012CaPlasticitySynHandler& operator \
-        = ( const GraupnerBrunel2012CaPlasticitySynHandler& other );
+    GraupnerBrunel2012CaPlasticitySynHandler& operator=(
+            const GraupnerBrunel2012CaPlasticitySynHandler& other );
 
     ////////////////////////////////////////////////////////////////
     // Inherited virtual functions from SynHandlerBase
