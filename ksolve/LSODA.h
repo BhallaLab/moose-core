@@ -90,20 +90,32 @@ private:
     int      g_nyh = 0, g_lenyh = 0;
 
     int      ml, mu, imxer;
-    int      mord[3] = {0, 12, 5};
     double   sqrteta, *yp1, *yp2;
-    double   sm1[13] = {0., 0.5, 0.575, 0.55, 0.45, 0.35, 0.25, 0.2, 0.15, 0.1, 0.075, 0.05, 0.025};
 
-    double   ccmax, el0, h, hmin, hmxi, hu, rc, tn;
+    array<int,3> mord = {0, 12, 5};
+    array<double, 13>  sm1 = {  0.,   0.5,  0.575, 0.55,
+                                0.45, 0.35, 0.25,  0.2,
+                                0.15, 0.1,  0.075, 0.05,
+                                0.025 };
+
+    array<double, 14> el = {0};
+    array<double, 13> cm1 = {0};
+    array<double,6> cm2 = {0};
+
+    array<array<double, 14>, 13> elco;
+    array<array<double,4>, 13> tesco;
+
     int      illin = 0, init = 0, mxstep, mxhnil, nhnil, ntrep = 0, nslast, nyh, ierpj, iersl,
              jcur, jstart, kflag, l, meth, miter, maxord, maxcor, msbp, mxncf, n, nq, nst,
              nfe, nje, nqu;
-    double   tsw, pdnorm;
     int      ixpr = 0, jtyp, mused, mxordn, mxords;
 
-    double   conit, crate, el[14], elco[13][14], hold, rmax, tesco[13][4];
+    double   ccmax, el0, h, hmin, hmxi, hu, rc, tn;
+    double   tsw, pdnorm;
+    double   conit, crate, hold, rmax;
+
     int      ialth, ipup, lmax, nslp;
-    double   pdest, pdlast, ratio, cm1[13], cm2[6];
+    double   pdest, pdlast, ratio;
     int      icount, irflag;
 
     double **yh, **wm, *ewt, *savf, *acor;

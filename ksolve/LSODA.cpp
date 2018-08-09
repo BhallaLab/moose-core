@@ -2827,7 +2827,7 @@ void LSODA::resetcoeff()
 */
 {
     int             i;
-    double         *ep1;
+    array<double, 14> ep1;
 
     ep1 = elco[nq];
     for (i = 1; i <= l; i++)
