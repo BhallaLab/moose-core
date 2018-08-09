@@ -24,7 +24,7 @@ using namespace std;
 
 class LSODA
 {
-    typedef void  (*_lsoda_f) (double, double *, double *, void *);
+    typedef void  (*LSODA_ODE_SYSTEM_TYPE) (double, double *, double *, void *);
 
 public:
 
@@ -43,13 +43,13 @@ public:
 
     void dgefa(double** a, int n, int* ipvt, int* info);
 
-    void prja(int neq, double *y, _lsoda_f f, void *_data);
+    void prja(int neq, double *y, LSODA_ODE_SYSTEM_TYPE f, void *_data);
 
     int n_lsoda(double y[], int n, double *x, double xout, double eps
-            , const double yscal[], _lsoda_f devis, void *data
+            , const double yscal[], LSODA_ODE_SYSTEM_TYPE devis, void *data
             );
 
-    void lsoda( _lsoda_f f, int neq, double *y, double *t, double tout
+    void lsoda( LSODA_ODE_SYSTEM_TYPE f, int neq, double *y, double *t, double tout
                 , int itask, int *istate, int iopt, int jt
                 , int iwork1, int iwork2, int iwork5, int iwork6, int iwork7, int iwork8, int iwork9
                 , double rwork1, double rwork5, double rwork6, double rwork7
@@ -58,14 +58,14 @@ public:
 
     void n_lsoda_terminate(void);
 
-    void correction( int neq, double *y, _lsoda_f f, int *corflag
+    void correction( int neq, double *y, LSODA_ODE_SYSTEM_TYPE f, int *corflag
             , double pnorm, double *del, double *delp, double *told
             , int *ncf, double *rh, int *m, void *_data
             );
 
-    void stoda(int neq, double *y, _lsoda_f f, void *_data);
+    void stoda(int neq, double *y, LSODA_ODE_SYSTEM_TYPE f, void *_data);
 
-    void lsoda_update( _lsoda_f f, double* y, double* t, const double tout
+    void lsoda_update( LSODA_ODE_SYSTEM_TYPE f, double* y, double* t, const double tout
             , int* istate, void* _data
             );
 

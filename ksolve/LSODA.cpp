@@ -798,7 +798,7 @@ c
 c-----------------------------------------------------------------------
 */
 
-void LSODA::lsoda( _lsoda_f f, int neq, double *y, double *t, double tout
+void LSODA::lsoda( LSODA_ODE_SYSTEM_TYPE f, int neq, double *y, double *t, double tout
                    // , int itol, double *rtol, double *atol
                    , int itask, int *istate, int iopt, int jt
                    , int iwork1, int iwork2, int iwork5, int iwork6, int iwork7, int iwork8, int iwork9
@@ -1579,7 +1579,7 @@ void LSODA::lsoda( _lsoda_f f, int neq, double *y, double *t, double tout
 }				/* end lsoda   */
 
 
-void LSODA::stoda(int neq, double *y, _lsoda_f f, void *_data)
+void LSODA::stoda(int neq, double *y, LSODA_ODE_SYSTEM_TYPE f, void *_data)
 {
     int             corflag=0, orderflag=0;
     int             i=0, i1=0, j=0, m=0, ncf=0;
@@ -2221,7 +2221,7 @@ void LSODA::scaleh(double *rh, double *pdh)
 }				/* end scaleh   */
 
 
-void LSODA::prja(int neq, double *y, _lsoda_f f, void *_data)
+void LSODA::prja(int neq, double *y, LSODA_ODE_SYSTEM_TYPE f, void *_data)
 {
     int             i, ier, j;
     double          fac, hl0, r, r0, yj;
@@ -2338,7 +2338,7 @@ double LSODA::fnorm(int n, double **a, double *w)
 1 : step size to be reduced, redo prediction,
 2 : corrector cannot converge, failure flag.
 */
-void LSODA::correction(int neq, double *y, _lsoda_f f, int *corflag
+void LSODA::correction(int neq, double *y, LSODA_ODE_SYSTEM_TYPE f, int *corflag
         , double pnorm, double *del, double *delp, double *told
         , int *ncf, double *rh, int *m, void *_data
         )
@@ -2847,7 +2847,7 @@ void LSODA::_freevectors(void)
  * more convenient interface *
  *****************************/
 
-int LSODA::n_lsoda(double y[], int n, double *x, double xout, double eps, const double yscal[], _lsoda_f devis, void *data)
+int LSODA::n_lsoda(double y[], int n, double *x, double xout, double eps, const double yscal[], LSODA_ODE_SYSTEM_TYPE devis, void *data)
 {
     int             i, istate, itask;
     double         *_y, *atol, *rtol;
@@ -2873,7 +2873,7 @@ void LSODA::n_lsoda_terminate(void)
     init = 0;
 }
 
-void LSODA::lsoda_update( _lsoda_f f, double* y, double* t, const double tout, int* istate, void* _data )
+void LSODA::lsoda_update( LSODA_ODE_SYSTEM_TYPE f, double* y, double* t, const double tout, int* istate, void* _data )
 {
     double          rwork1, rwork5, rwork6, rwork7;
     int             iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9;
