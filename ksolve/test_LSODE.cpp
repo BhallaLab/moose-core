@@ -22,6 +22,7 @@
 
 using namespace std;
 
+// Describe the system.
 static void fex(double t, double *y, double *ydot, void *data)
 {
     ydot[0] = 1.0E4 * y[1] * y[2] - .04E0 * y[0];
@@ -29,21 +30,19 @@ static void fex(double t, double *y, double *ydot, void *data)
     ydot[1] = -1.0 * (ydot[0] + ydot[2]);
 }
 
-int main(void)
+void lsoda_update( _lsoda_f f, double* y, double* t, const double tout, int* istate, void* _data )
 {
     double          rwork1, rwork5, rwork6, rwork7;
-    double          atol[4], rtol[4], t, tout, y[4];
+    double          atol[4], rtol[4];
     int             iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9;
     int             neq = 3;
-    int             itol, itask, istate, iopt, jt, iout;
+    int             itol, itask, iopt, jt, iout;
 
     iwork1 = iwork2 = iwork5 = iwork6 = iwork7 = iwork8 = iwork9 = 0;
     rwork1 = rwork5 = rwork6 = rwork7 = 0.0;
     y[1] = 1.0E0;
     y[2] = 0.0E0;
     y[3] = 0.0E0;
-    t = 0.0E0;
-    tout = 0.4E0;
     itol = 2;
     rtol[0] = 0.0;
     atol[0] = 0.0;
@@ -53,17 +52,28 @@ int main(void)
     atol[2] = 1.0E-10;
     atol[3] = 1.0E-6;
     itask = 1;
-    istate = 1;
     iopt = 0;
     jt = 2;
 
-    vector<double> res;
+    lsoda(fex, neq, y, t, tout, itol, rtol, atol, itask, istate, iopt, jt,
+            iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9,
+            rwork1, rwork5, rwork6, rwork7, 0);
+}
 
-    for (iout = 1; iout <= 12; iout++)
+int main(void)
+{
+    double t, tout, y[4];
+    t = 0e0;
+    tout = 0.4e0;
+    y[1] = 1e0;
+    y[2] = 0.0;
+    y[3] = 0.0;
+    int istate = 1;
+
+    vector<double> res;
+    for (size_t iout = 1; iout <= 12; iout++)
     {
-        lsoda(fex, neq, y, &t, tout, itol, rtol, atol, itask, &istate, iopt, jt,
-              iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9,
-              rwork1, rwork5, rwork6, rwork7, 0);
+        lsoda_update( fex, &y[0], &t, tout, &istate, NULL );
         printf(" at t= %12.4e y= %14.6e %14.6e %14.6e\n", t, y[1], y[2], y[3]);
         res.push_back( y[1] );
         res.push_back( y[2] );
