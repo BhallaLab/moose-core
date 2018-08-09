@@ -349,6 +349,7 @@ list(APPEND MOOSE_LIBRARIES
     signeur
     diffusion
     ksolve
+    lsoda
     device
     basecode
     )

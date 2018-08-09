@@ -14,7 +14,7 @@
  *        License:  GNU GPL2
  */
 
-#include "LSODE.h"
+#include "LSODA.h"
 
 #include <iostream>
 #include <vector>

@@ -41,7 +41,7 @@
 
 /* Contact: Dilawar Singh <dilawars@ncbs.res.in> */
 
-#include "LSODE.h"
+#include "LSODA.h"
 
 typedef void    (*_lsoda_f) (double, double *, double *, void *);
 
@@ -1548,10 +1548,11 @@ lsoda(f, neq, y, t, tout, itol, rtol, atol, itask, istate,
 
 static void stoda(int neq, double *y, _lsoda_f f, void *_data)
 {
-	int             corflag, orderflag;
-	int             i, i1, j, m, ncf;
-	double          del, delp, dsm, dup, exup, r, rh, rhup, told;
-	double          pdh, pnorm;
+	int             corflag=0, orderflag=0;
+	int             i=0, i1=0, j=0, m=0, ncf=0;
+	double          del=0.0, delp=0.0, dsm=0.0, dup=0.0, exup=0.0, r=0.0
+            , rh=0.0, rhup=0.0, told=0.0;
+	double          pdh=0.0, pnorm=0.0;
 
 /*
    stoda performs one step of the integration of an initial value

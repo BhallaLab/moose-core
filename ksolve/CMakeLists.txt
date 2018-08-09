@@ -53,8 +53,7 @@ elseif(WITH_BOOST)
 endif(WITH_GSL)
 
 add_library( ksolve ${KSOLVE_SRCS} )
+add_library( lsoda ${CMAKE_CURRENT_SOURCE_DIR}/LSODA.cpp)
 
-add_executable( test_lsode
-    ${CMAKE_CURRENT_SOURCE_DIR}/LSODE.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_LSODE.cpp
-    )
+add_executable( test_lsode ${CMAKE_CURRENT_SOURCE_DIR}/test_LSODA.cpp)
+target_link_libraries( test_lsode lsoda )
