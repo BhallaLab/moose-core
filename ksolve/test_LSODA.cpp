@@ -30,36 +30,6 @@ static void fex(double t, double *y, double *ydot, void *data)
     ydot[1] = -1.0 * (ydot[0] + ydot[2]);
 }
 
-void lsoda_update( _lsoda_f f, double* y, double* t, const double tout, int* istate, void* _data )
-{
-    double          rwork1, rwork5, rwork6, rwork7;
-    double          atol[4], rtol[4];
-    int             iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9;
-    int             neq = 3;
-    int             itol, itask, iopt, jt, iout;
-
-    iwork1 = iwork2 = iwork5 = iwork6 = iwork7 = iwork8 = iwork9 = 0;
-    rwork1 = rwork5 = rwork6 = rwork7 = 0.0;
-    y[1] = 1.0E0;
-    y[2] = 0.0E0;
-    y[3] = 0.0E0;
-    itol = 2;
-    rtol[0] = 0.0;
-    atol[0] = 0.0;
-    rtol[1] = rtol[3] = 1.0E-4;
-    rtol[2] = 1.0E-8;
-    atol[1] = 1.0E-6;
-    atol[2] = 1.0E-10;
-    atol[3] = 1.0E-6;
-    itask = 1;
-    iopt = 0;
-    jt = 2;
-
-    lsoda(fex, neq, y, t, tout, itol, rtol, atol, itask, istate, iopt, jt,
-            iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9,
-            rwork1, rwork5, rwork6, rwork7, 0);
-}
-
 int main(void)
 {
     double t, tout, y[4];
@@ -70,10 +40,12 @@ int main(void)
     y[3] = 0.0;
     int istate = 1;
 
+    LSODA lsoda;
+
     vector<double> res;
     for (size_t iout = 1; iout <= 12; iout++)
     {
-        lsoda_update( fex, &y[0], &t, tout, &istate, NULL );
+        lsoda.lsoda_update( fex, &y[0], &t, tout, &istate, NULL );
         printf(" at t= %12.4e y= %14.6e %14.6e %14.6e\n", t, y[1], y[2], y[3]);
         res.push_back( y[1] );
         res.push_back( y[2] );
@@ -86,7 +58,8 @@ int main(void)
         }
         tout = tout * 10.0E0;
     }
-    n_lsoda_terminate();
+
+    lsoda.n_lsoda_terminate();
 
     vector<double> expected = {
         9.851712e-01,  3.386380e-05, 1.479493e-02

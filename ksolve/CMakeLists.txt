@@ -55,5 +55,8 @@ endif(WITH_GSL)
 add_library( ksolve ${KSOLVE_SRCS} )
 add_library( lsoda ${CMAKE_CURRENT_SOURCE_DIR}/LSODA.cpp)
 
-add_executable( test_lsode ${CMAKE_CURRENT_SOURCE_DIR}/test_LSODA.cpp)
-target_link_libraries( test_lsode lsoda )
+add_executable( test_lsoda ${CMAKE_CURRENT_SOURCE_DIR}/test_LSODA.cpp)
+target_link_libraries( test_lsoda lsoda )
+
+enable_testing()
+add_test(NAME test_lsoda COMMAND $<TARGET_FILE:test_lsoda>)
