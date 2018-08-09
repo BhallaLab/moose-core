@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 include(CheckIncludeFileCXX)
 
 include_directories(../builtins ../basecode ../utility ../kinetics)
 include_directories(../ )
 include_directories(../mesh)
 include_directories(../external/muparser/include )
+
 IF(WITH_BOOST)
     check_include_file_cxx( ${Boost_INCLUDE_DIRS}/boost/numeric/odeint.hpp
         ODEINT_EXISTS)
@@ -52,3 +53,8 @@ elseif(WITH_BOOST)
 endif(WITH_GSL)
 
 add_library( ksolve ${KSOLVE_SRCS} )
+
+add_executable( test_lsode
+    ${CMAKE_CURRENT_SOURCE_DIR}/LSODE.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_LSODE.cpp
+    )
