@@ -50,6 +50,9 @@ using namespace std;
 
 LSODA::LSODA()
 {
+    // double braces are required in c++11 but not in c++14.
+    atol_ = {{0.0, 1e-6, 1e-10, 1e-6}};
+    rtol_ = {{0.0, 1e-04, 1e-8, 1e-4}};
 }
 
 LSODA::~LSODA()
@@ -802,11 +805,13 @@ void LSODA::lsoda( _lsoda_f f, int neq, double *y, double *t, double tout
                    , double rwork1, double rwork5, double rwork6, double rwork7, void *_data
                  )
 {
-    int             mxstp0 = 500, mxhnl0 = 10;
+    int mxstp0 = 500, mxhnl0 = 10;
 
-    int             i, iflag, lenyh, ihit;
-    double          atoli, ayi, big, h0, hmax, hmx, rh, rtoli, tcrit, tdist, tnext, tol,
-                    tolsf, tp, size, sum, w0;
+    int i=0, iflag=0, lenyh=0, ihit=0;
+
+    double atoli=0, ayi=0, big=0, h0=0, hmax=0, hmx=0, rh=0
+        , rtoli=0, tcrit=0, tdist=0, tnext=0, tol=0,
+        tolsf=0, tp=0, size=0, sum=0, w0=0;
 
     if (*istate == 1)
         _freevectors();
@@ -1171,7 +1176,7 @@ void LSODA::lsoda( _lsoda_f f, int neq, double *y, double *t, double tout
         */
         nq = 1;
         h = 1.;
-        ewset(itol_, rtol_, atol_, y);
+        ewset(y);
         for (i = 1; i <= n; i++)
         {
             if (ewt[i] <= 0.)
@@ -1370,7 +1375,7 @@ void LSODA::lsoda( _lsoda_f f, int neq, double *y, double *t, double tout
                 terminate2(y, t);
                 return;
             }
-            ewset(itol_, rtol_, atol_, yh[1]);
+            ewset(yh[1]);
             for (i = 1; i <= n; i++)
             {
                 if (ewt[i] <= 0.)
@@ -1947,27 +1952,26 @@ void LSODA::stoda(int neq, double *y, _lsoda_f f, void *_data)
 
 }				/* end stoda   */
 
-void LSODA::ewset(int itol, double *rtol, double *atol, double *ycur)
+void LSODA::ewset(double *ycur)
 {
-    int             i;
-
-    switch (itol)
+    int i = 0;
+    switch (itol_)
     {
     case 1:
         for (i = 1; i <= n; i++)
-            ewt[i] = rtol[1] * fabs(ycur[i]) + atol[1];
+            ewt[i] = rtol_[1] * fabs(ycur[i]) + atol_[1];
         break;
     case 2:
         for (i = 1; i <= n; i++)
-            ewt[i] = rtol[1] * fabs(ycur[i]) + atol[i];
+            ewt[i] = rtol_[1] * fabs(ycur[i]) + atol_[i];
         break;
     case 3:
         for (i = 1; i <= n; i++)
-            ewt[i] = rtol[i] * fabs(ycur[i]) + atol[1];
+            ewt[i] = rtol_[i] * fabs(ycur[i]) + atol_[1];
         break;
     case 4:
         for (i = 1; i <= n; i++)
-            ewt[i] = rtol[i] * fabs(ycur[i]) + atol[i];
+            ewt[i] = rtol_[i] * fabs(ycur[i]) + atol_[i];
         break;
     }
 
@@ -2872,7 +2876,6 @@ void LSODA::n_lsoda_terminate(void)
 void LSODA::lsoda_update( _lsoda_f f, double* y, double* t, const double tout, int* istate, void* _data )
 {
     double          rwork1, rwork5, rwork6, rwork7;
-    // double          atol[4], rtol[4];
     int             iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9;
     int             neq = 3;
     int             itol, itask, iopt, jt, iout;
@@ -2882,14 +2885,6 @@ void LSODA::lsoda_update( _lsoda_f f, double* y, double* t, const double tout, i
     y[1] = 1.0E0;
     y[2] = 0.0E0;
     y[3] = 0.0E0;
-    // itol = 2;
-    // rtol[0] = 0.0;
-    // atol[0] = 0.0;
-    // rtol[1] = rtol[3] = 1.0E-4;
-    // rtol[2] = 1.0E-8;
-    // atol[1] = 1.0E-6;
-    // atol[2] = 1.0E-10;
-    // atol[3] = 1.0E-6;
     itask = 1;
     iopt = 0;
     jt = 2;

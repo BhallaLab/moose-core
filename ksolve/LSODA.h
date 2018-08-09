@@ -17,14 +17,14 @@
 #ifndef LSODE_H
 #define LSODE_H
 
-typedef void    (*_lsoda_f) (double, double *, double *, void *);
-
 #include <memory>
 #include <array>
 using namespace std;
 
+
 class LSODA
 {
+    typedef void  (*_lsoda_f) (double, double *, double *, void *);
 
 public:
 
@@ -50,7 +50,6 @@ public:
             );
 
     void lsoda( _lsoda_f f, int neq, double *y, double *t, double tout
-                // , int itol, double *rtol, double *atol
                 , int itask, int *istate, int iopt, int jt
                 , int iwork1, int iwork2, int iwork5, int iwork6, int iwork7, int iwork8, int iwork9
                 , double rwork1, double rwork5, double rwork6, double rwork7
@@ -74,7 +73,7 @@ public:
     void     terminate2(double *y, double *t);
     void     successreturn(double *y, double *t, int itask, int ihit, double tcrit, int *istate);
     void     _freevectors(void);
-    void     ewset(int itol, double *rtol, double *atol, double *ycur);
+    void     ewset(double *ycur);
     void     resetcoeff(void);
     void     solsy(double *y);
     void     endstoda(void);
@@ -111,12 +110,11 @@ private:
     int     *ipvt;
 
 private:
+    std::array<double, 4> atol_; //= {0.0, 1e-6, 1e-10, 1e-6};
+    std::array<double, 4> rtol_; //= {0.0, 1e-04, 1e-8, 1e-4};
 
-    double atol_[4] = {0.0, 1e-6, 1e-10, 1e-6};
-    double rtol_[4] = {0.0, 1e-04, 1e-8, 1e-4};
     int itol_ = 2;
     int istate_ = 1;
-
 };
 
 
