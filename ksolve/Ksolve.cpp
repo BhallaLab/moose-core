@@ -6,7 +6,7 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#include "header.h"
+#include "../basecode/header.h"
 #ifdef USE_GSL
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
@@ -529,9 +529,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     {
         if( numThreads_ > 1 )
         {
-#ifndef NDEBUG
-            cout << "Debug: Reset to 1 threads " << endl;
-#endif
+            cout << "Info: using 1 thread since not many voxels." << endl;
             numThreads_ = 1;
         }
 
@@ -619,7 +617,7 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
 
 #if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     if( 1 < getNumThreads( ) )
-        cout << "Debug: User wants Ksolve with " << numThreads_ << " threads" << endl;
+        cout << "Info: User wants to use " << numThreads_ << " threads." << endl;
 #endif
 
 }
