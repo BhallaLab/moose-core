@@ -310,6 +310,15 @@ int VoxelPools::gslFunc( double t, const double* y, double *dydt,
     return 0;
 #endif
 }
+#elif USE_BOOST
+// This is called by BoostSys object.
+void VoxelPools::evalRates(
+    const vector_type_& y,  vector_type_& dydt,  const double t, VoxelPools* vp
+)
+{
+    vp->updateRates( &y[0], &dydt[0] );
+}
+#endif
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -326,16 +335,6 @@ void VoxelPools::lsodaSys( double t, double* y, double* dydt, void* param)
     vp->stoichPtr_->updateFuncs( y, t );
     vp->updateRates( y, dydt );
 }
-
-#elif USE_BOOST
-// This is called by BoostSys object.
-void VoxelPools::evalRates(
-    const vector_type_& y,  vector_type_& dydt,  const double t, VoxelPools* vp
-)
-{
-    vp->updateRates( &y[0], &dydt[0] );
-}
-#endif
 
 ///////////////////////////////////////////////////////////////////////
 // Here are the internal reaction rate calculation functions
