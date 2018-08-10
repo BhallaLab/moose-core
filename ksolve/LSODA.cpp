@@ -46,10 +46,11 @@
 #include "../utility/print_function.hpp"
 #include <cmath>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
-LSODA::LSODA()
+LSODA::LSODA( )
 {
 }
 
@@ -2891,6 +2892,7 @@ void LSODA::lsoda_update( LSODA_ODE_SYSTEM_TYPE f, const size_t neq
         , double* t, const double tout
         , int* istate
         , void* _data
+        , double rtol, double atol
         )
 {
     double          rwork1, rwork5, rwork6, rwork7;
@@ -2905,6 +2907,11 @@ void LSODA::lsoda_update( LSODA_ODE_SYSTEM_TYPE f, const size_t neq
 
     // moose::print_array(y, 10, "[A] ");
     yout.resize(neq+1);
+
+    // Set the tolerance. We should do it only once.
+    rtol_.resize(neq+1, rtol);
+    atol_.resize(neq+1, atol);
+
     for (size_t i = 1; i <= neq; i++)
         yout[i] = y[i-1];
 

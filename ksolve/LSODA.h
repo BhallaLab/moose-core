@@ -44,7 +44,7 @@ class LSODA
 
 public:
 
-    LSODA();
+    LSODA( );
     ~LSODA();
 
     int idamax( int n, double* dx, int incx);
@@ -88,6 +88,7 @@ public:
             , double* t, const double tout
             , int* istate
             , void* _data
+            , double rtol = 1e-4, double atol = 1e-6   // Tolerance
             );
 
     void     terminate(int *istate);
@@ -143,11 +144,10 @@ private:
     int     *ipvt;
 
 private:
-    std::array<double, 4> atol_ = {0.0, 1e-6, 1e-10, 1e-6};
-    std::array<double, 4> rtol_= {0.0, 1e-04, 1e-4, 1e-4};
-
     int itol_ = 2;
     int istate_ = 1;
+    std::vector<double> rtol_;
+    std::vector<double> atol_;
 
 public:
     void* param = nullptr;
