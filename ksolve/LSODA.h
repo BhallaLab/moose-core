@@ -19,12 +19,27 @@
 
 #include <memory>
 #include <array>
+
 using namespace std;
 
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Type definition of LSODA ode system. See the file test_LSODA.cpp
+ * for an example.
+ *
+ * @Param time, double
+ * @Param y, array of double.
+ * @Param dydt, array of double
+ * @Param data, void*
+ *
+ * @Returns void
+ */
+/* ----------------------------------------------------------------------------*/
+typedef void  (*LSODA_ODE_SYSTEM_TYPE) (double t, double * y, double * dydt, void *);
+
 class LSODA
 {
-    typedef void  (*LSODA_ODE_SYSTEM_TYPE) (double, double *, double *, void *);
 
 public:
 
@@ -49,7 +64,8 @@ public:
             , const double yscal[], LSODA_ODE_SYSTEM_TYPE devis, void *data
             );
 
-    void lsoda( LSODA_ODE_SYSTEM_TYPE f, int neq, double *y, double *t, double tout
+    void lsoda( LSODA_ODE_SYSTEM_TYPE f, int neq
+                , double *y, double *t, double tout
                 , int itask, int *istate, int iopt, int jt
                 , int iwork1, int iwork2, int iwork5, int iwork6, int iwork7, int iwork8, int iwork9
                 , double rwork1, double rwork5, double rwork6, double rwork7
@@ -65,8 +81,12 @@ public:
 
     void stoda(int neq, double *y, LSODA_ODE_SYSTEM_TYPE f, void *_data);
 
-    void lsoda_update( LSODA_ODE_SYSTEM_TYPE f, double* y, double* t, const double tout
-            , int* istate, void* _data
+    // We call this function in VoxelPools::
+    void lsoda_update( LSODA_ODE_SYSTEM_TYPE f, const size_t neq
+            , double* y
+            , double* t, const double tout
+            , int* istate
+            , void* _data
             );
 
     void     terminate(int *istate);

@@ -51,7 +51,8 @@ const Cinfo* Ksolve::initCinfo()
         "rk4: The Runge-Kutta 4th order fixed dt method"
         "rk2: The Runge-Kutta 2,3 embedded fixed dt method"
         "rkck: The Runge-Kutta Cash-Karp (4,5) method"
-        "rk8: The Runge-Kutta Prince-Dormand (8,9) method" ,
+        "rk8: The Runge-Kutta Prince-Dormand (8,9) method"
+        "lsoda: LSODA method" ,
         &Ksolve::setMethod,
         &Ksolve::getMethod
     );
@@ -249,20 +250,23 @@ string Ksolve::getMethod() const
 
 void Ksolve::setMethod( string method )
 {
+    std::transform(method.begin(), method.end(), method.begin(), ::tolower);
+
 #if USE_GSL
     if ( method == "rk5" || method == "gsl" )
     {
         method_ = "rk5";
     }
     else if ( method == "rk4"  || method == "rk2" ||
-              method == "rk8" || method == "rkck" )
+              method == "rk8" || method == "rkck" || method == "lsoda"
+              )
     {
         method_ = method;
     }
     else
     {
         cout << "Warning: Ksolve::setMethod: '" << method <<
-             "' not known, using rk5\n";
+             "' not known, using default rk5\n";
         method_ = "rk5";
     }
 #elif USE_BOOST
@@ -511,7 +515,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         dsolvePtr_->getBlock( dvalues );
 		// Second, set the prev_ value in DiffPoolVec
 		dsolvePtr_->setPrev();
-        setBlock( dvalues ); 
+        setBlock( dvalues );
     }
 
     size_t nvPools = pools_.size( );

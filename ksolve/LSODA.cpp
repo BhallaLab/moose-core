@@ -43,6 +43,7 @@
 /* Contact: Dilawar Singh <dilawars@ncbs.res.in> */
 
 #include "LSODA.h"
+#include "../utility/print_function.hpp"
 #include <cmath>
 #include <iostream>
 
@@ -798,12 +799,13 @@ c
 c-----------------------------------------------------------------------
 */
 
-void LSODA::lsoda( LSODA_ODE_SYSTEM_TYPE f, int neq, double *y, double *t, double tout
-                   // , int itol, double *rtol, double *atol
-                   , int itask, int *istate, int iopt, int jt
-                   , int iwork1, int iwork2, int iwork5, int iwork6, int iwork7, int iwork8, int iwork9
-                   , double rwork1, double rwork5, double rwork6, double rwork7, void *_data
-                 )
+void LSODA::lsoda( LSODA_ODE_SYSTEM_TYPE f, int neq
+        , double *y, double *t, double tout
+        , int itask, int *istate, int iopt, int jt
+        , int iwork1, int iwork2, int iwork5, int iwork6, int iwork7, int iwork8, int iwork9
+        , double rwork1, double rwork5, double rwork6, double rwork7
+        , void *_data
+        )
 {
     int mxstp0 = 500, mxhnl0 = 10;
 
@@ -2873,26 +2875,34 @@ void LSODA::n_lsoda_terminate(void)
     init = 0;
 }
 
-void LSODA::lsoda_update( LSODA_ODE_SYSTEM_TYPE f, double* y, double* t, const double tout, int* istate, void* _data )
+void LSODA::lsoda_update( LSODA_ODE_SYSTEM_TYPE f, const size_t neq
+        , double* y
+        , double* t, const double tout
+        , int* istate
+        , void* _data
+        )
 {
     double          rwork1, rwork5, rwork6, rwork7;
     int             iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9;
-    int             neq = 3;
     int             itol, itask, iopt, jt, iout;
 
     iwork1 = iwork2 = iwork5 = iwork6 = iwork7 = iwork8 = iwork9 = 0;
     rwork1 = rwork5 = rwork6 = rwork7 = 0.0;
-    y[1] = 1.0E0;
-    y[2] = 0.0E0;
-    y[3] = 0.0E0;
     itask = 1;
     iopt = 0;
     jt = 2;
 
-    lsoda(f, neq, y, t, tout, itask, istate, iopt, jt,
-            iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9, rwork1,
-            rwork5, rwork6, rwork7, 0
+    moose::print_array(y, 10, "[A] ");
+    if( *t == tout )
+        return;
+
+    lsoda(f, neq, y, t, tout
+            , itask, istate, iopt, jt
+            , iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9
+            , rwork1, rwork5, rwork6, rwork7, 0
             );
+
+    moose::print_array(y, 10, "[B] ");
 }
 
 

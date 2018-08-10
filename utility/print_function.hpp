@@ -277,5 +277,20 @@ namespace moose {
         logF.close();
     }
 
+    template<typename T>
+    void print_array( T* a, size_t n, const string prefix = "" )
+    {
+        stringstream ss;
+        ss << prefix;
+        for (size_t i = 0; i < n; i++)
+        {
+            ss << a[i] << ' ';
+            if( (i+1) % 20 == 0 )
+                ss << endl;
+        }
+        ss << endl;
+        cerr << ss.str();
+    }
+
 }
 #endif   /* ----- #ifndef print_function_INC  ----- */

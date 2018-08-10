@@ -26,18 +26,25 @@ using namespace std;
 static void fex(double t, double *y, double *ydot, void *data)
 {
     ydot[0] = 1.0E4 * y[1] * y[2] - .04E0 * y[0];
-    ydot[2] = 3.0E7 * y[1] * y[1];
     ydot[1] = -1.0 * (ydot[0] + ydot[2]);
+    ydot[2] = 3.0E7 * y[1] * y[1];
+}
+
+static void system_scipy( double t, double* y, double* ydot, void* data)
+{
+    ydot[0] = 1.0E4 * y[1] * y[2] - .04E0 * y[0];
+    ydot[1] = -1.0 * (ydot[0] + ydot[2]);
+    ydot[2] = 3.0E7 * y[1] * y[1];
 }
 
 int main(void)
 {
-    double t, tout, y[4];
+    double t, tout, y[3];
     t = 0e0;
     tout = 0.4e0;
+    y[0] = 0.0;
     y[1] = 1e0;
     y[2] = 0.0;
-    y[3] = 0.0;
     int istate = 1;
 
     LSODA lsoda;
@@ -45,7 +52,7 @@ int main(void)
     vector<double> res;
     for (size_t iout = 1; iout <= 12; iout++)
     {
-        lsoda.lsoda_update( fex, &y[0], &t, tout, &istate, NULL );
+        lsoda.lsoda_update( fex, 3, &y[0], &t, tout, &istate, nullptr );
         printf(" at t= %12.4e y= %14.6e %14.6e %14.6e\n", t, y[1], y[2], y[3]);
         res.push_back( y[1] );
         res.push_back( y[2] );
