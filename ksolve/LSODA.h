@@ -84,7 +84,7 @@ public:
 
     // We call this function in VoxelPools::
     void lsoda_update( LSODA_ODE_SYSTEM_TYPE f, const size_t neq
-            , const double* y, std::vector<double>& yout
+            , double* y, std::vector<double>& yout
             , double* t, const double tout
             , int* istate
             , void* _data
@@ -148,6 +148,9 @@ private:
 
     int itol_ = 2;
     int istate_ = 1;
+
+public:
+    void* param = nullptr;
 };
 
 

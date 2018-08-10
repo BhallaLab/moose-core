@@ -8,6 +8,7 @@
 
 #include "../basecode/header.h"
 #include "../basecode/SparseMatrix.h"
+#include "../utility/print_function.hpp"
 
 #ifdef USE_GSL
 #include <gsl/gsl_errno.h>
@@ -65,9 +66,13 @@ void VoxelPools::reinit( double dt )
     gsl_odeiv2_driver_reset_hstart( driver_, dt / 10.0 );
 #endif
 
-    // If method is LDODA create lSODA object.
+    // If method is LDODA create lSODA object and save the address of this as
+    // param (void*).
     if( getMethod() == "lsoda" )
+    {
         pLSODA = new LSODA();
+        pLSODA->param = (void *) this;
+    }
 }
 
 void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
@@ -105,8 +110,22 @@ void VoxelPools::advance( const ProcInfo* p )
     if( getMethod() == "lsoda" )
     {
         double t = p->currTime - p->dt;
+
+        double *y = varS();
         vector<double> yout(size()+1);
-        pLSODA->lsoda_update(&VoxelPools::lsodaFunc, size(), varS(), yout, &t, p->currTime, &lsodaState, nullptr);
+
+        pLSODA->lsoda_update( &VoxelPools::lsodaSys
+                , size(), y, yout
+                , &t, p->currTime
+                , &lsodaState
+                , this   // This will go to lsodaSys 4th arg.
+                );
+
+        // Now update the y from yout. This is different thant normal GSL or
+        // BOOST based approach.
+        for (size_t i = 0; i < size(); i++)
+            y[i] = yout[i+1];
+
         if( lsodaState == 0 )
         {
             cerr << "Error: VoxelPools::advance: LSODA integration error at time "
@@ -296,23 +315,22 @@ int VoxelPools::gslFunc( double t, const double* y, double *dydt,
 
 /* --------------------------------------------------------------------------*/
 /**
- * @Synopsis  Function to pass LSODA::lsoda_update function.
- *
- * @Param t
- * @Param y
- * @Param dydt
- * @Param params
- */
-/* ----------------------------------------------------------------------------*/
-void VoxelPools::lsodaFunc( double t, double* y, double* dydt, void* params)
+ * @Synopsis  Function to pass LSODA::lsoda_update function. Since it is
+ a * static function, we have to make sure void* param holds the value of
+ pointer * to VoxelPools.  * * @Param t * @Param y * @Param dydt * @Param
+ params Address of VoxelPools as void*.  */
+/*
+----------------------------------------------------------------------------*/
+void VoxelPools::lsodaSys( double t, double* y, double* dydt, void* param)
 {
-    VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
-    cout << "DEBUG: " << y[0] << " " << y[1] << " t: " << t << endl;
+    VoxelPools* vp = reinterpret_cast< VoxelPools* >( param );
+    // Fill in the values.
     vp->stoichPtr_->updateFuncs( y, t );
     vp->updateRates( y, dydt );
 }
 
 #elif USE_BOOST
+// This is called by BoostSys object.
 void VoxelPools::evalRates(
     const vector_type_& y,  vector_type_& dydt,  const double t, VoxelPools* vp
 )

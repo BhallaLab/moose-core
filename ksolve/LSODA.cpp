@@ -2887,7 +2887,7 @@ void LSODA::n_lsoda_terminate(void)
  */
 /* ----------------------------------------------------------------------------*/
 void LSODA::lsoda_update( LSODA_ODE_SYSTEM_TYPE f, const size_t neq
-        , const double* y, vector<double>& yout
+        , double* y, vector<double>& yout
         , double* t, const double tout
         , int* istate
         , void* _data
@@ -2911,7 +2911,8 @@ void LSODA::lsoda_update( LSODA_ODE_SYSTEM_TYPE f, const size_t neq
     lsoda(f, neq, &yout[0], t, tout
             , itask, istate, iopt, jt
             , iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9
-            , rwork1, rwork5, rwork6, rwork7, 0
+            , rwork1, rwork5, rwork6, rwork7
+            , _data
             );
 
 }
