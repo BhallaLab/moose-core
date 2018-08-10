@@ -36,7 +36,7 @@ stoich.path = '/compt/##'
 moose.reinit()
 print( '[INFO] Using method = %s' % ksolve.method )
 t1 = time.time()
-moose.start( 10 )
+moose.start( 100 )
 print('[INFO] Time taken %s' % (time.time() - t1 ))
 expected = [ 7.77859 , 2.77858 , 2.27541 , 6.12141 , 7.77858 , 2.77858
         , 2.27541 , 6.12141 , 7.77858 , 2.77858 , 2.27541 , 6.12141 , 7.77858
