@@ -105,7 +105,8 @@ void VoxelPools::advance( const ProcInfo* p )
     if( getMethod() == "lsoda" )
     {
         double t = p->currTime - p->dt;
-        pLSODA->lsoda_update(&VoxelPools::lsodaFunc, size(), varS(), &t, p->currTime, &lsodaState, nullptr);
+        vector<double> yout(size()+1);
+        pLSODA->lsoda_update(&VoxelPools::lsodaFunc, size(), varS(), yout, &t, p->currTime, &lsodaState, nullptr);
         if( lsodaState == 0 )
         {
             cerr << "Error: VoxelPools::advance: LSODA integration error at time "

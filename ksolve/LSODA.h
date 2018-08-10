@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <array>
+#include <vector>
 
 using namespace std;
 
@@ -83,7 +84,7 @@ public:
 
     // We call this function in VoxelPools::
     void lsoda_update( LSODA_ODE_SYSTEM_TYPE f, const size_t neq
-            , double* y
+            , const double* y, std::vector<double>& yout
             , double* t, const double tout
             , int* istate
             , void* _data
@@ -142,8 +143,8 @@ private:
     int     *ipvt;
 
 private:
-    std::array<double, 4> atol_; //= {0.0, 1e-6, 1e-10, 1e-6};
-    std::array<double, 4> rtol_; //= {0.0, 1e-04, 1e-8, 1e-4};
+    std::array<double, 4> atol_ = {0.0, 1e-6, 1e-10, 1e-6};
+    std::array<double, 4> rtol_= {0.0, 1e-04, 1e-4, 1e-4};
 
     int itol_ = 2;
     int istate_ = 1;

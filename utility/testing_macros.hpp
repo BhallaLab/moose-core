@@ -150,7 +150,7 @@ static ostringstream assertStream;
     if(! doubleEq(a, b) ) { \
         assertStream.str(""); \
         LOCATION(assertStream); \
-        assertStream << "Expected " << b << ", received " << a  << endl; \
+        assertStream << "Expected " << a << ", received " << b  << endl; \
         assertStream << token; \
         moose::__dump__(assertStream.str(), moose::failed); \
         throw std::runtime_error( "float equality test failed" ); \

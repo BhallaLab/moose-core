@@ -51,9 +51,6 @@ using namespace std;
 
 LSODA::LSODA()
 {
-    // double braces are required in c++11 but not in c++14.
-    atol_ = {{0.0, 1e-6, 1e-10, 1e-6}};
-    rtol_ = {{0.0, 1e-04, 1e-8, 1e-4}};
 }
 
 LSODA::~LSODA()
@@ -2875,8 +2872,22 @@ void LSODA::n_lsoda_terminate(void)
     init = 0;
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  MOOSE interface. Note that we need to create another array yp
+ * which is one size bigger than y.
+ *
+ * @Param f
+ * @Param
+ * @Param
+ * @Param t
+ * @Param
+ * @Param
+ * @Param
+ */
+/* ----------------------------------------------------------------------------*/
 void LSODA::lsoda_update( LSODA_ODE_SYSTEM_TYPE f, const size_t neq
-        , double* y
+        , const double* y, vector<double>& yout
         , double* t, const double tout
         , int* istate
         , void* _data
@@ -2892,17 +2903,17 @@ void LSODA::lsoda_update( LSODA_ODE_SYSTEM_TYPE f, const size_t neq
     iopt = 0;
     jt = 2;
 
-    moose::print_array(y, 10, "[A] ");
-    if( *t == tout )
-        return;
+    // moose::print_array(y, 10, "[A] ");
+    yout.resize(neq+1);
+    for (size_t i = 1; i <= neq; i++)
+        yout[i] = y[i-1];
 
-    lsoda(f, neq, y, t, tout
+    lsoda(f, neq, &yout[0], t, tout
             , itask, istate, iopt, jt
             , iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9
             , rwork1, rwork5, rwork6, rwork7, 0
             );
 
-    moose::print_array(y, 10, "[B] ");
 }
 
 

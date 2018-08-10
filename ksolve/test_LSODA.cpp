@@ -17,6 +17,7 @@
 #include "LSODA.h"
 
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include "../utility/testing_macros.hpp"
 
@@ -26,37 +27,75 @@ using namespace std;
 static void fex(double t, double *y, double *ydot, void *data)
 {
     ydot[0] = 1.0E4 * y[1] * y[2] - .04E0 * y[0];
-    ydot[1] = -1.0 * (ydot[0] + ydot[2]);
+    // Don't swap ydot[1] and ydot[2]. The order will change and test will fail.
     ydot[2] = 3.0E7 * y[1] * y[1];
+    ydot[1] = -1.0 * (ydot[0] + ydot[2]);
 }
 
 static void system_scipy( double t, double* y, double* ydot, void* data)
 {
-    ydot[0] = 1.0E4 * y[1] * y[2] - .04E0 * y[0];
-    ydot[1] = -1.0 * (ydot[0] + ydot[2]);
-    ydot[2] = 3.0E7 * y[1] * y[1];
+    double mu = 1E4;
+    ydot[0] = y[1];
+    ydot[1] = mu * (1- y[0]*y[0])*y[1] - y[0];
 }
 
-int main(void)
+int test_scipy_sys( void )
 {
-    double t, tout, y[3];
-    t = 0e0;
-    tout = 0.4e0;
-    y[0] = 0.0;
-    y[1] = 1e0;
-    y[2] = 0.0;
+    cout << "Running test scipy sys" << endl;
+    double t, tout;
+    t = 0e0; tout = 10;
+
+    array<double, 2> y = {10,0};
     int istate = 1;
 
     LSODA lsoda;
 
+    vector<double> yout;
+    lsoda.lsoda_update( system_scipy, 2, &y[0], yout, &t, tout, &istate, nullptr );
+    printf(" at t= %12.4e y= %14.6e %14.6e\n", t, yout[1], yout[2]);
+    lsoda.n_lsoda_terminate();
+
+    if (istate <= 0)
+    {
+        cerr << "error istate = " <<  istate << endl;
+        exit(0);
+    }
+    return 0;
+}
+
+int test_fex(void)
+{
+    cout << "Running test fex." << endl;
+    int neq = 3;
+    double t, tout, y[4];
+    t = 0e0;
+    tout = 0.4e0;
+    y[0] = 1e0;
+    y[1] = 0e0;
+    y[2] = 0.0;
+    int istate = 1;
+
+    LSODA lsoda;
+    setprecision( 12 );
+
     vector<double> res;
+
+    vector<double> yout;
     for (size_t iout = 1; iout <= 12; iout++)
     {
-        lsoda.lsoda_update( fex, 3, &y[0], &t, tout, &istate, nullptr );
-        printf(" at t= %12.4e y= %14.6e %14.6e %14.6e\n", t, y[1], y[2], y[3]);
+        lsoda.lsoda_update( fex, neq, y, yout, &t, tout, &istate, nullptr );
+        // printf(" at t= %12.4e y= %14.6e %14.6e %14.6e\n", t, y[0], y[1], y[2]);
+        cerr << " at t " << t << " y= " << yout[1] << ' ' << yout[2] << ' '
+            << yout[3] << endl;
+
+        // Update the y for next iteration.
+        y[0] = yout[1];
+        y[1] = yout[2];
+        y[2] = yout[3];
+
+        res.push_back( y[0] );
         res.push_back( y[1] );
         res.push_back( y[2] );
-        res.push_back( y[3] );
 
         if (istate <= 0)
         {
@@ -101,5 +140,12 @@ int main(void)
              " at t=   4.0000e+09 y=   4.658667e-07   1.863468e-12   9.999995e-01 \n"
              " at t=   4.0000e+10 y=   1.431100e-08   5.724404e-14   1.000000e+00 \n"
              << endl;
+    return 0;
+}
+
+int main(int argc, const char *argv[])
+{
+    test_scipy_sys();
+    test_fex();
     return 0;
 }
