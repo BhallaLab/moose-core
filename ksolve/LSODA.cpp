@@ -52,6 +52,13 @@ using namespace std;
 
 LSODA::LSODA( )
 {
+
+    mord = {0, 12, 5};
+    sm1 = { 0., 0.5,  0.575, 0.55, 0.45, 0.35, 0.25, 0.2, 0.15, 0.1, 0.075, 0.05, 0.025 };
+    el = {0};
+    cm1 = {0};
+    cm2 = {0};
+
 }
 
 LSODA::~LSODA()
@@ -798,20 +805,20 @@ c-----------------------------------------------------------------------
 */
 
 void LSODA::lsoda( LSODA_ODE_SYSTEM_TYPE f, int neq
-        , double *y, double *t, double tout
-        , int itask, int *istate, int iopt, int jt
-        , int iwork1, int iwork2, int iwork5, int iwork6, int iwork7, int iwork8, int iwork9
-        , double rwork1, double rwork5, double rwork6, double rwork7
-        , void *_data
-        )
+                   , double *y, double *t, double tout
+                   , int itask, int *istate, int iopt, int jt
+                   , int iwork1, int iwork2, int iwork5, int iwork6, int iwork7, int iwork8, int iwork9
+                   , double rwork1, double rwork5, double rwork6, double rwork7
+                   , void *_data
+                 )
 {
     int mxstp0 = 500, mxhnl0 = 10;
 
     int i=0, iflag=0, lenyh=0, ihit=0;
 
     double atoli=0, ayi=0, big=0, h0=0, hmax=0, hmx=0, rh=0
-        , rtoli=0, tcrit=0, tdist=0, tnext=0, tol=0,
-        tolsf=0, tp=0, size=0, sum=0, w0=0;
+                                     , rtoli=0, tcrit=0, tdist=0, tnext=0, tol=0,
+                                       tolsf=0, tp=0, size=0, sum=0, w0=0;
 
     if (*istate == 1)
         _freevectors();
@@ -2339,9 +2346,9 @@ double LSODA::fnorm(int n, double **a, double *w)
 2 : corrector cannot converge, failure flag.
 */
 void LSODA::correction(int neq, double *y, LSODA_ODE_SYSTEM_TYPE f, int *corflag
-        , double pnorm, double *del, double *delp, double *told
-        , int *ncf, double *rh, int *m, void *_data
-        )
+                       , double pnorm, double *del, double *delp, double *told
+                       , int *ncf, double *rh, int *m, void *_data
+                      )
 {
     int             i;
     double          rm, rate, dcon;
@@ -2843,36 +2850,6 @@ void LSODA::_freevectors(void)
     // Does nothing. USE c++ memory mechanism here.
 }
 
-/*****************************
- * more convenient interface *
- *****************************/
-
-int LSODA::n_lsoda(double y[], int n, double *x, double xout, double eps, const double yscal[], LSODA_ODE_SYSTEM_TYPE devis, void *data)
-{
-    int             i, istate, itask;
-    double         *_y, *atol, *rtol;
-    _y = (double *) calloc(3 * (n + 1), sizeof(double));
-    atol = _y + n + 1;
-    rtol = atol + n + 1;
-    for (i = 1; i <= n; ++i)
-    {
-        _y[i] = y[i - 1];
-        atol[i] = eps * yscal[i - 1];
-    }
-    istate = init? 2 : 1;
-    itask = 2;
-    lsoda(devis, n, _y, x, xout, itask, &istate, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0., 0., 0., 0., data);
-    for (i = 1; i <= n; ++i) y[i - 1] = _y[i];
-    free(_y);
-    return istate < 0 ? istate : 0;
-}
-
-void LSODA::n_lsoda_terminate(void)
-{
-    if (init) _freevectors();
-    init = 0;
-}
-
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis  MOOSE interface. Note that we need to create another array yp
@@ -2897,7 +2874,7 @@ void LSODA::lsoda_update( LSODA_ODE_SYSTEM_TYPE f, const size_t neq
 {
     double          rwork1, rwork5, rwork6, rwork7;
     int             iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9;
-    int             itol, itask, iopt, jt, iout;
+    int             itask, iopt, jt, iout;
 
     iwork1 = iwork2 = iwork5 = iwork6 = iwork7 = iwork8 = iwork9 = 0;
     rwork1 = rwork5 = rwork6 = rwork7 = 0.0;
@@ -2905,22 +2882,24 @@ void LSODA::lsoda_update( LSODA_ODE_SYSTEM_TYPE f, const size_t neq
     iopt = 0;
     jt = 2;
 
-    // moose::print_array(y, 10, "[A] ");
     yout.resize(neq+1);
 
     // Set the tolerance. We should do it only once.
     rtol_.resize(neq+1, rtol);
     atol_.resize(neq+1, atol);
+    rtol_[0] = 0;
+    atol_[0] = 0;
 
+    // Fill-in values.
     for (size_t i = 1; i <= neq; i++)
         yout[i] = y[i-1];
 
     lsoda(f, neq, &yout[0], t, tout
-            , itask, istate, iopt, jt
-            , iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9
-            , rwork1, rwork5, rwork6, rwork7
-            , _data
-            );
+          , itask, istate, iopt, jt
+          , iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9
+          , rwork1, rwork5, rwork6, rwork7
+          , _data
+         );
 
 }
 

@@ -73,8 +73,6 @@ public:
                 , void *_data
               );
 
-    void n_lsoda_terminate(void);
-
     void correction( int neq, double *y, LSODA_ODE_SYSTEM_TYPE f, int *corflag
             , double pnorm, double *del, double *delp, double *told
             , int *ncf, double *rh, int *m, void *_data
@@ -114,15 +112,17 @@ private:
     int      ml, mu, imxer;
     double   sqrteta, *yp1, *yp2;
 
-    array<int,3> mord = {0, 12, 5};
-    array<double, 13>  sm1 = {  0.,   0.5,  0.575, 0.55,
-                                0.45, 0.35, 0.25,  0.2,
-                                0.15, 0.1,  0.075, 0.05,
-                                0.025 };
+    // NOTE: initialize in default constructor. Older compiler e.g. 4.8.4 would
+    // produce error if these are initialized here.
 
-    array<double, 14> el = {0};
-    array<double, 13> cm1 = {0};
-    array<double,6> cm2 = {0};
+    array<int,3> mord; // = {0, 12, 5};
+
+    // = {  0., 0.5,  0.575, 0.55, 0.45, 0.35, 0.25,  0.2, 0.15, 0.1,  0.075, 0.05, 0.025 };
+    array<double, 13>  sm1;
+
+    array<double, 14> el; // = {0};
+    array<double, 13> cm1; // = {0};
+    array<double,6> cm2; // = {0};
 
     array<array<double, 14>, 13> elco;
     array<array<double,4>, 13> tesco;
