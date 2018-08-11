@@ -63,7 +63,7 @@ public:
             , const size_t job
             );
 
-    void dgefa(double** a, int n, int* ipvt, int* info);
+    void dgefa(double** const a, const size_t n, int* const ipvt, int* const info);
 
     void prja(int neq, double *y, LSODA_ODE_SYSTEM_TYPE f, void *_data);
 

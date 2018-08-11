@@ -225,7 +225,7 @@ double LSODA::ddot(const size_t n, const double* const dx, const size_t incx
     )
 {
     double          dotprod;
-    int             ix, iy, i, m;
+    size_t             ix, iy, i, m;
 
     dotprod = 0.;
     if (n <= 0)
@@ -321,7 +321,7 @@ void LSODA::daxpy(const size_t n, const double da, const double* const dx
         , const size_t incx, double* dy, const size_t incy
         )
 {
-    int             ix, iy, i, m;
+    size_t             ix, iy, i, m;
 
     if (n < 0 || da == 0.)
         return;
@@ -419,8 +419,8 @@ void LSODA::dgesl(double** const a, const size_t n, const int* const ipvt
         , double* b, const size_t job
         )
 {
-    int             k, j;
-    double          t;
+    size_t k, j;
+    double t;
 
     /*
        Job = 0, solve a * x = b.
@@ -522,10 +522,10 @@ void LSODA::dgesl(double** const a, const size_t n, const int* const ipvt
 */
 
 
-void LSODA::dgefa(double** a, int n, int* ipvt, int* info)
+void LSODA::dgefa(double** const a, const size_t n, int* const ipvt, int* const info)
 {
-    int             j, k, i;
-    double          t;
+    size_t j, k, i;
+    double t;
 
     /* Gaussian elimination with partial pivoting.   */
 
@@ -608,15 +608,7 @@ Wolfram Research, Inc.
 tam@wri.com
 */
 
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-
-#define max( a , b )  ( (a) > (b) ? (a) : (b) )
-#define min( a , b )  ( (a) < (b) ? (a) : (b) )
-
 #define ETA 2.2204460492503131e-16
-
 
 /*
    The following are useful statistics.
