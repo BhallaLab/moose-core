@@ -40,6 +40,38 @@ static void system_scipy( double t, double* y, double* ydot, void* data)
     ydot[1] = mu * (1- y[0]*y[0])*y[1] - y[0];
 }
 
+// This system is described here
+// https://github.com/sdwfrost/liblsoda/issues/10
+static void system_github_issue_10(double t, double* y, double* ydot, void* data)
+{
+    ydot[0]= 9*y[0] + 24*y[1] + 5*cos(t)-(1/3)*sin(t);
+    ydot[1]= -24*y[0] -51*y[1] -95*cos(t) + (1/3)*sin(t);
+}
+
+int test_github_system( void )
+{
+    cout << "Running test given https://github.com/sdwfrost/liblsoda/issues/10" << endl;
+    double t = 0e0, tout = 1;
+
+    array<double, 2> y = {4.0/3.0, 2.0/3.0};
+    int istate = 1;
+
+    LSODA lsoda;
+
+    vector<double> yout;
+    lsoda.lsoda_update( system_github_issue_10, 2, &y[0], yout, &t, tout, &istate, nullptr );
+    printf(" at t= %12.4e y= %14.6e %14.6e\n", t, yout[1], yout[2]);
+
+    ASSERT_DOUBLE_EQ( "LSODA", -1.210928, yout[1]);
+    ASSERT_DOUBLE_EQ( "LSODA", 4.722848, yout[2] );
+    if (istate <= 0)
+    {
+        cerr << "error istate = " <<  istate << endl;
+        exit(0);
+    }
+    return 0;
+}
+
 int test_scipy_sys( void )
 {
     cout << "Running test scipy sys" << endl;
@@ -139,5 +171,6 @@ int main(int argc, const char *argv[])
 {
     test_scipy_sys();
     test_fex();
+    test_github_system();
     return 0;
 }
