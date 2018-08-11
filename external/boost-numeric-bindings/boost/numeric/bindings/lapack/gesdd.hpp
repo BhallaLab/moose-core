@@ -428,9 +428,9 @@ namespace boost { namespace numeric { namespace bindings {
               || (jobz == 'A' && traits::leading_dimension (vt) >= n)
               || (jobz == 'S' && traits::leading_dimension (vt) >= minmn));
 
-      assert (traits::vector_size (w)
-              >= detail::gesdd_min_work (val_t(), jobz, m, n));
-      assert (traits::vector_size (iw) >= detail::gesdd_iwork (m, n));
+      //assert (traits::vector_size (w)
+      //        >= detail::gesdd_min_work (val_t(), jobz, m, n));
+      //assert (traits::vector_size (iw) >= detail::gesdd_iwork (m, n));
 
       int info;
       detail::gesdd (jobz, m, n,
@@ -502,11 +502,13 @@ namespace boost { namespace numeric { namespace bindings {
                   && traits::leading_dimension (vt) >= n)
               || (jobz == 'A' && traits::leading_dimension (vt) >= n)
               || (jobz == 'S' && traits::leading_dimension (vt) >= minmn));
+#if 0
       assert (traits::vector_size (w)
               >= detail::gesdd_min_work (val_t(), jobz, m, n));
       assert (traits::vector_size (rw)
               >= detail::gesdd_rwork (val_t(), jobz, m, n));
       assert (traits::vector_size (iw) >= detail::gesdd_iwork (m, n));
+#endif
 
       int info;
       detail::gesdd (jobz, m, n,
