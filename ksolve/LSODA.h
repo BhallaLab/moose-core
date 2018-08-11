@@ -51,7 +51,9 @@ public:
 
     void dscal(const size_t n, const double da, double* dx, const size_t incx);
 
-    double ddot(int n, double* dx, int ncx, double* dy, int incy);
+    double ddot(const size_t n, const double* const dx, const size_t ncx
+            , const double* const dy, const size_t incy
+            );
 
     void daxpy(int n, double da, double* dx, int incx, double* dy, int incy);
 

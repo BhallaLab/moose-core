@@ -220,7 +220,9 @@ void LSODA::dscal(const size_t n, const double da, double* dx, const size_t incx
 
 */
 
-double LSODA::ddot(int n, double* dx, int incx, double* dy, int incy)
+double LSODA::ddot(const size_t n, const double* const dx, const size_t incx
+        , const double* const dy, const size_t incy
+    )
 {
     double          dotprod;
     int             ix, iy, i, m;
@@ -272,7 +274,6 @@ double LSODA::ddot(int n, double* dx, int incx, double* dy, int incy)
     for (i = 1; i <= n * incx; i = i + incx)
         dotprod = dotprod + dx[i] * dy[i];
     return dotprod;
-
 }
 
 /***********
