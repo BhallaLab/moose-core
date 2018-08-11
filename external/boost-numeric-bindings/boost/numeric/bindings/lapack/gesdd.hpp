@@ -428,11 +428,6 @@ namespace boost { namespace numeric { namespace bindings {
               || (jobz == 'A' && traits::leading_dimension (vt) >= n)
               || (jobz == 'S' && traits::leading_dimension (vt) >= minmn));
 
-#ifndef BOOST_NUMERIC_BINDINGS_POOR_MANS_TRAITS
-      typedef typename traits::matrix_traits<MatrA>::value_type val_t;
-#else
-      typedef typename MatrA::value_type val_t;
-#endif
       assert (traits::vector_size (w)
               >= detail::gesdd_min_work (val_t(), jobz, m, n));
       assert (traits::vector_size (iw) >= detail::gesdd_iwork (m, n));
@@ -507,11 +502,6 @@ namespace boost { namespace numeric { namespace bindings {
                   && traits::leading_dimension (vt) >= n)
               || (jobz == 'A' && traits::leading_dimension (vt) >= n)
               || (jobz == 'S' && traits::leading_dimension (vt) >= minmn));
-#ifndef BOOST_NUMERIC_BINDINGS_POOR_MANS_TRAITS
-      typedef typename traits::matrix_traits<MatrA>::value_type val_t;
-#else
-      typedef typename MatrA::value_type val_t;
-#endif
       assert (traits::vector_size (w)
               >= detail::gesdd_min_work (val_t(), jobz, m, n));
       assert (traits::vector_size (rw)
