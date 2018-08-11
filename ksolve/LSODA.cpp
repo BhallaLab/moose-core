@@ -2862,16 +2862,16 @@ void LSODA::_freevectors(void)
  */
 /* ----------------------------------------------------------------------------*/
 void LSODA::lsoda_update( LSODA_ODE_SYSTEM_TYPE f, const size_t neq
-        , double* y, vector<double>& yout
+        , const double* const y, vector<double>& yout
         , double* t, const double tout
         , int* istate
-        , void* _data
+        , void* const _data
         , double rtol, double atol
         )
 {
-    double          rwork1, rwork5, rwork6, rwork7;
-    int             iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9;
-    int             itask, iopt, jt;
+    double rwork1, rwork5, rwork6, rwork7;
+    int    iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9;
+    int    itask, iopt, jt;
 
     iwork1 = iwork2 = iwork5 = iwork6 = iwork7 = iwork8 = iwork9 = 0;
     rwork1 = rwork5 = rwork6 = rwork7 = 0.0;

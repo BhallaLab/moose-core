@@ -52,7 +52,7 @@ static void system_github_issue_10(double t, double* y, double* ydot, void* data
 int test_github_system( void )
 {
     // cout << "Running test given https://github.com/sdwfrost/liblsoda/issues/10" << endl;
-    double t = 0e0, tout = 1;
+    double t = 0e0, tout = 0.5;
 
     array<double, 2> y = {4.0/3.0, 2.0/3.0};
     int istate = 1;
@@ -60,16 +60,29 @@ int test_github_system( void )
     LSODA lsoda;
 
     vector<double> yout;
-    lsoda.lsoda_update( system_github_issue_10, 2, &y[0], yout, &t, tout, &istate, nullptr );
-    // printf(" at t= %12.4e y= %14.6e %14.6e\n", t, yout[1], yout[2]);
+    vector<double> res;
+    for (size_t i = 0; i < 10; i++)
+    {
+        lsoda.lsoda_update( system_github_issue_10, 2, &y[0], yout, &t, tout, &istate, nullptr );
+        res.push_back( yout[1] );
+        res.push_back( yout[2] );
+        tout += 0.5;
 
-    ASSERT_TRUE( "LSODA", doubleEq(-1.2109284e1, yout[1]) );
-    ASSERT_TRUE( "LSODA", doubleEq(4.722848, yout[2]) );
+        y[0] = yout[1];
+        y[1] = yout[2];
+
+        // cout << t << ' ' << setprecision(8) << y[0] << ' ' << y[1] << endl;
+    }
+
+    ASSERT_TRUE( doubleEq(-11.9400786, res[0]), "y0(t=0.5) =" << res[0] );
+    ASSERT_TRUE( doubleEq( 3.8608262, res[1]), "y1(t=0.5) =" << res[1] );
+
     if (istate <= 0)
     {
         cerr << "error istate = " <<  istate << endl;
         exit(0);
     }
+
     return 0;
 }
 

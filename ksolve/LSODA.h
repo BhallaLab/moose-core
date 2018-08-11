@@ -82,10 +82,10 @@ public:
 
     // We call this function in VoxelPools::
     void lsoda_update( LSODA_ODE_SYSTEM_TYPE f, const size_t neq
-            , double* y, std::vector<double>& yout
+            , const double* const y, std::vector<double>& yout
             , double* t, const double tout
             , int* istate
-            , void* _data
+            , void* const _data
             , double rtol = 1e-4, double atol = 1e-6   // Tolerance
             );
 
