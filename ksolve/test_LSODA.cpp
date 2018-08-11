@@ -20,6 +20,7 @@
 #include <iomanip>
 #include <vector>
 #include <cassert>
+#include <chrono>
 #include "../utility/testing_macros.hpp"
 
 using namespace std;
@@ -50,7 +51,7 @@ static void system_github_issue_10(double t, double* y, double* ydot, void* data
 
 int test_github_system( void )
 {
-    cout << "Running test given https://github.com/sdwfrost/liblsoda/issues/10" << endl;
+    // cout << "Running test given https://github.com/sdwfrost/liblsoda/issues/10" << endl;
     double t = 0e0, tout = 1;
 
     array<double, 2> y = {4.0/3.0, 2.0/3.0};
@@ -60,7 +61,7 @@ int test_github_system( void )
 
     vector<double> yout;
     lsoda.lsoda_update( system_github_issue_10, 2, &y[0], yout, &t, tout, &istate, nullptr );
-    printf(" at t= %12.4e y= %14.6e %14.6e\n", t, yout[1], yout[2]);
+    // printf(" at t= %12.4e y= %14.6e %14.6e\n", t, yout[1], yout[2]);
 
     ASSERT_TRUE( "LSODA", doubleEq(-1.2109284e1, yout[1]) );
     ASSERT_TRUE( "LSODA", doubleEq(4.722848, yout[2]) );
@@ -85,7 +86,7 @@ int test_scipy_sys( void )
 
     vector<double> yout;
     lsoda.lsoda_update( system_scipy, 2, &y[0], yout, &t, tout, &istate, nullptr );
-    printf(" at t= %12.4e y= %14.6e %14.6e\n", t, yout[1], yout[2]);
+    // printf(" at t= %12.4e y= %14.6e %14.6e\n", t, yout[1], yout[2]);
 
     ASSERT_DOUBLE_EQ( "LSODA", 9.999899e+00, yout[1]);
     ASSERT_DOUBLE_EQ( "LSODA", -1.010111e-05, yout[2] );
@@ -100,7 +101,7 @@ int test_scipy_sys( void )
 
 int test_fex(void)
 {
-    cout << "Running test fex." << endl;
+    // cout << "Running test fex." << endl;
     int neq = 3;
     double t, tout, y[4];
     t = 0e0;
@@ -119,9 +120,7 @@ int test_fex(void)
     for (size_t iout = 1; iout <= 12; iout++)
     {
         lsoda.lsoda_update( fex, neq, y, yout, &t, tout, &istate, nullptr, 1e-4, 1e-8 );
-
-        cerr << " at t " << t << " y= " << yout[1] << ' ' << yout[2] << ' ' << yout[3] << endl;
-
+        // cerr << " at t " << t << " y= " << yout[1] << ' ' << yout[2] << ' ' << yout[3] << endl;
         // Update the y for next iteration.
         y[0] = yout[1];
         y[1] = yout[2];
@@ -169,8 +168,23 @@ int test_fex(void)
 
 int main(int argc, const char *argv[])
 {
+    chrono::steady_clock::time_point begin = chrono::steady_clock::now();
     test_scipy_sys();
+    chrono::steady_clock::time_point end= chrono::steady_clock::now();
+    cout << "|| Time taken (us)= " << chrono::duration_cast<chrono::microseconds>(end - begin).count() <<endl;
+
+    begin = chrono::steady_clock::now();
     test_fex();
+    end = chrono::steady_clock::now();
+    cout << "|| Time taken (us)=" <<
+        chrono::duration_cast<chrono::nanoseconds> (end - begin).count()/1000 << endl;
+
+    begin = chrono::steady_clock::now();
     test_github_system();
+    end = chrono::steady_clock::now();
+    cout << "|| Time taken (us)="
+        << chrono::duration_cast<chrono::nanoseconds> (end - begin).count()/1000
+        <<endl;
+
     return 0;
 }

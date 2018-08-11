@@ -819,7 +819,8 @@ void Gsolve::makeReacDepsUnique()
         vector< unsigned int >& dep = sys_.dependency[ i ];
         // Here we want to remove self-entries as well as duplicates.
         sort( dep.begin(), dep.end() );
-        vector< unsigned int >::iterator k = dep.begin();
+
+        // vector< unsigned int >::iterator k = dep.begin();
 
         /// STL stuff follows, with the usual weirdness.
         vector< unsigned int >::iterator pos =

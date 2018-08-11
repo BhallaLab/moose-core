@@ -194,11 +194,6 @@ void testBuildStoich()
     Field< Id >::set( stoich, "compartment", kin );
     Field< Id >::set( stoich, "ksolve", ksolve );
 
-    // Used to get at the stoich matrix from gdb.
-#ifndef NDEBUG
-    Stoich* stoichPtr = reinterpret_cast< Stoich* >( stoich.eref().data() );
-#endif
-
     Field< string >::set( stoich, "path", "/kinetics/##" );
 
     unsigned int n = Field< unsigned int >::get( stoich, "numAllPools" );

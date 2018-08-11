@@ -404,7 +404,7 @@ void GssaVoxelPools::xferIn( XferInfo& xf,
     vector< double >::const_iterator j = xf.lastValues.begin() + offset;
     vector< double >::iterator m = xf.subzero.begin() + offset;
     double* s = varS();
-    bool hasChanged = false;
+    // bool hasChanged = false;
     for ( vector< unsigned int >::const_iterator
             k = xf.xferPoolIdx.begin(); k != xf.xferPoolIdx.end(); ++k )
     {

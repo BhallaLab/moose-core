@@ -20,9 +20,9 @@
 #include <memory>
 #include <array>
 #include <vector>
+#include <memory>
 
 using namespace std;
-
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -49,7 +49,7 @@ public:
 
     int idamax( const size_t n, const double* const, const size_t incx);
 
-    void dscal(int n, double da, double* dx, int incx);
+    void dscal(const size_t n, const double da, double* dx, const size_t incx);
 
     double ddot(int n, double* dx, int ncx, double* dy, int incy);
 

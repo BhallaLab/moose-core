@@ -44,9 +44,11 @@
 
 #include "LSODA.h"
 #include "../utility/print_function.hpp"
+
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <memory>
 
 using namespace std;
 
@@ -150,9 +152,9 @@ int LSODA::idamax( const size_t n, const double* const dx, const size_t incx)
    da * dx[1+i*incx].
 
 */
-void LSODA::dscal(int n, double da, double* dx, int incx)
+void LSODA::dscal(const size_t n, const double da, double* dx, const size_t incx)
 {
-    int             m, i;
+    size_t m, i;
 
     if (n <= 0)
         return;
@@ -412,10 +414,8 @@ void LSODA::daxpy(int n, double da, double* dx, int incx, double* dy, int incy)
 
 void LSODA::dgesl(double** a, int n, int* ipvt, double* b, int job)
 {
-    int             nm1, k, j;
+    int             k, j;
     double          t;
-
-    nm1 = n - 1;
 
     /*
        Job = 0, solve a * x = b.
@@ -2871,7 +2871,7 @@ void LSODA::lsoda_update( LSODA_ODE_SYSTEM_TYPE f, const size_t neq
 {
     double          rwork1, rwork5, rwork6, rwork7;
     int             iwork1, iwork2, iwork5, iwork6, iwork7, iwork8, iwork9;
-    int             itask, iopt, jt, iout;
+    int             itask, iopt, jt;
 
     iwork1 = iwork2 = iwork5 = iwork6 = iwork7 = iwork8 = iwork9 = 0;
     rwork1 = rwork5 = rwork6 = rwork7 = 0.0;

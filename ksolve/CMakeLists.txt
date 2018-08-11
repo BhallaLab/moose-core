@@ -56,6 +56,7 @@ endif(WITH_GSL)
 
 add_library( ksolve ${KSOLVE_SRCS} )
 add_library( lsoda ${CMAKE_CURRENT_SOURCE_DIR}/LSODA.cpp)
+set_target_properties( ksolve lsoda PROPERTIES COMPILE_FLAGS "-Werror -Wall")
 
 add_executable( test_lsoda ${CMAKE_CURRENT_SOURCE_DIR}/test_LSODA.cpp)
 target_link_libraries( test_lsoda lsoda )

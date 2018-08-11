@@ -6,21 +6,22 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#include "header.h"
+#include "../basecode/header.h"
+#include "../basecode/SparseMatrix.h"
 
-#include "lookupVolumeFromMesh.h"
+#include "../kinetics/lookupVolumeFromMesh.h"
+#include "../kinetics/EnzBase.h"
+
 #include "RateTerm.h"
 #include "FuncTerm.h"
-#include "SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "VoxelPoolsBase.h"
-#include "../mesh/VoxelJunction.h"
 #include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
-
-#include "EnzBase.h"
 #include "ZombieMMenz.h"
+
+#include "../mesh/VoxelJunction.h"
 
 #define EPSILON 1e-15
 
@@ -156,8 +157,11 @@ void ZombieMMenz::setSolver( Id solver, Id enzId )
 	vector< Id > enzvec;
 	vector< Id > subvec;
 	vector< Id > prdvec;
-	unsigned int num = enzId.element()->getNeighbors( enzvec, enzFinfo );
-	num = enzId.element()->getNeighbors( subvec, subFinfo );
-	num = enzId.element()->getNeighbors( prdvec, prdFinfo );
+
+        // set but not used.
+        // size_t num = enzId.element()->getNeighbors( enzvec, enzFinfo );
+	// num = enzId.element()->getNeighbors( subvec, subFinfo );
+	// num = enzId.element()->getNeighbors( prdvec, prdFinfo );
+
 	stoich_->installMMenz( enzId, enzvec, subvec, prdvec );
 }
