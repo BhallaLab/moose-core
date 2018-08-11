@@ -194,8 +194,8 @@ namespace moose {
         /*  Be safe than sorry */
         if(!reset)
             ss << T_RESET;
+
         cout << ss.str() << endl;
-        cout.flush( );
     }
 
     /*
