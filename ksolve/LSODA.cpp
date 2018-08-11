@@ -317,7 +317,9 @@ To: whitbeck@sanjuan.wrc.unr.edu
 
 */
 
-void LSODA::daxpy(int n, double da, double* dx, int incx, double* dy, int incy)
+void LSODA::daxpy(const size_t n, const double da, const double* const dx
+        , const size_t incx, double* dy, const size_t incy
+        )
 {
     int             ix, iy, i, m;
 
@@ -413,7 +415,9 @@ void LSODA::daxpy(int n, double da, double* dx, int incx, double* dy, int incy)
    BLAS : daxpy, ddot
 */
 
-void LSODA::dgesl(double** a, int n, int* ipvt, double* b, int job)
+void LSODA::dgesl(double** const a, const size_t n, const int* const ipvt
+        , double* b, const size_t job
+        )
 {
     int             k, j;
     double          t;

@@ -55,9 +55,13 @@ public:
             , const double* const dy, const size_t incy
             );
 
-    void daxpy(int n, double da, double* dx, int incx, double* dy, int incy);
+    void daxpy(const size_t n, const double da, const double* const dx
+            , const size_t incx, double* dy, const size_t incy
+            );
 
-    void dgesl(double** a, int n, int* ipvt, double* b, int job);
+    void dgesl(double** const a, const size_t n, const int* const ipvt, double* b
+            , const size_t job
+            );
 
     void dgefa(double** a, int n, int* ipvt, int* info);
 
