@@ -77,6 +77,7 @@ class rdesigneur:
             combineSegments = True,
             stealCellFromLibrary = False,
             verbose = True,
+            addSomaChemCompt = False,  # Put a soma chemCompt on neuroMesh
             diffusionLength= 2e-6,
             meshLambda = -1.0,    #This is a backward compatibility hack
             temperature = 32,
@@ -111,6 +112,7 @@ class rdesigneur:
         self.combineSegments = combineSegments
         self.stealCellFromLibrary = stealCellFromLibrary
         self.verbose = verbose
+        self.addSomaChemCompt = addSomaChemCompt
         self.diffusionLength= diffusionLength
         if meshLambda > 0.0:
             print("Warning: meshLambda argument is deprecated. Please use 'diffusionLength' instead.\nFor now rdesigneur will accept this argument.")
@@ -147,6 +149,7 @@ class rdesigneur:
         self.cellPortionElist = []
         self.spineComptElist = []
         self.tabForXML = []
+        self._endos = []
 
         if not moose.exists( '/library' ):
             library = moose.Neutral( '/library' )
@@ -1287,30 +1290,84 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
     #################################################################
 
+    def _isModelFromKkit( self ):
+        for i in self.chemProtoList:
+            if i[-2:] == ".g":
+                return True
+        return False
+
+    def _assignComptNamesFromKkit( self ):
+        '''
+        Algorithm: Identify compts by volume. First 3 are \n
+        dend, head and psd. If the addSomaChemCompt flag is true, 
+        then it is \n
+        soma, dend, head, and psd. \n
+        Then there may be a series of additional compts, which go into
+        the previous list, in order, as endo_compts. Rather than
+        assume identity, I'll just call them <x>_endo.
+        '''
+        comptList = moose.wildcardFind( self.chemid.path + '/#[ISA=ChemCompt]' )
+        if len( comptList ) < 2:
+            if comptList[0].name != 'dend':
+                comptList[0].name = 'dend'
+            return comptList
+        if not self._isModelFromKkit():
+            return comptList
+        sortedComptList = sorted( comptList, key=lambda x: -x.volume )
+
+        sortedNames = ["dend", "spine","psd", "dend_endo", "spine_endo", "psd_endo"]
+        if self.addSomaChemCompt:
+            sortedNames.insert(0, "soma" )
+            sortedNames.insert(4, "soma_endo" )
+        for i in min( len( sortedComptList ), len( sortedNames ) ):
+            sortedComptList[i].name = sortedNames[i]
+        return sortedComptList
+
+
     def _buildNeuroMesh( self ):
-        comptlist = moose.wildcardFind( self.chemid.path + '/#[ISA=ChemCompt]' )
-        sortedComptList = sorted( comptlist, key=lambda x: -x.volume )
-        # A little juggling here to put the chem pathways onto new meshes.
+        # Address the following cases:
+        #   - dend alone
+        #   - dend with spine and PSD
+        #   - above plus n endo meshes located as per name suffix: 
+        #       er_1_dend, vesicle_2_spine, 
+        #   - above plus presyn, e.g.:
+        #       er_1_dend, vesicle_2_spine, 
+        #   - above plus soma
+        #   - soma alone
+        #   - soma plus n endo meshes
+
         self.chemid.name = 'temp_chem'
         newChemid = moose.Neutral( self.model.path + '/chem' )
-        self.dendCompt = moose.NeuroMesh( newChemid.path + '/dend' )
-        self.dendCompt.geometryPolicy = 'cylinder'
-        self.dendCompt.separateSpines = 0
-        if len( sortedComptList ) == 3:
+        comptlist = self._assignComptNamesFromKkit()
+        comptdict = { i.name:i for i in comptlist } 
+        if len(comptdict) == 1 or 'dend' in comptdict:
+            self.dendCompt = moose.NeuroMesh( newChemid.path + '/dend' )
+            self.dendCompt.geometryPolicy = 'cylinder'
+            self.dendCompt.separateSpines = 0
+            self._moveCompt( comptdict['dend'], self.dendCompt )
+
+        if 'dend' in comptdict and 'spine' in comptdict:
             self.dendCompt.separateSpines = 1
             self.spineCompt = moose.SpineMesh( newChemid.path + '/spine' )
             moose.connect( self.dendCompt, 'spineListOut', self.spineCompt, 'spineList' )
-            self.psdCompt = moose.PsdMesh( newChemid.path + '/psd' )
-            moose.connect( self.dendCompt, 'psdListOut', self.psdCompt, 'psdList','OneToOne')
-        #Move the old reac systems onto the new compartments.
-        self._moveCompt( sortedComptList[0], self.dendCompt )
-        if len( sortedComptList ) == 3:
-            self._moveCompt( sortedComptList[1], self.spineCompt )
-            self._moveCompt( sortedComptList[2], self.psdCompt )
+            self._moveCompt( comptdict['spine'], self.spineCompt )
+            if 'psd' in comptdict:
+                self.psdCompt = moose.PsdMesh( newChemid.path + '/psd' )
+                moose.connect( self.dendCompt, 'psdListOut', self.psdCompt, 'psdList','OneToOne')
+                self._moveCompt( comptdict['psd'], self.psdCompt )
+
         self.dendCompt.diffLength = self.diffusionLength
         self.dendCompt.subTree = self.cellPortionElist
+        for i in comptdict:
+            if len(i) > 5:
+                if i[-5:] == '_endo':
+                    endo = moose.EndoMesh( newChemid.path + '/' +i )
+                    self._endos.append( endo )
+                    endo.surround = comptdict[i[0:-5]]
+                    self._moveCompt( comptdict[i], endo )
         moose.delete( self.chemid )
         self.chemid = newChemid
+
 
     #################################################################
     def _configureSolvers( self ) :
