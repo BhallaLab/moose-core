@@ -158,10 +158,11 @@ void ZombieMMenz::setSolver( Id solver, Id enzId )
 	vector< Id > subvec;
 	vector< Id > prdvec;
 
-        // set but not used.
-        // size_t num = enzId.element()->getNeighbors( enzvec, enzFinfo );
-	// num = enzId.element()->getNeighbors( subvec, subFinfo );
-	// num = enzId.element()->getNeighbors( prdvec, prdFinfo );
+        // The return value of following calls are used nowhere so we are not
+        // storing them.
+        enzId.element()->getNeighbors( enzvec, enzFinfo );
+        enzId.element()->getNeighbors( subvec, subFinfo );
+        enzId.element()->getNeighbors( prdvec, prdFinfo );
 
 	stoich_->installMMenz( enzId, enzvec, subvec, prdvec );
 }
