@@ -17,6 +17,10 @@ add_library( _moose MODULE ${PYMOOSE_SRCS} )
 set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/python/moose")
 
 find_package(PythonInterp REQUIRED)
+find_package(PythonLibs REQUIRED)
+
+include_directories( ${PYTHON_INCLUDE_DIRS} )
+
 execute_process( COMMAND
     ${PYTHON_EXECUTABLE} -c
         "import importlib.machinery
@@ -35,15 +39,6 @@ add_definitions(-DUSE_NUMPY)
 
 add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
 
-execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --includes
-    OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --libs
-    OUTPUT_VARIABLE PYTHON_LIBRARIES
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-message( STATUS "Python include flags: ${PYTHON_INCLUDE_FLAGS}" )
 set_target_properties(_moose PROPERTIES
     COMPILE_DEFINITIONS "PYMOOSE"
     COMPILE_FLAGS "${PYTHON_INCLUDE_FLAGS}"
