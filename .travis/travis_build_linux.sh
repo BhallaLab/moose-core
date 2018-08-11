@@ -42,13 +42,16 @@ if type $PYTHON3 > /dev/null; then $PYTHON3 -m compileall -q . ; fi
 
 echo "Currently in `pwd`"
 (
-    rm -rf /tmp/moose/usr && mkdir -p /tmp/moose/usr/{bin,lib}
+    MOOSE_INSTALL_PREFIX=/tmp/moose/usr
+    rm -rf $MOOSE_INSTALL_PREFIX && mkdir -p $MOOSE_INSTALL_PREFIX/{bin,lib}
     mkdir -p _GSL_BUILD && cd _GSL_BUILD
     cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" \
-        -DCMAKE_INSTALL_PREFIX=/tmp/moose/usr ..
+        -DCMAKE_INSTALL_PREFIX=$MOOSE_INSTALL_PREFIX ..
     $MAKE && ctest --output-on-failure
     make install
-    PYTHONPATH=/tmp/moose/usr/lib/python2.7/site-packages $PYTHON2 -c 'import moose;print(moose.__file__);print(moose.version())'
+    PYMOOSE_LIB=$MOOSE_INSTALL_PREFIX/lib/python2.7
+    PYTHONPATH=$PYMOOSE_LIB/site-packages:$PYMOOSE_LIB/dist-packages \
+        $PYTHON2 -c 'import moose;print(moose.__file__);print(moose.version())'
 )
 
 (

@@ -13,16 +13,16 @@
 using namespace std;
 
 
-#include "header.h"
-#include "global.h"
-#include "SingleMsg.h"
-#include "DiagonalMsg.h"
-#include "OneToOneMsg.h"
-#include "OneToAllMsg.h"
-#include "SparseMatrix.h"
-#include "SparseMsg.h"
+#include "../basecode/header.h"
+#include "../basecode/global.h"
+#include "../msg/SingleMsg.h"
+#include "../basecode/SparseMatrix.h"
+#include "../basecode/Dinfo.h"
+#include "../msg/DiagonalMsg.h"
+#include "../msg/OneToOneMsg.h"
+#include "../msg/OneToAllMsg.h"
+#include "../msg/SparseMsg.h"
 #include "Shell.h"
-#include "Dinfo.h"
 #include "Wildcard.h"
 
 // Want to separate out this search path into the Makefile options
@@ -221,7 +221,7 @@ Id Shell::doCreate( string type, ObjId parent, string name,
         {
             stringstream ss;
             ss << "Object with same path already present : " << parent.path()
-                << "/" << name;
+               << "/" << name;
             moose::showWarn( ss.str() );
             return Id();
         }
@@ -335,13 +335,12 @@ void Shell::doStart( double runtime, bool notify )
     SetGet2< double, bool >::set( clockId, "start", runtime, notify );
 
     /*-----------------------------------------------------------------------------
-     *  Now that simulation is over, call cleanUp function of Streamer class
-     *  objects. The purpose of this is to write whatever is left in tables to
-     *  the output file.
+     *  Now that simulation is over, call cleanUp function
+     of Streamer class *  objects. The purpose of this is to
+     write whatever is left in tables to *  the output file.
      *-----------------------------------------------------------------------------*/
-    vector< ObjId > streamers;
-    wildcardFind( "/##[TYPE=Streamer]", streamers );
-    LOG( moose::debug,  "total streamers " << streamers.size( ) );
+    vector< ObjId > streamers; wildcardFind( "/##[TYPE=Streamer]", streamers );
+
     for( vector<ObjId>::const_iterator itr = streamers.begin()
             ; itr != streamers.end(); itr++ )
     {
@@ -1023,7 +1022,7 @@ void Shell::cleanSimulation()
         if ( i->value() > 4 )                   /* These are created by users */
         {
             LOG( moose::debug
-                    , "Shell::cleanSimulation: deleted cruft at " <<
+                 , "Shell::cleanSimulation: deleted cruft at " <<
                  i->value() << ": " << i->path());
             s->doDelete( *i );
         }

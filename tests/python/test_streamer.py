@@ -19,7 +19,7 @@ import sys
 import time
 import moose
 import numpy as np
-print(( '[INFO] Using moose form %s' % moose.__file__ ))
+print( '[INFO] Using moose form %s' % moose.__file__ )
 
 def sanity_test( ):
     a = moose.Table( '/t1' )
