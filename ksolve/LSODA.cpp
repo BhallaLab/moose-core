@@ -64,6 +64,16 @@ LSODA::LSODA( )
 
 LSODA::~LSODA()
 {
+    if(yh)
+        free(yh);
+    if(wm)
+        free(wm);
+    if(ewt)
+        free(ewt);
+    if(savf)
+        free(savf);
+    if(acor)
+        free(acor);
 }
 
 /* Purpose : Find largest component of double vector dx
@@ -813,9 +823,6 @@ void LSODA::lsoda( LSODA_ODE_SYSTEM_TYPE f, int neq
     double atoli=0, ayi=0, big=0, h0=0, hmax=0, hmx=0, rh=0
                                      , rtoli=0, tcrit=0, tdist=0, tnext=0, tol=0,
                                        tolsf=0, tp=0, size=0, sum=0, w0=0;
-
-    if (*istate == 1)
-        _freevectors();
 
     /*
        Block a.
