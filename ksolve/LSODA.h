@@ -47,7 +47,7 @@ public:
     LSODA( );
     ~LSODA();
 
-    int idamax( int n, double* dx, int incx);
+    int idamax( const size_t n, const double* const, const size_t incx);
 
     void dscal(int n, double da, double* dx, int incx);
 

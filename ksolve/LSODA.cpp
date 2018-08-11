@@ -79,10 +79,10 @@ LSODA::~LSODA()
    idamax = first i, i=1 to n, to minimize fabs( dx[1-incx+i*incx] ).
 
 */
-int LSODA::idamax(int n, double* dx, int incx)
+int LSODA::idamax( const size_t n, const double* const dx, const size_t incx)
 {
     double          dmax, xmag;
-    int             i, ii, xindex;
+    size_t             i, ii, xindex;
 
     xindex = 0;
     if (n <= 0)
@@ -128,8 +128,6 @@ int LSODA::idamax(int n, double* dx, int incx)
 /***********
  * dscal.c *
  ***********/
-
-
 /* Purpose : scalar vector multiplication
 
    dx = da * dx

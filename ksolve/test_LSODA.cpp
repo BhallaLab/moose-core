@@ -62,8 +62,8 @@ int test_github_system( void )
     lsoda.lsoda_update( system_github_issue_10, 2, &y[0], yout, &t, tout, &istate, nullptr );
     printf(" at t= %12.4e y= %14.6e %14.6e\n", t, yout[1], yout[2]);
 
-    ASSERT_DOUBLE_EQ( "LSODA", -1.210928, yout[1]);
-    ASSERT_DOUBLE_EQ( "LSODA", 4.722848, yout[2] );
+    ASSERT_TRUE( "LSODA", doubleEq(-1.2109284e1, yout[1]) );
+    ASSERT_TRUE( "LSODA", doubleEq(4.722848, yout[2]) );
     if (istate <= 0)
     {
         cerr << "error istate = " <<  istate << endl;
