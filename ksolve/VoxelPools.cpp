@@ -108,12 +108,10 @@ const string VoxelPools::getMethod( )
 
 void VoxelPools::advance( const ProcInfo* p )
 {
-    // double t = p->currTime - p->dt;
+    double t = p->currTime - p->dt;
 
     if( getMethod() == "lsoda" )
     {
-        double t = p->currTime - p->dt;
-
         double *y = varS();
         vector<double> yout(size()+1);
 
