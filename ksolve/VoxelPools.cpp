@@ -64,6 +64,8 @@ void VoxelPools::reinit( double dt )
         return;
     gsl_odeiv2_driver_reset( driver_ );
     gsl_odeiv2_driver_reset_hstart( driver_, dt / 10.0 );
+#elif USE_BOOST
+    cout << "Info: Using BOOST method. " << sys_.method << endl;
 #endif
 
     // If method is LDODA create lSODA object and save the address of this as
@@ -73,6 +75,7 @@ void VoxelPools::reinit( double dt )
         pLSODA = new LSODA();
         pLSODA->param = (void *) this;
     }
+
 }
 
 void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
@@ -263,6 +266,7 @@ void VoxelPools::advance( const ProcInfo* p )
             , p->currTime
             , p->dt
         );
+
 #endif
     }
 

@@ -7,28 +7,31 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 #include "../basecode/header.h"
+#include "../basecode/SparseMatrix.h"
+
 #ifdef USE_GSL
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
 #endif
 
-#include "OdeSystem.h"
-#include "VoxelPoolsBase.h"
-#include "VoxelPools.h"
-#include "../mesh/VoxelJunction.h"
-#include "ZombiePoolInterface.h"
-
-#include "RateTerm.h"
-#include "FuncTerm.h"
-#include "SparseMatrix.h"
-#include "KinSparseMatrix.h"
-#include "Stoich.h"
 #include "../shell/Shell.h"
 
 #include "../mesh/MeshEntry.h"
 #include "../mesh/Boundary.h"
 #include "../mesh/ChemCompt.h"
+#include "../mesh/VoxelJunction.h"
+
+#include "../utility/print_function.hpp"
+
+#include "OdeSystem.h"
+#include "VoxelPoolsBase.h"
+#include "VoxelPools.h"
+#include "ZombiePoolInterface.h"
+#include "RateTerm.h"
+#include "FuncTerm.h"
+#include "KinSparseMatrix.h"
+#include "Stoich.h"
 #include "Ksolve.h"
 
 #include <future>
@@ -52,7 +55,7 @@ const Cinfo* Ksolve::initCinfo()
         "rk2: The Runge-Kutta 2,3 embedded fixed dt method"
         "rkck: The Runge-Kutta Cash-Karp (4,5) method"
         "rk8: The Runge-Kutta Prince-Dormand (8,9) method"
-        "lsoda: LSODA method" ,
+        "lsoda: LSODA method",
         &Ksolve::setMethod,
         &Ksolve::getMethod
     );
@@ -180,7 +183,7 @@ const Cinfo* Ksolve::initCinfo()
     {
         &method,			// Value
         &epsAbs,			// Value
-        &epsRel ,			// Value
+        &epsRel,			// Value
 #if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
         &numThreads,                    // Value
 #endif
@@ -252,6 +255,18 @@ void Ksolve::setMethod( string method )
 {
     std::transform(method.begin(), method.end(), method.begin(), ::tolower);
 
+    // If user is trying to set ksolve method after ksolve has been initialized,
+    // show a warning.
+    if( isBuilt_ )
+    {
+        moose::showWarn(
+            "You are trying to set Ksolve::method after moose::Stoich has been "
+            " initialized. This will be ignored. Please do before ksolve is assigned to "
+            " moose::Stoich."
+            );
+        return;
+    }
+
 #if USE_GSL
     if ( method == "rk5" || method == "gsl" )
     {
@@ -259,7 +274,7 @@ void Ksolve::setMethod( string method )
     }
     else if ( method == "rk4"  || method == "rk2" ||
               method == "rk8" || method == "rkck" || method == "lsoda"
-              )
+            )
     {
         method_ = method;
     }
@@ -273,6 +288,7 @@ void Ksolve::setMethod( string method )
     // TODO: Check for boost related methods.
     method_ = method;
 #endif
+
 }
 
 double Ksolve::getEpsAbs() const
@@ -367,12 +383,15 @@ void Ksolve::setStoich( Id stoich )
         // ode.initStepSize = getEstimatedDt();
         ode.initStepSize = 0.01; // This will be overridden at reinit.
         ode.method = method_;
+
 #ifdef USE_GSL
         ode.gslSys.dimension = stoichPtr_->getNumAllPools();
-        if ( ode.gslSys.dimension == 0 ) {
-			stoichPtr_ = 0;
+        if ( ode.gslSys.dimension == 0 )
+        {
+            stoichPtr_ = 0;
             return; // No pools, so don't bother.
-		}
+        }
+
         innerSetMethod( ode, method_ );
         ode.gslSys.function = &VoxelPools::gslFunc;
         ode.gslSys.jacobian = 0;
@@ -513,8 +532,8 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         dvalues[3] = stoichPtr_->getNumVarPools();
 
         dsolvePtr_->getBlock( dvalues );
-		// Second, set the prev_ value in DiffPoolVec
-		dsolvePtr_->setPrev();
+        // Second, set the prev_ value in DiffPoolVec
+        dsolvePtr_->setPrev();
         setBlock( dvalues );
     }
 
@@ -563,8 +582,8 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         getBlock( kvalues );
         dsolvePtr_->setBlock( kvalues );
 
-		// Now use the values in the Dsolve to update junction fluxes
-		// for diffusion, channels, and xreacs
+        // Now use the values in the Dsolve to update junction fluxes
+        // for diffusion, channels, and xreacs
         dsolvePtr_->updateJunctions( p->dt );
     }
 }
@@ -584,16 +603,17 @@ void Ksolve::parallel_advance(int begin, int end, size_t nWorkers, ProcPtr p)
     for (size_t cpu = 0; cpu != nWorkers; ++cpu)
     {
         std::async( std::launch::async
-                , [this, &idx, end, p]() {
-                    for (;;)
-                    {
-                        int i = idx++;
-                        if (i >= end)
-                            break;
-                        pools_[i].advance( p );
-                    }
-                }
-            );
+                    , [this, &idx, end, p]()
+        {
+            for (;;)
+            {
+                int i = idx++;
+                if (i >= end)
+                    break;
+                pools_[i].advance( p );
+            }
+        }
+                  );
     }
 }
 #endif
