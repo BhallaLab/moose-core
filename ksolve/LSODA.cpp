@@ -10,41 +10,14 @@
  * [here](http://lh3lh3.users.sourceforge.net/download/lsoda.c)
 
  * The original source code came with no license or copyright
- * information. Heng Li released his modification under the MIT/X11 license. All
- * authors' notes are kept in this file.
+ * information. Heng Li released his modification under the MIT/X11 license. I
+ * maintain the same license. I have removed quite a lot of text/comments from
+ * this library. Please refer to the standard documentation.
+ *
+ * Contact: Dilawar Singh <dilawars@ncbs.res.in>
 */
-
-/* The MIT License
-
-   Copyright (c) 2009 Genome Research Ltd (GRL).
-   Copyright (c) 2018 Dilawar Singh <dilawars@ncbs.res.in>
-
-   Permission is hereby granted, free of charge, to any person obtaining
-   a copy of this software and associated documentation files (the
-   "Software"), to deal in the Software without restriction, including
-   without limitation the rights to use, copy, modify, merge, publish,
-   distribute, sublicense, and/or sell copies of the Software, and to
-   permit persons to whom the Software is furnished to do so, subject to
-   the following conditions:
-
-   The above copyright notice and this permission notice shall be
-   included in all copies or substantial portions of the Software.
-
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
-   BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-   ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-   SOFTWARE.
-*/
-
-/* Contact: Dilawar Singh <dilawars@ncbs.res.in> */
 
 #include "LSODA.h"
-#include "../utility/print_function.hpp"
-
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -64,16 +37,6 @@ LSODA::LSODA( )
 
 LSODA::~LSODA()
 {
-    if(yh)
-        free(yh);
-    if(wm)
-        free(wm);
-    if(ewt)
-        free(ewt);
-    if(savf)
-        free(savf);
-    if(acor)
-        free(acor);
 }
 
 /* Purpose : Find largest component of double vector dx
@@ -89,7 +52,6 @@ LSODA::~LSODA()
 
    Find smallest index of maximum magnitude of dx.
    idamax = first i, i=1 to n, to minimize fabs( dx[1-incx+i*incx] ).
-
 */
 int LSODA::idamax( const size_t n, const double* const dx, const size_t incx)
 {
@@ -532,10 +494,10 @@ void LSODA::dgesl(double** const a, const size_t n, const int* const ipvt
 */
 
 
-void LSODA::dgefa(double** const a, const size_t n, int* const ipvt, int* const info)
+void LSODA::dgefa(double** const a, const size_t n, int* const ipvt, size_t* const info)
 {
-    size_t j, k, i;
-    double t;
+    size_t j=0, k=0, i=0;
+    double t=0.0;
 
     /* Gaussian elimination with partial pivoting.   */
 
@@ -823,6 +785,9 @@ void LSODA::lsoda( LSODA_ODE_SYSTEM_TYPE f, int neq
     double atoli=0, ayi=0, big=0, h0=0, hmax=0, hmx=0, rh=0
                                      , rtoli=0, tcrit=0, tdist=0, tnext=0, tol=0,
                                        tolsf=0, tp=0, size=0, sum=0, w0=0;
+
+    if (*istate == 1)
+        _freevectors();
 
     /*
        Block a.
@@ -2229,10 +2194,10 @@ void LSODA::scaleh(double *rh, double *pdh)
 }				/* end scaleh   */
 
 
-void LSODA::prja(int neq, double *y, LSODA_ODE_SYSTEM_TYPE f, void *_data)
+void LSODA::prja(const size_t neq, double * const y, LSODA_ODE_SYSTEM_TYPE f, void *_data)
 {
-    int             i, ier, j;
-    double          fac, hl0, r, r0, yj;
+    size_t i=0, ier=0, j=0;
+    double fac=0.0, hl0=0.0, r=0.0, r0=0.0, yj=0.0;
     /*
        prja is called by stoda to compute and process the matrix
        P = I - h * el[1] * J, where J is an approximation to the Jacobian.
@@ -2346,13 +2311,13 @@ double LSODA::fnorm(int n, double **a, double *w)
 1 : step size to be reduced, redo prediction,
 2 : corrector cannot converge, failure flag.
 */
-void LSODA::correction(int neq, double *y, LSODA_ODE_SYSTEM_TYPE f, int *corflag
-                       , double pnorm, double *del, double *delp, double *told
-                       , int *ncf, double *rh, int *m, void *_data
-                      )
+void LSODA::correction(const size_t neq, double* const y, LSODA_ODE_SYSTEM_TYPE f, int *corflag
+        , double pnorm, double *del, double *delp, double *told
+        , int *ncf, double *rh, int *m, void *_data
+        )
 {
-    int             i;
-    double          rm, rate, dcon;
+    size_t i=0;
+    double rm=0.0, rate=0.0, dcon=0.0;
 
     /*
        Up to maxcor corrector iterations are taken.  A convergence test is
@@ -2363,12 +2328,14 @@ void LSODA::correction(int neq, double *y, LSODA_ODE_SYSTEM_TYPE f, int *corflag
 
     *m = 0;
     *corflag = 0;
-    rate = 0.;
     *del = 0.;
     yp1 = yh[1];
+
     for (i = 1; i <= n; i++)
         y[i] = yp1[i];
+
     (*f) (tn, y + 1, savf + 1, _data);
+
     nfe++;
     /*
        If indicated, the matrix P = I - h * el[1] * J is reevaluated and

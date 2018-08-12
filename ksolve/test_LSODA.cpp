@@ -14,14 +14,15 @@
  *        License:  GNU GPL2
  */
 
-#include "LSODA.h"
-
 #include <iostream>
 #include <iomanip>
 #include <vector>
 #include <cassert>
 #include <chrono>
-#include "../utility/testing_macros.hpp"
+#include <cmath>
+
+#include "LSODA.h"
+#include "helper.h"
 
 using namespace std;
 
@@ -71,11 +72,11 @@ int test_github_system( void )
         y[0] = yout[1];
         y[1] = yout[2];
 
-        // cout << t << ' ' << setprecision(8) << y[0] << ' ' << y[1] << endl;
+        cout << t << ' ' << setprecision(8) << y[0] << ' ' << y[1] << endl;
     }
 
-    ASSERT_TRUE( doubleEq(-11.9400786, res[0]), "y0(t=0.5) =" << res[0] );
-    ASSERT_TRUE( doubleEq( 3.8608262, res[1]), "y1(t=0.5) =" << res[1] );
+    assert( areEqual(-11.9400786, res[0]) );
+    assert( areEqual( 3.8608262, res[1]) );
 
     if (istate <= 0)
     {
@@ -101,8 +102,8 @@ int test_scipy_sys( void )
     lsoda.lsoda_update( system_scipy, 2, &y[0], yout, &t, tout, &istate, nullptr );
     // printf(" at t= %12.4e y= %14.6e %14.6e\n", t, yout[1], yout[2]);
 
-    ASSERT_DOUBLE_EQ( "LSODA", 9.999899e+00, yout[1]);
-    ASSERT_DOUBLE_EQ( "LSODA", -1.010111e-05, yout[2] );
+    areEqual( 9.999899e+00, yout[1]);
+    areEqual( -1.010111e-05, yout[2] );
 
     if (istate <= 0)
     {
