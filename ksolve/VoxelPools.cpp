@@ -112,11 +112,10 @@ void VoxelPools::advance( const ProcInfo* p )
 
     if( getMethod() == "lsoda" )
     {
-        double *y = varS();
         vector<double> yout(size()+1);
 
         pLSODA->lsoda_update( &VoxelPools::lsodaSys
-                , size(), y, yout
+                , size(), Svec(), yout
                 , &t, p->currTime
                 , &lsodaState
                 , this   // This will go to lsodaSys 4th arg.
@@ -125,7 +124,7 @@ void VoxelPools::advance( const ProcInfo* p )
         // Now update the y from yout. This is different thant normal GSL or
         // BOOST based approach.
         for (size_t i = 0; i < size(); i++)
-            y[i] = yout[i+1];
+            varS()[i] = yout[i+1];
 
         if( lsodaState == 0 )
         {
