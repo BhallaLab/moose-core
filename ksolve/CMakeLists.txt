@@ -6,6 +6,8 @@ include_directories(../ )
 include_directories(../mesh)
 include_directories(../external/muparser/include )
 
+find_package(Threads REQUIRED)
+
 IF(WITH_BOOST)
     check_include_file_cxx( ${Boost_INCLUDE_DIRS}/boost/numeric/odeint.hpp
         ODEINT_EXISTS)
@@ -65,7 +67,8 @@ add_executable( test_lsoda ${CMAKE_CURRENT_SOURCE_DIR}/test_LSODA.cpp)
 target_link_libraries( test_lsoda lsoda )
 
 add_executable( benchmark_lsoda ${CMAKE_CURRENT_SOURCE_DIR}/benchmark_LSODA.cpp)
-target_link_libraries( benchmark_lsoda lsoda )
+target_link_libraries( benchmark_lsoda lsoda ${CMAKE_THREAD_LIBS_INIT})
+set_target_properties( benchmark_lsoda PROPERTIES COMPILE_FLAGS "-O3 -pthread" LINK_FLAGS "-pthread")
 
 enable_testing()
 add_test(NAME test_lsoda COMMAND $<TARGET_FILE:test_lsoda>)
