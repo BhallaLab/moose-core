@@ -81,10 +81,10 @@ def loadModel(filename, target,method=None):
     else:
         file_name,extension = splitext(filename)
         if extension in [".swc",".p"]:
-            moose._moose.loadModel(filename,target,"Neutral")
+            ret = moose._moose.loadModel(filename,target,"Neutral")
         elif extension in [".g",".cspace"]:
             #only if genesis or cspace file, then mooseAddChemSolver is called
-            moose._moose.loadModel(filename,target,"ee")
+            ret = moose._moose.loadModel(filename,target,"ee")
           
             method = "ee"
             if solverClass.lower() in ["gssa","gillespie","stochastic","gsolve"]:
@@ -94,7 +94,7 @@ def loadModel(filename, target,method=None):
             elif solverClass.lower() in ["exponential euler","exponentialeuler","neutral"]:
                 method = "ee"
             moose.mooseAddChemSolver(target,method)
-
+        return ret
 def version( ):
     return VERSION
 
