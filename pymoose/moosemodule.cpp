@@ -2770,6 +2770,63 @@ PyObject * moose_ObjId_get_destField_attr(PyObject * self, void * closure)
     return (PyObject*)ret;
 }
 
+
+int defineDestFinfos(const Cinfo * cinfo)
+{
+    const string& className = cinfo->name();
+#ifndef NDEBUG
+    if (verbosity > 1)
+    {
+        cout << "\tCreating destField attributes for " << className << endl;
+    }
+#endif
+    vector <PyGetSetDef>& vec = get_getsetdefs()[className];
+    /*
+      We do not know the final number of user-accessible
+      destFinfos as we have to ignore the destFinfos starting
+      with get/set. So use a vector instead of C array.
+    */
+    size_t currIndex = vec.size();
+    for (unsigned int ii = 0; ii < cinfo->getNumDestFinfo(); ++ii)
+    {
+        Finfo * destFinfo = const_cast<Cinfo*>(cinfo)->getDestFinfo(ii);
+        const string& name = destFinfo->name();
+        /*
+          get_{xyz} and set_{xyz} are internal destFinfos for
+          accessing valueFinfos. Ignore them.
+
+          With the '_' removed from internal get/set for value
+          fields, we cannot separate them out. - Subha Fri Jan 31
+          16:43:51 IST 2014
+
+          The policy changed in the past and hence the following were commented out.
+          - Subha Tue May 26 00:25:28 EDT 2015
+         */
+        // if (name.find("get") == 0 || name.find("set") == 0){
+        //     continue;
+        // }
+        PyGetSetDef destFieldGetSet;
+        vec.push_back(destFieldGetSet);
+
+        vec[currIndex].name = strdup(name.c_str());
+        vec[currIndex].doc = (char*) "Destination field";
+        vec[currIndex].get = (getter)moose_ObjId_get_destField_attr;
+        PyObject *args = PyTuple_New(1);
+        if (!args || !vec[currIndex].name) {
+            cerr << "moosemodule.cpp: defineDestFinfos: allocation failed\n";
+            return 0;
+        }
+        PyTuple_SetItem(args, 0, PyString_FromString(name.c_str()));
+        vec[currIndex].closure = (void*)args;
+
+        //LOG( debug, "\tCreated destField " << vec[currIndex].name );
+
+        ++currIndex;
+    } // ! for
+
+    return 1;
+}
+
 /**
    Try to obtain a LookupField object for a specified
    lookupFinfo. The first item in `closure` must be the name of
