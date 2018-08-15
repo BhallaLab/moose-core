@@ -43,32 +43,30 @@ def mooseAddChemSolver(modelRoot, solver):
     """    Add the solvers to Chemical compartment     """
 
     compt = moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]')
-    
-    if ( len(compt) == 0):
-        return "Atleast one compartment is required "
+    if not compt:
+        return ("Atleast one compartment is required ")
+    elif ( len(compt) > 3 ):
+        return ("Warning: setSolverOnCompt Cannot handle " ,  len(compt) , " chemical compartments\n")
+
     else:
-        if ( len(compt) > 3 ):
-            return ("Warning: setSolverOnCompt Cannot handle " ,  len(compt) , " chemical compartments\n")
+        comptinfo = moose.Annotator(moose.element(compt[0]).path + '/info')
+        
+        previousSolver = stdSolvertype(comptinfo.solver)
+        currentSolver = stdSolvertype(solver)
 
+        if previousSolver != currentSolver:
+            comptinfo.solver = currentSolver
+            if (moose.exists(compt[0].path + '/stoich')):
+                # "A: and stoich exists then delete the stoich add solver"
+                mooseDeleteChemSolver(modelRoot)
+            setCompartmentSolver(modelRoot, currentSolver)
+            return True
         else:
-            comptinfo = moose.Annotator(moose.element(compt[0]).path + '/info')
-            
-            previousSolver = stdSolvertype(comptinfo.solver)
-            currentSolver = stdSolvertype(solver)
-
-            if previousSolver != currentSolver:
-                comptinfo.solver = currentSolver
-                if (moose.exists(compt[0].path + '/stoich')):
-                    # "A: and stoich exists then delete the stoich add solver"
-                    mooseDeleteChemSolver(modelRoot)
+            if not moose.exists(compt[0].path + '/stoich'):
+                # " stoich exist, doing nothing"
                 setCompartmentSolver(modelRoot, currentSolver)
                 return True
-            else:
-                if not moose.exists(compt[0].path + '/stoich'):
-                    # " stoich exist, doing nothing"
-                    setCompartmentSolver(modelRoot, currentSolver)
-                    return True
-        return False
+    return False
 
 
 def setCompartmentSolver(modelRoot, solver):
