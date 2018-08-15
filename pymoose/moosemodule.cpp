@@ -2720,17 +2720,12 @@ int defineDestFinfos(const Cinfo * cinfo)
         PyGetSetDef destFieldGetSet;
         vec.push_back(destFieldGetSet);
 
-        vec[currIndex].name = (char*)calloc(name.size() + 1, sizeof(char));
-        strncpy(vec[currIndex].name,
-                const_cast<char*>(name.c_str()),
-                name.size());
-
+        vec[currIndex].name = strdup(name.c_str());
         vec[currIndex].doc = (char*) "Destination field";
         vec[currIndex].get = (getter)moose_ObjId_get_destField_attr;
-        PyObject * args = PyTuple_New(1);
-        if (args == NULL)
-        {
-            cerr << "moosemodule.cpp: defineDestFinfos: Failed to allocate tuple" << endl;
+        PyObject *args = PyTuple_New(1);
+        if (!args || !vec[currIndex].name) {
+            cerr << "moosemodule.cpp: defineDestFinfos: allocation failed\n";
             return 0;
         }
         PyTuple_SetItem(args, 0, PyString_FromString(name.c_str()));
