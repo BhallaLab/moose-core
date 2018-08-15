@@ -19,7 +19,7 @@
 
 set -o nounset                              # Treat unset variables as an error
 set +e  # Let installation fail in some command
-
+apt-get update
 apt-get install -qq libxml2-dev libbz2-dev
 apt-get install -qq libhdf5-serial-dev
 apt-get install -qq make cmake
