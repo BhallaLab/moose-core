@@ -15,19 +15,14 @@ add_library( _moose MODULE ${PYMOOSE_SRCS} )
 set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
 
 find_package(PythonInterp REQUIRED)
-execute_process( COMMAND ${PYTHON_EXECUTABLE} -c
-    "try: import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])
-except Exception: pass"
-    OUTPUT_VARIABLE PYTHON_SO_EXTENSION
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-message( STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
-
+find_package(PythonLibs REQUIRED)
 find_package(NumPy REQUIRED)
+
 include_directories(${NUMPY_INCLUDE_DIRS})
+include_directories(${PYTHON_INCLUDE_DIRS})
 add_definitions(-DUSE_NUMPY)
 
-add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
+# add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
 
 execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --includes
     OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
@@ -37,7 +32,7 @@ execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --libs
     OUTPUT_VARIABLE PYTHON_LIBRARIES
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-message( STATUS "Python include flags: ${PYTHON_INCLUDE_FLAGS}" )
+
 set_target_properties(_moose PROPERTIES
     COMPILE_DEFINITIONS "PYMOOSE"
     COMPILE_FLAGS "${PYTHON_INCLUDE_FLAGS}"
@@ -45,11 +40,6 @@ set_target_properties(_moose PROPERTIES
     PREFIX ""
     SUFFIX ".so"
     )
-
-if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
-    set_target_properties(_moose PROPERTIES
-    SUFFIX ${PYTHON_SO_EXTENSION})
-endif()
 
 # see issue #80
 if(HDF5_LIBRARY_DIRS)
@@ -94,7 +84,7 @@ add_dependencies(_moose copy_python_files)
 
 
 # Print message at the end of build process.
-add_custom_command( TARGET _moose POST_BUILD 
+add_custom_command( TARGET _moose POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan
     "MOOSE python extention is successfully built. Now "
     " 1. Run 'make install' to install it for single user. "
