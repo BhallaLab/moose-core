@@ -109,16 +109,15 @@ const string VoxelPools::getMethod( )
 void VoxelPools::advance( const ProcInfo* p )
 {
     double t = p->currTime - p->dt;
+    Ksolve* k = reinterpret_cast<Ksolve*>( stoichPtr_->getKsolve().eref().data() );
 
     if( getMethod() == "lsoda" )
     {
         vector<double> yout(size()+1);
 
-        pLSODA->lsoda_update( &VoxelPools::lsodaSys
-                , size(), Svec(), yout
-                , &t, p->currTime
-                , &lsodaState
-                , this   // This will go to lsodaSys 4th arg.
+        pLSODA->lsoda_update( &VoxelPools::lsodaSys, size()
+                , Svec(), yout , &t
+                , p->currTime, &lsodaState, this 
                 );
 
         // Now update the y from yout. This is different thant normal GSL or

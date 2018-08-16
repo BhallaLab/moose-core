@@ -171,7 +171,10 @@ Shell::Shell()
 
 Shell::~Shell()
 {
-    string notifyEnvVar = std::getenv( "MOOSE_NOTIFY" ); 
+    string notifyEnvVar = "";
+    if( std::getenv( "MOOSE_NOTIFY" ) )
+        notifyEnvVar = string( std::getenv( "MOOSE_NOTIFY" ) );
+
     if( notify_ || notifyEnvVar.size() > 0 )
         cout << "Info: Clock time " << clock_time_ << " sec." << endl;
 }
