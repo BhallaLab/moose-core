@@ -397,7 +397,7 @@ void Dsolve::calcJnChan( const DiffJunction& jn, Dsolve* other, double dt )
 			double lastN = myN;
 			double otherN = otherDv.getN( j->second );
 			double chanN = chanDv.getN( j->first );
-			double perm = myChan.permeability * chanN;
+			double perm = myChan.permeability * chanN / NA;
 			myN = integ( myN, perm * myN/j->firstVol, 
 							perm * otherN/j->secondVol, dt );
 			otherN += lastN - myN;	// Mass consv
@@ -431,7 +431,7 @@ void Dsolve::calcOtherJnChan( const DiffJunction& jn, Dsolve* other, double dt )
 			double lastN = myN;
 			double otherN = otherDv.getN( j->second );
 			double chanN = chanDv.getN( j->second );
-			double perm = otherChan.permeability * chanN;
+			double perm = otherChan.permeability * chanN / NA;
 			myN = integ( myN, perm * myN/j->firstVol, 
 							perm * otherN/j->secondVol, dt );
 			otherN += lastN - myN;	// Mass consv
