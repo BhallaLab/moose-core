@@ -20,21 +20,23 @@ from __future__ import print_function, absolute_import
 
 import imp
 import os
-import moose
 import numpy as np
 import math
 import itertools
 import sys
 import time
 
+# Call rdesigneur before moose so that moogul can set the matplotlib backend.
 import rdesigneur.rmoogli as rmoogli
 from rdesigneur.rdesigneurProtos import *
 import fixXreacs
+
 #from . import fixXreacs
 #from rdesigneur.rmoogli import *
 #import rmoogli
 #from rdesigneurProtos import *
 
+import moose
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
 
@@ -42,7 +44,7 @@ from moose.neuroml.ChannelML import ChannelML
 # in future, so other imports have been removed.
 try:
   from lxml import etree
-except ImportError:
+except ImportError as e:
   import xml.etree.ElementTree as etree
 
 import csv

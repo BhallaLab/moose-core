@@ -10,6 +10,7 @@
 #include <string>
 #include <algorithm>
 #include <chrono>
+#include <cstdlib>
 
 #include "../basecode/header.h"
 #include "../basecode/global.h"
@@ -45,12 +46,13 @@ bool Shell::doReinit_( 0 );
 bool Shell::isParserIdle_( 0 );
 double Shell::runtime_( 0.0 );
 
+double Shell::clock_time_( 0.0 );
+bool Shell::notify_( false );
+
 const Cinfo* Shell::initCinfo()
 {
 
-////////////////////////////////////////////////////////////////
-// Value Finfos
-////////////////////////////////////////////////////////////////
+    // Value Finfos
     static ReadOnlyValueFinfo< Shell, bool > isRunning(
         "isRunning",
         "Flag: Checks if simulation is in progress",
@@ -62,9 +64,7 @@ const Cinfo* Shell::initCinfo()
         &Shell::setCwe,
         &Shell::getCwe );
 
-////////////////////////////////////////////////////////////////
-// Dest Finfos: Functions handled by Shell
-////////////////////////////////////////////////////////////////
+    // Dest Finfos: Functions handled by Shell
     static DestFinfo handleUseClock( "useClock",
                                      "Deals with assignment of path to a given clock."
                                      " Arguments: path, field, tick number. ",
@@ -162,7 +162,9 @@ Shell::Shell()
 
 Shell::~Shell()
 {
-    ;
+    string notifyEnvVar = std::getenv( "MOOSE_NOTIFY" ); 
+    if( notify_ || notifyEnvVar.size() > 0 )
+        cout << "Info: Clock time " << clock_time_ << " sec." << endl;
 }
 
 void Shell::setShellElement( Element* shelle )
@@ -333,6 +335,8 @@ void Shell::doQuit()
 
 void Shell::doStart( double runtime, bool notify )
 {
+    Shell::notify_ = notify;
+
     auto t0 = std::chrono::high_resolution_clock::now();
 
     Id clockId( 1 );
@@ -354,8 +358,8 @@ void Shell::doStart( double runtime, bool notify )
     }
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    if( notify )
-        cout << "Info: Total time taken " << std::chrono::duration<double>(t1-t0).count() << " sec." << endl;
+    double s = std::chrono::duration<double>(t1-t0).count();
+    clock_time_ += s;
 }
 
 bool isDoingReinit()
