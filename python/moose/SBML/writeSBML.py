@@ -13,11 +13,12 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Friday May 27 12:19:00 2016(+0530)
 Version
-Last-Updated: Sat 16 Dec 02:10:00 2017(+0530)
+Last-Updated: Sat 6 Jan 01:10:00 2018(+0530)
           By: HarshaRani
 **********************************************************************/
 /****************************
-
+2018
+Jan 6: for Product_formation_, k3 units depends on noofSub, prd was passed which is fixed
 2017
 Dec 15: If model path exists is checked
         Enz cplx is written only if enz,cplx,sub, prd exist, a clean check is made
@@ -402,7 +403,7 @@ def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
                         "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" +
                         enzrate_law +
                         "\n \t </body>")
-                unit = parmUnit(noofPrd - 1, cremodel_)
+                unit = parmUnit(noofSub - 1, cremodel_)
                 printParameters(kl, "k3", k3, unit)
                 if groupName != moose.element('/'):
                     if groupName not in groupInfo:

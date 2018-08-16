@@ -10,10 +10,11 @@ set(PYMOOSE_SRCS
     test_moosemodule.cpp
     PyRun.cpp
     )
-add_library( _moose MODULE ${PYMOOSE_SRCS} )
 
+add_library( _moose MODULE ${PYMOOSE_SRCS} )
 set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
 
+find_package(PythonInterp REQUIRED)
 execute_process( COMMAND ${PYTHON_EXECUTABLE} -c
     "try: import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])
 except Exception: pass"
@@ -76,7 +77,7 @@ ELSE(MACOSX)
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
         "-Wl,--no-whole-archive"
-        ${PYTHON_LIBRARIES}
+        # ${PYTHON_LIBRARIES}
         ${SYSTEM_SHARED_LIBS}
         )
 endif(MACOSX)
@@ -96,9 +97,9 @@ add_dependencies(_moose copy_python_files)
 add_custom_command( TARGET _moose POST_BUILD 
     COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan
     "MOOSE python extention is successfully built. Now "
-    " 1. Run 'make install' to install it single user. "
+    " 1. Run 'make install' to install it for single user. "
     " 2. Run 'sudo make install' to install it system-wide. "
     " "
-    " After installation, 'pip uninstall moose' will uninstall moose. "
+    "NOTE: Run 'pip uninstall moose' to uninstall moose."
     VERBATIM
     )

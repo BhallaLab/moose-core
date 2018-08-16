@@ -10,7 +10,6 @@
 #########################################################################
 
 import math
-import matplotlib
 import sys
 import moose
 import os
@@ -30,6 +29,7 @@ hasMoogli = True
 
 if hasDisplay:
     try:
+        import matplotlib
         from PyQt4 import QtGui
         import moogli
         import moogli.extensions.moose
@@ -180,7 +180,7 @@ def makeMoogli( rd, mooObj, moogliEntry, fieldInfo ):
     viewer.attach_view(view)
     return viewer
 
-def displayMoogli( rd, _dt, _runtime, _rotation ):
+def displayMoogli( rd, _dt, _runtime, _rotation, fullscreen = False ):
     if not hasMoogli:
         return None
     global runtime
@@ -190,7 +190,10 @@ def displayMoogli( rd, _dt, _runtime, _rotation ):
     moogliDt = _dt
     rotation = _rotation
     for i in rd.moogNames:
-        i.show()
+        if fullscreen:
+            i.showMaximized()
+        else:
+            i.show()
         i.start()
     #viewer.showMaximized()
     #viewer.show()

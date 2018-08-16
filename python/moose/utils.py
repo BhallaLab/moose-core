@@ -10,12 +10,6 @@ from __future__ import print_function, division, absolute_import
 from __future__ import print_function, division
 from __future__ import absolute_import
 
-__author__           = 'Subhasis Ray, Aditya Gilra, Dilawar Singh'
-__copyright__        = "Copyright 2013, NCBS Bangalore"
-__credits__          = ["NCBS Bangalore", "Bhalla Lab"]
-__license__          = "GPL"
-__version__          = "1.0.0"
-
 import types
 import parser
 import token
@@ -28,10 +22,15 @@ from collections import defaultdict
 import re
 
 from moose.moose_constants import *
+from moose.print_utils import *
 
 # Print and Plot utilities.
-from moose.plot_utils import *
-from moose.print_utils import *
+try:
+    from moose.plot_utils import *
+except Exception as e:
+    info( "Plot utilities are not loaded due to '%s'" )
+    pass
+
 
 def create_table_path(model, graph, element, field):
 

@@ -15,10 +15,12 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Thu May 13 10:19:00 2016(+0530)
 Version
-Last-Updated: Wed Oct 4 14:50:00 2017(+0530)
-
+Last-Updated: Sat Jan 6 1:21:00 2018(+0530)
           By:HarshaRani
 **********************************************************************/
+2018
+Jan6 :  - only if valid model exists, then printing the no of compartment,pool,reaction etc
+        - at reaction level a check made to see if path exist while creating a new reaction
 2017
 Oct 4 : - loadpath is cleaned up
 Sep 13: - After EnzymaticReaction's k2 is set, explicity ratio is set to 4 to make sure it balance.
@@ -77,6 +79,8 @@ except ImportError:
     pass
 
 def mooseReadSBML(filepath, loadpath, solver="ee"):
+    """Load SBML model 
+    """
     global foundLibSBML_
     if not foundLibSBML_:
         print('No python-libsbml found.'
@@ -108,33 +112,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                 print("No model present.")
                 return moose.element('/')
             else:
-                print((" model: " + str(model)))
-                print(("functionDefinitions: " +
-                       str(model.getNumFunctionDefinitions())))
-                print(("    unitDefinitions: " +
-                       str(model.getNumUnitDefinitions())))
-                print(("   compartmentTypes: " +
-                       str(model.getNumCompartmentTypes())))
-                print(("        specieTypes: " +
-                       str(model.getNumSpeciesTypes())))
-                print(("       compartments: " +
-                       str(model.getNumCompartments())))
-                print(("            species: " +
-                       str(model.getNumSpecies())))
-                print(("         parameters: " +
-                       str(model.getNumParameters())))
-                print((" initialAssignments: " +
-                       str(model.getNumInitialAssignments())))
-                print(("              rules: " +
-                       str(model.getNumRules())))
-                print(("        constraints: " +
-                       str(model.getNumConstraints())))
-                print(("          reactions: " +
-                       str(model.getNumReactions())))
-                print(("             events: " +
-                       str(model.getNumEvents())))
-                print("\n")
-
+                
                 if (model.getNumCompartments() == 0):
                     return moose.element('/'), "Atleast one compartment is needed"
                 else:
@@ -187,6 +165,32 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                         # as while reading in GUI the model will show up untill
                         # built which is not correct print "Deleted rest of the
                         # model"
+                        print((" model: " + str(model)))
+                        print(("functionDefinitions: " +
+                            str(model.getNumFunctionDefinitions())))
+                        print(("    unitDefinitions: " +
+                            str(model.getNumUnitDefinitions())))
+                        print(("   compartmentTypes: " +
+                               str(model.getNumCompartmentTypes())))
+                        print(("        specieTypes: " +
+                               str(model.getNumSpeciesTypes())))
+                        print(("       compartments: " +
+                               str(model.getNumCompartments())))
+                        print(("            species: " +
+                               str(model.getNumSpecies())))
+                        print(("         parameters: " +
+                               str(model.getNumParameters())))
+                        print((" initialAssignments: " +
+                               str(model.getNumInitialAssignments())))
+                        print(("              rules: " +
+                               str(model.getNumRules())))
+                        print(("        constraints: " +
+                               str(model.getNumConstraints())))
+                        print(("          reactions: " +
+                               str(model.getNumReactions())))
+                        print(("             events: " +
+                               str(model.getNumEvents())))
+                        print("\n")
                         moose.delete(basePath)
                         loadpath = moose.Shell('/')
             #return basePath, ""
@@ -641,11 +645,14 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,fun
                     sp = react.getSpecies()
                     sp = str(idBeginWith(sp))
                     speCompt = specInfoMap[sp]["comptId"].path
+
                     if group:
                         if moose.exists(speCompt+'/'+group):
                             speCompt = speCompt+'/'+group
                         else:
                             speCompt = (moose.Neutral(speCompt+'/'+group)).path
+                    if moose.exists(speCompt + '/' + rName):
+                        rName =rId
                     reaction_ = moose.Reac(speCompt + '/' + rName)
                     reactionCreated = True
                     reactSBMLIdMooseId[rName] = {
@@ -849,16 +856,13 @@ def unitsforRates(model):
 def getMembers(node, ruleMemlist):
     msg = ""
     found = True
-    if  node.getType() == libsbml.AST_LAMBDA:
-        #In lambda get Bvar values and getRighChild which will be kineticLaw
-        if node.getNumBvars() == 0:
-            print ("0")
-            return False
-
-        for i in range (0,node.getNumBvars()):
-            ruleMemlist.append(node.getChild(i).getName())
-        #funcD[funcName] = {"bvar" : bvar, "MathML":node.getRightChild()}
+    if node == None:
+        pass
+    elif node.getType() == libsbml.AST_POWER:
+        pass
+    
     elif node.getType() == libsbml.AST_FUNCTION:
+        #print " function"
         #funcName = node.getName()
         #funcValue = []
         #functionfound = False
@@ -870,8 +874,9 @@ def getMembers(node, ruleMemlist):
         #funcKL[node.getName()] = funcValue
 
     elif node.getType() == libsbml.AST_PLUS:
+        #print " plus ", node.getNumChildren()
         if node.getNumChildren() == 0:
-            print ("0")
+            #print ("0")
             return False
         getMembers(node.getChild(0), ruleMemlist)
         for i in range(1, node.getNumChildren()):
@@ -882,11 +887,10 @@ def getMembers(node, ruleMemlist):
         pass
     elif node.getType() == libsbml.AST_NAME:
         # This will be the ci term"
-
         ruleMemlist.append(node.getName())
     elif node.getType() == libsbml.AST_MINUS:
         if node.getNumChildren() == 0:
-            print("0")
+            #print("0")
             return False
         else:
             lchild = node.getLeftChild()
@@ -896,7 +900,7 @@ def getMembers(node, ruleMemlist):
     elif node.getType() == libsbml.AST_DIVIDE:
 
         if node.getNumChildren() == 0:
-            print("0")
+            #print("0")
             return False
         else:
             lchild = node.getLeftChild()
@@ -906,7 +910,7 @@ def getMembers(node, ruleMemlist):
 
     elif node.getType() == libsbml.AST_TIMES:
         if node.getNumChildren() == 0:
-            print ("0")
+            #print ("0")
             return False
         getMembers(node.getChild(0), ruleMemlist)
         for i in range(1, node.getNumChildren()):
@@ -914,13 +918,21 @@ def getMembers(node, ruleMemlist):
             getMembers(node.getChild(i), ruleMemlist)
 
     elif node.getType() == libsbml.AST_LAMBDA:
+        #In lambda get Bvar values and getRighChild which will be kineticLaw
         if node.getNumChildren() == 0:
-            print ("0")
+            #print ("0")
             return False
+        if node.getNumBvars() == 0:
+            #print ("0")
+            return False
+        '''
         getMembers(node.getChild(0), ruleMemlist)
         for i in range(1, node.getNumChildren()):
             getMembers(node.getChild(i), ruleMemlist)
-
+        '''
+        for i in range (0,node.getNumBvars()):
+            ruleMemlist.append(node.getChild(i).getName())
+        #funcD[funcName] = {"bvar" : bvar, "MathML":node.getRightChild()}
     elif node.getType() == libsbml.AST_FUNCTION_POWER:
         msg = msg + "\n moose is yet to handle \""+node.getName() + "\" operator"
         found = False
@@ -960,7 +972,7 @@ def createRules(model, specInfoMap, globparameterIdValue):
         if (rule.isAssignment()):
             rule_variable = rule.getVariable()
         
-            if specInfoMap.has_key(rule_variable):
+            if rule_variable in specInfoMap:
                 #In assignment rule only if pool exist, then that is conveted to moose as 
                 # this can be used as summation of pool's, P1+P2+P3 etc 
                 rule_variable = parentSp = str(idBeginWith(rule_variable))
@@ -983,10 +995,9 @@ def createRules(model, specInfoMap, globparameterIdValue):
                     if found:
                         allPools = True
                         for i in ruleMemlist:
-                            if specInfoMap.has_key(i):
-                                pass
-                            else:
+                            if i not in specInfoMap:
                                 allPools = False
+                                break
                         if allPools:
                             #only if addition then summation works, only then I create a function in moose
                             # which is need to get the summation's output to a pool
