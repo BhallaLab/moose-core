@@ -106,7 +106,7 @@ const Cinfo* Ksolve::initCinfo()
 #if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     static ValueFinfo< Ksolve, unsigned int > numThreads (
         "numThreads",
-        "Number of threads to use (applicable in deterministic case)",
+        "Number of threads to use",
         &Ksolve::setNumThreads,
         &Ksolve::getNumThreads
     );
@@ -548,7 +548,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     {
         if( numThreads_ > 1 )
         {
-            cout << "Info: using 1 thread since not many voxels." << endl;
+            cout << "Info: Only 1 voxel in system. Solver will NOT use multiple threads." << endl;
             numThreads_ = 1;
         }
 
@@ -637,7 +637,7 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
 
 #if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     if( 1 < getNumThreads( ) )
-        cout << "Info: User wants to use " << numThreads_ << " threads." << endl;
+        cout << "Info: Solver requested " << numThreads_ << " threads." << endl;
 #endif
 
 }
