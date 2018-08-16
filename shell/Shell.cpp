@@ -9,24 +9,26 @@
 
 #include <string>
 #include <algorithm>
+#include <chrono>
 
-using namespace std;
+#include "../basecode/header.h"
+#include "../basecode/global.h"
+#include "../basecode/SparseMatrix.h"
+#include "../basecode/Dinfo.h"
 
-
-#include "header.h"
-#include "global.h"
-#include "SingleMsg.h"
-#include "DiagonalMsg.h"
-#include "OneToOneMsg.h"
-#include "OneToAllMsg.h"
-#include "SparseMatrix.h"
-#include "SparseMsg.h"
-#include "Shell.h"
-#include "Dinfo.h"
-#include "Wildcard.h"
+#include "../msg/SingleMsg.h"
+#include "../msg/DiagonalMsg.h"
+#include "../msg/OneToOneMsg.h"
+#include "../msg/OneToAllMsg.h"
+#include "../msg/SparseMsg.h"
 
 // Want to separate out this search path into the Makefile options
 #include "../scheduling/Clock.h"
+
+#include "Shell.h"
+#include "Wildcard.h"
+
+using namespace std;
 
 const unsigned int Shell::OkStatus = ~0;
 const unsigned int Shell::ErrorStatus = ~1;
@@ -331,6 +333,8 @@ void Shell::doQuit()
 
 void Shell::doStart( double runtime, bool notify )
 {
+    auto t0 = std::chrono::high_resolution_clock::now();
+
     Id clockId( 1 );
     SetGet2< double, bool >::set( clockId, "start", runtime, notify );
 
@@ -341,13 +345,17 @@ void Shell::doStart( double runtime, bool notify )
      *-----------------------------------------------------------------------------*/
     vector< ObjId > streamers;
     wildcardFind( "/##[TYPE=Streamer]", streamers );
-    LOG( moose::debug,  "total streamers " << streamers.size( ) );
+    // LOG( moose::debug,  "total streamers " << streamers.size( ) );
     for( vector<ObjId>::const_iterator itr = streamers.begin()
             ; itr != streamers.end(); itr++ )
     {
         Streamer* pStreamer = reinterpret_cast<Streamer*>( itr->data( ) );
         pStreamer->cleanUp( );
     }
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+    if( notify )
+        cout << "Info: Total time taken " << std::chrono::duration<double>(t1-t0).count() << " sec." << endl;
 }
 
 bool isDoingReinit()
