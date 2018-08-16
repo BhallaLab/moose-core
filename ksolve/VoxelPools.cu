@@ -128,10 +128,6 @@ void VoxelPools::advance( const ProcInfo* p )
     //operate_0(N_x);
     double t = p->currTime - p->dt;
 
-//#ifdef USE_CUDA
-//    advance_on_cuda( 
-
-//#else
 #ifdef USE_GSL
     int status = gsl_odeiv2_driver_apply( driver_, &t, p->currTime, varS());
     if ( status != GSL_SUCCESS ) {

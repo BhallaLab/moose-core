@@ -423,19 +423,20 @@ public:
                           colIndexArg.begin(), colIndexArg.end() );
         rowStart_[rowNum + 1] = N_.size();
     }
-	/// Here we expose the sparse matrix for MOOSE use.
-	const vector< T >& matrixEntry() const
-	{
-		return N_;
-	}
-	const vector< unsigned int >& colIndex() const
-	{
-		return colIndex_;
-	}
-	const vector< unsigned int >& rowStart() const
-	{
-		return rowStart_;
-	}
+
+    /// Here we expose the sparse matrix for MOOSE use.
+    const vector< T >& matrixEntry() const
+    {
+        return N_;
+    }
+    const vector< unsigned int >& colIndex() const
+    {
+        return colIndex_;
+    }
+    const vector< unsigned int >& rowStart() const
+    {
+        return rowStart_;
+    }
     //////////////////////////////////////////////////////////////////
     // Operations on entire matrix.
     //////////////////////////////////////////////////////////////////
@@ -591,20 +592,21 @@ public:
         for ( unsigned int i = 0; i < len; ++i )
             trip[i]= Triplet< T >(z[i], row[i], col[i] );
         sort( trip.begin(), trip.end(), Triplet< T >::cmp );
-    	unsigned int nr = nrows_;
-    	unsigned int nc = ncolumns_;
-		if ( !retainSize ) {
-    		nr = trip.back().b_ + 1;
-    		nc = 0;
-    		for ( typename vector< Triplet< T > >::iterator i =
-                trip.begin(); i != trip.end(); ++i )
-    		{
-        		if ( nc < i->c_ )
-            		nc = i->c_;
-    		}
-    		nc++;
-		}
-   		setSize( nr, nc );
+        unsigned int nr = nrows_;
+        unsigned int nc = ncolumns_;
+        if ( !retainSize )
+        {
+            nr = trip.back().b_ + 1;
+            nc = 0;
+            for ( typename vector< Triplet< T > >::iterator i =
+                        trip.begin(); i != trip.end(); ++i )
+            {
+                if ( nc < i->c_ )
+                    nc = i->c_;
+            }
+            nc++;
+        }
+        setSize( nr, nc );
 
         vector< unsigned int > colIndex( nc );
         vector< T > entry( nc );

@@ -62,8 +62,8 @@
 #include "CudaKsolve.h"
 #include "cuda_ode_solver.h"
 
-#include "timer.h"
-#include "utils.h"
+#include "../external/cuda/timer.h"
+#include "../external/cuda/utils.h"
 
 // Declaration of some static variables.
 const unsigned int Clock::numTicks = 32;

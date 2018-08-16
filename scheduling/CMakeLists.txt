@@ -15,5 +15,17 @@ include_directories(../basecode)
 add_library(scheduling ${scheduling_SRC})
 
 if(WITH_CUDA)
+    SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_30,code=sm_30)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )
+    FILE(GLOB CUDA_SRC *.cu)
+    INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS})
+    CUDA_COMPILE(SCHEDULING_CUDA_OBJS ${CUDA_SRC})
+    CUDA_ADD_LIBRARY(scheduling_cuda ${SCHEDULING_CUDA_OBJS})
+    TARGET_LINK_LIBRARIES(scheduling_cuda 
+        ${CUDA_LIBRARIES} ${CUDA_cusparse_LIBRARY} ${CUDA_cublas_LIBRARY} 
+        )
+endif()
+
+if(WITH_CUDA)
     target_link_libraries( scheduling scheduling_cuda )
 endif(WITH_CUDA)

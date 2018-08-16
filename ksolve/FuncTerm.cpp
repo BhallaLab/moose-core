@@ -102,7 +102,7 @@ void FuncTerm::setTarget( unsigned int t )
 	target_ = t;
 }
 
-const unsigned int FuncTerm::getTarget() const
+unsigned int FuncTerm::getTarget() const
 {
 	return target_;
 }

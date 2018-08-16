@@ -121,15 +121,6 @@ class SeqSynHandler: public SynHandlerBase
 		 */
 		double sequencePower_;
 
-		/**
-		 * Exponent to use for the outcome of the sequential calculations.
-		 * This is needed because linear summation of terms in the kernel
-		 * means that a brief stong sequence match is no better than lots
-		 * of successive low matches. In other words, 12345 is no better
-		 * than 11111.
-		 */
-		double sequencePower_;
-
 		///////////////////////////////////////////
 		// Some readonly fields
 		double seqActivation_; // global activation if sequence recognized
