@@ -7,14 +7,13 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifdef ENABLE_CPP11
 #include <memory>
-#endif
+#include <numeric>
 
-#include "header.h"
+#include "../basecode/header.h"
 #include "RateTerm.h"
 #include "FuncTerm.h"
-#include "SparseMatrix.h"
+#include "../basecode/SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
@@ -405,7 +404,7 @@ void GssaVoxelPools::xferIn( XferInfo& xf,
     vector< double >::const_iterator j = xf.lastValues.begin() + offset;
     vector< double >::iterator m = xf.subzero.begin() + offset;
     double* s = varS();
-    bool hasChanged = false;
+    // bool hasChanged = false;
     for ( vector< unsigned int >::const_iterator
             k = xf.xferPoolIdx.begin(); k != xf.xferPoolIdx.end(); ++k )
     {

@@ -20,7 +20,7 @@ def moosedeleteChemSolver(modelRoot):
             st = moose.element(compt.path + '/stoich')
             st_ksolve = st.ksolve
             st_dsolve = st.dsolve
-            
+
             moose.delete(st)
             if moose.exists((st_ksolve).path):
                 moose.delete(st_ksolve)
@@ -46,15 +46,18 @@ def mooseaddChemSolver(modelRoot, solver):
      Add the solvers to Chemical compartment
     """
     compt = moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]')
-    if compt:
+    # at least one comparment is found.
+    if len(compt) > 0:
         comptinfo = moose.Annotator(moose.element(compt[0]).path + '/info')
         previousSolver = comptinfo.solver
         currentSolver = previousSolver
-        if solver == "Gillespie" or solver == "gssa":
+        if solver in [ "Gillespie", "gssa"]:
             currentSolver = "gssa"
-        elif solver == "Runge Kutta" or solver == "gsl":
+        elif solver in [ "Runge Kutta", "gsl" ]:
             currentSolver = "gsl"
-        elif solver == "Exponential Euler" or solver == "ee":
+        elif solver in [ "LSODA", "lsoda" ]:
+            solver = "lsoda"
+        elif solver in  ["Exponential Euler", "ee"]:
             currentSolver = "ee"
 
         if previousSolver != currentSolver:
@@ -94,65 +97,42 @@ def setCompartmentSolver(modelRoot, solver):
         for a,b in comptVol.items():
             if b == volSor:
                 compts.append(a)
-    
-    #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))] 
-    if ( len(compts) == '0'):
+
+    #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))]
+    if len(compts) == 0:
         print ("Atleast one compartment is required ")
         return
-    else:
-        if ( len(compts) > 3 ):
-            print ("Warning: setSolverOnCompt Cannot handle " ,  len(compts) , " chemical compartments\n")
-            return;
 
-        elif (len(compts) >1 ):
-            positionCompt(compts)
+    if len(compts) > 3:
+        print ("Warning: setSolverOnCompt cannot handle " + str(len(compts)) + \
+                " chemical compartments")
+        return;
 
-        fixXreacs( modelRoot )
+    positionCompt(compts)
+    fixXreacs( modelRoot )
 
-        for compt in compts:
-            if solver != 'ee':
-                if (solver == 'gsl') or (solver == 'Runge Kutta'):
-                    ksolve = moose.Ksolve(compt.path + '/ksolve')
-                if (solver == 'gssa') or (solver == 'Gillespie'):
-                    ksolve = moose.Gsolve(compt.path + '/gsolve')
-                
-                dsolve = moose.Dsolve(compt.path+'/dsolve')
-                stoich = moose.Stoich(compt.path + '/stoich')
-                stoich.compartment = compt
-                stoich.ksolve = ksolve
-                stoich.dsolve = dsolve
-                stoich.path = compt.path + "/##"
-        ksolveList = moose.wildcardFind(modelRoot+'/##[ISA=Ksolve]')
-        dsolveList = moose.wildcardFind(modelRoot+'/##[ISA=Dsolve]')
-        stoichList = moose.wildcardFind(modelRoot+'/##[ISA=Stoich]')
-        
-        i = 0
-        while(i < len(dsolveList)-1):
-            dsolveList[i+1].buildMeshJunctions(dsolveList[i])
-            i += 1
-        
-        print( " Solver is added to model path %s" % modelRoot )
-    '''
-    compts = moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]')
     for compt in compts:
-        if (solver == 'gsl') or (solver == 'Runge Kutta'):
-            ksolve = moose.Ksolve(compt.path + '/ksolve')
-        if (solver == 'gssa') or (solver == 'Gillespie'):
-            ksolve = moose.Gsolve(compt.path + '/gsolve')
-        if (solver != 'ee'):
+        ksolve, dsolve = None, None
+        if solver != 'ee':
+            if solver in [ 'gsl', 'Runge Kutta', 'lsoda' ]:
+                ksolve = moose.Ksolve(compt.path + '/ksolve')
+            elif solver in ['gssa', 'Gillespie']:
+                ksolve = moose.Gsolve(compt.path + '/gsolve')
+                dsolve = moose.Dsolve(compt.path+'/dsolve')
             stoich = moose.Stoich(compt.path + '/stoich')
             stoich.compartment = compt
             stoich.ksolve = ksolve
-            if moose.exists(compt.path):
-                stoich.path = compt.path + "/##"
-    stoichList = moose.wildcardFind(modelRoot + '/##[ISA=Stoich]')
-    if len(stoichList) == 2:
-        stoichList[1].buildXreacs(stoichList[0])
-    if len(stoichList) == 3:
-        stoichList[1].buildXreacs(stoichList[0])
-        stoichList[1].buildXreacs(stoichList[2])
+            if dsolve is not None:
+                stoich.dsolve = dsolve
+            stoich.path = compt.path + "/##"
 
-    for i in stoichList:
-        i.filterXreacs()
-    print( " Solver is added to model path %s" % modelRoot )
-    '''
+    ksolveList = moose.wildcardFind(modelRoot+'/##[ISA=Ksolve]')
+    dsolveList = moose.wildcardFind(modelRoot+'/##[ISA=Dsolve]')
+    stoichList = moose.wildcardFind(modelRoot+'/##[ISA=Stoich]')
+
+    i = 0
+    while(i < len(dsolveList)-1):
+        dsolveList[i+1].buildMeshJunctions(dsolveList[i])
+        i += 1
+
+    print("[INFO] Solver %s is added to model path %s" % (solver, modelRoot))

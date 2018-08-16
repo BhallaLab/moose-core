@@ -42,11 +42,16 @@ if type $PYTHON3 > /dev/null; then $PYTHON3 -m compileall -q . ; fi
 
 echo "Currently in `pwd`"
 (
-    mkdir -p _GSL_BUILD && cd _GSL_BUILD 
-    cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
+    MOOSE_INSTALL_PREFIX=/tmp/moose/usr
+    rm -rf $MOOSE_INSTALL_PREFIX && mkdir -p $MOOSE_INSTALL_PREFIX/{bin,lib}
+    mkdir -p _GSL_BUILD && cd _GSL_BUILD
+    cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" \
+        -DCMAKE_INSTALL_PREFIX=$MOOSE_INSTALL_PREFIX ..
     $MAKE && ctest --output-on-failure
-    sudo make install 
-    $PYTHON2 -c 'import moose;print(moose.__file__);print(moose.version())'
+    make install
+    PYMOOSE_LIB=$MOOSE_INSTALL_PREFIX/lib/python2.7
+    PYTHONPATH=$PYMOOSE_LIB/site-packages:$PYMOOSE_LIB/dist-packages \
+        $PYTHON2 -c 'import moose;print(moose.__file__);print(moose.version())'
 )
 
 (
@@ -59,8 +64,10 @@ echo "Currently in `pwd`"
 # This is only applicable on linux build.
 echo "Python3: Removed python2-networkx and install python3"
 if type $PYTHON3 > /dev/null; then
-    sudo apt-get remove -qq python-networkx
-    sudo apt-get install -qq python3-networkx
+    if type apt-get --help > /dev/null; then
+        sudo apt-get remove -qq python-networkx
+        sudo apt-get install -qq python3-networkx
+    fi
     (
         mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && \
             cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..

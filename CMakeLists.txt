@@ -296,10 +296,6 @@ if(WITH_MPI)
     endif()
 endif(WITH_MPI)
 
-# Always use private version of muparser. We have some custom edits.
-add_subdirectory(external/muparser)
-list(APPEND MOOSE_LIBRARIES muparser)
-
 # Add subdirectroeis
 add_subdirectory(basecode)
 add_subdirectory(msg)
@@ -320,6 +316,11 @@ add_subdirectory(benchmarks)
 add_subdirectory(kinetics)
 add_subdirectory(synapse)
 add_subdirectory(intfire)
+add_subdirectory(external/libsoda)
+add_subdirectory(external/muparser)
+
+list(APPEND MOOSE_LIBRARIES muparser)
+
 
 ###################################### LINKING #################################
 list(APPEND MOOSE_LIBRARIES
@@ -340,6 +341,7 @@ list(APPEND MOOSE_LIBRARIES
     signeur
     diffusion
     ksolve
+    lsoda
     device
     basecode
     )

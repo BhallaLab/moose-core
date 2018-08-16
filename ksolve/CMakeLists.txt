@@ -1,10 +1,13 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 include(CheckIncludeFileCXX)
 
 include_directories(../builtins ../basecode ../utility ../kinetics)
 include_directories(../ )
 include_directories(../mesh)
 include_directories(../external/muparser/include )
+
+find_package(Threads REQUIRED)
+
 IF(WITH_BOOST)
     check_include_file_cxx( ${Boost_INCLUDE_DIRS}/boost/numeric/odeint.hpp
         ODEINT_EXISTS)
@@ -22,6 +25,8 @@ if(PARALLELIZED_SOLVERS)
     message( STATUS "Parallel version of KSolve and Gsolve" )
     add_definitions( -DPARALLELIZE_KSOLVE_WITH_CPP11_ASYNC )
     add_definitions( -DPARALLELIZE_GSOLVE_WITH_CPP11_ASYNC )
+else()
+    message( STATUS "Serial version of KSolve and Gsolve" )
 endif(PARALLELIZED_SOLVERS)
 
 set(KSOLVE_SRCS

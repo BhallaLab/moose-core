@@ -294,12 +294,8 @@ namespace boost { namespace numeric { namespace bindings {
               || (jobvt == 'O' && traits::leading_dimension (vt) >= 1)
               || (jobvt == 'A' && traits::leading_dimension (vt) >= n)
               || (jobvt == 'S' && traits::leading_dimension (vt) >= minmn));
-#ifndef BOOST_NUMERIC_BINDINGS_POOR_MANS_TRAITS
-      typedef typename traits::matrix_traits<MatrA>::value_type val_t;
-#else
-      typedef typename MatrA::value_type val_t;
-#endif
-      assert (traits::vector_size(w) >= detail::gesvd_min_work(val_t(),m,n));
+
+      // assert (traits::vector_size(w) >= detail::gesvd_min_work(val_t(),m,n));
 
       int info;
       detail::gesvd (jobu, jobvt, m, n,
@@ -361,13 +357,9 @@ namespace boost { namespace numeric { namespace bindings {
               || (jobvt == 'O' && traits::leading_dimension (vt) >= 1)
               || (jobvt == 'A' && traits::leading_dimension (vt) >= n)
               || (jobvt == 'S' && traits::leading_dimension (vt) >= minmn));
-#ifndef BOOST_NUMERIC_BINDINGS_POOR_MANS_TRAITS
-      typedef typename traits::matrix_traits<MatrA>::value_type val_t;
-#else
-      typedef typename MatrA::value_type val_t;
-#endif
-      assert (traits::vector_size(w) >= detail::gesvd_min_work(val_t(),m,n));
-      assert (traits::vector_size(rw) >= detail::gesvd_rwork(val_t(),m,n));
+
+      // assert (traits::vector_size(w) >= detail::gesvd_min_work(val_t(),m,n));
+      // assert (traits::vector_size(rw) >= detail::gesvd_rwork(val_t(),m,n));
 
       int info;
       detail::gesvd (jobu, jobvt, m, n,
