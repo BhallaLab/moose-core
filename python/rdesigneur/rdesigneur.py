@@ -20,21 +20,23 @@ from __future__ import print_function, absolute_import
 
 import imp
 import os
-import moose
 import numpy as np
 import math
 import itertools
 import sys
 import time
 
+# Call rdesigneur before moose so that moogul can set the matplotlib backend.
 import rdesigneur.rmoogli as rmoogli
 from rdesigneur.rdesigneurProtos import *
 import fixXreacs
+
 #from . import fixXreacs
 #from rdesigneur.rmoogli import *
 #import rmoogli
 #from rdesigneurProtos import *
 
+import moose
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
 
@@ -42,7 +44,7 @@ from moose.neuroml.ChannelML import ChannelML
 # in future, so other imports have been removed.
 try:
   from lxml import etree
-except ImportError:
+except ImportError as e:
   import xml.etree.ElementTree as etree
 
 import csv
@@ -78,7 +80,7 @@ class rdesigneur:
             stealCellFromLibrary = False,
             verbose = True,
             diffusionLength= 2e-6,
-            meshLambda = -1.0,    #This is a backward compatibility hack
+            meshLambda = -1.0,      #This is a backward compatibility hack
             temperature = 32,
             chemDt= 0.1,            # Much finer than MOOSE, for multiscale
             diffDt= 0.01,           # 10x finer than MOOSE, for multiscale
@@ -99,6 +101,7 @@ class rdesigneur:
             stimList = [],
             plotList = [],
             moogList = [],
+            ode_method = 'rk5',
             params = None
         ):
         """ Constructor of the rdesigner. This just sets up internal fields
@@ -108,6 +111,7 @@ class rdesigneur:
         self.modelPath = modelPath
         self.turnOffElec = turnOffElec
         self.useGssa = useGssa
+        self.ode_method = ode_method
         self.combineSegments = combineSegments
         self.stealCellFromLibrary = stealCellFromLibrary
         self.verbose = verbose
@@ -1320,6 +1324,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             raise BuildError( "configureSolvers: no chem meshes defined." )
         fixXreacs.fixXreacs( self.chemid.path )
         dmksolve = moose.Ksolve( self.dendCompt.path + '/ksolve' )
+        dmksolve.method = self.ode_method
         dmdsolve = moose.Dsolve( self.dendCompt.path + '/dsolve' )
         dmstoich = moose.Stoich( self.dendCompt.path + '/stoich' )
         dmstoich.compartment = self.dendCompt
@@ -1333,6 +1338,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 smksolve = moose.Gsolve( self.spineCompt.path + '/ksolve' )
             else:
                 smksolve = moose.Ksolve( self.spineCompt.path + '/ksolve' )
+                smksolve.method = self.ode_method
             smdsolve = moose.Dsolve( self.spineCompt.path + '/dsolve' )
             smstoich = moose.Stoich( self.spineCompt.path + '/stoich' )
             smstoich.compartment = self.spineCompt
@@ -1344,6 +1350,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 pmksolve = moose.Gsolve( self.psdCompt.path + '/ksolve' )
             else:
                 pmksolve = moose.Ksolve( self.psdCompt.path + '/ksolve' )
+                pmksolve.method = self.ode_method
             pmdsolve = moose.Dsolve( self.psdCompt.path + '/dsolve' )
             pmstoich = moose.Stoich( self.psdCompt.path + '/stoich' )
             pmstoich.compartment = self.psdCompt

@@ -9,9 +9,22 @@
 
 #include <string>
 #include <algorithm>
+#include <chrono>
+#include <cstdlib>
 
-using namespace std;
+#include "../basecode/header.h"
+#include "../basecode/global.h"
+#include "../basecode/SparseMatrix.h"
+#include "../basecode/Dinfo.h"
 
+#include "../msg/SingleMsg.h"
+#include "../msg/DiagonalMsg.h"
+#include "../msg/OneToOneMsg.h"
+#include "../msg/OneToAllMsg.h"
+#include "../msg/SparseMsg.h"
+
+// Want to separate out this search path into the Makefile options
+#include "../scheduling/Clock.h"
 
 #include "../basecode/header.h"
 #include "../basecode/global.h"
@@ -25,8 +38,7 @@ using namespace std;
 #include "Shell.h"
 #include "Wildcard.h"
 
-// Want to separate out this search path into the Makefile options
-#include "../scheduling/Clock.h"
+using namespace std;
 
 const unsigned int Shell::OkStatus = ~0;
 const unsigned int Shell::ErrorStatus = ~1;
@@ -43,12 +55,13 @@ bool Shell::doReinit_( 0 );
 bool Shell::isParserIdle_( 0 );
 double Shell::runtime_( 0.0 );
 
+double Shell::clock_time_( 0.0 );
+bool Shell::notify_( false );
+
 const Cinfo* Shell::initCinfo()
 {
 
-////////////////////////////////////////////////////////////////
-// Value Finfos
-////////////////////////////////////////////////////////////////
+    // Value Finfos
     static ReadOnlyValueFinfo< Shell, bool > isRunning(
         "isRunning",
         "Flag: Checks if simulation is in progress",
@@ -60,9 +73,7 @@ const Cinfo* Shell::initCinfo()
         &Shell::setCwe,
         &Shell::getCwe );
 
-////////////////////////////////////////////////////////////////
-// Dest Finfos: Functions handled by Shell
-////////////////////////////////////////////////////////////////
+    // Dest Finfos: Functions handled by Shell
     static DestFinfo handleUseClock( "useClock",
                                      "Deals with assignment of path to a given clock."
                                      " Arguments: path, field, tick number. ",
@@ -160,7 +171,12 @@ Shell::Shell()
 
 Shell::~Shell()
 {
-    ;
+    string notifyEnvVar = "";
+    if( std::getenv( "MOOSE_NOTIFY" ) )
+        notifyEnvVar = string( std::getenv( "MOOSE_NOTIFY" ) );
+
+    if( notify_ || notifyEnvVar.size() > 0 )
+        cout << "Info: Clock time " << clock_time_ << " sec." << endl;
 }
 
 void Shell::setShellElement( Element* shelle )
@@ -331,6 +347,10 @@ void Shell::doQuit()
 
 void Shell::doStart( double runtime, bool notify )
 {
+    Shell::notify_ = notify;
+
+    auto t0 = std::chrono::high_resolution_clock::now();
+
     Id clockId( 1 );
     SetGet2< double, bool >::set( clockId, "start", runtime, notify );
 
@@ -339,14 +359,19 @@ void Shell::doStart( double runtime, bool notify )
      of Streamer class *  objects. The purpose of this is to
      write whatever is left in tables to *  the output file.
      *-----------------------------------------------------------------------------*/
-    vector< ObjId > streamers; wildcardFind( "/##[TYPE=Streamer]", streamers );
-
+    vector< ObjId > streamers;
+    wildcardFind( "/##[TYPE=Streamer]", streamers );
+    // LOG( moose::debug,  "total streamers " << streamers.size( ) );
     for( vector<ObjId>::const_iterator itr = streamers.begin()
             ; itr != streamers.end(); itr++ )
     {
         Streamer* pStreamer = reinterpret_cast<Streamer*>( itr->data( ) );
         pStreamer->cleanUp( );
     }
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+    double s = std::chrono::duration<double>(t1-t0).count();
+    clock_time_ += s;
 }
 
 bool isDoingReinit()

@@ -296,18 +296,27 @@ double Ksolve::getEpsAbs() const
     return epsAbs_;
 }
 
+double Ksolve::getEpsRel() const
+{
+    return epsRel_;
+}
+
+double Ksolve::getRelativeAccuracy( ) const
+{
+    return getEpsRel();
+}
+
+double Ksolve::getAbsoluteAccuracy( ) const
+{
+    return getEpsAbs();
+}
+
 void Ksolve::setEpsAbs( double epsAbs )
 {
     if ( epsAbs < 0 )
         epsAbs_ = 1.0e-4;
     else
         epsAbs_ = epsAbs;
-}
-
-
-double Ksolve::getEpsRel() const
-{
-    return epsRel_;
 }
 
 void Ksolve::setEpsRel( double epsRel )
