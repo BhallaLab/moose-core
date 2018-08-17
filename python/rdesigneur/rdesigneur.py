@@ -1364,7 +1364,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             comptdict['dend'] = self.dendCompt
 
         if 'dend' in comptdict and 'spine' in comptdict:
-            print( "comptdict = {}".format (comptdict ) )
+            #print( "comptdict = {}".format (comptdict ) )
             self.dendCompt.separateSpines = 1
             self.spineCompt = moose.SpineMesh( newChemid.path + '/spine' )
             moose.connect( self.dendCompt, 'spineListOut', self.spineCompt, 'spineList' )
@@ -1429,6 +1429,8 @@ rdesigneur.rmoogli.updateMoogliViewer()
             pmstoich.compartment = self.psdCompt
             pmstoich.ksolve = pmksolve
             pmstoich.dsolve = pmdsolve
+            if len( moose.wildcardFind( 'self.psdCompt.path/##[ISA=PoolBase]' ) ) == 0:
+                moose.Pool( self.psdCompt.path + '/dummy' )
             pmstoich.path = self.psdCompt.path + "/##"
 
             # Here we should test what kind of geom we have to use
