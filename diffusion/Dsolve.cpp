@@ -393,6 +393,7 @@ void Dsolve::calcJnXfer( const DiffJunction& jn,
 
 void Dsolve::calcJnChan( const DiffJunction& jn, Dsolve* other, double dt )
 {
+
     // Each jn has some channels
     // Each channel has a chanPool, an intPool and an extPool.
     // intPool is on self, extPool is on other, but we have a problem
@@ -436,11 +437,13 @@ void Dsolve::calcJnChan( const DiffJunction& jn, Dsolve* other, double dt )
             otherDv.setN( j->second, otherN );
         }
     }
+
 }
 
 // Same as above, but now go through channels on other Dsolve.
 void Dsolve::calcOtherJnChan( const DiffJunction& jn, Dsolve* other, double dt )
 {
+
     for ( unsigned int i = 0; i < jn.otherChannels.size(); ++i )
     {
         ConcChanInfo& otherChan = other->channels_[ jn.otherChannels[i] ];
@@ -581,6 +584,7 @@ void Dsolve::setStoich( Id id )
 
 void Dsolve::fillConcChans( const vector< ObjId >& chans )
 {
+
     static const Cinfo* ccc = Cinfo::find( "ConcChan" );
     static const Finfo* inPoolFinfo = ccc->findFinfo( "inPool" );
     static const Finfo* outPoolFinfo = ccc->findFinfo( "outPool" );
