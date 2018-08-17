@@ -393,16 +393,17 @@ void Dsolve::calcJnXfer( const DiffJunction& jn,
 
 void Dsolve::calcJnChan( const DiffJunction& jn, Dsolve* other, double dt )
 {
-
     // Each jn has some channels
     // Each channel has a chanPool, an intPool and an extPool.
-    // intPool is on self, extPool is on other, but we have a problem
+    // chanPool and intPool must be on self, extPool is on other. In
+    // cases where the intPool is on other, it attempts to swap the
+    // int and ext pools, but this too could fail
     // because the chanPool could be a third compartment, such as the memb
-    // If we stipulate it is is on self, that is easy but not general.
+    //
+    // Don't have a solution for this case as yet.
     // Other alternative is to have a message to update the N of the chan,
     // so it isn't in the domain of the solver at all except for here.
     // In which case we will want to point to the Moose object for it.
-    //
     //
 
     for ( unsigned int i = 0; i < jn.myChannels.size(); ++i )
@@ -411,12 +412,6 @@ void Dsolve::calcJnChan( const DiffJunction& jn, Dsolve* other, double dt )
         DiffPoolVec& myDv = pools_[ myChan.myPool ];
         DiffPoolVec& otherDv = other->pools_[ myChan.otherPool ];
         DiffPoolVec& chanDv = pools_[ myChan.chanPool ];
-        /*
-        DiffPoolVec& myDv = pools_[ jn.myPools[myChan.myPool] ];
-        DiffPoolVec& otherDv =
-        		other->pools_[ jn.otherPools[myChan.otherPool] ];
-        DiffPoolVec& chanDv = pools_[ jn.myPools[myChan.chanPool] ];
-        */
         for ( vector< VoxelJunction >::const_iterator
                 j = jn.vj.begin(); j != jn.vj.end(); ++j )
         {
@@ -424,7 +419,8 @@ void Dsolve::calcJnChan( const DiffJunction& jn, Dsolve* other, double dt )
             double myN = myDv.getN( j->first );
             double lastN = myN;
             double otherN = otherDv.getN( j->second );
-            double perm = myChan.permeability * chanDv.getN( j->first );
+            double chanN = chanDv.getN( j->first );
+            double perm = myChan.permeability * chanN / NA;
             myN = integ( myN, perm * myN/j->firstVol,
                          perm * otherN/j->secondVol, dt );
             otherN += lastN - myN;	// Mass consv
@@ -437,13 +433,11 @@ void Dsolve::calcJnChan( const DiffJunction& jn, Dsolve* other, double dt )
             otherDv.setN( j->second, otherN );
         }
     }
-
 }
 
 // Same as above, but now go through channels on other Dsolve.
 void Dsolve::calcOtherJnChan( const DiffJunction& jn, Dsolve* other, double dt )
 {
-
     for ( unsigned int i = 0; i < jn.otherChannels.size(); ++i )
     {
         ConcChanInfo& otherChan = other->channels_[ jn.otherChannels[i] ];
@@ -462,7 +456,8 @@ void Dsolve::calcOtherJnChan( const DiffJunction& jn, Dsolve* other, double dt )
             double myN = myDv.getN( j->first );
             double lastN = myN;
             double otherN = otherDv.getN( j->second );
-            double perm = otherChan.permeability * chanDv.getN(j->second);
+            double chanN = chanDv.getN( j->second );
+            double perm = otherChan.permeability * chanN / NA;
             myN = integ( myN, perm * myN/j->firstVol,
                          perm * otherN/j->secondVol, dt );
             otherN += lastN - myN;	// Mass consv
@@ -584,7 +579,6 @@ void Dsolve::setStoich( Id id )
 
 void Dsolve::fillConcChans( const vector< ObjId >& chans )
 {
-
     static const Cinfo* ccc = Cinfo::find( "ConcChan" );
     static const Finfo* inPoolFinfo = ccc->findFinfo( "inPool" );
     static const Finfo* outPoolFinfo = ccc->findFinfo( "outPool" );
@@ -609,21 +603,26 @@ void Dsolve::fillConcChans( const vector< ObjId >& chans )
         if (i->element()->getNeighbors( ret, chanPoolFinfo ) == 0 ) return;
         ObjId chanPool( ret[0] );
         ret.clear();
-        /*
-        ObjId inPool = i->element()->findCaller( fin );
-        ObjId chanPool = i->element()->findCaller( fchan );
-        ObjId outPool = i->element()->findCaller( fout );
-        */
+        unsigned int outPoolValue = outPool.id.value();
+        bool swapped = false;
         if ( !( inPool.bad() or chanPool.bad() ) )
         {
             unsigned int inPoolIndex = convertIdToPoolIndex( inPool.id );
             unsigned int chanPoolIndex = convertIdToPoolIndex(chanPool.id);
-            if ( inPoolIndex != ~0U && chanPoolIndex != ~0U )
+            if ( inPoolIndex == ~0U )   // Swap in and out as chan is symm
             {
-                ConcChanInfo cci( inPoolIndex, outPool.id.value(),
-                                  chanPoolIndex,
-                                  Field< double >::get( *i, "permeability" )
-                                );
+                inPoolIndex = convertIdToPoolIndex( outPool.id );
+                outPoolValue = inPool.id.value();
+                swapped = true;
+            }
+            if ( ( inPoolIndex != ~0U) && (chanPoolIndex != ~0U ) )
+            {
+                ConcChanInfo cci(
+                    inPoolIndex, outPoolValue, chanPoolIndex,
+                    Field< double >::get( *i, "permeability" ),
+                    ////// Fix it below ////////
+                    swapped
+                );
                 channels_.push_back( cci );
             }
         }
@@ -964,22 +963,26 @@ void Dsolve::mapChansBetweenDsolves( DiffJunction& jn, Id self, Id other)
     unsigned int outIndex;
     for ( unsigned int i = 0; i < ch.size(); ++i )
     {
+        unsigned int chanIndex = ch[i].chanPool;
         outIndex = otherSolve->convertIdToPoolIndex( ch[i].otherPool );
-        if ( outIndex != ~0U )
+        if ( (outIndex != ~0U) && (chanIndex != ~0U ) )
         {
             jn.myChannels.push_back(i);
             ch[i].otherPool = outIndex;	// replace the Id with the index.
+            ch[i].chanPool = chanIndex; //chanIndex may be on either Dsolve
         }
     }
     // Now set up the other Dsolve.
     vector< ConcChanInfo >& ch2 = otherSolve->channels_;
     for ( unsigned int i = 0; i < ch2.size(); ++i )
     {
+        unsigned int chanIndex = ch2[i].chanPool;
         outIndex = selfSolve->convertIdToPoolIndex( ch2[i].otherPool );
-        if ( outIndex != ~0U )
+        if ( (outIndex != ~0U) && (chanIndex != ~0U) )
         {
             jn.otherChannels.push_back(i);
             ch2[i].otherPool = outIndex;  // replace the Id with the index
+            ch2[i].chanPool = chanIndex;  //chanIndex may be on either Dsolve
         }
     }
 }
