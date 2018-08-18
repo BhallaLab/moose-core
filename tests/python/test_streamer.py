@@ -88,9 +88,9 @@ def test( ):
 
     # Now create a streamer and use it to write to a stream
     st = moose.Streamer( '/compt/streamer' )
-    st.outfile = os.path.join( os.getcwd(), 'temp.npy' )
+    st.outfile = os.path.join( os.getcwd(), 'temp.csv' )
     print(("outfile set to: %s " % st.outfile ))
-    assert st.outfile  == os.path.join( os.getcwd(), 'temp.npy' ), st.outfile
+    assert st.outfile  == os.path.join( os.getcwd(), 'temp.csv' ), st.outfile
 
     st.addTable( tabA )
     st.addTables( [ tabB, tabC ] )
@@ -112,7 +112,7 @@ def test( ):
     # Total rows should be 58 (counting zero as well).
     # print(data)
     # print( data.dtype )
-    time = data['time']
+    time = data[0,:]
     print( time )
     assert data.shape >= (58,), data.shape
     print( '[INFO] Test 2 passed' )
