@@ -9,9 +9,10 @@
 
 #include <string>
 #include <algorithm>
+#include <cctype>
+#include <clocale>
 
 using namespace std;
-
 
 #include "header.h"
 #include "global.h"
@@ -377,6 +378,30 @@ void Shell::doStop( )
 void Shell::doSetClock( unsigned int tickNum, double dt )
 {
     LookupField< unsigned int, double >::set( ObjId( 1 ), "tickDt", tickNum, dt );
+}
+
+void Shell::doSetClockByClassName( char* cl_name , double dt )
+{
+    string className( cl_name );
+
+    // Remove prefix moose. if there is any and make first character uppercase
+    // (helpful).
+    std::transform( className.begin(), className.end(), className.begin(), ::tolower );
+
+    if( className.substr(0, 6) == "moose." )
+        className.erase(0, 6);
+
+    // Make first character uppercase.
+    className[0] = toupper( className[0] );
+    if( className.size() == 0 )
+        cerr << "Warn: In setClock function: Invalid class name " << className << endl;
+
+    // First find the tick value of given class.
+    unsigned int tickNum = LookupField<string, unsigned int>::get( ObjId(1), "defaultTick", className );
+    if( tickNum > 0 )
+        doSetClock( tickNum, dt );
+    else
+        cerr << "Warn: In setClock function: MOOSE class " << className << " is not valid. Ignoring!" << endl;
 }
 
 void Shell::doUseClock( string path, string field, unsigned int tick )

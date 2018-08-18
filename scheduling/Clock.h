@@ -42,8 +42,10 @@ class Clock
 
     void setTickStep( unsigned int i, unsigned int v );
     unsigned int getTickStep( unsigned int i ) const;
+
     void setTickDt( unsigned int i, double v );
     double getTickDt( unsigned int i ) const;
+
     unsigned int getDefaultTick( string className ) const;
 
     vector< double > getDts() const;

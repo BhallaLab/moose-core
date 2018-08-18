@@ -476,6 +476,9 @@ public:
     // the parser so it is a Shell function too.
     void doSetClock( unsigned int tickNum, double dt );
 
+    // Set clock by class name. helper function.
+    void doSetClockByClassName( char* const className, double dt );
+
     // Should set these up as streams so that we can build error
     // messages similar to cout.
     void warning( const string& text );

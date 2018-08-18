@@ -187,8 +187,7 @@ const Cinfo* Clock::initCinfo()
         &Clock::isRunning
     );
 
-    static LookupValueFinfo< Clock, unsigned int, unsigned int >
-    tickStep(
+    static LookupValueFinfo< Clock, unsigned int, unsigned int> tickStep(
         "tickStep",
         "Step size of specified Tick, as integral multiple of dt_"
         " A zero step size means that the Tick is inactive",

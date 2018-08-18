@@ -1640,33 +1640,59 @@ PyObject * moose_useClock(PyObject * dummy, PyObject * args)
 
 
 PyDoc_STRVAR(moose_setClock_documentation,
-             "setClock(tick, dt)\n"
-             "\n"
-             "set the ticking interval of `tick` to `dt`.\n"
-             "\n"
-             "A tick with interval `dt` will call the functions scheduled on that tick every `dt` timestep.\n"
-             "\n"
-             "Parameters\n"
-             "----------\n"
-             "    tick : int\n"
-             "        tick number\n"
-             "    dt : double\n"
-             "        ticking interval\n");
+            "setClock( tickNumberOrClassName, dt)\n"
+            "\n"
+            "set the ticking interval of a given `tick` or class to `dt`.\n"
+            "\n"
+            "A tick with interval `dt` will call the functions scheduled on that tick every `dt` timestep.\n"
+            "\n"
+            "Parameters\n"
+            "----------\n"
+            "    tickOrClassName: tick (int) or className(string)\n"
+            "    dt : double\n"
+            "        ticking interval\n"
+            "Examples:\n"
+            "     moose.setClock( 16, 0.1) \n"
+            "     moose.setClock( 'Ksolve', 0.1) \n"
+            " Both set moose.Ksolve to `tick` at every 0.1 second. The later is easier to remember. \n"
+            );
 
 PyObject * moose_setClock(PyObject * dummy, PyObject * args)
 {
-    unsigned int tick;
-    double dt;
-    if(!PyArg_ParseTuple(args, "Id:moose_setClock", &tick, &dt))
+    unsigned int tick=0;
+    char* className;
+    double dt = 0.0;
+
+    // check the type of first argument in args. Call appropriate overloaded
+    // function in Clock.cpp .
+    PyObject* firstArg = PyTuple_GetItem( args, 0 );
+    if( PyInt_Check(firstArg))
     {
+        if(!PyArg_ParseTuple(args, "Id:moose_setClock", &tick, &dt))
+            return NULL;
+    }
+    else if( PyString_Check(firstArg) )
+    {
+        if( !PyArg_ParseTuple(args, "sd", &className, &dt) )
+            return NULL;
+    }
+    else
+    {
+        PyErr_SetString( PyExc_ValueError, "First argument to setClock must be either positive integer or class name." );
         return NULL;
     }
-    if (dt < 0)
+
+    if (dt <= 0)
     {
         PyErr_SetString(PyExc_ValueError, "dt must be positive.");
         return NULL;
     }
-    SHELLPTR->doSetClock(tick, dt);
+
+    if( tick > 0 )
+        SHELLPTR->doSetClock(tick, dt);
+    else
+        SHELLPTR->doSetClockByClassName(className, dt);
+
     Py_RETURN_NONE;
 }
 
