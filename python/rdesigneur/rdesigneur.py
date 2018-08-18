@@ -1009,9 +1009,11 @@ rdesigneur.rmoogli.updateMoogliViewer()
     def _buildStims( self ):
         knownFields = {
                 'inject':('CompartmentBase', 'setInject'),
-                'Ca':('CaConcBase', 'getCa'),
+                'Ca':('CaConcBase', 'setCa'),
                 'n':('PoolBase', 'setN'),
                 'conc':('PoolBase', 'setConc'),
+                'nInit':('PoolBase', 'setNinit'),
+                'concInit':('PoolBase', 'setConcInit'),
                 'vclamp':('CompartmentBase', 'setInject'),
                 'randsyn':('SynChan', 'addSpike'),
                 'periodicsyn':('SynChan', 'addSpike')
@@ -1044,8 +1046,8 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 k += 1
                 func = moose.Function( funcname )
                 func.expr = i[4]
-                if i[3] == 'vclamp': # Hack to clean up initial condition
-                    func.doEvalAtReinit = 1
+                #if i[3] == 'vclamp': # Hack to clean up initial condition
+                func.doEvalAtReinit = 1
                 for q in stimObj3:
                     moose.connect( func, 'valueOut', q, stimField )
 
