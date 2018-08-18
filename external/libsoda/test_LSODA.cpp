@@ -60,7 +60,7 @@ int test_github_system( void )
 
     for (size_t i = 0; i < 10; i++)
     {
-        lsoda.lsoda_update( system_github_issue_10, 2, y, yout, &t, tout, &istate, nullptr );
+        lsoda.lsoda_update( system_github_issue_10, 2, y, yout, &t, tout, &istate, nullptr, 1e-6, 1e-6 );
         res.push_back( yout[1] );
         res.push_back( yout[2] );
         tout += 0.5;
