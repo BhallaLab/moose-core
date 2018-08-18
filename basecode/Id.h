@@ -175,7 +175,7 @@ private:
 };
 
 namespace std {
-	template <> class hash<Id>{
+	template <> struct hash<Id>{
 			public :
 			size_t operator()(const Id &x ) const{
 			return hash<unsigned int>()( x.value() );
