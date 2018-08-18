@@ -1660,7 +1660,7 @@ PyDoc_STRVAR(moose_setClock_documentation,
 PyObject * moose_setClock(PyObject * dummy, PyObject * args)
 {
     unsigned int tick=0;
-    char* className;
+    string className;
     double dt = 0.0;
 
     // check the type of first argument in args. Call appropriate overloaded

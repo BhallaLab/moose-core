@@ -380,10 +380,8 @@ void Shell::doSetClock( unsigned int tickNum, double dt )
     LookupField< unsigned int, double >::set( ObjId( 1 ), "tickDt", tickNum, dt );
 }
 
-void Shell::doSetClockByClassName( char* cl_name , double dt )
+void Shell::doSetClockByClassName( string& className , double dt )
 {
-    string className( cl_name );
-
     // Remove prefix moose. if there is any and make first character uppercase
     // (helpful).
     std::transform( className.begin(), className.end(), className.begin(), ::tolower );
