@@ -380,7 +380,7 @@ void Shell::doSetClock( unsigned int tickNum, double dt )
     LookupField< unsigned int, double >::set( ObjId( 1 ), "tickDt", tickNum, dt );
 }
 
-void Shell::doSetClockByClassName( string& className , double dt )
+void Shell::doSetClockByClassName( string className , double dt )
 {
     // Remove prefix moose. if there is any and make first character uppercase
     // (helpful).

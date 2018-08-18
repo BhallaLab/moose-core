@@ -477,7 +477,7 @@ public:
     void doSetClock( unsigned int tickNum, double dt );
 
     // Set clock by class name. helper function.
-    void doSetClockByClassName( string& className, double dt );
+    void doSetClockByClassName( string className, double dt );
 
     // Should set these up as streams so that we can build error
     // messages similar to cout.
