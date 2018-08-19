@@ -816,7 +816,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 mn = 0
             ax.set_ylim( mn, mx )
             line, = plt.plot( range( len( vtab ) ), vpts[0] )
-            timeLabel = plt.text( len(vtab ) * 0.05, mn + 0.9*mx, 'time = 0' )
+            timeLabel = plt.text( len(vtab ) * 0.05, mn + 0.9*(mx-mn), 'time = 0' )
             self.wavePlotNames[wpn].append( [fig, line, vpts, timeLabel] )
             fig.canvas.draw()
 
