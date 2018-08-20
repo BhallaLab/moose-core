@@ -17,10 +17,8 @@
 #include <sstream>
 
 
-#ifdef  USE_BOOST
-//#ifdef BOOST_FILESYSTEM_EXISTS
+#ifdef  USE_BOOST_FILESYSTEM
 #include <boost/filesystem.hpp>
-//#endif                                          /* BOOST_FILESYSTEM_EXISTS */
 #endif
 
 #include "randnum/RNG.h"                        /* Use inbuilt rng */
