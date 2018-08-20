@@ -130,6 +130,7 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
 # If using BOOST ODE2 library to solve ODE system, then don't use GSL.
 if(WITH_BOOST_ODE OR WITH_BOOST)
+    message(STATUS "Turning off GSL")
     set(WITH_GSL OFF)
 endif()
 
@@ -140,6 +141,7 @@ set_target_properties(libmoose PROPERTIES PREFIX "")
 
 ## Variable to collect all static libraries.
 set(STATIC_LIBRARIES "" )
+
 # Collect all shared libraries here.
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 
@@ -166,14 +168,16 @@ if(WITH_GSL)
     # GSL is also used in RNG (whenever applicable), therefore include paths are
     # top level.
     include_directories( ${GSL_INCLUDE_DIRS} )
-elseif(WITH_BOOST OR WITH_BOOST_ODE)
+endif()
+
+if(WITH_BOOST OR WITH_BOOST_ODE)
     find_package(Boost 1.44 REQUIRED)
     find_package( LAPACK REQUIRED )
 endif()
 
 # if boost ode is being used, don't use GSL.
 if(WITH_BOOST_ODE OR WITH_BOOST)
-    add_definitions(-DUSE_BOOST_ODE -DWITH_BOOST -UUSE_GSL)
+    add_definitions(-DUSE_BOOST_ODE -DUSE_BOOST -UUSE_GSL)
 endif()
 
 
@@ -255,10 +259,10 @@ if(WITH_MPI)
     endif()
 endif(WITH_MPI)
 
-if(WITH_BOOST)
+if(WITH_BOOST OR WITH_BOOST_ODE)
     list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES})
     list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
-endif(WITH_BOOST)
+endif()
 
 if(PARALLELIZED_SOLVERS)
     list(APPEND SYSTEM_SHARED_LIBS ${CMAKE_THREAD_LIBS_INIT})
@@ -348,7 +352,7 @@ list(APPEND MOOSE_LIBRARIES
 list(REMOVE_DUPLICATES STATIC_LIBRARIES)
 if(SYSTEM_SHARED_LIBS)
     list(REMOVE_DUPLICATES SYSTEM_SHARED_LIBS)
-endif( )
+endif()
 
 # MAC linker does not understand many of gnu-ld options.
 message( STATUS "Shared libs: ${SYSTEM_SHARED_LIBS}")
@@ -375,9 +379,9 @@ endif(MACOSX)
 
 add_dependencies(moose.bin libmoose)
 target_link_libraries(moose.bin moose ${CMAKE_DL_LIBS})
-if( WITH_BOOST )
+if( WITH_BOOST_ODE )
     target_link_libraries( moose.bin ${Boost_LIBRARIES} )
-endif( WITH_BOOST )
+endif( )
 
 
 ######################### BUILD PYMOOSE ########################################

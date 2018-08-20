@@ -115,7 +115,7 @@ void VoxelPools::advance( const ProcInfo* p )
 
         pLSODA->lsoda_update( &VoxelPools::lsodaSys, size()
                 , Svec(), yout , &t
-                , p->currTime, &lsodaState, this 
+                , p->currTime, &lsodaState, this
                 );
 
         // Now update the y from yout. This is different thant normal GSL or
@@ -150,7 +150,7 @@ void VoxelPools::advance( const ProcInfo* p )
             assert( 0 );
         }
 
-#elif USE_BOOST
+#elif USE_BOOST_ODE
     // NOTE: Make sure to assing vp to BoostSys vp. In next call, it will be used by
     // updateRates func. Unlike gsl call, we can't pass extra void*  to gslFunc.
     VoxelPools* vp = reinterpret_cast< VoxelPools* >( sys_.params );
