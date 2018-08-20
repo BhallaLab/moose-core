@@ -77,12 +77,13 @@ else()
 endif()
 
 ################################ CMAKE OPTIONS ##################################
-option(DEBUG "Build with debug support" OFF)
-option(GPROF "Build for profiling using gprof" OFF)
-option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
-option(WITH_MPI  "Enable Openmpi support" OFF)
-option(WITH_BOOST "Use boost library instead of GSL" OFF)
-option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
+option(DEBUG                "Build with debug support" OFF)
+option(GPROF                "Build for profiling using gprof" OFF)
+option(ENABLE_UNIT_TESTS    "Enable unit tests (DEBUG should also be ON)" OFF)
+option(WITH_MPI             "Enable Openmpi support" OFF)
+option(WITH_BOOST           "Enabled BOOST based solvers" OFF)
+option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" OFF)
+option(WITH_GSL             "Use gsl-library. Alternative is WITH_BOOST" ON)
 option(PARALLELIZED_SOLVERS "Use parallel version of GSOLVE. (alpha)" OFF )
 option(PARALLELIZED_CLOCK "High level parallelization of moose::Clock (alpha)" OFF )
 
@@ -127,9 +128,10 @@ add_executable(moose.bin basecode/main.cpp)
 # default include paths.
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
-if(WITH_BOOST)
+# If using BOOST ODE2 library to solve ODE system, then don't use GSL.
+if(WITH_BOOST_ODE OR WITH_BOOST)
     set(WITH_GSL OFF)
-endif(WITH_BOOST)
+endif()
 
 include_directories(msg basecode)
 
@@ -164,18 +166,14 @@ if(WITH_GSL)
     # GSL is also used in RNG (whenever applicable), therefore include paths are
     # top level.
     include_directories( ${GSL_INCLUDE_DIRS} )
-elseif(WITH_BOOST)
-    find_package(Boost 1.44 COMPONENTS system filesystem random REQUIRED)
+elseif(WITH_BOOST OR WITH_BOOST_ODE)
+    find_package(Boost 1.44 REQUIRED)
     find_package( LAPACK REQUIRED )
-    add_definitions( -DUSE_BOOST -UUSE_GSL )
-    include_directories( ${Boost_INCLUDE_DIRS} )
-    check_include_file_cxx(
-        ${Boost_INCLUDE_DIRS}/boost/random/random_device.hpp
-        BOOST_RANDOM_DEVICE_EXISTS
-        )
-    if(BOOST_RANDOM_DEVICE_EXISTS)
-        add_definitions(-DBOOST_RANDOM_DEVICE_EXISTS)
-    endif(BOOST_RANDOM_DEVICE_EXISTS)
+endif()
+
+# if boost ode is being used, don't use GSL.
+if(WITH_BOOST_ODE OR WITH_BOOST)
+    add_definitions(-DUSE_BOOST_ODE -DWITH_BOOST -UUSE_GSL)
 endif()
 
 
