@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+import os
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+mpl.rcParams['text.usetex'] = False
 import moose
-import pylab
 import numpy as np
 import fixXreacs
 
@@ -10,7 +13,7 @@ def countCrossings( plot, thresh ):
     return sum( (vec[:-1] < thresh) * (vec[1:] >= thresh ) )
 
 def main( standalone = False ):
-        mfile = 'OSC_diff_vols.g'
+        mfile = os.path.join( os.path.dirname( __file__), 'OSC_diff_vols.g' )
         runtime = 4000.0
         modelId = moose.loadModel( mfile, 'model', 'ee' )
         kin = moose.element( '/model/kinetics' )
@@ -48,9 +51,9 @@ def main( standalone = False ):
             # Display all plots.
             for x in moose.wildcardFind( '/model/#graphs/conc#/#' ):
                 t = np.arange( 0, x.vector.size, 1 ) * x.dt
-                pylab.plot( t, x.vector, label=x.name )
-            pylab.legend()
-            pylab.show()
+                plt.plot( t, x.vector, label=x.name )
+            plt.legend()
+            plt.show()
         moose.delete( '/model' )
 
 # Run the 'main' if this script is executed standalone.

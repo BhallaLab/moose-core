@@ -78,6 +78,7 @@ def makeModel():
     ksolve = moose.Ksolve( '/model/compartment/ksolve' )
     dsolve = moose.Dsolve( '/model/dsolve' )
     eksolve = moose.Ksolve( '/model/endo/ksolve' )
+    eksolve.method = 'gsl'
     edsolve = moose.Dsolve( '/model/endo/dsolve' )
 
     stoich = moose.Stoich( '/model/compartment/stoich' )
@@ -138,7 +139,6 @@ def main( standalone = False ):
     makeModel()
     for i in range( 10, 18 ):
         moose.setClock( i, 0.01 )
-    moose.mooseAddChemSolver( 'model', 'gsl' )
     moose.reinit()
     moose.start( runtime )
     s = moose.element( '/model/compartment/s' )
