@@ -20,7 +20,7 @@ def main():
     mfile = os.path.join( scriptdir, 'genesis/kkit_objects_example.g' )
     runtime = 20.0
     modelId = moose.loadModel( mfile, 'model')
-    moose.mooseaddChemSolver('model',solver)
+    moose.mooseAddChemSolver('model',solver)
 
     # Increase volume so that the stochastic solver gssa
     # gives an interesting output
