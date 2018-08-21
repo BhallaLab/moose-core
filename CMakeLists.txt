@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(pymoose)
 
-if(COMMAND cmake_policy)
-    cmake_policy(SET CMP0003 NEW)
-    cmake_policy(SET CMP0004 NEW)
-endif(COMMAND cmake_policy)
-
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
@@ -119,6 +114,10 @@ if(GPROF AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     message(STATUS "Compiling with profiling with gprof")
     add_definitions(-pg)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
+endif()
+
+if(PARALLELIZED_SOLVERS)
+    find_package(Threads)
 endif()
 
 
@@ -269,6 +268,10 @@ if(WITH_BOOST_ODE)
     list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES})
     list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
 endif(WITH_BOOST_ODE)
+
+if(PARALLELIZED_SOLVERS)
+    list(APPEND SYSTEM_SHARED_LIBS ${CMAKE_THREAD_LIBS_INIT})
+endif()
 
 # These libraries could be static of dynamic. We need to discrimate between
 # these two types because of --whole-archive option. See
