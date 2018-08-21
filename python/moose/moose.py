@@ -93,8 +93,11 @@ def loadModel(filename, target,method=None):
                 method = "gsl"
             elif solverClass.lower() in ["exponential euler","exponentialeuler","neutral"]:
                 method = "ee"
-            moose.mooseAddChemSolver(target,method)
+            
+            if method != 'ee':
+                moose.mooseAddChemSolver(target,method)
         return ret
+        
 def version( ):
     return VERSION
 
