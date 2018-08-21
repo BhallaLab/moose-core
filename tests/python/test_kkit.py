@@ -20,7 +20,7 @@ def main():
     mfile = os.path.join( scriptdir, 'genesis/kkit_objects_example.g' )
     runtime = 20.0
     modelId = moose.loadModel( mfile, 'model')
-    moose.mooseAddChemSolver('model',solver)
+    moose.mooseAddChemSolver( '/model',  solver )
 
     # Increase volume so that the stochastic solver gssa
     # gives an interesting output
@@ -30,23 +30,13 @@ def main():
     moose.reinit()
     moose.start( runtime )
 
-    # Report parameters
-    '''
-    for x in moose.wildcardFind( '/model/kinetics/##[ISA=PoolBase]' ):
-            print x.name, x.nInit, x.concInit
-    for x in moose.wildcardFind( '/model/kinetics/##[ISA=ReacBase]' ):
-            print x.name, 'num: (', x.numKf, ', ',  x.numKb, '), conc: (', x.Kf, ', ', x.Kb, ')'
-    for x in moose.wildcardFind('/model/kinetics/##[ISA=EnzBase]'):
-            print x.name, '(', x.Km, ', ',  x.numKm, ', ', x.kcat, ')'
-            '''
-
     # Display all plots.
     for x in moose.wildcardFind( '/model/#graphs/conc#/#' ):
         t = numpy.arange( 0, x.vector.size, 1 ) * x.dt
 
     vals = x.vector
     stats = [ vals.min(), vals.max( ), vals.mean(), vals.std( ) ]
-    expected = [ 0.0, 0.00040464 , 0.0001444 , 0.00013177 ]
+    expected = [0.0, 0.00040324746614066575, 0.0001433307666099328, 0.0001313134713700798]
     assert numpy.allclose(stats, expected, rtol=1e-4) , 'Got %s expected %s' % (stats, expected )
 
 # Run the 'main' if this script is executed standalone.
