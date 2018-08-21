@@ -10,10 +10,9 @@ def positionCompt( compt ):
         compt[i+1].x0 += compt[i].x1
         i += 1
 
-def moosedeleteChemSolver(modelRoot):
-    """Delete solvers from Chemical Compartment
+def mooseDeleteChemSolver(modelRoot):
+    """Delete solvers from Chemical Compartment    """
 
-    """
     compts = moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]')
     for compt in compts:
         if moose.exists(compt.path + '/stoich'):
@@ -22,29 +21,27 @@ def moosedeleteChemSolver(modelRoot):
             st_dsolve = st.dsolve
 
             moose.delete(st)
+    
             if moose.exists((st_ksolve).path):
+                print("KSolver is deleted for modelpath %s " % st_ksolve)
                 moose.delete(st_ksolve)
-                print("KSolver is deleted for modelpath %s " % modelRoot)
-            if moose.exists((st_dsolve).path):
+                
+            if moose.exists((st_dsolve).path) and st_dsolve.path != '/':
+                print("DSolver is deleted for modelpath %s " % st_dsolve)
                 moose.delete(st_dsolve)
-                print("DSolver is deleted for modelpath %s " % modelRoot)
-    '''
-    compts = moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]')
-    for compt in compts:
-        if moose.exists(compt.path + '/stoich'):
-            st = moose.element(compt.path + '/stoich')
-            st_ksolve = st.ksolve
-            moose.delete(st)
-            if moose.exists((st_ksolve).path):
-                moose.delete(st_ksolve)
-                print("Solver is deleted for modelpath %s " % modelRoot)
+                
+def stdSolvertype(solverName):
+    if solverName.lower() in ["gssa","gillespie","stochastic","gsolve"]:
+        return "gssa"
+    elif solverName.lower() in ["gsl","runge kutta","deterministic","ksolve","rungekutta","rk5","rkf","rk"]:
+        return "gsl"
+    elif solverName.lower() in ["ee","exponential euler","exponentialeuler","neutral"]:
+        return "ee"
+    return "ee"
 
-    '''
+def mooseAddChemSolver(modelRoot, solver):
+    """    Add the solvers to Chemical compartment     """
 
-def mooseaddChemSolver(modelRoot, solver):
-    """
-     Add the solvers to Chemical compartment
-    """
     compt = moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]')
     # at least one comparment is found.
     if len(compt) > 0:
@@ -61,25 +58,15 @@ def mooseaddChemSolver(modelRoot, solver):
             currentSolver = "ee"
 
         if previousSolver != currentSolver:
-            # if previousSolver != currentSolver
             comptinfo.solver = currentSolver
             if (moose.exists(compt[0].path + '/stoich')):
                 # "A: and stoich exists then delete the stoich add solver"
-                deleteSolver(modelRoot)
-                setCompartmentSolver(modelRoot, currentSolver)
-                return True
-            else:
-                # " B: stoich doesn't exists then addSolver, this is when object is deleted which delete's the solver "
-                #  " and solver is also changed, then add addsolver "
-                setCompartmentSolver(modelRoot, currentSolver)
-                return True
+                mooseDeleteChemSolver(modelRoot)
+            setCompartmentSolver(modelRoot, currentSolver)
+            return True
         else:
-            if moose.exists(compt[0].path + '/stoich'):
+            if not moose.exists(compt[0].path + '/stoich'):
                 # " stoich exist, doing nothing"
-                return False
-            else:
-                # "but stoich doesn't exist,this is when object is deleted which deletes the solver
-                # " but solver are not changed, then also call addSolver"
                 setCompartmentSolver(modelRoot, currentSolver)
                 return True
     return False
@@ -120,7 +107,6 @@ def setCompartmentSolver(modelRoot, solver):
                 ksolve = moose.Gsolve(compt.path + '/gsolve')
                 dsolve = moose.Dsolve(compt.path+'/dsolve')
             stoich = moose.Stoich(compt.path + '/stoich')
-            stoich.compartment = compt
             stoich.ksolve = ksolve
             if dsolve is not None:
                 stoich.dsolve = dsolve
