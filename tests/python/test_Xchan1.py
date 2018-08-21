@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #########################################################################
 ## This program is part of 'MOOSE', the
 ## Messaging Object Oriented Simulation Environment.
@@ -7,10 +6,10 @@
 ## GNU Lesser General Public License version 2.1
 ## See the file COPYING.LIB for the full notice.
 ## Here test ConcChan. We set up a channel and a pump and run two tests.
-## First we have zero flux through the pump and check that the conc
+## First we have zero flux through the pump and check that the conc 
 ## equalizes on both sides of the membrane. Then we change the Kf of
 ## the pump to a value designed to give twice the conc In as Out.
-## The system is a 1-voxel cyl compt and an internal endoMesh, having a
+## The system is a 1-voxel cyl compt and an internal endoMesh, having a 
 ## volume = 1/8 of the cylinder.
 ##                      \
 ##    COMPT:    s ----> / s  :ENDO
@@ -22,17 +21,16 @@
 ##    COMPT:    s ----> s_xfer_endo / s     :ENDO
 ##                             s =chan= s
 ##                                  \
-##
+## 
 #########################################################################
+
 
 import math
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import moose
-print( '[INFO ] Using moose from %s, %s' % (moose.__file__, moose.version()) )
 import fixXreacs
-print( '[INFO] Using fixXreacs from %s' % fixXreacs.__file__ )
 
 def makeModel():
     # create container for model
@@ -63,11 +61,11 @@ def makeModel():
     moose.connect( chan, 'in', es, 'reac' )
     volRatio = compartment.volume / endo.volume
     rXfer.Kf = 0.0 # 0.02/sec
-    rXfer.Kb = 0.0 #
+    rXfer.Kb = 0.0 # 
     s.concInit = 0.001
     chanPool.nInit = 1000.0
-    # Flux (#/s) = permeability * N * (#out/vol_out - #in/vol_in)
-    chan.permeability = 0.1 * chanPool.volume / chanPool.nInit
+    # Flux (mM/s) = permeability * N * (conc_out - conc_in )
+    chan.permeability = 0.1 * chanPool.volume * 6.022e23 / chanPool.nInit
 
     #####################################################################
     fixXreacs.fixXreacs( '/model' )
@@ -79,7 +77,6 @@ def makeModel():
     ksolve = moose.Ksolve( '/model/compartment/ksolve' )
     dsolve = moose.Dsolve( '/model/dsolve' )
     eksolve = moose.Ksolve( '/model/endo/ksolve' )
-    eksolve.method = 'gsl'
     edsolve = moose.Dsolve( '/model/endo/dsolve' )
 
     stoich = moose.Stoich( '/model/compartment/stoich' )
@@ -144,17 +141,17 @@ def main( standalone = False ):
     moose.start( runtime )
     s = moose.element( '/model/compartment/s' )
     es = moose.element( '/model/endo/s' )
-    assert almostEq( s.conc, es.conc ), 'Asserting %g=%g' % (s.conc, es.conc)
+    assert( almostEq( s.conc, es.conc ) )
     # We go for concEndo = 2x concOut. Then
     # We already know volIn = volOut/8
     # #in/volIn = 2x #out/volOut
     # #in/volIn = 2x #out/(8*volIn)
     # so #in = #out/4
     # From consv, #in + #out = nInit
-    # so 5/4#out = nInit =>
+    # so 5/4#out = nInit => 
     #       #out = 0.8*nInit; #in = 0.2*nInit
     #
-    # flux = perm * nChan * (0.8nInit/volOut - 0.2nInit/(volOut/8) ) =
+    # flux = perm * nChan * (0.8nInit/volOut - 0.2nInit/(volOut/8) ) = 
     #        perm * (nChan*nInit/volOut) * (0.8 - 0.2*8) =
     #        perm * (nChan*nInit/volOut) * (-0.8)
     #
@@ -164,7 +161,7 @@ def main( standalone = False ):
     # Note that chan.permeability = 0.1*chanPool.volume / chanPool.nInit
 
     # so numKf = perm*nChan/volOut = (0.1*volIn/nChan)*nChan/volOut=0.1/8
-    #
+    #        
     rXfer = moose.element( '/model/compartment/rXfer' )
     rXfer.numKf = 0.1/8.0
     moose.start( runtime )
