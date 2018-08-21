@@ -117,10 +117,14 @@ int moose_Field_init(_Field * self, PyObject * args, PyObject * kwargs)
     self->owner = ((_ObjId*)owner);
     Py_INCREF(self->owner);
     ObjId tmp = ((_ObjId*)owner)->oid_;
+
     size_t size = strlen(fieldName);
     char * name = (char*)calloc(size+1, sizeof(char));
-    strncpy(name, fieldName, size);
+
+    // Using strncpy causes strinop-truncation warning. Using memcpy instead.
+    memcpy(name, fieldName, size);
     self->name = name;
+
     // In earlier version I tried to deallocate the existing
     // self->name if it is not NULL. But it turns out that it
     // causes a SIGABRT. In any case it should not be an issue as
