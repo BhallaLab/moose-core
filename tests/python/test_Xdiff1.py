@@ -27,8 +27,6 @@
 
 import math
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import moose
 print( '[INFO] Using moose from %s, %s' % (moose.__file__, moose.version()) )
 import fixXreacs
@@ -103,25 +101,6 @@ def makeModel():
     moose.connect( '/model/plot5', 'requestOut', es, 'getConc' )
     moose.connect( '/model/plot6', 'requestOut', '/model/compartment/s_xfer_endo', 'getConc' )
 
-def doPlot( ax, i, label ):
-    scale = 1
-    if i > 3:
-        scale = 1000 # Just to plot in uM.
-    plot1 = '/model/plot' + str(i)
-    plot2 = '/model/plot' + str(i+1)
-    plot3 = '/model/plot' + str(i+2)
-    plt.ylabel( label )
-    plt.xlabel( 'time(s)' )
-    v1 = moose.element(plot1).vector * scale
-    v2 = moose.element(plot2).vector * scale
-    v3 = moose.element(plot3).vector * scale
-    ax.plot( v1, label='s' )
-    ax.plot( v2, 'x',label='es' )
-    ax.plot( v3, label='xfer' )
-    ax.plot( np.array( v1 ) + np.array( v2 ), label='sum' )
-    plt.legend()
-
-
 def almostEq( a, b ):
     #print a, b, (a-b)/(a+b)
     return abs(a-b)/(a+b) < 5e-5
@@ -136,23 +115,6 @@ def main( standalone = False ):
     s = moose.element( '/model/compartment/s' )
     es = moose.element( '/model/endo/s' )
     assert( almostEq( s.conc, es.conc ) )
-    # We go for concEndo = 2x concOut. Then
-    # We already know volIn = volOut/8
-    # #in/volIn = 2x #out/volOut
-    # #in/volIn = 2x #out/(8*volIn)
-    # so #in = #out/4
-    # From consv, #in + #out = nInit
-    # so 5/4#out = nInit =>
-    #       #out = 0.8*nInit; #in = 0.2*nInit
-    #
-    # Diffn flux = D * (xa/L) * (0.8nInit/volOut - 0.2nInit/(volOut/8) )
-    #   = -D * (xa/L) * (nInit/volOut) * 0.8
-    #       We can obtain xa and L from the endo/mesh
-    #
-    # This has to be balanced by flux = numKf * nOut = numKf * 0.8 * nInit
-    # So 0.8*numKf*nInit = 0.8*(D.Xa/L)*(nInit/volOut)
-    # So numKf = D.Xa/(L*volOut)
-    #
     rXfer = moose.element( '/model/compartment/rXfer' )
     endo = moose.element( '/model/endo' )
     compt = moose.element( '/model/compartment' )
@@ -160,14 +122,6 @@ def main( standalone = False ):
     rXfer.numKf = 2.0*diffConst*endoA/(compt.r0*compt.volume)
     moose.start( runtime )
     assert( almostEq( 2 * s.conc, es.conc ) )
-
-    if standalone:
-        fig = plt.figure( figsize=(12,10) )
-        ax1 = fig.add_subplot(211)
-        doPlot( ax1, 1, '# of molecules' )
-        ax2 = fig.add_subplot(212)
-        doPlot( ax2, 4, 'conc (uM)' )
-        plt.savefig( __file__ + '.png' )
     moose.delete( '/model' )
 
 # Run the 'main' if this script is executed standalone.

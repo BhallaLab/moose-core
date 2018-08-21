@@ -22,8 +22,6 @@
 
 import math
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import moose
 import fixXreacs
 
@@ -92,21 +90,6 @@ def makeModel():
     moose.connect( '/model/plot5', 'requestOut', es, 'getConc' )
     moose.connect( '/model/plot6', 'requestOut', '/model/compartment/s_xfer_endo', 'getConc' )
 
-def doPlot( ax, i, label ):
-    plot1 = '/model/plot' + str(i)
-    plot2 = '/model/plot' + str(i+1)
-    plot3 = '/model/plot' + str(i+2)
-    plt.ylabel( label )
-    plt.xlabel( 'time(s)' )
-    v1 = moose.element(plot1).vector
-    v2 = moose.element(plot2).vector
-    v3 = moose.element(plot3).vector
-    ax.plot( v1, label='s' )
-    ax.plot( v2, 'x',label='es' )
-    ax.plot( v3, label='xfer' )
-    ax.plot( np.array( v1 ) + np.array( v2 ), label='sum' )
-    plt.legend()
-
 def almostEq( a, b ):
     return abs(a-b)/(a+b) < 5e-5
 
@@ -117,14 +100,6 @@ def main( standalone = False ):
     moose.start( runtime )
     assert( almostEq( moose.element( 'model/compartment/s' ).conc,
         moose.element( '/model/endo/s' ).conc ) )
-
-    if standalone:
-        fig = plt.figure( figsize=(12,10) )
-        ax1 = fig.add_subplot(211)
-        doPlot( ax1, 1, '# of molecules' )
-        ax2 = fig.add_subplot(212)
-        doPlot( ax2, 4, 'conc (mM)' )
-        plt.savefig( __file__ + '.png' )
     moose.delete( '/model' )
 
 # Run the 'main' if this script is executed standalone.

@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-mpl.rcParams['text.usetex'] = False
 import moose
 import numpy as np
 import fixXreacs
@@ -47,14 +44,6 @@ def main( standalone = False ):
     moose.start( runtime )
     # I don't have an analytic way to assess oscillations
     assert( countCrossings( '/model/graphs/conc2/M.Co', 0.001 ) == 4 )
-
-    if standalone:
-        # Display all plots.
-        for x in moose.wildcardFind( '/model/#graphs/conc#/#' ):
-            t = np.arange( 0, x.vector.size, 1 ) * x.dt
-            plt.plot( t, x.vector, label=x.name )
-        plt.legend()
-        plt.savefig( '%s.png' % sys.argv[0] )
     moose.delete( '/model' )
 
 # Run the 'main' if this script is executed standalone.
