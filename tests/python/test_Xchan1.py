@@ -175,7 +175,7 @@ def main( standalone = False ):
         doPlot( ax1, 1, '# of molecules' )
         ax2 = fig.add_subplot(212)
         doPlot( ax2, 4, 'conc (uM)' )
-        plt.show()
+        plt.savefig( __file__ . '.png' )
     moose.delete( '/model' )
 
 # Run the 'main' if this script is executed standalone.

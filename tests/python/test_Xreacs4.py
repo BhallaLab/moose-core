@@ -105,7 +105,7 @@ def main( standalone = False ):
         doPlot( ax1, '/model/plot1', '/model/plot2', '# of molecules' )
         ax2 = fig.add_subplot(212)
         doPlot( ax2, '/model/plot3', '/model/plot4', 'conc (mM)' )
-        plt.show()
+        plt.savefig( __file__ . '.png' )
 
     moose.delete( '/model' )
 
