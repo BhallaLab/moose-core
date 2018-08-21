@@ -25,12 +25,12 @@
 ##
 #########################################################################
 
-
 import math
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import moose
+print( '[INFO ] Using moose from %s, %s' % (moose.__file__, moose.version()) )
 import fixXreacs
 
 def makeModel():
@@ -138,11 +138,12 @@ def main( standalone = False ):
     makeModel()
     for i in range( 10, 18 ):
         moose.setClock( i, 0.01 )
+    moose.mooseAddChemSolver( 'model', 'gsl' )
     moose.reinit()
     moose.start( runtime )
     s = moose.element( '/model/compartment/s' )
     es = moose.element( '/model/endo/s' )
-    assert( almostEq( s.conc, es.conc ) )
+    assert almostEq( s.conc, es.conc ), 'Asserting %g=%g' % (s.conc, es.conc)
     # We go for concEndo = 2x concOut. Then
     # We already know volIn = volOut/8
     # #in/volIn = 2x #out/volOut
