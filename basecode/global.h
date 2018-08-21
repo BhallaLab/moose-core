@@ -68,7 +68,7 @@ namespace moose
      * initialize them. By default it is initialized by random_device (see
      * global.cpp).
      */
-    extern int __rng_seed__;
+    extern unsigned long __rng_seed__;
 
     /**
      * @brief Fix a path. For testing purpose.
@@ -181,18 +181,24 @@ namespace moose
      */
     string moosePathToUserPath( string path );
 
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Get the global seed set by call of moose.seed( X )
+     *
+     * @Returns  seed (int).
+     */
+    /* ----------------------------------------------------------------------------*/
+    int getGlobalSeed( );
 
     /* --------------------------------------------------------------------------*/
     /**
-     * @Synopsis  Generate random number between low and high.
+     * @Synopsis  Set the seed for all random generator. When seed of a RNG is
+     * not set, this seed it used. It is set to -1 by default.
      *
-     * @Param low
-     * @Param high
-     *
-     * @Returns Return a random number x such that low <= x <= high.
+     * @Param seed
      */
     /* ----------------------------------------------------------------------------*/
-    int random_integer( int low, int high);
+    void setGlobalSeed( int seed );
 }
 
 #endif   /* ----- #ifndef __MOOSE_GLOBAL_INC_  ----- */

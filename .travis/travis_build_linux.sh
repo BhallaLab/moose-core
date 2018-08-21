@@ -18,12 +18,12 @@
 #      REVISION:  ---
 #===============================================================================
 
-set -e -x
+set -e
+set -x
 
 PYTHON2="/usr/bin/python2"
 PYTHON3="/usr/bin/python3"
 MAKEFLAGS="-j`nproc`"
-
 
 if [ ! -n "$MAKE" ]; then
     MAKE="make -j`nproc`"
@@ -57,8 +57,8 @@ echo "Currently in `pwd`"
 (
     # Now with boost.
     mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && \
-        cmake -DWITH_BOOST=ON -DDEBUG=ON -DQUIET_MODE=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
-    $MAKE && ctest --output-on-failure
+        cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
+    $MAKE && ctest --output-on-failure -j4
 )
 
 # This is only applicable on linux build.
@@ -71,12 +71,12 @@ if type $PYTHON3 > /dev/null; then
     (
         mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && \
             cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
-        $MAKE && ctest --output-on-failure
+        $MAKE && ctest --output-on-failure -j4
     )
     (
         mkdir -p _BOOST_BUILD2 && cd _BOOST_BUILD2 && \
-            cmake -DWITH_BOOST=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
-        $MAKE && ctest --output-on-failure
+            cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
+        $MAKE && ctest --output-on-failure -j4
     )
     echo "All done"
 else

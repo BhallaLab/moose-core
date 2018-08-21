@@ -40,10 +40,9 @@ extern string joinPath( string pathA, string pathB);
 extern string fixPath( string path);
 extern string dumpStats( int  );
 
-
 namespace moose {
 
-    int __rng_seed__ = 0;
+    unsigned long __rng_seed__ = 0;
 
     moose::RNG<double> rng;
 
@@ -131,6 +130,7 @@ namespace moose {
             p = p.substr( 0, pos );
         else                                    /* no parent directory to create */
             return true;
+
         if( p.size() == 0 )
             return true;
 
@@ -153,7 +153,6 @@ namespace moose {
         string command( "mkdir -p ");
         command += p;
         int ret = system( command.c_str() );
-        cout << "+ Return code " << ret << endl;
         struct stat info;
         if( stat( p.c_str(), &info ) != 0 )
         {
@@ -221,16 +220,13 @@ namespace moose {
         return string( buffer );
     }
 
-    int random_integer( int low, int high)
+    int getGlobalSeed( )
     {
-#if ENABLE_CPP11
-        static std::random_device r;
-        static std::default_random_engine e1(r());
-        static std::uniform_int_distribution<int> uniform_dist(low, high);
-        return uniform_dist(e1);
-#else
-        return low + rand() % (high - low);
-#endif
+        return __rng_seed__;
     }
 
+    void setGlobalSeed( int seed )
+    {
+        __rng_seed__ = seed;
+    }
 }

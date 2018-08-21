@@ -15,7 +15,7 @@
 #include "VoxelPoolsBase.h"
 #include "external/libsoda/LSODA.h"
 
-#ifdef USE_BOOST
+#ifdef USE_BOOST_ODE
 #include "BoostSys.h"
 #endif
 
@@ -112,7 +112,7 @@ private:
 #ifdef USE_GSL
     gsl_odeiv2_driver* driver_;
     gsl_odeiv2_system sys_;
-#elif USE_BOOST
+#elif USE_BOOST_ODE
     BoostSys sys_;
 #endif
 

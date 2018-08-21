@@ -30,6 +30,7 @@
 #include "ZombiePoolInterface.h"
 #include "RateTerm.h"
 #include "FuncTerm.h"
+#include "../basecode/SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "Stoich.h"
 #include "Ksolve.h"
@@ -221,7 +222,7 @@ Ksolve::Ksolve()
     :
 #if USE_GSL
     method_( "rk5" ),
-#elif USE_BOOST
+#elif USE_BOOST_ODE
     method_( "rk5a" ),
 #endif
     epsAbs_( 1e-7 ),
@@ -284,7 +285,7 @@ void Ksolve::setMethod( string method )
              "' not known, using default rk5\n";
         method_ = "rk5";
     }
-#elif USE_BOOST
+#elif USE_BOOST_ODE
     // TODO: Check for boost related methods.
     method_ = method;
 #endif
@@ -412,7 +413,7 @@ void Ksolve::setStoich( Id stoich )
             pools_[i].setStoich( stoichPtr_, &ode );
             // pools_[i].setIntDt( ode.initStepSize ); // We're setting it up anyway
         }
-#elif USE_BOOST
+#elif USE_BOOST_ODE
         ode.dimension = stoichPtr_->getNumAllPools();
         ode.boostSys.epsAbs = epsAbs_;
         ode.boostSys.epsRel = epsRel_;

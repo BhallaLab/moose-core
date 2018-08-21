@@ -1,4 +1,3 @@
-set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(pymoose)
 
@@ -85,15 +84,17 @@ option(WITH_BOOST           "Enabled BOOST based solvers" OFF)
 option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" OFF)
 option(WITH_GSL             "Use gsl-library. Alternative is WITH_BOOST" ON)
 option(PARALLELIZED_SOLVERS "Use parallel version of GSOLVE. (alpha)" OFF )
-option(PARALLELIZED_CLOCK "High level parallelization of moose::Clock (alpha)" OFF )
+option(PARALLELIZED_CLOCK   "High level parallelization of moose::Clock (alpha)" OFF )
+
+option(USE_PRIVATE_RNG      "Stochastic Objects use their private RNG" ON)
 
 
 ############################ BUILD CONFIGURATION #################################
 
-# Default macros
+# Default definitions.
 add_definitions(-DUSE_GENESIS_PARSER)
 
-if(DEBUG OR (CMAKE_BUILD_TYPE STREQUAL Debug))
+if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     message(STATUS "Building for Debug/Unit testing")
     add_definitions(-DDO_UNIT_TESTS)
     set(CMAKE_BUILD_TYPE Debug)
@@ -104,10 +105,13 @@ elseif(ENABLE_UNIT_TESTS)
 else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
-    add_definitions(-UDO_UNIT_TESTS -DQUIET_MODE -O3)
+		add_definitions(-UDO_UNIT_TESTS -O3 -DDISABLE_DEBUG)
+    # Treat all warnings as errors. Some the warnings are disabled in
+    #  CheckCXXCompiler.cmake .
+    add_definitions(-Werror)
 endif()
 
-if(GPROF AND DEBUG)
+if(GPROF AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     message(STATUS "Compiling with profiling with gprof")
     add_definitions(-pg)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
@@ -145,6 +149,12 @@ set(STATIC_LIBRARIES "" )
 # Collect all shared libraries here.
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 
+# BOOST ode library performs better than GSL and ideally should be made default.
+# Making boost default means that we get rid of gsl. Boost does not have a very
+# good matrix library; it has ublas which is not well maintained and emit a lot
+# of warning during compilation. Nonetheless, WITH_BOOST_ODE works fine and
+# produce results quicker than GSL. Both boost ode and ublas are in moose source
+# tree ./external/odeint-v2 and ./external/boost-numeric-bindings
 if(WITH_GSL)
     find_package(GSL 1.16 REQUIRED)
     if(NOT GSL_FOUND)
@@ -330,7 +340,6 @@ list(APPEND MOOSE_LIBRARIES
     msg
     benchmarks
     shell
-    randnum
     scheduling
     moose_mpi
     biophysics
@@ -484,13 +493,13 @@ include( CTest )
 # onto the console if a test fails.
 set(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
 
-if(DEBUG)
+if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     # Run this test in debug mode. In Release mode, this does not do anything.
     set(MOOSE_BIN_LOCATION $<TARGET_FILE:moose.bin>)
     message(STATUS "Executable moose.bin will be at ${MOOSE_BIN_LOCATION}" )
 
     add_test(NAME moose.bin-raw-run COMMAND moose.bin -u -q)
-endif(DEBUG)
+endif()
 
 ## PyMOOSE tests.
 set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)

@@ -20,7 +20,7 @@
 #include <exception>
 
 
-#if USE_BOOST
+#if USE_BOOST_ODE
 #include <boost/format.hpp>
 #endif
 

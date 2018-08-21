@@ -14,7 +14,7 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
-#elif USE_BOOST
+#elif USE_BOOST_ODE
 #include <boost/numeric/odeint.hpp>
 using namespace boost::numeric;
 #endif
@@ -91,7 +91,7 @@ void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
                       ode->epsAbs, ode->epsRel
                     );
     }
-#elif USE_BOOST
+#elif USE_BOOST_ODE
     if( ode )
         sys_ = ode->boostSys;
 #endif
@@ -112,7 +112,6 @@ void VoxelPools::advance( const ProcInfo* p )
     if( getMethod() == "lsoda" )
     {
         vector<double> yout(size()+1);
-
         pLSODA->lsoda_update( &VoxelPools::lsodaSys, size()
                 , Svec(), yout , &t
                 , p->currTime, &lsodaState, this
@@ -263,7 +262,6 @@ void VoxelPools::advance( const ProcInfo* p )
 
 #endif
     }
-
     if ( !stoichPtr_->getAllowNegative() )   // clean out negatives
     {
         unsigned int nv = stoichPtr_->getNumVarPools();

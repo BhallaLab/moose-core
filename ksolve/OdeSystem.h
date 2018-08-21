@@ -10,11 +10,11 @@
 #ifndef _ODE_SYSTEM_H
 #define _ODE_SYSTEM_H
 
-#if  USE_BOOST
+#if  USE_BOOST_ODE
 #include "BoostSys.h"
 #elif USE_GSL
 #include <gsl/gsl_odeiv2.h>
-#endif     /* -----  not USE_BOOST  ----- */
+#endif     /* -----  not USE_BOOST_ODE  ----- */
 
 class OdeSystem
 {
@@ -38,11 +38,11 @@ public:
     double epsAbs; // Absolute error
     double epsRel; // Relative error
 
-#if  USE_BOOST
-    //BoostSys* pBoostSys;
-    BoostSys boostSys;
-    size_t dimension;
-#endif     /* -----  USE_BOOST  ----- */
+#if  USE_BOOST_ODE
+        //BoostSys* pBoostSys;
+        BoostSys boostSys;
+        size_t dimension;
+#endif     /* -----  USE_BOOST_ODE  ----- */
 };
 
 #endif // _ODE_SYSTEM_H
