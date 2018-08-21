@@ -30,6 +30,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import moose
+print( '[INFO] Using moose from %s, %s' % (moose.__file__, moose.version()) )
 import fixXreacs
 
 diffConst = 1e-16
@@ -131,7 +132,7 @@ def main( standalone = False ):
     for i in range( 10, 18 ):
         moose.setClock( i, 0.01 )
     moose.reinit()
-    moose.start( runtime )
+    moose.start( runtime, 1 )
     s = moose.element( '/model/compartment/s' )
     es = moose.element( '/model/endo/s' )
     assert( almostEq( s.conc, es.conc ) )
