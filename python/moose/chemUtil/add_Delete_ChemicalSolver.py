@@ -79,10 +79,15 @@ def setCompartmentSolver(modelRoot, solver):
     vollist = sorted(comptlist.keys())
     compts = [comptlist[key] for key in vollist]
 
-    #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))]
-    if (len(compts) >1 ):
-        positionCompt(compts)
-        fixXreacs( modelRoot )
+    #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))] 
+    
+    if solver != 'ee':
+        if (len(compts) >1 ):
+            positionCompt(compts)
+            fixXreacs( modelRoot )
+            
+    vollist = sorted(comptlist.keys())
+    compts = [comptlist[key] for key in vollist]
 
     for compt in compts:
         if solver != 'ee':
