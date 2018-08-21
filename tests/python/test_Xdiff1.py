@@ -102,8 +102,8 @@ def makeModel():
     moose.connect( '/model/plot6', 'requestOut', '/model/compartment/s_xfer_endo', 'getConc' )
 
 def almostEq( a, b ):
-    #print a, b, (a-b)/(a+b)
-    return abs(a-b)/(a+b) < 5e-5
+    #  print( a, b, (a-b)/(a+b) )
+    return abs(a-b)/(a+b) < 6e-5
 
 def main( standalone = False ):
     runtime = 100
@@ -121,7 +121,7 @@ def main( standalone = False ):
     endoA = endo.aScale * pow( compt.volume, endo.aPower )
     rXfer.numKf = 2.0*diffConst*endoA/(compt.r0*compt.volume)
     moose.start( runtime )
-    assert( almostEq( 2 * s.conc, es.conc ) )
+    assert almostEq( 2 * s.conc, es.conc ), "%g=?%g" % (2*s.conc, es.conc)
     moose.delete( '/model' )
 
 # Run the 'main' if this script is executed standalone.
