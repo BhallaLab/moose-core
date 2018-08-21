@@ -97,6 +97,7 @@ def loadModel(filename, target,method=None):
             if method != 'ee':
                 moose.mooseAddChemSolver(target,method)
         return ret
+        
 def version( ):
     return VERSION
 

@@ -71,18 +71,21 @@ def mooseAddChemSolver(modelRoot, solver):
 
 def setCompartmentSolver(modelRoot, solver):
     comptlist = dict((c.volume, c) for c in moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]'))
-    print (" addDelete",comptlist)
     vollist = sorted(comptlist.keys())
     compts = [comptlist[key] for key in vollist]
     #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))] 
     
-    print ("solver here in hrani_moose_core/add_delete %s",solver)
+    if solver != 'ee':
+        if (len(compts) >1 ):
+            positionCompt(compts)
+            fixXreacs( modelRoot )
+            
+    vollist = sorted(comptlist.keys())
+    compts = [comptlist[key] for key in vollist]
+    #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))] 
+
     for compt in compts:
         if solver != 'ee':
-            if (len(compts) >1 ):
-                positionCompt(compts)
-                fixXreacs( modelRoot )
-            
             if (solver == 'gsl'):
                 ksolve = moose.Ksolve(compt.path + '/ksolve')
             if (solver == 'gssa') :
