@@ -36,7 +36,7 @@ def main():
             solver = sys.argv[3]
 
     modelId = moose.loadModel( mfile, 'model')
-    moose.mooseAddChemSolver('model',solver)
+    moose.mooseaddChemSolver('model',solver)
     moose.element( '/model/kinetics/neuroNOS/nNOS.arg' ).concInit = 0.1
     moose.reinit()
     moose.start( runtime )

@@ -24,7 +24,7 @@ def main():
         if ( len( sys.argv ) == 4 ):
                 solver = sys.argv[3]
         modelId = moose.loadModel( mfile, 'model')
-        moose.mooseAddChemSolver('model',solver)
+        moose.mooseaddChemSolver('model',solver)
 
         # Increase volume so that the stochastic solver gssa
         # gives an interesting output
