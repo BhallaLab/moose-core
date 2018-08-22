@@ -11,6 +11,7 @@ add_definitions(-Wall
     #-Wno-return-type-c-linkage
     -Wno-unused-variable
     -Wno-unused-function
+    -Wno-unused-local-typedefs
     #-Wno-unused-private-field
     )
 
@@ -34,7 +35,7 @@ if(COMPILER_SUPPORTS_CXX11)
     add_definitions( -DENABLE_CPP11 )
     if(APPLE)
 			  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
-				message(STATUS "NOTE: Making clang to inline more aggresively" ) 
+				message(STATUS "NOTE: Making clang to inline more aggresively" )
 				add_definitions( -mllvm -inline-threshold=1000 )
     endif(APPLE)
 else(COMPILER_SUPPORTS_CXX11)

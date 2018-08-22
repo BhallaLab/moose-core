@@ -5,7 +5,11 @@ from fixXreacs import fixXreacs
 def positionCompt( compt ):
     i = 0
     while (i != len(compt)-1):
-        #print "PositionCompt ", compt[i+1],compt[i+1].volume, compt[i], compt[i].volume
+        # Position the compartmnet. If compartment type is Endomesh etc, ignore it.
+        # Endomesh does not have .x1 etc fields.
+        if isinstance( compt[i+1], moose.EndoMesh ) or isinstance(compt[i], moose.EndoMesh):
+            #  print( '[WARN] positionCompt: Trying to position EndoMesh.  Ignoring ...' )
+            continue
         compt[i+1].x1 += compt[i].x1
         compt[i+1].x0 += compt[i].x1
         i += 1
@@ -21,15 +25,15 @@ def mooseDeleteChemSolver(modelRoot):
             st_dsolve = st.dsolve
 
             moose.delete(st)
-    
+
             if moose.exists((st_ksolve).path):
                 print("KSolver is deleted for modelpath %s " % st_ksolve)
                 moose.delete(st_ksolve)
-                
+
             if moose.exists((st_dsolve).path) and st_dsolve.path != '/':
                 print("DSolver is deleted for modelpath %s " % st_dsolve)
                 moose.delete(st_dsolve)
-                
+
 def stdSolvertype(solverName):
     if solverName.lower() in ["gssa","gillespie","stochastic","gsolve"]:
         return "gssa"
@@ -40,8 +44,9 @@ def stdSolvertype(solverName):
     return "ee"
 
 def mooseAddChemSolver(modelRoot, solver):
-    """    Add the solvers to Chemical compartment     """
-
+    """
+    Add the solvers to Chemical compartment
+    """
     compt = moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]')
     # at least one comparment is found.
     if len(compt) > 0:
@@ -73,30 +78,19 @@ def mooseAddChemSolver(modelRoot, solver):
 
 
 def setCompartmentSolver(modelRoot, solver):
-    comptlist = dict((c, c.volume) for c in moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]'))
-    comptVol = {}
-    compts = []
-    vol  = [v for k,v in comptlist.items()]
-    volumeSort = sorted(vol)
-    for k,v in comptlist.items():
-        comptVol[k]= v
-    for volSor in volumeSort:
-        for a,b in comptVol.items():
-            if b == volSor:
-                compts.append(a)
+    comptlist = dict((c.volume, c) for c in moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]'))
+    vollist = sorted(comptlist.keys())
+    compts = [comptlist[key] for key in vollist]
 
-    #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))]
-    if len(compts) == 0:
-        print ("Atleast one compartment is required ")
-        return
-
-    if len(compts) > 3:
-        print ("Warning: setSolverOnCompt cannot handle " + str(len(compts)) + \
-                " chemical compartments")
-        return;
-
-    positionCompt(compts)
-    fixXreacs( modelRoot )
+    #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))] 
+    
+    if solver != 'ee':
+        if (len(compts) >1 ):
+            positionCompt(compts)
+            fixXreacs( modelRoot )
+            
+    vollist = sorted(comptlist.keys())
+    compts = [comptlist[key] for key in vollist]
 
     for compt in compts:
         ksolve, dsolve = None, None
@@ -105,11 +99,16 @@ def setCompartmentSolver(modelRoot, solver):
                 ksolve = moose.Ksolve(compt.path + '/ksolve')
             elif solver in ['gssa', 'Gillespie']:
                 ksolve = moose.Gsolve(compt.path + '/gsolve')
+
+            if (len(compts) > 1):
                 dsolve = moose.Dsolve(compt.path+'/dsolve')
+
             stoich = moose.Stoich(compt.path + '/stoich')
             stoich.ksolve = ksolve
             if dsolve is not None:
                 stoich.dsolve = dsolve
+
+            stoich.compartment = compt
             stoich.path = compt.path + "/##"
 
     ksolveList = moose.wildcardFind(modelRoot+'/##[ISA=Ksolve]')

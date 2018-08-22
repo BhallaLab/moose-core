@@ -136,7 +136,8 @@ namespace boost { namespace numeric { namespace bindings {
     template <typename A, typename W, typename Work>
     inline
     int syev (char jobz, char uplo, A& a, W& w, detail::workspace1<Work> workspace ) {
-       // typedef typename A::value_type value_type ;
+
+       typedef typename A::value_type value_type ;
 
        return detail::syev(jobz, uplo, a, w, workspace.w_);
     } // syev()
@@ -195,7 +196,7 @@ namespace boost { namespace numeric { namespace bindings {
     template <typename A, typename W, typename Work>
     inline
     int syev (char jobz, A& a, W& w, detail::workspace1<Work> workspace ) {
-       // typedef typename A::value_type value_type ;
+       typedef typename A::value_type value_type ;
        char uplo = traits::matrix_uplo_tag( a ) ;
 #ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK
        typedef typename traits::matrix_traits<A>::matrix_structure matrix_structure ;

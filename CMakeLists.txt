@@ -278,6 +278,10 @@ if(PARALLELIZED_SOLVERS)
     list(APPEND SYSTEM_SHARED_LIBS ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
+if(PARALLELIZED_SOLVERS)
+    list(APPEND SYSTEM_SHARED_LIBS ${CMAKE_THREAD_LIBS_INIT})
+endif()
+
 # These libraries could be static of dynamic. We need to discrimate between
 # these two types because of --whole-archive option. See
 # BhallaLab/moose-core#66,

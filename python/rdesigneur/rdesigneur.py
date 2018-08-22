@@ -22,9 +22,9 @@ import imp
 import os
 import numpy as np
 import math
-import itertools
 import sys
 import time
+import matplotlib.pyplot as plt
 
 # Call rdesigneur before moose so that moogul can set the matplotlib backend.
 import rdesigneur.rmoogli as rmoogli
@@ -91,6 +91,7 @@ class rdesigneur:
             elecPlotDt = 0.1e-3,    # Same default as from MOOSE
             funcDt = 0.1e-3,        # Used when turnOffElec is False.
                                     # Otherwise system uses chemDt.
+            numWaveFrames = 100,    # Number of frames to use for waveplots
             cellProto = [],
             spineProto = [],
             chanProto = [],
@@ -130,6 +131,7 @@ class rdesigneur:
         self.elecPlotDt= elecPlotDt
         self.funcDt= funcDt
         self.chemPlotDt= chemPlotDt
+        self.numWaveFrames = numWaveFrames
 
         self.cellProtoList = cellProto
         self.spineProtoList = spineProto
@@ -150,6 +152,7 @@ class rdesigneur:
         self.saveAs = []
         self.moogList = moogList
         self.plotNames = []
+        self.wavePlotNames = []
         self.saveNames = []
         self.moogNames = []
         self.cellPortionElist = []
@@ -690,7 +693,10 @@ class rdesigneur:
                 tabname = graphs.path + '/plot' + str(k)
                 scale = knownFields[i[3]][2]
                 units = knownFields[i[3]][3]
-                self.plotNames.append( ( tabname, i[4], k, scale, units, i[3] ) )
+                if len( i ) > 5 and i[5] == 'wave':
+                    self.wavePlotNames.append( [ tabname, i[4], k, scale, units, i[3] ] )
+                else:
+                    self.plotNames.append( [ tabname, i[4], k, scale, units, i[3] ] )
                 k += 1
                 if i[3] == 'n' or i[3] == 'conc' or i[3] == 'volume' or i[3] == 'Gbar':
                     tabs = moose.Table2( tabname, numPlots )
@@ -762,7 +768,6 @@ rdesigneur.rmoogli.updateMoogliViewer()
             self.display( len( self.moogNames ) + 1 )
 
     def display( self, startIndex = 0 ):
-        import matplotlib.pyplot as plt
         for i in self.plotNames:
             plt.figure( i[2] + startIndex )
             plt.title( i[1] )
@@ -781,12 +786,55 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 t = np.arange( 0, vtab[0].vector.size, 1 ) * vtab[0].dt
                 for j in vtab:
                     plt.plot( t, j.vector * i[3] )
-        if len( self.moogList ) > 0:
+        if len( self.moogList ) or len( self.wavePlotNames ) > 0:
             plt.ion()
+        # Here we build the plots and lines for the waveplots
+        self.initWavePlots( startIndex )
+        if len( self.wavePlotNames ) > 0:
+            for i in range( 3 ):
+                self.displayWavePlots()
         plt.show( block=True )
+        self._save()                                            
+        
+
+    def initWavePlots( self, startIndex ):
+        self.frameDt = moose.element( '/clock' ).currentTime/self.numWaveFrames
+        for wpn in range( len(self.wavePlotNames) ):
+            i = self.wavePlotNames[wpn]
+            vtab = moose.vec( i[0] )
+            if len( vtab ) < 2:
+                print( "Warning: Waveplot {} abandoned, only {} points".format( i[1], len( vtab ) ) )
+                continue
+            dFrame = len( vtab[0].vector ) / self.numWaveFrames
+            if dFrame < 1:
+                dFrame = 1
+            vpts = np.array( [ [k.vector[j] for j in range( 0, len( k.vector ), dFrame ) ] for k in vtab] ).T * i[3]
+            fig = plt.figure( i[2] + startIndex )
+            ax = fig.add_subplot( 111 )
+            plt.title( i[1] )
+            plt.xlabel( "position (voxels)" )
+            plt.ylabel( i[4] )
+            mn = np.min(vpts)
+            mx = np.max(vpts)
+            if mn/mx < 0.3:
+                mn = 0
+            ax.set_ylim( mn, mx )
+            line, = plt.plot( range( len( vtab ) ), vpts[0] )
+            timeLabel = plt.text( len(vtab ) * 0.05, mn + 0.9*(mx-mn), 'time = 0' )
+            self.wavePlotNames[wpn].append( [fig, line, vpts, timeLabel] )
+            fig.canvas.draw()
+
+    def displayWavePlots( self ):
+        for f in range( self.numWaveFrames ):
+            for i in self.wavePlotNames:
+                wp = i[6]
+                if len( wp[2] ) > f:
+                    wp[1].set_ydata( wp[2][f] )
+                    wp[3].set_text( "time = {:.1f}".format(f*self.frameDt) )
+                    wp[0].canvas.draw()
+            plt.pause(0.001)
         
         #This calls the _save function which saves only if the filenames have been specified
-        self._save()                                            
 
     ################################################################
     # Here we get the time-series data and write to various formats
@@ -983,7 +1031,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
                         self._writeCSV(name, timeSeriesData)
                         print(name, " written")
                     else:
-                        print("not possible")
+                        print("Save format not known")
                         pass
         else:
             pass
@@ -1013,9 +1061,11 @@ rdesigneur.rmoogli.updateMoogliViewer()
     def _buildStims( self ):
         knownFields = {
                 'inject':('CompartmentBase', 'setInject'),
-                'Ca':('CaConcBase', 'getCa'),
+                'Ca':('CaConcBase', 'setCa'),
                 'n':('PoolBase', 'setN'),
                 'conc':('PoolBase', 'setConc'),
+                'nInit':('PoolBase', 'setNinit'),
+                'concInit':('PoolBase', 'setConcInit'),
                 'vclamp':('CompartmentBase', 'setInject'),
                 'randsyn':('SynChan', 'addSpike'),
                 'periodicsyn':('SynChan', 'addSpike')
@@ -1048,8 +1098,8 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 k += 1
                 func = moose.Function( funcname )
                 func.expr = i[4]
-                if i[3] == 'vclamp': # Hack to clean up initial condition
-                    func.doEvalAtReinit = 1
+                #if i[3] == 'vclamp': # Hack to clean up initial condition
+                func.doEvalAtReinit = 1
                 for q in stimObj3:
                     moose.connect( func, 'valueOut', q, stimField )
 
@@ -1368,7 +1418,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             comptdict['dend'] = self.dendCompt
 
         if 'dend' in comptdict and 'spine' in comptdict:
-            print( "comptdict = {}".format (comptdict ) )
+            #print( "comptdict = {}".format (comptdict ) )
             self.dendCompt.separateSpines = 1
             self.spineCompt = moose.SpineMesh( newChemid.path + '/spine' )
             moose.connect( self.dendCompt, 'spineListOut', self.spineCompt, 'spineList' )
@@ -1436,6 +1486,8 @@ rdesigneur.rmoogli.updateMoogliViewer()
             pmstoich.compartment = self.psdCompt
             pmstoich.ksolve = pmksolve
             pmstoich.dsolve = pmdsolve
+            if len( moose.wildcardFind( 'self.psdCompt.path/##[ISA=PoolBase]' ) ) == 0:
+                moose.Pool( self.psdCompt.path + '/dummy' )
             pmstoich.path = self.psdCompt.path + "/##"
 
             # Here we should test what kind of geom we have to use
