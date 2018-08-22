@@ -209,6 +209,7 @@ def mooseAddChemSolver(modelpath, solver):
               "Runge Kutta"       ("gsl")
 
     """
+    global chemError_
     if chemImport_:
         chemError_ = _chemUtil.add_Delete_ChemicalSolver.mooseAddChemSolver(modelpath, solver)
         return chemError_
