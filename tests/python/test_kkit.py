@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import numpy
+import numpy as np
 import sys
 import os
 import moose
@@ -8,6 +8,7 @@ print( '[INFO] Using moose from %s' % moose.__file__ )
 
 scriptdir = os.path.dirname( os.path.realpath( __file__ ) )
 print( 'Script dir %s' % scriptdir )
+
 
 def main():
     """ This example illustrates loading, running, and saving a kinetic model
@@ -32,12 +33,13 @@ def main():
 
     # Display all plots.
     for x in moose.wildcardFind( '/model/#graphs/conc#/#' ):
-        t = numpy.arange( 0, x.vector.size, 1 ) * x.dt
+        t = np.arange( 0, x.vector.size, 1 ) * x.dt
 
     vals = x.vector
-    stats = [ vals.min(), vals.max( ), vals.mean(), vals.std( ) ]
-    expected = [0.0, 0.00040324746614066575, 0.0001433307666099328, 0.0001313134713700798]
-    assert numpy.allclose(stats, expected, rtol=1e-4) , 'Got %s expected %s' % (stats, expected )
+    stats = np.array([ vals.min(), vals.max( ), vals.mean(), vals.std( )])
+    expected = np.array([0.0, 0.0004032, 0.000143, 0.0001313])
+    assert np.allclose(stats, expected, atol=1e-5) , \
+            'Got %s expected %s:Error %s' % (stats, expected, expected-stats )
 
 # Run the 'main' if this script is executed standalone.
 if __name__ == '__main__':
