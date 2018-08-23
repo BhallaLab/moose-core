@@ -11,7 +11,7 @@ add_definitions(-Wall
     #-Wno-return-type-c-linkage
     -Wno-unused-variable
     -Wno-unused-function
-    -Wno-ununsed-local-typedefs
+    -Wno-unused-local-typedefs
     #-Wno-unused-private-field
     )
 

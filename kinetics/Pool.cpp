@@ -7,8 +7,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
-#include "ElementValueFinfo.h"
+#include "../basecode/header.h"
+#include "../basecode/ElementValueFinfo.h"
 #include "lookupVolumeFromMesh.h"
 #include "PoolBase.h"
 #include "Pool.h"
@@ -45,9 +45,9 @@ const Cinfo* Pool::initCinfo()
 // Class definitions
 //////////////////////////////////////////////////////////////
 static const Cinfo* poolCinfo = Pool::initCinfo();
-const SrcFinfo1< double >& nOut =
-    *dynamic_cast< const SrcFinfo1< double >* >(
-        poolCinfo->findFinfo( "nOut" ) );
+
+const SrcFinfo1< double >& nOut = *dynamic_cast<const SrcFinfo1< double >*
+                                  >(poolCinfo->findFinfo( "nOut"));
 
 Pool::Pool()
     : n_( 0.0 ), nInit_( 0.0 ), diffConst_( 0.0 ), motorConst_( 0.0 ),
