@@ -134,4 +134,6 @@ def setCompartmentSolver(modelRoot, solver):
         while(i < len(dsolveList)-1):
             dsolveList[i+1].buildMeshJunctions(dsolveList[i])
             i += 1
-    print( " Solver is added to model path %s with %s solver" % (modelRoot,solver) )
+    if not modelRoot[:1].startswith('/'):
+        modelRoot ='/'+modelRoot
+    print( " Solver is added to model path `%s` with `%s` solver" % (modelRoot,solver) )
