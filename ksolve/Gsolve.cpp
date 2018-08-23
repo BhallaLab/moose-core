@@ -205,7 +205,7 @@ static const Cinfo* gsolveCinfo = Gsolve::initCinfo();
 
 Gsolve::Gsolve() :
 #if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
-    numThreads_ ( 2 ),
+    numThreads_ ( 1 ),
 #endif
     pools_( 1 ),
     startVoxel_( 0 ),
@@ -464,8 +464,8 @@ void Gsolve::process( const Eref& e, ProcPtr p )
          *  Somewhat complicated computation to compute the number of threads. 1
          *  thread per (at least) voxel pool is ideal situation.
          *-----------------------------------------------------------------------------*/
-        size_t grainSize = min( nvPools, 1 + (nvPools / numThreads_ ) );
-        size_t nWorkers = nvPools / grainSize;
+        size_t grainSize = min( nvPools, nvPools / numThreads_ );
+        size_t nWorkers = ceil(nvPools / grainSize);
 
         for (size_t i = 0; i < nWorkers; i++)
             parallel_advance( i * grainSize, (i+1) * grainSize, nWorkers, p, &sys_ );

@@ -518,14 +518,15 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
 #ifdef PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     // Third, do the numerical integration for all reactions.
-    size_t grainSize = min( nvPools, 1 + (nvPools / numThreads_ ) );
-    size_t nWorkers = nvPools / grainSize;
+    size_t grainSize = min( nvPools, nvPools / numThreads_ );
+    size_t nWorkers = ceil(nvPools / grainSize);
+    // cout << "Number of pools " << nvPools << " number of threads " << numThreads_ << endl;
 
     if( 1 == nWorkers || 1 == nvPools )
     {
         if( numThreads_ > 1 )
         {
-            cerr << "Warn: Not enough voxels. Reverting to serial mode. " << endl;
+            cerr << "Warn: Not enough voxels or threads. Reverting to serial mode. " << endl;
             numThreads_ = 1;
         }
 
@@ -538,7 +539,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
          *  Somewhat complicated computation to compute the number of threads. 1
          *  thread per (at least) voxel pool is ideal situation.
          *-----------------------------------------------------------------------------*/
-        //cout << "Grain size " << grainSize <<  " Workers : " << nWorkers << endl;
+        // cout << "Grain size " << grainSize <<  " Workers : " << nWorkers << endl;
         for (size_t i = 0; i < nWorkers; i++)
             parallel_advance( i * grainSize, (i+1) * grainSize, nWorkers, p );
     }

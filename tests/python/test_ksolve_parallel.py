@@ -17,9 +17,11 @@ def main():
     # define the geometry
     compt = moose.CylMesh( '/cylinder' )
     compt.r0 = compt.r1 = 1
-    compt.x1 = 100
-    compt.diffLength = 0.2
-    assert( compt.numDiffCompts == compt.x1/compt.diffLength )
+    #  compt.diffLength = 1e-6
+    compt.x1 = 1e-2
+    assert compt.numDiffCompts == int(compt.x1/compt.diffLength), ( 
+            compt.numDiffCompts, compt.x1 / compt.diffLength )
+    print( 'No of compartment %d' % compt.numDiffCompts )
 
     #define the molecule. Its geometry is defined by its parent volume, cylinder
     c = moose.Pool( '/cylinder/pool' )
@@ -49,6 +51,7 @@ def main():
 
     #Set up solvers
     ksolve = moose.Ksolve( '/cylinder/ksolve' )
+    ksolve.numThreads = 4
     dsolve = moose.Dsolve( '/cylinder/dsolve' )
     stoich = moose.Stoich( '/cylinder/stoich' )
     stoich.compartment = compt
@@ -62,11 +65,11 @@ def main():
     x = np.arange( 0, compt.x1, compt.diffLength )
     c.vec.nInit = [ (q < 0.2 * compt.x1) for q in x ]
 
-    expected = [ (0.2, 0.4000000000000001)
-            , (0.3355471454768751, 0.45713472793392007)
-            , (0.4759264630589813, 0.4852188847862358)
-            , (0.6163057931092064, 0.47168830962559016)
-            , (0.7566851225599798, 0.4124677536200488) 
+    expected = [ (0.2, 0.40000000000000013)
+            , (2.6704795776286974e-07, 1.2678976830753021e-17)
+            , (8.167639617309419e-14, 3.8777269301457245e-24)
+            , (2.498062905267963e-20, 1.1860363878961374e-30)
+            , (7.64029581501609e-27, 3.6273808003690943e-37)
             ]
 
     # Run and plot it.
@@ -77,7 +80,7 @@ def main():
     yvec = c.vec.n
     u1, m1 = np.mean( yvec ), np.std( yvec )
     print( u1, m1 )
-    assert np.isclose( (u1, m1), expected[0]).all()
+    assert np.isclose( (u1, m1), expected[0], atol=1e-5).all(), expected[0]
     t1 = time.time()
     for i, t in enumerate(range( 0, runtime-1, updateDt)):
         moose.start( updateDt )
@@ -85,7 +88,7 @@ def main():
         yvec = c.vec.n
         u1, m1 = np.mean( yvec ), np.std( yvec )
         print( u1, m1 )
-        np.isclose( (u1,m1), expected[i+1] ).all()
+        np.isclose( (u1,m1), expected[i+1], atol=1e-5 ).all(), expected[i+1]
     print( "Time = ", time.time() - t1 )
 
 
