@@ -62,10 +62,9 @@ public:
     // Set number of threads to use (for deterministic case only).
     unsigned int getNumThreads( ) const;
     void setNumThreads( unsigned int x );
-
-    // Parallel advance().
-    void parallel_advance(int begin, int end, size_t nWorkers, ProcPtr p);
 #endif
+
+    size_t advance_chunk( const size_t begin, const size_t end, ProcPtr p );
 
     /**
      * This does a quick and dirty estimate of the timestep suitable

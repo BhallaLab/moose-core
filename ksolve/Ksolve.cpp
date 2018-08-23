@@ -31,10 +31,18 @@
 #include "../mesh/ChemCompt.h"
 #include "Ksolve.h"
 
+#include <chrono>
+#include <algorithm>
+
+#ifdef USE_BOOST_ASYNC 
+#define BOOST_THREAD_PROVIDES_FUTURE
+#include <boost/thread.hpp>
+#include <boost/thread/future.hpp>
+#else
 #include <future>
 #include <atomic>
 #include <thread>
-#include <chrono>
+#endif
 
 using namespace std::chrono;
 
@@ -531,9 +539,13 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
 #ifdef PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     // Third, do the numerical integration for all reactions.
-    size_t grainSize = min( nvPools, nvPools / numThreads_ );
-    size_t nWorkers = ceil(nvPools / grainSize);
-    // cout << "Number of pools " << nvPools << " number of threads " << numThreads_ << endl;
+    size_t grainSize = max( (size_t)1, min( nvPools, nvPools / numThreads_));
+
+    size_t nWorkers = std::max(1, (int)(nvPools/grainSize) );
+
+    // cout << "Number of pools " << nvPools << " number of threads " << numThreads_
+        // << "nWorkers  " << nWorkers
+        // << endl;
 
     if( 1 == nWorkers || 1 == nvPools )
     {
@@ -552,9 +564,31 @@ void Ksolve::process( const Eref& e, ProcPtr p )
          *  Somewhat complicated computation to compute the number of threads. 1
          *  thread per (at least) voxel pool is ideal situation.
          *-----------------------------------------------------------------------------*/
-        // cout << "Grain size " << grainSize <<  " Workers : " << nWorkers << endl;
+        // cout << " Grain size " << grainSize <<  " Workers : " << nWorkers << endl;
+#if USE_BOOST_ASYNC
+        vector< boost::shared_future<size_t> > vecResult;
+#else
+        vector< std::future<size_t> > vecResult;
+#endif
+
         for (size_t i = 0; i < nWorkers; i++)
-            parallel_advance( i * grainSize, (i+1) * grainSize, nWorkers, p );
+        {
+#if USE_BOOST_ASYNC
+            boost::shared_future<size_t> res = boost::async( 
+                    boost::bind( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p )
+                );
+            vecResult.push_back(res );
+#else
+            std::future<size_t> res = std::async( std::launch::deferred
+                    , &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p 
+                    );
+            vecResult.push_back( std::move(res) );
+#endif
+        }
+
+        for (auto &v : vecResult )
+            v.get();
+
     }
 #else
     for ( size_t i = 0; i < nvPools; i++ )
@@ -583,34 +617,16 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     totalTime_ += duration_cast<::microseconds>(t1_-t0_).count();
 }
 
-
-#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
-/**
- * @brief Advance voxels pools using parallel Ksolve.
- *
- * @param begin
- * @param end
- * @param p
- */
-void Ksolve::parallel_advance(int begin, int end, size_t nWorkers, ProcPtr p)
+size_t Ksolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )
 {
-    std::atomic<int> idx( begin );
-    for (size_t cpu = 0; cpu != nWorkers; ++cpu)
+    size_t total = 0;
+    for (size_t i = begin; i < std::min(end, pools_.size() ); i++) 
     {
-        std::async( std::launch::async
-                , [this, &idx, end, p]() {
-                    for (;;)
-                    {
-                        int i = idx++;
-                        if (i >= end)
-                            break;
-                        pools_[i].advance( p );
-                    }
-                }
-            );
+        pools_[i].advance( p );
+        total += 1;
     }
+    return total;
 }
-#endif
 
 
 void Ksolve::reinit( const Eref& e, ProcPtr p )
