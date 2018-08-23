@@ -34,6 +34,9 @@
 #include <future>
 #include <atomic>
 #include <thread>
+#include <chrono>
+
+using namespace std::chrono;
 
 const unsigned int OFFNODE = ~0;
 
@@ -235,7 +238,13 @@ Ksolve::Ksolve()
 
 Ksolve::~Ksolve()
 {
-    ;
+    char* p = getenv( "MOOSE_SHOW_PROFILING_INFO" );
+    if( p != NULL )
+    {
+        cout << "Info: Ksolve took " << totalTime_ << " us and took " << numSteps_  
+            << " steps." << endl;
+
+    }
 }
 
 //////////////////////////////////////////////////////////////
@@ -496,8 +505,12 @@ double Ksolve::getEstimatedDt() const
 //////////////////////////////////////////////////////////////
 void Ksolve::process( const Eref& e, ProcPtr p )
 {
+
     if ( isBuilt_ == false )
         return;
+
+    numSteps_ += 1;
+    t0_ = std::chrono::high_resolution_clock::now();
 
     // First, handle incoming diffusion values, update S with those.
     if ( dsolvePtr_ )
@@ -547,6 +560,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     for ( size_t i = 0; i < nvPools; i++ )
         pools_[i].advance( p );
 #endif
+    
 
 
     // Assemble and send the integrated values off for the Dsolve.
@@ -564,6 +578,9 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 		// for diffusion, channels, and xreacs
         dsolvePtr_->updateJunctions( p->dt );
     }
+
+    t1_ = high_resolution_clock::now();
+    totalTime_ += duration_cast<::microseconds>(t1_-t0_).count();
 }
 
 

@@ -10,6 +10,10 @@
 #ifndef _KSOLVE_H
 #define _KSOLVE_H
 
+#include <chrono>
+
+using namespace std::chrono;
+
 class Stoich;
 
 class Ksolve: public ZombiePoolInterface
@@ -168,6 +172,14 @@ private:
 
     /// Pointer to diffusion solver
     ZombiePoolInterface* dsolvePtr_;
+
+    // Timing and benchmarking related variables.
+    size_t numSteps_  = 0;
+
+    // Time taken in all process function in us.
+    double totalTime_ = 0.0;
+
+    high_resolution_clock::time_point t0_, t1_;
 
 };
 
