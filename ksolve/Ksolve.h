@@ -58,11 +58,9 @@ public:
     vector< double > getNvec( unsigned int voxel) const;
     void setNvec( unsigned int voxel, vector< double > vec );
 
-#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     // Set number of threads to use (for deterministic case only).
     unsigned int getNumThreads( ) const;
     void setNumThreads( unsigned int x );
-#endif
 
     size_t advance_chunk( const size_t begin, const size_t end, ProcPtr p );
 
@@ -142,12 +140,10 @@ private:
     double epsAbs_;
     double epsRel_;
 
-#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     /**
      * @brief Number of threads to use. Only applicable for deterministic case.
      */
     unsigned int numThreads_;
-#endif
 
     /**
      * Each VoxelPools entry handles all the pools in a single voxel.

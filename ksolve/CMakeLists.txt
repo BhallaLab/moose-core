@@ -24,12 +24,6 @@ if(WITH_BOOST)
     include_directories( ${Boost_INCLUDE_DIRS} )
 endif()
 
-if(PARALLELIZED_SOLVERS)
-    message( STATUS "Parallel version of KSolve and Gsolve" )
-    add_definitions( -DPARALLELIZE_KSOLVE_WITH_CPP11_ASYNC )
-    add_definitions( -DPARALLELIZE_GSOLVE_WITH_CPP11_ASYNC )
-endif(PARALLELIZED_SOLVERS)
-
 set(KSOLVE_SRCS
 	KinSparseMatrix.cpp
 	ZombiePool.cpp

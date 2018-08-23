@@ -111,14 +111,12 @@ const Cinfo* Ksolve::initCinfo()
         &Ksolve::getNumAllVoxels
     );
 
-#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     static ValueFinfo< Ksolve, unsigned int > numThreads (
         "numThreads",
         "Number of threads to use (applicable in deterministic case)",
         &Ksolve::setNumThreads,
         &Ksolve::getNumThreads
     );
-#endif
 
     static ValueFinfo< Ksolve, unsigned int > numPools(
         "numPools",
@@ -192,9 +190,7 @@ const Cinfo* Ksolve::initCinfo()
         &method,			// Value
         &epsAbs,			// Value
         &epsRel ,			// Value
-#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
         &numThreads,                    // Value
-#endif
         &compartment,		// Value
         &numLocalVoxels,	// ReadOnlyValue
         &nVec,				// LookupValue
@@ -234,9 +230,7 @@ Ksolve::Ksolve()
 #endif
     epsAbs_( 1e-7 ),
     epsRel_( 1e-7 ),
-#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     numThreads_( 1 ),
-#endif
     pools_( 1 ),
     startVoxel_( 0 ),
     dsolve_(),
@@ -320,7 +314,6 @@ void Ksolve::setEpsRel( double epsRel )
     }
 }
 
-#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
 void Ksolve::setNumThreads( unsigned int x )
 {
     numThreads_ = x;
@@ -330,7 +323,6 @@ unsigned int Ksolve::getNumThreads(  ) const
 {
     return numThreads_;
 }
-#endif
 
 Id Ksolve::getStoich() const
 {
@@ -538,7 +530,6 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
     size_t nvPools = pools_.size( );
 
-#ifdef PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     // Third, do the numerical integration for all reactions.
     size_t grainSize = max( (size_t)1, min( nvPools, nvPools / numThreads_));
 
@@ -595,7 +586,6 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 #endif
 
     }
-#endif
     
 
     // Assemble and send the integrated values off for the Dsolve.
@@ -646,10 +636,8 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
         return;
     }
 
-#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     if( 1 < getNumThreads( ) )
-        cout << "Debug: User wants Ksolve with " << numThreads_ << " threads" << endl;
-#endif
+        cout << "Info: Setting up ksolve with " << numThreads_ << " threads" << endl;
 
 }
 
