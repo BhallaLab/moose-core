@@ -1,7 +1,9 @@
+import os
 import numpy as np
 import moose
 print( 'Using moose from %s' % moose.__file__ )
 import time
+os.environ['MOOSE_SHOW_PROFILING_INFO'] = '1'
 def main():
     """
     This example implements a reaction-diffusion like system which is
@@ -51,7 +53,7 @@ def main():
 
     #Set up solvers
     ksolve = moose.Ksolve( '/cylinder/ksolve' )
-    ksolve.numThreads = 4
+    ksolve.numThreads = 1
     dsolve = moose.Dsolve( '/cylinder/dsolve' )
     stoich = moose.Stoich( '/cylinder/stoich' )
     stoich.compartment = compt

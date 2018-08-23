@@ -42,6 +42,7 @@
 #include <future>
 #include <atomic>
 #include <thread>
+#include <functional>
 #endif
 
 using namespace std::chrono;
@@ -568,7 +569,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 #if USE_BOOST_ASYNC
         vector< boost::shared_future<size_t> > vecResult;
 #else
-        vector< std::future<size_t> > vecResult;
+        vector<std::thread> vecThreads;
 #endif
 
         for (size_t i = 0; i < nWorkers; i++)
@@ -579,23 +580,23 @@ void Ksolve::process( const Eref& e, ProcPtr p )
                 );
             vecResult.push_back(res );
 #else
-            std::future<size_t> res = std::async( std::launch::deferred
-                    , &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p 
-                    );
-            vecResult.push_back( std::move(res) );
+            std::thread  t( std::bind( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p ) );
+            vecThreads.push_back( std::move(t) );
 #endif
         }
 
+#if USE_BOOST_ASYNC
         for (auto &v : vecResult )
             v.get();
+#else
+        for( auto &v : vecThreads )
+            if( v.joinable() )
+                v.join();
+#endif
 
     }
-#else
-    for ( size_t i = 0; i < nvPools; i++ )
-        pools_[i].advance( p );
 #endif
     
-
 
     // Assemble and send the integrated values off for the Dsolve.
     if ( dsolvePtr_ )
