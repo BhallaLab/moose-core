@@ -53,7 +53,7 @@ def main():
 
     #Set up solvers
     ksolve = moose.Ksolve( '/cylinder/ksolve' )
-    ksolve.numThreads = 1
+    ksolve.numThreads = 4
     dsolve = moose.Dsolve( '/cylinder/dsolve' )
     stoich = moose.Stoich( '/cylinder/stoich' )
     stoich.compartment = compt
