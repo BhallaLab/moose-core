@@ -223,7 +223,7 @@ Ksolve::Ksolve()
     epsAbs_( 1e-7 ),
     epsRel_( 1e-7 ),
 #if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
-    numThreads_( 3 ),
+    numThreads_( 1 ),
 #endif
     pools_( 1 ),
     startVoxel_( 0 ),
@@ -525,9 +525,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     {
         if( numThreads_ > 1 )
         {
-#ifndef NDEBUG
-            cout << "Debug: Reset to 1 threads " << endl;
-#endif
+            cerr << "Warn: Not enough voxels. Reverting to serial mode. " << endl;
             numThreads_ = 1;
         }
 
