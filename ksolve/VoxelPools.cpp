@@ -287,8 +287,10 @@ void VoxelPools::updateAllRateTerms( const vector< RateTerm* >& rates,
         delete( rates_[i] );
 
     rates_.resize( rates.size() );
+
     for ( unsigned int i = 0; i < numCoreRates; ++i )
         rates_[i] = rates[i]->copyWithVolScaling( getVolume(), 1, 1 );
+
     for ( unsigned int i = numCoreRates; i < rates.size(); ++i )
     {
         rates_[i] = rates[i]->copyWithVolScaling(  getVolume(),

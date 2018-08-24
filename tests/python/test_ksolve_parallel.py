@@ -4,7 +4,8 @@ import moose
 print( 'Using moose from %s' % moose.__file__ )
 import time
 os.environ['MOOSE_SHOW_PROFILING_INFO'] = '1'
-def main():
+
+def main( nthreads = 1 ):
     """
     This example implements a reaction-diffusion like system which is
     bistable and propagates losslessly. It is based on the NEURON example 
@@ -53,7 +54,7 @@ def main():
 
     #Set up solvers
     ksolve = moose.Ksolve( '/cylinder/ksolve' )
-    ksolve.numThreads = 1
+    ksolve.numThreads = nthreads
     dsolve = moose.Dsolve( '/cylinder/dsolve' )
     stoich = moose.Stoich( '/cylinder/stoich' )
     stoich.compartment = compt
@@ -92,7 +93,13 @@ def main():
         print( u1, m1 )
         np.isclose( (u1,m1), expected[i+1], atol=1e-5 ).all(), expected[i+1]
     print( "Time = ", time.time() - t1 )
+    return time.time() - t1
 
 
 if __name__ == '__main__':
-    main()
+    import multiprocessing
+    nT = int(multiprocessing.cpu_count()/2)
+    t2 = main( nT )
+    moose.delete( '/cylinder' )
+    t1 = main( 2 )
+    print( '1 threads=%g, %d threds=%g, speedup=%g' % (nT, t2, t1, t1/t2))

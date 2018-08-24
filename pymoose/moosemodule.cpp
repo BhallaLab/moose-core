@@ -1720,16 +1720,17 @@ PyObject * moose_start(PyObject * dummy, PyObject * args )
     sigHandler.sa_flags = 0;
     sigaction(SIGINT, &sigHandler, NULL);
 
-#if 0
-    // NOTE: (dilawar) Does not know if Py_BEGIN_ALLOW_THREADS is
-    // neccessary.
-    // Py_BEGIN_ALLOW_THREADS
+    // Release the GIL. We are not going to use the python objects here. Not
+    // sure how PyRun module is affected by this.
+#if 1
+    Py_BEGIN_ALLOW_THREADS
     SHELLPTR->doStart(runtime);
-    // Py_END_ALLOW_THREADS
+    Py_END_ALLOW_THREADS
     Py_RETURN_NONE;
-#endif
+#else
     SHELLPTR->doStart( runtime, notify );
     Py_RETURN_NONE;
+#endif
 
 }
 
