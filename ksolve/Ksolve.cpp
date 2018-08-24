@@ -571,7 +571,8 @@ void Ksolve::process( const Eref& e, ProcPtr p )
                 );
             vecResult.push_back( res );
 #else
-            std::thread  t( std::bind( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p ) );
+            // std::thread  t( std::bind( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p ) );
+            std::thread t( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p );
             vecThreads.push_back( std::move(t) );
 #endif
         }

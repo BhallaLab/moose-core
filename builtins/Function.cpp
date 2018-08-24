@@ -345,18 +345,6 @@ Function::Function(): _t(0.0), _valid(false), _numVar(0), _lastValue(0.0),
     _valid = true;
 }
 
-#if 0
-void Function::extendMuParser( void )
-{
-    // Adding pi and e, the defaults are `_pi` and `_e`
-    _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
-    _parser.DefineConst(_T("e"), (mu::value_type)M_E);
-    // Add support
-    _parser.DefineVar( _T("t"),  &this->_t );
-    _parser.DefineOprt( _T("%"), &Function::muCallbackFMod, 7, mu::EOprtAssociativity::oaRIGHT, 0);
-}
-#endif
-
 Function::Function(const Function& rhs): _numVar(rhs._numVar),
     _lastValue(rhs._lastValue),
     _value(rhs._value), _rate(rhs._rate),
@@ -484,8 +472,10 @@ double * _functionAddVar(const char *name, void *data)
     Function* function = reinterpret_cast< Function * >(data);
     double * ret = NULL;
     string strname(name);
+
     // Names starting with x are variables, everything else is constant.
-    if (strname[0] == 'x'){
+    if (strname[0] == 'x')
+    {
         int index = atoi(strname.substr(1).c_str());
         if ((unsigned)index >= function->_varbuf.size()){
             function->_varbuf.resize(index+1, 0);
@@ -497,7 +487,9 @@ double * _functionAddVar(const char *name, void *data)
             function->_numVar = function->_varbuf.size();
         }
         ret = &(function->_varbuf[index]->value);
-    } else if (strname[0] == 'y'){
+    } 
+    else if (strname[0] == 'y')
+    {
         int index = atoi(strname.substr(1).c_str());
         if ((unsigned)index >= function->_pullbuf.size()){
             function->_pullbuf.resize(index+1, 0 );
@@ -687,11 +679,8 @@ double Function::getDerivative() const
 void Function::setNumVar(const unsigned int num)
 {
     _clearBuffer();
-    for (unsigned int ii = 0; ii < num; ++ii){
-        stringstream name;
-        name << "x" << ii;
-        _functionAddVar(name.str().c_str(), this);
-    }
+    for (unsigned int ii = 0; ii < num; ++ii)
+        _functionAddVar( ("x"+std::to_string(ii)).c_str(), this);
 }
 
 unsigned int Function::getNumVar() const
