@@ -97,7 +97,9 @@ def main( nthreads = 1 ):
 
 
 if __name__ == '__main__':
-    t1 = main( 1 )
+    import multiprocessing
+    nT = int(multiprocessing.cpu_count()/2)
+    t2 = main( nT )
     moose.delete( '/cylinder' )
-    t2 = main( 4 )
-    print( '1 thread=%g, 2 threds=%g, speedup=%g' % (t2, t1, t1/t2))
+    t1 = main( 2 )
+    print( '1 threads=%g, %d threds=%g, speedup=%g' % (nT, t2, t1, t1/t2))

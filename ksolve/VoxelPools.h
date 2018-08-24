@@ -1,6 +1,5 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
-#include <boost/numeric/odeint.hpp>
 ** Messaging Object Oriented Simulation Environment.
 **           Copyright (C) 2003-2014 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the

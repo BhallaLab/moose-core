@@ -569,7 +569,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
             boost::shared_future<size_t> res = boost::async( 
                     boost::bind( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p )
                 );
-            vecResult.push_back(res );
+            vecResult.push_back( res );
 #else
             std::thread  t( std::bind( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p ) );
             vecThreads.push_back( std::move(t) );
