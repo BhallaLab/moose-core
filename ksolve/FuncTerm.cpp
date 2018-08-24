@@ -23,9 +23,10 @@
 #include <sstream>
 using namespace std;
 
-#include "muParser.h"
 #include "FuncTerm.h"
+
 #include "../utility/numutil.h"
+#include "../builtins/MooseParser.h"
 
 FuncTerm::FuncTerm()
 	: reactantIndex_( 1, 0 ),
@@ -33,8 +34,8 @@ FuncTerm::FuncTerm()
 		target_( ~0U)
 {
 	args_ = 0;
-	parser_.DefineConst(_T("pi"), (mu::value_type)M_PI);
-	parser_.DefineConst(_T("e"), (mu::value_type)M_E);
+	parser_.DefineConst( "pi", M_PI );
+	parser_.DefineConst( "e", M_E );
 }
 
 FuncTerm::~FuncTerm()
@@ -57,7 +58,7 @@ void FuncTerm::setReactantIndex( const vector< unsigned int >& mol )
 		stringstream ss;
 		args_[i] = 0.0;
 		ss << "x" << i;
-		parser_.DefineVar( ss.str(), &args_[i] );
+		parser_.DefineVar( ss.str(), args_[i] );
 	}
 	// Define a 't' variable even if we don't always use it.
 	args_[mol.size()] = 0.0;
@@ -70,14 +71,15 @@ const vector< unsigned int >& FuncTerm::getReactantIndex() const
 }
 
 
-void showError(mu::Parser::exception_type &e)
+void showError(moose::Parser::exception_type &e)
 {
     cout << "Error occurred in parser.\n"
          << "Message:  " << e.GetMsg() << "\n"
-         << "Formula:  " << e.GetExpr() << "\n"
-         << "Token:    " << e.GetToken() << "\n"
-         << "Position: " << e.GetPos() << "\n"
-         << "Error code:     " << e.GetCode() << endl;
+         // << "Formula:  " << e.GetExpr() << "\n"
+         // << "Token:    " << e.GetToken() << "\n"
+         // << "Position: " << e.GetPos() << "\n"
+         // << "Error code:     " << e.GetCode() << endl;
+         << endl;
 }
 
 void FuncTerm::setExpr( const string& expr )
@@ -85,7 +87,7 @@ void FuncTerm::setExpr( const string& expr )
 	try {
 		parser_.SetExpr( expr );
 		expr_ = expr;
-	} catch(mu::Parser::exception_type &e) {
+	} catch(moose::Parser::exception_type &e) {
 		showError(e);
 		//return;
                 throw(e);
@@ -145,7 +147,7 @@ double FuncTerm::operator() ( const double* S, double t ) const
             double result = parser_.Eval() * volScale_;
             return result;
         }
-        catch (mu::Parser::exception_type &e )
+        catch (moose::Parser::exception_type &e )
         {
             cerr << "Error: " << e.GetMsg() << endl;
             throw e;
@@ -165,7 +167,7 @@ void FuncTerm::evalPool( double* S, double t ) const
         {
             S[ target_] = parser_.Eval() * volScale_;
         }
-        catch ( mu::Parser::exception_type & e )
+        catch ( moose::Parser::exception_type & e )
         {
             showError( e );
             //throw e;

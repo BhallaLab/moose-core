@@ -48,7 +48,7 @@
 #ifndef _MOOSE_FUNCTION_H_
 #define _MOOSE_FUNCTION_H_
 
-#include "muParser.h"
+#include "../builtins/MooseParser.h"
 
 /**
    Simple function parser and evaluator for MOOSE. This can take a mathematical
@@ -124,7 +124,7 @@ class Function
      *
      * @return  double using std::fmod(a, b)
      */
-    static mu::value_type muCallbackFMod( mu::value_type a, mu::value_type b );
+    static moose::Parser::value_type muCallbackFMod( moose::Parser::value_type a, moose::Parser::value_type b );
 #endif
 
     Function& operator=(const Function rhs);
@@ -154,9 +154,11 @@ protected:
     vector< double * > _pullbuf;
     map< string, double *> _constbuf;  // for constants
     string _independent; // index of independent variable
-    mu::Parser _parser;
+
+    moose::MooseParser<double> _parser;
+
     void _clearBuffer();
-    void _showError(mu::Parser::exception_type &e) const;
+    void _showError(moose::Parser::exception_type &e) const;
 	char* _stoich; // Used by kinetic solvers when this is zombified.
 };
 

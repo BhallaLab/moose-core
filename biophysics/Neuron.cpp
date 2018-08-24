@@ -19,7 +19,7 @@
 #include "Neuron.h"
 #include "basecode/global.h"
 
-#include "../builtins/Parser.h"
+#include "../builtins/MooseParser.h"
 
 class nuParser: public moose::MooseParser<double>
 {

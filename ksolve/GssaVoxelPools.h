@@ -10,6 +10,8 @@
 #ifndef _GSSA_VOXEL_POOLS_BASE_H
 #define _GSSA_VOXEL_POOLS_BASE_H
 
+#include "../randnum/RNG.h"
+
 class Stoich;
 
 class GssaVoxelPools: public VoxelPoolsBase

@@ -330,32 +330,20 @@ Function::Function(): _t(0.0), _valid(false), _numVar(0), _lastValue(0.0),
     _value(0.0), _rate(0.0), _mode(1),
     _useTrigger( false ), _doEvalAtReinit( false ), _stoich(0)
 {
-    _parser.SetVarFactory(_functionAddVar, this);
+    // _parser.SetVarFactory(_functionAddVar, this);
     _independent = "x0";
     //extendMuParser( );
 
     // Adding this default expression by default to avoid complains from GUI
     try{
         _parser.SetExpr("0");
-    } catch (mu::Parser::exception_type &e) {
+    } catch (moose::Parser::exception_type &e) {
         _showError(e);
         _clearBuffer();
         return;
     }
     _valid = true;
 }
-
-#if 0
-void Function::extendMuParser( void )
-{
-    // Adding pi and e, the defaults are `_pi` and `_e`
-    _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
-    _parser.DefineConst(_T("e"), (mu::value_type)M_E);
-    // Add support
-    _parser.DefineVar( _T("t"),  &this->_t );
-    _parser.DefineOprt( _T("%"), &Function::muCallbackFMod, 7, mu::EOprtAssociativity::oaRIGHT, 0);
-}
-#endif
 
 Function::Function(const Function& rhs): _numVar(rhs._numVar),
     _lastValue(rhs._lastValue),
@@ -367,23 +355,20 @@ Function::Function(const Function& rhs): _numVar(rhs._numVar),
     static Eref er;
     _independent = rhs._independent;
 
-    _parser.SetVarFactory(_functionAddVar, this);
+    // _parser.SetVarFactory(_functionAddVar, this;
     //extendMuParser( );
 
     // Copy the constants
-    mu::valmap_type cmap = rhs._parser.GetConst();
-    if (cmap.size()){
-        mu::valmap_type::const_iterator item = cmap.begin();
-        for (; item!=cmap.end(); ++item){
+    moose::Parser::varmap_type cmap = rhs._parser.GetConst();
+    if (cmap.size() > 0)
+        for (auto item = cmap.begin(); item!=cmap.end(); ++item)
             _parser.DefineConst(item->first, item->second);
-        }
-    }
 
 
     setExpr(er, rhs.getExpr( er ));
     // Copy the values from the var pointers in rhs
     assert(_varbuf.size() == rhs._varbuf.size());
-    for (unsigned int ii = 0; ii < rhs._varbuf.size(); ++ii){
+    for (size_t ii = 0; ii < rhs._varbuf.size(); ++ii){
         _varbuf[ii]->value = rhs._varbuf[ii]->value;
     }
     assert(_pullbuf.size() == rhs._pullbuf.size());
@@ -402,16 +387,15 @@ Function& Function::operator=(const Function rhs)
     _rate = rhs._rate;
     _independent = rhs._independent;
     // Adding pi and e, the defaults are `_pi` and `_e`
-    _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
-    _parser.DefineConst(_T("e"), (mu::value_type)M_E);
+    _parser.DefineConst("pi", (moose::Parser::value_type)M_PI);
+    _parser.DefineConst("e", (moose::Parser::value_type)M_E);
     // Copy the constants
-    mu::valmap_type cmap = rhs._parser.GetConst();
-    if (cmap.size()){
-        mu::valmap_type::const_iterator item = cmap.begin();
-        for (; item!=cmap.end(); ++item){
+    moose::Parser::varmap_type cmap = rhs._parser.GetConst();
+
+    if ( ! cmap.empty() )
+        for ( auto item = cmap.begin(); item != cmap.end(); ++item )
             _parser.DefineConst(item->first, item->second);
-        }
-    }
+
     // Copy the values from the var pointers in rhs
     setExpr(er, rhs.getExpr( er ));
     assert(_varbuf.size() == rhs._varbuf.size());
@@ -450,14 +434,15 @@ void Function::_clearBuffer()
     _pullbuf.clear();
 }
 
-void Function::_showError(mu::Parser::exception_type &e) const
+void Function::_showError(moose::Parser::exception_type &e) const
 {
     cout << "Error occurred in parser.\n"
          << "Message:  " << e.GetMsg() << "\n"
-         << "Formula:  " << e.GetExpr() << "\n"
-         << "Token:    " << e.GetToken() << "\n"
-         << "Position: " << e.GetPos() << "\n"
-         << "Error code:     " << e.GetCode() << endl;
+         // << "Formula:  " << e.GetExpr() << "\n"
+         // << "Token:    " << e.GetToken() << "\n"
+         // << "Position: " << e.GetPos() << "\n"
+         // << "Error code:     " << e.GetCode() << endl;
+         << endl;
 }
 
 /**
@@ -516,7 +501,7 @@ double * _functionAddVar(const char *name, void *data)
 	     << " You must define the constants beforehand using LookupField c: c[name]"
                 " = value"
              << endl;
-        throw mu::ParserError("Undefined constant.");
+        throw moose::Parser::ParserException("Undefined constant.");
     }
 
     return ret;
@@ -565,10 +550,10 @@ void Function::innerSetExpr(const Eref& eref, string expr)
     _clearBuffer();
     _varbuf.resize(_numVar);
     // _pullbuf.resize(_num
-    mu::varmap_type vars;
+    moose::Parser::varmap_type vars;
     try{
         _parser.SetExpr(expr);
-    } catch (mu::Parser::exception_type &e) {
+    } catch (moose::Parser::exception_type &e) {
         cerr << "Error setting expression on: " << eref.objId().path() << endl;
         _showError(e);
         _clearBuffer();
@@ -579,7 +564,7 @@ void Function::innerSetExpr(const Eref& eref, string expr)
     try{
         _parser.Eval();
         _valid = true;
-    } catch (mu::Parser::exception_type &e){
+    } catch (moose::Parser::exception_type &e){
         _showError(e);
     }
 }
@@ -632,7 +617,7 @@ double Function::getValue() const
     }
     try{
         value = _parser.Eval();
-    } catch (mu::Parser::exception_type &e){
+    } catch (moose::Parser::exception_type &e){
         _showError(e);
     }
     return value;
@@ -672,12 +657,12 @@ double Function::getDerivative() const
         cout << "Error: Function::getDerivative() - invalid state" << endl;
         return value;
     }
-    mu::varmap_type variables = _parser.GetVar();
-    mu::varmap_type::const_iterator item = variables.find(_independent);
+    moose::Parser::varmap_type variables = _parser.GetVar();
+    moose::Parser::varmap_type::const_iterator item = variables.find(_independent);
     if (item != variables.end()){
         try{
-            value = _parser.Diff(item->second, *(item->second));
-        } catch (mu::Parser::exception_type &e){
+            value = _parser.Diff(item->second, item->second);
+        } catch (moose::Parser::exception_type &e){
             _showError(e);
         }
     }
@@ -728,9 +713,10 @@ void Function::setConst(string name, double value)
 
 double Function::getConst(string name) const
 {
-    mu::valmap_type cmap = _parser.GetConst();
-    if (cmap.size()){
-        mu::valmap_type::const_iterator it = cmap.find(name);
+    moose::Parser::varmap_type cmap = _parser.GetConst();
+    if (! cmap.empty() )
+    {
+        moose::Parser::varmap_type::const_iterator it = cmap.find(name);
         if (it != cmap.end()){
             return it->second;
         }
@@ -820,13 +806,4 @@ void Function::reinit(const Eref &e, ProcPtr p)
     }
 }
 
-#if 0
-mu::value_type Function::muCallbackFMod( mu::value_type a, mu::value_type b)
-{
-    cerr << "Callback: " << a << " " << b << endl;
-    return fmod(a, b);
-}
-#endif
-
-//
 // Function.cpp ends here

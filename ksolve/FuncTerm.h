@@ -10,7 +10,7 @@
 #ifndef _FUNC_TERM_H
 #define _FUNC_TERM_H
 
-#include "muParser.h"
+#include "../builtins/MooseParser.h"
 
 class FuncTerm
 {
@@ -43,7 +43,7 @@ class FuncTerm
 		double* args_;
 		// Look up reactants in the S vec.
 		vector< unsigned int > reactantIndex_;
-		mu::Parser parser_;
+		moose::MooseParser<double> parser_;
 		string expr_;
 		/**
 		 * Scale factor to account for pool volume if we are assigning conc
