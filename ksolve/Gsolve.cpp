@@ -23,12 +23,22 @@
 #include "GssaSystem.h"
 #include "Stoich.h"
 #include "GssaVoxelPools.h"
+#include "Gsolve.h"
 
+#include <chrono>
+#include <algorithm>
+
+#ifdef USE_BOOST_ASYNC 
+#define BOOST_THREAD_PROVIDES_FUTURE
+#include <boost/thread.hpp>
+#include <boost/thread/future.hpp>
+#else
 #include <future>
 #include <atomic>
 #include <thread>
+#include <functional>
+#endif
 
-#include "Gsolve.h"
 
 #define SIMPLE_ROUNDING 0
 
@@ -204,9 +214,7 @@ static const Cinfo* gsolveCinfo = Gsolve::initCinfo();
 //////////////////////////////////////////////////////////////
 
 Gsolve::Gsolve() :
-#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
-    numThreads_ ( 2 ),
-#endif
+    numThreads_ ( 1 ),
     pools_( 1 ),
     startVoxel_( 0 ),
     dsolve_(),
@@ -360,38 +368,6 @@ void Gsolve::setClockedUpdate( bool val )
 }
 
 
-#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
-/**
- * @brief Advance voxels pools but concurrently.
- *
- * @param begin
- * @param end
- * @param p
- */
-void Gsolve::parallel_advance(int begin, int end, size_t nWorkers, const ProcPtr p
-                              , const GssaSystem* sys
-                             )
-{
-    std::atomic<int> idx( begin );
-    for (size_t cpu = 0; cpu != nWorkers; ++cpu)
-    {
-        std::async( std::launch::async,
-                [this, &idx, end, p, sys]()
-                {
-                    for (;;)
-                    {
-                        int i = idx++;
-                        if (i >= end)
-                            break;
-                        pools_[i].advance( p, sys);
-                    }
-                }
-            );
-    }
-}
-
-#endif
-
 //////////////////////////////////////////////////////////////
 // Process operations.
 //////////////////////////////////////////////////////////////
@@ -450,13 +426,24 @@ void Gsolve::process( const Eref& e, ProcPtr p )
     // First we advance the simulation.
     size_t nvPools = pools_.size( );
 
-#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
-    // If there is only one voxel-pool or one thread is specified by user then
-    // there is no point in using std::async there.
-    if( 1 == getNumThreads( ) || 1 == nvPools )
+    // Third, do the numerical integration for all reactions.
+    size_t grainSize = max( (size_t)1, min( nvPools, nvPools / numThreads_));
+    size_t nWorkers = std::max(1, (int)(nvPools/grainSize) );
+
+    // cout << "Number of pools " << nvPools << " number of threads " << numThreads_
+        // << "nWorkers  " << nWorkers
+        // << endl;
+
+    if( 1 == nWorkers || 1 == nvPools )
     {
+        if( numThreads_ > 1 )
+        {
+            cerr << "Warn: Not enough voxels or threads. Reverting to serial mode. " << endl;
+            numThreads_ = 1;
+        }
+
         for ( size_t i = 0; i < nvPools; i++ )
-            pools_[i].advance( p, &sys_ );
+            pools_[i].advance( p,&sys_ );
     }
     else
     {
@@ -464,17 +451,36 @@ void Gsolve::process( const Eref& e, ProcPtr p )
          *  Somewhat complicated computation to compute the number of threads. 1
          *  thread per (at least) voxel pool is ideal situation.
          *-----------------------------------------------------------------------------*/
-        size_t grainSize = min( nvPools, 1 + (nvPools / numThreads_ ) );
-        size_t nWorkers = nvPools / grainSize;
+        // cout << " Grain size " << grainSize <<  " Workers : " << nWorkers << endl;
+#if USE_BOOST_ASYNC
+        vector< boost::shared_future<size_t> > vecResult;
+#else
+        vector<std::thread> vecThreads;
+#endif
 
         for (size_t i = 0; i < nWorkers; i++)
-            parallel_advance( i * grainSize, (i+1) * grainSize, nWorkers, p, &sys_ );
+        {
+#if USE_BOOST_ASYNC
+            boost::shared_future<size_t> res = boost::async( 
+                    boost::bind( &Gsolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p )
+                );
+            vecResult.push_back(res );
+#else
+            std::thread  t( std::bind( &Gsolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p ) );
+            vecThreads.push_back( std::move(t) );
+#endif
+        }
+
+#if USE_BOOST_ASYNC
+        for (auto &v : vecResult )
+            v.get();
+#else
+        for( auto &v : vecThreads )
+            if( v.joinable() )
+                v.join();
+#endif
 
     }
-#else
-    for ( size_t i = 0; i < nvPools; i++ )
-        pools_[i].advance( p, &sys_ );
-#endif
 
     if ( useClockedUpdate_ )   // Check if a clocked stim is to be updated
     {
@@ -493,11 +499,22 @@ void Gsolve::process( const Eref& e, ProcPtr p )
         getBlock( kvalues );
         dsolvePtr_->setBlock( kvalues );
 
-		// Now use the values in the Dsolve to update junction fluxes
-		// for diffusion, channels, and xreacs
-		dsolvePtr_->updateJunctions( p->dt );
-		// Here the Gsolve may need to do something to convert to integers
+        // Now use the values in the Dsolve to update junction fluxes
+        // for diffusion, channels, and xreacs
+        dsolvePtr_->updateJunctions( p->dt );
+        // Here the Gsolve may need to do something to convert to integers
     }
+}
+
+size_t Gsolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )
+{
+    size_t total = 0;
+    for (size_t i = begin; i < std::min(end, pools_.size() ); i++) 
+    {
+        pools_[i].advance( p, &sys_ );
+        total += 1;
+    }
+    return total;
 }
 
 void Gsolve::reinit( const Eref& e, ProcPtr p )
@@ -519,11 +536,9 @@ void Gsolve::reinit( const Eref& e, ProcPtr p )
         i->refreshAtot( &sys_ );
     }
 
-#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
     if( 1 < getNumThreads( ) )
-        cout << "Info: Using threaded gsolve: " << getNumThreads( )
+        cout << "Info: Setting up threaded gsolve with " << getNumThreads( )
             << " threads. " << endl;
-#endif
 }
 
 //////////////////////////////////////////////////////////////
@@ -1063,7 +1078,6 @@ double Gsolve::volume( unsigned int i ) const
     return 0.0;
 }
 
-#if PARALLELIZE_GSOLVE_WITH_CPP11_ASYNC
 unsigned int Gsolve::getNumThreads( ) const
 {
     return numThreads_;
@@ -1073,4 +1087,3 @@ void Gsolve::setNumThreads( unsigned int x )
 {
     numThreads_ = x;
 }
-#endif

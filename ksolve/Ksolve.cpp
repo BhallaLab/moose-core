@@ -31,9 +31,21 @@
 #include "../mesh/ChemCompt.h"
 #include "Ksolve.h"
 
+#include <chrono>
+#include <algorithm>
+
+#ifdef USE_BOOST_ASYNC 
+#define BOOST_THREAD_PROVIDES_FUTURE
+#include <boost/thread.hpp>
+#include <boost/thread/future.hpp>
+#else
 #include <future>
 #include <atomic>
 #include <thread>
+#include <functional>
+#endif
+
+using namespace std::chrono;
 
 const unsigned int OFFNODE = ~0;
 
@@ -99,14 +111,12 @@ const Cinfo* Ksolve::initCinfo()
         &Ksolve::getNumAllVoxels
     );
 
-#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     static ValueFinfo< Ksolve, unsigned int > numThreads (
         "numThreads",
         "Number of threads to use (applicable in deterministic case)",
         &Ksolve::setNumThreads,
         &Ksolve::getNumThreads
     );
-#endif
 
     static ValueFinfo< Ksolve, unsigned int > numPools(
         "numPools",
@@ -180,9 +190,7 @@ const Cinfo* Ksolve::initCinfo()
         &method,			// Value
         &epsAbs,			// Value
         &epsRel ,			// Value
-#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
         &numThreads,                    // Value
-#endif
         &compartment,		// Value
         &numLocalVoxels,	// ReadOnlyValue
         &nVec,				// LookupValue
@@ -222,9 +230,7 @@ Ksolve::Ksolve()
 #endif
     epsAbs_( 1e-7 ),
     epsRel_( 1e-7 ),
-#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
-    numThreads_( 3 ),
-#endif
+    numThreads_( 1 ),
     pools_( 1 ),
     startVoxel_( 0 ),
     dsolve_(),
@@ -235,7 +241,13 @@ Ksolve::Ksolve()
 
 Ksolve::~Ksolve()
 {
-    ;
+    char* p = getenv( "MOOSE_SHOW_PROFILING_INFO" );
+    if( p != NULL )
+    {
+        cout << "Info: Ksolve took " << totalTime_ << " us and took " << numSteps_  
+            << " steps." << endl;
+
+    }
 }
 
 //////////////////////////////////////////////////////////////
@@ -302,7 +314,6 @@ void Ksolve::setEpsRel( double epsRel )
     }
 }
 
-#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
 void Ksolve::setNumThreads( unsigned int x )
 {
     numThreads_ = x;
@@ -312,7 +323,6 @@ unsigned int Ksolve::getNumThreads(  ) const
 {
     return numThreads_;
 }
-#endif
 
 Id Ksolve::getStoich() const
 {
@@ -496,8 +506,12 @@ double Ksolve::getEstimatedDt() const
 //////////////////////////////////////////////////////////////
 void Ksolve::process( const Eref& e, ProcPtr p )
 {
+
     if ( isBuilt_ == false )
         return;
+
+    numSteps_ += 1;
+    t0_ = std::chrono::high_resolution_clock::now();
 
     // First, handle incoming diffusion values, update S with those.
     if ( dsolvePtr_ )
@@ -516,18 +530,20 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
     size_t nvPools = pools_.size( );
 
-#ifdef PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     // Third, do the numerical integration for all reactions.
-    size_t grainSize = min( nvPools, 1 + (nvPools / numThreads_ ) );
-    size_t nWorkers = nvPools / grainSize;
+    size_t grainSize = max( (size_t)1, min( nvPools, nvPools / numThreads_));
+
+    size_t nWorkers = std::max(1, (int)(nvPools/grainSize) );
+
+    // cout << "Number of pools " << nvPools << " number of threads " << numThreads_
+        // << "nWorkers  " << nWorkers
+        // << endl;
 
     if( 1 == nWorkers || 1 == nvPools )
     {
         if( numThreads_ > 1 )
         {
-#ifndef NDEBUG
-            cout << "Debug: Reset to 1 threads " << endl;
-#endif
+            cerr << "Warn: Not enough voxels or threads. Reverting to serial mode. " << endl;
             numThreads_ = 1;
         }
 
@@ -540,15 +556,37 @@ void Ksolve::process( const Eref& e, ProcPtr p )
          *  Somewhat complicated computation to compute the number of threads. 1
          *  thread per (at least) voxel pool is ideal situation.
          *-----------------------------------------------------------------------------*/
-        //cout << "Grain size " << grainSize <<  " Workers : " << nWorkers << endl;
-        for (size_t i = 0; i < nWorkers; i++)
-            parallel_advance( i * grainSize, (i+1) * grainSize, nWorkers, p );
-    }
+        // cout << " Grain size " << grainSize <<  " Workers : " << nWorkers << endl;
+#if USE_BOOST_ASYNC
+        vector< boost::shared_future<size_t> > vecResult;
 #else
-    for ( size_t i = 0; i < nvPools; i++ )
-        pools_[i].advance( p );
+        vector<std::thread> vecThreads;
 #endif
 
+        for (size_t i = 0; i < nWorkers; i++)
+        {
+#if USE_BOOST_ASYNC
+            boost::shared_future<size_t> res = boost::async( 
+                    boost::bind( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p )
+                );
+            vecResult.push_back(res );
+#else
+            std::thread  t( std::bind( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p ) );
+            vecThreads.push_back( std::move(t) );
+#endif
+        }
+
+#if USE_BOOST_ASYNC
+        for (auto &v : vecResult )
+            v.get();
+#else
+        for( auto &v : vecThreads )
+            if( v.joinable() )
+                v.join();
+#endif
+
+    }
+    
 
     // Assemble and send the integrated values off for the Dsolve.
     if ( dsolvePtr_ )
@@ -565,36 +603,21 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 		// for diffusion, channels, and xreacs
         dsolvePtr_->updateJunctions( p->dt );
     }
+
+    t1_ = high_resolution_clock::now();
+    totalTime_ += duration_cast<::microseconds>(t1_-t0_).count();
 }
 
-
-#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
-/**
- * @brief Advance voxels pools using parallel Ksolve.
- *
- * @param begin
- * @param end
- * @param p
- */
-void Ksolve::parallel_advance(int begin, int end, size_t nWorkers, ProcPtr p)
+size_t Ksolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )
 {
-    std::atomic<int> idx( begin );
-    for (size_t cpu = 0; cpu != nWorkers; ++cpu)
+    size_t total = 0;
+    for (size_t i = begin; i < std::min(end, pools_.size() ); i++) 
     {
-        std::async( std::launch::async
-                , [this, &idx, end, p]() {
-                    for (;;)
-                    {
-                        int i = idx++;
-                        if (i >= end)
-                            break;
-                        pools_[i].advance( p );
-                    }
-                }
-            );
+        pools_[i].advance( p );
+        total += 1;
     }
+    return total;
 }
-#endif
 
 
 void Ksolve::reinit( const Eref& e, ProcPtr p )
@@ -613,10 +636,8 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
         return;
     }
 
-#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     if( 1 < getNumThreads( ) )
-        cout << "Debug: User wants Ksolve with " << numThreads_ << " threads" << endl;
-#endif
+        cout << "Info: Setting up ksolve with " << numThreads_ << " threads" << endl;
 
 }
 
