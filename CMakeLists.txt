@@ -304,8 +304,8 @@ if(WITH_MPI)
 endif(WITH_MPI)
 
 # Always use private version of muparser. We have some custom edits.
-add_subdirectory(external/muparser)
-list(APPEND MOOSE_LIBRARIES muparser)
+add_subdirectory(external/tinyexpr)
+list(APPEND MOOSE_LIBRARIES tinyexpr)
 
 # Add subdirectroeis
 add_subdirectory(basecode)

@@ -7,9 +7,9 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
-#include "ElementValueFinfo.h"
-#include "LookupElementValueFinfo.h"
+#include "../basecode/header.h"
+#include "../basecode/ElementValueFinfo.h"
+#include "../basecode/LookupElementValueFinfo.h"
 #include "shell/Shell.h"
 #include "shell/Wildcard.h"
 #include "ReadCell.h"
@@ -19,13 +19,13 @@
 #include "Neuron.h"
 #include "basecode/global.h"
 
-#include "muParser.h"
+#include "../builtins/Parser.h"
 
-class nuParser: public mu::Parser
+class nuParser: public moose::MooseParser<double>
 {
 public:
     nuParser( const string& expr ):
-        mu::Parser(),
+        moose::MooseParser<double>(),
         p(0.0), // geometrical path distance wound through dendrite
         g(0.0), // geometrical path distance direct from soma.
         L(0.0), // electrical distance arg
@@ -775,7 +775,7 @@ static void setCompartmentParams(
             }
         }
     }
-    catch ( mu::Parser::exception_type& err )
+    catch ( moose::Parser::exception_type& err )
     {
         cout << err.GetMsg() << endl;
     }
@@ -801,7 +801,7 @@ static void setMechParams(
             }
         }
     }
-    catch ( mu::Parser::exception_type& err )
+    catch ( moose::Parser::exception_type& err )
     {
         cout << err.GetMsg() << endl;
     }
@@ -1526,7 +1526,7 @@ void Neuron::evalExprForElist( const vector< ObjId >& elist,
             valIndex += nuParser::numVal;
         }
     }
-    catch ( mu::Parser::exception_type& err )
+    catch ( moose::Parser::exception_type& err )
     {
         cout << err.GetMsg() << endl;
     }
@@ -1879,7 +1879,7 @@ void Neuron::makeSpacingDistrib( const vector< ObjId >& elist,
             }
         }
     }
-    catch ( mu::Parser::exception_type& err )
+    catch ( moose::Parser::exception_type& err )
     {
         cout << err.GetMsg() << endl;
     }
@@ -1923,7 +1923,7 @@ static void makeAngleDistrib ( const vector< ObjId >& elist,
                 theta[k] = angle;
         }
     }
-    catch ( mu::Parser::exception_type& err )
+    catch ( moose::Parser::exception_type& err )
     {
         cout << err.GetMsg() << endl;
     }
@@ -1965,7 +1965,7 @@ static void makeSizeDistrib ( const vector< ObjId >& elist,
                 size[k] = sz;
         }
     }
-    catch ( mu::Parser::exception_type& err )
+    catch ( moose::Parser::exception_type& err )
     {
         cout << err.GetMsg() << endl;
     }
