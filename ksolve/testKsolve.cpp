@@ -313,12 +313,12 @@ void testFuncTerm()
 
     // First check that it doesn't die even if we forget to set up anything.
     double ans = ft( args, 2.0 );
-    ft.setExpr( "x0+x1*t" );
 
     vector< unsigned int > mol( 2, 0 );
     mol[0] = 2;
     mol[1] = 0;
     ft.setReactantIndex( mol );
+    ft.setExpr( "x0+x1*t" );
 
     ans = ft( args, 10.0 );
     assert( doubleEq( ans, 13.0 ) );

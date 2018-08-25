@@ -149,11 +149,9 @@ double FuncTerm::operator() ( const double* S, double t ) const
     for ( i = 0; i < reactantIndex_.size(); ++i )
     {
         args_[i] = S[reactantIndex_[i]];
-        const_cast<FuncTerm*>(this)->addVar( ("x"+to_string(i)).c_str(),  i );
     }
 
     args_[i] = t;
-    const_cast<FuncTerm*>(this)->addVar( "t", i );
 
     try
     {
