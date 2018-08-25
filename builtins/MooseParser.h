@@ -55,7 +55,11 @@ class MooseParser
 
         void SetExpr( const string& expr );
 
+        static void findXsYs( const string& expr, vector<string>& vars );
+
         moose::Parser::value_type Eval( ) const;
+
+        bool IsConstantExpr( const string& expr );
 
         Parser::varmap_type GetVar() const;
 
@@ -82,7 +86,13 @@ class MooseParser
         Parser::varmap_type const_map_;
         Parser::varmap_type used_vars_;
 
+        /* Map to variable names and pointer to their values. */
+        map<string, double*> map_;
+
         /* tiny expr */
+        vector<te_variable> te_vars_;
+        te_expr* te_expr_;
+        int* err_ = NULL;
 };
 
 } // namespace moose.

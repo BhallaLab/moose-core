@@ -7,7 +7,6 @@ add_library(moose_builtins
     Arith.cpp
     Group.cpp
     Mstring.cpp
-    Func.cpp
     Function.cpp
     Variable.cpp
     InputVariable.cpp

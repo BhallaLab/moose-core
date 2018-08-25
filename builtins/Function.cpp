@@ -15,6 +15,7 @@
 #include "../utility/utility.h"
 #include "../utility/numutil.h"
 #include "../utility/print_function.hpp"
+#include "../builtins/MooseParser.h"
 #include "Variable.h"
 
 #include "Function.h"
@@ -314,18 +315,7 @@ Function::Function(): _t(0.0), _valid(false), _numVar(0), _lastValue(0.0),
 {
     _parser.SetVarFactory(_functionAddVar, this);
     _independent = "x0";
-
     // Adding this default expression by default to avoid complains from GUI
-    try
-    {
-        _parser.SetExpr("0");
-    }
-    catch (moose::Parser::exception_type &e)
-    {
-        _showError(e);
-        _clearBuffer();
-        return;
-    }
     _valid = true;
 }
 
@@ -456,6 +446,7 @@ void Function::_showError(moose::Parser::exception_type &e) const
  */
 double * _functionAddVar(const char *name, void *data)
 {
+    MOOSE_DEBUG( "Adding xs,ys, or t to function. Current #var " << name );
     Function* function = static_cast< Function * >(data);
     double * ret = NULL;
     string strname(name);
@@ -475,7 +466,6 @@ double * _functionAddVar(const char *name, void *data)
             }
             function->_numVar = function->_varbuf.size();
         }
-        MOOSE_DEBUG( "Adding xs to function. Current #var " << function->_numVar );
         return &(function->_varbuf[index]->value);
     }
 
@@ -527,6 +517,15 @@ unsigned int Function::addVar()
     return 0;
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Find all x\d+ and y\d+ in the experssion.
+ *
+ * @Param expr
+ * @Param vars
+ */
+/* ----------------------------------------------------------------------------*/
+
 void Function::setExpr(const Eref& eref, string expr)
 {
     this->innerSetExpr( eref, expr ); // Refer to the virtual function here.
@@ -539,10 +538,24 @@ void Function::innerSetExpr(const Eref& eref, string expr)
     _clearBuffer();
     _varbuf.resize(_numVar);
 
+    // Find all variables x\d+ or y\d+ etc, and add them to variable buffer.
+    vector<string> xsys;
+    moose::MooseParser::findXsYs( expr, xsys);
+
+    // Now bind the values from the array of values_ to the map_. This map is to
+    // be passed to parser. 
+    for( size_t i = 0; i < xsys.size(); i++ )
+    {
+        _functionAddVar( xsys[i].c_str(),  this);
+        map_[xsys[i]] = &values_[i];
+    }
+
     moose::Parser::varmap_type vars;
+
     try
     {
-        _parser.SetExpr(expr);
+        // Set parser expression. Send the map and the array of values as well.
+        _parser.SetExpr(expr );
     }
     catch (moose::Parser::exception_type &e)
     {
@@ -614,7 +627,7 @@ double Function::getValue() const
     }
     try
     {
-        value = _parser.Eval();
+        // value = _parser.Eval( );
     }
     catch (moose::Parser::exception_type &e)
     {
@@ -731,20 +744,18 @@ double Function::getConst(string name) const
 void Function::process(const Eref &e, ProcPtr p)
 {
     if (!_valid)
-    {
         return;
-    }
+
     vector < double > databuf;
     requestOut()->send(e, &databuf);
-    for (unsigned int ii = 0;
-            (ii < databuf.size()) && (ii < _pullbuf.size());
-            ++ii)
-    {
+
+    for (size_t ii = 0; (ii < databuf.size()) && (ii < _pullbuf.size()); ++ii)
         *_pullbuf[ii] = databuf[ii];
-    }
+
     _t = p->currTime;
     _value = getValue();
     _rate = (_value - _lastValue) / p->dt;
+
     if ( _useTrigger && _value < TriggerThreshold )
     {
         _lastValue = _value;

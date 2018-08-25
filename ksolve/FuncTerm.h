@@ -39,12 +39,18 @@ public:
     void setTarget( unsigned int tgt );
     void setVolScale( double vs );
     double getVolScale() const;
+
 private:
     double* args_;
     // Look up reactants in the S vec.
     vector< unsigned int > reactantIndex_;
     moose::MooseParser parser_;
     string expr_;
+
+    // map of variable names and pointer to their value.
+    map<string, double*> map_;
+    array<double, 10> value_;
+
     /**
      * Scale factor to account for pool volume if we are assigning conc
      * rather than N. Note that this conc will not be further updated

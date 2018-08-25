@@ -55,7 +55,7 @@ public:
         DefineFun( "H", nuParser::H );
         if ( expr.find( "oldVal" ) != string::npos )
             useOldVal = true;
-        SetExpr( expr );
+        // SetExpr( expr );
     }
 
     /// Defines the order of arguments in the val array.

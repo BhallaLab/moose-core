@@ -20,9 +20,6 @@ def test_var_order():
     simtime = nsteps
     dt = 1.0
     # fn0 = moose.Function('/fn0')
-    # fn0.x.num = 2
-    # fn0.expr = 'x0 + x1'
-    # fn0.mode = 1
     fn1 = moose.Function('/fn1')
     fn1.x.num = 2
     fn1.expr = 'y1+y0+x1+x0'
@@ -65,8 +62,10 @@ def test_var_order():
         moose.setClock(ii, dt)
     moose.reinit()
     moose.start(simtime)
-    for ii in range(len(z1.vector)):
-        print(ii, z1.vector[ii])
+    expected = [0, 1.1, 2.211, 3.322, 4.433, 5.544]
+    assert np.allclose(z1.vector, expected), "Excepted %s, got %s" % (expected,
+            z1.vector )
+
 
 if __name__ == '__main__':
     test_var_order()

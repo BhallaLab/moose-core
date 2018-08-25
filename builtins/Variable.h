@@ -36,7 +36,6 @@ public:
 
     virtual void epSetValue(const Eref & e, double v)
     {
-        MOOSE_DEBUG( " Setting value of variable using input field." << v );
         value = v;
     }
 

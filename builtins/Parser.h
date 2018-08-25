@@ -15,6 +15,7 @@
 #include "../external/tinyexpr/tinyexpr.h"
 
 #include <string>
+#include <map>
 #include <exception>
 
 using namespace std;
@@ -56,7 +57,7 @@ class MooseParser
 
         }
 
-        T Eval( )
+        T Eval( map<string, double> map )
         {
             return 0.0;
         }
