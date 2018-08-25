@@ -12,6 +12,13 @@ import numpy as np
 import moose
 print( "[INFO ] Using moose %s form %s" % (moose.version(), moose.__file__) )
 
+def create_func( funcname, expr ):
+    f = moose.Function( funcname )
+    f.expr = expr
+    t = moose.Table( funcname + 'tab' )
+    moose.connect( t, 'requestOut', f, 'getValue' )
+    return f, t
+
 def test_var_order():
     """The y values are one step behind the x values because of
     scheduling sequences"""
@@ -62,9 +69,8 @@ def test_var_order():
     moose.reinit()
     moose.start(simtime)
     expected = [0, 1.1, 2.211, 3.322, 4.433, 5.544]
-    print( "got", z1.vector )
-    print( "expected", expected )
     assert np.allclose(z1.vector, expected), "Excepted %s, got %s" % (expected, z1.vector )
+    print( 'Passed order vars' )
 
 def test_t( ):
     f = moose.Function( '/funct' )
@@ -78,9 +84,43 @@ def test_t( ):
     y = t.vector
     d = np.diff( y[1:] ) 
     assert np.mean(d) == d[0]
+    print( 'Passed t/2' )
 
+def test_trig( ):
+    f = moose.Function( '/func2' )
+    f.expr = 'sin(t)^2+cos(t)^2'
+    t = moose.Table( '/table2' )
+    moose.setClock( f.tick, 0.1)
+    moose.setClock( t.tick, 0.1)
+    moose.connect( t, 'requestOut', f, 'getValue' )
+    moose.reinit()
+    moose.start( 1 )
+    y = t.vector
+    assert np.mean(y) == 1.0
+    assert np.std(y) == 0.0
+    print( 'Passed sin^2 x + cos^x==1' )
 
+def test_rand( ):
+    moose.seed( 10 )
+    f, t = create_func( 'random', 'rand()')
+    moose.reinit()
+    moose.start(1)
+    expected = [0.29876116, 0.49458993, 0.83191136, 0.02517173 
+            , 0.26556613, 0.15037787, 0.81660184, 0.89081653 
+            , 0.03061665, 0.72743551, 0.13145815 ]
+    assert np.isclose(t.vector, expected ).all()
+    print( 'passed test random' )
+
+def test_fmod( ):
+    f, t = create_func( 'fmod', 'fmod(t, 2)' )
+    moose.reinit()
+    moose.start( 20 )
+    y = t.vector
+    assert( np.max(y) <= 2 ), y
 
 if __name__ == '__main__':
     test_var_order()
     test_t( )
+    test_trig( )
+    test_rand( )
+    test_fmod( )

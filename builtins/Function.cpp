@@ -446,10 +446,12 @@ void Function::_showError(moose::Parser::exception_type &e) const
  */
 double * _functionAddVar(const char *name, void *data)
 {
-    MOOSE_DEBUG( "Adding xs,ys, or t to function. Current #var " << name );
+    // MOOSE_DEBUG( "Adding xs,ys, or t to function. Current #var " << name );
     Function* function = static_cast< Function * >(data);
     double * ret = NULL;
+
     string strname(name);
+
     // Names starting with x are variables, everything else is constant.
     if (strname[0] == 'x')
     {

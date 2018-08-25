@@ -93,6 +93,14 @@ class MooseParser
         void SetVarFactory( double* (*fn)(const char*, void*), void *);
 
 
+        /*-----------------------------------------------------------------------------
+         *  User defined function of parser.
+         *-----------------------------------------------------------------------------*/
+        static moose::Parser::value_type Rand( );
+        static moose::Parser::value_type Rand2( double a, double b );
+        static moose::Parser::value_type Fmod( double a, double b );
+
+
     private:
         /* data */
         string expr_;
@@ -108,6 +116,7 @@ class MooseParser
         vector<te_variable> te_vars_;
         te_expr* te_expr_;
         int err_;
+        size_t num_user_defined_funcs_ = 0;
 };
 
 } // namespace moose.
