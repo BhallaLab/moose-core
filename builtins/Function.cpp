@@ -12,6 +12,7 @@
 // URL:
 
 #include "../basecode/header.h"
+#include "../basecode/global.h"
 #include "../utility/utility.h"
 #include "../utility/numutil.h"
 #include "../utility/print_function.hpp"

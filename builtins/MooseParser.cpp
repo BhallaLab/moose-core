@@ -84,8 +84,6 @@ namespace moose
     void MooseParser::DefineVar( const char* varName, moose::Parser::value_type* val)
     {
         // MOOSE_DEBUG( "DefineVar: varName " << varName << " addr: " << val );
-        // Variable* v = new Variable( );
-        // v->value = *val;
         te_variable t = { varName, val, TE_VARIABLE, NULL };
         te_vars_.push_back( t );
         map_[varName] = val;

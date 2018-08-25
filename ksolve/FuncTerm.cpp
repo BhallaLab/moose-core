@@ -24,9 +24,9 @@
 using namespace std;
 
 #include "FuncTerm.h"
-
 #include "../utility/numutil.h"
 #include "../builtins/MooseParser.h"
+#include "../builtins/Variable.h"
 
 FuncTerm::FuncTerm()
     : reactantIndex_( 1, 0 ),
@@ -34,8 +34,6 @@ FuncTerm::FuncTerm()
       target_( ~0U)
 {
     args_ = 0;
-    parser_.DefineConst( "pi", M_PI );
-    parser_.DefineConst( "e", M_E );
 }
 
 FuncTerm::~FuncTerm()
@@ -85,6 +83,27 @@ void showError(moose::Parser::exception_type &e)
 
 void FuncTerm::setExpr( const string& expr )
 {
+    // Find all variables x\d+ or y\d+ etc, and add them to variable buffer.
+    vector<string> xs;
+    vector<string> ys;
+    moose::MooseParser::findXsYs( expr, xs, ys);
+
+    // Now create a map which maps the variable name to location of values. This
+    // is critical to make sure that pointers remain valid when multi-threaded
+    // encironment is used.
+    for( size_t i = 0; i < xs.size(); i++ )
+    {
+        _functionAddVar( xs[i].c_str(),  this);
+        // get the address of Variable's value. Is it safe in multi-threaded
+        // environment? I hope so.
+        map_[xs[i]] = &(_varbuf[i]->value);
+    }
+    for( size_t i = 0; i < ys.size(); i++ )
+    {
+        _functionAddVar( ys[i].c_str(),  this);
+        map_[ys[i]] = _pullbuf[i];
+    }
+
     try
     {
         parser_.SetExpr( expr );

@@ -11,12 +11,20 @@
 #define _FUNC_TERM_H
 
 #include "../builtins/MooseParser.h"
+#include "../builtins/Function.h"
 
-class FuncTerm
+class Variable;
+
+class FuncTerm : protected Function
 {
+
 public:
+
     FuncTerm();
     ~FuncTerm();
+
+    friend  double * _functionAddVar(const char *name, void *data);
+
     /**
      * This computes the value. The time t is an argument needed by
      * some functions.
@@ -33,10 +41,13 @@ public:
      */
     void setReactantIndex( const vector< unsigned int >& mol );
     const vector< unsigned int >& getReactantIndex() const;
+
     const string& getExpr() const;
     void setExpr( const string& e );
+
     const unsigned int getTarget() const;
     void setTarget( unsigned int tgt );
+
     void setVolScale( double vs );
     double getVolScale() const;
 
@@ -46,10 +57,6 @@ private:
     vector< unsigned int > reactantIndex_;
     moose::MooseParser parser_;
     string expr_;
-
-    // map of variable names and pointer to their value.
-    map<string, double*> map_;
-    array<double, 10> value_;
 
     /**
      * Scale factor to account for pool volume if we are assigning conc

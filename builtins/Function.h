@@ -13,6 +13,9 @@
 #define MAX_VARS_IN_FUNCTION 100
 
 #include "../builtins/MooseParser.h"
+#include "../basecode/header.h"
+
+class Variable;
 
 /**
    Simple function parser and evaluator for MOOSE. This can take a mathematical
