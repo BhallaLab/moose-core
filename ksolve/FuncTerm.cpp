@@ -54,14 +54,12 @@ void FuncTerm::setReactantIndex( const vector< unsigned int >& mol )
         delete[] args_;
         args_ = 0;
     }
+
     args_ = new double[ mol.size() + 1 ];
-    // args_.resize( mol.size() + 1, 0.0 );
     for ( unsigned int i = 0; i < mol.size(); ++i )
     {
-        stringstream ss;
         args_[i] = 0.0;
-        ss << "x" << i;
-        parser_.DefineVar( ss.str(), args_[i] );
+        parser_.DefineVar( ("x"+to_string(i)).c_str(), &args_[i] );
     }
     // Define a 't' variable even if we don't always use it.
     args_[mol.size()] = 0.0;

@@ -333,7 +333,7 @@ Function::Function(const Function& rhs):
     moose::Parser::varmap_type cmap = rhs._parser.GetConst();
     if (cmap.size() > 0)
         for (auto item = cmap.begin(); item!=cmap.end(); ++item)
-            _parser.DefineConst(item->first, item->second);
+            _parser.DefineConst(item->first.c_str(), item->second);
 
     setExpr(er, rhs.getExpr( er ));
 
@@ -359,16 +359,12 @@ Function& Function::operator=(const Function rhs)
     _rate = rhs._rate;
     _independent = rhs._independent;
 
-    // Adding pi and e, the defaults are `_pi` and `_e`
-    _parser.DefineConst("pi", (moose::Parser::value_type)M_PI);
-    _parser.DefineConst("e", (moose::Parser::value_type)M_E);
-
     // Copy the constants
     moose::Parser::varmap_type cmap = rhs._parser.GetConst();
 
     if ( ! cmap.empty() )
         for ( auto item = cmap.begin(); item != cmap.end(); ++item )
-            _parser.DefineConst(item->first, item->second);
+            _parser.DefineConst(item->first.c_str(), item->second);
 
     // Copy the values from the var pointers in rhs
     setExpr(er, rhs.getExpr( er ));
@@ -712,7 +708,7 @@ Variable * Function::getVar(unsigned int ii)
 
 void Function::setConst(string name, double value)
 {
-    _parser.DefineConst(name, value);
+    _parser.DefineConst(name.c_str(), value);
 }
 
 double Function::getConst(string name) const

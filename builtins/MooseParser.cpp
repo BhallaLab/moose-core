@@ -12,7 +12,9 @@
 #include <cassert>
 
 #include "../utility/testing_macros.hpp"
+#include "../utility/strutil.h"
 #include "../basecode/global.h"
+
 
 using namespace std;
 
@@ -81,13 +83,17 @@ namespace moose
      *-----------------------------------------------------------------------------*/
     void MooseParser::DefineVar( const char* varName, moose::Parser::value_type* val)
     {
-        cout << "NA " << varName << " val: " << val << endl;
-
+        // MOOSE_DEBUG( "DefineVar: varName " << varName << " addr: " << val );
+        // Variable* v = new Variable( );
+        // v->value = *val;
+        te_variable t = { varName, val, TE_VARIABLE, NULL };
+        te_vars_.push_back( t );
+        map_[varName] = val;
     }
 
-    void MooseParser::DefineVar( const string& varName, moose::Parser::value_type& val)
+    void MooseParser::DefineConst( const char* constName, const moose::Parser::value_type& value )
     {
-        cout << "NA " << varName << " val: " << val << endl;
+        const_map_[constName] = value;
     }
 
     void MooseParser::DefineFun( const char* funcName, moose::Parser::value_type (&func)(moose::Parser::value_type) )
@@ -135,7 +141,7 @@ namespace moose
 
     bool MooseParser::SetExpr( const string& expr )
     {
-        if( expr.size() < 1 || expr == "0" || expr == "0.0" )
+        if( moose::trim(expr).size() < 1 || moose::trim(expr) == "0" || moose::trim(expr) == "0.0" )
             return false;
 
         // NOTE: Before we come here, make sure that map_ is set properly. Map can
@@ -146,6 +152,7 @@ namespace moose
             MOOSE_DEBUG( "MOOSE does not yet know where the values of variables x{i}, y{i} etc. " 
                     << " are stored. Did you forget to call SetVariableMap? Doing nothing .." 
                     );
+            cout << "\tExpr: " << expr <<  "|" << expr.size() << endl;
             return false;
         }
 
@@ -194,17 +201,6 @@ namespace moose
         return var_map_;
     }
 
-
-    void MooseParser::DefineConst( const string& constName, moose::Parser::value_type& value )
-    {
-        MOOSE_DEBUG( "Adding constant " << constName << " with value " << value );
-        const_map_[constName] = value;
-    }
-
-    void MooseParser::DefineConst( const char* constName, const moose::Parser::value_type& value )
-    {
-        const_map_[constName] = value;
-    }
 
     moose::Parser::value_type MooseParser::Diff( 
             const moose::Parser::value_type a, const moose::Parser::value_type b 

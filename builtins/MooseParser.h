@@ -49,8 +49,6 @@ class MooseParser
 
         void DefineVar( const char* varName, moose::Parser::value_type* val);
 
-        void DefineVar( const string& varName, moose::Parser::value_type& val);
-
         void DefineFun( const char* funcName, moose::Parser::value_type (&func)(moose::Parser::value_type) );
 
         /* --------------------------------------------------------------------------*/
@@ -79,8 +77,6 @@ class MooseParser
         Parser::varmap_type GetVar() const;
 
         void SetVarFactory( const char* varName, void* data );
-
-        void DefineConst( const string& constName, moose::Parser::value_type& value );
 
         void DefineConst( const char* constName, const moose::Parser::value_type& value );
 
