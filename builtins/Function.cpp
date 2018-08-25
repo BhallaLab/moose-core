@@ -484,8 +484,11 @@ double * _functionAddVar(const char *name, void *data)
     Function* function = reinterpret_cast< Function * >(data);
     double * ret = NULL;
     string strname(name);
+
+    cout << "A " << name << endl;
     // Names starting with x are variables, everything else is constant.
-    if (strname[0] == 'x'){
+    if (strname[0] == 'x')
+    {
         int index = atoi(strname.substr(1).c_str());
         if ((unsigned)index >= function->_varbuf.size()){
             function->_varbuf.resize(index+1, 0);
@@ -497,7 +500,9 @@ double * _functionAddVar(const char *name, void *data)
             function->_numVar = function->_varbuf.size();
         }
         ret = &(function->_varbuf[index]->value);
-    } else if (strname[0] == 'y'){
+    } 
+    else if (strname[0] == 'y')
+    {
         int index = atoi(strname.substr(1).c_str());
         if ((unsigned)index >= function->_pullbuf.size()){
             function->_pullbuf.resize(index+1, 0 );
@@ -508,9 +513,13 @@ double * _functionAddVar(const char *name, void *data)
             }
         }
         ret = function->_pullbuf[index];
-    } else if (strname == "t"){
+    }
+    else if (strname == "t")
+    {
         ret = &function->_t;
-    } else {
+    }
+    else 
+    {
         cerr << "Got an undefined symbol: " << name << endl
              << "Variables must be named xi, yi, where i is integer index."
 	     << " You must define the constants beforehand using LookupField c: c[name]"
@@ -538,24 +547,12 @@ double * _functionAddVar(const char *name, void *data)
  */
 unsigned int Function::addVar()
 {
-//     unsigned int newVarIndex = _numVar;
-//     ++_numVar;
-//     stringstream name;
-//     name << "x" << newVarIndex;
-//     _functionAddVar(name.str().c_str(), this);
-    //     return newVarIndex;
     return 0;
 }
 
-// void Function::dropVar(unsigned int msgLookup)
-// {
-//     // Don't know what this can possibly mean in the context of
-//     // evaluating a set expression.
-// }
-
 void Function::setExpr(const Eref& eref, string expr)
 {
-	this->innerSetExpr( eref, expr ); // Refer to the virtual function here.
+    this->innerSetExpr( eref, expr ); // Refer to the virtual function here.
 }
 
 // Virtual function, this does the work.
