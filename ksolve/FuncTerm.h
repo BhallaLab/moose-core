@@ -10,12 +10,15 @@
 #ifndef _FUNC_TERM_H
 #define _FUNC_TERM_H
 
+#include <memory>
+using namespace std;
+
 #include "../builtins/MooseParser.h"
 #include "../builtins/Function.h"
 
 class Variable;
 
-class FuncTerm : protected Function
+class FuncTerm 
 {
 
 public:
@@ -33,6 +36,8 @@ public:
     const FuncTerm& operator=( const FuncTerm& other );
 
     void evalPool( double* s, double t ) const;
+
+    void addVar( const char* name, size_t i );
 
     /**
      * This function finds the reactant indices in the vector
@@ -52,7 +57,9 @@ public:
     double getVolScale() const;
 
 private:
+
     double* args_;
+
     // Look up reactants in the S vec.
     vector< unsigned int > reactantIndex_;
     moose::MooseParser parser_;
@@ -65,6 +72,12 @@ private:
      */
     double volScale_;
     unsigned int target_; /// Index of the entity to be updated by Func
+
+    // parser 
+    vector< unique_ptr<Variable> > varbuf_;
+    vector<double*>   pullbuf_;
+    map<string, double*> map_;
+    double t_;           // Variable t.
 };
 
 #endif // _FUNC_TERM_H

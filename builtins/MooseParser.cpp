@@ -81,12 +81,25 @@ namespace moose
     /*-----------------------------------------------------------------------------
      *  Other function.
      *-----------------------------------------------------------------------------*/
-    void MooseParser::DefineVar( const char* varName, moose::Parser::value_type* val)
+    void MooseParser::DefineVar( const char* varName, moose::Parser::value_type* const val) 
     {
         // MOOSE_DEBUG( "DefineVar: varName " << varName << " addr: " << val );
         te_variable t = { varName, val, TE_VARIABLE, NULL };
         te_vars_.push_back( t );
         map_[varName] = val;
+    }
+
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Add a variable to parser.
+     *
+     * @Param varName
+     * @Param v
+     */
+    /* ----------------------------------------------------------------------------*/
+    void MooseParser::AddVariableToParser( const char* varName, moose::Parser::value_type* v)
+    {
+        map_[varName] = v;
     }
 
     void MooseParser::DefineConst( const char* constName, const moose::Parser::value_type& value )
@@ -151,6 +164,8 @@ namespace moose
                     << " are stored. Did you forget to call SetVariableMap? Doing nothing .." 
                     );
             cout << "\tExpr: " << expr <<  "|" << expr.size() << endl;
+            cout << " === Currently assigned variables." << endl;
+            print_tvars( &te_vars_[0], te_vars_.size() );
             return false;
         }
 

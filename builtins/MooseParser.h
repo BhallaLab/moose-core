@@ -47,7 +47,7 @@ class MooseParser
         MooseParser();
         ~MooseParser();
 
-        void DefineVar( const char* varName, moose::Parser::value_type* val);
+        void DefineVar( const char* varName, moose::Parser::value_type* const val);
 
         void DefineFun( const char* funcName, moose::Parser::value_type (&func)(moose::Parser::value_type) );
 
@@ -69,6 +69,8 @@ class MooseParser
 
         static void findAllVars( const string& expr, vector<string>& vars, char start );
         static void findXsYs( const string& expr, vector<string>& xs, vector<string>& ys );
+
+        void AddVariableToParser( const char* varName, moose::Parser::value_type* const v);
 
         moose::Parser::value_type Eval( ) const;
 

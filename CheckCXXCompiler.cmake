@@ -11,10 +11,12 @@ add_definitions(-Wall
     #-Wno-return-type-c-linkage
     -Wno-unused-variable
     -Wno-unused-function
-    -Wno-unused-local-typedefs
     #-Wno-unused-private-field
     )
 
+if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" )
+    add_definitions( -Wno-unused-local-typedefs )
+endif()
 
 add_definitions(-fPIC)
 if(COMPILER_WARNS_STRICT_ALIASING)

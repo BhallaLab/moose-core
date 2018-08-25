@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <sstream>
+#include <memory>
 using namespace std;
 
 #include "FuncTerm.h"
@@ -57,11 +58,12 @@ void FuncTerm::setReactantIndex( const vector< unsigned int >& mol )
     for ( unsigned int i = 0; i < mol.size(); ++i )
     {
         args_[i] = 0.0;
-        parser_.DefineVar( ("x"+to_string(i)).c_str(), &args_[i] );
+        addVar( ("x"+to_string(i)).c_str(), i );
     }
+
     // Define a 't' variable even if we don't always use it.
     args_[mol.size()] = 0.0;
-    parser_.DefineVar( "t", &args_[mol.size()] );
+    addVar( "t", mol.size() );
 }
 
 const vector< unsigned int >& FuncTerm::getReactantIndex() const
@@ -74,36 +76,12 @@ void showError(moose::Parser::exception_type &e)
 {
     cout << "Error occurred in parser.\n"
          << "Message:  " << e.GetMsg() << "\n"
-         // << "Formula:  " << e.GetExpr() << "\n"
-         // << "Token:    " << e.GetToken() << "\n"
-         // << "Position: " << e.GetPos() << "\n"
-         // << "Error code:     " << e.GetCode() << endl;
          << endl;
 }
 
 void FuncTerm::setExpr( const string& expr )
 {
     // Find all variables x\d+ or y\d+ etc, and add them to variable buffer.
-    vector<string> xs;
-    vector<string> ys;
-    moose::MooseParser::findXsYs( expr, xs, ys);
-
-    // Now create a map which maps the variable name to location of values. This
-    // is critical to make sure that pointers remain valid when multi-threaded
-    // encironment is used.
-    for( size_t i = 0; i < xs.size(); i++ )
-    {
-        _functionAddVar( xs[i].c_str(),  this);
-        // get the address of Variable's value. Is it safe in multi-threaded
-        // environment? I hope so.
-        map_[xs[i]] = &(_varbuf[i]->value);
-    }
-    for( size_t i = 0; i < ys.size(); i++ )
-    {
-        _functionAddVar( ys[i].c_str(),  this);
-        map_[ys[i]] = _pullbuf[i];
-    }
-
     try
     {
         parser_.SetExpr( expr );
@@ -152,6 +130,12 @@ const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
     return *this;
 }
 
+void FuncTerm::addVar( const char* name, size_t i )
+{
+    parser_.DefineVar( name, &args_[i] );
+    parser_.AddVariableToParser( name, &args_[i] );
+}
+
 /**
  * This computes the value. The time t is an argument needed by
  * some functions.
@@ -160,10 +144,17 @@ double FuncTerm::operator() ( const double* S, double t ) const
 {
     if ( !args_ )
         return 0.0;
-    unsigned int i;
+
+    size_t  i = 0;
     for ( i = 0; i < reactantIndex_.size(); ++i )
+    {
         args_[i] = S[reactantIndex_[i]];
+        const_cast<FuncTerm*>(this)->addVar( ("x"+to_string(i)).c_str(),  i );
+    }
+
     args_[i] = t;
+    const_cast<FuncTerm*>(this)->addVar( "t", i );
+
     try
     {
         double result = parser_.Eval() * volScale_;
