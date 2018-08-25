@@ -15,6 +15,7 @@ print( "[INFO ] Using moose %s form %s" % (moose.version(), moose.__file__) )
 def test_var_order():
     """The y values are one step behind the x values because of
     scheduling sequences"""
+    moose.delete( '/' )
     nsteps = 5
     simtime = nsteps
     dt = 1.0
@@ -61,12 +62,13 @@ def test_var_order():
     moose.reinit()
     moose.start(simtime)
     expected = [0, 1.1, 2.211, 3.322, 4.433, 5.544]
+    print( "got", z1.vector )
+    print( "expected", expected )
     assert np.allclose(z1.vector, expected), "Excepted %s, got %s" % (expected, z1.vector )
 
 def test_t( ):
-    moose.delete( '/' )
     f = moose.Function( '/funct' )
-    f.expr = 't'
+    f.expr = 't/2.0'
     t = moose.Table( '/table1' )
     moose.setClock( f.tick, 0.1)
     moose.setClock( t.tick, 0.1)
@@ -74,12 +76,11 @@ def test_t( ):
     moose.reinit()
     moose.start( 1 )
     y = t.vector
-    print( 'Raw', y )
-    print( 'Diff', np.diff(y) )
-    assert (np.diff(y) == 0.1).all(), np.diff(y)
+    d = np.diff( y[1:] ) 
+    assert np.mean(d) == d[0]
 
 
 
 if __name__ == '__main__':
-    test_t( )
     test_var_order()
+    test_t( )

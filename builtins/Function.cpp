@@ -729,20 +729,20 @@ double Function::getConst(string name) const
 
 void Function::process(const Eref &e, ProcPtr p)
 {
-#if 0
     if( ! _valid )
         return;
-#endif
 
+    // Update values of incoming variables.
     vector < double > databuf;
     requestOut()->send(e, &databuf);
-
-    for (size_t ii = 0; (ii < databuf.size()) && (ii < _pullbuf.size()); ++ii)
-        *_pullbuf[ii] = databuf[ii];
 
     _t = p->currTime;
     _value = getValue();
     _rate = (_value - _lastValue) / p->dt;
+
+
+    for (size_t ii = 0; (ii < databuf.size()) && (ii < _pullbuf.size()); ++ii)
+        *_pullbuf[ii] = databuf[ii];
 
     if ( _useTrigger && _value < TriggerThreshold )
     {
@@ -753,16 +753,19 @@ void Function::process(const Eref &e, ProcPtr p)
     if( 1 == _mode )
     {
         valueOut()->send(e, _value);
+        _lastValue = _value;
         return;
     }
     if( 2 == _mode )
     {
         derivativeOut()->send(e, getDerivative());
+        _lastValue = _value;
         return;
     }
     if( 3 == _mode )
     {
         rateOut()->send(e, _rate);
+        _lastValue = _value;
         return;
     }
     else
@@ -770,10 +773,9 @@ void Function::process(const Eref &e, ProcPtr p)
         valueOut()->send(e, _value);
         derivativeOut()->send(e, getDerivative());
         rateOut()->send(e, _rate);
+        _lastValue = _value;
         return;
     }
-
-    _lastValue = _value;
 }
 
 void Function::reinit(const Eref &e, ProcPtr p)

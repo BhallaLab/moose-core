@@ -252,8 +252,10 @@ void Table::process( const Eref& e, ProcPtr p )
     requestOut()->send( e, &ret );
 
     if (useSpikeMode_)
+    {
         for ( auto i = ret.begin(); i != ret.end(); ++i )
             spike( *i );
+    }
     else
         vec().insert( vec().end(), ret.begin(), ret.end() );
 
@@ -451,9 +453,9 @@ double Table::getDt( void ) const
  * when packing the data for writing.
  */
 void Table::zipWithTime( const vector<double>& v
-                         , vector<double>& tvec
-                         , const double& currTime
-                       )
+        , vector<double>& tvec
+        , const double& currTime
+    )
 {
     size_t N = v.size();
     for (size_t i = 0; i < N; i++)
