@@ -109,24 +109,6 @@ class Function
 
     double getDerivative() const;
 
-#if 0
-    /**
-     * @brief Extend standard muparser library. This add some binary operators
-     * and user-defined functions.
-     */
-    void extendMuParser( void );
-
-    /**
-     * @brief callback function for floating point mod-operator.
-     *
-     * @param a double
-     * @param b double
-     *
-     * @return  double using std::fmod(a, b)
-     */
-    static moose::Parser::value_type muCallbackFMod( moose::Parser::value_type a, moose::Parser::value_type b );
-#endif
-
     Function& operator=(const Function rhs);
 
     unsigned int addVar();
@@ -148,14 +130,19 @@ protected:
     unsigned int _mode;
     bool _useTrigger;
     bool _doEvalAtReinit;
-     // this stores variables received via incoming messages, identifiers of the form x{i} are included in this
+
+    // Stores variables received via incoming messages, identifiers of the form x{i} 
+    // are included in this.
     vector<Variable *> _varbuf;
-    // this stores variable values pulled by sending request. identifiers of the form y{i} are included in this
+
+    // this stores variable values pulled by sending request. 
+    // identifiers of the form y{i} are included in this
     vector< double * > _pullbuf;
+
     map< string, double *> _constbuf;  // for constants
     string _independent; // index of independent variable
 
-    moose::MooseParser<double> _parser;
+    moose::MooseParser _parser;
 
     void _clearBuffer();
     void _showError(moose::Parser::exception_type &e) const;

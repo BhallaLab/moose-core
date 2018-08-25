@@ -41,96 +41,50 @@ namespace moose {
         typedef map<string, value_type> varmap_type;
     }
 
-template<typename T=Parser::value_type>
 class MooseParser
 {
-
     public:
-        MooseParser() {;}
-        ~MooseParser() {;}
+        MooseParser();
+        ~MooseParser();
 
-        void DefineVar( const char* varName, T* val)
-        {
-            cout << "NA " << varName << " val: " << val << endl;
+        void DefineVar( const char* varName, moose::Parser::value_type* val);
 
-        }
+        void DefineVar( const string& varName, moose::Parser::value_type& val);
 
-        void DefineVar( const string& varName, T& val)
-        {
-            cout << "NA " << varName << " val: " << val << endl;
-        }
+        void DefineFun( const char* funcName, moose::Parser::value_type (&func)(moose::Parser::value_type) );
 
-        void DefineFun( const char* funcName, T (&func)(T) )
-        {
+        void SetExpr( const string& expr );
 
-        }
+        moose::Parser::value_type Eval( ) const;
 
-        void SetExpr( const string& expr )
-        {
-            expr_ = expr;
-        }
+        Parser::varmap_type GetVar() const;
 
-        T Eval( ) const
-        {
-            return 0.0;
-        }
+        void SetVarFactory( const char* varName, void* data );
 
-        Parser::varmap_type GetVar() const
-        {
-            return var_map_;
-        }
+        void DefineConst( const string& constName, moose::Parser::value_type& value );
 
-        // void SetVarFactory( const string& varName, void* data )
-        void SetVarFactory( const char* varName, void* data )
-        {
-        }
+        void DefineConst( const char* constName, const moose::Parser::value_type& value );
 
-        void DefineConst( const string& constName, T& value )
-        {
-            const_map_[constName] = value;
-        }
+        moose::Parser::value_type Diff( const moose::Parser::value_type a, const moose::Parser::value_type b) const;
 
-        void DefineConst( const char* constName, const T& value )
-        {
-            const_map_[constName] = value;
-        }
-
-        T Diff( const T a, const T b) const
-        {
-            return a-b;
-        }
-
-        Parser::varmap_type GetConst( ) const
-        {
-            return const_map_;
-        }
-
-        Parser::varmap_type GetUsedVar( )
-        {
-            return used_vars_;
-        }
-
-        void ClearVar( )
-        {
-            const_map_.clear();
-            var_map_.clear();
-        }
-
-        const string GetExpr( ) const
-        {
-            return expr_;
-        }
+        Parser::varmap_type GetConst( ) const;
+        Parser::varmap_type GetUsedVar( );
+        void ClearVar( );
+        const string GetExpr( ) const;
+        void SetVarFactory( double* (*fn)(const char*, void*), void *);
 
 
     private:
         /* data */
         string expr_;
-        T value=0.0;
+        moose::Parser::value_type value=0.0;
         Parser::varmap_type var_map_;
         Parser::varmap_type const_map_;
         Parser::varmap_type used_vars_;
+
+        /* tiny expr */
 };
 
+} // namespace moose.
 
-}
 #endif /* end of include guard: PARSER_H */

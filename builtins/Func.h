@@ -107,7 +107,7 @@ class Func
 protected:
     friend double _addVar(const char * name, void *data);
     vector< double > _varbuf;
-    moose::MooseParser<double> _parser;
+    moose::MooseParser _parser;
     double _x, _y, _z;
     unsigned int _mode;
     mutable bool _valid;

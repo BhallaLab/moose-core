@@ -348,7 +348,7 @@ void SeqSynHandler::updateKernel()
         return;
     double x = 0;
     double t = 0;
-    moose::MooseParser<double> p;
+    moose::MooseParser p;
     p.DefineVar("x", &x);
     p.DefineVar("t", &t);
     p.DefineConst("pi", M_PI);

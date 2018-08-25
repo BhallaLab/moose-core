@@ -21,11 +21,11 @@
 
 #include "../builtins/MooseParser.h"
 
-class nuParser: public moose::MooseParser<double>
+class nuParser: public moose::MooseParser
 {
 public:
     nuParser( const string& expr ):
-        moose::MooseParser<double>(),
+        moose::MooseParser(),
         p(0.0), // geometrical path distance wound through dendrite
         g(0.0), // geometrical path distance direct from soma.
         L(0.0), // electrical distance arg
