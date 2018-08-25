@@ -13,12 +13,10 @@ option(build_tinyexpr_example3 "Build TinyExpr example 3." OFF)
 
 find_library(MATH_LIB m)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi -Wall -Wshadow -fPIC -O3")
-
-set(SOURCE_FILES
-        tinyexpr.c
-        tinyexpr.h
-        )
+# When using as external project, let the top level CMakeList.txt set these
+# flags.
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi -Wall -Wshadow -fPIC -O3")
+set(SOURCE_FILES tinyexpr.c)
 
 add_library(tinyexpr STATIC ${SOURCE_FILES})
 if (TE_POW_FROM_RIGHT)

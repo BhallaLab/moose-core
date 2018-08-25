@@ -539,13 +539,14 @@ void Function::innerSetExpr(const Eref& eref, string expr)
     vector<string> ys;
     moose::MooseParser::findXsYs( expr, xs, ys);
 
-    // Now bind the values from the array of values_ to the map_. This map is to
-    // be passed to parser. 
+    // Now create a map which maps the variable name to location of values. This
+    // is critical to make sure that pointers remain valid when multi-threaded
+    // encironment is used.
     for( size_t i = 0; i < xs.size(); i++ )
     {
         _functionAddVar( xs[i].c_str(),  this);
         // get the address of Variable's value. Is it safe in multi-threaded
-        // environment?
+        // environment? I hope so.
         map_[xs[i]] = &(_varbuf[i]->value);
     }
     for( size_t i = 0; i < ys.size(); i++ )
@@ -554,13 +555,11 @@ void Function::innerSetExpr(const Eref& eref, string expr)
         map_[ys[i]] = _pullbuf[i];
     }
 
-    moose::Parser::varmap_type vars;
-
     try
     {
         // Set parser expression. Send the map and the array of values as well.
         _parser.SetVariableMap( map_ );
-        _valid = _parser.SetExpr(expr );
+        _valid = _parser.SetExpr( expr );
         return;
     }
     catch (moose::Parser::exception_type &e)
@@ -735,6 +734,9 @@ double Function::getConst(string name) const
 
 void Function::process(const Eref &e, ProcPtr p)
 {
+    if( ! _valid )
+        return;
+
     vector < double > databuf;
     requestOut()->send(e, &databuf);
 
@@ -788,47 +790,41 @@ void Function::reinit(const Eref &e, ProcPtr p)
         cout << "Error: Function::reinit() - invalid parser state. Will do nothing." << endl;
         return;
     }
+
     if (moose::trim(_parser.GetExpr(), " \t\n\r").length() == 0)
     {
-        cout << "Error: no expression set. Will do nothing." << endl;
-        setExpr(e, "0.0");
+        MOOSE_WARN( "No expression set. Will do nothing." << _parser.GetExpr() );
         _valid = false;
     }
+
     _t = p->currTime;
     if (_doEvalAtReinit)
-    {
         _lastValue = _value = getValue();
+    else
+        _lastValue = _value = 0.0;
+
+    _rate = 0.0;
+
+    if (1 == _mode)
+    {
+        valueOut()->send(e, _value);
+        return;
+    }
+    if( 2 == _mode )
+    {
+        derivativeOut()->send(e, 0.0);
+        return;
+    }
+    if( 3 == _mode )
+    {
+        rateOut()->send(e, _rate);
+        return;
     }
     else
     {
-        _lastValue = _value = 0.0;
-    }
-    _rate = 0.0;
-    switch (_mode)
-    {
-    case 1:
-    {
-        valueOut()->send(e, _value);
-        break;
-    }
-    case 2:
-    {
-        derivativeOut()->send(e, 0.0);
-        break;
-    }
-    case 3:
-    {
-        rateOut()->send(e, _rate);
-        break;
-    }
-    default:
-    {
         valueOut()->send(e, _value);
         derivativeOut()->send(e, 0.0);
         rateOut()->send(e, _rate);
-        break;
-    }
+        return;
     }
 }
-
-// Function.cpp ends here

@@ -107,7 +107,7 @@ class MooseParser
         /* tiny expr */
         vector<te_variable> te_vars_;
         te_expr* te_expr_;
-        int* err_ = NULL;
+        int err_;
 };
 
 } // namespace moose.

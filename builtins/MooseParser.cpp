@@ -7,7 +7,12 @@
  *   Organization:  NCBS Bangalore
  *        License:  MIT License
  */
+
 #include <vector>
+#include <cassert>
+
+#include "../utility/testing_macros.hpp"
+
 using namespace std;
 
 #include "MooseParser.h"
@@ -90,29 +95,41 @@ void MooseParser::findXsYs( const string& expr, vector<string>& xs, vector<strin
 
 bool MooseParser::SetExpr( const string& expr )
 {
-    MOOSE_DEBUG( "Setting expression " << expr );
+    if( expr.size() < 1 || expr == "0" || expr == "0.0" )
+        return false;
+
+    // NOTE: Before we come here, make sure that map_ is set properly. Map can
+    // be set by calling SetVariableMap function.  Following warning is for 
+    // developers. It should not be shown to user.
     if( map_.empty() && ! IsConstantExpr(expr) )
     {
-        MOOSE_WARN( "Parser does not know yet where the values of variables x{i}, y{i} etc. " 
-                << " is stored. Did you forget to call SetVariableMap? Doing nothing .." 
+        MOOSE_DEBUG( "MOOSE does not yet know where the values of variables x{i}, y{i} etc. " 
+                << " are stored. Did you forget to call SetVariableMap? Doing nothing .." 
                 );
         return false;
     }
 
     size_t i = 0;
+    te_vars_.clear();
     for (auto itr = map_.begin(); itr != map_.end(); itr++)
     {
         te_variable t;
+        t.type = 0;
         t.name = itr->first.c_str();
         t.address = itr->second;
+        t.context = NULL;
         te_vars_.push_back( t );
-        print_tvars( &t, 1 );
     }
 
-    te_expr_ = te_compile( expr.c_str(), &te_vars_[0], map_.size(), err_ );
+    MOOSE_DEBUG( "Variable count : " << map_.size() );
+    MOOSE_DEBUG( "TE VAR count   "  << te_vars_.size() );
+
+    te_expr_ = te_compile( expr.c_str(), &te_vars_[0], map_.size(), &err_ );
+
     if( te_expr_ == NULL )
     {
-        MOOSE_WARN( "Failed to compile expression: " << expr << " . Error at " << err_ );
+        printf("Failed to evaluate:\n\t%s\n", expr.c_str() );
+        printf("\t%*s^\nError near here.\n", err_-1, "");
         return false;
     }
 
@@ -128,13 +145,14 @@ void MooseParser::SetVariableMap( const map<string, double*> m )
 
 moose::Parser::value_type MooseParser::Eval( ) const
 {
-    print_tvars( &te_vars_[0], 4 );
+    double val = 0.0;
     if( te_expr_ )
-        return te_eval( te_expr_ );
-    else
-        MOOSE_WARN( "Could not evaluate function." );
-
-    return 0.0;
+    {
+        val = te_eval( te_expr_ );
+        cout << "Eval " << val << endl;
+        return val;
+    }
+    return val;
 }
 
 Parser::varmap_type MooseParser::GetVar() const

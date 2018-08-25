@@ -50,8 +50,7 @@ def test_var_order():
     y1.stopTime = simtime
     y1.stepPosition = 0.0
     #  print( fn1, type(fn1) )
-    print( moose.showmsg(fn1.x) )
-
+    #  print( moose.showmsg(fn1.x) )
     moose.connect(x0, 'output', fn1.x[0], 'input')
     moose.connect(x1, 'output', fn1.x[1], 'input')
     moose.connect(fn1, 'requestOut', y0, 'getOutputValue')
