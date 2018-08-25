@@ -16,10 +16,6 @@
 #include "Clock.h"
 #include "StreamerBase.h"
 
-// Write to numpy arrays.
-#include "../utility/cnpy.hpp"
-
-
 static SrcFinfo1< vector< double >* > *requestOut()
 {
     static SrcFinfo1< vector< double >* > requestOut(
@@ -63,7 +59,7 @@ const Cinfo* Table::initCinfo()
         "useSpikeMode"
         , "When set to true, look for spikes in a time-series."
         " Normally used for monitoring Vm for action potentials."
-		" Could be used for any thresholded event. Default is False."
+        " Could be used for any thresholded event. Default is False."
         , &Table::setUseSpikeMode
         , &Table::getUseSpikeMode
     );
@@ -210,13 +206,13 @@ const Cinfo* Table::initCinfo()
 
 static const Cinfo* tableCinfo = Table::initCinfo();
 
-Table::Table() : 
-		threshold_( 0.0 ) , 
-		lastTime_( 0.0 ) , 
-		input_( 0.0 ), 
-		fired_(false), 
-		useSpikeMode_(false), 
-		dt_( 0.0 )
+Table::Table() :
+    threshold_( 0.0 ),
+    lastTime_( 0.0 ),
+    input_( 0.0 ),
+    fired_(false),
+    useSpikeMode_(false),
+    dt_( 0.0 )
 {
     // Initialize the directory to which each table should stream.
     rootdir_ = "_tables";
@@ -254,13 +250,12 @@ void Table::process( const Eref& e, ProcPtr p )
     // Copy incoming data to ret and insert into vector.
     vector< double > ret;
     requestOut()->send( e, &ret );
-	if (useSpikeMode_) {
-		for ( vector< double >::const_iterator
-					i = ret.begin(); i != ret.end(); ++i )
-		spike( *i );
-	} else {
-    	vec().insert( vec().end(), ret.begin(), ret.end() );
-	}
+
+    if (useSpikeMode_)
+        for ( auto i = ret.begin(); i != ret.end(); ++i )
+            spike( *i );
+    else
+        vec().insert( vec().end(), ret.begin(), ret.end() );
 
     /*  If we are streaming to a file, let's write to a file. And clean the
      *  vector.
@@ -268,10 +263,10 @@ void Table::process( const Eref& e, ProcPtr p )
      */
     if( useStreamer_ )
     {
-        if( fmod(lastTime_, 5.0) == 0.0 or getVecSize() >= 10000 )
+        if( fmod(lastTime_, 5.0) == 0.0 || getVecSize() >= 10000 )
         {
             zipWithTime( vec(), data_, lastTime_ );
-            StreamerBase::writeToOutFile( outfile_, format_ , "a", data_, columns_ );
+            StreamerBase::writeToOutFile( outfile_, format_, "a", data_, columns_ );
             data_.clear();
             clearVec();
         }
@@ -289,8 +284,9 @@ void Table::reinit( const Eref& e, ProcPtr p )
     tablePath_ = e.id().path();
     unsigned int numTick = e.element()->getTick();
     Clock* clk = reinterpret_cast<Clock*>(Id(1).eref().data());
+
     dt_ = clk->getTickDt( numTick );
-	fired_ = false;
+    fired_ = false;
 
     /** Create the default filepath for this table.  */
     if( useStreamer_ )
@@ -304,8 +300,8 @@ void Table::reinit( const Eref& e, ProcPtr p )
         // with rootdit as path.
         if( ! outfileIsSet_ )
             setOutfile( rootdir_ +
-                    moose::moosePathToUserPath(tablePath_) + '.' + format_
-                    );
+                        moose::moosePathToUserPath(tablePath_) + '.' + format_
+                      );
     }
 
     input_ = 0.0;
@@ -313,13 +309,14 @@ void Table::reinit( const Eref& e, ProcPtr p )
     lastTime_ = 0;
     vector< double > ret;
     requestOut()->send( e, &ret );
-	if (useSpikeMode_) {
-		for ( vector< double >::const_iterator
-					i = ret.begin(); i != ret.end(); ++i )
-		spike( *i );
-	} else {
-    	vec().insert( vec().end(), ret.begin(), ret.end() );
-	}
+
+    if (useSpikeMode_)
+    {
+        for ( auto i = ret.begin(); i != ret.end(); ++i )
+            spike( *i );
+    }
+    else
+        vec().insert( vec().end(), ret.begin(), ret.end() );
 
     if( useStreamer_ )
     {
@@ -342,21 +339,24 @@ void Table::input( double v )
 
 void Table::spike( double v )
 {
-	if ( fired_ ) { // Wait for it to go below threshold
-		if ( v < threshold_ )
-			fired_ = false;
-	} else {
-		if ( v > threshold_ ) { // wait for it to go above threshold.
-			fired_ = true;
-        	vec().push_back( lastTime_ );
-		}
-	}
+    // Wait for it to go below threshold
+    if ( fired_ )
+    {
+        if ( v < threshold_ )
+            fired_ = false;
+    }
+    else
+    {
+        if ( v > threshold_ )   // wait for it to go above threshold.
+        {
+            fired_ = true;
+            vec().push_back( lastTime_ );
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////
 // Field Definitions
-//////////////////////////////////////////////////////////////
-
 void Table::setThreshold( double v )
 {
     threshold_ = v;
@@ -370,12 +370,12 @@ double Table::getThreshold() const
 // Set the format of table to which its data should be written.
 void Table::setFormat( string format )
 {
-    if( format == "csv" or format == "npy" )
+    if( format == "csv" )
         format_ = format;
     else
         LOG( moose::warning
-                , "Unsupported format " << format
-                << " only npy and csv are supported"
+             , "Unsupported format " << format
+             << " only sv is supported"
            );
 }
 
@@ -451,9 +451,9 @@ double Table::getDt( void ) const
  * when packing the data for writing.
  */
 void Table::zipWithTime( const vector<double>& v
-        , vector<double>& tvec
-        , const double& currTime
-        )
+                         , vector<double>& tvec
+                         , const double& currTime
+                       )
 {
     size_t N = v.size();
     for (size_t i = 0; i < N; i++)

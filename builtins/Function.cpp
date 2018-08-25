@@ -314,14 +314,17 @@ Function::Function(): _t(0.0), _valid(false), _numVar(0), _lastValue(0.0),
     _useTrigger( false ), _doEvalAtReinit( false ), _stoich(0)
 {
     _independent = "x0";
+    map_["t"] = &_t;
 }
 
-Function::Function(const Function& rhs): _numVar(rhs._numVar),
+Function::Function(const Function& rhs):
+    _numVar(rhs._numVar),
     _lastValue(rhs._lastValue),
     _value(rhs._value), _rate(rhs._rate),
     _mode(rhs._mode),
     _useTrigger( rhs._useTrigger),
-    _stoich(0)
+    _stoich(0),
+    map_(rhs.map_)
 {
     static Eref er;
     _independent = rhs._independent;
@@ -343,6 +346,7 @@ Function::Function(const Function& rhs): _numVar(rhs._numVar),
 
     for (unsigned int ii = 0; ii < rhs._pullbuf.size(); ++ii)
         *_pullbuf[ii] = *(rhs._pullbuf[ii]);
+
 }
 
 Function& Function::operator=(const Function rhs)
@@ -614,16 +618,7 @@ bool Function::getDoEvalAtReinit() const
 
 double Function::getValue() const
 {
-    double value = 0.0;
-    try
-    {
-        value = _parser.Eval( );
-    }
-    catch (moose::Parser::exception_type &e)
-    {
-        _showError(e);
-    }
-    return value;
+    return _parser.Eval( );
 }
 
 
@@ -734,17 +729,16 @@ double Function::getConst(string name) const
 
 void Function::process(const Eref &e, ProcPtr p)
 {
+#if 0
     if( ! _valid )
         return;
+#endif
 
     vector < double > databuf;
     requestOut()->send(e, &databuf);
 
     for (size_t ii = 0; (ii < databuf.size()) && (ii < _pullbuf.size()); ++ii)
-    {
-        cout << databuf[ii] << ' ';
         *_pullbuf[ii] = databuf[ii];
-    }
 
     _t = p->currTime;
     _value = getValue();
@@ -755,31 +749,30 @@ void Function::process(const Eref &e, ProcPtr p)
         _lastValue = _value;
         return;
     }
-    switch (_mode)
-    {
-    case 1:
-    {
-        valueOut()->send(e, _value);
-        break;
-    }
-    case 2:
-    {
-        derivativeOut()->send(e, getDerivative());
-        break;
-    }
-    case 3:
-    {
-        rateOut()->send(e, _rate);
-        break;
-    }
-    default:
+
+    if( 1 == _mode )
     {
         valueOut()->send(e, _value);
+        return;
+    }
+    if( 2 == _mode )
+    {
+        derivativeOut()->send(e, getDerivative());
+        return;
+    }
+    if( 3 == _mode )
+    {
+        rateOut()->send(e, _rate);
+        return;
+    }
+    else
+    {
+        valueOut()->send(e, _value);
         derivativeOut()->send(e, getDerivative());
         rateOut()->send(e, _rate);
-        break;
+        return;
     }
-    }
+
     _lastValue = _value;
 }
 
@@ -791,13 +784,8 @@ void Function::reinit(const Eref &e, ProcPtr p)
         return;
     }
 
-    if (moose::trim(_parser.GetExpr(), " \t\n\r").length() == 0)
-    {
-        MOOSE_WARN( "No expression set. Will do nothing." << _parser.GetExpr() );
-        _valid = false;
-    }
-
     _t = p->currTime;
+
     if (_doEvalAtReinit)
         _lastValue = _value = getValue();
     else

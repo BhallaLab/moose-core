@@ -32,7 +32,6 @@ class Function
     void setExpr( const Eref& e, string expr);
     string getExpr( const Eref& e ) const;
 
-
     // get a list of variable identifiers.
     // this is created by the parser
     vector<string> getVars() const;
@@ -52,11 +51,11 @@ class Function
     void setMode(unsigned int mode);
     unsigned int getMode() const;
 
-	// set/get flag to use trigger mode.
+    // set/get flag to use trigger mode.
     void setUseTrigger(bool useTrigger);
     bool getUseTrigger() const;
 
-	// set/get flag to do function evaluation at reinit
+    // set/get flag to do function evaluation at reinit
     void setDoEvalAtReinit(bool doEvalAtReinit);
     bool getDoEvalAtReinit() const;
 
@@ -101,9 +100,6 @@ protected:
     // are included in this.
     vector<Variable *> _varbuf;
 
-    // These variables may be redundant but used for interfacing with
-    // MooseParser.
-    map<string, double*> map_;
 
     // this stores variable values pulled by sending request. 
     // identifiers of the form y{i} are included in this
@@ -119,6 +115,10 @@ protected:
 
     // Used by kinetic solvers when this is zombified.
     char* _stoich;
+
+    // These variables may be redundant but used for interfacing with
+    // MooseParser.
+    map<string, double*> map_;
 };
 
 #endif

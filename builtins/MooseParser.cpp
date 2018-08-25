@@ -121,18 +121,17 @@ bool MooseParser::SetExpr( const string& expr )
         te_vars_.push_back( t );
     }
 
-    MOOSE_DEBUG( "Variable count : " << map_.size() );
-    MOOSE_DEBUG( "TE VAR count   "  << te_vars_.size() );
+    // MOOSE_DEBUG( "Variable count : " << map_.size() );
+    // MOOSE_DEBUG( "TE VAR count   "  << te_vars_.size() );
 
     te_expr_ = te_compile( expr.c_str(), &te_vars_[0], map_.size(), &err_ );
-
-    if( te_expr_ == NULL )
+    if( ! te_expr_ )
     {
-        printf("Failed to evaluate:\n\t%s\n", expr.c_str() );
+        printf("Failed to compile:\n\t%s\n", expr.c_str() );
         printf("\t%*s^\nError near here.\n", err_-1, "");
-        return false;
+        throw;
     }
-
+    expr_ = expr;
     return true;
 }
 
@@ -145,14 +144,9 @@ void MooseParser::SetVariableMap( const map<string, double*> m )
 
 moose::Parser::value_type MooseParser::Eval( ) const
 {
-    double val = 0.0;
     if( te_expr_ )
-    {
-        val = te_eval( te_expr_ );
-        cout << "Eval " << val << endl;
-        return val;
-    }
-    return val;
+        return  te_eval( te_expr_ );
+    return 0.0;
 }
 
 Parser::varmap_type MooseParser::GetVar() const
