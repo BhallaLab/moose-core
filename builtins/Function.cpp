@@ -345,12 +345,14 @@ Function::Function(): _t(0.0), _valid(false), _numVar(0), _lastValue(0.0),
     _valid = true;
 }
 
-Function::Function(const Function& rhs): _numVar(rhs._numVar),
+Function::Function(const Function& rhs):
+    _numVar(rhs._numVar),
     _lastValue(rhs._lastValue),
     _value(rhs._value), _rate(rhs._rate),
     _mode(rhs._mode),
     _useTrigger( rhs._useTrigger),
-    _stoich(0)
+    _stoich(0),
+    map_(rhs.map_)
 {
     static Eref er;
     _independent = rhs._independent;
@@ -741,23 +743,23 @@ void Function::process(const Eref &e, ProcPtr p)
     switch (_mode){
         case 1: {
             valueOut()->send(e, _value);
-            break;
+        return;
         }
         case 2: {
             derivativeOut()->send(e, getDerivative());
-            break;
+        return;
         }
         case 3: {
             rateOut()->send(e, _rate);
-            break;
+        return;
         }
         default: {
             valueOut()->send(e, _value);
             derivativeOut()->send(e, getDerivative());
             rateOut()->send(e, _rate);
-            break;
-        }
+        return;
     }
+
     _lastValue = _value;
 }
 

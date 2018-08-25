@@ -16,10 +16,6 @@
 #include "../scheduling/Clock.h"
 #include "StreamerBase.h"
 
-// Write to numpy arrays.
-#include "../utility/cnpy.hpp"
-
-
 static SrcFinfo1< vector< double >* > *requestOut()
 {
     static SrcFinfo1< vector< double >* > requestOut(
@@ -211,8 +207,8 @@ const Cinfo* Table::initCinfo()
 static const Cinfo* tableCinfo = Table::initCinfo();
 
 Table::Table() :
-    threshold_( 0.0 ) ,
-    lastTime_( 0.0 ) ,
+    threshold_( 0.0 ),
+    lastTime_( 0.0 ),
     input_( 0.0 ),
     fired_(false),
     useSpikeMode_(false),
@@ -270,11 +266,18 @@ void Table::process( const Eref& e, ProcPtr p )
      */
     if( useFileStreamer_ )
     {
-        if( fmod(lastTime_, 5.0) == 0.0 or getVecSize() >= 10000 )
+        if( fmod(lastTime_, 5.0) == 0.0 || getVecSize() >= 10000 )
         {
+<<<<<<< HEAD
             mergeWithTime( data_ );
             StreamerBase::writeToOutFile( outfile_, format_ , "a", data_, columns_ );
             clearAllVecs();
+=======
+            zipWithTime( vec(), data_, lastTime_ );
+            StreamerBase::writeToOutFile( outfile_, format_, "a", data_, columns_ );
+            data_.clear();
+            clearVec();
+>>>>>>> c5fded807... removed npy support. On large files, it was not working properly. Only
         }
     }
 }
@@ -297,6 +300,7 @@ void Table::reinit( const Eref& e, ProcPtr p )
     tablePath_ = e.id().path();
     unsigned int numTick = e.element()->getTick();
     Clock* clk = reinterpret_cast<Clock*>(Id(1).eref().data());
+
     dt_ = clk->getTickDt( numTick );
 	fired_ = false;
 
@@ -324,13 +328,20 @@ void Table::reinit( const Eref& e, ProcPtr p )
 
     if (useSpikeMode_)
     {
+<<<<<<< HEAD
         for (vector<double>::const_iterator i = ret.begin(); i != ret.end(); ++i )
+=======
+        for ( auto i = ret.begin(); i != ret.end(); ++i )
+>>>>>>> c5fded807... removed npy support. On large files, it was not working properly. Only
             spike( *i );
     }
     else
         vec().insert( vec().end(), ret.begin(), ret.end() );
+<<<<<<< HEAD
 
     tvec_.push_back(lastTime_);
+=======
+>>>>>>> c5fded807... removed npy support. On large files, it was not working properly. Only
 
     if( useFileStreamer_ )
     {
@@ -351,16 +362,27 @@ void Table::input( double v )
 
 void Table::spike( double v )
 {
+<<<<<<< HEAD
     if ( fired_ )
     { // Wait for it to go below threshold
+=======
+    // Wait for it to go below threshold
+    if ( fired_ )
+    {
+>>>>>>> c5fded807... removed npy support. On large files, it was not working properly. Only
         if ( v < threshold_ )
             fired_ = false;
     }
     else
     {
+<<<<<<< HEAD
         if ( v > threshold_ )
         {
             // wait for it to go above threshold.
+=======
+        if ( v > threshold_ )   // wait for it to go above threshold.
+        {
+>>>>>>> c5fded807... removed npy support. On large files, it was not working properly. Only
             fired_ = true;
             vec().push_back( lastTime_ );
         }
@@ -369,8 +391,6 @@ void Table::spike( double v )
 
 //////////////////////////////////////////////////////////////
 // Field Definitions
-//////////////////////////////////////////////////////////////
-
 void Table::setThreshold( double v )
 {
     threshold_ = v;
@@ -384,12 +404,12 @@ double Table::getThreshold() const
 // Set the format of table to which its data should be written.
 void Table::setFormat( string format )
 {
-    if( format == "csv" or format == "npy" )
+    if( format == "csv" )
         format_ = format;
     else
         LOG( moose::warning
                 , "Unsupported format " << format
-                << " only npy and csv are supported"
+             << " only sv is supported"
            );
 }
 

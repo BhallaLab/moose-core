@@ -68,7 +68,6 @@ class Function
     void setExpr( const Eref& e, string expr);
     string getExpr( const Eref& e ) const;
 
-
     // get a list of variable identifiers.
     // this is created by the parser
     vector<string> getVars() const;
@@ -166,6 +165,10 @@ protected:
 
     // Used by kinetic solvers when this is zombified.
     char* _stoich;
+
+    // These variables may be redundant but used for interfacing with
+    // MooseParser.
+    map<string, double*> map_;
 };
 
 
