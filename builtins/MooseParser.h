@@ -53,9 +53,24 @@ class MooseParser
 
         void DefineFun( const char* funcName, moose::Parser::value_type (&func)(moose::Parser::value_type) );
 
-        void SetExpr( const string& expr );
+        /* --------------------------------------------------------------------------*/
+        /**
+         * @Synopsis Compile expression using tinyexpr library. Further calls
+         * uses this compiled expression.
+         *
+         * @Param expr Expression. It can only contain following variables:
+         *  t, x0, x1, ..., y0, y1, .., * c0, c1 etc.
+         *
+         * @Returns True if expression is compiled succcessfully, false
+         * otherwise.
+         */
+        /* ----------------------------------------------------------------------------*/
+        bool SetExpr( const string& expr );
 
-        static void findXsYs( const string& expr, vector<string>& vars );
+        void SetVariableMap( const map<string, double*> map );
+
+        static void findAllVars( const string& expr, vector<string>& vars, char start );
+        static void findXsYs( const string& expr, vector<string>& xs, vector<string>& ys );
 
         moose::Parser::value_type Eval( ) const;
 

@@ -88,7 +88,7 @@ class Function
 protected:
     friend double * _functionAddVar(const char * name, void *data);
     double _t; // local storage for current time
-    mutable bool _valid;
+    bool _valid;
     unsigned int _numVar;
     double _lastValue;
     double _value;
@@ -100,7 +100,9 @@ protected:
     // Stores variables received via incoming messages, identifiers of the form x{i} 
     // are included in this.
     vector<Variable *> _varbuf;
-    array<double, MAX_VARS_IN_FUNCTION> values_;
+
+    // These variables may be redundant but used for interfacing with
+    // MooseParser.
     map<string, double*> map_;
 
     // this stores variable values pulled by sending request. 

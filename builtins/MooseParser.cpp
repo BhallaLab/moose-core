@@ -15,6 +15,15 @@ using namespace std;
 #include "../external/tinyexpr/tinyexpr.h"
 #include "../utility/print_function.hpp"
 
+void print_tvars( const te_variable* te, size_t n = 1 )
+{
+    for (size_t i = 0; i < n; i++) 
+    {
+        auto t = te[i];
+        cout << t.name << " at " << t.address << " value " << *((double*)t.address) << endl;
+    }
+}
+
 namespace moose
 {
 
@@ -43,41 +52,51 @@ void MooseParser::DefineFun( const char* funcName, moose::Parser::value_type (&f
 
 bool MooseParser::IsConstantExpr( const string& expr )
 {
-    vector<string> vars;
-    findXsYs( expr, vars );
-    if( vars.size() > 0 )
+    vector<string> xs;
+    vector<string> ys;
+    findXsYs( expr, xs, ys );
+    if( 0 < (xs.size() + ys.size()) )
         return false;
     return true;
 }
 
-void MooseParser::findXsYs( const string& expr, vector<string>& vars )
+void MooseParser::findAllVars( const string& expr, vector<string>& vars, char start )
 {
-    size_t startVar=0, endVar=0; 
-    for( size_t i = 0; i < expr.size(); i++)
+    int startVar=-1;
+    string temp = expr + "!"; // To make sure we compare the last element as well.
+    for( size_t i = 0; i < temp.size(); i++)
     {
-        if( startVar == 0 && ('x' == expr[i] || 'y' == expr[i]) )
+        if( startVar == -1 && start == expr[i] )
         {
             startVar = i;
             continue;
         }
-        if( startVar > 0 )
+        if( startVar > -1 )
         {
             if( ! isdigit( expr[i] ) )
             {
                 vars.push_back( expr.substr(startVar, i - startVar ) );
-                startVar = 0;
+                startVar = -1;
             }
         }
     }
 }
 
-void MooseParser::SetExpr( const string& expr )
+void MooseParser::findXsYs( const string& expr, vector<string>& xs, vector<string>& ys )
+{
+    findAllVars( expr, xs, 'x' );
+    findAllVars( expr, ys, 'y' );
+}
+
+bool MooseParser::SetExpr( const string& expr )
 {
     MOOSE_DEBUG( "Setting expression " << expr );
-    if( map_.empty() )
+    if( map_.empty() && ! IsConstantExpr(expr) )
     {
-        MOOSE_WARN( "Parser does not know the value of x0, y0 etc." );
-        return;
+        MOOSE_WARN( "Parser does not know yet where the values of variables x{i}, y{i} etc. " 
+                << " is stored. Did you forget to call SetVariableMap? Doing nothing .." 
+                );
+        return false;
     }
 
     size_t i = 0;
@@ -87,22 +106,33 @@ void MooseParser::SetExpr( const string& expr )
         t.name = itr->first.c_str();
         t.address = itr->second;
         te_vars_.push_back( t );
+        print_tvars( &t, 1 );
     }
 
     te_expr_ = te_compile( expr.c_str(), &te_vars_[0], map_.size(), err_ );
     if( te_expr_ == NULL )
     {
         MOOSE_WARN( "Failed to compile expression: " << expr << " . Error at " << err_ );
-        return;
+        return false;
     }
+
+    return true;
+}
+
+void MooseParser::SetVariableMap( const map<string, double*> m )
+{
+    map_.clear();
+    for( auto &v : m )
+        map_[v.first] = v.second;
 }
 
 moose::Parser::value_type MooseParser::Eval( ) const
 {
+    print_tvars( &te_vars_[0], 4 );
     if( te_expr_ )
         return te_eval( te_expr_ );
     else
-        MOOSE_WARN( "could not evalualte." );
+        MOOSE_WARN( "Could not evaluate function." );
 
     return 0.0;
 }

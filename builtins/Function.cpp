@@ -313,10 +313,7 @@ Function::Function(): _t(0.0), _valid(false), _numVar(0), _lastValue(0.0),
     _value(0.0), _rate(0.0), _mode(1),
     _useTrigger( false ), _doEvalAtReinit( false ), _stoich(0)
 {
-    _parser.SetVarFactory(_functionAddVar, this);
     _independent = "x0";
-    // Adding this default expression by default to avoid complains from GUI
-    _valid = true;
 }
 
 Function::Function(const Function& rhs): _numVar(rhs._numVar),
@@ -334,7 +331,6 @@ Function::Function(const Function& rhs): _numVar(rhs._numVar),
     if (cmap.size() > 0)
         for (auto item = cmap.begin(); item!=cmap.end(); ++item)
             _parser.DefineConst(item->first, item->second);
-
 
     setExpr(er, rhs.getExpr( er ));
 
@@ -539,15 +535,23 @@ void Function::innerSetExpr(const Eref& eref, string expr)
     _varbuf.resize(_numVar);
 
     // Find all variables x\d+ or y\d+ etc, and add them to variable buffer.
-    vector<string> xsys;
-    moose::MooseParser::findXsYs( expr, xsys);
+    vector<string> xs;
+    vector<string> ys;
+    moose::MooseParser::findXsYs( expr, xs, ys);
 
     // Now bind the values from the array of values_ to the map_. This map is to
     // be passed to parser. 
-    for( size_t i = 0; i < xsys.size(); i++ )
+    for( size_t i = 0; i < xs.size(); i++ )
     {
-        _functionAddVar( xsys[i].c_str(),  this);
-        map_[xsys[i]] = &values_[i];
+        _functionAddVar( xs[i].c_str(),  this);
+        // get the address of Variable's value. Is it safe in multi-threaded
+        // environment?
+        map_[xs[i]] = &(_varbuf[i]->value);
+    }
+    for( size_t i = 0; i < ys.size(); i++ )
+    {
+        _functionAddVar( ys[i].c_str(),  this);
+        map_[ys[i]] = _pullbuf[i];
     }
 
     moose::Parser::varmap_type vars;
@@ -555,25 +559,17 @@ void Function::innerSetExpr(const Eref& eref, string expr)
     try
     {
         // Set parser expression. Send the map and the array of values as well.
-        _parser.SetExpr(expr );
+        _parser.SetVariableMap( map_ );
+        _valid = _parser.SetExpr(expr );
+        return;
     }
     catch (moose::Parser::exception_type &e)
     {
         cerr << "Error setting expression on: " << eref.objId().path() << endl;
+        _valid = false;
         _showError(e);
         _clearBuffer();
         return;
-    }
-    // Force variable creation right away. Otherwise numVar does not
-    // get set properly
-    try
-    {
-        _parser.Eval();
-        _valid = true;
-    }
-    catch (moose::Parser::exception_type &e)
-    {
-        _showError(e);
     }
 }
 
@@ -620,14 +616,9 @@ bool Function::getDoEvalAtReinit() const
 double Function::getValue() const
 {
     double value = 0.0;
-    if (!_valid)
-    {
-        cout << "Error: Function::getValue() - invalid state" << endl;
-        return value;
-    }
     try
     {
-        // value = _parser.Eval( );
+        value = _parser.Eval( );
     }
     catch (moose::Parser::exception_type &e)
     {
@@ -635,6 +626,7 @@ double Function::getValue() const
     }
     return value;
 }
+
 
 double Function::getRate() const
 {
@@ -743,14 +735,14 @@ double Function::getConst(string name) const
 
 void Function::process(const Eref &e, ProcPtr p)
 {
-    if (!_valid)
-        return;
-
     vector < double > databuf;
     requestOut()->send(e, &databuf);
 
     for (size_t ii = 0; (ii < databuf.size()) && (ii < _pullbuf.size()); ++ii)
+    {
+        cout << databuf[ii] << ' ';
         *_pullbuf[ii] = databuf[ii];
+    }
 
     _t = p->currTime;
     _value = getValue();
