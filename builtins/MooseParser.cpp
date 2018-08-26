@@ -24,10 +24,25 @@ namespace moose
     MooseParser::MooseParser() 
     {
         symbol_table_.clear();
+
+        // And add user defined functions.
+        symbol_table_.add_function( "rand", MooseParser::RandSeed );
+        symbol_table_.add_function( "rand2", MooseParser::Rand2Seed );
+        symbol_table_.add_function( "fmod", MooseParser::Fmod );
     }
 
     MooseParser::~MooseParser() 
     {
+    }
+
+    MooseParser& MooseParser::operator=(const moose::MooseParser& other)
+    {
+        symbol_table_ = other.symbol_table_;
+        expression_ = other.expression_;
+
+        MOOSE_WARN( "Parser will NOT be copied." );
+
+        return *this;
     }
 
     /*-----------------------------------------------------------------------------
@@ -38,8 +53,22 @@ namespace moose
         return moose::mtrand();
     }
 
+    double MooseParser::RandSeed( double seed = -1 )
+    {
+        if( seed >= 0 )
+            moose::mtseed( (size_t) seed );
+        return moose::mtrand();
+    }
+
     double MooseParser::Rand2( double a, double b )
     {
+        return moose::mtrand( a, b );
+    }
+
+    double MooseParser::Rand2Seed( double a, double b, double seed = -1 )
+    {
+        if( seed >= 0 )
+            moose::mtseed( (size_t) seed );
         return moose::mtrand( a, b );
     }
 
@@ -54,7 +83,6 @@ namespace moose
      *-----------------------------------------------------------------------------*/
     void MooseParser::DefineVar( const string& varName, double& val) 
     {
-        MOOSE_DEBUG( "Adding variable " << varName << " with val ref " << val );
         symbol_table_.add_variable( varName, val );
     }
 
@@ -78,7 +106,6 @@ namespace moose
 
     void MooseParser::DefineFun1( const string& funcName, double (&func)(double) )
     {
-        // MOOSE_DEBUG( "Defining func " << funcName );
         // Add a function. This function currently handles only one argument
         // function.
         num_user_defined_funcs_ += 1;
@@ -117,35 +144,37 @@ namespace moose
         }
     }
 
+    string MooseParser::Reformat( const string user_expr )
+    {
+        string expr( user_expr );
+
+        // Replate || with or
+        moose::str_replace_all( expr, "||", " or " );
+        moose::str_replace_all( expr, "&&", " and " );
+
+        // replate ! with not but do not change !=
+        moose::str_replace_all( expr, "!=", "@@@" ); // placeholder
+        moose::str_replace_all( expr, "!", " not " );
+        moose::str_replace_all( expr, "@@@", "!=" ); // change back @@@ to !=
+
+
+        return expr;
+    }
+
     void MooseParser::findXsYs( const string& expr, vector<string>& xs, vector<string>& ys )
     {
         findAllVars( expr, xs, 'x' );
         findAllVars( expr, ys, 'y' );
     }
 
-    bool MooseParser::SetExpr( const string& expr )
+    bool MooseParser::SetExpr( const string& user_expr )
     {
-        MOOSE_DEBUG( "Setting expression " << expr << "(" << expr.size() << ")" );
+        string expr = Reformat( user_expr );
         if( moose::trim(expr).size() < 1 || moose::trim(expr) == "0" || moose::trim(expr) == "0.0" )
         {
             expr_ = "";
             return false;
         }
-
-        // NOTE: Before we come here, make sure that map_ is set properly. Map can
-        // be set by calling SetVariableMap function.  Following warning is for 
-        // developers. It should not be shown to user.
-        if( map_.empty() && ! IsConstantExpr(expr) )
-        {
-            MOOSE_DEBUG( "MOOSE does not yet know where the values of variables x{i}, y{i} etc. " 
-                    << " are stored. Did you forget to call SetVariableMap? Doing nothing .." 
-                    );
-            cout << "\tExpr: " << expr <<  "|" << expr.size() << endl;
-
-            return false;
-        }
-
-        size_t i = 0;
 
         expression_.register_symbol_table( symbol_table_ );
         if( ! parser_.compile( expr, expression_ ) )

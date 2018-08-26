@@ -48,10 +48,21 @@ namespace moose
      */
     int strncasecmp( const std::string& a, const std::string& b, size_t n);
 
-		/**
-		 * Generate random string of given length.
-		 */
-		std::string random_string( const unsigned size );
+    /**
+     * Generate random string of given length.
+     */
+    std::string random_string( const unsigned size );
+
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Replace a with b in given string.
+     *
+     * @Param str
+     * @Param a
+     * @Param b
+     */
+    /* ----------------------------------------------------------------------------*/
+    void str_replace_all( std::string& str, const std::string& a, const std::string& b);
 }
 
 #endif //_STRINGUTIL_H
