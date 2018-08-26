@@ -48,7 +48,6 @@ void RollingMatrix::resize( size_t nrows, size_t ncolumns )
 double RollingMatrix::get( size_t row, size_t column ) const
 {
     size_t index = (row + currentStartRow_ ) % nrows_;
-    cout << "Accessing " << index << " col " << column << endl;
     return rows_[index][column];
 }
 
