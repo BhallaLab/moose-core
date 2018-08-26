@@ -84,7 +84,6 @@ option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" OFF)
 option(WITH_GSL             "Use gsl-library. Alternative is WITH_BOOST" ON)
 option(PARALLELIZED_SOLVERS "Use parallel version of GSOLVE. (alpha)" OFF )
 option(PARALLELIZED_CLOCK   "High level parallelization of moose::Clock (alpha)" OFF )
-
 option(USE_PRIVATE_RNG      "Stochastic Objects use their private RNG" ON)
 
 
@@ -92,7 +91,6 @@ option(USE_PRIVATE_RNG      "Stochastic Objects use their private RNG" ON)
 
 # Default definitions.
 add_definitions(-DUSE_GENESIS_PARSER)
-
 if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     message(STATUS "Building for Debug/Unit testing")
     add_definitions(-DDO_UNIT_TESTS)
@@ -302,10 +300,6 @@ if(WITH_MPI)
         list(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
     endif()
 endif(WITH_MPI)
-
-# Always use private version of muparser. We have some custom edits.
-add_subdirectory(external/tinyexpr)
-list(APPEND MOOSE_LIBRARIES tinyexpr)
 
 # Add subdirectroeis
 add_subdirectory(basecode)

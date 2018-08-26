@@ -10,79 +10,40 @@
 
 #include <vector>
 #include <cassert>
-
-#include "../utility/testing_macros.hpp"
-#include "../utility/strutil.h"
-#include "../basecode/global.h"
-
-
 using namespace std;
 
-#include "MooseParser.h"
-
-#include "../external/tinyexpr/tinyexpr.h"
+#include "../utility/testing_macros.hpp"
 #include "../utility/print_function.hpp"
-
-void print_tvars( const te_variable* te, size_t n = 1 )
-{
-    for (size_t i = 0; i < n; i++) 
-    {
-        auto t = te[i];
-        cout << (i+1) << ' ' << setw(4) << t.name << "(" << t.address << ") ";
-        if( 0 == (i+1) % 4 )
-            cout << endl;
-    }
-    cout << endl;
-}
+#include "../utility/strutil.h"
+#include "../basecode/global.h"
+#include "MooseParser.h"
 
 namespace moose
 {
 
     MooseParser::MooseParser() 
     {
-        te_vars_.clear();
-
-        // Add user defined functions.
-        te_variable frnd1 = { "rand", (void*) MooseParser::Rand, TE_FUNCTION0, NULL };
-        te_vars_.push_back( frnd1 );
-
-        te_variable frnd2 = { "rand2", (void*) MooseParser::Rand2, TE_FUNCTION2, NULL };
-        te_vars_.push_back( frnd2 );
-
-        te_variable ffmod = { "fmod", (void*) MooseParser::Fmod, TE_FUNCTION2, NULL };
-        te_vars_.push_back( ffmod );
-
-        // make sure to get this variable right. Every time we set the
-        // expression, we clear all value but these.
-        num_user_defined_funcs_ = 3;
+        symbol_table_.clear();
     }
 
     MooseParser::~MooseParser() 
     {
     }
 
-    MooseParser& MooseParser::operator=(const MooseParser& other)
-    {
-        te_expr_ = std::move( te_expr_ );
-        te_vars_ = other.te_vars_;
-        map_ = other.map_;
-        return *this;
-    }
-
     /*-----------------------------------------------------------------------------
      *  User defined function here.
      *-----------------------------------------------------------------------------*/
-    moose::Parser::value_type MooseParser::Rand( )
+    double MooseParser::Rand( )
     {
         return moose::mtrand();
     }
 
-    moose::Parser::value_type MooseParser::Rand2( double a, double b )
+    double MooseParser::Rand2( double a, double b )
     {
         return moose::mtrand( a, b );
     }
 
-    moose::Parser::value_type MooseParser::Fmod( double a, double b )
+    double MooseParser::Fmod( double a, double b )
     {
         return fmod(a, b);
     }
@@ -91,12 +52,10 @@ namespace moose
     /*-----------------------------------------------------------------------------
      *  Other function.
      *-----------------------------------------------------------------------------*/
-    void MooseParser::DefineVar( const char* varName, moose::Parser::value_type* const val) 
+    void MooseParser::DefineVar( const string& varName, double& val) 
     {
-        // MOOSE_DEBUG( "DefineVar: varName " << varName << " addr: " << val );
-        te_variable t = { varName, val, TE_VARIABLE, NULL };
-        te_vars_.push_back( t );
-        map_[varName] = val;
+        MOOSE_DEBUG( "Adding variable " << varName << " with val ref " << val );
+        symbol_table_.add_variable( varName, val );
     }
 
     /* --------------------------------------------------------------------------*/
@@ -107,24 +66,23 @@ namespace moose
      * @Param v
      */
     /* ----------------------------------------------------------------------------*/
-    void MooseParser::AddVariableToParser( const char* varName, moose::Parser::value_type* v)
+    void MooseParser::AddVariableToParser( const char* varName, double* v)
     {
         map_[varName] = v;
     }
 
-    void MooseParser::DefineConst( const char* constName, const moose::Parser::value_type& value )
+    void MooseParser::DefineConst( const string& constName, const double value )
     {
         const_map_[constName] = value;
     }
 
-    void MooseParser::DefineFun1( const char* funcName, moose::Parser::value_type (&func)(moose::Parser::value_type) )
+    void MooseParser::DefineFun1( const string& funcName, double (&func)(double) )
     {
         // MOOSE_DEBUG( "Defining func " << funcName );
         // Add a function. This function currently handles only one argument
         // function.
-        te_variable t = { .name = funcName, (void *)func, TE_FUNCTION1, NULL };
         num_user_defined_funcs_ += 1;
-        te_vars_.insert( te_vars_.begin(), t );
+        symbol_table_.add_function( funcName, func );
     }
 
     bool MooseParser::IsConstantExpr( const string& expr )
@@ -167,7 +125,7 @@ namespace moose
 
     bool MooseParser::SetExpr( const string& expr )
     {
-        // MOOSE_DEBUG( "Setting expression " << expr << "(" << expr.size() << ")" );
+        MOOSE_DEBUG( "Setting expression " << expr << "(" << expr.size() << ")" );
         if( moose::trim(expr).size() < 1 || moose::trim(expr) == "0" || moose::trim(expr) == "0.0" )
         {
             expr_ = "";
@@ -183,53 +141,48 @@ namespace moose
                     << " are stored. Did you forget to call SetVariableMap? Doing nothing .." 
                     );
             cout << "\tExpr: " << expr <<  "|" << expr.size() << endl;
-            cout << " === Currently assigned variables." << endl;
-            print_tvars( &te_vars_[0], te_vars_.size() );
+
             return false;
         }
 
         size_t i = 0;
 
-        // Remove all variable after num_user_defined_funcs_ from the vector.
-        te_vars_.erase( te_vars_.begin() + num_user_defined_funcs_, te_vars_.end() );
-        for (auto itr = map_.begin(); itr != map_.end(); itr++)
+        expression_.register_symbol_table( symbol_table_ );
+        if( ! parser_.compile( expr, expression_ ) )
         {
-            te_variable t;
-            t.type = 0;
-            t.name = itr->first.c_str();
-            t.address = itr->second;
-            t.context = NULL;
-            te_vars_.push_back( t );
+            cerr << "Parser Error: " << parser_.error() << endl;
+            for (std::size_t i = 0; i < parser_.error_count(); ++i)
+            {
+                typedef exprtk::parser_error::type error_t;
+                error_t error = parser_.get_error(i);
+                cerr << "Error[" << i << "] Position: " << error.token.position
+                    << " Type: [" << exprtk::parser_error::to_str(error.mode)
+                    << "] Msg: " << error.diagnostic << endl;
+            }
+            return false;
         }
 
-
-        unique_ptr<te_expr> t( te_compile( expr.c_str(), te_vars_.data(), te_vars_.size(), &err_ ));
-        te_expr_ = std::move(t);
-        if( ! te_expr_ )
-        {
-            printf("Failed to compile:\n\t%s\n", expr.c_str() );
-            printf("\t%*s^\nError near here.\n", err_-1, "");
-            cout << endl;
-            cout << "Following variables are set:" << endl;
-            print_tvars( te_vars_.data(), te_vars_.size() );
-            throw;
-        }
         expr_ = moose::trim(expr);
         return true;
+
     }
 
     void MooseParser::SetVariableMap( const map<string, double*> m )
     {
         map_.clear();
         for( auto &v : m )
+        {
             map_[v.first] = v.second;
+            symbol_table_.add_variable( v.first, *v.second );
+        }
     }
 
-    moose::Parser::value_type MooseParser::Eval( ) const
+    double MooseParser::Eval( ) const
     {
         double v = 0.0;
-        if( expr_.size() > 0 && te_expr_ )
-            v =  te_eval( te_expr_.get() );
+
+        if( expr_.size() > 0 )
+            v = expression_.value();
         return v;
     }
 
@@ -239,9 +192,7 @@ namespace moose
     }
 
 
-    moose::Parser::value_type MooseParser::Diff( 
-            const moose::Parser::value_type a, const moose::Parser::value_type b 
-            ) const
+    double MooseParser::Diff( const double a, const double b ) const
     {
         return a-b;
     }

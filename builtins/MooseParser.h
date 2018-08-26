@@ -12,18 +12,22 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "../external/tinyexpr/tinyexpr.h"
-
 #include <string>
 #include <memory>
 #include <exception>
 #include <map>
 #include <iostream>
+#include "../external/exprtk/exprtk.hpp"
 
 using namespace std;
 
 namespace moose {
-    namespace Parser {
+namespace Parser {
+
+        // ExprTk types.
+        typedef exprtk::symbol_table<double> symbol_table_t;
+        typedef exprtk::expression<double>     expression_t;
+        typedef exprtk::parser<double>             parser_t;
 
         struct ParserException : public std::exception 
         {
@@ -50,9 +54,11 @@ class MooseParser
 
         MooseParser& operator=(const moose::MooseParser&);
 
-        void DefineVar( const char* varName, moose::Parser::value_type* const val);
+        void DefineVar( const string& varName, double& );
 
-        void DefineFun1( const char* funcName, moose::Parser::value_type (&func)(moose::Parser::value_type) );
+        void DefineConst( const string& cname, const double val );
+
+        void DefineFun1( const string& funcName, double (&func)(double) );
 
         /* --------------------------------------------------------------------------*/
         /**
@@ -73,9 +79,9 @@ class MooseParser
         static void findAllVars( const string& expr, vector<string>& vars, char start );
         static void findXsYs( const string& expr, vector<string>& xs, vector<string>& ys );
 
-        void AddVariableToParser( const char* varName, moose::Parser::value_type* const v);
+        void AddVariableToParser( const char* varName, double* const v);
 
-        moose::Parser::value_type Eval( ) const;
+        double Eval( ) const;
 
         bool IsConstantExpr( const string& expr );
 
@@ -83,12 +89,12 @@ class MooseParser
 
         void SetVarFactory( const char* varName, void* data );
 
-        void DefineConst( const char* constName, const moose::Parser::value_type& value );
 
-        moose::Parser::value_type Diff( const moose::Parser::value_type a, const moose::Parser::value_type b) const;
+        double Diff( const double a, const double b) const;
 
         Parser::varmap_type GetConst( ) const;
         Parser::varmap_type GetUsedVar( );
+
         void ClearVar( );
         const string GetExpr( ) const;
         void SetVarFactory( double* (*fn)(const char*, void*), void *);
@@ -97,15 +103,15 @@ class MooseParser
         /*-----------------------------------------------------------------------------
          *  User defined function of parser.
          *-----------------------------------------------------------------------------*/
-        static moose::Parser::value_type Rand( );
-        static moose::Parser::value_type Rand2( double a, double b );
-        static moose::Parser::value_type Fmod( double a, double b );
+        static double Rand( );
+        static double Rand2( double a, double b );
+        static double Fmod( double a, double b );
 
 
     private:
         /* data */
         string expr_;
-        moose::Parser::value_type value=0.0;
+        double value=0.0;
         Parser::varmap_type var_map_;
         Parser::varmap_type const_map_;
         Parser::varmap_type used_vars_;
@@ -113,10 +119,10 @@ class MooseParser
         /* Map to variable names and pointer to their values. */
         map<string, double*> map_;
 
-        /* tiny expr */
-        vector<te_variable> te_vars_;
-        unique_ptr<te_expr> te_expr_;
-        int err_;
+        /* Parser related */
+        Parser::symbol_table_t symbol_table_;   /* symbol table */
+        Parser::expression_t   expression_;     /* expression type */
+        Parser::parser_t       parser_;          /* parser */
         size_t num_user_defined_funcs_ = 0;
 };
 

@@ -334,7 +334,7 @@ Function::Function(const Function& rhs):
     moose::Parser::varmap_type cmap = rhs._parser.GetConst();
     if (cmap.size() > 0)
         for (auto item = cmap.begin(); item!=cmap.end(); ++item)
-            _parser.DefineConst(item->first.c_str(), item->second);
+            _parser.DefineConst(item->first, item->second);
 
     setExpr(er, rhs.getExpr( er ));
 
