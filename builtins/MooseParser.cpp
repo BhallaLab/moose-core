@@ -26,8 +26,10 @@ namespace moose
         symbol_table_.clear();
 
         // And add user defined functions.
-        symbol_table_.add_function( "rand", MooseParser::RandSeed );
-        symbol_table_.add_function( "rand2", MooseParser::Rand2Seed );
+        symbol_table_.add_function( "rand", MooseParser::Rand );
+        symbol_table_.add_function( "srand", MooseParser::SRand );
+        symbol_table_.add_function( "rand2", MooseParser::Rand2 );
+        symbol_table_.add_function( "srand2", MooseParser::SRand2 );
         symbol_table_.add_function( "fmod", MooseParser::Fmod );
     }
 
@@ -53,7 +55,7 @@ namespace moose
         return moose::mtrand();
     }
 
-    double MooseParser::RandSeed( double seed = -1 )
+    double MooseParser::SRand( double seed = -1 )
     {
         if( seed >= 0 )
             moose::mtseed( (size_t) seed );
@@ -65,7 +67,7 @@ namespace moose
         return moose::mtrand( a, b );
     }
 
-    double MooseParser::Rand2Seed( double a, double b, double seed = -1 )
+    double MooseParser::SRand2( double a, double b, double seed = -1 )
     {
         if( seed >= 0 )
             moose::mtseed( (size_t) seed );

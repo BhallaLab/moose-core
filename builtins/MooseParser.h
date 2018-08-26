@@ -108,9 +108,9 @@ class MooseParser
          *  User defined function of parser.
          *-----------------------------------------------------------------------------*/
         static double Rand( );
-        static double RandSeed( double seed );
+        static double SRand( double seed );
         static double Rand2( double a, double b );
-        static double Rand2Seed( double a, double b, double seed );
+        static double SRand2( double a, double b, double seed );
         static double Fmod( double a, double b );
 
 
