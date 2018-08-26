@@ -379,15 +379,7 @@ void next_token(state *s)
                     ) s->next++;
 
                 const te_variable *var = find_lookup(s, start, s->next - start);
-
-#if 1
-                if(var)
-                    printf( "Found lookup %s\n", var->name );
-                else
-                    printf( "Could not find %s %s\n", s->start, s->next );
-#endif
                 if (!var) var = find_builtin(start, s->next - start);
-
                 if (!var)
                 {
                     s->type = TOK_ERROR;

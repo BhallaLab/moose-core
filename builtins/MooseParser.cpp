@@ -86,7 +86,7 @@ namespace moose
      *-----------------------------------------------------------------------------*/
     void MooseParser::DefineVar( const char* varName, moose::Parser::value_type* const val) 
     {
-        MOOSE_DEBUG( "DefineVar: varName " << varName << " addr: " << val );
+        // MOOSE_DEBUG( "DefineVar: varName " << varName << " addr: " << val );
         te_variable t = { varName, val, TE_VARIABLE, NULL };
         te_vars_.push_back( t );
         map_[varName] = val;
@@ -112,7 +112,7 @@ namespace moose
 
     void MooseParser::DefineFun( const char* funcName, moose::Parser::value_type (&func)(moose::Parser::value_type) )
     {
-        MOOSE_DEBUG( "Defining func " << funcName );
+        // MOOSE_DEBUG( "Defining func " << funcName );
         // Add a function. This function currently handles only one argument
         // function.
         te_variable t = { .name = funcName, (void *)func, TE_FUNCTION1, NULL };
@@ -259,6 +259,7 @@ namespace moose
     void MooseParser::SetVarFactory( double* (*fn)(const char*, void*), void *)
     {
         MOOSE_DEBUG( "setVarFactory is not implemented." );
+        throw;
     }
 
 
