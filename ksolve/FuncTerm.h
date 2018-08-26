@@ -37,7 +37,7 @@ public:
 
     void evalPool( double* s, double t ) const;
 
-    void addVar( const char* name, size_t i );
+    void addVar( const string& name, size_t i );
 
     /**
      * This function finds the reactant indices in the vector

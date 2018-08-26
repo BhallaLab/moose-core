@@ -58,7 +58,7 @@ void FuncTerm::setReactantIndex( const vector< unsigned int >& mol )
     for ( unsigned int i = 0; i < mol.size(); ++i )
     {
         args_[i] = 0.0;
-        addVar( ("x"+to_string(i)).c_str(), i );
+        addVar( "x"+to_string(i), i );
     }
 
     // Define a 't' variable even if we don't always use it.
@@ -130,10 +130,9 @@ const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
     return *this;
 }
 
-void FuncTerm::addVar( const char* name, size_t i )
+void FuncTerm::addVar( const string& name, size_t i )
 {
-    parser_.DefineVar( name, args_[i] );
-    parser_.AddVariableToParser( name, &args_[i] );
+    parser_.DefineVar( name, &args_[i] );
 }
 
 /**
@@ -147,9 +146,7 @@ double FuncTerm::operator() ( const double* S, double t ) const
 
     size_t  i = 0;
     for ( i = 0; i < reactantIndex_.size(); ++i )
-    {
         args_[i] = S[reactantIndex_[i]];
-    }
 
     args_[i] = t;
 
@@ -174,6 +171,7 @@ void FuncTerm::evalPool( double* S, double t ) const
     for ( i = 0; i < reactantIndex_.size(); ++i )
         args_[i] = S[reactantIndex_[i]];
     args_[i] = t;
+
     try
     {
         S[ target_] = parser_.Eval() * volScale_;

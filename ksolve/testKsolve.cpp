@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 #include "../basecode/header.h"
+#include "../utility/testing_macros.hpp"
 #include "../basecode/SparseMatrix.h"
 #include "../shell/Shell.h"
 #include "RateTerm.h"
@@ -322,11 +323,14 @@ void testFuncTerm()
 
     ans = ft( args, 10.0 );
     assert( doubleEq( ans, 13.0 ) );
+    cout << "ans " << ans << endl;
+
     mol[0] = 0;
     mol[1] = 9;
     ft.setReactantIndex( mol );
     ans = ft( args, 2.0 );
-    assert( doubleEq( ans, 21.0 ) );
+    cout << "ans " << ans << endl;
+    ASSERT_EQ( 21.0, ans,  "testFuncTerm" );
     cout << "." << flush;
 }
 

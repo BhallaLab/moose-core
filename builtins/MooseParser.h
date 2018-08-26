@@ -23,12 +23,13 @@
 using namespace std;
 
 namespace moose {
-namespace Parser {
+    namespace Parser {
 
         // ExprTk types.
         typedef exprtk::symbol_table<double> symbol_table_t;
         typedef exprtk::expression<double>     expression_t;
         typedef exprtk::parser<double>             parser_t;
+        typedef exprtk::parser_error::type error_t;
 
         struct ParserException : public std::exception 
         {
@@ -45,7 +46,7 @@ namespace Parser {
         typedef ParserException exception_type;
         typedef double value_type;
         typedef map<string, value_type> varmap_type;
-    }
+    } // namespace Parser
 
 class MooseParser
 {
@@ -55,7 +56,7 @@ class MooseParser
 
         MooseParser& operator=(const moose::MooseParser&);
 
-        void DefineVar( const string& varName, double& );
+        void DefineVar( const string& varName, double* v );
 
         void DefineConst( const string& cname, const double val );
 
@@ -82,8 +83,6 @@ class MooseParser
 
         static void findAllVars( const string& expr, vector<string>& vars, char start );
         static void findXsYs( const string& expr, vector<string>& xs, vector<string>& ys );
-
-        void AddVariableToParser( const char* varName, double* const v);
 
         double Eval( ) const;
 

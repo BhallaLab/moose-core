@@ -83,23 +83,12 @@ namespace moose
     /*-----------------------------------------------------------------------------
      *  Other function.
      *-----------------------------------------------------------------------------*/
-    void MooseParser::DefineVar( const string& varName, double& val) 
+    void MooseParser::DefineVar( const string& varName, double* val) 
     {
-        symbol_table_.add_variable( varName, val );
+        MOOSE_DEBUG( "Adding variable " << varName << " with val " << val << "(" << &val << ")" );
+        symbol_table_.add_variable( varName, *val );
     }
 
-    /* --------------------------------------------------------------------------*/
-    /**
-     * @Synopsis  Add a variable to parser.
-     *
-     * @Param varName
-     * @Param v
-     */
-    /* ----------------------------------------------------------------------------*/
-    void MooseParser::AddVariableToParser( const char* varName, double* v)
-    {
-        map_[varName] = v;
-    }
 
     void MooseParser::DefineConst( const string& constName, const double value )
     {
@@ -179,13 +168,12 @@ namespace moose
         }
 
         expression_.register_symbol_table( symbol_table_ );
-        if( ! parser_.compile( expr, expression_ ) )
+        if( ! parser_.compile(expr, expression_) )
         {
             cerr << "Parser Error: " << parser_.error() << endl;
             for (std::size_t i = 0; i < parser_.error_count(); ++i)
             {
-                typedef exprtk::parser_error::type error_t;
-                error_t error = parser_.get_error(i);
+                Parser::error_t error = parser_.get_error(i);
                 cerr << "Error[" << i << "] Position: " << error.token.position
                     << " Type: [" << exprtk::parser_error::to_str(error.mode)
                     << "] Msg: " << error.diagnostic << endl;
@@ -195,7 +183,6 @@ namespace moose
 
         expr_ = moose::trim(expr);
         return true;
-
     }
 
     void MooseParser::SetVariableMap( const map<string, double*> m )
