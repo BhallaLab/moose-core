@@ -28,8 +28,11 @@ void print_tvars( const te_variable* te, size_t n = 1 )
     for (size_t i = 0; i < n; i++) 
     {
         auto t = te[i];
-        cout << t.name << " at " << t.address << " value " << *((double*)t.address) << endl;
+        cout << (i+1) << ' ' << setw(4) << t.name << "(" << t.address << ") ";
+        if( 0 == (i+1) % 4 )
+            cout << endl;
     }
+    cout << endl;
 }
 
 namespace moose
@@ -83,7 +86,7 @@ namespace moose
      *-----------------------------------------------------------------------------*/
     void MooseParser::DefineVar( const char* varName, moose::Parser::value_type* const val) 
     {
-        // MOOSE_DEBUG( "DefineVar: varName " << varName << " addr: " << val );
+        MOOSE_DEBUG( "DefineVar: varName " << varName << " addr: " << val );
         te_variable t = { varName, val, TE_VARIABLE, NULL };
         te_vars_.push_back( t );
         map_[varName] = val;
@@ -109,7 +112,13 @@ namespace moose
 
     void MooseParser::DefineFun( const char* funcName, moose::Parser::value_type (&func)(moose::Parser::value_type) )
     {
-        cout << "NA: Defining func " << endl;
+        MOOSE_DEBUG( "Defining func " << funcName );
+        // Add a function. This function currently handles only one argument
+        // function.
+        te_variable t = { .name = funcName, (void *)func, TE_FUNCTION1, NULL };
+        num_user_defined_funcs_ += 1;
+        te_vars_.insert( te_vars_.begin(), t );
+        cout << " + Variable size " << te_vars_.size() << endl;
     }
 
     bool MooseParser::IsConstantExpr( const string& expr )
@@ -152,6 +161,7 @@ namespace moose
 
     bool MooseParser::SetExpr( const string& expr )
     {
+        MOOSE_DEBUG( "Setting expression " << expr );
         if( moose::trim(expr).size() < 1 || moose::trim(expr) == "0" || moose::trim(expr) == "0.0" )
             return false;
 
@@ -184,11 +194,14 @@ namespace moose
         }
 
 
-        te_expr_ = te_compile( expr.c_str(), &te_vars_[0], te_vars_.size(), &err_ );
+        te_expr_ = te_compile( expr.c_str(), te_vars_.data(), te_vars_.size(), &err_ );
         if( ! te_expr_ )
         {
             printf("Failed to compile:\n\t%s\n", expr.c_str() );
             printf("\t%*s^\nError near here.\n", err_-1, "");
+            cout << endl;
+            cout << "Following variables are set:" << endl;
+            print_tvars( te_vars_.data(), te_vars_.size() );
             throw;
         }
         expr_ = expr;

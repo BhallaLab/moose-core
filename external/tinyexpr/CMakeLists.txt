@@ -17,6 +17,7 @@ find_library(MATH_LIB m)
 # flags.
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi -Wall -Wshadow -fPIC -O3")
 set(SOURCE_FILES tinyexpr.c)
+add_definitions( -std=c99 -Wall -fPIC )
 
 add_library(tinyexpr STATIC ${SOURCE_FILES})
 if (TE_POW_FROM_RIGHT)

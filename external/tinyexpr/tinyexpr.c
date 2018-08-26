@@ -366,13 +366,26 @@ void next_token(state *s)
         else
         {
             /* Look for a variable or builtin function call. */
-            if (s->next[0] >= 'a' && s->next[0] <= 'z')
+            if( (s->next[0] >= 'a' && s->next[0] <= 'z')
+                || (s->next[0] >= 'A' && s->next[0] <= 'Z')
+              )
             {
                 const char *start;
                 start = s->next;
-                while ((s->next[0] >= 'a' && s->next[0] <= 'z') || (s->next[0] >= '0' && s->next[0] <= '9') || (s->next[0] == '_')) s->next++;
+                while ( (s->next[0] >= 'a' && s->next[0] <= 'z') 
+                        || (s->next[0] >= 'A' && s->next[0] <= 'Z') 
+                        || (s->next[0] >= '0' && s->next[0] <= '9') 
+                        || (s->next[0] == '_')
+                    ) s->next++;
 
                 const te_variable *var = find_lookup(s, start, s->next - start);
+
+#if 1
+                if(var)
+                    printf( "Found lookup %s\n", var->name );
+                else
+                    printf( "Could not find %s %s\n", s->start, s->next );
+#endif
                 if (!var) var = find_builtin(start, s->next - start);
 
                 if (!var)
@@ -1005,6 +1018,17 @@ te_expr *te_compile(const char *expression, const te_variable *variables, int va
     s.start = s.next = expression;
     s.lookup = variables;
     s.lookup_len = var_count;
+
+#if 0
+    // Got variables.
+    int i = 0;
+    for (i = 0; i < var_count; i++) 
+    {
+        te_variable v = variables[i];
+        if( v.address )
+            printf( "%d %s ", i, v.name );
+    }
+#endif
 
     next_token(&s);
     te_expr *root = list(&s);
