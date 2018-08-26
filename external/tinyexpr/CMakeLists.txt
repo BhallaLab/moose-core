@@ -4,22 +4,15 @@ project(tinyexpr)
 
 option(TE_POW_FROM_RIGHT "Evaluate exponents from right to left." OFF)
 option(TE_NAT_LOG "Define the log function as natural logarithm." OFF)
-option(build_tinyexpr_test "Build TinyExpr tests." OFF)
-option(build_tinyexpr_test_pr "Build TinyExpr tests PR." OFF)
-option(build_tinyexpr_bench "Build TinyExpr benchmark." OFF)
-option(build_tinyexpr_example "Build TinyExpr example." OFF)
-option(build_tinyexpr_example2 "Build TinyExpr example 2." OFF)
-option(build_tinyexpr_example3 "Build TinyExpr example 3." OFF)
+option(ENABLE_TESTS "Enabled tests" ON)
+option(ENABLE_EXAMPALES "Enabled examples" ON)
+option(ENABLE_BENCHMAKRS "Enabled benchamarks" ON)
 
 find_library(MATH_LIB m)
 
-# When using as external project, let the top level CMakeList.txt set these
-# flags.
-# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ansi -Wall -Wshadow -fPIC -O3")
 set(SOURCE_FILES tinyexpr.c)
-add_definitions( -std=c99 -Wall -fPIC )
-
 add_library(tinyexpr STATIC ${SOURCE_FILES})
+
 if (TE_POW_FROM_RIGHT)
     target_compile_definitions(tinyexpr PRIVATE TE_POW_FROM_RIGHT)
 endif()
@@ -27,36 +20,45 @@ if (TE_NAT_LOG)
     target_compile_definitions(tinyexpr PRIVATE TE_NAT_LOG)
 endif()
 target_link_libraries(tinyexpr ${MATH_LIB})
+
 install(TARGETS tinyexpr ARCHIVE DESTINATION lib)
 install(FILES tinyexpr.h DESTINATION include COMPONENT Devel)
 
-if (build_tinyexpr_test)
-    add_executable(tinyexpr_test test.c tinyexpr.c)
-    target_link_libraries(tinyexpr_test ${MATH_LIB})
-endif()
+# Now tests.
 
-if (build_tinyexpr_test_pr)
-    add_executable(tinyexpr_test_pr test.c tinyexpr.c)
+if (ENABLE_TESTS)
+    add_executable(tinyexpr_test test.c )
+    target_link_libraries(tinyexpr_test tinyexpr)
+
+    add_executable(tinyexpr_test_pr test.c)
     target_compile_definitions(tinyexpr_test_pr PRIVATE TE_POW_FROM_RIGHT TE_NAT_LOG)
-    target_link_libraries(tinyexpr_test_pr ${MATH_LIB})
+    target_link_libraries(tinyexpr_test_pr tinyexpr ${MATH_LIB})
 endif()
 
-if (build_tinyexpr_bench)
-    add_executable(tinyexpr_benchmark benchmark.c tinyexpr.c)
-    target_link_libraries(tinyexpr_benchmark ${MATH_LIB})
+if (ENABLE_BENCHMAKRS)
+    add_executable(tinyexpr_benchmark benchmark.c)
+    target_link_libraries(tinyexpr_benchmark tinyexpr ${MATH_LIB})
 endif()
 
-if (build_tinyexpr_example)
-    add_executable(tinyexpr_example example.c tinyexpr.c)
-    target_link_libraries(tinyexpr_example ${MATH_LIB})
+if (ENABLE_EXAMPALES)
+    add_custom_target(examples)
+    file(GLOB _example_src "example*.c")
+    foreach( _ex_src ${_example_src})
+        message(STATUS "Adding ${_ex_src} to examples" )
+        get_filename_component(TGT_NAME ${_ex_src} NAME_WE)
+        set(TGT_EXAMPLE_NAME tinyexpr_${TGT_NAME})
+        add_executable(${TGT_EXAMPLE_NAME} ${_ex_src} )
+        target_link_libraries(${TGT_EXAMPLE_NAME} tinyexpr)
+        add_dependencies(examples ${TGT_EXAMPLE_NAME})
+    endforeach()
 endif()
 
-if (build_tinyexpr_example2)
-    add_executable(tinyexpr_example2 example2.c tinyexpr.c)
-    target_link_libraries(tinyexpr_example2 ${MATH_LIB})
-endif()
-
-if (build_tinyexpr_example3)
-    add_executable(tinyexpr_example3 example3.c tinyexpr.c)
-    target_link_libraries(tinyexpr_example3 ${MATH_LIB})
-endif()
+enable_testing()
+add_test( NAME test1 
+    COMMAND $<TARGET_FILE:tinyexpr_test>
+    WORKING_DIRECTORY $CMAKE_CURRENT_BINARY_DIR}
+    )
+add_test( NAME test2
+    COMMAND $<TARGET_FILE:tinyexpr_test_pr>
+    WORKING_DIRECTORY $CMAKE_CURRENT_BINARY_DIR}
+    )
