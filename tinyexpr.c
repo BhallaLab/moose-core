@@ -255,10 +255,13 @@ void next_token(state *s) {
             s->type = TOK_NUMBER;
         } else {
             /* Look for a variable or builtin function call. */
-            if (s->next[0] >= 'a' && s->next[0] <= 'z') {
+            if ( (s->next[0] >= 'a' && s->next[0] <= 'z') || (s->next[0] >= 'A' && s->next[0] <= 'Z')) {
                 const char *start;
                 start = s->next;
-                while ((s->next[0] >= 'a' && s->next[0] <= 'z') || (s->next[0] >= '0' && s->next[0] <= '9') || (s->next[0] == '_')) s->next++;
+                while ((s->next[0] >= 'a' && s->next[0] <= 'z') 
+                        || (s->next[0] >= 'A' && s->next[0] <= 'Z') 
+                        || (s->next[0] >= '0' && s->next[0] <= '9') 
+                        || (s->next[0] == '_')) s->next++;
 
                 const te_variable *var = find_lookup(s, start, s->next - start);
                 if (!var) var = find_builtin(start, s->next - start);
