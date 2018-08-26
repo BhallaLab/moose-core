@@ -59,7 +59,14 @@ namespace moose
 
     MooseParser::~MooseParser() 
     {
-        te_free( te_expr_ );
+    }
+
+    MooseParser& MooseParser::operator=(const MooseParser& other)
+    {
+        te_expr_ = std::move( te_expr_ );
+        te_vars_ = other.te_vars_;
+        map_ = other.map_;
+        return *this;
     }
 
     /*-----------------------------------------------------------------------------
@@ -110,7 +117,7 @@ namespace moose
         const_map_[constName] = value;
     }
 
-    void MooseParser::DefineFun( const char* funcName, moose::Parser::value_type (&func)(moose::Parser::value_type) )
+    void MooseParser::DefineFun1( const char* funcName, moose::Parser::value_type (&func)(moose::Parser::value_type) )
     {
         // MOOSE_DEBUG( "Defining func " << funcName );
         // Add a function. This function currently handles only one argument
@@ -118,7 +125,6 @@ namespace moose
         te_variable t = { .name = funcName, (void *)func, TE_FUNCTION1, NULL };
         num_user_defined_funcs_ += 1;
         te_vars_.insert( te_vars_.begin(), t );
-        cout << " + Variable size " << te_vars_.size() << endl;
     }
 
     bool MooseParser::IsConstantExpr( const string& expr )
@@ -161,7 +167,7 @@ namespace moose
 
     bool MooseParser::SetExpr( const string& expr )
     {
-        MOOSE_DEBUG( "Setting expression " << expr << "(" << expr.size() << ")" );
+        // MOOSE_DEBUG( "Setting expression " << expr << "(" << expr.size() << ")" );
         if( moose::trim(expr).size() < 1 || moose::trim(expr) == "0" || moose::trim(expr) == "0.0" )
         {
             expr_ = "";
@@ -197,7 +203,8 @@ namespace moose
         }
 
 
-        te_expr_ = te_compile( expr.c_str(), te_vars_.data(), te_vars_.size(), &err_ );
+        unique_ptr<te_expr> t( te_compile( expr.c_str(), te_vars_.data(), te_vars_.size(), &err_ ));
+        te_expr_ = std::move(t);
         if( ! te_expr_ )
         {
             printf("Failed to compile:\n\t%s\n", expr.c_str() );
@@ -222,8 +229,7 @@ namespace moose
     {
         double v = 0.0;
         if( expr_.size() > 0 && te_expr_ )
-            v =  te_eval( te_expr_ );
-        MOOSE_DEBUG( "Evaluating " << expr_ << "=" << v );
+            v =  te_eval( te_expr_.get() );
         return v;
     }
 
@@ -263,7 +269,7 @@ namespace moose
 
     void MooseParser::SetVarFactory( double* (*fn)(const char*, void*), void *)
     {
-        MOOSE_DEBUG( "setVarFactory is not implemented." );
+        MOOSE_WARN( "setVarFactory is not implemented." );
         throw;
     }
 

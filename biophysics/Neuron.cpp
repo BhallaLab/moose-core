@@ -52,7 +52,7 @@ public:
         DefineVar( "y", &y );
         DefineVar( "z", &z );
         DefineVar( "oldVal", &oldVal );
-        DefineFun( "H", nuParser::H );
+        DefineFun1( "H", nuParser::H );
 
         if ( expr.find( "oldVal" ) != string::npos )
             useOldVal = true;

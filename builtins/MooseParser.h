@@ -15,6 +15,7 @@
 #include "../external/tinyexpr/tinyexpr.h"
 
 #include <string>
+#include <memory>
 #include <exception>
 #include <map>
 #include <iostream>
@@ -47,9 +48,11 @@ class MooseParser
         MooseParser();
         ~MooseParser();
 
+        MooseParser& operator=(const moose::MooseParser&);
+
         void DefineVar( const char* varName, moose::Parser::value_type* const val);
 
-        void DefineFun( const char* funcName, moose::Parser::value_type (&func)(moose::Parser::value_type) );
+        void DefineFun1( const char* funcName, moose::Parser::value_type (&func)(moose::Parser::value_type) );
 
         /* --------------------------------------------------------------------------*/
         /**
@@ -112,7 +115,7 @@ class MooseParser
 
         /* tiny expr */
         vector<te_variable> te_vars_;
-        te_expr* te_expr_;
+        unique_ptr<te_expr> te_expr_;
         int err_;
         size_t num_user_defined_funcs_ = 0;
 };
