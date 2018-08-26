@@ -161,9 +161,12 @@ namespace moose
 
     bool MooseParser::SetExpr( const string& expr )
     {
-        MOOSE_DEBUG( "Setting expression " << expr );
+        MOOSE_DEBUG( "Setting expression " << expr << "(" << expr.size() << ")" );
         if( moose::trim(expr).size() < 1 || moose::trim(expr) == "0" || moose::trim(expr) == "0.0" )
+        {
+            expr_ = "";
             return false;
+        }
 
         // NOTE: Before we come here, make sure that map_ is set properly. Map can
         // be set by calling SetVariableMap function.  Following warning is for 
@@ -204,7 +207,7 @@ namespace moose
             print_tvars( te_vars_.data(), te_vars_.size() );
             throw;
         }
-        expr_ = expr;
+        expr_ = moose::trim(expr);
         return true;
     }
 
@@ -217,9 +220,11 @@ namespace moose
 
     moose::Parser::value_type MooseParser::Eval( ) const
     {
-        if( te_expr_ )
-            return  te_eval( te_expr_ );
-        return 0.0;
+        double v = 0.0;
+        if( expr_.size() > 0 && te_expr_ )
+            v =  te_eval( te_expr_ );
+        MOOSE_DEBUG( "Evaluating " << expr_ << "=" << v );
+        return v;
     }
 
     Parser::varmap_type MooseParser::GetVar() const

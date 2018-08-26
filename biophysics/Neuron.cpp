@@ -1883,7 +1883,7 @@ void Neuron::makeSpacingDistrib( const vector< ObjId >& elist,
     }
     catch ( moose::Parser::exception_type& err )
     {
-        cout << err.GetMsg() << endl;
+        cerr << err.GetMsg() << endl;
     }
 }
 
