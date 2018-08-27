@@ -511,7 +511,6 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         return;
 
     numSteps_ += 1;
-    t0_ = std::chrono::high_resolution_clock::now();
 
     // First, handle incoming diffusion values, update S with those.
     if ( dsolvePtr_ )
@@ -546,7 +545,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
             numThreads_ = 1;
         }
 
-        for ( size_t i = 0; i < nvPools; i++ )
+        for ( unsigned int i = 0; i < nvPools; i++ )
             pools_[i].advance( p );
     }
     else
@@ -562,6 +561,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         vector<std::thread> vecThreads;
 #endif
 
+        t0_ = std::chrono::high_resolution_clock::now();
         for (size_t i = 0; i < nWorkers; i++)
         {
 #if USE_BOOST_ASYNC
@@ -576,8 +576,15 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
         for (auto &v : vecThreads )
             v.join();
-
     }
+
+    t1_ = high_resolution_clock::now();
+    double dt = duration_cast<::microseconds>(t1_-t0_).count();
+    if( numSteps_ % 100 == 0 )
+    {
+        cout << "DT" << dt << " |" << grainSize << "| ";
+    }
+    totalTime_ += dt;
     
 
     // Assemble and send the integrated values off for the Dsolve.
@@ -596,8 +603,11 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         dsolvePtr_->updateJunctions( p->dt );
     }
 
-    t1_ = high_resolution_clock::now();
-    totalTime_ += duration_cast<::microseconds>(t1_-t0_).count();
+}
+
+void Ksolve::advance_pool( const size_t i, ProcPtr p )
+{
+    pools_[i].advance(p);
 }
 
 void Ksolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )

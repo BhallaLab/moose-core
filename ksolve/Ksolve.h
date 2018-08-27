@@ -64,6 +64,8 @@ public:
 
     void advance_chunk( const size_t begin, const size_t end, ProcPtr p );
 
+    void advance_pool( const size_t i, ProcPtr p );
+
     /**
      * This does a quick and dirty estimate of the timestep suitable
      * for this sytem

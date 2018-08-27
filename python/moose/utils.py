@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -* coding: utf-8 -*-
 # Utility functions for moose.
 
 from __future__ import print_function, division, absolute_import
@@ -336,7 +336,7 @@ def autoposition(root):
 def loadModel(filename, target,method='ee'):
     moose.loadModel(filename,target)
     moose.mooseaddChemSolver(target,method)
-
+	
 def readcell_scrambled(filename, target, method='ee'):
     """A special version for handling cases where a .p file has a line
     with specified parent yet to be defined.
@@ -842,3 +842,70 @@ def get_child_Mstring(mooseobject,mstring):
             return child
     return None
 
+def connect_CaConc(compartment_list, temperature=None):
+    """ Connect the Ca pools and channels within each of the compartments in compartment_list
+     Ca channels should have a child Mstring named 'ion' with value set in MOOSE.
+     Ca dependent channels like KCa should have a child Mstring called 'ionDependency' with value set in MOOSE.
+     Call this only after instantiating cell so that all channels and pools have been created. """
+    for compartment in compartment_list:
+        caconc = None
+        for child in compartment.children:
+            neutralwrap = moose.Neutral(child)
+            if neutralwrap.className == 'CaConc':
+                caconc = moose.CaConc(child)
+                break
+        if caconc is not None:
+            child = get_child_Mstring(caconc,'phi')
+            if child is not None:
+                caconc.B = float(child.value) # B = phi by definition -- see neuroml 1.8.1 defn
+            else:
+                ## B has to be set for caconc based on thickness of Ca shell and compartment l and dia,
+                ## OR based on the Mstring phi under CaConc path.
+                ## I am using a translation from Neuron for mitral cell, hence this method.
+                ## In Genesis, gmax / (surfacearea*thick) is set as value of B!
+                caconc.B = 1 / (2*FARADAY) / \
+                    (math.pi*compartment.diameter*compartment.length * caconc.thick)
+            for child in compartment.children:
+                neutralwrap = moose.Neutral(child)
+                if neutralwrap.className == 'HHChannel':
+                    channel = moose.HHChannel(child)
+                    ## If child Mstring 'ion' is present and is Ca, connect channel current to caconc
+                    for childid in channel.children:
+                        # in async13, gates which have not been created still 'exist'
+                        # i.e. show up as a child, but cannot be wrapped.
+                        try:
+                            child = moose.element(childid)
+                            if child.className=='Mstring':
+                                child = moose.Mstring(child)
+                                if child.name=='ion':
+                                    if child.value in ['Ca','ca']:
+                                        moose.connect(channel,'IkOut',caconc,'current')
+                                        #print 'Connected IkOut of',channel.path,'to current of',caconc.path
+                                ## temperature is used only by Nernst part here...
+                                if child.name=='nernst_str':
+                                    nernst = moose.Nernst(channel.path+'/nernst')
+                                    nernst_params = child.value.split(',')
+                                    nernst.Cout = float(nernst_params[0])
+                                    nernst.valence = float(nernst_params[1])
+                                    nernst.Temperature = temperature
+                                    moose.connect(nernst,'Eout',channel,'setEk')
+                                    moose.connect(caconc,'concOut',nernst,'ci')
+                                    #print 'Connected Nernst',nernst.path
+                        except TypeError:
+                            pass
+
+                if neutralwrap.className == 'HHChannel2D':
+                    channel = moose.HHChannel2D(child)
+                    ## If child Mstring 'ionDependency' is present, connect caconc Ca conc to channel
+                    for childid in channel.children:
+                        # in async13, gates which have not been created still 'exist'
+                        # i.e. show up as a child, but cannot be wrapped.
+                        try:
+                            child = moose.element(childid)
+                            if child.className=='Mstring' and child.name=='ionDependency':
+                                child = moose.Mstring(child)
+                                if child.value in ['Ca','ca']:
+                                    moose.connect(caconc,'concOut',channel,'concen')
+                                    #print 'Connected concOut of',caconc.path,'to concen of',channel.path
+                        except TypeError:
+                            pass
