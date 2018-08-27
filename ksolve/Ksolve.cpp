@@ -532,12 +532,11 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
     // Third, do the numerical integration for all reactions.
     size_t grainSize = max( (size_t)1, min( nvPools, nvPools / numThreads_));
-
     size_t nWorkers = std::max(1, (int)(nvPools/grainSize) );
 
-    // cout << "Number of pools " << nvPools << " number of threads " << numThreads_
-        // << "nWorkers  " << nWorkers
-        // << endl;
+    // Just to be sure. Its not very costly computation.
+    while( nWorkers * grainSize < nvPools )
+        grainSize += 1;
 
     if( 1 == nWorkers || 1 == nvPools )
     {
@@ -566,9 +565,6 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         for (size_t i = 0; i < nWorkers; i++)
         {
 #if USE_BOOST_ASYNC
-            // boost::shared_future<size_t> res = boost::async(
-                    // boost::bind( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p )
-                // );
             boost::thread t( boost::bind( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p ));
             vecThreads.push_back( boost::move(t) );
 #else
@@ -578,7 +574,6 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 #endif
         }
 
-        // cout << "Total threads " << vecThreads.size() << endl;
         for (auto &v : vecThreads )
             v.join();
 
@@ -596,8 +591,8 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         getBlock( kvalues );
         dsolvePtr_->setBlock( kvalues );
 
-		// Now use the values in the Dsolve to update junction fluxes
-		// for diffusion, channels, and xreacs
+        // Now use the values in the Dsolve to update junction fluxes
+        // for diffusion, channels, and xreacs
         dsolvePtr_->updateJunctions( p->dt );
     }
 
@@ -605,15 +600,10 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     totalTime_ += duration_cast<::microseconds>(t1_-t0_).count();
 }
 
-size_t Ksolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )
+void Ksolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )
 {
-    size_t total = 0;
     for (size_t i = begin; i < std::min(end, pools_.size() ); i++) 
-    {
         pools_[i].advance( p );
-        total += 1;
-    }
-    return total;
 }
 
 

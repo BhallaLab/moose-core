@@ -62,7 +62,7 @@ public:
     unsigned int getNumThreads( ) const;
     void setNumThreads( unsigned int x );
 
-    size_t advance_chunk( const size_t begin, const size_t end, ProcPtr p );
+    void advance_chunk( const size_t begin, const size_t end, ProcPtr p );
 
     /**
      * This does a quick and dirty estimate of the timestep suitable
