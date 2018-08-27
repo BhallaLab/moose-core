@@ -122,11 +122,14 @@ double FuncTerm::getVolScale() const
 const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
 {
     args_ = 0; // Don't delete it, the original one is still using it.
-    parser_ = other.parser_;
     expr_ = other.expr_;
     volScale_ = other.volScale_;
     target_ = other.target_;
     setReactantIndex( other.reactantIndex_ );
+
+    // Parser can't be copied. Copy symbol table and expression.
+    parser_.RegisterSymbolTable( other.parser_.GetSymbolTable() );
+
     return *this;
 }
 

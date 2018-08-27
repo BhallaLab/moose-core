@@ -216,8 +216,7 @@ void testFastMatrixElim()
     FastMatrixElim::advance( y, fops, diagVal );
 
     // Here we verify the answer
-
-    cout << "  row " << foo.nRows() << " cols " << foo.nColumns() << endl;
+    // cout << "  row " << foo.nRows() << " cols " << foo.nColumns() << endl;
     vector< double > alle;
 
     for( size_t i = 0; i < numCompts; ++i )
@@ -227,7 +226,7 @@ void testFastMatrixElim()
             alle.push_back( x );
         }
 
-    cout << "myCode: " << checkAns( alle.data(), numCompts, y.data(), ones.data() ) << endl;
+    // cout << "myCode: " << checkAns( alle.data(), numCompts, y.data(), ones.data() ) << endl;
 
     assert(checkAns( &alle[0], numCompts, &y[0], &ones[0] ) < 1e-25);
 

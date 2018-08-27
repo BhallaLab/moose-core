@@ -54,8 +54,24 @@ class MooseParser
         MooseParser();
         ~MooseParser();
 
-        MooseParser& operator=(const moose::MooseParser&);
+        // Parser should never be copied. Else multithreaded programs MAY
+        // produce unexptected results. I.e. FuncTerm must have its own parser.
+        MooseParser& operator=(const moose::MooseParser&) = delete;
+        
+        /*-----------------------------------------------------------------------------
+         *  Set/Get
+         *-----------------------------------------------------------------------------*/
+        Parser::symbol_table_t  GetSymbolTable( ) const;
+        Parser::expression_t    GetExpression( ) const;
 
+        void SetSymbolTable( Parser::symbol_table_t tab );
+        void SetExpression( Parser::expression_t& expr );
+
+        void RegisterSymbolTable( Parser::symbol_table_t tab );
+
+        /*-----------------------------------------------------------------------------
+         *  User interface.
+         *-----------------------------------------------------------------------------*/
         void DefineVar( const string& varName, double* v );
 
         void DefineConst( const string& cname, const double val );

@@ -37,15 +37,18 @@ namespace moose
     {
     }
 
+#if 0
     MooseParser& MooseParser::operator=(const moose::MooseParser& other)
     {
         symbol_table_ = other.symbol_table_;
-        expression_ = other.expression_;
-
-        MOOSE_WARN( "Parser will NOT be copied." );
-
+        // Copy the expression and symbol table.
+        expression_.register_symbol_table( symbol_table_ );
+        // parser_ = other.parser_;
+        MOOSE_WARN( "Beware! Parser will NOT be copied." );
         return *this;
     }
+#endif
+
 
     /*-----------------------------------------------------------------------------
      *  User defined function here.
@@ -79,6 +82,35 @@ namespace moose
         return fmod(a, b);
     }
 
+
+    /*-----------------------------------------------------------------------------
+     *  Get/Set
+     *-----------------------------------------------------------------------------*/
+    Parser::symbol_table_t MooseParser::GetSymbolTable( ) const
+    {
+        return symbol_table_;
+    }
+    
+    void MooseParser::SetSymbolTable( Parser::symbol_table_t tab )
+    {
+        symbol_table_ = tab;
+    }
+
+    void MooseParser::SetExpression( Parser::expression_t& expr )
+    {
+        expression_ = expr;
+    }
+
+    Parser::expression_t MooseParser::GetExpression( ) const
+    {
+        return expression_;
+    }
+
+    void MooseParser::RegisterSymbolTable( Parser::symbol_table_t tab )
+    {
+        symbol_table_ = tab;
+        expression_.register_symbol_table( symbol_table_ );
+    }
 
     /*-----------------------------------------------------------------------------
      *  Other function.
