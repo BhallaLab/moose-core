@@ -558,7 +558,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
          *-----------------------------------------------------------------------------*/
         // cout << " Grain size " << grainSize <<  " Workers : " << nWorkers << endl;
 #if USE_BOOST_ASYNC
-        vector< boost::shared_future<size_t> > vecResult;
+        vector< boost::thread > vecThreads;
 #else
         vector<std::thread> vecThreads;
 #endif
@@ -566,10 +566,11 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         for (size_t i = 0; i < nWorkers; i++)
         {
 #if USE_BOOST_ASYNC
-            boost::shared_future<size_t> res = boost::async( 
-                    boost::bind( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p )
-                );
-            vecResult.push_back( res );
+            // boost::shared_future<size_t> res = boost::async(
+                    // boost::bind( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p )
+                // );
+            boost::thread t( boost::bind( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p ));
+            vecThreads.push_back( boost::move(t) );
 #else
             // std::thread  t( std::bind( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p ) );
             std::thread t( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p );
@@ -577,14 +578,9 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 #endif
         }
 
-#if USE_BOOST_ASYNC
-        for (auto &v : vecResult )
-            v.get();
-#else
-        for( auto &v : vecThreads )
-            if( v.joinable() )
-                v.join();
-#endif
+        // cout << "Total threads " << vecThreads.size() << endl;
+        for (auto &v : vecThreads )
+            v.join();
 
     }
     
