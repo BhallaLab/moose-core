@@ -34,7 +34,7 @@
 #include <chrono>
 #include <algorithm>
 
-#ifdef USE_BOOST_ASYNC 
+#ifdef USE_BOOST_ASYNC
 #define BOOST_THREAD_PROVIDES_FUTURE
 #include <boost/thread.hpp>
 #include <boost/thread/future.hpp>
@@ -54,7 +54,6 @@ const Cinfo* Ksolve::initCinfo()
     ///////////////////////////////////////////////////////
     // Field definitions
     ///////////////////////////////////////////////////////
-
     static ValueFinfo< Ksolve, string > method (
         "method",
         "Integration method, using GSL. So far only explict. Options are:"
@@ -96,13 +95,14 @@ const Cinfo* Ksolve::initCinfo()
         "current solver. ",
         &Ksolve::getNumLocalVoxels
     );
-    static LookupValueFinfo<
-    Ksolve, unsigned int, vector< double > > nVec(
+
+    static LookupValueFinfo< Ksolve, unsigned int, vector< double > > nVec(
         "nVec",
         "vector of pool counts. Index specifies which voxel.",
         &Ksolve::setNvec,
         &Ksolve::getNvec
     );
+
     static ValueFinfo< Ksolve, unsigned int > numAllVoxels(
         "numAllVoxels",
         "Number of voxels in the entire reac-diff system, "
@@ -131,6 +131,7 @@ const Cinfo* Ksolve::initCinfo()
         "Estimated timestep for reac system based on Euler error",
         &Ksolve::getEstimatedDt
     );
+
     static ReadOnlyValueFinfo< Ksolve, Id > stoich(
         "stoich",
         "Id for stoichiometry object tied to this Ksolve",
@@ -144,17 +145,23 @@ const Cinfo* Ksolve::initCinfo()
 
     static DestFinfo process( "process",
                               "Handles process call from Clock",
-                              new ProcOpFunc< Ksolve >( &Ksolve::process ) );
+                              new ProcOpFunc< Ksolve >( &Ksolve::process )
+                            );
+
     static DestFinfo reinit( "reinit",
                              "Handles reinit call from Clock",
-                             new ProcOpFunc< Ksolve >( &Ksolve::reinit ) );
+                             new ProcOpFunc< Ksolve >( &Ksolve::reinit )
+                           );
 
     static DestFinfo initProc( "initProc",
                                "Handles initProc call from Clock",
-                               new ProcOpFunc< Ksolve >( &Ksolve::initProc ) );
+                               new ProcOpFunc< Ksolve >( &Ksolve::initProc )
+                             );
+
     static DestFinfo initReinit( "initReinit",
                                  "Handles initReinit call from Clock",
-                                 new ProcOpFunc< Ksolve >( &Ksolve::initReinit ) );
+                                 new ProcOpFunc< Ksolve >( &Ksolve::initReinit )
+                               );
 
     static DestFinfo voxelVol( "voxelVol",
                                "Handles updates to all voxels. Comes from parent "
@@ -162,6 +169,7 @@ const Cinfo* Ksolve::initCinfo()
                                new OpFunc1< Ksolve, vector< double > >(
                                    &Ksolve::updateVoxelVol )
                              );
+
     ///////////////////////////////////////////////////////
     // Shared definitions
     ///////////////////////////////////////////////////////
@@ -169,16 +177,19 @@ const Cinfo* Ksolve::initCinfo()
     {
         &process, &reinit
     };
+
     static SharedFinfo proc( "proc",
                              "Shared message for process and reinit. These are used for "
                              "all regular Ksolve calculations including interfacing with "
                              "the diffusion calculations by a Dsolve.",
                              procShared, sizeof( procShared ) / sizeof( const Finfo* )
                            );
+
     static Finfo* initShared[] =
     {
         &initProc, &initReinit
     };
+
     static SharedFinfo init( "init",
                              "Shared message for initProc and initReinit. This is used"
                              " when the system has cross-compartment reactions. ",
@@ -187,20 +198,20 @@ const Cinfo* Ksolve::initCinfo()
 
     static Finfo* ksolveFinfos[] =
     {
-        &method,			// Value
-        &epsAbs,			// Value
-        &epsRel ,			// Value
-        &numThreads,                    // Value
-        &compartment,		// Value
-        &numLocalVoxels,	// ReadOnlyValue
-        &nVec,				// LookupValue
-        &numAllVoxels,		// ReadOnlyValue
-        &numPools,			// Value
-        &estimatedDt,		// ReadOnlyValue
-        &stoich,			// ReadOnlyValue
-        &voxelVol,			// DestFinfo
-        &proc,				// SharedFinfo
-        &init,				// SharedFinfo
+        &method,                         // Value
+        &epsAbs,                         // Value
+        &epsRel ,                         // Value
+        &numThreads,                            // Value
+        &compartment,                           // Value
+        &numLocalVoxels,                 // ReadOnlyValue
+        &nVec,                                 // LookupValue
+        &numAllVoxels,                         // ReadOnlyValue
+        &numPools,                         // Value
+        &estimatedDt,                         // ReadOnlyValue
+        &stoich,                         // ReadOnlyValue
+        &voxelVol,                         // DestFinfo
+        &proc,                                 // SharedFinfo
+        &init,                                 // SharedFinfo
     };
 
     static Dinfo< Ksolve > dinfo;
@@ -241,13 +252,15 @@ Ksolve::Ksolve()
 
 Ksolve::~Ksolve()
 {
+#if 0
     char* p = getenv( "MOOSE_SHOW_PROFILING_INFO" );
     if( p != NULL )
     {
-        cout << "Info: Ksolve took " << totalTime_ << " us and took " << numSteps_  
-            << " steps." << endl;
+        cout << "Info: Ksolve took " << totalTime_ << " us and took " << numSteps_
+             << " steps." << endl;
 
     }
+#endif
 }
 
 //////////////////////////////////////////////////////////////
@@ -375,10 +388,11 @@ void Ksolve::setStoich( Id stoich )
         ode.method = method_;
 #ifdef USE_GSL
         ode.gslSys.dimension = stoichPtr_->getNumAllPools();
-        if ( ode.gslSys.dimension == 0 ) {
-			stoichPtr_ = 0;
+        if ( ode.gslSys.dimension == 0 )
+        {
+            stoichPtr_ = 0;
             return; // No pools, so don't bother.
-		}
+        }
         innerSetMethod( ode, method_ );
         ode.gslSys.function = &VoxelPools::gslFunc;
         ode.gslSys.jacobian = 0;
@@ -522,8 +536,8 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         dvalues[3] = stoichPtr_->getNumVarPools();
 
         dsolvePtr_->getBlock( dvalues );
-		// Second, set the prev_ value in DiffPoolVec
-		dsolvePtr_->setPrev();
+        // Second, set the prev_ value in DiffPoolVec
+        dsolvePtr_->setPrev();
         setBlock( dvalues );
     }
 
@@ -554,14 +568,13 @@ void Ksolve::process( const Eref& e, ProcPtr p )
          *  Somewhat complicated computation to compute the number of threads. 1
          *  thread per (at least) voxel pool is ideal situation.
          *-----------------------------------------------------------------------------*/
-        // cout << " Grain size " << grainSize <<  " Workers : " << nWorkers << endl;
 #if USE_BOOST_ASYNC
         vector< boost::thread > vecThreads;
 #else
         vector<std::thread> vecThreads;
 #endif
 
-        t0_ = std::chrono::high_resolution_clock::now();
+        // t0_ = std::chrono::high_resolution_clock::now();
         for (size_t i = 0; i < nWorkers; i++)
         {
 #if USE_BOOST_ASYNC
@@ -578,14 +591,12 @@ void Ksolve::process( const Eref& e, ProcPtr p )
             v.join();
     }
 
+#if 0
     t1_ = high_resolution_clock::now();
     double dt = duration_cast<::microseconds>(t1_-t0_).count();
-    if( numSteps_ % 100 == 0 )
-    {
-        cout << "DT" << dt << " |" << grainSize << "| ";
-    }
     totalTime_ += dt;
-    
+#endif
+
 
     // Assemble and send the integrated values off for the Dsolve.
     if ( dsolvePtr_ )
@@ -612,7 +623,7 @@ void Ksolve::advance_pool( const size_t i, ProcPtr p )
 
 void Ksolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )
 {
-    for (size_t i = begin; i < std::min(end, pools_.size() ); i++) 
+    for (size_t i = begin; i < std::min(end, pools_.size() ); i++)
         pools_[i].advance( p );
 }
 
