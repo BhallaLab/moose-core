@@ -29,11 +29,8 @@ using namespace boost::numeric;
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
 
-using namespace std::placeholders;
-
 //////////////////////////////////////////////////////////////
 // Class definitions
-//////////////////////////////////////////////////////////////
 
 VoxelPools::VoxelPools()
 {

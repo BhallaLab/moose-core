@@ -97,6 +97,7 @@ def main( nthreads = 1 ):
 
 if __name__ == '__main__':
     import multiprocessing
+    import sys
     nT = int(multiprocessing.cpu_count()/2)
     if len(sys.argv) > 1:
         nT = int(sys.argv[1])
