@@ -92,14 +92,13 @@ def main( nthreads = 1 ):
         u1, m1 = np.mean( yvec ), np.std( yvec )
         print( u1, m1 )
         np.isclose( (u1,m1), expected[i+1], atol=1e-5 ).all(), expected[i+1]
-    print( "Time = ", time.time() - t1 )
     return time.time() - t1
 
 
 if __name__ == '__main__':
     import multiprocessing
     nT = int(multiprocessing.cpu_count()/2)
+    if len(sys.argv) > 1:
+        nT = int(sys.argv[1])
     t2 = main( nT )
-    moose.delete( '/cylinder' )
-    t1 = main( 2 )
-    print( '1 threads=%g, %d threds=%g, speedup=%g' % (nT, t2, t1, t1/t2))
+    print( 'With threads=%d, Time=%g' % (nT, t2))
