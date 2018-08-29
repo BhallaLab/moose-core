@@ -48,7 +48,6 @@ if(WITH_GSL)
     list(APPEND KSOLVE_SRCS SteadyStateGsl.cpp )
 elseif(WITH_BOOST_ODE)
     list(APPEND KSOLVE_SRCS SteadyStateBoost.cpp )
-    list(APPEND KSOLVE_SRCS BoostSys.cpp)
 endif(WITH_GSL)
 
 add_library( ksolve ${KSOLVE_SRCS} )

@@ -406,15 +406,11 @@ void Ksolve::setStoich( Id stoich )
         }
 #elif USE_BOOST_ODE
         ode.dimension = stoichPtr_->getNumAllPools();
-        ode.boostSys.epsAbs = epsAbs_;
-        ode.boostSys.epsRel = epsRel_;
-        ode.boostSys.method = method_;
         if ( ode.dimension == 0 )
             return; // No pools, so don't bother.
         unsigned int numVoxels = pools_.size();
         for ( unsigned int i = 0 ; i < numVoxels; ++i )
         {
-            ode.boostSys.params = &pools_[i];
             pools_[i].setStoich( stoichPtr_, &ode );
         }
 #endif
