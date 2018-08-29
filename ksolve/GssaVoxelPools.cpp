@@ -50,7 +50,7 @@ const double SAFETY_FACTOR = 1.0 + 1.0e-9;
 //////////////////////////////////////////////////////////////
 
 GssaVoxelPools::GssaVoxelPools() :
-     VoxelPoolsBase(), t_( 0.0 ), atot_( 0.0 )
+    VoxelPoolsBase(), t_( 0.0 ), atot_( 0.0 )
 { ; }
 
 GssaVoxelPools::~GssaVoxelPools()
@@ -72,14 +72,23 @@ void GssaVoxelPools::updateDependentMathExpn(
     // The lower commented block has all funcs updated every time step,
     // but this too
     // doesn't update the cascading reacs. So this is now handled by the
-    // useClockedUpdate flag, and we use the upper block here instead.
-
-
+    // useClockedUpdate flag, and we use the lower block here instead.
+    /*
+    const vector< unsigned int >& deps = g->dependentMathExpn[ rindex ];
+    for( vector< unsigned int >::const_iterator
+    		i = deps.begin(); i != deps.end(); ++i ) {
+    		g->stoich->funcs( *i )->evalPool( varS(), time );
+    }
+    */
+    /*
     unsigned int numFuncs = g->stoich->getNumFuncs();
     for( unsigned int i = 0; i < numFuncs; ++i )
     {
         g->stoich->funcs( i )->evalPool( varS(), time );
     }
+    */
+    // This function is equivalent to the loop above.
+    g->stoich->updateFuncs( varS(), time );
 }
 
 void GssaVoxelPools::updateDependentRates(
@@ -93,7 +102,7 @@ void GssaVoxelPools::updateDependentRates(
     }
 }
 
-unsigned int GssaVoxelPools::pickReac() 
+unsigned int GssaVoxelPools::pickReac()
 {
     double r = rng_.uniform( ) * atot_;
     double sum = 0.0;
@@ -121,6 +130,7 @@ void GssaVoxelPools::setNumReac( unsigned int n )
 {
     v_.clear();
     v_.resize( n, 0.0 );
+    numFire_.resize( n, 0 );
 }
 
 /**
@@ -130,6 +140,7 @@ void GssaVoxelPools::setNumReac( unsigned int n )
  */
 bool GssaVoxelPools::refreshAtot( const GssaSystem* g )
 {
+    g->stoich->updateFuncs( varS(), t_ );
     updateReacVelocities( g, S(), v_ );
     atot_ = 0;
     for ( vector< double >::const_iterator
@@ -151,8 +162,6 @@ bool GssaVoxelPools::refreshAtot( const GssaSystem* g )
  */
 void GssaVoxelPools::recalcTime( GssaSystem* g, double currTime )
 {
-        omp_lock_t lock;
-    updateDependentMathExpn( g, 0, currTime);
     refreshAtot( g );
     assert( t_ > currTime );
     t_ = currTime;
@@ -171,6 +180,8 @@ void GssaVoxelPools::advance( const ProcInfo* p, GssaSystem* g )
         if ( atot_ <= 0.0 )   // reac system is stuck, will not advance.
         {
             t_ = nextt;
+            g->stoich->updateFuncs( varS(), t_ );
+            // updateDependentMathExpn( g, 0, t_ );
             return;
         }
         unsigned int rindex = pickReac();
@@ -182,6 +193,8 @@ void GssaVoxelPools::advance( const ProcInfo* p, GssaSystem* g )
             if ( !refreshAtot( g ) )   // Stuck state.
             {
                 t_ = nextt;
+                g->stoich->updateFuncs( varS(), t_ );
+                // updateDependentMathExpn( g, 0, t_ );
                 return;
             }
             // We had a roundoff error, fixed it, but now need to be sure
@@ -197,53 +210,96 @@ void GssaVoxelPools::advance( const ProcInfo* p, GssaSystem* g )
             assert( rindex < v_.size() );
         }
 
+#if ENABLE_CPP11
+        double sign = std::copysign( 1, v_[rindex] );
+#else
         double sign = double(v_[rindex] >= 0) - double(0 > v_[rindex] );
-        g->transposeN.fireReac( rindex, Svec(), sign );
-        double r = rng_.uniform();
-        while ( r <= 0.0 )
-        {
-            r = rng_.uniform();
-        }
-        t_ -= ( 1.0 / atot_ ) * log( r );
+#endif
 
-        updateDependentMathExpn( g, rindex, t_ );
+        g->transposeN.fireReac( rindex, Svec(), sign );
+        numFire_[rindex]++;
+
+        double r = rng_.uniform();
+
+        while ( r <= 0.0 )
+            r = rng_.uniform();
+
+        t_ -= ( 1.0 / atot_ ) * log( r );
+        g->stoich->updateFuncs( varS(), t_ );
+        // updateDependentMathExpn( g, rindex, t_ );
         updateDependentRates( g->dependency[ rindex ], g->stoich );
     }
 }
 
 void GssaVoxelPools::reinit( const GssaSystem* g )
 {
-    //rng_.setSeed( moose::__rng_seed__ );
+    rng_.setSeed( moose::__rng_seed__ );
     VoxelPoolsBase::reinit(); // Assigns S = Sinit;
     unsigned int numVarPools = g->stoich->getNumVarPools();
     g->stoich->updateFuncs( varS(), 0 );
 
     double* n = varS();
 
-    if ( g->useRandInit )
+    if( g->useRandInit )
     {
-        // round up or down probabilistically depending on fractional
-        // num molecules.
+        vector<double> error(numVarPools, 0.0);
+        map<double, vector<Eref>> groupByVal;
+
         for ( unsigned int i = 0; i < numVarPools; ++i )
         {
-            double base = floor( n[i] );
+            error[i] = n[i];
+            double base = std::floor( n[i] );
             assert( base >= 0.0 );
             double frac = n[i] - base;
-            if ( rng_.uniform() > frac )
+            if ( rng_.uniform() >= frac )
                 n[i] = base;
             else
                 n[i] = base + 1.0;
+
+            error[i] -= n[i];
+
+            //if( true )
+            //{
+            //    //NOTE: Thats how I get the name of the pool at this index.
+            //    Eref e = g->stoich->getPoolByIndex( i ).eref();
+            //    groupByVal[n[i]].push_back( e );
+
+            //    // Guess the fix the error.
+            //}
+
+
+        }
+
+        double extra = std::accumulate( error.begin(), error.end(), 0.0 );
+        if( std::abs(extra) > 0.1 )
+        {
+            cout << "WARNING: Extra " << extra
+                << " molecules in system after converting fractional to integer e.g. 1.1 = 1 (~90% of times) or 2 (~10% of times)." << endl;
         }
     }
     else     // Just round to the nearest int.
     {
         for ( unsigned int i = 0; i < numVarPools; ++i )
         {
+#if ENABLE_CPP11
+            // Just like rint but does not raise exception.
+            // See http://en.cppreference.com/w/cpp/numeric/math/nearbyint for
+            // details.
+            n[i] = std::nearbyint(n[i]);
+#else
             n[i] = round( n[i] );
+#endif
         }
     }
+
     t_ = 0.0;
     refreshAtot( g );
+    numFire_.assign( v_.size(), 0 );
+}
+
+vector< unsigned int > GssaVoxelPools::numFire() const
+{
+    return numFire_;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -324,7 +380,6 @@ void GssaVoxelPools::setStoich( const Stoich* stoichPtr )
 void GssaVoxelPools::setVolumeAndDependencies( double vol )
 {
     VoxelPoolsBase::setVolumeAndDependencies( vol );
-    stoichPtr_->setupCrossSolverReacVols();
     updateAllRateTerms( stoichPtr_->getRateTerms(),
                         stoichPtr_->getNumCoreRates() );
 }
@@ -360,7 +415,7 @@ void GssaVoxelPools::xferIn( XferInfo& xf,
         // cout << x << "	i = " << *i << *j << "	m = " << *m << endl;
         double dx = *i++ - *j++;
         double base = floor( dx );
-        if ( rng_.uniform() > dx - base )
+        if ( rng_.uniform() >= (dx - base) )
             x += base;
         else
             x += base + 1.0;
@@ -395,31 +450,4 @@ void GssaVoxelPools::xferIn( XferInfo& xf,
     */
     // Does this fix the problem of negative concs?
     refreshAtot( g );
-}
-
-void GssaVoxelPools::xferInOnlyProxies(
-    const vector< unsigned int >& poolIndex,
-    const vector< double >& values,
-    unsigned int numProxyPools,
-    unsigned int voxelIndex	)
-{
-    unsigned int offset = voxelIndex * poolIndex.size();
-    vector< double >::const_iterator i = values.begin() + offset;
-    unsigned int proxyEndIndex = stoichPtr_->getNumVarPools() +
-                                 stoichPtr_->getNumProxyPools();
-    for ( vector< unsigned int >::const_iterator
-            k = poolIndex.begin(); k != poolIndex.end(); ++k )
-    {
-        // if ( *k >= size() - numProxyPools )
-        if ( *k >= stoichPtr_->getNumVarPools() && *k < proxyEndIndex )
-        {
-            double base = floor( *i );
-            if ( rng_.uniform() > *i - base )
-                varSinit()[*k] = (varS()[*k] += base );
-            else
-                varSinit()[*k] = (varS()[*k] += base + 1.0 );
-            // varSinit()[*k] = (varS()[*k] += round( *i ));
-        }
-        i++;
-    }
 }

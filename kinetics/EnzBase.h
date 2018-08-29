@@ -17,7 +17,7 @@
  */
 class EnzBase
 {
-	public: 
+	public:
 		EnzBase();
 		virtual ~EnzBase();
 
@@ -33,6 +33,7 @@ class EnzBase
 
 		// This doesn't need a virtual form, depends on standard msgs.
 		unsigned int getNumSub( const Eref& e ) const;
+		unsigned int getNumPrd( const Eref& e ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Virtual funcs for field assignment stuff
@@ -65,7 +66,7 @@ class EnzBase
 		//////////////////////////////////////////////////////////////////
 		// Zombification functions.
 		//////////////////////////////////////////////////////////////////
-		static void zombify( Element* original, const Cinfo* zClass, 
+		static void zombify( Element* original, const Cinfo* zClass,
 						Id solver );
 		/// Assign solver info
 		virtual void setSolver( Id solver, Id orig );

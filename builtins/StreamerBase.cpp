@@ -27,7 +27,7 @@
 #include <memory>
 
 // Class function definitions
-StreamerBase::StreamerBase() 
+StreamerBase::StreamerBase()
 {
 }
 
@@ -42,7 +42,7 @@ StreamerBase::~StreamerBase()
 {
 
 }
- 
+
 
 string StreamerBase::getOutFilepath( void ) const
 {
@@ -55,28 +55,27 @@ void StreamerBase::setOutFilepath( string filepath )
 }
 
 
-void StreamerBase::writeToOutFile( const string& filepath 
-        , const string& outputFormat 
-        , const string& openmode 
-        , const vector<double>& data 
+void StreamerBase::writeToOutFile( const string& filepath
+        , const string& outputFormat
+        , const string& openmode
+        , const vector<double>& data
         , const vector<string>& columns
         )
 {
     if( data.size() == 0 )
         return;
 
-    if( "csv" == outputFormat )
-        writeToCSVFile( filepath, openmode, data, columns );
-    else if( "npy" == outputFormat )
+    if( "npy" == outputFormat )
         writeToNPYFile( filepath, openmode, data, columns );
+    else if( "csv" == outputFormat or "dat" == outputFormat )
+        writeToCSVFile( filepath, openmode, data, columns );
     else
     {
-        LOG( moose::warning, "Unsupported format " << outputFormat 
+        LOG( moose::warning, "Unsupported format " << outputFormat
                 << ". Use npy or csv. Falling back to default csv"
            );
         writeToCSVFile( filepath, openmode, data, columns );
     }
-
 }
 
 
@@ -96,11 +95,11 @@ void StreamerBase::writeToCSVFile( const string& filepath, const string& openmod
     if( openmode == "w" )
     {
         string headerText = "";
-        for( vector<string>::const_iterator it = columns.begin(); 
+        for( vector<string>::const_iterator it = columns.begin();
             it != columns.end(); it++ )
-            headerText += "\"" + *it + "\"" + delimiter_;
+            headerText += ( *it + delimiter_ );
         headerText += eol;
-        fprintf( fp, "%s", headerText.c_str() ); 
+        fprintf( fp, "%s", headerText.c_str() );
     }
 
     string text = "";

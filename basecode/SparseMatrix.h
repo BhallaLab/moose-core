@@ -360,6 +360,7 @@ public:
         return entry.size();
     }
 
+#if 0
     void rowOperation( unsigned int row, unary_function< T, void>& f )
     {
         assert( row < nrows_ );
@@ -376,6 +377,7 @@ public:
         for ( i = N_.begin() + rs; i != end; ++i )
             f( *i );
     }
+#endif
 
     /**
      * Adds a row to the sparse matrix, must go strictly in row order.
@@ -421,6 +423,19 @@ public:
                           colIndexArg.begin(), colIndexArg.end() );
         rowStart_[rowNum + 1] = N_.size();
     }
+	/// Here we expose the sparse matrix for MOOSE use.
+	const vector< T >& matrixEntry() const
+	{
+		return N_;
+	}
+	const vector< unsigned int >& colIndex() const
+	{
+		return colIndex_;
+	}
+	const vector< unsigned int >& rowStart() const
+	{
+		return rowStart_;
+	}
     //////////////////////////////////////////////////////////////////
     // Operations on entire matrix.
     //////////////////////////////////////////////////////////////////
@@ -567,7 +582,7 @@ public:
 
     void tripletFill( const vector< unsigned int >& row,
                       const vector< unsigned int >& col,
-                      const vector< T >& z )
+                      const vector< T >& z, bool retainSize = false )
     {
         unsigned int len = row.size();
         if ( len > col.size() ) len = col.size();
@@ -576,16 +591,20 @@ public:
         for ( unsigned int i = 0; i < len; ++i )
             trip[i]= Triplet< T >(z[i], row[i], col[i] );
         sort( trip.begin(), trip.end(), Triplet< T >::cmp );
-        unsigned int nr = trip.back().b_ + 1;
-        unsigned int nc = 0;
-        for ( typename vector< Triplet< T > >::iterator i =
-                    trip.begin(); i != trip.end(); ++i )
-        {
-            if ( nc < i->c_ )
-                nc = i->c_;
-        }
-        nc++;
-        setSize( nr, nc );
+    	unsigned int nr = nrows_;
+    	unsigned int nc = ncolumns_;
+		if ( !retainSize ) {
+    		nr = trip.back().b_ + 1;
+    		nc = 0;
+    		for ( typename vector< Triplet< T > >::iterator i =
+                trip.begin(); i != trip.end(); ++i )
+    		{
+        		if ( nc < i->c_ )
+            		nc = i->c_;
+    		}
+    		nc++;
+		}
+   		setSize( nr, nc );
 
         vector< unsigned int > colIndex( nc );
         vector< T > entry( nc );

@@ -8,6 +8,8 @@
 **********************************************************************/
 
 #include <string>
+#include <algorithm>
+
 using namespace std;
 
 
@@ -26,15 +28,6 @@ using namespace std;
 // Want to separate out this search path into the Makefile options
 #include "../scheduling/Clock.h"
 
-#ifdef USE_SBML
-#include "../sbml/MooseSbmlWriter.h"
-#include "../sbml/MooseSbmlReader.h"
-#endif
-
-#ifdef USE_OPENMPI
-#include "omp.h"
-#endif
-
 const unsigned int Shell::OkStatus = ~0;
 const unsigned int Shell::ErrorStatus = ~1;
 
@@ -52,10 +45,6 @@ double Shell::runtime_( 0.0 );
 
 const Cinfo* Shell::initCinfo()
 {
-
-#ifdef ENABLE_LOGGER
-    clock_t t = clock();
-#endif
 
 ////////////////////////////////////////////////////////////////
 // Value Finfos
@@ -174,39 +163,6 @@ Shell::~Shell()
     ;
 }
 
-#ifdef  CYMOOSE
-
-/*-----------------------------------------------------------------------------
- *  This function must create a fully functional Shell. Used in cython
- *  interface.
- *-----------------------------------------------------------------------------*/
-Shell* Shell::initShell()
-{
-    Eref sheller = Id().eref();
-    Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-    return shell;
-}
-
-Id Shell::create(string type, string name, unsigned int numData
-                 , NodePolicy nodePolicy, unsigned int preferredNode
-                )
-{
-    if(name.size() == 0)
-        return doCreate(type, Id(), name, numData, nodePolicy, preferredNode);
-
-    string::size_type pos = name.find_last_of('/');
-    string parentPath = name.substr(0, pos);
-    ObjId parentObj = ObjId(parentPath);
-    //cerr << "info: Creating Obj with parent : " << parentObj << endl;
-    Id id = doCreate(type, parentObj, name.substr(pos+1)
-                     , numData, nodePolicy, preferredNode
-                    );
-    //cerr << "    ++ with id " << id << endl;
-    return id;
-}
-
-#endif     /* -----  CYMOOSE  ----- */
-
 void Shell::setShellElement( Element* shelle )
 {
     shelle_ = shelle;
@@ -256,12 +212,17 @@ Id Shell::doCreate( string type, ObjId parent, string name,
             warning( ss.str() );
             return Id();
         }
+
+        // TODO: This should be an error in future.
+        // This logic of handling already existing path is now handled in
+        // melements.cpp . Calling this section should become an error in
+        // future.
         if ( Neutral::child( parent.eref(), name ) != Id() )
         {
             stringstream ss;
-            ss << "Shell::doCreate: Object with same name already present: '"
-               << parent.path() << "/" << name << "'. No Element created";
-            warning( ss.str() );
+            ss << "Object with same path already present : " << parent.path()
+                << "/" << name;
+            moose::showWarn( ss.str() );
             return Id();
         }
         // Get the new Id ahead of time and pass to all nodes.
@@ -280,6 +241,7 @@ Id Shell::doCreate( string type, ObjId parent, string name,
             nb,			// Node balance configuration
             parentMsgIndex	// Message index of child-parent msg.
         );
+
         // innerCreate( type, parent, ret, name, numData, isGlobal );
 
         return ret;
@@ -372,6 +334,21 @@ void Shell::doStart( double runtime, bool notify )
         //simStart = true;
     Id clockId( 1 );
     SetGet2< double, bool >::set( clockId, "start", runtime, notify );
+
+    /*-----------------------------------------------------------------------------
+     *  Now that simulation is over, call cleanUp function of Streamer class
+     *  objects. The purpose of this is to write whatever is left in tables to
+     *  the output file.
+     *-----------------------------------------------------------------------------*/
+    vector< ObjId > streamers;
+    wildcardFind( "/##[TYPE=Streamer]", streamers );
+    // LOG( moose::debug,  "total streamers " << streamers.size( ) );
+    for( vector<ObjId>::const_iterator itr = streamers.begin()
+            ; itr != streamers.end(); itr++ )
+    {
+        Streamer* pStreamer = reinterpret_cast<Streamer*>( itr->data( ) );
+        pStreamer->cleanUp( );
+    }
 }
 
 bool isDoingReinit()
@@ -410,39 +387,6 @@ void Shell::doUseClock( string path, string field, unsigned int tick )
             "useClock", path, field, tick, msgIndex );
     // innerUseClock( path, field, tick);
 }
-
-/**
- * Write given model to SBML file. Returns success value.
- */
-int Shell::doWriteSBML( const string& fname, const string& modelpath )
-{
-#ifdef USE_SBML
-    moose::SbmlWriter sw;
-    int ret = sw.write( fname, modelpath );
-    return ret;
-#else
-
-    cerr << "Shell::WriteSBML: This copy of MOOSE has not been compiled with SBML writing support.\n";
-    return -2;
-#endif
-}
-/**
- * read given SBML model to moose. Returns success value.
- */
-
-Id Shell::doReadSBML( const string& fname, const string& modelpath, const string& solverclass )
-{
-#ifdef USE_SBML
-    moose::SbmlReader sr;
-    return sr.read( fname, modelpath,solverclass);
-#else
-    cerr << "Shell::ReadSBML: This copy of MOOSE has not been compiled with SBML reading support.\n";
-    return Id();
-#endif
-}
-
-
-////////////////////////////////////////////////////////////////////////
 
 void Shell::doMove( Id orig, ObjId newParent )
 {
@@ -603,36 +547,6 @@ bool Shell::chopPath( const string& path, vector< string >& ret,
     return isAbsolute;
 }
 
-/*
-/// non-static func. Fallback which treats index brackets as part of
-/// name string, and does not try to extract integer indices.
-ObjId Shell::doFindWithoutIndexing( const string& path ) const
-{
-	Id curr = Id();
-	vector< string > names;
-	vector< vector< unsigned int > > indices;
-	bool isAbsolute = chopString( path, names, '/' );
-
-	if ( !isAbsolute )
-		curr = cwe_;
-
-	for ( vector< string >::iterator i = names.begin();
-		i != names.end(); ++i ) {
-		if ( *i == "." ) {
-		} else if ( *i == ".." ) {
-			curr = Neutral::parent( curr.eref() ).id;
-		} else {
-			curr = Neutral::child( curr.eref(), *i );
-		}
-	}
-
-	assert( curr.element() );
-	assert( curr.element()->dataHandler() );
-	return ObjId( curr, 0 );
-}
-*/
-
-/// non-static func. Returns the Id found by traversing the specified path.
 ObjId Shell::doFind( const string& path ) const
 {
     if ( path == "/" || path == "/root" )
@@ -1071,6 +985,9 @@ void Shell::handleUseClock( const Eref& e,
     		*/
 }
 
+/**
+ * @brief This function is NOT called when simulation ends normally.
+ */
 void Shell::handleQuit()
 {
     Shell::keepLooping_ = 0;
@@ -1084,20 +1001,13 @@ bool Shell::keepLooping()
 
 void Shell::warning( const string& text )
 {
-    LOG( moose::warning, text  );
+    moose::showWarn( text  );
 }
 
 void Shell::error( const string& text )
 {
     cout << "Error: Shell:: " << text << endl;
 }
-
-/*
-void Shell::wildcard( const string& path, vector< ObjId >& list )
-{
-	wildcardFind( path, list );
-}
-*/
 
 /**
  * @brief Clean-up MOOSE before shutting down. This function is called whenever
@@ -1111,7 +1021,7 @@ void Shell::cleanSimulation()
     Neutral::children( sheller, kids );
     for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
     {
-        if ( i->value() > 4 )
+        if ( i->value() > 4 )                   /* These are created by users */
         {
             LOG( moose::debug
                     , "Shell::cleanSimulation: deleted cruft at " <<

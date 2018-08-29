@@ -23,6 +23,7 @@
 #include "NeuroMesh.h"
 #include "SpineEntry.h"
 #include "SpineMesh.h"
+#include "EndoMesh.h"
 #include "../utility/numutil.h"
 #include "../utility/strutil.h"
 #include "../shell/Wildcard.h"
@@ -648,6 +649,7 @@ void NeuroMesh::updateShaftParents()
 // Uses all compartments, and if they have spines on them adds those too.
 void NeuroMesh::setSubTree( const Eref& e, vector< ObjId > compts )
 {
+    sort( compts.begin(), compts.end() );
     if ( separateSpines_ )
     {
         NeuroNode::buildSpinyTree( compts, nodes_, shaft_, head_, parent_);
@@ -1253,6 +1255,13 @@ void NeuroMesh::matchMeshEntries( const ChemCompt* other,
     if ( cm )
     {
         matchCubeMeshEntries( other, ret );
+        return;
+    }
+    const EndoMesh* em = dynamic_cast< const EndoMesh* >( other );
+    if ( em )
+    {
+        em->matchMeshEntries( this, ret );
+        flipRet( ret );
         return;
     }
     const SpineMesh* sm = dynamic_cast< const SpineMesh* >( other );

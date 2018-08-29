@@ -10,6 +10,7 @@
 #ifndef _STDP_SYN_HANDLER_H
 #define _STDP_SYN_HANDLER_H
 
+/*
 class PreSynEvent: public SynEvent
 {
 	public:
@@ -50,15 +51,16 @@ struct ComparePostSynEvent
 		return lhs.time > rhs.time;
 	}
 };
+*/
 
 /**
  * This handles simple synapses without plasticity. It uses a priority
- * queue to manage them. This gets inefficient for large numbers of 
+ * queue to manage them. This gets inefficient for large numbers of
  * synapses but is pretty robust.
  */
 class STDPSynHandler: public SynHandlerBase
 {
-	public: 
+	public:
 		STDPSynHandler();
 		~STDPSynHandler();
 		STDPSynHandler& operator=( const STDPSynHandler& other );
@@ -75,6 +77,7 @@ class STDPSynHandler: public SynHandlerBase
 		unsigned int addSynapse();
 		void dropSynapse( unsigned int droppedSynNumber );
 		void addSpike( unsigned int index, double time, double weight );
+		double getTopSpike( unsigned int index ) const;
 		////////////////////////////////////////////////////////////////
 		void addPostSpike( const Eref& e, double time );
 

@@ -16,6 +16,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <iostream>
 #include <sstream>
 #include <typeinfo> // used in Conv.h to extract compiler independent typeid
@@ -40,7 +41,7 @@ using namespace std;
  */
 typedef unsigned int FuncId;
 
-/** 
+/**
  * Looks up data entries.
  */
 typedef unsigned int DataId;
@@ -107,6 +108,8 @@ class Neutral;
 #include "SharedFinfo.h"
 #include "FieldElementFinfo.h"
 #include "FieldElement.h"
+#include "../builtins/Streamer.h"
 #include "../shell/Neutral.h"
+
 
 #endif // _HEADER_H

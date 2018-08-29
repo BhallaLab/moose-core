@@ -12,36 +12,41 @@
 
 class RandSpike
 {
-  public:
+public:
     RandSpike();
 
-	//////////////////////////////////////////////////////////////////
-	// Field functions.
-	//////////////////////////////////////////////////////////////////
-		void setRate( double rate );
-		double getRate() const;
+    //////////////////////////////////////////////////////////////////
+    // Field functions.
+    //////////////////////////////////////////////////////////////////
+    void setRate( double rate );
+    double getRate() const;
 
-		void setRefractT( double val );
-		double getRefractT() const;
+    void setRefractT( double val );
+    double getRefractT() const;
 
-        bool getFired() const;
+    void setDoPeriodic( bool val );
+    bool getDoPeriodic() const;
 
-	//////////////////////////////////////////////////////////////////
-	// Message dest functions.
-	//////////////////////////////////////////////////////////////////
+    bool getFired() const;
 
-		void process( const Eref& e, ProcPtr p );
-		void reinit( const Eref& e, ProcPtr p );
+    //////////////////////////////////////////////////////////////////
+    // Message dest functions.
+    //////////////////////////////////////////////////////////////////
 
-	//////////////////////////////////////////////////////////////////
-		static const Cinfo* initCinfo();
-	private:
-		double rate_;
-		double realRate_;
-		double refractT_;
-		double lastEvent_;
-		double threshold_;
-		bool fired_;
+    void process( const Eref& e, ProcPtr p );
+    void reinit( const Eref& e, ProcPtr p );
+
+    //////////////////////////////////////////////////////////////////
+    static const Cinfo* initCinfo();
+private:
+    double rate_;
+    double realRate_;
+    double refractT_;
+    double lastEvent_;
+    double threshold_;
+    bool fired_;
+    bool doPeriodic_;
+
 };
 
 #endif // _RANDSPIKE_H

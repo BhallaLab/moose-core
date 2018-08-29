@@ -1,11 +1,18 @@
-cmake_minimum_required(VERSION 2.6)
-include_directories(../basecode ../utility ../kinetics)
-add_library(synapse
-    SimpleSynHandler.cpp
-    SynHandlerBase.cpp
-    STDPSynHandler.cpp
+cmake_minimum_required(VERSION 2.8)
+
+include_directories( ../basecode ../utility ../kinetics)
+include_directories( ../external/muparser/include/ )
+
+set( SYNAPSE_SRCS
     GraupnerBrunel2012CaPlasticitySynHandler.cpp
-    Synapse.cpp
+    RollingMatrix.cpp
+    SeqSynHandler.cpp
+    SimpleSynHandler.cpp
     STDPSynapse.cpp
+    STDPSynHandler.cpp
+    Synapse.cpp
+    SynHandlerBase.cpp
     testSynapse.cpp
     )
+
+add_library(synapse ${SYNAPSE_SRCS} )

@@ -1,47 +1,47 @@
-// Function.h --- 
-// 
+// Function.h ---
+//
 // Filename: Function.h
-// Description: 
+// Description:
 // Author: Subhasis Ray
-// Maintainer: 
+// Maintainer:
 // Created: Fri May 30 19:34:13 2014 (+0530)
-// Version: 
-// Last-Updated: 
-//           By: 
+// Version:
+// Last-Updated:
+//           By:
 //     Update #: 0
-// URL: 
-// Keywords: 
-// Compatibility: 
-// 
-// 
+// URL:
+// Keywords:
+// Compatibility:
+//
+//
 
-// Commentary: 
-// 
+// Commentary:
+//
 // A new version of Func with FieldElements to collect data.
-// 
-// 
+//
+//
 
 // Change log:
-// 
-// 
-// 
-// 
+//
+//
+//
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
 // published by the Free Software Foundation; either version 3, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; see the file COPYING.  If not, write to
 // the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 // Floor, Boston, MA 02110-1301, USA.
-// 
-// 
+//
+//
 
 // Code:
 
@@ -67,14 +67,14 @@ class Function
     virtual void innerSetExpr( const Eref& e, string expr);
     void setExpr( const Eref& e, string expr);
     string getExpr( const Eref& e ) const;
-    
-    
+
+
     // get a list of variable identifiers.
     // this is created by the parser
     vector<string> getVars() const;
     void setVarValues(vector< string > vars, vector < double > vals);
 
-    
+
     // get/set the value of variable `name`
     void setVar(unsigned int index, double value);
     Variable * getVar(unsigned int ii);
@@ -91,6 +91,10 @@ class Function
 	// set/get flag to use trigger mode.
     void setUseTrigger(bool useTrigger);
     bool getUseTrigger() const;
+
+	// set/get flag to do function evaluation at reinit
+    void setDoEvalAtReinit(bool doEvalAtReinit);
+    bool getDoEvalAtReinit() const;
 
     void setNumVar(unsigned int num);
     unsigned int getNumVar() const;
@@ -143,6 +147,7 @@ protected:
     double _rate;
     unsigned int _mode;
     bool _useTrigger;
+    bool _doEvalAtReinit;
      // this stores variables received via incoming messages, identifiers of the form x{i} are included in this
     vector<Variable *> _varbuf;
     // this stores variable values pulled by sending request. identifiers of the form y{i} are included in this
@@ -159,5 +164,5 @@ protected:
 #endif
 
 
-// 
-//// Function.h ends here_parser.DefineVar( _T("t"), 
+//
+//// Function.h ends here_parser.DefineVar( _T("t"),

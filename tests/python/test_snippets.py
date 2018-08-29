@@ -1,10 +1,11 @@
-"""test_snippets.py: 
+# -*- coding: utf-8 -*-
+"""test_snippets.py:
 
-    This script tests all the snippets.
+This script tests all the snippets.
 
 """
 from __future__ import print_function
-    
+
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2015, Dilawar Singh and NCBS Bangalore"
 __credits__          = ["NCBS Bangalore"]
@@ -39,13 +40,6 @@ def executeCode(filepath):
         results_[filepath] = 'Passed'
     else:
         results_[filepath] = 'Failed'
-
-    #p = subprocess.Popen(["python", newfile.name]
-            #, stderr = subprocess.PIPE
-            #, stdout = subprocess.PIPE
-            #)
-    #output, err = p.communicate()
-    #print output, err
 
 def main():
     snippetPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../Demos/snippets')

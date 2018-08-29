@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 include(CheckIncludeFileCXX)
 
 include_directories(../builtins ../basecode ../utility ../kinetics)
 include_directories(../ )
 include_directories(../mesh)
 include_directories(../external/muparser/include )
-IF(WITH_BOOST)
+IF(WITH_BOOST_ODE)
     check_include_file_cxx( ${Boost_INCLUDE_DIRS}/boost/numeric/odeint.hpp
         ODEINT_EXISTS)
     # If boost distribution does not have its own odeint library, use the
@@ -16,23 +16,29 @@ IF(WITH_BOOST)
     include_directories( ../external/boost-numeric-bindings )
 elseif(WITH_GSL)
     include_directories( ${GSL_INCLUDE_DIRS} )
-endif(WITH_BOOST)
+endif(WITH_BOOST_ODE)
+
+if(PARALLELIZED_SOLVERS)
+    message( STATUS "Parallel version of KSolve and Gsolve" )
+    add_definitions( -DPARALLELIZE_KSOLVE_WITH_CPP11_ASYNC )
+    add_definitions( -DPARALLELIZE_GSOLVE_WITH_CPP11_ASYNC )
+endif(PARALLELIZED_SOLVERS)
 
 set(KSOLVE_SRCS
-	KinSparseMatrix.cpp	
-	ZombiePool.cpp 
+	KinSparseMatrix.cpp
+	ZombiePool.cpp
         ZombieFunction.cpp
-        ZombieBufPool.cpp 
-	ZombieReac.cpp 
-	ZombieEnz.cpp 
-	ZombieMMenz.cpp 
+        ZombieBufPool.cpp
+	ZombieReac.cpp
+	ZombieEnz.cpp
+	ZombieMMenz.cpp
         VoxelPoolsBase.cpp
-	VoxelPools.cpp 
+	VoxelPools.cpp
         GssaVoxelPools.cpp
-	RateTerm.cpp 
+	RateTerm.cpp
         FuncTerm.cpp
-	Stoich.cpp 
-	Ksolve.cpp 
+	Stoich.cpp
+	Ksolve.cpp
         Gsolve.cpp
         ZombiePoolInterface.cpp
         testKsolve.cpp
@@ -40,7 +46,7 @@ set(KSOLVE_SRCS
 
 if(WITH_GSL)
     list(APPEND KSOLVE_SRCS SteadyStateGsl.cpp )
-elseif(WITH_BOOST)
+elseif(WITH_BOOST_ODE)
     list(APPEND KSOLVE_SRCS SteadyStateBoost.cpp )
     list(APPEND KSOLVE_SRCS BoostSys.cpp)
 endif(WITH_GSL)
