@@ -54,7 +54,7 @@ public:
 #ifdef USE_GSL      /* -----  not USE_BOOST_ODE  ----- */
     static int gslFunc( double t, const double* y, double *dydt, void* params);
 #elif  USE_BOOST_ODE
-    static void evalRates( VoxelPools* vp, vector_type_ y, vector_type_ dydt, const double t );
+    static void evalRates( VoxelPools* vp, const vector_type_& y, vector_type_& dydt );
 #endif     /* -----  not USE_BOOST_ODE  ----- */
 
     //////////////////////////////////////////////////////////////////
