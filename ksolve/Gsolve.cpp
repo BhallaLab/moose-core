@@ -449,7 +449,7 @@ void Gsolve::process( const Eref& e, ProcPtr p )
         }
 
         for ( size_t i = 0; i < nvPools; i++ )
-            pools_[i].advance( p,&sys_ );
+            pools_[i].advance( p, &sys_ );
     }
     else
     {
@@ -461,8 +461,10 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 
         for (size_t i = 0; i < numThreads_; i++)
         {
+            // Use lambda. It is roughly 10% faster than std::bind and does not
+            // involve copying data.
             std::thread  t( 
-                    std::bind( &Gsolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p ) 
+                    [this, i, grainSize, p](){ this->advance_chunk(i*grainSize, (i+1)*grainSize, p); }
                     );
             vecThreads.push_back( std::move(t) );
         }
@@ -474,8 +476,28 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 
     if ( useClockedUpdate_ )   // Check if a clocked stim is to be updated
     {
-        for ( auto &v : pools_ )
-            v.recalcTime( &sys_, p->currTime );
+        if(numThreads_ == 1)
+        {
+            for ( auto &v : pools_ )
+                v.recalcTime( &sys_, p->currTime );
+        }
+        else
+        {
+            vector<std::thread> vecThreads;
+
+            for (size_t i = 0; i < numThreads_; i++)
+            {
+                // Use lambda. It is roughly 10% faster than std::bind and does not
+                // involve copying data.
+                std::thread  t( 
+                        [this, i, grainSize, p](){ this->recalcTimeChunk(i*grainSize, (i+1)*grainSize, p); }
+                        );
+                vecThreads.push_back( std::move(t) );
+            }
+
+            for( auto &v : vecThreads )
+                v.join();
+        }
     }
 
     // Finally, assemble and send the integrated values off for the Dsolve.
@@ -491,9 +513,15 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 
         // Now use the values in the Dsolve to update junction fluxes
         // for diffusion, channels, and xreacs
-        dsolvePtr_->updateJunctions( p->dt );
+        dsolvePtr_->updateJunctions( p->dt, numThreads_ );
         // Here the Gsolve may need to do something to convert to integers
     }
+}
+
+void Gsolve::recalcTimeChunk( const size_t begin, const size_t end, ProcPtr p)
+{
+    for (size_t i = begin; i < std::min(pools_.size(), end); i++) 
+        pools_[i].recalcTime( &sys_, p->currTime );
 }
 
 void Gsolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )

@@ -564,35 +564,18 @@ void Ksolve::process( const Eref& e, ProcPtr p )
          *  Somewhat complicated computation to compute the number of threads. 1
          *  thread per (at least) voxel pool is ideal situation.
          *-----------------------------------------------------------------------------*/
-#if USE_BOOST_ASYNC
-        vector< boost::thread > vecThreads;
-#else
         vector<std::thread> vecThreads;
-#endif
 
-        // t0_ = std::chrono::high_resolution_clock::now();
+        // lambdas are faster than std::bind
         for (size_t i = 0; i < nWorkers; i++)
         {
-#if USE_BOOST_ASYNC
-            boost::thread t( boost::bind( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p ));
-            vecThreads.push_back( boost::move(t) );
-#else
-            // std::thread  t( std::bind( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p ) );
             std::thread t( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p );
             vecThreads.push_back( std::move(t) );
-#endif
         }
 
         for (auto &v : vecThreads )
             v.join();
     }
-
-#if 0
-    t1_ = high_resolution_clock::now();
-    double dt = duration_cast<::microseconds>(t1_-t0_).count();
-    totalTime_ += dt;
-#endif
-
 
     // Assemble and send the integrated values off for the Dsolve.
     if ( dsolvePtr_ )
@@ -607,7 +590,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
         // Now use the values in the Dsolve to update junction fluxes
         // for diffusion, channels, and xreacs
-        dsolvePtr_->updateJunctions( p->dt );
+        dsolvePtr_->updateJunctions( p->dt, numThreads_ );
     }
 
 }

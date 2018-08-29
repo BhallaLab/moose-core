@@ -153,8 +153,6 @@ void VoxelPools::advance( const ProcInfo* p )
                 , Svec()
                 , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
                 );
-
-#if  1
     else if( method_ == "rk5")
         odeint::integrate_const( rk_karp_stepper_type_()
                 , [this](const vector_type_& dy, vector_type_& dydt, const double t) { 
@@ -245,7 +243,6 @@ void VoxelPools::advance( const ProcInfo* p )
                 , p->currTime
                 , p->dt
                 );
-#endif
 
 #endif
     if ( !stoichPtr_->getAllowNegative() )   // clean out negatives

@@ -30,11 +30,11 @@
 #include "../mesh/ChemCompt.h"
 
 ZombiePoolInterface::ZombiePoolInterface()
-		: stoich_(), compartment_(),
-		isBuilt_( false )
+    : stoich_(), compartment_(),
+      isBuilt_( false )
 {;}
 
-void ZombiePoolInterface::updateJunctions( double dt )
+void ZombiePoolInterface::updateJunctions( double dt, const size_t num_threads )
 {;}
 void ZombiePoolInterface::setPrev()
 {;}
@@ -43,21 +43,24 @@ void ZombiePoolInterface::setPrev()
 
 Id ZombiePoolInterface::getCompartment() const
 {
-	return compartment_;
+    return compartment_;
 }
 
 void ZombiePoolInterface::setCompartment( Id compt )
 {
-	isBuilt_ = false; // We will have to now rebuild the whole thing.
-	if ( compt.element()->cinfo()->isA( "ChemCompt" ) ) {
-		compartment_ = compt;
-		vector< double > vols =
-			Field< vector < double > >::get( compt, "voxelVolume" );
-		if ( vols.size() > 0 ) {
-			setNumAllVoxels( vols.size() );
-			for ( unsigned int i = 0; i < vols.size(); ++i ) {
-				pools(i)->setVolume( vols[i] );
-			}
-		}
-	}
+    isBuilt_ = false; // We will have to now rebuild the whole thing.
+    if ( compt.element()->cinfo()->isA( "ChemCompt" ) )
+    {
+        compartment_ = compt;
+        vector< double > vols =
+            Field< vector < double > >::get( compt, "voxelVolume" );
+        if ( vols.size() > 0 )
+        {
+            setNumAllVoxels( vols.size() );
+            for ( unsigned int i = 0; i < vols.size(); ++i )
+            {
+                pools(i)->setVolume( vols[i] );
+            }
+        }
+    }
 }

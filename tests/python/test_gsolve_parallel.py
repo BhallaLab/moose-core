@@ -4,7 +4,7 @@ print( '[INFO] Using moose from %s' % moose.__file__ )
 import time
 moose.seed( 10 )
 
-def main():
+def main( nT ):
     """
     This example implements a reaction-diffusion like system which is
     bistable and propagates losslessly. It is based on the NEURON example 
@@ -13,6 +13,7 @@ def main():
     of chemical reactions. Please see rxdReacDiffusion.py for a variant that 
     uses a reaction plus a function object to control its rates.
     """
+    print( 'Using %d threads' % nT )
 
     dt = 0.1
 
@@ -41,7 +42,7 @@ def main():
     #Set up solvers
     ksolve = moose.Gsolve( '/cylinder/Gsolve' )
     try:
-        ksolve.numThreads = 2
+        ksolve.numThreads = nT
     except Exception as e:
         print( 'OLD MOOSE. Does not support multithreading' )
     dsolve = moose.Dsolve( '/cylinder/dsolve' )
@@ -73,5 +74,10 @@ def main():
     assert res == expected
 
 if __name__ == '__main__':
-    main()
+    import sys
+    import multiprocessing
+    nT = int(multiprocessing.cpu_count() / 2)
+    if len(sys.argv) > 1:
+        nT = int(sys.argv[1])
+    main( nT )
 

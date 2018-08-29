@@ -108,7 +108,9 @@ public:
      */
     void updateRateTerms( unsigned int index );
 
+    // Function for multithreading.
     void advance_chunk( const size_t begin, const size_t end, ProcPtr p );
+    void recalcTimeChunk( const size_t begin, const size_t end, ProcPtr p);
 
     //////////////////////////////////////////////////////////////////
     /// Flag: returns true if randomized round to integers is done.
@@ -160,6 +162,8 @@ private:
 
     /// Flag: True if atot should be updated every clock tick
     bool useClockedUpdate_;
+
+    double t1_;
 };
 
 #endif	// _GSOLVE_H
