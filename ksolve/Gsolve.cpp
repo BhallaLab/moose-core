@@ -435,13 +435,12 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 
     // Third, do the numerical integration for all reactions.
     size_t grainSize = max( (size_t)1, min( nvPools, nvPools / numThreads_));
-    size_t nWorkers = std::max(1, (int)(nvPools/grainSize) );
 
     // Make sure that we cover all the pools.
-    while( (nWorkers * grainSize) < nvPools )
+    while( (numThreads_ * grainSize) < nvPools )
         grainSize += 1;
 
-    if( 1 == nWorkers || 1 == nvPools )
+    if( 1 == numThreads_ || 1 == nvPools )
     {
         if( numThreads_ > 1 )
         {
@@ -460,9 +459,11 @@ void Gsolve::process( const Eref& e, ProcPtr p )
          *-----------------------------------------------------------------------------*/
         vector<std::thread> vecThreads;
 
-        for (size_t i = 0; i < nWorkers; i++)
+        for (size_t i = 0; i < numThreads_; i++)
         {
-            std::thread  t( std::bind( &Gsolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p ) );
+            std::thread  t( 
+                    std::bind( &Gsolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p ) 
+                    );
             vecThreads.push_back( std::move(t) );
         }
 
