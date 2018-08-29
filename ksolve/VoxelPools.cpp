@@ -140,49 +140,47 @@ void VoxelPools::advance( const ProcInfo* p )
     const double fixedDt = 0.1;
 
     if( method_ == "rk2" )
-    {
         odeint::integrate_const( rk_midpoint_stepper_type_()
-                                 , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
-                                 , Svec()
-                                 , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
-                               );
-    }
+                , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
+                , Svec()
+                , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
+                );
     else if( method_ == "rk4" )
         odeint::integrate_const( rk4_stepper_type_()
-                                 , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
-                                 , Svec()
-                                 , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
-                               );
+                , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
+                , Svec()
+                , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
+                );
     else if( method_ == "rk5")
         odeint::integrate_const( rk_karp_stepper_type_()
-                                 , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
-                                 , Svec()
-                                 , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
-                               );
+                , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
+                , Svec()
+                , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
+                );
     else if( method_ == "rk5a")
         odeint::integrate_adaptive(
-            odeint::make_controlled<rk_karp_stepper_type_>( absTol_, relTol_ )
-            , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
-            , Svec()
-            , p->currTime - p->dt
-            , p->currTime
-            , p->dt
-        );
+                odeint::make_controlled<rk_karp_stepper_type_>( absTol_, relTol_ )
+                , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
+                , Svec()
+                , p->currTime - p->dt
+                , p->currTime
+                , p->dt
+                );
     else if ("rk54" == method_ )
         odeint::integrate_const( rk_karp_stepper_type_()
-                                 , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
-                                 , Svec()
-                                 , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
-                               );
+                , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
+                , Svec()
+                , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
+                );
     else if ("rk54a" == method_ )
         odeint::integrate_adaptive(
-            odeint::make_controlled<rk_karp_stepper_type_>( absTol_, relTol_ )
-            , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
-            , Svec()
-            , p->currTime - p->dt
-            , p->currTime
-            , p->dt
-        );
+                odeint::make_controlled<rk_karp_stepper_type_>( absTol_, relTol_ )
+                , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
+                , Svec()
+                , p->currTime - p->dt
+                , p->currTime
+                , p->dt
+                );
     else if ("rk5" == method_ )
         odeint::integrate_const( rk_dopri_stepper_type_()
                 , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
@@ -193,38 +191,38 @@ void VoxelPools::advance( const ProcInfo* p )
                 );
     else if ("rk5a" == method_ )
         odeint::integrate_adaptive(
-            odeint::make_controlled<rk_dopri_stepper_type_>( absTol_, relTol_ )
-            , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
-            , Svec()
-            , p->currTime - p->dt
-            , p->currTime
-            , p->dt
-        );
+                odeint::make_controlled<rk_dopri_stepper_type_>( absTol_, relTol_ )
+                , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
+                , Svec()
+                , p->currTime - p->dt
+                , p->currTime
+                , p->dt
+                );
     else if( method_ == "rk8" )
         odeint::integrate_const( rk_felhberg_stepper_type_()
-                                 , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
-                                 , Svec()
-                                 , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
-                               );
+                , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
+                , Svec()
+                , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
+                );
     else if( method_ == "rk8a" )
         odeint::integrate_adaptive(
-            odeint::make_controlled<rk_felhberg_stepper_type_>( absTol_, relTol_ )
-            , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
-            , Svec()
-            , p->currTime - p->dt
-            , p->currTime
-            , p->dt
-        );
+                odeint::make_controlled<rk_felhberg_stepper_type_>( absTol_, relTol_ )
+                , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
+                , Svec()
+                , p->currTime - p->dt
+                , p->currTime
+                , p->dt
+                );
 
     else
         odeint::integrate_adaptive(
-            odeint::make_controlled<rk_karp_stepper_type_>( absTol_, relTol_ )
-            , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
-            , Svec()
-            , p->currTime - p->dt
-            , p->currTime
-            , p->dt
-        );
+                odeint::make_controlled<rk_karp_stepper_type_>( absTol_, relTol_ )
+                , boost::bind( &VoxelPools::evalRates, this, _1, _2, _3 )
+                , Svec()
+                , p->currTime - p->dt
+                , p->currTime
+                , p->dt
+                );
 
 #endif
     if ( !stoichPtr_->getAllowNegative() )   // clean out negatives
