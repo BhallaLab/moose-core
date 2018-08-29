@@ -28,7 +28,7 @@
 #include <chrono>
 #include <algorithm>
 
-#ifdef USE_BOOST_ASYNC 
+#ifdef USE_BOOST_ASYNC
 #define BOOST_THREAD_PROVIDES_FUTURE
 #include <boost/thread.hpp>
 #include <boost/thread/future.hpp>
@@ -70,13 +70,14 @@ const Cinfo* Gsolve::initCinfo()
         "current solver. ",
         &Gsolve::getNumLocalVoxels
     );
-    static LookupValueFinfo<
-    Gsolve, unsigned int, vector< double > > nVec(
+
+    static LookupValueFinfo<Gsolve, unsigned int, vector< double > > nVec(
         "nVec",
         "vector of pool counts",
         &Gsolve::setNvec,
         &Gsolve::getNvec
     );
+
     static ValueFinfo< Gsolve, unsigned int > numAllVoxels(
         "numAllVoxels",
         "Number of voxels in the entire reac-diff system, "
@@ -91,6 +92,13 @@ const Cinfo* Gsolve::initCinfo()
         "including variable, function and buffered.",
         &Gsolve::setNumPools,
         &Gsolve::getNumPools
+    );
+
+    static ValueFinfo< Gsolve, unsigned int > numThreads(
+        "numThreads",
+        "Number of threads to use in GSolve",
+        &Gsolve::setNumThreads,
+        &Gsolve::getNumThreads
     );
 
     static ValueFinfo< Gsolve, bool > useRandInit(
@@ -117,7 +125,7 @@ const Cinfo* Gsolve::initCinfo()
         "This flag should be set when the reaction system "
         "includes a function with a dependency on time or on external "
         "events. It has a significant speed penalty so the flag "
-        "should not be set unless there are such functions. " ,
+        "should not be set unless there are such functions. ",
         &Gsolve::setClockedUpdate,
         &Gsolve::getClockedUpdate
     );
@@ -181,28 +189,29 @@ const Cinfo* Gsolve::initCinfo()
 
     static Finfo* gsolveFinfos[] =
     {
-        &stoich,			// Value
-        &numLocalVoxels,	// ReadOnlyValue
-        &nVec,				// LookupValue
-        &numAllVoxels,		// ReadOnlyValue
-        &numPools,			// Value
-        &voxelVol,			// DestFinfo
-        &proc,				// SharedFinfo
-        &init,				// SharedFinfo
+        &stoich,           // Value
+        &numLocalVoxels,   // ReadOnlyValue
+        &nVec,             // LookupValue
+        &numAllVoxels,     // ReadOnlyValue
+        &numPools,         // Value
+        &numThreads,       // Value
+        &voxelVol,         // DestFinfo
+        &proc,             // SharedFinfo
+        &init,             // SharedFinfo
         // Here we put new fields that were not there in the Ksolve.
-        &useRandInit,		// Value
-        &useClockedUpdate,	// Value
-        &numFire,			// ReadOnlyLookupValue
+        &useRandInit,      // Value
+        &useClockedUpdate, // Value
+        &numFire,          // ReadOnlyLookupValue
     };
 
     static Dinfo< Gsolve > dinfo;
-    static  Cinfo gsolveCinfo(
-        "Gsolve",
-        Neutral::initCinfo(),
-        gsolveFinfos,
-        sizeof(gsolveFinfos)/sizeof(Finfo *),
-        &dinfo
-    );
+
+    static  Cinfo gsolveCinfo( "Gsolve",
+            Neutral::initCinfo(),
+            gsolveFinfos,
+            sizeof(gsolveFinfos)/sizeof(Finfo *),
+            &dinfo
+            );
 
     return &gsolveCinfo;
 }
@@ -373,7 +382,7 @@ void Gsolve::setClockedUpdate( bool val )
 //////////////////////////////////////////////////////////////
 void Gsolve::process( const Eref& e, ProcPtr p )
 {
-    // cout << stoichPtr_ << "	dsolve = " <<	dsolvePtr_ << endl;
+    // cout << stoichPtr_ << "    dsolve = " <<    dsolvePtr_ << endl;
     if ( !stoichPtr_ )
         return;
 
@@ -396,7 +405,7 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 
         for ( ; i != dvalues.end(); ++i )
         {
-            //	cout << *i << "	" << round( *i ) << "		";
+            //    cout << *i << "    " << round( *i ) << "        ";
 #if SIMPLE_ROUNDING
             *i = round( *i );
 #else
@@ -416,12 +425,10 @@ void Gsolve::process( const Eref& e, ProcPtr p )
     // happening. This is very inefficient at this point, need to fix.
     if ( dsolvePtr_ )
     {
-        for ( vector< GssaVoxelPools >::iterator
-                i = pools_.begin(); i != pools_.end(); ++i )
-        {
+        for ( auto i = pools_.begin(); i != pools_.end(); ++i )
             i->refreshAtot( &sys_ );
-        }
     }
+
     // Fourth, update the mol #s.
     // First we advance the simulation.
     size_t nvPools = pools_.size( );
@@ -430,9 +437,9 @@ void Gsolve::process( const Eref& e, ProcPtr p )
     size_t grainSize = max( (size_t)1, min( nvPools, nvPools / numThreads_));
     size_t nWorkers = std::max(1, (int)(nvPools/grainSize) );
 
-    // cout << "Number of pools " << nvPools << " number of threads " << numThreads_
-        // << "nWorkers  " << nWorkers
-        // << endl;
+    // Make sure that we cover all the pools.
+    while( (nWorkers * grainSize) < nvPools )
+        grainSize += 1;
 
     if( 1 == nWorkers || 1 == nvPools )
     {
@@ -451,34 +458,16 @@ void Gsolve::process( const Eref& e, ProcPtr p )
          *  Somewhat complicated computation to compute the number of threads. 1
          *  thread per (at least) voxel pool is ideal situation.
          *-----------------------------------------------------------------------------*/
-        // cout << " Grain size " << grainSize <<  " Workers : " << nWorkers << endl;
-#if USE_BOOST_ASYNC
-        vector< boost::shared_future<size_t> > vecResult;
-#else
         vector<std::thread> vecThreads;
-#endif
 
         for (size_t i = 0; i < nWorkers; i++)
         {
-#if USE_BOOST_ASYNC
-            boost::shared_future<size_t> res = boost::async( 
-                    boost::bind( &Gsolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p )
-                );
-            vecResult.push_back(res );
-#else
             std::thread  t( std::bind( &Gsolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p ) );
             vecThreads.push_back( std::move(t) );
-#endif
         }
 
-#if USE_BOOST_ASYNC
-        for (auto &v : vecResult )
-            v.get();
-#else
         for( auto &v : vecThreads )
-            if( v.joinable() )
-                v.join();
-#endif
+            v.join();
 
     }
 
@@ -506,15 +495,10 @@ void Gsolve::process( const Eref& e, ProcPtr p )
     }
 }
 
-size_t Gsolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )
+void Gsolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )
 {
-    size_t total = 0;
-    for (size_t i = begin; i < std::min(end, pools_.size() ); i++) 
-    {
+    for (size_t i = begin; i < std::min(end, pools_.size() ); i++)
         pools_[i].advance( p, &sys_ );
-        total += 1;
-    }
-    return total;
 }
 
 void Gsolve::reinit( const Eref& e, ProcPtr p )
@@ -538,7 +522,7 @@ void Gsolve::reinit( const Eref& e, ProcPtr p )
 
     if( 1 < getNumThreads( ) )
         cout << "Info: Setting up threaded gsolve with " << getNumThreads( )
-            << " threads. " << endl;
+             << " threads. " << endl;
 }
 
 //////////////////////////////////////////////////////////////
@@ -767,48 +751,48 @@ void Gsolve::fillIncrementFuncDep()
 /*
 void Gsolve::fillMathDep()
 {
-	// create map of funcs that depend on specified molecule.
-	vector< vector< unsigned int > > funcMap(
-			stoichPtr_->getNumAllPools() );
-	unsigned int numFuncs = stoichPtr_->getNumFuncs();
-	for ( unsigned int i = 0; i < numFuncs; ++i ) {
-		const FuncTerm *f = stoichPtr_->funcs( i );
-		vector< unsigned int > molIndex = f->getReactantIndex();
-		for ( unsigned int j = 0; j < molIndex.size(); ++j )
-			funcMap[ molIndex[j] ].push_back( i );
-	}
-	// The output of each func is a mol indexed as
-	// numVarMols + numBufMols + i
-	unsigned int funcOffset =
-			stoichPtr_->getNumVarPools() + stoichPtr_->getNumProxyPools() + stoichPtr_->getNumBufPools();
-	unsigned int numRates = stoichPtr_->getNumRates();
-	sys_.dependentMathExpn.resize( numRates );
-	vector< unsigned int > indices;
-	for ( unsigned int i = 0; i < numRates; ++i ) {
-		vector< unsigned int >& dep = sys_.dependentMathExpn[ i ];
-		dep.resize( 0 );
-		// Extract the row of all molecules that depend on the reac.
-		const int* entry;
-		const unsigned int* colIndex;
-		unsigned int numInRow =
-				sys_.transposeN.getRow( i, &entry, &colIndex );
-		for ( unsigned int j = 0; j < numInRow; ++j ) {
-			unsigned int molIndex = colIndex[j];
-			vector< unsigned int >& funcs = funcMap[ molIndex ];
-			dep.insert( dep.end(), funcs.begin(), funcs.end() );
-			for ( unsigned int k = 0; k < funcs.size(); ++k ) {
-				unsigned int outputMol = funcs[k] + funcOffset;
-				// Insert reac deps here. Columns are reactions.
-				vector< int > e; // Entries: we don't need.
-				vector< unsigned int > c; // Column index: the reactions.
-				stoichPtr_->getStoichiometryMatrix().
-						getRow( outputMol, e, c );
-				// Each of the reacs (col entries) depend on this func.
-				vector< unsigned int > rdep = sys_.dependency[i];
-				rdep.insert( rdep.end(), c.begin(), c.end() );
-			}
-		}
-	}
+    // create map of funcs that depend on specified molecule.
+    vector< vector< unsigned int > > funcMap(
+            stoichPtr_->getNumAllPools() );
+    unsigned int numFuncs = stoichPtr_->getNumFuncs();
+    for ( unsigned int i = 0; i < numFuncs; ++i ) {
+        const FuncTerm *f = stoichPtr_->funcs( i );
+        vector< unsigned int > molIndex = f->getReactantIndex();
+        for ( unsigned int j = 0; j < molIndex.size(); ++j )
+            funcMap[ molIndex[j] ].push_back( i );
+    }
+    // The output of each func is a mol indexed as
+    // numVarMols + numBufMols + i
+    unsigned int funcOffset =
+            stoichPtr_->getNumVarPools() + stoichPtr_->getNumProxyPools() + stoichPtr_->getNumBufPools();
+    unsigned int numRates = stoichPtr_->getNumRates();
+    sys_.dependentMathExpn.resize( numRates );
+    vector< unsigned int > indices;
+    for ( unsigned int i = 0; i < numRates; ++i ) {
+        vector< unsigned int >& dep = sys_.dependentMathExpn[ i ];
+        dep.resize( 0 );
+        // Extract the row of all molecules that depend on the reac.
+        const int* entry;
+        const unsigned int* colIndex;
+        unsigned int numInRow =
+                sys_.transposeN.getRow( i, &entry, &colIndex );
+        for ( unsigned int j = 0; j < numInRow; ++j ) {
+            unsigned int molIndex = colIndex[j];
+            vector< unsigned int >& funcs = funcMap[ molIndex ];
+            dep.insert( dep.end(), funcs.begin(), funcs.end() );
+            for ( unsigned int k = 0; k < funcs.size(); ++k ) {
+                unsigned int outputMol = funcs[k] + funcOffset;
+                // Insert reac deps here. Columns are reactions.
+                vector< int > e; // Entries: we don't need.
+                vector< unsigned int > c; // Column index: the reactions.
+                stoichPtr_->getStoichiometryMatrix().
+                        getRow( outputMol, e, c );
+                // Each of the reacs (col entries) depend on this func.
+                vector< unsigned int > rdep = sys_.dependency[i];
+                rdep.insert( rdep.end(), c.begin(), c.end() );
+            }
+        }
+    }
 }
 */
 
@@ -826,8 +810,8 @@ void Gsolve::insertMathDepReacs( unsigned int mathDepIndex,
 
     // Extract the row of all reacs that depend on the target molecule
     if ( N_.getRowIndices( molIndex, reacIndices ) > 0 ) {
-    	vector< unsigned int >& dep = dependency_[ firedReac ];
-    	dep.insert( dep.end(), reacIndices.begin(), reacIndices.end() );
+        vector< unsigned int >& dep = dependency_[ firedReac ];
+        dep.insert( dep.end(), reacIndices.begin(), reacIndices.end() );
     }
     */
 }

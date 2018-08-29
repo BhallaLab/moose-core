@@ -108,7 +108,7 @@ public:
      */
     void updateRateTerms( unsigned int index );
 
-    size_t advance_chunk( const size_t begin, const size_t end, ProcPtr p );
+    void advance_chunk( const size_t begin, const size_t end, ProcPtr p );
 
     //////////////////////////////////////////////////////////////////
     /// Flag: returns true if randomized round to integers is done.
