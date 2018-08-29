@@ -79,12 +79,9 @@ endif()
 option(DEBUG                "Build with debug support" OFF)
 option(GPROF                "Build for profiling using gprof" OFF)
 option(ENABLE_UNIT_TESTS    "Enable unit tests (DEBUG should also be ON)" OFF)
-option(WITH_MPI             "Enable Openmpi support" OFF)
-option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" OFF)
-option(WITH_GSL             "Use gsl-library. Alternative is WITH_BOOST" ON)
-option(PARALLELIZED_SOLVERS "Use parallel version of GSOLVE. (alpha)" OFF )
-option(PARALLELIZED_CLOCK   "High level parallelization of moose::Clock (alpha)" OFF )
-
+option(WITH_MPI             "Enable Openmpi support" ON)
+option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" ON)
+option(WITH_GSL             "Use gsl-library. Alternative is WITH_BOOST" OFF)
 option(USE_PRIVATE_RNG      "Stochastic Objects use their private RNG" ON)
 
 
@@ -254,7 +251,7 @@ if(WITH_MPI)
     message(STATUS "Using MPI compiler  ${MPI_CXX_COMPILER}")
     set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
     add_definitions( -DUSE_MPI )
-    set_target_properties( moose.bin libmoose _moose 
+    set_target_properties( moose.bin libmoose 
         PROPERTIES 
         COMPILE_FLAGS "${CMAKE_CXX_COMPILE_FLAGS} -fopenmp"
         LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -fopenmp"

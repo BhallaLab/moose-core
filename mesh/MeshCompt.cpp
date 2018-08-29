@@ -68,8 +68,8 @@ const SparseMatrix< double >& MeshCompt::getStencil() const
 /// Virtual function to return info on Entries connected to this one
 vector< unsigned int > MeshCompt::getNeighbors( unsigned int row ) const
 {
-	const double* entry;
-	const unsigned int *colIndex;
+	const double* entry = nullptr;
+	const unsigned int *colIndex = nullptr;
 
 	unsigned int n = m_.getRow( row, &entry, &colIndex );
 
@@ -84,8 +84,8 @@ vector< unsigned int > MeshCompt::getNeighbors( unsigned int row ) const
 //////////////////////////////////////////////////////////////////
 vector< double > MeshCompt::innerGetStencilRate( unsigned int row ) const
 {
-	const double* entry;
-	const unsigned int *colIndex;
+	const double* entry = nullptr;
+	const unsigned int *colIndex = nullptr;
 
 	unsigned int n = m_.getRow( row, &entry, &colIndex );
 

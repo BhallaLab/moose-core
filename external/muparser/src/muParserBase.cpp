@@ -1772,7 +1772,7 @@ namespace mu
     fclose(pFile);
 #endif
 
-#else
+// #else
     for (i=0; i<nBulkSize; ++i)
     {
       results[i] = ParseCmdCodeBulk(i, 0);
