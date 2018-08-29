@@ -91,6 +91,8 @@ class Stoich
 		 */
 		vector< unsigned int > getPoolIdMap() const;
 
+                Id getPoolByIndex( unsigned int index ) const;
+
 		/**
 		 * Take the provided wildcard path to build the list of elements
 		 * managed by this solver.
@@ -198,39 +200,9 @@ class Stoich
 		 */
 		void convertRatesToStochasticForm();
 
-		/**
-		 * Builds cross-reaction terms between current stoich and
-		 * otherStoich. The function scans the voxels at which there
-		 * are jucntions between different compartments, and orchestrates
-		 * setup of interfaces between the Ksolves that implement the
-		 * cross-reactions at these junctions.
-		 */
-		void buildXreacs( const Eref& e, Id otherStoich );
-
-		void filterXreacs();
-
 		/// Used to handle run-time size updates for spines.
 		void scaleBufsAndRates( unsigned int index, double volScale );
 
-		/**
-		 * Expands out list of compartment mappings of proxy reactions to
-		 * the appropriate entries on the rates_vector.
-		void comptsOnCrossReacTerms( vector< pair< Id, Id > >& xr ) const;
-		 */
-
-		/**
-		 * Used to set up and update all cross solver reac terms and
-		 * their rates, if there has been a change in volumes. Should
-		 * also work if there has been a change in voxelization.
-		 */
-		void setupCrossSolverReacVols() const;
-
-		/**
-		 * Finds all the input molecules contributing to any of the
-		 * Function cases: poolFunc, incrementFunc or reacFunc
-		void inputsToPoolFuncs(
-				vector< pair< Id, vector< unsigned int > > >& ret ) const;
-		 */
 		//////////////////////////////////////////////////////////////////
 		// Zombification functions.
 		//////////////////////////////////////////////////////////////////
@@ -515,7 +487,7 @@ class Stoich
 		 */
 		bool useOneWay_;
 
-		/** 
+		/**
 		 * True if pools are permitted to take negative concentrations.
 		 * This may happen if solver is handling a general equation system
 		 * that is not constrained by chemical rules.

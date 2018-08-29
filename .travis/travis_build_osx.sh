@@ -20,16 +20,26 @@
 set -o nounset                              # Treat unset variables as an error
 set -e
 
+# NOTE: On travis, don't enable -j`nproc` option. It may not compile properly.
+
 (
+
+    # Make sure not to pick up python from /opt.
+    PATH=/usr/bin:/usr/local/bin:$PATH
     mkdir -p _GSL_BUILD && cd _GSL_BUILD \
-        && cmake -DQUIET_MODE=ON -DDEBUG=ON \
+        && cmake -DDEBUG=ON \
         -DPYTHON_EXECUTABLE=`which python` ..
     make && ctest --output-on-failure
-    sudo make install
+
     cd .. # Now with boost.
     mkdir -p _BOOST_BUILD && cd _BOOST_BUILD \
-        && cmake -DWITH_BOOST=ON -DDEBUG=ON \
+        && cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON \
         -DPYTHON_EXECUTABLE=`which python` ..
+
     make && ctest --output-on-failure
     cd ..
+    set +e
+
 )
+set +e
+

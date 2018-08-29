@@ -39,10 +39,9 @@ extern string joinPath( string pathA, string pathB);
 extern string fixPath( string path);
 extern string dumpStats( int  );
 
-
 namespace moose {
 
-    int __rng_seed__ = 0;
+    unsigned long __rng_seed__ = 0;
 
     moose::RNG<double> rng;
 
@@ -130,29 +129,13 @@ namespace moose {
             p = p.substr( 0, pos );
         else                                    /* no parent directory to create */
             return true;
+
         if( p.size() == 0 )
             return true;
 
-#ifdef  USE_BOOST
-        try
-        {
-            boost::filesystem::path pdirs( p );
-            boost::filesystem::create_directories( pdirs );
-            LOG( moose::info, "Created directory " << p );
-            return true;
-        }
-        catch(const boost::filesystem::filesystem_error& e)
-        {
-            LOG( moose::warning, "create_directories(" << p << ") failed with "
-                    << e.code().message()
-               );
-            return false;
-        }
-#else      /* -----  not USE_BOOST  ----- */
         string command( "mkdir -p ");
         command += p;
         int ret = system( command.c_str() );
-        cout << "+ Return code " << ret << endl;
         struct stat info;
         if( stat( p.c_str(), &info ) != 0 )
         {
@@ -169,7 +152,6 @@ namespace moose {
             LOG( moose::warning, p << " is no directory" );
             return false;
         }
-#endif     /* -----  not USE_BOOST  ----- */
         return true;
     }
 
@@ -220,4 +202,13 @@ namespace moose {
         return string( buffer );
     }
 
+    int getGlobalSeed( )
+    {
+        return __rng_seed__;
+    }
+
+    void setGlobalSeed( int seed )
+    {
+        __rng_seed__ = seed;
+    }
 }

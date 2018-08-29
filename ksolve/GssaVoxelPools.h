@@ -34,7 +34,7 @@ public:
 
     void advance( const ProcInfo* p, const GssaSystem* g );
 
-	vector< unsigned int > numFire() const;
+    vector< unsigned int > numFire() const;
 
     /**
     * Cleans out all reac rates and recalculates atot. Needed whenever a
@@ -70,17 +70,6 @@ public:
     void xferIn( XferInfo& xf,
                  unsigned int voxelIndex, const GssaSystem* g );
 
-    /**
-     * Used during initialization: Takes only the proxy pool values
-     * from the incoming transfer data, and assigns it to the proxy
-     * pools on current solver
-     */
-    void xferInOnlyProxies(
-        const vector< unsigned int >& poolIndex,
-        const vector< double >& values,
-        unsigned int numProxyPools,
-        unsigned int voxelIndex	);
-
     void setStoich( const Stoich* stoichPtr );
 
 private:
@@ -99,8 +88,8 @@ private:
     vector< double > v_;
     // Possibly we should put independent RNGS, so save one here.
 
-	// Count how many times each reaction has fired.
-	vector< unsigned int > numFire_;
+    // Count how many times each reaction has fired.
+    vector< unsigned int > numFire_;
 
     /**
      * @brief RNG.

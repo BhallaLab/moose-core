@@ -17,6 +17,9 @@ public:
     Gsolve();
     ~Gsolve();
 
+    // Assignment operator required for c++11
+    Gsolve& operator=(const Gsolve& );
+
     //////////////////////////////////////////////////////////////////
     // Field assignment stuff
     //////////////////////////////////////////////////////////////////
@@ -129,7 +132,6 @@ public:
 #endif
 
     //////////////////////////////////////////////////////////////////
-    static SrcFinfo2< Id, vector< double > >* xComptOut();
     static const Cinfo* initCinfo();
 private:
 
