@@ -102,7 +102,7 @@ class rdesigneur:
             chemDistrib = [],
             adaptorList= [],
             stimList = [],
-            plotList = [],
+            plotList = [],  # elecpath, geom_expr, object, field, title ['wave' [min max]]
             moogList = [],
             ode_method = 'rk5',
             params = None
@@ -693,10 +693,12 @@ class rdesigneur:
                 tabname = graphs.path + '/plot' + str(k)
                 scale = knownFields[i[3]][2]
                 units = knownFields[i[3]][3]
+                ymin = i[6] if len(i) > 7 else 0
+                ymax = i[7] if len(i) > 7 else 0
                 if len( i ) > 5 and i[5] == 'wave':
-                    self.wavePlotNames.append( [ tabname, i[4], k, scale, units, i[3] ] )
+                    self.wavePlotNames.append( [ tabname, i[4], k, scale, units, i[3], ymin, ymax ] )
                 else:
-                    self.plotNames.append( [ tabname, i[4], k, scale, units, i[3] ] )
+                    self.plotNames.append( [ tabname, i[4], k, scale, units, i[3], ymin, ymax ] )
                 k += 1
                 if i[3] == 'n' or i[3] == 'conc' or i[3] == 'volume' or i[3] == 'Gbar':
                     tabs = moose.Table2( tabname, numPlots )
@@ -769,6 +771,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
     def display( self, startIndex = 0 ):
         for i in self.plotNames:
+            # ?, title, fignum, scale, ylabel, wave/spikeTime, ymin, ymax
             plt.figure( i[2] + startIndex )
             plt.title( i[1] )
             plt.xlabel( "Time (s)" )
@@ -786,6 +789,8 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 t = np.arange( 0, vtab[0].vector.size, 1 ) * vtab[0].dt
                 for j in vtab:
                     plt.plot( t, j.vector * i[3] )
+                    if i[6] != i[7]:
+                        plt.ylim( i[6], i[7] )
         if len( self.moogList ) or len( self.wavePlotNames ) > 0:
             plt.ion()
         # Here we build the plots and lines for the waveplots
@@ -814,10 +819,14 @@ rdesigneur.rmoogli.updateMoogliViewer()
             plt.title( i[1] )
             plt.xlabel( "position (voxels)" )
             plt.ylabel( i[4] )
-            mn = np.min(vpts)
-            mx = np.max(vpts)
-            if mn/mx < 0.3:
-                mn = 0
+            if i[6] != i[7]:
+                mn = i[6]
+                mx = i[7]
+            else:
+                mn = np.min(vpts)
+                mx = np.max(vpts)
+                if mn/mx < 0.3:
+                    mn = 0
             ax.set_ylim( mn, mx )
             line, = plt.plot( range( len( vtab ) ), vpts[0] )
             timeLabel = plt.text( len(vtab ) * 0.05, mn + 0.9*(mx-mn), 'time = 0' )
@@ -827,12 +836,12 @@ rdesigneur.rmoogli.updateMoogliViewer()
     def displayWavePlots( self ):
         for f in range( self.numWaveFrames ):
             for i in self.wavePlotNames:
-                wp = i[6]
+                wp = i[-1]
                 if len( wp[2] ) > f:
                     wp[1].set_ydata( wp[2][f] )
                     wp[3].set_text( "time = {:.1f}".format(f*self.frameDt) )
                     wp[0].canvas.draw()
-            plt.pause(0.001)
+            #plt.pause(0.001)
         
         #This calls the _save function which saves only if the filenames have been specified
 
