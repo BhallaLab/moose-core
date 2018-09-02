@@ -484,13 +484,17 @@ class rdesigneur:
     # Here we set up the distributions
     ################################################################
     def buildPassiveDistrib( self ):
-	# [. path field expr [field expr]...]
+	# [path field expr [field expr]...]
         # RM, RA, CM set specific values, per unit area etc.
-        # Ra, Ra, Cm set absolute values.
+        # Rm, Ra, Cm set absolute values.
         # Also does Em, Ek, initVm
 	# Expression can use p, g, L, len, dia, maxP, maxG, maxL.
         temp = []
         for i in self.passiveDistrib:
+            if (len( i ) < 3) or (len(i) %2 != 1):
+                raise BuildError( "buildPassiveDistrib: Need 3 + N*2 arguments, have {}".format( len(i) ) )
+
+            temp.append( '.' )
             temp.extend( i )
             temp.extend( [""] )
         self.elecid.passiveDistribution = temp
@@ -1534,11 +1538,13 @@ class rmoog( baseplot ):
     def __init__( self,
         elecpath = 'soma', geom_expr = '1', relpath = '.', field = 'Vm', 
         title = 'Membrane potential', 
-        ymin = 0.0, ymax = 0.0 ): # Could put in other display options.
+        ymin = 0.0, ymax = 0.0, 
+        show = True ): # Could put in other display options.
         baseplot.__init__( self, elecpath, geom_expr, relpath, field )
         self.title = title
         self.ymin = ymin # If ymin == ymax, it autoscales.
         self.ymax = ymax
+        sel.show = show
 
     @staticmethod
     def convertArg( arg ):
@@ -1552,7 +1558,7 @@ class rmoog( baseplot ):
         # Stimlist = [path, geomExpr, relPath, field, expr_string]
 class rstim( baseplot ):
     def __init__( self,
-            elecpath = 'soma', geom_expr = '1', relpath = '.', field = 'Im', expr = '0'):
+            elecpath = 'soma', geom_expr = '1', relpath = '.', field = 'inject', expr = '0'):
         baseplot.__init__( self, elecpath, geom_expr, relpath, field )
         self.expr = expr
 
