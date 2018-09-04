@@ -1544,7 +1544,7 @@ class rmoog( baseplot ):
         self.title = title
         self.ymin = ymin # If ymin == ymax, it autoscales.
         self.ymax = ymax
-        sel.show = show
+        self.show = show
 
     @staticmethod
     def convertArg( arg ):
