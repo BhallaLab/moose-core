@@ -32,12 +32,12 @@
 #define BOOST_THREAD_PROVIDES_FUTURE
 #include <boost/thread.hpp>
 #include <boost/thread/future.hpp>
-#else
+#endif
+
 #include <future>
 #include <atomic>
 #include <thread>
 #include <functional>
-#endif
 
 
 #define SIMPLE_ROUNDING 0

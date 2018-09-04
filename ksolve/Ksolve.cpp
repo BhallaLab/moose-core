@@ -38,12 +38,12 @@
 #define BOOST_THREAD_PROVIDES_FUTURE
 #include <boost/thread.hpp>
 #include <boost/thread/future.hpp>
-#else
+#endif
+
 #include <future>
+#include <functional>
 #include <atomic>
 #include <thread>
-#include <functional>
-#endif
 
 using namespace std::chrono;
 
