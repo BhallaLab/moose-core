@@ -256,10 +256,15 @@ class rdesigneur:
         if ( modPos != -1 ): # Function is in a file, load and check
             pathTokens = func[0:modPos].split('/')
             pathTokens = ['/'] + pathTokens
-            modulePath = os.path.join(*pathTokens[:-1])
+            modulePath = os.path.realpath(os.path.join(*pathTokens[:-1]))
             moduleName = pathTokens[-1]
             funcName = func[modPos+1:bracePos]
-            moduleFile, pathName, description = imp.find_module(moduleName, [modulePath])
+            try:
+                moduleFile, pathName, description = imp.find_module(moduleName, [modulePath])
+            except Exception as e:
+                msg = "[WARN] Could not find function '%s' in module '%s'. Searched: '%s'" % ( 
+                        funcName, moduleName, modulePath)
+                raise RuntimeError( msg )
             try:
                 module = imp.load_module(moduleName, moduleFile, pathName, description)
                 funcObj = getattr(module, funcName)
