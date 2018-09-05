@@ -252,11 +252,11 @@ Ksolve::Ksolve()
 
 Ksolve::~Ksolve()
 {
-#if 0
-    char* p = getenv( "MOOSE_SHOW_PROFILING_INFO" );
+#if 1
+    char* p = getenv( "MOOSE_SHOW_SOLVER_PERF" );
     if( p != NULL )
     {
-        cout << "Info: Ksolve took " << totalTime_ << " us and took " << numSteps_
+        cout << "Info: Ksolve (+Dsolve) took " << totalTime_ << " us and took " << numSteps_
              << " steps." << endl;
 
     }
@@ -517,9 +517,11 @@ double Ksolve::getEstimatedDt() const
 void Ksolve::process( const Eref& e, ProcPtr p )
 {
 
+
     if ( isBuilt_ == false )
         return;
 
+    clock_t t0 = clock();
     numSteps_ += 1;
 
     // First, handle incoming diffusion values, update S with those.
@@ -594,6 +596,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         dsolvePtr_->updateJunctions( p->dt, numThreads_ );
     }
 
+    totalTime_ += (double) (clock() - t0)/CLOCKS_PER_SEC;
 }
 
 void Ksolve::advance_pool( const size_t i, ProcPtr p )
