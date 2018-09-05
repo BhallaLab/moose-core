@@ -29,7 +29,8 @@ import matplotlib.pyplot as plt
 
 import rdesigneur.rmoogli as rmoogli
 from rdesigneur.rdesigneurProtos import *
-import fixXreacs
+from moose.fixXreacs import fixXreacs
+#import fixXreacs
 #from . import fixXreacs
 #from rdesigneur.rmoogli import *
 #import rmoogli
@@ -1323,7 +1324,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             return
         if not hasattr( self, 'dendCompt' ):
             raise BuildError( "configureSolvers: no chem meshes defined." )
-        fixXreacs.fixXreacs( self.chemid.path )
+        fixXreacs( self.chemid.path )
         dmksolve = moose.Ksolve( self.dendCompt.path + '/ksolve' )
         dmdsolve = moose.Dsolve( self.dendCompt.path + '/dsolve' )
         dmstoich = moose.Stoich( self.dendCompt.path + '/stoich' )
