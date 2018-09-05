@@ -252,9 +252,12 @@ class rdesigneur:
         if bracePos == -1:
             return False
 
-        modPos = func.find( "." )
+        # . can be in path name as well. Find the last dot which is most likely
+        # to be the function name.
+        modPos = func.rfind( "." )
         if ( modPos != -1 ): # Function is in a file, load and check
-            pathTokens = func[0:modPos].split('/')
+            resolvedPath = os.path.realpath( func[0:modPos] )
+            pathTokens = resolvedPath.split('/')
             pathTokens = ['/'] + pathTokens
             modulePath = os.path.realpath(os.path.join(*pathTokens[:-1]))
             moduleName = pathTokens[-1]
