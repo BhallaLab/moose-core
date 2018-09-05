@@ -1722,17 +1722,8 @@ PyObject * moose_start(PyObject * dummy, PyObject * args )
     sigHandler.sa_flags = 0;
     sigaction(SIGINT, &sigHandler, NULL);
 
-    // Release the GIL. We are not going to use the python objects here. Not
-    // sure how PyRun module is affected by this.
-#if 1
-    Py_BEGIN_ALLOW_THREADS
-    SHELLPTR->doStart(runtime);
-    Py_END_ALLOW_THREADS
-    Py_RETURN_NONE;
-#else
     SHELLPTR->doStart( runtime, notify );
     Py_RETURN_NONE;
-#endif
 
 }
 
@@ -3236,13 +3227,11 @@ PyMODINIT_FUNC MODINIT(_moose)
        );
 
     if (doUnitTests)
-    {
         test_moosemodule();
-    }
 #ifdef PY3K
     return moose_module;
 #endif
-} //! init_moose
+} 
 
 
 //////////////////////////////////////////////

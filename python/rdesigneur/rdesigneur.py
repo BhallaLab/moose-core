@@ -181,7 +181,6 @@ class rdesigneur:
             for j in moose.wildcardFind( '/model/chem/##[ISA=ChemCompt]'):
                 s = moose.element( j.path + '/stoich' )
                 print( "In {}, {} voxels X {} pools".format( j.name, j.mesh.num, s.numAllPools ) )
-        print( '------ END' )
 
     def buildModel( self, modelPath = '/model' ):
         if moose.exists( modelPath ):
