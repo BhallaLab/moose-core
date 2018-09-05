@@ -565,6 +565,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
          *  thread per (at least) voxel pool is ideal situation.
          *-----------------------------------------------------------------------------*/
         vector<std::thread> vecThreads;
+        // cout << nWorkers << " grain size " << grainSize << endl;
 
         // lambdas are faster than std::bind
         for (size_t i = 0; i < nWorkers; i++)
