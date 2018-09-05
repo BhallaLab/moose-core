@@ -267,8 +267,8 @@ const Cinfo * Function::initCinfo()
                 &rate,
                 &derivative,
                 &mode,
-				&useTrigger,
-				&doEvalAtReinit,
+		&useTrigger,
+		&doEvalAtReinit,
                 &expr,
                 &numVars,
                 &inputs,
@@ -485,7 +485,6 @@ double * _functionAddVar(const char *name, void *data)
     double * ret = NULL;
     string strname(name);
 
-    cout << "A " << name << endl;
     // Names starting with x are variables, everything else is constant.
     if (strname[0] == 'x')
     {
