@@ -608,7 +608,9 @@ class rdesigneur:
 
     # Utility function for doing lookups for objects.
     def _makeUniqueNameStr( self, obj ):
-        return obj.name + " " + str( obj.index )
+        # second one is faster than the former. 140 ns v/s 180 ns.
+        #  return obj.name + " " + str( obj.index )
+        return "%s %s" % (obj.name, obj.index)
 
     # Returns vector of source objects, and the field to use.
     # plotSpec is of the form
@@ -621,10 +623,11 @@ class rdesigneur:
             return (), ""
 
         kf = knownFields[field] # Find the field to decide type.
-        if ( kf[0] == 'CaConcBase' or kf[0] == 'ChanBase' or kf[0] == 'NMDAChan' or kf[0] == 'VClamp' ):
+        if kf[0] in ['CaConcBase', 'ChanBase', 'NMDAChan', 'VClamp']:
             objList = self._collapseElistToPathAndClass( comptList, plotSpec[2], kf[0] )
             return objList, kf[1]
-        elif (field == 'n' or field == 'conc' or field == 'volume'  ):
+
+        elif field in [ 'n', 'conc', 'volume']:
             path = plotSpec[2]
             pos = path.find( '/' )
             if pos == -1:   # Assume it is in the dend compartment.
@@ -704,7 +707,7 @@ class rdesigneur:
                 else:
                     self.plotNames.append( [ tabname, i[4], k, scale, units, i[3], ymin, ymax ] )
                 k += 1
-                if i[3] == 'n' or i[3] == 'conc' or i[3] == 'volume' or i[3] == 'Gbar':
+                if i[3] in [ 'n', 'conc', 'volume', 'Gbar' ]:
                     tabs = moose.Table2( tabname, numPlots )
                 else:
                     tabs = moose.Table( tabname, numPlots )
@@ -903,7 +906,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 units = knownFields[i[3]][3]
                 self.saveNames.append( ( save_tabname, i[4], k, scale, units ) )
                 k += 1
-                if i[3] == 'n' or i[3] == 'conc' or i[3] == 'volume' or i[3] == 'Gbar':
+                if i[3] in [ 'n', 'conc', 'volume', 'Gbar' ]:
                     save_tabs = moose.Table2( save_tabname, numPlots )
                     save_vtabs = moose.vec( save_tabs )
                 else:
