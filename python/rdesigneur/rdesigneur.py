@@ -181,6 +181,7 @@ class rdesigneur:
             for j in moose.wildcardFind( '/model/chem/##[ISA=ChemCompt]'):
                 s = moose.element( j.path + '/stoich' )
                 print( "In {}, {} voxels X {} pools".format( j.name, j.mesh.num, s.numAllPools ) )
+        print( '------ END' )
 
     def buildModel( self, modelPath = '/model' ):
         if moose.exists( modelPath ):
@@ -860,6 +861,9 @@ rdesigneur.rmoogli.updateMoogliViewer()
     '''
 
     def _savePlots( self ):
+        if self.verbose:
+            print( 'rdesigneur: Saving plots ...', end = ' ' )
+            sys.stdout.flush()
 
         knownFields = {
             'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)' ),
@@ -913,6 +917,9 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 for p in [ x for x in plotObj3 if x != dummy ]:
                     moose.connect( save_vtabs[q], 'requestOut', p, plotField )
                     q += 1
+
+        if self.verbose:
+            print( ' ... DONE.' )
 
     def _getTimeSeriesTable( self ):
 
