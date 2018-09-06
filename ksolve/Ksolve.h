@@ -176,6 +176,8 @@ private:
     // Time taken in all process function in us.
     double totalTime_ = 0.0;
 
+    high_resolution_clock::time_point t0_, t1_;
+
 };
 
 #endif	// _KSOLVE_H

@@ -168,19 +168,18 @@ class rdesigneur:
             quit()
 
 
-
     ################################################################
     def _printModelStats( self ):
-        print("Rdesigneur: Elec model has",
+        print("\n\tRdesigneur: Elec model has",
             self.elecid.numCompartments, "compartments and",
             self.elecid.numSpines, "spines on",
             len( self.cellPortionElist ), "compartments.")
         if hasattr( self , 'chemid' ):
             dmstoich = moose.element( self.dendCompt.path + '/stoich' )
-            print("Chem part of model has the following compartments: ")
+            print("\tChem part of model has the following compartments: ")
             for j in moose.wildcardFind( '/model/chem/##[ISA=ChemCompt]'):
                 s = moose.element( j.path + '/stoich' )
-                print( "In {}, {} voxels X {} pools".format( j.name, j.mesh.num, s.numAllPools ) )
+                print( "\t | In {}, {} voxels X {} pools".format( j.name, j.mesh.num, s.numAllPools ) )
 
     def buildModel( self, modelPath = '/model' ):
         if moose.exists( modelPath ):
@@ -189,29 +188,30 @@ class rdesigneur:
             return
         self.model = moose.Neutral( modelPath )
         self.modelPath = modelPath
-        try:
-            # Protos made in the init phase. Now install the elec and
-            # chem protos on model.
-            self.installCellFromProtos()
-            # Now assign all the distributions
-            self.buildPassiveDistrib()
-            self.buildChanDistrib()
-            self.buildSpineDistrib()
-            self.buildChemDistrib()
-            self._configureSolvers()
-            self.buildAdaptors()
-            self._buildStims()
-            self._buildPlots()
-            self._buildMoogli()
-            self._configureHSolve()
-            self._configureClocks()
+        print( "[INFO ] rdesigneur: Building model. " )
+        funcs = [ self.installCellFromProtos, self.buildPassiveDistrib
+            , self.buildChanDistrib, self.buildSpineDistrib, self.buildChemDistrib
+            , self._configureSolvers, self.buildAdaptors, self._buildStims
+            , self._buildPlots, self._buildMoogli, self._configureHSolve
+            , self._configureClocks, self._printModelStats, self._savePlots 
+            ]
+        for i, _func in enumerate( funcs ):
             if self.verbose:
-                self._printModelStats()
-            self._savePlots()
-
-        except BuildError as msg:
-            print("Error: rdesigneur: model build failed:", msg)
-            moose.delete( self.model )
+                print( " + (%d/%d) executing %25s"%(i, len(funcs), _func.__name__), end=' ' )
+                sys.stdout.flush()
+            t0 = time.time()
+            try:
+                _func( )
+            except BuildError as msg:
+                print("Error: rdesigneur: model build failed:", msg)
+                moose.delete( self.model )
+                return
+            t = time.time() - t0
+            if self.verbose:
+                msg = r'    ... DONE'
+                if t > 1:
+                    msg += ' %.3f sec' % t
+                print( msg )
 
     def installCellFromProtos( self ):
         if self.stealCellFromLibrary:
@@ -695,31 +695,32 @@ class rdesigneur:
             assert( plotField == plotField2 )
             plotObj3 = plotObj + plotObj2
             numPlots = sum( q != dummy for q in plotObj3 )
-            #print( "PlotList: {0}: numobj={1}, field ={2}, nd={3}, ns={4}".format( pair, numPlots, plotField, len( dendCompts ), len( spineCompts ) ) )
-            if numPlots > 0:
-                tabname = graphs.path + '/plot' + str(k)
-                scale = knownFields[i[3]][2]
-                units = knownFields[i[3]][3]
-                ymin = i[6] if len(i) > 7 else 0
-                ymax = i[7] if len(i) > 7 else 0
-                if len( i ) > 5 and i[5] == 'wave':
-                    self.wavePlotNames.append( [ tabname, i[4], k, scale, units, i[3], ymin, ymax ] )
-                else:
-                    self.plotNames.append( [ tabname, i[4], k, scale, units, i[3], ymin, ymax ] )
-                k += 1
-                if i[3] in [ 'n', 'conc', 'volume', 'Gbar' ]:
-                    tabs = moose.Table2( tabname, numPlots )
-                else:
-                    tabs = moose.Table( tabname, numPlots )
-                    if i[3] == 'spikeTime':
-                        tabs.vec.threshold = -0.02 # Threshold for classifying Vm as a spike.
-                        tabs.vec.useSpikeMode = True # spike detect mode on
+            if numPlots == 0:
+                return 
 
-                vtabs = moose.vec( tabs )
-                q = 0
-                for p in [ x for x in plotObj3 if x != dummy ]:
-                    moose.connect( vtabs[q], 'requestOut', p, plotField )
-                    q += 1
+            tabname = graphs.path + '/plot' + str(k)
+            scale = knownFields[i[3]][2]
+            units = knownFields[i[3]][3]
+            ymin = i[6] if len(i) > 7 else 0
+            ymax = i[7] if len(i) > 7 else 0
+            if len( i ) > 5 and i[5] == 'wave':
+                self.wavePlotNames.append( [ tabname, i[4], k, scale, units, i[3], ymin, ymax ] )
+            else:
+                self.plotNames.append( [ tabname, i[4], k, scale, units, i[3], ymin, ymax ] )
+            k += 1
+            if i[3] in [ 'n', 'conc', 'volume', 'Gbar' ]:
+                tabs = moose.Table2( tabname, numPlots )
+            else:
+                tabs = moose.Table( tabname, numPlots )
+                if i[3] == 'spikeTime':
+                    tabs.vec.threshold = -0.02 # Threshold for classifying Vm as a spike.
+                    tabs.vec.useSpikeMode = True # spike detect mode on
+
+            vtabs = moose.vec( tabs )
+            q = 0
+            for p in [ x for x in plotObj3 if x != dummy ]:
+                moose.connect( vtabs[q], 'requestOut', p, plotField )
+                q += 1
 
     def _buildMoogli( self ):
         knownFields = {

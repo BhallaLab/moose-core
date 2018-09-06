@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 #include "../basecode/header.h"
+#include "../basecode/global.h"
 #ifdef USE_GSL
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
@@ -247,16 +248,15 @@ Ksolve::Ksolve()
     dsolve_(),
     dsolvePtr_( 0 )
 {
-    ;
 }
 
 Ksolve::~Ksolve()
 {
-#if 1
+#if 0
     char* p = getenv( "MOOSE_SHOW_SOLVER_PERF" );
     if( p != NULL )
     {
-        cout << "Info: Ksolve (+Dsolve) took " << totalTime_ << " us and took " << numSteps_
+        cout << "Info: Ksolve (+Dsolve) took " << totalTime_ << " seconds and took " << numSteps_
              << " steps." << endl;
 
     }
@@ -521,8 +521,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     if ( isBuilt_ == false )
         return;
 
-    clock_t t0 = clock();
-    numSteps_ += 1;
+    t0_ = high_resolution_clock::now();
 
     // First, handle incoming diffusion values, update S with those.
     if ( dsolvePtr_ )
@@ -595,8 +594,8 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         // for diffusion, channels, and xreacs
         dsolvePtr_->updateJunctions( p->dt, numThreads_ );
     }
-
-    totalTime_ += (double) (clock() - t0)/CLOCKS_PER_SEC;
+    t1_ = high_resolution_clock::now();
+    moose::addSolverProf( "Ksolve", duration_cast<duration<double>> (t1_ - t0_ ).count(), 1 );
 }
 
 void Ksolve::advance_pool( const size_t i, ProcPtr p )
