@@ -6,7 +6,8 @@ __version__     =   "1.0.0"
 __maintainer__  =   "HarshaRani"
 __email__       =   "hrani@ncbs.res.in"
 __status__      =   "Development"
-__updated__     =   "Aug 22 2018"
+__updated__     =   "Sep 03 2018"
+
 
 '''
 mooseAddChemSolver and mooseDeleteChemSolver is  for adding and deleting only
@@ -14,7 +15,7 @@ Chemical solver
 '''
 
 import moose
-from fixXreacs import fixXreacs
+from moose.fixXreacs import fixXreacs
 
 def positionCompt( compt ):
     i = 0
