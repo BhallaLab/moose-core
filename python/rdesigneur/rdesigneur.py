@@ -29,11 +29,7 @@ import matplotlib.pyplot as plt
 
 import rdesigneur.rmoogli as rmoogli
 from rdesigneur.rdesigneurProtos import *
-import fixXreacs
-#from . import fixXreacs
-#from rdesigneur.rmoogli import *
-#import rmoogli
-#from rdesigneurProtos import *
+from moose.fixXreacs import fixXreacs
 
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
@@ -101,7 +97,7 @@ class rdesigneur:
             adaptorList= [],
             stimList = [],
             plotList = [],  # elecpath, geom_expr, object, field, title ['wave' [min max]]
-            moogList = [],
+            moogList = [], 
             params = None
         ):
         """ Constructor of the rdesigner. This just sets up internal fields
@@ -142,11 +138,16 @@ class rdesigneur:
         self.params = params
 
         self.adaptorList = adaptorList
-        self.stimList = stimList
-        self.plotList = plotList
-        self.saveList = plotList                    #ADDED BY Sarthak
+        try:
+            self.stimList = [ rstim.convertArg(i) for i in stimList ]
+            self.plotList = [ rplot.convertArg(i) for i in plotList ]
+            self.moogList = [ rmoog.convertArg(i) for i in moogList ]
+        except BuildError as msg:
+            print("Error: rdesigneur: " + msg)
+            quit()
+
+        #self.saveList = plotList                    #ADDED BY Sarthak
         self.saveAs = []
-        self.moogList = moogList
         self.plotNames = []
         self.wavePlotNames = []
         self.saveNames = []
@@ -472,10 +473,10 @@ class rdesigneur:
         # Here we hack geomExpr to use it for the syn weight. We assume it
         # is just a number. In due course
         # it should be possible to actually evaluate it according to geom.
-        synWeight = float( stimInfo[1] )
+        synWeight = float( stimInfo.geom_expr )
         stimObj = []
         for i in dendCompts + spineCompts:
-            path = i.path + '/' + stimInfo[2] + '/sh/synapse[0]'
+            path = i.path + '/' + stimInfo.relpath + '/sh/synapse[0]'
             if moose.exists( path ):
                 synInput = make_synInput( name='synInput', parent=path )
                 synInput.doPeriodic = doPeriodic
@@ -488,13 +489,17 @@ class rdesigneur:
     # Here we set up the distributions
     ################################################################
     def buildPassiveDistrib( self ):
-	# [. path field expr [field expr]...]
+	# [path field expr [field expr]...]
         # RM, RA, CM set specific values, per unit area etc.
-        # Ra, Ra, Cm set absolute values.
+        # Rm, Ra, Cm set absolute values.
         # Also does Em, Ek, initVm
 	# Expression can use p, g, L, len, dia, maxP, maxG, maxL.
         temp = []
         for i in self.passiveDistrib:
+            if (len( i ) < 3) or (len(i) %2 != 1):
+                raise BuildError( "buildPassiveDistrib: Need 3 + N*2 arguments, have {}".format( len(i) ) )
+
+            temp.append( '.' )
             temp.extend( i )
             temp.extend( [""] )
         self.elecid.passiveDistribution = temp
@@ -617,7 +622,7 @@ class rdesigneur:
     #   [ region_wildcard, region_expr, path, field, title]
     def _parseComptField( self, comptList, plotSpec, knownFields ):
         # Put in stuff to go through fields if the target is a chem object
-        field = plotSpec[3]
+        field = plotSpec.field
         if not field in knownFields:
             print("Warning: Rdesigneur::_parseComptField: Unknown field '{}'".format( field ) )
             return (), ""
@@ -649,13 +654,13 @@ class rdesigneur:
 
             voxelVec = [i for i in range(len( em ) ) if em[i] in comptSet ]
             # Here we collapse the voxelVec into objects to plot.
-            allObj = moose.vec( self.modelPath + '/chem/' + plotSpec[2] )
+            allObj = moose.vec( self.modelPath + '/chem/' + plotSpec.relpath )
             #print "####### allObj=", self.modelPath + '/chem/' + plotSpec[2]
             if len( allObj ) >= len( voxelVec ):
                 objList = [ allObj[int(j)] for j in voxelVec]
             else:
                 objList = []
-                print( "Warning: Rdesigneur::_parseComptField: unknown Object: '", plotSpec[2], "'" )
+                print( "Warning: Rdesigneur::_parseComptField: unknown Object: '", plotSpec.relpath, "'" )
             #print "############", chemCompt, len(objList), kf[1]
             return objList, kf[1]
 
@@ -687,7 +692,7 @@ class rdesigneur:
         dummy = moose.element( '/' )
         k = 0
         for i in self.plotList:
-            pair = i[0] + " " + i[1]
+            pair = i.elecpath + ' ' + i.geom_expr
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
             spineCompts = self.elecid.spinesFromExpression[ pair ]
             plotObj, plotField = self._parseComptField( dendCompts, i, knownFields )
@@ -740,8 +745,8 @@ class rdesigneur:
         moogliBase = moose.Neutral( self.modelPath + '/moogli' )
         k = 0
         for i in self.moogList:
-            kf = knownFields[i[3]]
-            pair = i[0] + " " + i[1]
+            kf = knownFields[i.field]
+            pair = i.elecpath + " " + i.geom_expr
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
             spineCompts = self.elecid.spinesFromExpression[ pair ]
             dendObj, mooField = self._parseComptField( dendCompts, i, knownFields )
@@ -749,13 +754,6 @@ class rdesigneur:
             assert( mooField == mooField2 )
             mooObj3 = dendObj + spineObj
             numMoogli = len( mooObj3 )
-            #dendComptMap = self.dendCompt.elecComptMap
-            #self.moogliViewer = rmoogli.makeMoogli( self, mooObj3, mooField )
-            if len( i ) == 5:
-                i.extend( kf[4:6] )
-            elif len( i ) == 6:
-                i.extend( [kf[5]] )
-            #self.moogliViewer = rmoogli.makeMoogli( self, mooObj3, i, kf )
             self.moogNames.append( rmoogli.makeMoogli( self, mooObj3, i, kf ) )
 
 
@@ -858,9 +856,10 @@ rdesigneur.rmoogli.updateMoogliViewer()
     ################################################################
     #[TO DO] Add NSDF output function
     '''
-    The author of the functions -- [_savePlots(), _getTimeSeriesTable(), _writeXML(), _writeCSV(), _saveFormats(), _save()] is
+    The original author of the functions -- [_savePlots(), _writeXML(), _writeCSV(), _save()] is
     Sarthak Sharma.
     Email address: sarthaks442@gmail.com
+    Heavily modified by U.S. Bhalla
     '''
 
     def _savePlots( self ):
@@ -1002,81 +1001,59 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
         #plotData contains all the details of a single plot
         title = etree.SubElement( root, "timeSeries" )
-        title.set( 'title', str(plotData[1]))
-        title.set( 'field', str(plotData[8]))
-        title.set( 'scale', str(plotData[3]))
-        title.set( 'units', str(plotData[4]))
-        title.set( 'dt', str(plotData[5]))
+        title.set( 'title', rp.title)
+        title.set( 'field', rp.field)
+        title.set( 'scale', str(scale) )
+        title.set( 'units', units)
+        title.set( 'dt', str(vtab[0].dt) )
+        res = rp.saveResolution
         p = []
-        assert(len(plotData[7]) == len(plotData[9]))
-
-        res = plotData[10]
-        for ind, jvec in enumerate(plotData[7]):
+        for t, v in zip( time, vtab ):
             p.append( etree.SubElement( title, "data"))
-            p[-1].set( 'path', str(plotData[9][ind].path))
-            p[-1].text = ''.join( str(round(value,res)) + ' ' for value in jvec )
-
+            p[-1].set( 'path', v.path )
+            p[-1].text = ''.join( str(round(y,res)) + ' ' for y in v.vector )
         tree = etree.ElementTree(root)
         tree.write(filename)
 
-    def _writeCSV(self, filename, timeSeriesData):
+    def _writeCSV( self, plotData, time, vtab ): 
+        tabname = plotData[0]
+        idx = plotData[1]
+        scale = plotData[2]
+        units = plotData[3]
+        rp = plotData[4]
+        filename = rp.saveFile[:-4] + str(idx) + '.csv'
 
-        plotData = timeSeriesData
-        dataList = []
-        header = []
-        time = plotData[6]
-        res = plotData[10]
-
-        for ind, jvec in enumerate(plotData[7]):
-            header.append(plotData[9][ind].path)
-            dataList.append([round(value,res) for value in jvec.tolist()])
-        dl = [tuple(lst) for lst in dataList]
-        rows = zip(tuple(time), *dl)
-        header.insert(0, "time")
-
+        header = ["time",]
+        valMatrix = [time,]
+        header.extend( [ v.path for v in vtab ] )
+        valMatrix.extend( [ v.vector for v in vtab ] )
+        nv = np.array( valMatrix ).T
         with open(filename, 'wb') as f:
             writer = csv.writer(f, quoting=csv.QUOTE_MINIMAL)
             writer.writerow(header)
-            for row in rows:
+            for row in nv:
                 writer.writerow(row)
 
     ##########****SAVING*****###############
-    def _saveFormats(self, timeSeriesData, k, *filenames):
-        "This takes in the filenames and writes to corresponding format."
-        if filenames:
-            for filename in filenames:
-                for name in filename:
-                    print (name)
-                    if name[-4:] == '.xml':
-                        self._writeXML(name, timeSeriesData)
-                        print(name, " written")
-                    elif name[-4:] == '.csv':
-                        self._writeCSV(name, timeSeriesData)
-                        print(name, " written")
-                    else:
-                        print("Save format not known")
-                        pass
-        else:
-            pass
 
 
     def _save( self ):
-        timeSeriesTable = self._getTimeSeriesTable()
-        for i,sList in enumerate(self.saveList):
+        for i in self.saveNames:
+            tabname = i[0]
+            idx = i[1]
+            scale = i[2]
+            units = i[3]
+            rp = i[4] # The rplot data structure, it has the setup info.
 
-            if (len(sList) >= 6) and (type(sList[5]) != int):
-                    self.saveAs.extend(filter(lambda fmt: type(fmt)!=int, sList[5:]))
-                    try:
-                        timeSeriesData = timeSeriesTable[i]
-                    except IndexError:
-                        print("The object to be plotted has all dummy elements.")
-                        pass
-                    self._saveFormats(timeSeriesData, i, self.saveAs)
-                    self.saveAs=[]
+            vtab = moose.vec( tabname )
+            t = np.arange( 0, vtab[0].vector.size, 1 ) * vtab[0].dt
+            ftype = rp.filename[-4:]
+            if ftype == '.xml':
+                self._writeXML( i, t, vtab )
+            elif ftype == '.csv':
+                self._writeCSV( i, t, vtab )
             else:
-                pass
-        else:
-            pass
+                print("Save format '{}' not known, please use .csv or .xml".format( ftype ) )
 
     ################################################################
     # Here we set up the stims
@@ -1097,17 +1074,17 @@ rdesigneur.rmoogli.updateMoogliViewer()
         k = 0
         # Stimlist = [path, geomExpr, relPath, field, expr_string]
         for i in self.stimList:
-            pair = i[0] + " " + i[1]
+            pair = i.elecpath + " " + i.geom_expr
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
             spineCompts = self.elecid.spinesFromExpression[ pair ]
             #print( "pair = {}, numcompts = {},{} ".format( pair, len( dendCompts), len( spineCompts ) ) )
-            if i[3] == 'vclamp':
+            if i.field == 'vclamp':
                 stimObj3 = self._buildVclampOnCompt( dendCompts, spineCompts, i )
                 stimField = 'commandIn'
-            elif i[3] == 'randsyn':
+            elif i.field == 'randsyn':
                 stimObj3 = self._buildSynInputOnCompt( dendCompts, spineCompts, i )
                 stimField = 'setRate'
-            elif i[3] == 'periodicsyn':
+            elif i.field == 'periodicsyn':
                 stimObj3 = self._buildSynInputOnCompt( dendCompts, spineCompts, i, doPeriodic = True )
                 stimField = 'setRate'
             else:
@@ -1120,7 +1097,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 funcname = stims.path + '/stim' + str(k)
                 k += 1
                 func = moose.Function( funcname )
-                func.expr = i[4]
+                func.expr = i.expr
                 #if i[3] == 'vclamp': # Hack to clean up initial condition
                 func.doEvalAtReinit = 1
                 for q in stimObj3:
@@ -1475,7 +1452,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             return
         if not hasattr( self, 'dendCompt' ):
             raise BuildError( "configureSolvers: no chem meshes defined." )
-        fixXreacs.fixXreacs( self.chemid.path )
+        fixXreacs( self.chemid.path )
         dmksolve = moose.Ksolve( self.dendCompt.path + '/ksolve' )
         dmdsolve = moose.Dsolve( self.dendCompt.path + '/dsolve' )
         dmstoich = moose.Stoich( self.dendCompt.path + '/stoich' )
@@ -1636,4 +1613,95 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 for j in range( i[1], i[2] ):
                     moose.connect( i[3], 'requestOut', chemVec[j], chemFieldSrc)
                 msg = moose.connect( i[3], 'output', elObj, elecFieldDest )
+
+
+#######################################################################
+# Some helper classes, used to define argument lists.
+#######################################################################
+
+class baseplot:
+    def __init__( self,
+            elecpath='soma', geom_expr='1', relpath='.', field='Vm' ):
+        self.elecpath = elecpath
+        self.geom_expr = geom_expr
+        self.relpath = relpath
+        self.field = field
+
+class rplot( baseplot ):
+    def __init__( self,
+        elecpath = 'soma', geom_expr = '1', relpath = '.', field = 'Vm', 
+        title = 'Membrane potential', 
+        mode = 'time', 
+        ymin = 0.0, ymax = 0.0, 
+        saveFile = "", saveResolution = 3, show = True ):
+        baseplot.__init__( self, elecpath, geom_expr, relpath, field )
+        self.title = title
+        self.mode = mode # Options: time, wave, wave_still, raster
+        self.ymin = ymin # If ymin == ymax, it autoscales.
+        self.ymax = ymax
+        if len( saveFile ) < 5:
+            self.saveFile = ""
+        else:
+            f = saveFile.split('.')
+            if len(f) < 2 or ( f[-1] != 'xml' and f[-1] != 'csv' ):
+                raise BuildError( "rplot: Filetype is '{}', must be of type .xml or .csv.".format( f[-1] ) )
+        self.saveFile = saveFile
+        self.show = show
+
+    def printme( self ):
+        print( "{}, {}, {}, {}, {}, {}, {}, {}, {}, {}".format( 
+            self.elecpath,
+            self.geom_expr, self.relpath, self.field, self.title,
+            self.mode, self.ymin, self.ymax, self.saveFile, self.show ) )
+
+    @staticmethod
+    def convertArg( arg ):
+        if isinstance( arg, rplot ):
+            return arg
+        elif isinstance( arg, list ):
+            return rplot( *arg )
+        else:
+            raise BuildError( "rplot initialization failed" )
+
+class rmoog( baseplot ):
+    def __init__( self,
+        elecpath = 'soma', geom_expr = '1', relpath = '.', field = 'Vm', 
+        title = 'Membrane potential', 
+        ymin = 0.0, ymax = 0.0, 
+        show = True ): # Could put in other display options.
+        baseplot.__init__( self, elecpath, geom_expr, relpath, field )
+        self.title = title
+        self.ymin = ymin # If ymin == ymax, it autoscales.
+        self.ymax = ymax
+        self.show = show
+
+    @staticmethod
+    def convertArg( arg ):
+        if isinstance( arg, rmoog ):
+            return arg
+        elif isinstance( arg, list ):
+            return rmoog( *arg )
+        else:
+            raise BuildError( "rmoog initialization failed" )
+
+        # Stimlist = [path, geomExpr, relPath, field, expr_string]
+class rstim( baseplot ):
+    def __init__( self,
+            elecpath = 'soma', geom_expr = '1', relpath = '.', field = 'inject', expr = '0'):
+        baseplot.__init__( self, elecpath, geom_expr, relpath, field )
+        self.expr = expr
+
+    def printme( self ):
+        print( "{}, {}, {}, {}, {}, {}, {}, {}, {}, {}".format( 
+            self.elecpath,
+            self.geom_expr, self.relpath, self.field, self.expr ) )
+
+    @staticmethod
+    def convertArg( arg ):
+        if isinstance( arg, rstim ):
+            return arg
+        elif isinstance( arg, list ):
+            return rstim( *arg )
+        else:
+            raise BuildError( "rstim initialization failed" )
 
