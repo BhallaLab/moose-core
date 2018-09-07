@@ -45,6 +45,7 @@ const Cinfo* Pool::initCinfo()
 // Class definitions
 //////////////////////////////////////////////////////////////
 static const Cinfo* poolCinfo = Pool::initCinfo();
+
 const SrcFinfo1< double >& nOut = *dynamic_cast<const SrcFinfo1< double >*
                                   >(poolCinfo->findFinfo( "nOut"));
 

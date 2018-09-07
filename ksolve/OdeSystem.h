@@ -39,8 +39,6 @@ public:
     double epsRel; // Relative error
 
 #if  USE_BOOST_ODE
-        //BoostSys* pBoostSys;
-        BoostSys boostSys;
         size_t dimension;
 #endif     /* -----  USE_BOOST_ODE  ----- */
 };

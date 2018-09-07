@@ -369,9 +369,10 @@ void Shell::doStart( double runtime, bool notify )
         pStreamer->cleanUp( );
     }
 
-    auto t1 = std::chrono::high_resolution_clock::now();
-    double s = std::chrono::duration<double>(t1-t0).count();
-    clock_time_ += s;
+    // Print the stats collected by profiling map.
+    char* p = getenv( "MOOSE_SHOW_SOLVER_PERF" );
+    if( p != NULL )
+        moose::printSolverProfMap( );
 }
 
 bool isDoingReinit()

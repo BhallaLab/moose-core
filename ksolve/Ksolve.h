@@ -10,6 +10,10 @@
 #ifndef _KSOLVE_H
 #define _KSOLVE_H
 
+#include <chrono>
+
+using namespace std::chrono;
+
 class Stoich;
 
 class Ksolve: public ZombiePoolInterface
@@ -58,14 +62,13 @@ public:
     vector< double > getNvec( unsigned int voxel) const;
     void setNvec( unsigned int voxel, vector< double > vec );
 
-#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     // Set number of threads to use (for deterministic case only).
     unsigned int getNumThreads( ) const;
     void setNumThreads( unsigned int x );
 
-    // Parallel advance().
-    void parallel_advance(int begin, int end, size_t nWorkers, ProcPtr p);
-#endif
+    void advance_chunk( const size_t begin, const size_t end, ProcPtr p );
+
+    void advance_pool( const size_t i, ProcPtr p );
 
     /**
      * This does a quick and dirty estimate of the timestep suitable
@@ -143,12 +146,10 @@ private:
     double epsAbs_;
     double epsRel_;
 
-#if PARALLELIZE_KSOLVE_WITH_CPP11_ASYNC
     /**
      * @brief Number of threads to use. Only applicable for deterministic case.
      */
     unsigned int numThreads_;
-#endif
 
     /**
      * Each VoxelPools entry handles all the pools in a single voxel.
@@ -172,6 +173,14 @@ private:
 
     /// Pointer to diffusion solver
     ZombiePoolInterface* dsolvePtr_;
+
+    // Timing and benchmarking related variables.
+    size_t numSteps_  = 0;
+
+    // Time taken in all process function in us.
+    double totalTime_ = 0.0;
+
+    high_resolution_clock::time_point t0_, t1_;
 
 };
 

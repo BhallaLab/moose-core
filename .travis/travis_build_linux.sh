@@ -45,20 +45,17 @@ echo "Currently in `pwd`"
     MOOSE_INSTALL_PREFIX=/tmp/moose/usr
     rm -rf $MOOSE_INSTALL_PREFIX && mkdir -p $MOOSE_INSTALL_PREFIX/{bin,lib}
     mkdir -p _GSL_BUILD && cd _GSL_BUILD
-    cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" \
-        -DCMAKE_INSTALL_PREFIX=$MOOSE_INSTALL_PREFIX ..
-    $MAKE && ctest --output-on-failure
-    make install
-    PYMOOSE_LIB=$MOOSE_INSTALL_PREFIX/lib/python2.7
-    PYTHONPATH=$PYMOOSE_LIB/site-packages:$PYMOOSE_LIB/dist-packages \
-        $PYTHON2 -c 'import moose;print(moose.__file__);print(moose.version())'
+    cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
+    $MAKE && ctest --output-on-failure 
+    sudo make install && cd  /tmp
+    $PYTHON2 -c 'import moose;print(moose.__file__);print(moose.version())'
 )
 
 (
     # Now with boost.
     mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && \
         cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
-    $MAKE && ctest --output-on-failure -j4
+    $MAKE && ctest --output-on-failure 
 )
 
 # This is only applicable on linux build.
@@ -70,13 +67,13 @@ if type $PYTHON3 > /dev/null; then
     fi
     (
         mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && \
-            cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
-        $MAKE && ctest --output-on-failure -j4
+            cmake -DPYTHON_EXECUTABLE="$PYTHON3" ..
+        $MAKE && ctest --output-on-failure 
     )
     (
         mkdir -p _BOOST_BUILD2 && cd _BOOST_BUILD2 && \
-            cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
-        $MAKE && ctest --output-on-failure -j4
+            cmake -DWITH_BOOST_ODE=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
+        $MAKE && ctest --output-on-failure 
     )
     echo "All done"
 else

@@ -33,6 +33,8 @@
 #include "../ksolve/ZombiePool.h"
 #include "../ksolve/ZombieBufPool.h"
 
+#include <thread>
+
 const Cinfo* Dsolve::initCinfo()
 {
     ///////////////////////////////////////////////////////
@@ -504,11 +506,8 @@ void Dsolve::calcJunction( const DiffJunction& jn, double dt )
 
 void Dsolve::process( const Eref& e, ProcPtr p )
 {
-    for ( vector< DiffPoolVec >::iterator
-            i = pools_.begin(); i != pools_.end(); ++i )
-    {
+    for ( auto i = pools_.begin(); i != pools_.end(); ++i )
         i->advance( p->dt );
-    }
 }
 
 void Dsolve::reinit( const Eref& e, ProcPtr p )
@@ -523,12 +522,19 @@ void Dsolve::reinit( const Eref& e, ProcPtr p )
 
 void Dsolve::updateJunctions( double dt )
 {
-    for ( vector< DiffJunction >::const_iterator
-            i = junctions_.begin(); i != junctions_.end(); ++i )
-    {
+    for (auto i = junctions_.begin(); i != junctions_.end(); ++i )
         calcJunction( *i, dt );
-    }
 }
+
+
+void Dsolve::calcJunction_chunk( const size_t begin, const size_t end, double dt )
+{
+    for (size_t i = begin; i < min(end, junctions_.size()); i++) 
+        calcJunction( junctions_[i], dt );
+
+}
+
+
 //////////////////////////////////////////////////////////////
 // Solver coordination and setup functions
 //////////////////////////////////////////////////////////////
