@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 
 import rdesigneur.rmoogli as rmoogli
 from rdesigneur.rdesigneurProtos import *
-from moose.fixXreacs import fixXreacs
+import moose.fixXreacs as fixXreacs
 
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
