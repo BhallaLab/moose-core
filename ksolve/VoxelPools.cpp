@@ -152,8 +152,8 @@ void VoxelPools::advance( const ProcInfo* p )
 #elif USE_BOOST_ODE
         // NOTE: Make sure to assing vp to BoostSys vp. In next call, it will be used by
         // updateRates func. Unlike gsl call, we can't pass extra void*  to gslFunc.
-        VoxelPools* vp = reinterpret_cast< VoxelPools* >( sys_.params );
-        sys_.vp = vp;
+        VoxelPools* vp = reinterpret_cast< VoxelPools* >( this );
+
         /*-----------------------------------------------------------------------------
 NOTE: 04/21/2016 11:31:42 AM
 

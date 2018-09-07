@@ -54,15 +54,13 @@ public:
     void setInitDt( double dt );
 
 #ifdef USE_GSL      /* -----  not USE_BOOST  ----- */
-
     static int gslFunc( double t, const double* y, double *dydt, void* params);
-
-    // System of LSODA.
-    static void lsodaSys( double t, double* y, double* dydt, void* params);
-
 #elif  USE_BOOST_ODE
     static void evalRates( VoxelPools* vp, const vector_type_& y, vector_type_& dydt );
 #endif     /* -----  not USE_BOOST_ODE  ----- */
+
+    // System of LSODA.
+    static void lsodaSys( double t, double* y, double* dydt, void* params);
 
     //////////////////////////////////////////////////////////////////
     // Rate manipulation and calculation functions
