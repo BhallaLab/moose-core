@@ -513,7 +513,7 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 
         // Now use the values in the Dsolve to update junction fluxes
         // for diffusion, channels, and xreacs
-        dsolvePtr_->updateJunctions( p->dt, numThreads_ );
+        dsolvePtr_->updateJunctions( p->dt );
         // Here the Gsolve may need to do something to convert to integers
     }
 }

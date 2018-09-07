@@ -520,32 +520,10 @@ void Dsolve::reinit( const Eref& e, ProcPtr p )
     }
 }
 
-void Dsolve::updateJunctions( double dt, const size_t numThreads = 1)
+void Dsolve::updateJunctions( double dt )
 {
-    if( numThreads == 1 )
-    {
-        for (auto i = junctions_.begin(); i != junctions_.end(); ++i )
-            calcJunction( *i, dt );
-        return;
-    }
-
-    /* Parallel version */
-    vector<std::thread> vecThreads;
-
-    // Compute the chunk/grain size.
-    size_t grainSize = ceil( junctions_.size() / numThreads );
-    while( (grainSize * numThreads) < junctions_.size() )
-        grainSize += 1;
-
-    // lambdas are faster than std::bind
-    for (size_t i = 0; i < numThreads; i++)
-    {
-        std::thread t( &Dsolve::calcJunction_chunk, this, i*grainSize, (i+1)*grainSize, dt );
-        vecThreads.push_back( std::move(t) );
-    }
-
-    for (auto &v : vecThreads )
-        v.join();
+    for (auto i = junctions_.begin(); i != junctions_.end(); ++i )
+        calcJunction( *i, dt );
 }
 
 

@@ -34,7 +34,7 @@ ZombiePoolInterface::ZombiePoolInterface()
       isBuilt_( false )
 {;}
 
-void ZombiePoolInterface::updateJunctions( double dt, const size_t num_threads )
+void ZombiePoolInterface::updateJunctions( double dt )
 {;}
 void ZombiePoolInterface::setPrev()
 {;}

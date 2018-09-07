@@ -592,7 +592,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
 
         // Now use the values in the Dsolve to update junction fluxes
         // for diffusion, channels, and xreacs
-        dsolvePtr_->updateJunctions( p->dt, numThreads_ );
+        dsolvePtr_->updateJunctions( p->dt ); 
     }
     t1_ = high_resolution_clock::now();
     moose::addSolverProf( "Ksolve", duration_cast<duration<double>> (t1_ - t0_ ).count(), 1 );

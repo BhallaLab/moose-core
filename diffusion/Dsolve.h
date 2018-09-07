@@ -68,8 +68,7 @@ public:
     void reinit( const Eref& e, ProcPtr p );
 
     //////////////////////////////////////////////////////////////////
-    // NOTE: num_threads can also be set by Ksolve or Gsolve.
-    void updateJunctions( double dt, const size_t num_threads);
+    void updateJunctions( double dt );
 
     /**
      * Builds junctions between Dsolves handling NeuroMesh, SpineMesh,

@@ -97,8 +97,7 @@ public:
     Id getCompartment() const;
 
     /// Used for telling Dsolver to handle all ops across Junctions
-    // NOTe: Numthreads can be set by Ksolve or Gsolve.
-    virtual void updateJunctions( double dt, const size_t num_threads );
+    virtual void updateJunctions( double dt );
 
     /// Used to tell Dsolver to assign 'prev' values.
     virtual void setPrev();
