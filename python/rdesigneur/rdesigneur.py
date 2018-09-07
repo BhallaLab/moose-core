@@ -99,6 +99,7 @@ class rdesigneur:
             stimList = [],
             plotList = [],
             moogList = [],
+            ode_method = "gsl",     # gsl, lsoda, gssa
             params = None
         ):
         """ Constructor of the rdesigner. This just sets up internal fields

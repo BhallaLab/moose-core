@@ -57,6 +57,9 @@ public:
 
     static int gslFunc( double t, const double* y, double *dydt, void* params);
 
+    // System of LSODA.
+    static void lsodaSys( double t, double* y, double* dydt, void* params);
+
 #elif  USE_BOOST_ODE
     static void evalRates( VoxelPools* vp, const vector_type_& y, vector_type_& dydt );
 #endif     /* -----  not USE_BOOST_ODE  ----- */
