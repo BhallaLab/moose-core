@@ -252,7 +252,7 @@ class rdesigneur:
     ################################################################
     # Return true if it is a function.
     def buildProtoFromFunction( self, func, protoName ):
-        bracePos = func.find( '()' )
+        bracePos = func.rfind( '()' )
         if bracePos == -1:
             return False
 
@@ -1302,8 +1302,8 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 self._moveCompt( comptdict['psd'], self.psdCompt )
                 comptdict['psd'] = self.psdCompt
 
-        self.dendCompt.diffLength = self.diffusionLength
-        self.dendCompt.subTree = self.cellPortionElist
+            self.dendCompt.diffLength = self.diffusionLength
+            self.dendCompt.subTree = self.cellPortionElist
         for i in comptdict:
             if len(i) > 5:
                 if i[-5:] == '_endo':
