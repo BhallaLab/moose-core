@@ -1437,8 +1437,9 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 self._moveCompt( comptdict['psd'], self.psdCompt )
                 comptdict['psd'] = self.psdCompt
 
-        self.dendCompt.diffLength = self.diffusionLength
-        self.dendCompt.subTree = self.cellPortionElist
+            self.dendCompt.diffLength = self.diffusionLength
+            self.dendCompt.subTree = self.cellPortionElist
+        
         for i in comptdict:
             if len(i) > 5:
                 if i[-5:] == '_endo':
@@ -1448,6 +1449,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
                     #print( "{}****{}".format(i[0:-5], comptdict[i[0:-5]]))
                     self._moveCompt( comptdict[i], endo )
                     comptdict[i] = endo
+        
         moose.delete( self.chemid )
         self.chemid = newChemid
 
