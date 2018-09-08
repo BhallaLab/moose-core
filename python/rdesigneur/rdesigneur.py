@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 
 import rdesigneur.rmoogli as rmoogli
 from rdesigneur.rdesigneurProtos import *
-import fixXreacs
+import moose.fixXreacs as fixXreacs
 #from . import fixXreacs
 #from rdesigneur.rmoogli import *
 #import rmoogli
