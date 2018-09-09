@@ -18,12 +18,13 @@ set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/python/moose")
 find_package(PythonInterp REQUIRED)
 execute_process( COMMAND
     ${PYTHON_EXECUTABLE} -c
-        "import importlib.machinery
+"import importlib.machinery
 print(importlib.machinery.EXTENSION_SUFFIXES[-1])"
     OUTPUT_VARIABLE PYTHON_SO_EXTENSION
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 if(NOT PYTHON_SO_EXTENSION)
+    message(STATUS "Python so ext could not be determined. Using default .so")
     set(PYTHON_SO_EXTENSION ".so")
 endif()
 message( STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
