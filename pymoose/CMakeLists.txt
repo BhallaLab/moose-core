@@ -35,30 +35,33 @@ add_definitions(-DUSE_NUMPY)
 add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
 
 # make sure the Python.h is found.
-find_package( PythonLibs REQUIRED)
-include_directories( ${PYTHON_INCLUDE_DIRS} )
-
-#execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --includes
-#    OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
-#    OUTPUT_STRIP_TRAILING_WHITESPACE
-#    )
-#execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --libs
-#    OUTPUT_VARIABLE PYTHON_LIBRARIES
-#    OUTPUT_STRIP_TRAILING_WHITESPACE
-#    )
-# message( STATUS "Python include flags: ${PYTHON_INCLUDE_FLAGS}" )
-
-set_target_properties(_moose PROPERTIES
-    COMPILE_DEFINITIONS "PYMOOSE"
-    COMPILE_FLAGS "${PYTHON_INCLUDE_FLAGS}"
-    LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
-    PREFIX ""
-    SUFFIX ${PYTHON_SO_EXTENSION}
-    )
-
-if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
-    set_target_properties(_moose PROPERTIES
-    SUFFIX ${PYTHON_SO_EXTENSION})
+find_package( PythonLibs)
+if(PYTHON_INCLUDE_DIRS)
+    include_directories( ${PYTHON_INCLUDE_DIRS} )
+else()
+     # Use python executable to find include paths. For building wheel, we are
+     # stuck with cmake-2.8 with which PythonLibs module might fail.
+     execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --includes
+         OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
+         OUTPUT_STRIP_TRAILING_WHITESPACE
+         )
+     execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --libs
+         OUTPUT_VARIABLE PYTHON_LIBRARIES
+         OUTPUT_STRIP_TRAILING_WHITESPACE
+         )
+     message( STATUS "Python include flags: ${PYTHON_INCLUDE_FLAGS}" )
+     set_target_properties(_moose PROPERTIES
+         COMPILE_DEFINITIONS "PYMOOSE"
+         COMPILE_FLAGS "${PYTHON_INCLUDE_FLAGS}"
+         LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
+         PREFIX ""
+         SUFFIX ${PYTHON_SO_EXTENSION}
+         )
+     
+     if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
+         set_target_properties(_moose PROPERTIES
+         SUFFIX ${PYTHON_SO_EXTENSION})
+     endif()
 endif()
 
 # see issue #80
