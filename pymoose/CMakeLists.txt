@@ -41,6 +41,7 @@ if(PYTHON_INCLUDE_DIRS)
 else()
      # Use python executable to find include paths. For building wheel, we are
      # stuck with cmake-2.8 with which PythonLibs module might fail.
+     message( STATUS "Using ${PYTHON_EXECUTABLE}-config to find Python.h" )
      execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --includes
          OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
          OUTPUT_STRIP_TRAILING_WHITESPACE
