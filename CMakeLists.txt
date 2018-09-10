@@ -226,7 +226,7 @@ if(HDF5_FOUND)
     endif(NOT HDF5_HL_LIBRARIES)
     list(APPEND HDF5_LIBRARIES ${HDF5_HL_LIBRARIES})
 
-    message(STATUS "MOOSE will use following HDF5 ${HDF5_LIBRARIES}" )
+    # message(STATUS "MOOSE will use following HDF5 ${HDF5_LIBRARIES}" )
     foreach(HDF5_LIB ${HDF5_LIBRARIES})
         if(HDF5_LIB)
             get_filename_component( HDF5_LIB_EXT ${HDF5_LIB} EXT )
@@ -280,7 +280,7 @@ if(WITH_GSL)
        message( STATUS "Using static libraries ${GSL_STATIC_LIBRARIES}" )
        list(APPEND STATIC_LIBRARIES ${GSL_STATIC_LIBRARIES})
     else( )
-       message(STATUS "Using gsl libraries: ${GSL_LIBRARIES}")
+       # message(DEBUG "Using gsl libraries: ${GSL_LIBRARIES}")
        foreach(GSL_LIB ${GSL_LIBRARIES} )
            if(GSL_LIB)
                get_filename_component( GSL_LIB_EXT ${GSL_LIB} EXT )
@@ -356,7 +356,7 @@ if(SYSTEM_SHARED_LIBS)
 endif( )
 
 # MAC linker does not understand many of gnu-ld options.
-message( STATUS "Shared libs: ${SYSTEM_SHARED_LIBS}")
+# message( DEBUG "Shared libs: ${SYSTEM_SHARED_LIBS}")
 if(MACOSX)
     target_link_libraries(libmoose
         "-Wl,-all_load"

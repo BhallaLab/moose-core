@@ -1,5 +1,31 @@
 cmake_minimum_required(VERSION 2.8)
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake_modules/")
+
+find_package(PythonInterp REQUIRED)
+
+# Find Numpy 
+find_package(NumPy REQUIRED)
+include_directories(${NUMPY_INCLUDE_DIRS})
+add_definitions( -std=c++11 )
+add_definitions(-DUSE_NUMPY)
+add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
+
+# set module extensiton. default is .so
+execute_process( COMMAND
+    ${PYTHON_EXECUTABLE} -c
+"import importlib.machinery
+print(importlib.machinery.EXTENSION_SUFFIXES[0])"
+    OUTPUT_VARIABLE PYTHON_SO_EXTENSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+if(NOT PYTHON_SO_EXTENSION)
+    message(STATUS "Python so ext could not be determined. Using default .so")
+    set(PYTHON_SO_EXTENSION ".so")
+endif()
+message(STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
+
+# TARGET 
 set(PYMOOSE_SRCS
     moosemodule.cpp
     vec.cpp
@@ -10,30 +36,11 @@ set(PYMOOSE_SRCS
     test_moosemodule.cpp
     )
 
-# Build _moose.so in source directory and them copy everything to
+# Build python module in source directory and them copy everything to
 # current binary directory using cmake.
 add_library( _moose MODULE ${PYMOOSE_SRCS} )
-set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/python/moose")
-
-find_package(PythonInterp REQUIRED)
-execute_process( COMMAND
-    ${PYTHON_EXECUTABLE} -c
-"import importlib.machinery
-print(importlib.machinery.EXTENSION_SUFFIXES[-1])"
-    OUTPUT_VARIABLE PYTHON_SO_EXTENSION
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-if(NOT PYTHON_SO_EXTENSION)
-    message(STATUS "Python so ext could not be determined. Using default .so")
-    set(PYTHON_SO_EXTENSION ".so")
-endif()
-message( STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
-
-find_package(NumPy REQUIRED)
-include_directories(${NUMPY_INCLUDE_DIRS})
-add_definitions(-DUSE_NUMPY)
-
-add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
+set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../python/moose")
+message(STATUS "Python module will be saved to ${PYMOOSE_OUTPUT_DIRECTORY}" )
 
 # make sure the Python.h is found.
 find_package( PythonLibs)
@@ -55,16 +62,20 @@ else()
      set_target_properties(_moose PROPERTIES
          COMPILE_DEFINITIONS "PYMOOSE"
          COMPILE_FLAGS "${PYTHON_INCLUDE_FLAGS}"
-         LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
-         PREFIX ""
-         SUFFIX ${PYTHON_SO_EXTENSION}
-         )
+        )
      
-     if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
-         set_target_properties(_moose PROPERTIES
-         SUFFIX ${PYTHON_SO_EXTENSION})
-     endif()
 endif()
+
+# Remove prefix lib from python module.
+if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
+    set_target_properties(_moose PROPERTIES SUFFIX ${PYTHON_SO_EXTENSION}) 
+endif()
+set_target_properties(_moose PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
+    PREFIX ""
+    SUFFIX ${PYTHON_SO_EXTENSION}
+    )
+
 
 # see issue #80
 if(HDF5_LIBRARY_DIRS)
