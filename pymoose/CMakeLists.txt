@@ -76,6 +76,10 @@ set_target_properties(_moose PROPERTIES
     SUFFIX ${PYTHON_SO_EXTENSION}
     )
 
+# On OSX+Brew and python2.5; link with libstdc++
+if(MACOSX AND ("${PYTHON_VERSION_MAJOR}" STREQUAL "2"))
+    add_definitions( -std=c++11 -stdlib=libc++ )
+endif()
 
 # see issue #80
 if(HDF5_LIBRARY_DIRS)
