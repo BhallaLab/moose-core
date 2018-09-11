@@ -102,7 +102,7 @@ def loadModel(filename, target,method=None):
                 method = "ee"
             
             if method != 'ee':
-                moose.mooseAddChemSolver(target,method)
+                chemError_ = _chemUtil.add_Delete_ChemicalSolver.mooseAddChemSolver(target,method)
         return ret
         
 def version( ):

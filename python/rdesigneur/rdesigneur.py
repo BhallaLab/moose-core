@@ -29,11 +29,7 @@ import matplotlib.pyplot as plt
 
 import rdesigneur.rmoogli as rmoogli
 from rdesigneur.rdesigneurProtos import *
-import fixXreacs
-#from . import fixXreacs
-#from rdesigneur.rmoogli import *
-#import rmoogli
-#from rdesigneurProtos import *
+import moose.fixXreacs as fixXreacs
 
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
@@ -168,19 +164,18 @@ class rdesigneur:
             quit()
 
 
-
     ################################################################
     def _printModelStats( self ):
-        print("Rdesigneur: Elec model has",
+        print("\n\tRdesigneur: Elec model has",
             self.elecid.numCompartments, "compartments and",
             self.elecid.numSpines, "spines on",
             len( self.cellPortionElist ), "compartments.")
         if hasattr( self , 'chemid' ):
             dmstoich = moose.element( self.dendCompt.path + '/stoich' )
-            print("Chem part of model has the following compartments: ")
+            print("\tChem part of model has the following compartments: ")
             for j in moose.wildcardFind( '/model/chem/##[ISA=ChemCompt]'):
                 s = moose.element( j.path + '/stoich' )
-                print( "In {}, {} voxels X {} pools".format( j.name, j.mesh.num, s.numAllPools ) )
+                print( "\t | In {}, {} voxels X {} pools".format( j.name, j.mesh.num, s.numAllPools ) )
 
     def buildModel( self, modelPath = '/model' ):
         if moose.exists( modelPath ):
@@ -189,29 +184,30 @@ class rdesigneur:
             return
         self.model = moose.Neutral( modelPath )
         self.modelPath = modelPath
-        try:
-            # Protos made in the init phase. Now install the elec and
-            # chem protos on model.
-            self.installCellFromProtos()
-            # Now assign all the distributions
-            self.buildPassiveDistrib()
-            self.buildChanDistrib()
-            self.buildSpineDistrib()
-            self.buildChemDistrib()
-            self._configureSolvers()
-            self.buildAdaptors()
-            self._buildStims()
-            self._buildPlots()
-            self._buildMoogli()
-            self._configureHSolve()
-            self._configureClocks()
+        print( "[INFO ] rdesigneur: Building model. " )
+        funcs = [ self.installCellFromProtos, self.buildPassiveDistrib
+            , self.buildChanDistrib, self.buildSpineDistrib, self.buildChemDistrib
+            , self._configureSolvers, self.buildAdaptors, self._buildStims
+            , self._buildPlots, self._buildMoogli, self._configureHSolve
+            , self._configureClocks, self._printModelStats, self._savePlots 
+            ]
+        for i, _func in enumerate( funcs ):
             if self.verbose:
-                self._printModelStats()
-            self._savePlots()
-
-        except BuildError as msg:
-            print("Error: rdesigneur: model build failed:", msg)
-            moose.delete( self.model )
+                print( " + (%d/%d) executing %25s"%(i, len(funcs), _func.__name__), end=' ' )
+                sys.stdout.flush()
+            t0 = time.time()
+            try:
+                _func( )
+            except BuildError as msg:
+                print("Error: rdesigneur: model build failed:", msg)
+                moose.delete( self.model )
+                return
+            t = time.time() - t0
+            if self.verbose:
+                msg = r'    ... DONE'
+                if t > 1:
+                    msg += ' %.3f sec' % t
+                print( msg )
 
     def installCellFromProtos( self ):
         if self.stealCellFromLibrary:
@@ -252,11 +248,14 @@ class rdesigneur:
         if bracePos == -1:
             return False
 
-        modPos = func.find( "." )
+        # . can be in path name as well. Find the last dot which is most likely
+        # to be the function name.
+        modPos = func.rfind( "." )
         if ( modPos != -1 ): # Function is in a file, load and check
-            pathTokens = func[0:modPos].split('/')
+            resolvedPath = os.path.realpath( func[0:modPos] )
+            pathTokens = resolvedPath.split('/')
             pathTokens = ['/'] + pathTokens
-            modulePath = os.path.join(*pathTokens[:-1])
+            modulePath = os.path.realpath(os.path.join(*pathTokens[:-1]))
             moduleName = pathTokens[-1]
             funcName = func[modPos+1:bracePos]
             moduleFile, pathName, description = imp.find_module(moduleName, [modulePath])
@@ -480,9 +479,9 @@ class rdesigneur:
     # Here we set up the distributions
     ################################################################
     def buildPassiveDistrib( self ):
-	# [. path field expr [field expr]...]
+	# [path field expr [field expr]...]
         # RM, RA, CM set specific values, per unit area etc.
-        # Ra, Ra, Cm set absolute values.
+        # Rm, Ra, Cm set absolute values.
         # Also does Em, Ek, initVm
 	# Expression can use p, g, L, len, dia, maxP, maxG, maxL.
         temp = []
@@ -600,7 +599,9 @@ class rdesigneur:
 
     # Utility function for doing lookups for objects.
     def _makeUniqueNameStr( self, obj ):
-        return obj.name + " " + str( obj.index )
+        # second one is faster than the former. 140 ns v/s 180 ns.
+        #  return obj.name + " " + str( obj.index )
+        return "%s %s" % (obj.name, obj.index)
 
     # Returns vector of source objects, and the field to use.
     # plotSpec is of the form
@@ -613,10 +614,11 @@ class rdesigneur:
             return (), ""
 
         kf = knownFields[field] # Find the field to decide type.
-        if ( kf[0] == 'CaConcBase' or kf[0] == 'ChanBase' or kf[0] == 'NMDAChan' or kf[0] == 'VClamp' ):
+        if kf[0] in ['CaConcBase', 'ChanBase', 'NMDAChan', 'VClamp']:
             objList = self._collapseElistToPathAndClass( comptList, plotSpec[2], kf[0] )
             return objList, kf[1]
-        elif (field == 'n' or field == 'conc' or field == 'volume'  ):
+
+        elif field in [ 'n', 'conc', 'volume']:
             path = plotSpec[2]
             pos = path.find( '/' )
             if pos == -1:   # Assume it is in the dend compartment.
@@ -644,7 +646,7 @@ class rdesigneur:
                 objList = [ allObj[int(j)] for j in voxelVec]
             else:
                 objList = []
-                print( "Warning: Rdesigneur::_parseComptField: unknown Object: '", plotSpec[2], "'" )
+                print( "Warn: Rdesigneur::_parseComptField: unknown Object: '%s'" % plotSpec[2] )
             #print "############", chemCompt, len(objList), kf[1]
             return objList, kf[1]
 
@@ -684,29 +686,32 @@ class rdesigneur:
             assert( plotField == plotField2 )
             plotObj3 = plotObj + plotObj2
             numPlots = sum( q != dummy for q in plotObj3 )
-            #print( "PlotList: {0}: numobj={1}, field ={2}, nd={3}, ns={4}".format( pair, numPlots, plotField, len( dendCompts ), len( spineCompts ) ) )
-            if numPlots > 0:
-                tabname = graphs.path + '/plot' + str(k)
-                scale = knownFields[i[3]][2]
-                units = knownFields[i[3]][3]
-                if len( i ) > 5 and i[5] == 'wave':
-                    self.wavePlotNames.append( [ tabname, i[4], k, scale, units, i[3] ] )
-                else:
-                    self.plotNames.append( [ tabname, i[4], k, scale, units, i[3] ] )
-                k += 1
-                if i[3] == 'n' or i[3] == 'conc' or i[3] == 'volume' or i[3] == 'Gbar':
-                    tabs = moose.Table2( tabname, numPlots )
-                else:
-                    tabs = moose.Table( tabname, numPlots )
-                    if i[3] == 'spikeTime':
-                        tabs.vec.threshold = -0.02 # Threshold for classifying Vm as a spike.
-                        tabs.vec.useSpikeMode = True # spike detect mode on
+            if numPlots == 0:
+                return 
 
-                vtabs = moose.vec( tabs )
-                q = 0
-                for p in [ x for x in plotObj3 if x != dummy ]:
-                    moose.connect( vtabs[q], 'requestOut', p, plotField )
-                    q += 1
+            tabname = graphs.path + '/plot' + str(k)
+            scale = knownFields[i[3]][2]
+            units = knownFields[i[3]][3]
+            ymin = i[6] if len(i) > 7 else 0
+            ymax = i[7] if len(i) > 7 else 0
+            if len( i ) > 5 and i[5] == 'wave':
+                self.wavePlotNames.append( [ tabname, i[4], k, scale, units, i[3], ymin, ymax ] )
+            else:
+                self.plotNames.append( [ tabname, i[4], k, scale, units, i[3], ymin, ymax ] )
+            k += 1
+            if i[3] in [ 'n', 'conc', 'volume', 'Gbar' ]:
+                tabs = moose.Table2( tabname, numPlots )
+            else:
+                tabs = moose.Table( tabname, numPlots )
+                if i[3] == 'spikeTime':
+                    tabs.vec.threshold = -0.02 # Threshold for classifying Vm as a spike.
+                    tabs.vec.useSpikeMode = True # spike detect mode on
+
+            vtabs = moose.vec( tabs )
+            q = 0
+            for p in [ x for x in plotObj3 if x != dummy ]:
+                moose.connect( vtabs[q], 'requestOut', p, plotField )
+                q += 1
 
     def _buildMoogli( self ):
         knownFields = {
@@ -828,7 +833,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
                     wp[1].set_ydata( wp[2][f] )
                     wp[3].set_text( "time = {:.1f}".format(f*self.frameDt) )
                     wp[0].canvas.draw()
-            plt.pause(0.001)
+            #plt.pause(0.001)
         
         #This calls the _save function which saves only if the filenames have been specified
 
@@ -837,12 +842,16 @@ rdesigneur.rmoogli.updateMoogliViewer()
     ################################################################
     #[TO DO] Add NSDF output function
     '''
-    The author of the functions -- [_savePlots(), _getTimeSeriesTable(), _writeXML(), _writeCSV(), _saveFormats(), _save()] is
+    The original author of the functions -- [_savePlots(), _writeXML(), _writeCSV(), _save()] is
     Sarthak Sharma.
     Email address: sarthaks442@gmail.com
+    Heavily modified by U.S. Bhalla
     '''
 
     def _savePlots( self ):
+        if self.verbose:
+            print( 'rdesigneur: Saving plots ...', end = ' ' )
+            sys.stdout.flush()
 
         knownFields = {
             'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)' ),
@@ -883,7 +892,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 units = knownFields[i[3]][3]
                 self.saveNames.append( ( save_tabname, i[4], k, scale, units ) )
                 k += 1
-                if i[3] == 'n' or i[3] == 'conc' or i[3] == 'volume' or i[3] == 'Gbar':
+                if i[3] in [ 'n', 'conc', 'volume', 'Gbar' ]:
                     save_tabs = moose.Table2( save_tabname, numPlots )
                     save_vtabs = moose.vec( save_tabs )
                 else:
@@ -896,6 +905,9 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 for p in [ x for x in plotObj3 if x != dummy ]:
                     moose.connect( save_vtabs[q], 'requestOut', p, plotField )
                     q += 1
+
+        if self.verbose:
+            print( ' ... DONE.' )
 
     def _getTimeSeriesTable( self ):
 
@@ -988,7 +1000,6 @@ rdesigneur.rmoogli.updateMoogliViewer()
             p.append( etree.SubElement( title, "data"))
             p[-1].set( 'path', str(plotData[9][ind].path))
             p[-1].text = ''.join( str(round(value,res)) + ' ' for value in jvec )
-
         tree = etree.ElementTree(root)
         tree.write(filename)
 
@@ -1006,11 +1017,10 @@ rdesigneur.rmoogli.updateMoogliViewer()
         dl = [tuple(lst) for lst in dataList]
         rows = zip(tuple(time), *dl)
         header.insert(0, "time")
-
         with open(filename, 'wb') as f:
             writer = csv.writer(f, quoting=csv.QUOTE_MINIMAL)
             writer.writerow(header)
-            for row in rows:
+            for row in nv:
                 writer.writerow(row)
 
     ##########****SAVING*****###############
@@ -1609,4 +1619,3 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 for j in range( i[1], i[2] ):
                     moose.connect( i[3], 'requestOut', chemVec[j], chemFieldSrc)
                 msg = moose.connect( i[3], 'output', elObj, elecFieldDest )
-
