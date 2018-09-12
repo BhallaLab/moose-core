@@ -29,11 +29,7 @@ import matplotlib.pyplot as plt
 
 import rdesigneur.rmoogli as rmoogli
 from rdesigneur.rdesigneurProtos import *
-import fixXreacs
-#from . import fixXreacs
-#from rdesigneur.rmoogli import *
-#import rmoogli
-#from rdesigneurProtos import *
+import moose.fixXreacs as fixXreacs
 
 from moose.neuroml.NeuroML import NeuroML
 from moose.neuroml.ChannelML import ChannelML
@@ -77,6 +73,7 @@ class rdesigneur:
             combineSegments = True,
             stealCellFromLibrary = False,
             verbose = True,
+            benchmark = False,
             addSomaChemCompt = False,  # Put a soma chemCompt on neuroMesh
             addEndoChemCompt = False,  # Put an endo compartment, typically for ER, on each of the NeuroMesh compartments.
             diffusionLength= 2e-6,
@@ -114,6 +111,7 @@ class rdesigneur:
         self.combineSegments = combineSegments
         self.stealCellFromLibrary = stealCellFromLibrary
         self.verbose = verbose
+        self.benchmark = benchmark
         self.addSomaChemCompt = addSomaChemCompt
         self.addEndoChemCompt = addEndoChemCompt
         self.diffusionLength= diffusionLength
@@ -173,19 +171,20 @@ class rdesigneur:
             quit()
 
 
-
     ################################################################
     def _printModelStats( self ):
-        print("Rdesigneur: Elec model has",
+        if not self.verbose:
+            return
+        print("\nRdesigneur: Elec model has",
             self.elecid.numCompartments, "compartments and",
             self.elecid.numSpines, "spines on",
             len( self.cellPortionElist ), "compartments.")
         if hasattr( self , 'chemid' ):
             dmstoich = moose.element( self.dendCompt.path + '/stoich' )
-            print("Chem part of model has the following compartments: ")
+            print("\tChem part of model has the following compartments: ")
             for j in moose.wildcardFind( '/model/chem/##[ISA=ChemCompt]'):
                 s = moose.element( j.path + '/stoich' )
-                print( "In {}, {} voxels X {} pools".format( j.name, j.mesh.num, s.numAllPools ) )
+                print( "\t | In {}, {} voxels X {} pools".format( j.name, j.mesh.num, s.numAllPools ) )
 
     def buildModel( self, modelPath = '/model' ):
         if moose.exists( modelPath ):
@@ -194,28 +193,29 @@ class rdesigneur:
             return
         self.model = moose.Neutral( modelPath )
         self.modelPath = modelPath
-        try:
-            # Protos made in the init phase. Now install the elec and
-            # chem protos on model.
-            self.installCellFromProtos()
-            # Now assign all the distributions
-            self.buildPassiveDistrib()
-            self.buildChanDistrib()
-            self.buildSpineDistrib()
-            self.buildChemDistrib()
-            self._configureSolvers()
-            self.buildAdaptors()
-            self._buildStims()
-            self._buildPlots()
-            self._buildMoogli()
-            self._configureHSolve()
-            self._configureClocks()
-            if self.verbose:
-                self._printModelStats()
-
-        except BuildError as msg:
-            print("Error: rdesigneur: model build failed:", msg)
-            moose.delete( self.model )
+        funcs = [ self.installCellFromProtos, self.buildPassiveDistrib
+            , self.buildChanDistrib, self.buildSpineDistrib, self.buildChemDistrib
+            , self._configureSolvers, self.buildAdaptors, self._buildStims
+            , self._buildPlots, self._buildMoogli, self._configureHSolve
+            , self._configureClocks, self._printModelStats 
+            ]
+        for i, _func in enumerate( funcs ):
+            if self.benchmark:
+                print( " + (%d/%d) executing %25s"%(i, len(funcs), _func.__name__), end=' ' )
+            t0 = time.time()
+            try:
+                _func( )
+            except BuildError as msg:
+                print("Error: rdesigneur: model build failed:", msg)
+                moose.delete( self.model )
+                return
+            t = time.time() - t0
+            if self.benchmark:
+                msg = r'    ... DONE'
+                if t > 1:
+                    msg += ' %.3f sec' % t
+                print( msg )
+            sys.stdout.flush()
 
     def installCellFromProtos( self ):
         if self.stealCellFromLibrary:
@@ -256,11 +256,14 @@ class rdesigneur:
         if bracePos == -1:
             return False
 
-        modPos = func.find( "." )
+        # . can be in path name as well. Find the last dot which is most likely
+        # to be the function name.
+        modPos = func.rfind( "." )
         if ( modPos != -1 ): # Function is in a file, load and check
-            pathTokens = func[0:modPos].split('/')
+            resolvedPath = os.path.realpath( func[0:modPos] )
+            pathTokens = resolvedPath.split('/')
             pathTokens = ['/'] + pathTokens
-            modulePath = os.path.join(*pathTokens[:-1])
+            modulePath = os.path.realpath(os.path.join(*pathTokens[:-1]))
             moduleName = pathTokens[-1]
             funcName = func[modPos+1:bracePos]
             moduleFile, pathName, description = imp.find_module(moduleName, [modulePath])
@@ -608,7 +611,9 @@ class rdesigneur:
 
     # Utility function for doing lookups for objects.
     def _makeUniqueNameStr( self, obj ):
-        return obj.name + " " + str( obj.index )
+        # second one is faster than the former. 140 ns v/s 180 ns.
+        #  return obj.name + " " + str( obj.index )
+        return "%s %s" % (obj.name, obj.index)
 
     # Returns vector of source objects, and the field to use.
     # plotSpec is of the form
@@ -621,10 +626,10 @@ class rdesigneur:
             return (), ""
 
         kf = knownFields[field] # Find the field to decide type.
-        if ( kf[0] == 'CaConcBase' or kf[0] == 'ChanBase' or kf[0] == 'NMDAChan' or kf[0] == 'VClamp' ):
+        if kf[0] in ['CaConcBase', 'ChanBase', 'NMDAChan', 'VClamp']:
             objList = self._collapseElistToPathAndClass( comptList, plotSpec.relpath, kf[0] )
             return objList, kf[1]
-        elif (field == 'n' or field == 'conc' or field == 'volume'  ):
+        elif field in [ 'n', 'conc', 'volume']:
             path = plotSpec.relpath
             pos = path.find( '/' )
             if pos == -1:   # Assume it is in the dend compartment.
@@ -698,7 +703,7 @@ class rdesigneur:
                 scale = knownFields[i.field][2]
                 units = knownFields[i.field][3]
                 if i.mode == 'wave':
-                    self.wavePlotNames.append( [ tabname, i.title, k, scale, units, i.field, i.ymin, i.ymax ] )
+                    self.wavePlotNames.append( [ tabname, i.title, k, scale, units, i ] )
                 else:
                     self.plotNames.append( [ tabname, i.title, k, scale, units, i.field, i.ymin, i.ymax ] )
                 if len( i.saveFile ) > 4 and i.saveFile[-4] == '.xml' or i.saveFile:
@@ -713,11 +718,11 @@ class rdesigneur:
                         tabs.vec.threshold = -0.02 # Threshold for classifying Vm as a spike.
                         tabs.vec.useSpikeMode = True # spike detect mode on
 
-                vtabs = moose.vec( tabs )
-                q = 0
-                for p in [ x for x in plotObj3 if x != dummy ]:
-                    moose.connect( vtabs[q], 'requestOut', p, plotField )
-                    q += 1
+            vtabs = moose.vec( tabs )
+            q = 0
+            for p in [ x for x in plotObj3 if x != dummy ]:
+                moose.connect( vtabs[q], 'requestOut', p, plotField )
+                q += 1
 
     def _buildMoogli( self ):
         knownFields = {
@@ -769,7 +774,6 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
     def display( self, startIndex = 0 ):
         for i in self.plotNames:
-            # ?, title, fignum, scale, ylabel, wave/spikeTime, ymin, ymax
             plt.figure( i[2] + startIndex )
             plt.title( i[1] )
             plt.xlabel( "Time (s)" )
@@ -787,8 +791,6 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 t = np.arange( 0, vtab[0].vector.size, 1 ) * vtab[0].dt
                 for j in vtab:
                     plt.plot( t, j.vector * i[3] )
-                    if i[6] != i[7]:
-                        plt.ylim( i[6], i[7] )
         if len( self.moogList ) or len( self.wavePlotNames ) > 0:
             plt.ion()
         # Here we build the plots and lines for the waveplots
@@ -817,14 +819,15 @@ rdesigneur.rmoogli.updateMoogliViewer()
             plt.title( i[1] )
             plt.xlabel( "position (voxels)" )
             plt.ylabel( i[4] )
-            if i[6] != i[7]:
-                mn = i[6]
-                mx = i[7]
-            else:
+            plotinfo = i[5]
+            if plotinfo.ymin == plotinfo.ymax:
                 mn = np.min(vpts)
                 mx = np.max(vpts)
                 if mn/mx < 0.3:
                     mn = 0
+            else:
+                mn = plotinfo.ymin
+                mx = plotinfo.ymax
             ax.set_ylim( mn, mx )
             line, = plt.plot( range( len( vtab ) ), vpts[0] )
             timeLabel = plt.text( len(vtab ) * 0.05, mn + 0.9*(mx-mn), 'time = 0' )
@@ -834,7 +837,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
     def displayWavePlots( self ):
         for f in range( self.numWaveFrames ):
             for i in self.wavePlotNames:
-                wp = i[-1]
+                wp = i[6]
                 if len( wp[2] ) > f:
                     wp[1].set_ydata( wp[2][f] )
                     wp[3].set_text( "time = {:.1f}".format(f*self.frameDt) )
