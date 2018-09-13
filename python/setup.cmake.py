@@ -54,9 +54,9 @@ setup(
         packages               = [ 'rdesigneur', 'moose'
                                     , 'moose.SBML', 'moose.genesis'
                                     , 'moose.neuroml', 'moose.neuroml2'
-                                    , 'moose.chemUtil', 'moose.chemMerge' 
+                                    , 'moose.chemUtil', 'moose.chemMerge'
                                 ],
-        install_requires       = [ 'python-libsbml', 'numpy' ],
+        install_requires       = [ 'matplotlib', 'numpy' ],
         package_dir            = { 'moose' : 'moose', 'rdesigneur' : 'rdesigneur' },
         package_data           = { 'moose' : ['_moose' + suffix, 'neuroml2/schema/NeuroMLCoreDimensions.xml'] },
         )
