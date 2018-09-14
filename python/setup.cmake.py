@@ -32,11 +32,12 @@ with open( os.path.join( script_dir, 'VERSION'), 'r' ) as f:
     version = f.read( )
 print( 'Got %s from VERSION file' % version )
 
-# importlib is available only for python3.
+# importlib is available only for python3. Since we build wheels, prefer .so
+# extension. This way a wheel built by any python3.x will work with any python3.
 suffix = '.so'
 try:
     import importlib.machinery
-    suffix = importlib.machinery.EXTENSION_SUFFIXES[0]
+    suffix = importlib.machinery.EXTENSION_SUFFIXES[-1]
 except Exception as e:
     print( '[WARN] Failed to determine importlib suffix' )
     suffix = '.so'
