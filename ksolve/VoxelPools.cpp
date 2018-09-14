@@ -66,9 +66,12 @@ void VoxelPools::reinit( double dt )
 void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
 {
     stoichPtr_ = s;
-    absTol_ = ode->epsAbs;
-    relTol_ = ode->epsRel;
-    method_ = ode->method;
+    if( ode )
+    {
+        absTol_ = ode->epsAbs;
+        relTol_ = ode->epsRel;
+        method_ = ode->method;
+    }
 
 #ifdef USE_GSL
     if ( ode )

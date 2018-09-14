@@ -378,6 +378,7 @@ void Ksolve::setStoich( Id stoich )
     assert( stoich.element()->cinfo()->isA( "Stoich" ) );
     stoich_ = stoich;
     stoichPtr_ = reinterpret_cast< Stoich* >( stoich.eref().data() );
+
     if ( !isBuilt_ )
     {
         OdeSystem ode;
@@ -386,6 +387,7 @@ void Ksolve::setStoich( Id stoich )
         // ode.initStepSize = getEstimatedDt();
         ode.initStepSize = 0.01; // This will be overridden at reinit.
         ode.method = method_;
+
 #ifdef USE_GSL
         ode.gslSys.dimension = stoichPtr_->getNumAllPools();
         if ( ode.gslSys.dimension == 0 )
@@ -416,6 +418,7 @@ void Ksolve::setStoich( Id stoich )
 #endif
         isBuilt_ = true;
     }
+
 }
 
 Id Ksolve::getDsolve() const

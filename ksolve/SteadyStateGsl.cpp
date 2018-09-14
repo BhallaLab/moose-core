@@ -382,9 +382,10 @@ void SteadyState::setStoich( Id value )
     double vol = LookupField< unsigned int, double >::get(
                      stoichPtr->getCompartment(), "oneVoxelVolume", 0 );
     pool_.setVolume( vol );
-    pool_.setStoich( stoichPtr, 0 );
-    pool_.updateAllRateTerms( stoichPtr->getRateTerms(),
-                              stoichPtr->getNumCoreRates() );
+
+    pool_.setStoich( stoichPtr, nullptr );
+
+    pool_.updateAllRateTerms( stoichPtr->getRateTerms(), stoichPtr->getNumCoreRates() );
     isInitialized_ = 1;
 }
 
