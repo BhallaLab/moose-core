@@ -235,7 +235,7 @@ static const Cinfo* ksolveCinfo = Ksolve::initCinfo();
 
 Ksolve::Ksolve()
     :
-#if USE_GSL
+#ifdef USE_GSL
     method_( "rk5" ),
 #elif USE_BOOST_ODE
     method_( "rk5a" ),
@@ -248,19 +248,12 @@ Ksolve::Ksolve()
     dsolve_(),
     dsolvePtr_( 0 )
 {
+    ;
 }
 
 Ksolve::~Ksolve()
 {
-#if 0
-    char* p = getenv( "MOOSE_SHOW_SOLVER_PERF" );
-    if( p != NULL )
-    {
-        cout << "Info: Ksolve (+Dsolve) took " << totalTime_ << " seconds and took " << numSteps_
-             << " steps." << endl;
-
-    }
-#endif
+    ;
 }
 
 //////////////////////////////////////////////////////////////
