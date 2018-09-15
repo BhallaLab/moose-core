@@ -143,16 +143,11 @@ void VoxelPools::advance( const ProcInfo* p )
     // Variout stepper times are listed here:
     // https://www.boost.org/doc/libs/1_68_0/libs/numeric/odeint/doc/html/boost_numeric_odeint/odeint_in_detail/steppers.html#boost_numeric_odeint.odeint_in_detail.steppers.explicit_steppers
 
-    auto sys = [this](const vector_type_& dy, vector_type_& dydt, const double t) { VoxelPools::evalRates(this, dy, dydt); };
+    auto sys = [this](const vector_type_& dy, vector_type_& dydt, const double t) { 
+        VoxelPools::evalRates(this, dy, dydt); };
 
     // This is usually the default method for boost: Runge Kutta Fehlberg
-    if( method_ == "default" )
-    {
-        odeint::adams_bashforth_moulton<4, vector_type_ > abm;
-        abm.initialize( odeint::runge_kutta_cash_karp54_classic< vector_type_ >(), sys , Svec(), t, p->dt);
-        abm.do_step( sys , Svec(), t, p->dt);
-    }
-    else if( method_ == "rk5")
+    if( method_ == "rk5")
         odeint::integrate_const( rk_karp_stepper_type_()
                 , sys , Svec() , p->currTime - p->dt, p->currTime, p->dt);
     else if( method_ == "rk2" )
