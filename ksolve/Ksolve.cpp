@@ -238,7 +238,7 @@ Ksolve::Ksolve()
 #ifdef USE_GSL
     method_( "rk5" ),
 #elif USE_BOOST_ODE
-    method_( "rk5a" ),
+    method_( "default" ),
 #endif
     epsAbs_( 1e-7 ),
     epsRel_( 1e-7 ),

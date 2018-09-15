@@ -146,10 +146,9 @@ void VoxelPools::advance( const ProcInfo* p )
     auto sys = [this](const vector_type_& dy, vector_type_& dydt, const double t) { VoxelPools::evalRates(this, dy, dydt); };
 
     // This is usually the default method for boost: Runge Kutta Fehlberg
-    if( method_ == "abm" )
+    if( method_ == "default" )
     {
-        double t = p->currTime - p->dt;
-        odeint::adams_bashforth_moulton<5 , vector_type_ > abm;
+        odeint::adams_bashforth_moulton<4, vector_type_ > abm;
         abm.initialize( odeint::runge_kutta_cash_karp54_classic< vector_type_ >(), sys , Svec(), t, p->dt);
         abm.do_step( sys , Svec(), t, p->dt);
     }

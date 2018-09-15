@@ -689,7 +689,7 @@ static bool isSolutionValid( const vector< double >& x )
     for( size_t i = 0; i < x.size(); i++ )
     {
         double v = x[i];
-        if ( std::isnan( v ) or std::isinf( v ) )
+        if ( std::isnan( v ) || std::isinf( v ) )
         {
             cout << "Warning: SteadyState iteration gave nan/inf concs\n";
             return false;
