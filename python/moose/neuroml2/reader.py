@@ -171,7 +171,8 @@ class NML2Reader(object):
             
     def createPopulations(self):
         for pop in self.network.populations:
-            mpop = moose.Neutral('%s/%s' % (self.lib.path, pop.id))
+            ep = '%s/%s' % (self.lib.path, pop.id)
+            mpop = moose.element(ep) if moose.exists(ep) else moose.Neutral(ep)
             self.cells_in_populations[pop.id] ={}
             for i in range(pop.size):
                 mu.info("Creating %s/%s instances of %s under %s"%(i,pop.size,pop.component, mpop))
@@ -204,7 +205,8 @@ class NML2Reader(object):
 
     def createCellPrototype(self, cell, symmetric=True):
         """To be completed - create the morphology, channels in prototype"""
-        nrn = moose.Neuron('%s/%s' % (self.lib.path, cell.id))
+        ep = '%s/%s' % (self.lib.path, cell.id)
+        nrn = moose.element(ep) if moose.exists(ep) else moose.Neuron(ep)
         self.proto_cells[cell.id] = nrn
         self.nml_to_moose[cell] = nrn
         self.moose_to_nml[nrn] = cell
@@ -233,11 +235,13 @@ class NML2Reader(object):
         self.seg_id_to_comp_name[nmlcell.id]={}
         for seg in segments:
             if seg.name is not None:
-                id_to_comp[seg.id] = compclass('%s/%s' % (cellpath, seg.name))
+                ep = '%s/%s' % (cellpath, seg.name)
+                id_to_comp[seg.id] = moose.element(ep) if moose.exists(ep) else compclass(ep)
                 self.seg_id_to_comp_name[nmlcell.id][seg.id] = seg.name
             else:
                 name = 'comp_%s'%seg.id
-                id_to_comp[seg.id] = compclass('%s/%s' % (cellpath, name))
+                ep = '%s/%s' % (cellpath, name)
+                id_to_comp[seg.id] = moose.element(ep) if moose.exists(ep) else compclass(ep)
                 self.seg_id_to_comp_name[nmlcell.id][seg.id] = name
         # Now assign the positions and connect up axial resistance
         if not symmetric:
@@ -548,16 +552,25 @@ class NML2Reader(object):
         return mchan
 
     def createPassiveChannel(self, chan):
-        mchan = moose.Leakage('%s/%s' % (self.lib.path, chan.id))
+        epath = '%s/%s' % (self.lib.path, chan.id)
+        if moose.exists( epath ):
+            mchan = moose.element(epath)
+        else:
+            mchan = moose.Leakage(epath)
         if self.verbose:
             mu.info(self.filename, 'Created', mchan.path, 'for', chan.id)
         return mchan
 
     def importInputs(self, doc):
-        minputs = moose.Neutral('%s/inputs' % (self.lib.path))
-        for pg_nml in doc.pulse_generators:
+        epath = '%s/inputs' % (self.lib.path)
+        if moose.exists( epath ):
+            minputs = moose.element( epath )
+        else:
+            minputs = moose.Neutral( epath )
 
-            pg = moose.PulseGen('%s/%s' % (minputs.path, pg_nml.id))
+        for pg_nml in doc.pulse_generators:
+            epath = '%s/%s' % (minputs.path, pg_nml.id)
+            pg = moose.element(epath) if moose.exists(epath) else moose.PulseGen(epath)
             pg.firstDelay = SI(pg_nml.delay)
             pg.firstWidth = SI(pg_nml.duration)
             pg.firstLevel = SI(pg_nml.amplitude)
