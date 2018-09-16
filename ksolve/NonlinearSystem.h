@@ -222,7 +222,7 @@ public:
      * @return  If successful, return true. Check the variable `x_` at
      * which the system f_ is close to zero (within  the tolerance).
      */
-    bool find_roots_gnewton( double tolerance = 1e-7 , size_t max_iter = 50)
+    bool find_roots_gnewton( double tolerance, size_t max_iter)
     {
         //tolerance = sqrt( numeric_limits<double>::epsilon() );
         double norm2OfDiff = 1.0;

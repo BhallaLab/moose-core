@@ -773,7 +773,7 @@ void SteadyState::settle( bool forceSetup )
     int status = 1;
 
     // Find roots . If successful, set status to 0.
-    if( ss->find_roots_gnewton( ) )
+    if( ss->find_roots_gnewton( convergenceCriterion_, maxIter_  ) )
         status = 0;
 
     if ( status == 0 && isSolutionValid( ss->ri.nVec ) )

@@ -143,6 +143,7 @@ void VoxelPools::advance( const ProcInfo* p )
     // Variout stepper times are listed here:
     // https://www.boost.org/doc/libs/1_68_0/libs/numeric/odeint/doc/html/boost_numeric_odeint/odeint_in_detail/steppers.html#boost_numeric_odeint.odeint_in_detail.steppers.explicit_steppers
 
+    // Describe system to be used in boost solver calls.
     auto sys = [this](const vector_type_& dy, vector_type_& dydt, const double t) { 
         VoxelPools::evalRates(this, dy, dydt); };
 
@@ -203,17 +204,6 @@ int VoxelPools::gslFunc( double t, const double* y, double *dydt,
     VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
     // Stoich* s = reinterpret_cast< Stoich* >( params );
     double* q = const_cast< double* >( y ); // Assign the func portion.
-
-    // Assign the buffered pools
-    // Not possible because this is a static function
-    // Not needed because dydt = 0;
-    /*
-    double* b = q + s->getNumVarPools();
-    vector< double >::const_iterator sinit = Sinit_.begin() + s->getNumVarPools();
-    for ( unsigned int i = 0; i < s->getNumBufPools(); ++i )
-    	*b++ = *sinit++;
-    	*/
-
     vp->stoichPtr_->updateFuncs( q, t );
     vp->updateRates( y, dydt );
 #ifdef USE_GSL
