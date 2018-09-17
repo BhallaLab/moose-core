@@ -47,6 +47,7 @@ def getState( ksolve, state, vol):
     a = moose.element( '/model/kinetics/a' ).conc
     vals_.append( a )
     state.settle()
+    
     vector = []
     a = moose.element( '/model/kinetics/a' ).conc
     for x in ksolve.nVec[0]:
@@ -109,6 +110,7 @@ def main():
     expected = (1.2247, 2.46)
     # Close upto 2 decimal place is good enough.
     assert np.isclose(got, expected, atol=1e-2).all(), "Got %s, expected %s" % (got, expected)
+    print( joint )
 
 if __name__ == '__main__':
     main()
