@@ -264,22 +264,27 @@ public:
         if(0 != apply() )
             return false;
 
-        while( ublas::norm_2(f_) >= tolerance )
+        while( ublas::norm_2(f_) > tolerance )
         {
             iter += 1;
+            ri.nIter = iter;
+
             if( 0 != compute_jacobians( x_, true ) )
             {
                 J_.clear();
                 invJ_.clear();
                 return false;
             }
+
             vector_type correction = ublas::prod( invJ_, f_ );
             x_ -=  correction;
-            ri.nIter = iter;
 
             // If could not compute the value of system successfully.
             if( 0 != apply() )
+            {
+                x_.clear();
                 return false;
+            }
 
             if( iter >= max_iter )
                 break;
