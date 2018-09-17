@@ -148,7 +148,10 @@ void VoxelPools::advance( const ProcInfo* p )
         VoxelPools::evalRates(this, dy, dydt); };
 
     // This is usually the default method for boost: Runge Kutta Fehlberg
-    if( method_ == "rk5")
+    if( method_ == "rk5a")
+        odeint::integrate_adaptive( odeint::make_controlled<rk_dopri_stepper_type_>( epsAbs_, epsRel_ )
+                , sys , Svec() , p->currTime - p->dt , p->currTime, p->dt );
+    else if( method_ == "rk5")
         odeint::integrate_const( rk_karp_stepper_type_()
                 , sys , Svec() , p->currTime - p->dt, p->currTime, p->dt);
     else if( method_ == "rk2" )
@@ -157,9 +160,6 @@ void VoxelPools::advance( const ProcInfo* p )
     else if( method_ == "rk4" )
         odeint::integrate_const( rk4_stepper_type_()
                 , sys, Svec(), p->currTime - p->dt, p->currTime, p->dt );
-    else if( method_ == "rk5a")
-        odeint::integrate_adaptive( odeint::make_controlled<rk_dopri_stepper_type_>( epsAbs_, epsRel_ )
-                , sys , Svec() , p->currTime - p->dt , p->currTime, p->dt );
     else if ("rk54" == method_ )
         odeint::integrate_const( rk_karp_stepper_type_()
                  , sys , Svec() , p->currTime - p->dt, p->currTime, p->dt);
@@ -170,8 +170,8 @@ void VoxelPools::advance( const ProcInfo* p )
         odeint::integrate_const( rk_felhberg_stepper_type_()
                  , sys, Svec(), p->currTime - p->dt, p->currTime, p->dt);
     else if( method_ == "rk8a" )
-        odeint::integrate_adaptive( odeint::make_controlled<rk_felhberg_stepper_type_>( epsAbs_, epsRel_ )
-                , sys, Svec(), p->currTime - p->dt, p->currTime, p->dt);
+        odeint::integrate_adaptive( rk_felhberg_stepper_type_()
+                 , sys, Svec(), p->currTime - p->dt, p->currTime, p->dt);
     else
         odeint::integrate_adaptive( odeint::make_controlled<rk_karp_stepper_type_>( epsAbs_, epsRel_ )
                 , sys, Svec(), p->currTime - p->dt, p->currTime, p->dt);

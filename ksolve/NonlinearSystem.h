@@ -31,8 +31,6 @@
 #include <boost/numeric/ublas/lu.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
-
-
 #include "VoxelPools.h"
 
 using namespace std;
@@ -112,6 +110,7 @@ public:
         // Making this value too small or too big gonna cause error in blas methods especially when 
         // computing inverse.  
         // Gnu-GSL uses GSL_SQRT_DBL_EPSILON  which is 1.4901161193847656e-08
+        // dx_ = 1.4901161193847656e-08;
         dx_ = std::sqrt( numeric_limits<double>::epsilon() );
     }
 
@@ -130,7 +129,7 @@ public:
         for( size_t i = 0; i < size_; i++)
         {
             // This trick I leart by looking at GSL implmentation.
-            double dx = dx_ * fabs(x[i]);
+            double dx = dx_ * std::fabs(x[i]);
             if( dx == 0 )
                 dx = dx_;
 
@@ -142,7 +141,7 @@ public:
                 auto r1 = compute_at(temp, res1);
                 auto r2 = compute_at(x, res2);
 
-                if( r1 == 0 && r2 == 0 )
+                if( 0 == r1 && 0 == r2 )
                 {
                     J_(i, j) = (res1[i] - res2[i]) / dx;
                     if( isnan(J_(i,j)) || isinf(J_(i,j)) )
