@@ -32,4 +32,4 @@ apt-get install -qq libgraphviz-dev
 
 # Dependencies for NML2
 apt-get install -qq python-scipy python3-scipy
-#pip install pyNeuroML libNeuroML
+pip install pyNeuroML libNeuroML
