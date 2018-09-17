@@ -1,11 +1,11 @@
-/**********************************************************************
-** This program is part of 'MOOSE', the
-** Messaging Object Oriented Simulation Environment.
-**           Copyright (C) 2003-2010 Upinder S. Bhalla. and NCBS
-** It is made available under the terms of the
-** GNU Lesser General Public License version 2.1
-** See the file COPYING.LIB for the full notice.
-**********************************************************************/
+/*
+* This program is part of 'MOOSE', the
+* Messaging Object Oriented Simulation Environment.
+*           Copyright (C) 2003-2010 Upinder S. Bhalla. and NCBS
+* It is made available under the terms of the
+* GNU Lesser General Public License version 2.1
+* See the file COPYING.LIB for the full notice.
+*/
 
 #include "../basecode/header.h"
 
@@ -150,8 +150,10 @@ void VoxelPools::advance( const ProcInfo* p )
     // This is usually the default method. It works well in practice. Tested
     // with steady-state solver. Closest to GSL rk5 .
     if( method_ == "rk5" || method_ == "gsl" || method_ == "boost" )
-        odeint::integrate_const( make_dense_output( epsAbs_, epsRel_, odeint::runge_kutta_dopri5<vector_type_>() ) 
-                , sys , Svec() , p->currTime - p->dt , p->currTime , p->dt);
+        odeint::integrate_const( 
+                make_dense_output( epsAbs_, epsRel_, odeint::runge_kutta_dopri5<vector_type_>() ) 
+                , sys , Svec() , p->currTime - p->dt , p->currTime , p->dt
+                );
     else if( method_ == "rk5a" || method_ == "adaptive" )
         odeint::integrate_adaptive( odeint::make_controlled<rk_dopri_stepper_type_>( epsAbs_, epsRel_ )
                 , sys , Svec() , p->currTime - p->dt , p->currTime, p->dt );

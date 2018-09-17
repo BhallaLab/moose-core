@@ -15,8 +15,6 @@ import numpy as np
 import moose
 print( "[INFO ] Using moose from %s" % moose.__file__ )
 
-vec_ = [ ]
-
 def main():
     compartment = makeModel()
     ksolve = moose.Ksolve( '/model/compartment/ksolve' )
@@ -49,10 +47,10 @@ def main():
         bvec.append( b.conc )
         a.concInit += deltaA
 
-    aa, bb = np.log10( avec ), np.log10( bvec )
-    got = np.mean(aa), np.std(aa), np.mean(bb), np.std(bb)
-    expected = (-0.6336, 0.16667, -0.63936, 0.89758)
-    assert np.isclose(got, expected, atol = 1e-3).all(), "Got %s, expected %s" % (got, expected)
+    aa, bb = avec, bvec
+    got = np.mean(aa), np.std(aa)
+    expected = 0.24899, 0.08660
+    assert np.isclose(got, expected, atol = 1e-4).all(), "Got %s, expected %s" % (got, expected)
     print( "[INFO ] Test 1 PASSED" )
     
 
@@ -66,10 +64,10 @@ def main():
         bvec.append( b.conc )
         a.concInit -= deltaA
 
-    aa, bb = np.log10( avec ), np.log10( bvec )
-    got = np.mean(aa), np.std(aa), np.mean(bb), np.std(bb)
-    expected = (-0.62954, 0.16505, 0.05225, 0.72241),
-    assert np.isclose(got, expected, atol = 1e-3).all(), "Got %s, expected %s" % (got, expected)
+    aa, bb = avec,  bvec
+    got = np.mean(aa), np.std(aa)
+    expected = 0.251, 0.0866
+    assert np.isclose(got, expected, atol = 1e-4).all(), "Got %s, expected %s" % (got, expected)
     print( "[INFO ] Test 2 PASSED" )
 
     # Now aim for the middle. We do this by judiciously choosing a 
@@ -85,10 +83,10 @@ def main():
         bvec.append( b.conc )
         a.concInit -= deltaA
 
-    aa, bb = np.log10( avec ), np.log10( bvec )
-    got = np.mean(aa), np.std(aa), np.mean(bb), np.std(bb)
-    expected = (-0.67228, 0.07711, -0.55786, 0.17519)
-    assert np.isclose(got, expected, atol = 1e-3).all(), "Got %s, expected %s" % (got, expected)
+    aa, bb = avec, bvec
+    got = np.mean(aa), np.std(aa)
+    expected = 0.216, 0.03752
+    assert np.isclose(got, expected, atol = 1e-4).all(), "Got %s, expected %s" % (got, expected)
     print( "[INFO ] Test 3 PASSED" )
     quit()
 
