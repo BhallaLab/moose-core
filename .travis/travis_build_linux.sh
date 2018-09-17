@@ -54,8 +54,8 @@ echo "Currently in `pwd`"
 (
     # Now with boost.
     mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && \
-        cmake -DWITH_BOOST_ODE=ON -DDEBUG=OFF -DPYTHON_EXECUTABLE="$PYTHON2" ..
-    $MAKE && ctest --output-on-failure
+        cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
+    $MAKE && ctest --output-on-failure 
 )
 
 # This is only applicable on linux build.
@@ -63,12 +63,14 @@ echo "Python3: Removed python2-networkx and install python3"
 if type $PYTHON3 > /dev/null; then
     sudo apt-get remove -qq python-networkx || echo "Error with apt"
     sudo apt-get install -qq python3-networkx || echo "Error with apt"
-    $PYTHON3 -m pip install pyneuroml libneuroml  --user --upgrade
+    # GSL.
     (
         mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && \
-            cmake -DPYTHON_EXECUTABLE="$PYTHON3" ..
-        $MAKE && ctest --output-on-failure
+            cmake -DPYTHON_EXECUTABLE="$PYTHON3" -DDEBUG=ON ..
+        $MAKE && ctest --output-on-failure 
     )
+
+    # BOOST
     (
         mkdir -p _BOOST_BUILD2 && cd _BOOST_BUILD2 && \
             cmake -DWITH_BOOST_ODE=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
