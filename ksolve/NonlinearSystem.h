@@ -144,7 +144,7 @@ public:
                 if( 0 == r1 && 0 == r2 )
                 {
                     J_(i, j) = (res1[i] - res2[i]) / dx;
-                    if( isnan(J_(i,j)) || isinf(J_(i,j)) )
+                    if( std::isnan(J_(i,j)) || std::isinf(J_(i,j)) )
                     {
                         /* Try increasing dx */
                         J_.clear();
