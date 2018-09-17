@@ -349,7 +349,7 @@ void SteadyState::setStoich( Id value )
     setupSSmatrix();
     double vol = LookupField< unsigned int, double >::get(stoichPtr->getCompartment(), "oneVoxelVolume", 0 );
     pool_.setVolume( vol );
-    pool_.setStoich( stoichPtr, 0 );
+    pool_.setStoich( stoichPtr, nullptr );
     pool_.updateAllRateTerms( stoichPtr->getRateTerms(), stoichPtr->getNumCoreRates() );
     isInitialized_ = 1;
 }
@@ -561,6 +561,7 @@ void SteadyState::setupSSmatrix()
     total_.assign( nConsv, 0.0 );
 
     Id ksolve = Field< Id >::get( stoich_, "ksolve" );
+
     vector< double > nVec =
         LookupField< unsigned int, vector< double > >::get(
             ksolve,"nVec", 0 );

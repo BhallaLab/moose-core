@@ -147,13 +147,14 @@ void VoxelPools::advance( const ProcInfo* p )
     auto sys = [this](const vector_type_& dy, vector_type_& dydt, const double t) { 
         VoxelPools::evalRates(this, dy, dydt); };
 
-    // This is usually the default method for boost: Runge Kutta Fehlberg
-    if( method_ == "rk5a")
+    // This is usually the default method. It works well in practice. Tested
+    // with steady-state solver. Closest to GSL rk5 .
+    if( method_ == "rk5" || method_ == "gsl" || method_ == "boost" )
+        odeint::integrate_const( make_dense_output( epsAbs_, epsRel_, odeint::runge_kutta_dopri5<vector_type_>() ) 
+                , sys , Svec() , p->currTime - p->dt , p->currTime , p->dt);
+    else if( method_ == "rk5a" || method_ == "adaptive" )
         odeint::integrate_adaptive( odeint::make_controlled<rk_dopri_stepper_type_>( epsAbs_, epsRel_ )
                 , sys , Svec() , p->currTime - p->dt , p->currTime, p->dt );
-    else if( method_ == "rk5")
-        odeint::integrate_const( rk_karp_stepper_type_()
-                , sys , Svec() , p->currTime - p->dt, p->currTime, p->dt);
     else if( method_ == "rk2" )
         odeint::integrate_const( rk_midpoint_stepper_type_()
                 , sys, Svec(), p->currTime - p->dt, p->currTime, p->dt);
@@ -163,7 +164,7 @@ void VoxelPools::advance( const ProcInfo* p )
     else if ("rk54" == method_ )
         odeint::integrate_const( rk_karp_stepper_type_()
                  , sys , Svec() , p->currTime - p->dt, p->currTime, p->dt);
-    else if ("rk54a" == method_ )
+    else if ("rkck" == method_ )
         odeint::integrate_adaptive( odeint::make_controlled<rk_karp_stepper_type_>( epsAbs_, epsRel_ )
                 , sys, Svec(), p->currTime - p->dt, p->currTime, p->dt);
     else if( method_ == "rk8" )
@@ -173,8 +174,13 @@ void VoxelPools::advance( const ProcInfo* p )
         odeint::integrate_adaptive( rk_felhberg_stepper_type_()
                  , sys, Svec(), p->currTime - p->dt, p->currTime, p->dt);
     else
-        odeint::integrate_adaptive( odeint::make_controlled<rk_karp_stepper_type_>( epsAbs_, epsRel_ )
-                , sys, Svec(), p->currTime - p->dt, p->currTime, p->dt);
+    {
+        cerr << "Ksolve: Unknow method " << method_  << ", using default!" << endl;
+        odeint::integrate_const(
+                make_dense_output( epsAbs_, epsRel_, odeint::runge_kutta_dopri5<vector_type_>() ) 
+                , sys , Svec() , p->currTime - p->dt , p->currTime , p->dt
+                );
+    }
 
 #endif
     if ( !stoichPtr_->getAllowNegative() )   // clean out negatives
