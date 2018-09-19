@@ -24,7 +24,8 @@ apt-get install -qq libxml2-dev libbz2-dev
 apt-get install -qq libhdf5-serial-dev
 apt-get install -qq make cmake
 apt-get install -qq python-numpy python-matplotlib python-networkx python-pip
-apt-get install -qq python3-numpy python3-matplotlib python3-dev python3-lxml python-lxml
+apt-get install -qq python3-lxml python-lxml
+apt-get install -qq python3-numpy python3-matplotlib python3-dev
 apt-get install -qq libboost-all-dev
 apt-get install -qq libgsl0-dev
 apt-get install -qq python-pip python3-pip
@@ -32,5 +33,8 @@ apt-get install -qq libgraphviz-dev
 
 # Dependencies for NML2
 apt-get install -qq python-scipy python3-scipy
-sudo python2 -m pip install pyNeuroML libNeuroML
-sudo python3 -m pip install pyNeuroML libNeuroML
+apt-get install -qq python-lxml python3-lxml
+apt-get install -qq python-setuptools python3-setuptools
+apt-get install -qq python-tornado python3-tornado
+python2 -m pip install pyNeuroML libNeuroML --user
+python3 -m pip install pyNeuroML libNeuroML --user
