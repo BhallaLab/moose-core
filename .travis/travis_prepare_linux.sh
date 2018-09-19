@@ -10,7 +10,7 @@
 #       OPTIONS: ---
 #  REQUIREMENTS: ---
 #          BUGS: ---
-#         NOTES: ---
+#         NOTES: Always run with sudo permission.
 #        AUTHOR: Dilawar Singh (), dilawars@ncbs.res.in
 #  ORGANIZATION: NCBS Bangalore
 #       CREATED: 01/02/2017 10:10:02 AM
@@ -36,5 +36,5 @@ apt-get install -qq python-scipy python3-scipy
 apt-get install -qq python-lxml python3-lxml
 apt-get install -qq python-setuptools python3-setuptools
 apt-get install -qq python-tornado python3-tornado
-python2 -m pip install pyNeuroML libNeuroML --user
-python3 -m pip install pyNeuroML libNeuroML --user
+python2 -m pip install pyNeuroML libNeuroML
+python3 -m pip install pyNeuroML libNeuroML

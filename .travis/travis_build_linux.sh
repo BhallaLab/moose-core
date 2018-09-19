@@ -40,8 +40,6 @@ unset PYTHONPATH
 $PYTHON2 -m compileall -q .
 if type $PYTHON3 > /dev/null; then $PYTHON3 -m compileall -q . ; fi
 
-$PYTHON2 -m pip install pyneuroml libneuroml
-
 echo "Currently in `pwd`"
 (
     mkdir -p _GSL_BUILD && cd _GSL_BUILD
@@ -55,7 +53,7 @@ echo "Currently in `pwd`"
     # Now with boost.
     mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && \
         cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
-    $MAKE && ctest --output-on-failure 
+    $MAKE && ctest --output-on-failure
 )
 
 # This is only applicable on linux build.
@@ -67,7 +65,7 @@ if type $PYTHON3 > /dev/null; then
     (
         mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && \
             cmake -DPYTHON_EXECUTABLE="$PYTHON3" -DDEBUG=ON ..
-        $MAKE && ctest --output-on-failure 
+        $MAKE && ctest --output-on-failure
     )
 
     # BOOST
