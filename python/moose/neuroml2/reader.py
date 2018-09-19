@@ -357,7 +357,7 @@ class NML2Reader(object):
             raise Exception('No prototype pool for %s referred to by %s' % ( 
                     species.concentration_model, species.id)
                 )
-        pool_id = moose.copy(proto_pool, comp, species.id)
+        pool_id = moose.copy(proto_pool, compartment, species.id)
         pool = moose.element(pool_id)
         pool.B = pool.B / (np.pi * compartment.length * ( 
             0.5 * compartment.diameter + pool.thickness) * 
@@ -421,11 +421,13 @@ class NML2Reader(object):
             try:
                 ionChannel = self.id_to_ionChannel[chdens.ion_channel]
             except KeyError:
-                mu.info('No channel with id', chdens.ion_channel)                
+                mu.info('No channel with id: %s' % chdens.ion_channel)                
                 continue
                 
             if self.verbose:
-                mu.info('Setting density of channel %s in %s to %s; erev=%s (passive: %s)'%(chdens.id, segments, condDensity,erev,self.isPassiveChan(ionChannel)))
+                mu.info('Setting density of channel %s in %s to %s; erev=%s (passive: %s)'%(
+                    chdens.id, segments, condDensity,erev,self.isPassiveChan(ionChannel))
+                    )
             
             if self.isPassiveChan(ionChannel):
                 for seg in segments:
@@ -542,13 +544,13 @@ class NML2Reader(object):
             if hasattr(ngate,'steady_state') and (ngate.time_course is None) and (ngate.steady_state is not None):
                 inf = ngate.steady_state
                 tau = 1 / (alpha + beta)
-                if (inf is not None):
+                if inf is not None:
                     inf = self.calculateRateFn(inf, vmin, vmax, vdivs)
                     mgate.tableA = q10_scale * (inf / tau)
                     mgate.tableB = q10_scale * (1 / tau)
                 
         if self.verbose:
-            mu.info(self.filename, '== Created', mchan.path, 'for', chan.id)
+            mu.info('%s: Created %s for %s'%(self.filename,mchan.path,chan.id))
         return mchan
 
     def createPassiveChannel(self, chan):
@@ -558,7 +560,7 @@ class NML2Reader(object):
         else:
             mchan = moose.Leakage(epath)
         if self.verbose:
-            mu.info(self.filename, 'Created', mchan.path, 'for', chan.id)
+            mu.info('%s: Created %s for %s'%(self.filename,mchan.path,chan.id))
         return mchan
 
     def importInputs(self, doc):
@@ -579,7 +581,7 @@ class NML2Reader(object):
 
     def importIonChannels(self, doc, vmin=-150e-3, vmax=100e-3, vdivs=5000):
         if self.verbose:
-            mu.info(self.filename, 'Importing the ion channels')
+            mu.info('%s : Importing the ion channels' % self.filename )
             
         for chan in doc.ion_channel+doc.ion_channel_hhs:
             if chan.type == 'ionChannelHH':
@@ -593,11 +595,12 @@ class NML2Reader(object):
             self.nml_to_moose[chan] = mchan
             self.proto_chans[chan.id] = mchan
             if self.verbose:
-                mu.info(self.filename, 'Created ion channel', mchan.path, 'for', chan.type, chan.id)
+                mu.info( self.filename + ' : Created ion channel %s for %s %s'%( 
+                    mchan.path, chan.type, chan.id))
 
     def importConcentrationModels(self, doc):
         for concModel in doc.decaying_pool_concentration_models:
-            proto = self.createDecayingPoolConcentrationModel(concModel)
+            self.createDecayingPoolConcentrationModel(concModel)
 
     def createDecayingPoolConcentrationModel(self, concModel):
         """Create prototype for concentration model"""        
@@ -606,10 +609,6 @@ class NML2Reader(object):
         else:
             name = concModel.id
         ca = moose.CaConc('%s/%s' % (self.lib.path, id))
-        mu.info('11111', concModel.restingConc)
-        mu.info('2222', concModel.decayConstant)
-        mu.info('33333', concModel.shellThickness)
-
         ca.CaBasal = SI(concModel.restingConc)
         ca.tau = SI(concModel.decayConstant)
         ca.thick = SI(concModel.shellThickness)
@@ -619,4 +618,4 @@ class NML2Reader(object):
         self.proto_pools[concModel.id] = ca
         self.nml_to_moose[concModel.id] = ca
         self.moose_to_nml[ca] = concModel
-        logger.debug('Created moose element: %s for nml conc %s' % (ca.path, concModel.id))
+        mu.debug('Created moose element: %s for nml conc %s' % (ca.path, concModel.id))

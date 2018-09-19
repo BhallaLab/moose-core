@@ -530,6 +530,7 @@ foreach( _py_script ${PY_SCRIPTS} )
     set(PYLINT_OPTIONS --disable=no-member --disable=no-name-in-module 
             --disable=invalid-unary-operand-type 
             --disable=import-error
+            --disable=no-method-argument
         )
     add_custom_target( ${TGT_NAME}
         COMMAND ${PYTHON_EXECUTABLE} -m pylint -E ${PYLINT_OPTIONS} ${_py_script}

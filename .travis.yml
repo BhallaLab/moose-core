@@ -26,13 +26,11 @@ before_script:
 
 
 before_script:
-- python3 -m pip install pylint --user
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then nvm get head || true; fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./.travis/travis_prepare_osx.sh; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ./.travis/travis_prepare_linux.sh; fi
 
 script:
-- ./.travis/run_pylint.sh
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./.travis/travis_build_osx.sh; fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./.travis/travis_build_linux.sh; fi
 

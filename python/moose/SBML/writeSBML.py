@@ -166,9 +166,10 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
     else:
         return False, "Atleast one compartment should exist to write SBML"
 
-def calPrime(x):
-    prime = int((20 * (float(x - cmin) / float(cmax - cmin))) - 10)
-    return prime
+# This function does not make sense. Where is cmin, cmax?
+#def calPrime(x):
+#    prime = int((20 * (float(x - cmin) / float(cmax - cmin))) - 10)
+#    return prime
 
 def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
     for enz in moose.wildcardFind(modelpath + '/##[ISA=EnzBase]'):
@@ -1055,11 +1056,12 @@ def writeSimulationAnnotation(modelpath):
         modelAnno = modelAnno + "</moose:ModelAnnotation>"
     return modelAnno
 
-def xyPosition(objInfo,xory):
-    try:
-        return(float(moose.element(objInfo).getField(xory)))
-    except ValueError:
-        return (float(0))
+## Already defined in chemConnectUtil from which this module is importing *
+#def xyPosition(objInfo,xory):
+#    try:
+#        return(float(moose.element(objInfo).getField(xory)))
+#    except ValueError:
+#        return (float(0))
 
 def recalculatecoordinates(modelpath, mObjlist,xcord,ycord):
     positionInfoExist = not(len(np.nonzero(xcord)[0]) == 0 \

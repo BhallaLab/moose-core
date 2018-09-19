@@ -222,7 +222,7 @@ def saveRecords(records, xvec = None, **kwargs):
     for k in records:
         try:
             yvec = records[k].vector
-        except AtrributeError as e:
+        except AttributeError as e:
             yevc = records[k]
         yvecs.append(yvec)
     xvec = np.linspace(0, clock.currentTime, len(yvecs[0]))
@@ -284,7 +284,7 @@ def plotRecords(records, xvec = None, **kwargs):
     plt.close( )
 
 
-def plotTables( regex = '.*', **kwargs ):
+def plotTablesByRegex( regex = '.*', **kwargs ):
     """plotTables Plot all moose.Table/moose.Table2 matching given regex. By
     default plot all tables. Table names must be unique. Table name are used as
     legend.

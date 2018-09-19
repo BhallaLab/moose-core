@@ -1,5 +1,6 @@
 #!/usr/bin/env bash 
 set -e
+python3 -m pip install pylint --user 
 PYLINT="python3 -m pylint -E \
     --disable=no-member --disable=no-name-in-module \
     --disable=invalid-unary-operand-type \
