@@ -150,7 +150,7 @@ void VoxelPools::advance( const ProcInfo* p )
     // This is usually the default method. It works well in practice. Tested
     // with steady-state solver. Closest to GSL rk5 .
     if( method_ == "rk5" || method_ == "gsl" || method_ == "boost" )
-        odeint::integrate_const( 
+        odeint::integrate_adaptive( 
                 make_dense_output( epsAbs_, epsRel_, odeint::runge_kutta_dopri5<vector_type_>() ) 
                 , sys , Svec() , p->currTime - p->dt , p->currTime , p->dt
                 );
