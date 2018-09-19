@@ -40,6 +40,7 @@ unset PYTHONPATH
 $PYTHON2 -m compileall -q .
 if type $PYTHON3 > /dev/null; then $PYTHON3 -m compileall -q . ; fi
 
+# Python2 and GSL.
 echo "Currently in `pwd`"
 (
     mkdir -p _GSL_BUILD && cd _GSL_BUILD
@@ -49,14 +50,8 @@ echo "Currently in `pwd`"
     $PYTHON2 -c 'import moose;print(moose.__file__);print(moose.version())'
 )
 
-(
-    # Now with boost.
-    mkdir -p _BOOST_BUILD && cd _BOOST_BUILD && \
-        cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
-    $MAKE && ctest --output-on-failure
-)
-
-# This is only applicable on linux build.
+# Python3 with GSL and BOOST. This should be the only build after we drop
+# python2 support.
 echo "Python3: Removed python2-networkx and install python3"
 if type $PYTHON3 > /dev/null; then
     sudo apt-get remove -qq python-networkx || echo "Error with apt"
