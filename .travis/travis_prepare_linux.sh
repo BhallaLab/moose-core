@@ -24,7 +24,7 @@ apt-get install -qq libxml2-dev libbz2-dev
 apt-get install -qq libhdf5-serial-dev
 apt-get install -qq make cmake
 apt-get install -qq python-numpy python-matplotlib python-networkx python-pip
-apt-get install -qq python3-numpy python3-matplotlib python3-dev
+apt-get install -qq python3-numpy python3-matplotlib python3-dev python3-lxml python-lxml
 apt-get install -qq libboost-all-dev
 apt-get install -qq libgsl0-dev
 apt-get install -qq python-pip python3-pip
