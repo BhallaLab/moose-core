@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function, division, absolute_import
+
 # reader.py ---
 # 
 # Filename: reader.py
@@ -14,7 +16,6 @@
 """Implementation of reader for NeuroML 2 models.
 TODO: handle morphologies of more than one segment...
 """
-from __future__ import print_function, division, absolute_import
 
 try:
     from future_builtins import zip, map
@@ -29,9 +30,8 @@ import neuroml as nml
 from pyneuroml import pynml
 import moose
 import moose.utils as mu
-
 from .units import SI
-from . import hhfit
+
 
 def _unique( ls ):
     res = [ ]
@@ -381,14 +381,15 @@ class NML2Reader(object):
         return False
     
 
-    rate_fn_map = {
-        'HHExpRate': hhfit.exponential2,
-        'HHSigmoidRate': hhfit.sigmoid2,
-        'HHSigmoidVariable': hhfit.sigmoid2,
-        'HHExpLinearRate': hhfit.linoid2 }
-
     def calculateRateFn(self, ratefn, vmin, vmax, tablen=3000, vShift='0mV'):
         """Returns A / B table from ngate."""
+        from . import hhfit
+        rate_fn_map = {
+            'HHExpRate': hhfit.exponential2,
+            'HHSigmoidRate': hhfit.sigmoid2,
+            'HHSigmoidVariable': hhfit.sigmoid2,
+            'HHExpLinearRate': hhfit.linoid2 }
+
         tab = np.linspace(vmin, vmax, tablen)
         if self._is_standard_nml_rate(ratefn):
             midpoint, rate, scale = map(SI, (ratefn.midpoint, ratefn.rate, ratefn.scale))
