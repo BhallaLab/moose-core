@@ -311,7 +311,7 @@ class rdesigneur:
             protoName = protoVec[0][6:]
             if self.isKnownClassOrFile( protoName, knownClasses ):
                 try:
-                    getAttr( moose, protoName )( '/library/' + protoVec[1] )
+                    getattr( moose, protoName )( '/library/' + protoVec[1] )
                 except AttributeError:
                     raise BuildError( protoType + "Proto: Moose class '" \
                             + protoVec[0] + "' not found." )

@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-#
-# plot_utils.py: Some utility function for plotting data in moose.
-
 from __future__ import print_function, division, absolute_import
 
 __author__           = "Dilawar Singh"

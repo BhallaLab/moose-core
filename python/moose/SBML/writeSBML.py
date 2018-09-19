@@ -32,16 +32,11 @@ Aug 3 : Added recalculatecoordinates,cleanup in groupName
 '''
 import sys
 import re
+import os
 import moose
 from moose.SBML.validation import validateModel
 from moose.chemUtil.chemConnectUtil import *
 from moose.chemUtil.graphUtils import *
-
-
-# ToDo:
-#   Table should be written
-# boundary condition for buffer pool having assignment statment constant
-# shd be false
 
 foundLibSBML_ = False
 try:
