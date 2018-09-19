@@ -26,8 +26,10 @@ set -e
     # Make sure not to pick up python from /opt.
     PATH=/usr/local/bin:/usr/bin:$PATH
 
-    # Run travis
+    # Get pylint
     python -m pip install pylint --user
+    python -m pip install python-libsbml --user
+    python -m pip install pyneuroml --user
 
     mkdir -p _GSL_BUILD && cd _GSL_BUILD \
         && cmake -DDEBUG=ON \
