@@ -26,17 +26,3 @@ add_library(basecode
 	doubleEq.cpp
 	testAsync.cpp
     )
-
-# tidy up 
-if( "${CMAKE_VERSION}" VERSION_GREATER "3.5")
-    set_target_properties(basecode 
-        PROPERTIES  CXX_STANDARD 11 
-                    CXX_STANDARD_REQUIRED ON 
-                    COMPILE_FLAGS "${WARNING_FLAGS}"
-        )
-    if(clang_tidy_exe)
-        set_target_properties(basecode 
-            PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
-            )
-    endif()
-endif()
