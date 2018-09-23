@@ -3,6 +3,7 @@ include( ${CMAKE_CURRENT_SOURCE_DIR}/../CheckCXXCompiler.cmake)
 add_library(hsolve
     	HSolveStruct.cpp
 	HinesMatrix.cpp
+        Cell.cpp
 	HSolvePassive.cpp
 	RateLookup.cpp
 	HSolveActive.cpp
