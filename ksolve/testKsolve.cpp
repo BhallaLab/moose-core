@@ -9,7 +9,6 @@
 #include "../basecode/header.h"
 #include "../shell/Shell.h"
 #include "RateTerm.h"
-#include "muParser.h"
 #include "FuncTerm.h"
 #include "../basecode/SparseMatrix.h"
 #include "KinSparseMatrix.h"
@@ -18,6 +17,8 @@
 #include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
+
+#include "../external/muparser/include/muParser.h"
 
 /**
  * Tab controlled by table
