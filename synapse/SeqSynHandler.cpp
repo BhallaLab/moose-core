@@ -8,8 +8,8 @@
 **********************************************************************/
 
 #include <queue>
-#include "global.h"
-#include "header.h"
+#include "../basecode/global.h"
+#include "../basecode/header.h"
 #include "Synapse.h"
 #include "SynEvent.h"
 #include "SynHandlerBase.h"
