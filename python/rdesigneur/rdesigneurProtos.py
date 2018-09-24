@@ -49,13 +49,15 @@ import moose
 import math
 from moose import utils
 
-EREST_ACT = -0.060
-ECA = 0.080
-EK =    -0.075
-SOMA_A = 3.32e-9
-per_ms = 1e3
-PI = 3.14159265359
+EREST_ACT    = -0.060
+ECA          = 0.080
+EK           = -0.075
+SOMA_A       = 3.32e-9
+per_ms       = 1e3
+PI           = 3.14159265359
 FaradayConst = 96485.3365 # Coulomb/mol
+CA_SCALE     = 25000 # Ratio of Traub units to mM. 250::0.01
+
 
 
 def make_HH_Na(name = 'HH_Na', parent='/library', vmin=-110e-3, vmax=50e-3, vdivs=3000):
