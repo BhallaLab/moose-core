@@ -15,6 +15,8 @@ add_definitions(-Wall
     )
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     add_definitions( -Wno-unused-local-typedefs )
+elseif(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
+    add_definitions( -Wno-unused-local-typedef )
 endif()
 
 
