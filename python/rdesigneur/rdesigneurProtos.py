@@ -452,6 +452,39 @@ def make_glu( name ):
     return glu
 
 #========================================================================
+#                NMDAChan: NMDA receptor
+#========================================================================
+
+def make_NMDA( name ):
+    if moose.exists( '/library/' + name ):
+        return
+    NMDA = moose.NMDAChan( '/library/' + name )
+    NMDA.Ek = 0.0
+    NMDA.tau1 = 20.0e-3
+    NMDA.tau2 = 20.0e-3
+    NMDA.Gbar = 5 * SOMA_A
+    NMDA.CMg = 1.2		#	[Mg]ext in mM
+    NMDA.KMg_A = 1.0/0.28
+    NMDA.KMg_B = 1.0/62
+    NMDA.temperature = 300  # Temperature in Kelvin.
+    NMDA.extCa = 1.5        # [Ca]ext in mM
+    NMDA.intCa = 0.00008        # [Ca]int in mM
+    NMDA.intCaScale = 1         # Scale factor from elec Ca units to mM
+    NMDA.intCaOffset = 0.00008  # Basal [Ca]int in mM
+    NMDA.condFraction = 0.02  # Fraction of conductance due to Ca
+
+    addmsg1 = moose.Mstring( NMDA.path + '/addmsg1' )
+    addmsg1.value = '.	ICaOut ../Ca_conc current'
+    addmsg2 = moose.Mstring( NMDA.path + '/addmsg2' )
+    addmsg2.value = '../Ca_conc	concOut . assignIntCa'
+
+    sh = moose.SimpleSynHandler( NMDA.path + '/sh' )
+    moose.connect( sh, 'activationOut', NMDA, 'activation' )
+    sh.numSynapses = 1
+    sh.synapse[0].weight = 1
+    return NMDA
+
+#========================================================================
 #                SynChan: GABA receptor
 #========================================================================
 
