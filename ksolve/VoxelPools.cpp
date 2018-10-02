@@ -23,7 +23,7 @@ using namespace boost::numeric;
 #include "VoxelPools.h"
 #include "RateTerm.h"
 #include "FuncTerm.h"
-#include "SparseMatrix.h"
+#include "../basecode/SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "../mesh/VoxelJunction.h"
 #include "XferInfo.h"

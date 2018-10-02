@@ -66,15 +66,6 @@ add_custom_target(uninstall
 # This is for testing purpose.
 link_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-################################# OS Specific ##################################
-message(STATUS "Operating system: ${CMAKE_SYSTEM_NAME}")
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    CMAKE_POLICY(SET CMP0042 NEW)
-    set(MACOSX TRUE)
-else()
-    set(MACOSX FALSE)
-endif()
-
 ################################ CMAKE OPTIONS ##################################
 option(WITH_NSDF            "Enable NSDF support. Requires hdf5" OFF )
 
