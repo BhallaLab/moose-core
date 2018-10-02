@@ -56,7 +56,8 @@ SOMA_A       = 3.32e-9
 per_ms       = 1e3
 PI           = 3.14159265359
 FaradayConst = 96485.3365 # Coulomb/mol
-CA_SCALE     = 25000 # Ratio of Traub units to mM. 250::0.01
+#CA_SCALE     = 25000 # Ratio of Traub units to mM. 250::0.01
+CA_SCALE     = 1.0 # I have now set sensible ranges in the KCA and KAHP
 
 
 
@@ -312,13 +313,17 @@ def make_Ca_conc( name ):
 # this was specified here in make_Ca_conc.
 
 #========================================================================
-#             Tabulated Ca-dependent K AHP Channel
+#             Tabulated Ca-dependent K AHP Channel: Traub 1991
 #========================================================================
 
 # This is a tabchannel which gets the calcium concentration from Ca_conc
 #  in order to calculate the activation of its Z gate.  It is set up much
 #  like the Ca channel, except that the A and B tables have values which are
 #  functions of concentration, instead of voltage.
+# Traub's original equation is min(0.2e-4 Xi, 0.01) which suggests a max
+# of 500 for the Xi (calcium) in his system. For dendritic calcium say 10uM
+# or 0.01 mM. Elsewhere we estimate that the ratio of Traub units to mM is
+# 250:0.01. Using this ratio, we should have xmax = 0.02.
 
 def make_K_AHP( name ):
     if moose.exists( '/library/' + name ):
@@ -332,7 +337,7 @@ def make_K_AHP( name ):
     K_AHP.Zpower = 1
 
     zgate = moose.element( K_AHP.path + '/gateZ' )
-    xmax = 500.0
+    xmax = 0.02 # 20 micromolar.
     zgate.min = 0
     zgate.max = xmax
     zgate.divs = 3000
@@ -341,7 +346,7 @@ def make_K_AHP( name ):
     dx = (zgate.max - zgate.min)/zgate.divs
     x = zgate.min
     for i in range( zgate.divs + 1 ):
-            zA[i] = min( 0.02 * CA_SCALE * x, 10 )
+            zA[i] = min( 250.00 * CA_SCALE * x, 10 )
             zB[i] = 1.0
             x = x + dx
 
@@ -405,13 +410,14 @@ def make_K_C( name ):
     xgate.tableB = xB
 
 # Create a table for the function of concentration, allowing a
-# concentration range of 0 to 200, with 3000 divisions.  This is done
+# concentration range of 0 to 100 uM, with 3000 divisions.  This is done
 # using the Z gate, which can receive a CONCEN message.  By using
 # the "instant" flag, the A and B tables are evaluated as lookup tables,
 #  rather than being used in a differential equation.
     zgate = moose.element( K_C.path + '/gateZ' )
     zgate.min = 0.0
-    xmax = 150.0
+    xmax = 0.02  # Max Ca conc is likely to be 100 uM even in spine, but
+        # based on estimates above let's keep it at 20uM.
     zgate.max = xmax
     zgate.divs = 3000
     zA = np.zeros( (zgate.divs + 1), dtype=float)
@@ -420,8 +426,8 @@ def make_K_C( name ):
     x = zgate.min
     #CaScale = 100000.0 / 250.0e-3
     for i in range( zgate.divs + 1 ):
-        zA[i] = min( 1000.0, x * CA_SCALE / (250 * xmax ) )
-        zB[i] = 1000.0
+        zA[i] = min( 1.0, x * CA_SCALE / xmax)
+        zB[i] = 1.0
         x += dx
     zgate.tableA = zA
     zgate.tableB = zB
