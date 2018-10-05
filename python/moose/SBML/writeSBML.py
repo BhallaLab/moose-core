@@ -166,11 +166,6 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
     else:
         return False, "Atleast one compartment should exist to write SBML"
 
-# This function does not make sense. Where is cmin, cmax?
-#def calPrime(x):
-#    prime = int((20 * (float(x - cmin) / float(cmax - cmin))) - 10)
-#    return prime
-
 def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
     for enz in moose.wildcardFind(modelpath + '/##[ISA=EnzBase]'):
         enzannoexist = False
@@ -1056,13 +1051,6 @@ def writeSimulationAnnotation(modelpath):
         modelAnno = modelAnno + "</moose:ModelAnnotation>"
     return modelAnno
 
-## Already defined in chemConnectUtil from which this module is importing *
-#def xyPosition(objInfo,xory):
-#    try:
-#        return(float(moose.element(objInfo).getField(xory)))
-#    except ValueError:
-#        return (float(0))
-
 def recalculatecoordinates(modelpath, mObjlist,xcord,ycord):
     positionInfoExist = not(len(np.nonzero(xcord)[0]) == 0 \
                         and len(np.nonzero(ycord)[0]) == 0)
@@ -1078,7 +1066,7 @@ def recalculatecoordinates(modelpath, mObjlist,xcord,ycord):
             objInfo = merts.path+'/info'
             if moose.exists(objInfo):
                 Ix = defaultsceneWidth * ((xyPosition(objInfo,'x')-xmin)/(xmax-xmin))
-                Iy = defaultsceneHeight * ((ymin-xyPosition(objInfo,'y'))/(ymax-ymin))
+                Iy = defaultsceneHeight * ((xyPosition(objInfo,'y')-ymin)/(ymax-ymin))
                 moose.element(objInfo).x = Ix
                 moose.element(objInfo).y = Iy
    

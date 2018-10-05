@@ -97,9 +97,10 @@ else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
 		add_definitions(-UDO_UNIT_TESTS -O3 -DDISABLE_DEBUG)
-    # Treat all warnings as errors. Some the warnings are disabled in
-    #  CheckCXXCompiler.cmake .
-    add_definitions(-Werror)
+    
+    # DO NOT Treat all warnings as errors. With some compilers and newer versions
+    # this often causes headache.
+    # add_definitions(-Werror)
 endif()
 
 if(GPROF AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
@@ -352,9 +353,18 @@ if(SYSTEM_SHARED_LIBS)
     list(REMOVE_DUPLICATES SYSTEM_SHARED_LIBS)
 endif( )
 
+# cmake --help-policy CMP0042. Also in pymoose/CMakeLists.txt 
+# More details:
+# https://gitlab.kitware.com/cmake/community/wikis/doc/cmake/RPATH-handling
+# especially section 'Mac OS X and the RPATH'
+# Switching is OFF since all libraries are statically linked in module.
+if(APPLE)
+    set_target_properties( libmoose PROPERTIES MACOSX_RPATH OFF)
+endif(APPLE)
+
 # MAC linker does not understand many of gnu-ld options.
 # message( DEBUG "Shared libs: ${SYSTEM_SHARED_LIBS}")
-if(MACOSX)
+if(APPLE)
     target_link_libraries(libmoose
         "-Wl,-all_load"
         ${MOOSE_LIBRARIES}
@@ -365,7 +375,7 @@ if(MACOSX)
         ${SYSTEM_SHARED_LIBS}
         ${CMAKE_DL_LIBS}
         )
-ELSE(MACOSX)
+else(APPLE)
     target_link_libraries(libmoose
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
@@ -373,7 +383,7 @@ ELSE(MACOSX)
         "-Wl,--no-whole-archive"
         ${SYSTEM_SHARED_LIBS}
         )
-endif(MACOSX)
+endif(APPLE)
 
 add_dependencies(moose.bin libmoose)
 target_link_libraries(moose.bin moose ${CMAKE_DL_LIBS})
