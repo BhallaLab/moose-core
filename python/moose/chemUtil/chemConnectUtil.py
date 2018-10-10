@@ -193,7 +193,7 @@ def countitems(mitems,objtype):
 def findCompartment(element):
     if element.path == '/':
         return moose.element('/')
-    elif mooseIsInstance(element, ["CubeMesh", "CyclMesh"]):
+    elif mooseIsInstance(element, ["CubeMesh", "CylMesh"]):
         return (element)
     else:
         return findCompartment(moose.element(element.parent))

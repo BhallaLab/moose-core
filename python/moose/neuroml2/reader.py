@@ -393,7 +393,7 @@ class NML2Reader(object):
         tab = np.linspace(vmin, vmax, tablen)
         if self._is_standard_nml_rate(ratefn):
             midpoint, rate, scale = map(SI, (ratefn.midpoint, ratefn.rate, ratefn.scale))
-            return self.rate_fn_map[ratefn.type](tab, rate, scale, midpoint)
+            return rate_fn_map[ratefn.type](tab, rate, scale, midpoint)
         else:
             for ct in self.doc.ComponentType:
                 if ratefn.type == ct.name:
