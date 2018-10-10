@@ -494,10 +494,12 @@ class rdesigneur:
 	# Expression can use p, g, L, len, dia, maxP, maxG, maxL.
         temp = []
         for i in self.passiveDistrib:
-            if (len( i ) < 3) or (len(i) %2 != 1):
-                raise BuildError( "buildPassiveDistrib: Need 3 + N*2 arguments, have {}".format( len(i) ) )
+            # Handle legacy format of ['.', path, field, expr [field expr]]
+            if (len( i ) < 3) or (i[0] != '.' and len(i) %2 != 1):
+                raise BuildError( "buildPassiveDistrib: Need 3 + N*2 arguments as (path field expr [field expr]...), have {}".format( len(i) ) )
 
-            temp.append( '.' )
+            if not(( len(i) % 2 ) != 1 and i[0] == '.' ):
+                temp.append( '.' )
             temp.extend( i )
             temp.extend( [""] )
         self.elecid.passiveDistribution = temp
