@@ -4,8 +4,11 @@ group: travis_lts
 dist: xenial
 
 os:
-- linux
-- osx
+    - linux
+    - osx
+
+osx_image: xcode10
+
 notifications:
   email:
     recipients:
