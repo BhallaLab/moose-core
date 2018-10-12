@@ -41,6 +41,5 @@ apt-get install -qq python-scipy python3-scipy
 apt-get install -qq python-lxml python3-lxml
 apt-get install -qq python-setuptools python3-setuptools
 apt-get install -qq python-tornado python3-tornado
-python2 -m pip install pyNeuroML libNeuroML
-python3 -m pip install pyNeuroML libNeuroML
-
+/usr/bin/python2 -m pip install pyNeuroML libNeuroML
+/usr/bin/python3 -m pip install pyNeuroML libNeuroML
