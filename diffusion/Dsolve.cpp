@@ -1130,7 +1130,7 @@ double Dsolve::getNinit( const Eref& e ) const
     {
         return pools_[ pid ].getNinit( vox );
     }
-    cout << "Warning: Dsolve::setNinit: Eref " << e << " out of range " <<
+    cout << "Warning: Dsolve::getNinit: Eref " << e << " out of range " <<
          pools_.size() << ", " << numVoxels_ << "\n";
     return 0.0;
 }
