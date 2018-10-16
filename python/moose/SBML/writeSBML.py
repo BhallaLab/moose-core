@@ -18,10 +18,11 @@ Last-Updated: Mon 30 Apr 15:10:00 2018(+0530)
 **********************************************************************/
 /****************************
 2018
-Oct13: CylMesh are written to SBML with annotation field and only zeroth element/voxel (incase of cylMesh) of moose object is written
-Oct 1: corrected the spell of CyclMesh-->CylMesh, negating the yaxis for kkit is removed 
+Oct 16: CylMesh's comparment volume is written, but zeroth volex details are populated 
+Oct 13: CylMesh are written to SBML with annotation field and only zeroth element/voxel (incase of cylMesh) of moose object is written
+Oct 1 : corrected the spell of CyclMesh-->CylMesh, negating the yaxis for kkit is removed 
 Apr 30: indentation corrected while writting annotation for enzymecomplex
-Jan 6: for Product_formation_, k3 units depends on noofSub, prd was passed which is fixed
+Jan 6 : for Product_formation_, k3 units depends on noofSub, prd was passed which is fixed
 2017
 Dec 15: If model path exists is checked
         Enz cplx is written only if enz,cplx,sub, prd exist, a clean check is made
@@ -1015,7 +1016,8 @@ def writeCompt(modelpath, cremodel_):
                                  "_")))
         c1.setName(comptName)
         c1.setConstant(True)
-        c1.setSize(size)
+        c1.setSize(compt.volume*pow(10,3))
+        #c1.setSize(size)
         c1.setSpatialDimensions(ndim)
         c1.setUnits('volume')
         #For each compartment get groups information along
