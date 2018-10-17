@@ -127,6 +127,7 @@ class NML2Reader(object):
         self.pop_to_cell_type = {}
         self.seg_id_to_comp_name = {}
         self.paths_to_chan_elements = {}
+        self.network = None
 
     def read(self, filename, symmetric=True):
         filename = os.path.realpath( filename )
@@ -139,8 +140,8 @@ class NML2Reader(object):
         
         if len(self.doc.networks)>=1:
             self.network = self.doc.networks[0]
-            
             moose.celsius = self._getTemperature()
+            
             
         self.importConcentrationModels(self.doc)
         self.importIonChannels(self.doc)
@@ -156,10 +157,13 @@ class NML2Reader(object):
         mu.info("Read all from %s"%filename)
         
     def _getTemperature(self):
-        if self.network.type=="networkWithTemperature":
-            return SI(self.network.temperature)
-        else:
-            return 0 # Why not, if there's no temp dependence in nml..?
+        if self.network is not None:
+            if self.network.type=="networkWithTemperature":
+                return SI(self.network.temperature)
+            else:
+                # Why not, if there's no temp dependence in nml..?
+                return 0
+        return SI('25')
         
     def getCellInPopulation(self, pop_id, index):
         return self.cells_in_populations[pop_id][index]
