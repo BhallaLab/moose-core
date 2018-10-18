@@ -404,10 +404,8 @@ class NML2Reader(object):
                     mu.info("Using %s to evaluate rate"%ct.name)
                     rate = []
                     for v in tab:
-                        vals = pynml.evaluate_component(ct
-                                , req_variables = 
-                                    {'v':'%sV'%v,'vShift':vShift,'temperature':self._getTemperature()}
-                                )
+                        req_vars  = {'v':'%sV'%v,'vShift':vShift,'temperature':self._getTemperature()}
+                        vals = pynml.evaluate_component(ct, req_variables =  req_vars)
                         # mu.info vals
                         if 'x' in vals:
                             rate.append(vals['x'])
