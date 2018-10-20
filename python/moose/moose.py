@@ -31,11 +31,11 @@ try:
     import moose.neuroml2 as _neuroml2
 except Exception as e:
     nml2Import_ = False
-    nml2ImportError_ = ' '.join( [ 
+    nml2ImportError_ = ' '.join( [
         "NML2 support is disabled because `libneuroml` and "
         , "`pyneuroml` modules are not found.\n"
         , "     $ pip install pyneuroml libneuroml \n"
-        , " should fix it." 
+        , " should fix it."
         , " Actual error: %s " % e ]
         )
 
@@ -77,7 +77,7 @@ def loadModel(filename, target,method=None):
         elif extension in [".g",".cspace"]:
             #only if genesis or cspace file, then mooseAddChemSolver is called
             ret = moose._moose.loadModel(filename,target,"ee")
-          
+
             method = "ee"
             if solverClass.lower() in ["gssa","gillespie","stochastic","gsolve"]:
                 method = "gssa"
@@ -85,15 +85,23 @@ def loadModel(filename, target,method=None):
                 method = "gsl"
             elif solverClass.lower() in ["exponential euler","exponentialeuler","neutral"]:
                 method = "ee"
-            
+
             if method != 'ee':
                 chemError_ = _chemUtil.add_Delete_ChemicalSolver.mooseAddChemSolver(target,method)
         return ret
-        
+
 # Version
 def version( ):
     # Show user version.
     return moose._moose.VERSION
+
+# helper functions.
+def currentTime():
+    """Get time lapased since the start of simulation (sec).
+    """
+    clk = moose.element( '/clock' )
+    return clk.currentTime
+
 
 # Tests
 from moose.moose_test import test
@@ -280,7 +288,6 @@ def le(el=None):
     return [child.path for child in el.children]
 
 ce = _moose.setCwe  # ce is a GENESIS shorthand for change element.
-
 
 def syncDataHandler(target):
     """Synchronize data handlers for target.
@@ -627,7 +634,3 @@ def doc(arg, inherited=True, paged=True):
         pager(text)
     else:
         print(text)
-
-
-#
-# moose.py ends here
