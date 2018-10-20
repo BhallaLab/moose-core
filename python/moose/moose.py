@@ -96,8 +96,9 @@ def version( ):
     return moose._moose.VERSION
 
 # helper functions.
-def currentTime():
-    """Get time lapased since the start of simulation (sec).
+def currentSimulationTime( ):
+    """Get simualtion time. 
+    It must be equal to sum of all  parameters passed to `moose.start` function.
     """
     clk = moose.element( '/clock' )
     return clk.currentTime
