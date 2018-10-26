@@ -81,7 +81,6 @@ except ImportError:
 def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
     """Load SBML model 
     """
-    print " validate mooseReadSBML: ",validate
     global foundLibSBML_
     if not foundLibSBML_:
         print('No python-libsbml found.'
