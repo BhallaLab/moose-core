@@ -266,7 +266,7 @@ unsigned int EndoMesh::getMeshDimensions( unsigned int fid ) const
 /// Virtual function to return # of spatial dimensions of mesh
 unsigned int EndoMesh::innerGetDimensions() const
 {
-	return 1;
+	return 3;
 }
 /// Virtual function to return volume of mesh Entry.
 double EndoMesh::getMeshEntryVolume( unsigned int fid ) const
