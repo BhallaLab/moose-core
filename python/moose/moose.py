@@ -122,7 +122,7 @@ known_types = ['void',
                'melement'] + sequence_types
 
 # SBML related functions.
-def mooseReadSBML(filepath, loadpath, solver='ee'):
+def mooseReadSBML(filepath, loadpath, solver='ee',validate="on"):
     """Load SBML model.
 
     keyword arguments: \n
@@ -134,7 +134,7 @@ def mooseReadSBML(filepath, loadpath, solver='ee'):
     """
     global sbmlImport_
     if sbmlImport_:
-        return _readSBML.mooseReadSBML( filepath, loadpath, solver )
+        return _readSBML.mooseReadSBML( filepath, loadpath, solver,validate )
     else:
         print( sbmlError_ )
         return False
