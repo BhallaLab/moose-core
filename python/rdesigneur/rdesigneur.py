@@ -948,10 +948,8 @@ rdesigneur.rmoogli.updateMoogliViewer()
         }
         stims = moose.Neutral( self.modelPath + '/stims' )
         k = 0
-        # Stimlist = [path, geomExpr, relPath, field, expr_string]
         # rstim class has {elecpath, geom_expr, relpath, field, expr}
         for i in self.stimList:
-            print( "Making stim {} {} {}".format( i.elecpath, i.relpath, i.field ) )
             pair = i.elecpath + " " + i.geom_expr
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
             spineCompts = self.elecid.spinesFromExpression[ pair ]
