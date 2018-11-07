@@ -890,8 +890,7 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
         sName = convertSpecialChar(spe.name)
         comptVec = findCompartment(spe)
         speciannoexist = False
-        speciGpname = ""
-
+        
         if not isinstance(moose.element(comptVec), moose.ChemCompt):
             return -2
         else:
@@ -1021,7 +1020,6 @@ def writeCompt(modelpath, cremodel_):
                 return False,groupInfo,"Outer compartment need to be specified for EndoMesh "
                 #return " EndoMesh need to outer compartment to be specified "
             else:
-                c1.outside = comptID_sbml[compt.surround]
                 comptAnno = "<moose:CompartmentAnnotation><moose:Mesh>" + \
                                     str(compt.className) + "</moose:Mesh>\n" + \
                                     "<moose:surround>" + \
@@ -1051,6 +1049,9 @@ def writeCompt(modelpath, cremodel_):
             c1.setConstant(True)
             c1.setSize(compt.volume*pow(10,3))
             #c1.setSize(size)
+            if isinstance(compts,moose.EndoMesh):
+                c1.outside = comptID_sbml[compt.surround]
+                
             if comptAnno:
                 c1.setAnnotation(comptAnno)
             c1.setSpatialDimensions(ndim)
