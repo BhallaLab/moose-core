@@ -13,11 +13,15 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Friday May 27 12:19:00 2016(+0530)
 Version
-Last-Updated: Mon 30 Apr 15:10:00 2018(+0530)
+Last-Updated: Thr 08 Nov 00:15:10 2018(+0530)
           By: HarshaRani
 **********************************************************************/
 /****************************
 2018
+Nov 06: All the Mesh Cyl,Cube,Neuro,Endo Mesh's can be written into SBML format with annotation field where Meshtype\
+        numDiffCompts,isMembraneBound and surround are written out.
+        For EndoMesh check made to see surround is specified
+Oct 20: EndoMesh added to SBML
 Oct 16: CylMesh's comparment volume is written, but zeroth volex details are populated 
 Oct 13: CylMesh are written to SBML with annotation field and only zeroth element/voxel (incase of cylMesh) of moose object is written
 Oct 1 : corrected the spell of CyclMesh-->CylMesh, negating the yaxis for kkit is removed 
@@ -108,6 +112,7 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
     neutralNotes = ""
 
     specieslist = moose.wildcardFind(modelpath + '/##[0][ISA=PoolBase]')
+    
     if specieslist:
         neutralPath = getGroupinfo(specieslist[0])
         if moose.exists(neutralPath.path + '/info'):
@@ -124,11 +129,12 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
     writeUnits(cremodel_)
     
     modelAnno = writeSimulationAnnotation(modelpath)
+    
     if modelAnno:
         cremodel_.setAnnotation(modelAnno)
     groupInfo = {}
-    
-    compartexist, groupInfo = writeCompt(modelpath, cremodel_)
+    compterrors =""
+    compartexist, groupInfo,compterrors = writeCompt(modelpath, cremodel_)
     
     if compartexist == True:
         species = writeSpecies( modelpath,cremodel_,sbmlDoc,sceneitems,groupInfo)
@@ -170,13 +176,16 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
             writeTofile = filepath + "/" + filename + '.xml'
             writeSBMLToFile(sbmlDoc, writeTofile)
             return True, consistencyMessages, writeTofile
-
+        
         if (not SBMLok):
             #cerr << "Errors encountered " << endl
             consistencyMessages = "Errors encountered"
             return -1, consistencyMessages
     else:
-        return False, "Atleast one compartment should exist to write SBML"
+        if compterrors:
+            return False, compterrors
+        else:
+            return False,"Atleast one compartment should exist to write SBML"
     
 def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
     for enz in moose.wildcardFind(modelpath + '/##[0][ISA=EnzBase]'):
@@ -991,49 +1000,81 @@ def writeCompt(modelpath, cremodel_):
     # getting all the compartments
     compts = moose.wildcardFind(modelpath + '/##[0][ISA=ChemCompt]')
     groupInfo = {}
+    comptID_sbml = {}
     for compt in compts:
         comptAnno = ""
         comptName = convertSpecialChar(compt.name)
         # converting m3 to litre
-        if isinstance(compt,moose.CylMesh):
+        createCompt = True
+        size = compt.volume * pow(10, 3)
+        ndim = compt.numDimensions
+        csetId = (str(idBeginWith(comptName +
+                                "_" +
+                                str(compt.getId().value) +
+                                "_" +
+                                str(compt.getDataIndex()) +
+                                "_")))
+        comptID_sbml[compt] = (csetId)
+        if isinstance(compt,moose.EndoMesh):
+            if comptID_sbml.get(compt.surround) == None:
+                createCompt = False
+                return False,groupInfo,"Outer compartment need to be specified for EndoMesh "
+                #return " EndoMesh need to outer compartment to be specified "
+            else:
+                c1.outside = comptID_sbml[compt.surround]
+                comptAnno = "<moose:CompartmentAnnotation><moose:Mesh>" + \
+                                    str(compt.className) + "</moose:Mesh>\n" + \
+                                    "<moose:surround>" + \
+                                    str(comptID_sbml[compt.surround])+ "</moose:surround>\n" + \
+                                    "<moose:isMembraneBound>" + \
+                                    str(compt.isMembraneBound)+ "</moose:isMembraneBound>\n" + \
+                                    "</moose:CompartmentAnnotation>"
+        elif isinstance(compt,moose.NeuroMesh) or isinstance (compt,moose.CylMesh) :
             size = (compt.volume/compt.numDiffCompts)*pow(10,3)
             comptAnno = "<moose:CompartmentAnnotation><moose:Mesh>" + \
                                 str(compt.className) + "</moose:Mesh>\n" + \
                                 "<moose:numDiffCompts>" + \
                                 str(compt.numDiffCompts)+ "</moose:numDiffCompts>\n" + \
+                                "<moose:isMembraneBound>" + \
+                                str(compt.isMembraneBound)+ "</moose:isMembraneBound>\n" + \
                                 "</moose:CompartmentAnnotation>"
-        else:    
-            size = compt.volume * pow(10, 3)
-        ndim = compt.numDimensions
-        c1 = cremodel_.createCompartment()
-        if comptAnno:
-            c1.setAnnotation(comptAnno)
-        c1.setId(str(idBeginWith(comptName +
-                                 "_" +
-                                 str(compt.getId().value) +
-                                 "_" +
-                                 str(compt.getDataIndex()) +
-                                 "_")))
-        c1.setName(comptName)
-        c1.setConstant(True)
-        c1.setSize(compt.volume*pow(10,3))
-        #c1.setSize(size)
-        c1.setSpatialDimensions(ndim)
-        c1.setUnits('volume')
-        #For each compartment get groups information along
-        for grp in moose.wildcardFind(compt.path+'/##[0][TYPE=Neutral]'):
-            grp_cmpt = findGroup_compt(grp.parent)
-            try:
-                value = groupInfo[moose.element(grp)]
-            except KeyError:
-                # Grp is not present
-                groupInfo[moose.element(grp)] = []
-
+        else:
+            comptAnno = "<moose:CompartmentAnnotation><moose:Mesh>" + \
+                                str(compt.className) + "</moose:Mesh>\n" + \
+                                "<moose:isMembraneBound>" + \
+                                str(compt.isMembraneBound)+ "</moose:isMembraneBound>\n" + \
+                                "</moose:CompartmentAnnotation>"
+        if createCompt:
+            c1 = cremodel_.createCompartment()
+            c1.setId(csetId)
+            c1.setName(comptName)
+            c1.setConstant(True)
+            c1.setSize(compt.volume*pow(10,3))
+            #c1.setSize(size)
+            if comptAnno:
+                c1.setAnnotation(comptAnno)
+            c1.setSpatialDimensions(ndim)
+            if ndim == 3:
+                c1.setUnits('volume')
+            elif ndim == 2:
+                c1.setUnits('area')
+            elif ndim == 1:
+                c1.setUnits('metre')
+            
+            #For each compartment get groups information along
+            for grp in moose.wildcardFind(compt.path+'/##[0][TYPE=Neutral]'):
+                grp_cmpt = findGroup_compt(grp.parent)
+                try:
+                    value = groupInfo[moose.element(grp)]
+                except KeyError:
+                    # Grp is not present
+                    groupInfo[moose.element(grp)] = []
+        
 
     if compts:
-        return True,groupInfo
+        return True,groupInfo,""
     else:
-        return False,groupInfo
+        return False,groupInfo,""
 # write Simulation runtime,simdt,plotdt
 
 def writeSimulationAnnotation(modelpath):
@@ -1061,7 +1102,9 @@ def writeSimulationAnnotation(modelpath):
                 ori = q.path
                 name = convertSpecialChar(q.name)
                 graphSpefound = False
-                while not(isinstance(moose.element(q), moose.CubeMesh) or isinstance(moose.element(q),moose.CylMesh)):
+                
+                while not(isinstance(moose.element(q), moose.CubeMesh) or isinstance(moose.element(q),moose.CylMesh) \
+                    or    isinstance(moose.element(q), moose.EndoMesh) or isinstance(moose.element(q),moose.NeuroMesh)):
                     q = q.parent
                     graphSpefound = True
                 if graphSpefound:
@@ -1076,6 +1119,7 @@ def writeSimulationAnnotation(modelpath):
         if plots != " ":
             modelAnno = modelAnno + "<moose:plots> " + plots + "</moose:plots>\n"
         modelAnno = modelAnno + "</moose:ModelAnnotation>"
+        
     return modelAnno
 
 def recalculatecoordinates(modelpath, mObjlist,xcord,ycord):
