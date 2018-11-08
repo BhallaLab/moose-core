@@ -30,8 +30,14 @@ import neuroml as nml
 from pyneuroml import pynml
 import moose
 import moose.utils as mu
+import moose.neuroml as mnml
 from .units import SI
 
+
+def _write_flattened_nml( doc, outfile ):
+    import neuroml.writers
+    neuroml.writers.NeuroMLWriter.write( doc, outfile )
+    mu.info( "Wrote processed NML model to %s" % outfile )
 
 def _unique( ls ):
     res = [ ]
@@ -122,6 +128,7 @@ class NML2Reader(object):
         self.lib = moose.Neutral('/library')
         self.id_to_ionChannel = {}
         self._cell_to_sg = {} # nml cell to dict - the dict maps segment groups to segments
+        self._variables = {}
         
         self.cells_in_populations = {}
         self.pop_to_cell_type = {}
@@ -137,6 +144,9 @@ class NML2Reader(object):
         if self.verbose:
             mu.info('Parsed NeuroML2 file: %s'% filename)
         self.filename = filename
+
+        if self.verbose:
+            _write_flattened_nml( self.doc, '__flattened.xml' )
         
         if len(self.doc.networks)>=1:
             self.network = self.doc.networks[0]
@@ -383,6 +393,9 @@ class NML2Reader(object):
         if hasattr(chan,'gates'):
             return len(chan.gate_hh_rates)+len(chan.gates)==0
         return False
+
+    def evaluate_moose_component(self, ct, variables):
+        print( "[INFO ] May be the expression has moose. " )
     
 
     def calculateRateFn(self, ratefn, vmin, vmax, tablen=3000, vShift='0mV'):
@@ -392,7 +405,8 @@ class NML2Reader(object):
             'HHExpRate': hhfit.exponential2,
             'HHSigmoidRate': hhfit.sigmoid2,
             'HHSigmoidVariable': hhfit.sigmoid2,
-            'HHExpLinearRate': hhfit.linoid2 }
+            'HHExpLinearRate': hhfit.linoid2 
+            }
 
         tab = np.linspace(vmin, vmax, tablen)
         if self._is_standard_nml_rate(ratefn):
@@ -405,7 +419,8 @@ class NML2Reader(object):
                     rate = []
                     for v in tab:
                         req_vars  = {'v':'%sV'%v,'vShift':vShift,'temperature':self._getTemperature()}
-                        vals = pynml.evaluate_component(ct, req_variables =  req_vars)
+                        req_vars.update( self._variables )
+                        vals = pynml.evaluate_component(ct, req_variables=req_vars)
                         if 'x' in vals:
                             rate.append(vals['x'])
                         if 't' in vals:
@@ -610,18 +625,20 @@ class NML2Reader(object):
 
     def createDecayingPoolConcentrationModel(self, concModel):
         """Create prototype for concentration model"""        
-        if concModel.name is not None:
+        if hasattr(concModel, 'name') and concModel.name is not None:
             name = concModel.name
         else:
             name = concModel.id
-        ca = moose.CaConc('%s/%s' % (self.lib.path, id))
-        ca.CaBasal = SI(concModel.restingConc)
-        ca.tau = SI(concModel.decayConstant)
-        ca.thick = SI(concModel.shellThickness)
+
+        ca = moose.CaConc('%s/%s' % (self.lib.path, name))
+        ca.CaBasal = SI(concModel.resting_conc)
+        ca.tau = SI(concModel.decay_constant)
+        ca.thick = SI(concModel.shell_thickness)
         ca.B = 5.2e-6 # B = 5.2e-6/(Ad) where A is the area of the 
                       # shell and d is thickness - must divide by 
                       # shell volume when copying
         self.proto_pools[concModel.id] = ca
-        self.nml_to_moose[concModel.id] = ca
+        self.nml_to_moose[name] = ca
+        self._variables[name] = moose.element(ca.path).CaBasal
         self.moose_to_nml[ca] = concModel
         mu.debug('Created moose element: %s for nml conc %s' % (ca.path, concModel.id))
