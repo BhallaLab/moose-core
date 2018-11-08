@@ -33,6 +33,11 @@ import moose.utils as mu
 from .units import SI
 
 
+def _write_flattened_nml( doc, outfile ):
+    import neuroml.writers
+    neuroml.writers.NeuroMLWriter.write( doc, outfile )
+    mu.info( "Wrote processed NML model to %s" % outfile )
+
 def _unique( ls ):
     res = [ ]
     for l in ls:
@@ -137,6 +142,9 @@ class NML2Reader(object):
         if self.verbose:
             mu.info('Parsed NeuroML2 file: %s'% filename)
         self.filename = filename
+
+        if self.verbose:
+            _write_flattened_nml( self.doc, '__flattened.xml' )
         
         if len(self.doc.networks)>=1:
             self.network = self.doc.networks[0]
@@ -606,14 +614,20 @@ class NML2Reader(object):
 
     def importConcentrationModels(self, doc):
         for concModel in doc.decaying_pool_concentration_models:
+            if self.versbose:
+                mu.info( '\t' + concModel )
             self.createDecayingPoolConcentrationModel(concModel)
 
     def createDecayingPoolConcentrationModel(self, concModel):
         """Create prototype for concentration model"""        
+        print( ' createDecayingPoolConcentrationModel ' )
         if concModel.name is not None:
             name = concModel.name
         else:
             name = concModel.id
+        print( 'Creating CaConc element' )
+        quit()
+
         ca = moose.CaConc('%s/%s' % (self.lib.path, id))
         ca.CaBasal = SI(concModel.restingConc)
         ca.tau = SI(concModel.decayConstant)
