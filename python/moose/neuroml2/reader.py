@@ -391,6 +391,9 @@ class NML2Reader(object):
         if hasattr(chan,'gates'):
             return len(chan.gate_hh_rates)+len(chan.gates)==0
         return False
+
+    def evaluate_moose_component(self, ct, variables):
+        print( "[INFO ] May be the expression has moose. " )
     
 
     def calculateRateFn(self, ratefn, vmin, vmax, tablen=3000, vShift='0mV'):
@@ -413,7 +416,12 @@ class NML2Reader(object):
                     rate = []
                     for v in tab:
                         req_vars  = {'v':'%sV'%v,'vShift':vShift,'temperature':self._getTemperature()}
-                        vals = pynml.evaluate_component(ct, req_variables =  req_vars)
+                        vals = {}
+                        try:
+                            vals = pynml.evaluate_component(ct, req_variables =  req_vars)
+                        except Exception as e:
+                            print( e )
+                            vals = self.evaluate_moose_component(ct, req_variables=req_vars )
                         if 'x' in vals:
                             rate.append(vals['x'])
                         if 't' in vals:
@@ -614,24 +622,19 @@ class NML2Reader(object):
 
     def importConcentrationModels(self, doc):
         for concModel in doc.decaying_pool_concentration_models:
-            if self.versbose:
-                mu.info( '\t' + concModel )
             self.createDecayingPoolConcentrationModel(concModel)
 
     def createDecayingPoolConcentrationModel(self, concModel):
         """Create prototype for concentration model"""        
-        print( ' createDecayingPoolConcentrationModel ' )
-        if concModel.name is not None:
+        if hasattr(concModel, 'name') and concModel.name is not None:
             name = concModel.name
         else:
             name = concModel.id
-        print( 'Creating CaConc element' )
-        quit()
 
-        ca = moose.CaConc('%s/%s' % (self.lib.path, id))
-        ca.CaBasal = SI(concModel.restingConc)
-        ca.tau = SI(concModel.decayConstant)
-        ca.thick = SI(concModel.shellThickness)
+        ca = moose.CaConc('%s/%s' % (self.lib.path, name))
+        ca.CaBasal = SI(concModel.resting_conc)
+        ca.tau = SI(concModel.decay_constant)
+        ca.thick = SI(concModel.shell_thickness)
         ca.B = 5.2e-6 # B = 5.2e-6/(Ad) where A is the area of the 
                       # shell and d is thickness - must divide by 
                       # shell volume when copying
