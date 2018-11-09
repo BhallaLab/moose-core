@@ -19,20 +19,21 @@ TODO: handle morphologies of more than one segment...
 
 try:
     from future_builtins import zip, map
-except ImportError:
+except ImportError as e:
     pass
 
 import sys
 import os
 import math
+import itertools
 import numpy as np
-import neuroml as nml
-from pyneuroml import pynml
 import moose
 import moose.utils as mu
-import moose.neuroml as mnml
-from .units import SI
 
+import neuroml as nml
+from pyneuroml import pynml
+
+from .units import SI
 
 def _write_flattened_nml( doc, outfile ):
     import neuroml.writers
@@ -505,13 +506,23 @@ class NML2Reader(object):
             mu.info('== Creating channel: %s (%s) -> %s (%s)'%(chan.id, chan.gate_hh_rates, mchan, mgates))
 
         all_gates = chan.gates + chan.gate_hh_rates
-        for ngate, mgate in zip(all_gates,mgates):
+
+        # If gate x and y are missing and only z is specified then we have to
+        # make sure that z gate does not zip with gateX. 
+        if len(all_gates) < len(mgates):
+            all_gates += [None for i in range(len(mgates)-len(all_gates))]
+
+        # Sort all_gates such that they come in x, y, z order.
+        all_gates = sorted( all_gates, key=lambda x: x.id if x else None )
+        for ngate, mgate in zip(all_gates, mgates):
+            if ngate is None:
+                continue
             if mgate.name.endswith('X'):
                 mchan.Xpower = ngate.instances
             elif mgate.name.endswith('Y'):
                 mchan.Ypower = ngate.instances
             elif mgate.name.endswith('Z'):
-                mchan.Zpower = ngate.instance
+                mchan.Zpower = ngate.instances
             mgate.min = vmin
             mgate.max = vmax
             mgate.divs = vdivs
