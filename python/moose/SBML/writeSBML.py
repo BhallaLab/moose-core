@@ -1013,7 +1013,7 @@ def writeCompt(modelpath, cremodel_):
                                 "_" +
                                 str(compt.getDataIndex()) +
                                 "_")))
-        comptID_sbml[compt] = (csetId)
+        comptID_sbml[compt] = csetId
         if isinstance(compt,moose.EndoMesh):
             if comptID_sbml.get(compt.surround) == None:
                 createCompt = False
@@ -1027,12 +1027,14 @@ def writeCompt(modelpath, cremodel_):
                                     "<moose:isMembraneBound>" + \
                                     str(compt.isMembraneBound)+ "</moose:isMembraneBound>\n" + \
                                     "</moose:CompartmentAnnotation>"
-        elif isinstance(compt,moose.NeuroMesh) or isinstance (compt,moose.CylMesh) :
+        elif isinstance (compt,moose.CylMesh) :
             size = (compt.volume/compt.numDiffCompts)*pow(10,3)
             comptAnno = "<moose:CompartmentAnnotation><moose:Mesh>" + \
                                 str(compt.className) + "</moose:Mesh>\n" + \
-                                "<moose:numDiffCompts>" + \
-                                str(compt.numDiffCompts)+ "</moose:numDiffCompts>\n" + \
+                                "<moose:totLength>" + \
+                                str(compt.totLength)+ "</moose:totLength>\n" + \
+                                "<moose:diffLength>" + \
+                                str(compt.diffLength)+ "</moose:diffLength>\n" + \
                                 "<moose:isMembraneBound>" + \
                                 str(compt.isMembraneBound)+ "</moose:isMembraneBound>\n" + \
                                 "</moose:CompartmentAnnotation>"
