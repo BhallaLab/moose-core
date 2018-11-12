@@ -13,11 +13,12 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Friday May 27 12:19:00 2016(+0530)
 Version
-Last-Updated: Thr 08 Nov 00:15:10 2018(+0530)
+Last-Updated: Thr 12 Nov 14:15:10 2018(+0530)
           By: HarshaRani
 **********************************************************************/
 /****************************
 2018
+Nov 12: xfer cross compartment molecules are not written to SBML instead written the original molecule also for connecting Reaction and Enzyme 
 Nov 06: All the Mesh Cyl,Cube,Neuro,Endo Mesh's can be written into SBML format with annotation field where Meshtype\
         numDiffCompts,isMembraneBound and surround are written out.
         For EndoMesh check made to see surround is specified
@@ -604,6 +605,14 @@ def processRateLaw(objectCount, cremodel, noofObj, type, mobjEnz):
     nameList_[:] = []
     for value, count in objectCount.items():
         value = moose.element(value)
+        if re.search("xfer",value.name):
+            modelRoot = value.path[0:value.path.index('/',1)]
+            xrefPool = value.name[:value.name.index("_xfer_")]
+            xrefCompt = value.name[value.name.index("_xfer_") + len("_xfer_"):]
+            orgCompt = moose.wildcardFind(modelRoot+'/##[FIELD(name)='+xrefCompt+']')[0]
+            orgPool = moose.wildcardFind(orgCompt.path+'/##[FIELD(name)='+xrefPool+']')[0]
+            value = orgPool
+
         nameIndex = value.name + "_" + \
             str(value.getId().value) + "_" + str(value.getDataIndex()) + "_"
         clean_name = (str(idBeginWith(convertSpecialChar(nameIndex))))
@@ -887,111 +896,114 @@ def convertSpecialChar(str1):
 def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
     # getting all the species
     for spe in moose.wildcardFind(modelpath + '/##[0][ISA=PoolBase]'):
-        sName = convertSpecialChar(spe.name)
-        comptVec = findCompartment(spe)
-        speciannoexist = False
-        
-        if not isinstance(moose.element(comptVec), moose.ChemCompt):
-            return -2
-        else:
-            compt = comptVec.name + "_" + \
-                str(comptVec.getId().value) + "_" + \
-                str(comptVec.getDataIndex()) + "_"
-            s1 = cremodel_.createSpecies()
-            spename = sName + "_" + \
-                str(spe.getId().value) + "_" + str(spe.getDataIndex()) + "_"
-            spename = str(idBeginWith(spename))
-            s1.setId(spename)
-
-            if spename.find(
-                    "cplx") != -1 and isinstance(moose.element(spe.parent), moose.EnzBase):
-                enz = spe.parent
-                if (moose.element(enz.parent), moose.PoolBase):
-                    # print " found a cplx name ",spe.parent,
-                    # moose.element(spe.parent).parent
-                    enzname = enz.name
-                    enzPool = (enz.parent).name
-                    sName = convertSpecialChar(
-                        enzPool + "_" + enzname + "_" + sName)
-
-            #s1.setName(sName)
-            s1.setName(str(idBeginWith(convertSpecialCharshot(spe.name))))
-            # s1.setInitialAmount(spe.nInit)
-            s1.setInitialConcentration(spe.concInit)
-            s1.setCompartment(compt)
-            #  Setting BoundaryCondition and constant as per this rule for BufPool
-            #  -constanst  -boundaryCondition  -has assignment/rate Rule  -can be part of sub/prd
-            #   false           true              yes                       yes
-            #   true            true               no                       yes
-            if spe.className == "BufPool" or spe.className == "ZombieBufPool":
-                # BoundaryCondition is made for buff pool
-                s1.setBoundaryCondition(True)
-
-                if moose.exists(spe.path + '/func'):
-                    bpf = moose.element(spe.path)
-                    for fp in bpf.children:
-                        if fp.className == "Function" or fp.className == "ZombieFunction":
-                            if len(moose.element(
-                                    fp.path + '/x').neighbors["input"]) > 0:
-                                s1.setConstant(False)
-                            else:
-                                # if function exist but sumtotal object doesn't
-                                # exist
-                                spe_constTrue.append(spename)
-                                s1.setConstant(True)
-                else:
-                    spe_constTrue.append(spename)
-                    s1.setConstant(True)
+        #Eliminating xfer molecules writting
+        if not re.search("xfer",spe.name):
+            
+            sName = convertSpecialChar(spe.name)
+            comptVec = findCompartment(spe)
+            speciannoexist = False
+            
+            if not isinstance(moose.element(comptVec), moose.ChemCompt):
+                return -2
             else:
-                # if not bufpool then Pool, then
-                s1.setBoundaryCondition(False)
-                s1.setConstant(False)
-            s1.setUnits("substance")
-            s1.setHasOnlySubstanceUnits(False)
-            if moose.exists(spe.path + '/info'):
-                Anno = moose.Annotator(spe.path + '/info')
-                if Anno.notes != "":
-                    cleanNotesS = convertNotesSpecialChar(Anno.notes)
-                    notesStringS = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t" + \
-                        cleanNotesS + "\n\t </body>"
-                    s1.setNotes(notesStringS)
+                compt = comptVec.name + "_" + \
+                    str(comptVec.getId().value) + "_" + \
+                    str(comptVec.getDataIndex()) + "_"
+                s1 = cremodel_.createSpecies()
+                spename = sName + "_" + \
+                    str(spe.getId().value) + "_" + str(spe.getDataIndex()) + "_"
+                spename = str(idBeginWith(spename))
+                s1.setId(spename)
 
+                if spename.find(
+                        "cplx") != -1 and isinstance(moose.element(spe.parent), moose.EnzBase):
+                    enz = spe.parent
+                    if (moose.element(enz.parent), moose.PoolBase):
+                        # print " found a cplx name ",spe.parent,
+                        # moose.element(spe.parent).parent
+                        enzname = enz.name
+                        enzPool = (enz.parent).name
+                        sName = convertSpecialChar(
+                            enzPool + "_" + enzname + "_" + sName)
 
-                element = moose.element(spe)
-                ele = getGroupinfo(element)
-                if element.className == "Neutral" or Anno.color or Anno.textColor or sceneitems or Anno.x or Anno.y:
-                    speciannoexist = True
-                if speciannoexist:
-                    speciAnno = "<moose:ModelAnnotation>\n"
-                    if ele.className == "Neutral":
-                        #speciAnno = speciAnno + "<moose:Group>" + ele.name + "</moose:Group>\n"
-                        if ele not in speGroup:
-                            speGroup[ele]=[spename]
-                        else:
-                            speGroup[ele].append(spename)
+                #s1.setName(sName)
+                s1.setName(str(idBeginWith(convertSpecialCharshot(spe.name))))
+                # s1.setInitialAmount(spe.nInit)
+                s1.setInitialConcentration(spe.concInit)
+                s1.setCompartment(compt)
+                #  Setting BoundaryCondition and constant as per this rule for BufPool
+                #  -constanst  -boundaryCondition  -has assignment/rate Rule  -can be part of sub/prd
+                #   false           true              yes                       yes
+                #   true            true               no                       yes
+                if spe.className == "BufPool" or spe.className == "ZombieBufPool":
+                    # BoundaryCondition is made for buff pool
+                    s1.setBoundaryCondition(True)
 
-
-                    if sceneitems:
-                        #Saved from GUI, then scene co-ordinates are passed
-                        speciAnno = speciAnno + "<moose:xCord>" + \
-                                str(sceneitems[spe]['x']) + "</moose:xCord>\n" + \
-                                "<moose:yCord>" + \
-                                str(sceneitems[spe]['y'])+ "</moose:yCord>\n"
+                    if moose.exists(spe.path + '/func'):
+                        bpf = moose.element(spe.path)
+                        for fp in bpf.children:
+                            if fp.className == "Function" or fp.className == "ZombieFunction":
+                                if len(moose.element(
+                                        fp.path + '/x').neighbors["input"]) > 0:
+                                    s1.setConstant(False)
+                                else:
+                                    # if function exist but sumtotal object doesn't
+                                    # exist
+                                    spe_constTrue.append(spename)
+                                    s1.setConstant(True)
                     else:
-                        #Saved from cmdline,genesis coordinates are kept as its
-                        # SBML, cspace, python, then auto-coordinates are done
-                        #and coordinates are updated in moose Annotation field
-                        speciAnno = speciAnno + "<moose:xCord>" + \
-                                str(Anno.x) + "</moose:xCord>\n" + \
-                                "<moose:yCord>" + \
-                                str(Anno.y)+ "</moose:yCord>\n"
-                    if Anno.color:
-                        speciAnno = speciAnno + "<moose:bgColor>" + Anno.color + "</moose:bgColor>\n"
-                    if Anno.textColor:
-                        speciAnno = speciAnno + "<moose:textColor>" + \
-                            Anno.textColor + "</moose:textColor>\n"
-                    speciAnno = speciAnno + "</moose:ModelAnnotation>"
-                    s1.setAnnotation(speciAnno)
+                        spe_constTrue.append(spename)
+                        s1.setConstant(True)
+                else:
+                    # if not bufpool then Pool, then
+                    s1.setBoundaryCondition(False)
+                    s1.setConstant(False)
+                s1.setUnits("substance")
+                s1.setHasOnlySubstanceUnits(False)
+                if moose.exists(spe.path + '/info'):
+                    Anno = moose.Annotator(spe.path + '/info')
+                    if Anno.notes != "":
+                        cleanNotesS = convertNotesSpecialChar(Anno.notes)
+                        notesStringS = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t" + \
+                            cleanNotesS + "\n\t </body>"
+                        s1.setNotes(notesStringS)
+
+
+                    element = moose.element(spe)
+                    ele = getGroupinfo(element)
+                    if element.className == "Neutral" or Anno.color or Anno.textColor or sceneitems or Anno.x or Anno.y:
+                        speciannoexist = True
+                    if speciannoexist:
+                        speciAnno = "<moose:ModelAnnotation>\n"
+                        if ele.className == "Neutral":
+                            #speciAnno = speciAnno + "<moose:Group>" + ele.name + "</moose:Group>\n"
+                            if ele not in speGroup:
+                                speGroup[ele]=[spename]
+                            else:
+                                speGroup[ele].append(spename)
+
+
+                        if sceneitems:
+                            #Saved from GUI, then scene co-ordinates are passed
+                            speciAnno = speciAnno + "<moose:xCord>" + \
+                                    str(sceneitems[spe]['x']) + "</moose:xCord>\n" + \
+                                    "<moose:yCord>" + \
+                                    str(sceneitems[spe]['y'])+ "</moose:yCord>\n"
+                        else:
+                            #Saved from cmdline,genesis coordinates are kept as its
+                            # SBML, cspace, python, then auto-coordinates are done
+                            #and coordinates are updated in moose Annotation field
+                            speciAnno = speciAnno + "<moose:xCord>" + \
+                                    str(Anno.x) + "</moose:xCord>\n" + \
+                                    "<moose:yCord>" + \
+                                    str(Anno.y)+ "</moose:yCord>\n"
+                        if Anno.color:
+                            speciAnno = speciAnno + "<moose:bgColor>" + Anno.color + "</moose:bgColor>\n"
+                        if Anno.textColor:
+                            speciAnno = speciAnno + "<moose:textColor>" + \
+                                Anno.textColor + "</moose:textColor>\n"
+                        speciAnno = speciAnno + "</moose:ModelAnnotation>"
+                        s1.setAnnotation(speciAnno)
     return True
 
 
