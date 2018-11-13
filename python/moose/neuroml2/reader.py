@@ -37,7 +37,21 @@ from .units import SI
 def _write_flattened_nml( doc, outfile ):
     import neuroml.writers
     neuroml.writers.NeuroMLWriter.write( doc, outfile )
-    logger_.info( "Wrote processed NML model to %s" % outfile )
+    logger_.debug( "Wrote flattened NML model to %s" % outfile )
+
+def _gates_sorted( all_gates ):
+    # If the id of gates are subset of 'x', 'y' or 'z' then sort them so they load in 
+    # X, Y or Z gate respectively. Otherwise do not touch them i.e. first gate
+    # will be loaded into X, second into Y and so on.
+    allMooseGates = ['x', 'y', 'z']
+    allGatesDict = { g.id : g for g in all_gates }
+    gateNames = [ g.id.lower() for g in all_gates ]
+    if set(gateNames).issubset(set(allMooseGates)):
+        sortedGates = []
+        for gid in allMooseGates:
+            sortedGates.append( allGatesDict.get(gid) )
+        return sortedGates
+    return all_gates
 
 def _unique( ls ):
     res = [ ]
@@ -144,22 +158,19 @@ class NML2Reader(object):
         self.doc = nml.loaders.read_neuroml2_file( 
                 filename, include_includes=True, verbose=self.verbose)
         
-        if self.verbose:
-            logger_.info('Parsed NeuroML2 file: %s'% filename)
         self.filename = filename
 
+        logger_.info('Parsed NeuroML2 file: %s'% filename)
         if self.verbose:
-            _write_flattened_nml( self.doc, '__flattened.xml' )
+            _write_flattened_nml( self.doc, '%s__flattened.xml' % self.filename )
         
         if len(self.doc.networks)>=1:
             self.network = self.doc.networks[0]
             moose.celsius = self._getTemperature()
             
-            
         self.importConcentrationModels(self.doc)
         self.importIonChannels(self.doc)
         self.importInputs(self.doc)
-        
         
         for cell in self.doc.cells:
             self.createCellPrototype(cell, symmetric=symmetric)
@@ -167,7 +178,6 @@ class NML2Reader(object):
         if len(self.doc.networks)>=1:
             self.createPopulations()
             self.createInputs()
-        logger_.info("Read all from %s"%filename)
         
     def _getTemperature(self):
         if self.network is not None:
@@ -509,13 +519,8 @@ class NML2Reader(object):
 
         all_gates = chan.gates + chan.gate_hh_rates
 
-        # If gate x and y are missing and only z is specified then we have to
-        # make sure that z gate does not zip with gateX. 
-        if len(all_gates) < len(mgates):
-            all_gates += [None for i in range(len(mgates)-len(all_gates))]
-
         # Sort all_gates such that they come in x, y, z order.
-        all_gates = sorted( all_gates, key=lambda x: x.id if x else None )
+        all_gates = _gates_sorted( all_gates )
         for ngate, mgate in zip(all_gates, mgates):
             if ngate is None:
                 continue
