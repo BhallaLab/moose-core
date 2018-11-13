@@ -142,7 +142,8 @@ class NML2Reader(object):
         self.proto_chans = {}  # map id to prototype channels in moose
         self.proto_pools = {}  # map id to prototype pools (Ca2+, Mg2+)
         self.includes = {}     # Included files mapped to other readers
-        self.lib = moose.Neutral('/library')
+        self.lib = moose.element('/library') if moose.exists('/library') \
+                else moose.Neutral( '/library' )
         self.id_to_ionChannel = {}
         self._cell_to_sg = {} # nml cell to dict - the dict maps segment groups to segments
         self._variables = {}
