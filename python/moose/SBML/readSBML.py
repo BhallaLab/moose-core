@@ -13,10 +13,12 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Thu May 13 10:19:00 2016(+0530)
 Version
-Last-Updated: Fri Oct 26 11:21:00 2018(+0530)
+Last-Updated: Mon Nov 19 15:45:00 2018(+0530)
           By:HarshaRani
 **********************************************************************/
 2018
+Nov 19: - reading and creating CylMesh and EndoMesh if specified in the Annotation field in compartment
+          definition, also checking if EndoMesh missing/wrong surround compartment 
 Oct 26: - validator can be switchedoff by passing validate="off" while readSBML files
 May 18: - cleanedup and connected cplx pool to correct parent enzyme 
 Jan 6:  - only if valid model exists, then printing the no of compartment,pool,reaction etc
@@ -142,7 +144,8 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
                     globparameterIdValue = {}
 
                     mapParameter(model, globparameterIdValue)
-                    errorFlag = createCompartment(
+                    msgCmpt = ""
+                    errorFlag,msgCmpt = createCompartment(
                         basePath, model, comptSbmlidMooseIdMap)
 
                     groupInfo = checkGroup(basePath,model)
@@ -159,7 +162,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
                                     model, specInfoMap, modelAnnotaInfo, globparameterIdValue,funcDef,groupInfo)
                                 if len(moose.wildcardFind(moose.element(loadpath).path+"/##[ISA=ReacBase],/##[ISA=EnzBase]")) == 0:
                                     errorFlag = False
-                                    noRE = ("Atleast one reaction should be present ")
+                                    noRE = ("Atleast one reaction should be present to display in the widget ")
                         getModelAnnotation(
                             model, baseId, basePath)
                     if not errorFlag:
@@ -197,9 +200,9 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
                         moose.delete(basePath)
                         loadpath = moose.Shell('/')
             #return basePath, ""
-            loaderror = msgRule+msgReac+noRE
+            loaderror = msgCmpt+msgRule+msgReac+noRE
             if loaderror != "":
-                loaderror = loaderror +" to display in the widget"
+                loaderror = loaderror
             return moose.element(loadpath), loaderror
         else:
             print("Validation failed while reading the model.")
@@ -402,6 +405,36 @@ def getModelAnnotation(obj, baseId, basepath):
                                             tablelistname.append(fullPath)
                                             moose.connect(tab, "requestOut", plotSId, "getConc")
 
+def getCmptAnnotation(obj):
+    annotateMap = {}
+    if (obj.getAnnotation() is not None):
+        annoNode = obj.getAnnotation()
+        for ch in range(0, annoNode.getNumChildren()):
+            childNode = annoNode.getChild(ch)
+            if (childNode.getPrefix() == "moose" and (childNode.getName() in["CompartmentAnnotation"])):
+                sublist = []
+                for gch in range(0, childNode.getNumChildren()):
+                    grandChildNode = childNode.getChild(gch)
+                    nodeName = grandChildNode.getName()
+                    nodeValue = ""
+                    if (grandChildNode.getNumChildren() == 1):
+                        nodeValue = grandChildNode.getChild(0).toXMLString()
+                    else:
+                        print(
+                            "Error: expected exactly ONE child of ", nodeName)
+                    if nodeName == "Mesh":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "numDiffCompts":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "isMembraneBound":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "totLength":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "diffLength":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "surround":
+                        annotateMap[nodeName] = nodeValue
+    return annotateMap
 
 def getObjAnnotation(obj, modelAnnotationInfo):
     name = obj.getId()
@@ -1301,10 +1334,12 @@ def transformUnit(unitForObject, hasonlySubUnit=False):
 def createCompartment(basePath, model, comptSbmlidMooseIdMap):
     # ToDoList : Check what should be done for the spaitialdimension is 2 or
     # 1, area or length
-    #print " createCompartment ",model.getNumCompartments()
+    cmptAnnotaInfo = {}
+    
     if not(model.getNumCompartments()):
-        return False, "Model has no compartment, atleast one compartment should exist to display the widget"
+        return False, "Model has no compartment, atleast one compartment should exist to display in the widget"
     else:
+        endo_surr = {}
         for c in range(0, model.getNumCompartments()):
             compt = model.getCompartment(c)
             # print("Compartment " + str(c) + ": "+ UnitDefinition.printUnits(compt.getDerivedUnitDefinition()))
@@ -1333,18 +1368,44 @@ def createCompartment(basePath, model, comptSbmlidMooseIdMap):
                 unitfactor, unitset, unittype = transformUnit(compt)
 
             else:
-                print(
-                    " Currently we don't deal with spatial Dimension less than 3 and unit's area or length")
-                return False
+                return False," Currently we don't deal with spatial Dimension less than 3 and unit's area or length" 
 
             if not(name):
                 name = sbmlCmptId
+            cmptAnnotaInfo = {}
+            cmptAnnotaInfo = getCmptAnnotation(compt)
+            if "Mesh" in cmptAnnotaInfo.keys():
+                if cmptAnnotaInfo["Mesh"] == "CubeMesh" or cmptAnnotaInfo["Mesh"] == "NeuroMesh":
+                    mooseCmptId = moose.CubeMesh(basePath.path + '/' + name)
+                
+                elif cmptAnnotaInfo["Mesh"] == "CylMesh":
+                    mooseCmptId = moose.CylMesh(basePath.path + '/' + name)
+                    ln = (float(cmptAnnotaInfo["totLength"])/float(cmptAnnotaInfo["diffLength"]))*float(cmptAnnotaInfo["diffLength"])
+                    mooseCmptId.x1 = ln
+                    mooseCmptId.diffLength = float(cmptAnnotaInfo["diffLength"])
+                
+                elif cmptAnnotaInfo["Mesh"] == "EndoMesh":
+                    mooseCmptId = moose.EndoMesh(basePath.path + '/' + name)
+                    endo_surr[sbmlCmptId] = cmptAnnotaInfo["surround"]
 
-            mooseCmptId = moose.CubeMesh(basePath.path + '/' + name)
+                if cmptAnnotaInfo["isMembraneBound"] == 'True':
+                    mooseCmptId.isMembraneBound = bool(cmptAnnotaInfo["isMembraneBound"])
+            else:
+                mooseCmptId = moose.CubeMesh(basePath.path+'/'+name)
+            
             mooseCmptId.volume = (msize * unitfactor)
+    
             comptSbmlidMooseIdMap[sbmlCmptId] = {
                 "MooseId": mooseCmptId, "spatialDim": dimension, "size": msize}
-    return True
+        
+        for key,value in endo_surr.items():
+            if value in comptSbmlidMooseIdMap:
+                endomesh = comptSbmlidMooseIdMap[key]["MooseId"]
+                endomesh.surround = comptSbmlidMooseIdMap[value]["MooseId"]
+            elif key in comptSbmlidMooseIdMap:
+                del(comptSbmlidMooseIdMap[key])
+                return False," EndoMesh's surrounding compartment missing or wrong deleting the compartment check the file"
+    return True,""
 
 
 def setupMMEnzymeReaction(reac, rName, specInfoMap, reactSBMLIdMooseId,
