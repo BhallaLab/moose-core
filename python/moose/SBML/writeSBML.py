@@ -854,7 +854,7 @@ def getGroupinfo(element):
     #   if /modelpath/Compartment/Group/Group1/Pool, then I check and get Group1
     #   And /modelpath is also a NeutralObject,I stop till I find Compartment
 
-    while not mooseIsInstance(element, ["Neutral", "CubeMesh", "CylMesh"]):
+    while not mooseIsInstance(element, ["Neutral", "CubeMesh", "CylMesh","EndoMesh","NeuroMesh"]):
         element = element.parent
     return element
 
@@ -866,7 +866,7 @@ def idBeginWith(name):
     return changedName
 
 def findGroup_compt(melement):
-    while not (mooseIsInstance(melement, ["Neutral","CubeMesh", "CylMesh"])):
+    while not (mooseIsInstance(melement, ["Neutral","CubeMesh", "CylMesh","EndoMesh","NeuroMesh"])):
         melement = melement.parent
     return melement
 
