@@ -9,10 +9,11 @@ __version__          = "1.0.0"
 __maintainer__       = "Harsha Rani"
 __email__            = "hrani@ncbs.res.in"
 __status__           = "Development"
-__updated__          = "Nov 21 2018"
+__updated__          = "Nov 22 2018"
 
 # 2018
-# Nov 21: xref pool are not wirtten and cleaned up if part of Reaction/Enzyme or notes, 
+# Nov 22: searched for _xfer_ instead of xfer
+# Nov 21: xfer pool are not written and cleaned up if part of Reaction/Enzyme or notes, 
 #         group are checked under all the mesh
           
 # Oct 16: Channels are written back to genesis
@@ -222,15 +223,15 @@ def storeEnzMsg( enzList, f):
         else:
             storeCplxEnzMsgs( enz, f )
 
-def xfer(xrefpool):
-    if re.search("xfer",xrefpool.name):
-        modelRoot = xrefpool.path[0:xrefpool.path.index('/',1)]
-        xrefPool = xrefpool.name[:xrefpool.name.index("_xfer_")]
-        xrefCompt = xrefpool.name[xrefpool.name.index("_xfer_") + len("_xfer_"):]
+def xfer(xferpool):
+    if re.search("_xfer_",xferpool.name):
+        modelRoot = xferpool.path[0:xferpool.path.index('/',1)]
+        xrefPool = xferpool.name[:xferpool.name.index("_xfer_")]
+        xrefCompt = xferpool.name[xferpool.name.index("_xfer_") + len("_xfer_"):]
         orgCompt = moose.wildcardFind(modelRoot+'/##[FIELD(name)='+xrefCompt+']')[0]
         orgPool = moose.wildcardFind(orgCompt.path+'/##[FIELD(name)='+xrefPool+']')[0]
-        xrefpool = orgPool
-    return xrefpool
+        xferpool = orgPool
+    return xferpool
 
 def storeChanMsg(chanList,f):
     for channel in chanList:

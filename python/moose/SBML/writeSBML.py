@@ -13,11 +13,12 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Friday May 27 12:19:00 2016(+0530)
 Version
-Last-Updated: Thr 12 Nov 14:15:10 2018(+0530)
+Last-Updated: Wed 21 Nov 15:15:10 2018(+0530)
           By: HarshaRani
 **********************************************************************/
 /****************************
 2018
+Nov 22: searched for _xfer_ instead of xfer
 Nov 12: xfer cross compartment molecules are not written to SBML instead written the original molecule also for connecting Reaction and Enzyme 
 Nov 06: All the Mesh Cyl,Cube,Neuro,Endo Mesh's can be written into SBML format with annotation field where Meshtype\
         numDiffCompts,isMembraneBound and surround are written out.
@@ -605,7 +606,8 @@ def processRateLaw(objectCount, cremodel, noofObj, type, mobjEnz):
     nameList_[:] = []
     for value, count in objectCount.items():
         value = moose.element(value)
-        if re.search("xfer",value.name):
+
+        if re.search("_xfer_",value.name):
             modelRoot = value.path[0:value.path.index('/',1)]
             xrefPool = value.name[:value.name.index("_xfer_")]
             xrefCompt = value.name[value.name.index("_xfer_") + len("_xfer_"):]
@@ -897,7 +899,7 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
     # getting all the species
     for spe in moose.wildcardFind(modelpath + '/##[0][ISA=PoolBase]'):
         #Eliminating xfer molecules writting
-        if not re.search("xfer",spe.name):
+        if not re.search("_xfer_",spe.name):
             
             sName = convertSpecialChar(spe.name)
             comptVec = findCompartment(spe)
