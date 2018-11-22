@@ -1687,7 +1687,7 @@ void testBiophysicsProcess()
     testIntFireNetwork();
     testCompartmentProcess();
     // testMarkovGslSolver();
-    // testMarkovChannel();
+    testMarkovChannel();
 #if 0
     testHHChannel();
 #endif

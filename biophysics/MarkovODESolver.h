@@ -24,55 +24,60 @@
 
 class MarkovGslSolver
 {
-	public:
-		MarkovGslSolver();
-		~MarkovGslSolver();
+public:
+    MarkovGslSolver();
+    ~MarkovGslSolver();
 
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
-		bool getIsInitialized() const;
-		string getMethod() const;
-		void setMethod( string method );
-		double getRelativeAccuracy() const;
-		void setRelativeAccuracy( double value );
-		double getAbsoluteAccuracy() const;
-		void setAbsoluteAccuracy( double value );
-		double getInternalDt() const;
-		void setInternalDt( double value );
+    bool getIsInitialized() const;
+    string getMethod() const;
+    void setMethod( string method );
+    double getRelativeAccuracy() const;
+    void setRelativeAccuracy( double value );
+    double getAbsoluteAccuracy() const;
+    void setAbsoluteAccuracy( double value );
+    double getInternalDt() const;
+    void setInternalDt( double value );
 
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-		void process( const Eref& e, ProcPtr info );
-		void reinit( const Eref& e, ProcPtr info );
+    void process( const Eref& e, ProcPtr info );
+    void reinit( const Eref& e, ProcPtr info );
 
-		void init( vector< double > );
-		void handleQ( vector< vector< double > > );
+    void init( vector< double > );
+    void handleQ( vector< vector< double > > );
 
-		static const Cinfo* initCinfo();
-	private:
-		bool isInitialized_;
-		string method_;
-		double absAccuracy_;
-		double relAccuracy_;
-		double internalStepSize_;
-		double* stateGsl_;
+    static const Cinfo* initCinfo();
+private:
+    bool isInitialized_;
+    string method_;
+    double absAccuracy_;
+    double relAccuracy_;
+    double internalStepSize_;
+    double* stateGsl_;
 
-		//The following four variables should be members of any solver class that
-		//will be implmented.
-		unsigned int nVars_;
-		vector< double > state_;
-		vector< double > initialState_;
-		vector< vector< double > > Q_;
+    //The following four variables should be members of any solver class that
+    //will be implmented.
+    unsigned int nVars_;
+    vector< double > state_;
+    vector< double > initialState_;
+    vector< vector< double > > Q_;
 
-		const gsl_odeiv_step_type* gslStepType_;
-		gsl_odeiv_step* gslStep_;
-		gsl_odeiv_control* gslControl_;
-		gsl_odeiv_evolve* gslEvolve_;
-		gsl_odeiv_system gslSys_;
+#ifdef USE_GSL
+    const gsl_odeiv_step_type* gslStepType_;
+    gsl_odeiv_step* gslStep_;
+    gsl_odeiv_control* gslControl_;
+    gsl_odeiv_evolve* gslEvolve_;
+    gsl_odeiv_system gslSys_;
+#else
 
-		static int evalSystem( double, const double*, double*, void* );
+#endif
+
+
+    static int evalSystem( double, const double*, double*, void* );
 };
 #endif
