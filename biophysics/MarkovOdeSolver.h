@@ -21,6 +21,11 @@
 // This makes it necessary for the system to keep track of changes in the system
 // matrix, which is implemented by the message handler.
 ///////////////////////////////////////////////////
+//
+#ifdef  USE_GSL
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_odeiv.h>
+#endif     /* -----  not USE_GSL  ----- */
 
 class MarkovOdeSolver
 {

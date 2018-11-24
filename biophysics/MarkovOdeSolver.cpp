@@ -145,8 +145,8 @@ MarkovOdeSolver::MarkovOdeSolver()
     gslStep_ = 0;
 #endif     /* -----  not USE_GSL  ----- */
     nVars_ = 0;
-    absAccuracy_ = 1e-6;
-    relAccuracy_ = 1e-6;
+    absAccuracy_ = 1e-8;
+    relAccuracy_ = 1e-8;
     internalStepSize_ = 1.0e-6;
 }
 
@@ -332,9 +332,9 @@ void MarkovOdeSolver::init( vector< double > initialState )
         gsl_odeiv_evolve_reset(gslEvolve_);
     assert(gslEvolve_ != 0);
     if ( !gslControl_ )
-        gslControl_ = gsl_odeiv_control_y_new( absAccuracy__, relAccuracy_ );
+        gslControl_ = gsl_odeiv_control_y_new( absAccuracy_, relAccuracy_ );
     else
-        gsl_odeiv_control_init(gslControl_,absAccuracy__, relAccuracy_, 1, 0);
+        gsl_odeiv_control_init(gslControl_,absAccuracy_, relAccuracy_, 1, 0);
     assert(gslControl_!= 0);
     gslSys_.function = &MarkovOdeSolver::evalSystem;
     gslSys_.jacobian = 0;
@@ -358,9 +358,23 @@ void MarkovOdeSolver::process( const Eref& e, ProcPtr p )
 
 
 #ifdef  USE_GSL
-    int status = gsl_odeiv_evolve_apply ( gslEvolve_, gslControl_, gslStep_, &gslSys_,
-            &t, nextt, &internalStepSize_, &stateOde_[0]
-            );
+    while( t < nextt )
+    {
+        int status = gsl_odeiv_evolve_apply ( gslEvolve_, gslControl_, gslStep_, &gslSys_,
+                &t, nextt, &internalStepSize_, &stateOde_[0]
+                );
+        //Simple idea borrowed from Dieter Jaeger's implementation of a Markov
+        //channel to deal with potential round-off error.
+        sum = 0;
+        for ( unsigned int i = 0; i < nVars_; i++ )
+            sum += stateOde_[i];
+
+        for ( unsigned int i = 0; i < nVars_; i++ )
+            stateOde_[i] /= sum;
+
+        if( status != GSL_SUCCESS )
+            break;
+    }
 #endif
 
 #if USE_BOOST_ODE
@@ -398,19 +412,6 @@ void MarkovOdeSolver::process( const Eref& e, ProcPtr p )
         odeint::integrate( sys, stateOde_, t, nextt, p->dt );
 #endif     /* -----  not USE_GSL  ----- */
 
-        //Simple idea borrowed from Dieter Jaeger's implementation of a Markov
-        //channel to deal with potential round-off error.
-        sum = 0;
-        for ( unsigned int i = 0; i < nVars_; i++ )
-            sum += stateOde_[i];
-
-        for ( unsigned int i = 0; i < nVars_; i++ )
-            stateOde_[i] /= sum;
-
-#ifdef USE_GSL
-        if ( status != GSL_SUCCESS )
-            break;
-#endif
 
     for ( unsigned int i = 0; i < nVars_; ++i )
         state_[i] = stateOde_[i];

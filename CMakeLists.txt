@@ -58,11 +58,7 @@ endif()
 option(DEBUG                "Build with debug support" OFF)
 option(ENABLE_UNIT_TESTS    "Enable unit tests (DEBUG should also be ON)" OFF)
 option(USE_PRIVATE_RNG      "Stochastic Objects use their private RNG" ON)
-
-option(WITH_BOOST           "Enable boost. Prefer boost over stl" ON)
-option(WITH_GSL             "Use gsl library for ODE solvers." OFF)
-option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" ON)
-
+option(WITH_GSL             "Use gsl library instead of BOOST for ODE solvers." OFF)
 option(GPROF                "Build for profiling using gprof" OFF)
 option(WITH_MPI             "Enable Openmpi support" OFF)
 option(PARALLELIZED_CLOCK   "High level parallelization of moose::Clock (alpha)" OFF )
@@ -115,15 +111,13 @@ add_executable(moose.bin basecode/main.cpp)
 # default include paths.
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
-if(WITH_BOOST)
-    set(WITH_BOOST_ODE ON)
-    set(WITH_GSL       OFF)
-endif(WITH_BOOST)
-
-# If using BOOST ODE2 library to solve ODE system, then don't use GSL.
-if(WITH_BOOST_ODE)
-    set(WITH_GSL OFF)
-endif(WITH_BOOST_ODE)
+# Boost and GSL solvers are mutually exclusive. Boost is default.
+set(WITH_BOOST_ODE ON)
+set(WITH_BOOST     ON)
+if(WITH_GSL)
+    set(WITH_BOOST_ODE OFF)
+    set(WITH_BOOST     OFF)
+endif(WITH_GSL)
 
 set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
