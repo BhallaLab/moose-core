@@ -55,19 +55,21 @@ if( CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
 endif()
 
 ################################ CMAKE OPTIONS ##################################
-option(WITH_NSDF            "Enable NSDF support. Requires hdf5" OFF )
-
 option(DEBUG                "Build with debug support" OFF)
-option(GPROF                "Build for profiling using gprof" OFF)
 option(ENABLE_UNIT_TESTS    "Enable unit tests (DEBUG should also be ON)" OFF)
+option(USE_PRIVATE_RNG      "Stochastic Objects use their private RNG" ON)
+
+option(WITH_BOOST           "Enable boost. Prefer boost over stl" ON)
+option(WITH_GSL             "Use gsl library for ODE solvers." OFF)
+option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" ON)
+
+option(GPROF                "Build for profiling using gprof" OFF)
 option(WITH_MPI             "Enable Openmpi support" OFF)
-option(WITH_BOOST           "Enable boost. Prefer boost over stl" OFF)
-option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" OFF)
-option(WITH_GSL             "Use gsl-library. Alternative is WITH_BOOST" ON)
 option(PARALLELIZED_CLOCK   "High level parallelization of moose::Clock (alpha)" OFF )
 option(USE_PRIVATE_RNG      "Stochastic Objects use their private RNG" ON)
 option(WITH_ASAN            "Use AddressSanitizer in DEBUG mode." OFF)
 
+option(WITH_NSDF            "Enable NSDF support. Requires hdf5" OFF )
 
 ############################ BUILD CONFIGURATION #################################
 

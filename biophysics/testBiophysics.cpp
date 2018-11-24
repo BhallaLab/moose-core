@@ -765,7 +765,7 @@ static double sampleCurrent[] = {0.0, // This is to handle the value sent by Cha
     2.8153360e-22, 2.8748287e-22, 2.9349545e-22, 2.9957137e-22, 3.0571067e-22
     };
 
-void testMarkovGslSolver()
+void testMarkovOdeSolver()
 {
     Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
     unsigned size = 1;
@@ -774,7 +774,7 @@ void testMarkovGslSolver()
     Id comptId = shell->doCreate( "Compartment", nid, "compt", size );
     Id rateTabId = shell->doCreate( "MarkovRateTable", comptId, "rateTab", size );
     Id mChanId = shell->doCreate( "MarkovChannel", comptId, "mChan", size );
-    Id gslSolverId = shell->doCreate( "MarkovGslSolver", comptId, "gslSolver", size );
+    Id gslSolverId = shell->doCreate( "MarkovOdeSolver", comptId, "gslSolver", size );
 
     Id tabId = shell->doCreate( "Table", nid, "tab", size );
 
@@ -902,7 +902,7 @@ void testMarkovGslSolver()
     {
         if (!doubleEq( sampleCurrent[i] * 1e25, vec[i] * 1e25 ))
         {
-            cout << "testMarkovGslSolver: sample=" << sampleCurrent[i]*1e25 << " calculated=" << vec[i]*1e25 << endl;
+            cout << "testMarkovOdeSolver: sample=" << sampleCurrent[i]*1e25 << " calculated=" << vec[i]*1e25 << endl;
         }
         ASSERT_DOUBLE_EQ("", sampleCurrent[i] * 1e25, vec[i] * 1e25 );
     }
@@ -914,16 +914,16 @@ void testMarkovGslSolver()
 }
 
 ////////////////
-//The testMarkovGslSolver() function includes the MarkovChannel object, but
+//The testMarkovOdeSolver() function includes the MarkovChannel object, but
 //is a rather trivial case, in that the rates are all constant.
-//This test simultaneously tests the MarkovChannel, MarkovGslSolver,
+//This test simultaneously tests the MarkovChannel, MarkovOdeSolver,
 //MarkovSolverBase and MarkovSolver classes.
 //This test involves simulating the 4-state NMDA channel model specified
 //in the following paper :
 //"Voltage Dependence of NMDA-Activated Macroscopic Conductances Predicted
 //by Single-Channel Kinetics", Craig E. Jahr and Charles F. Stevens, The Journal
 //of Neuroscience, 1990, 10(9), pp. 3178-3182.
-//It is expected that the MarkovGslSolver and the MarkovSolver objects will
+//It is expected that the MarkovOdeSolver and the MarkovSolver objects will
 //give the same answer.
 //
 //Note that this is different from the NMDAChan test which involves synapses.
@@ -944,12 +944,12 @@ void testMarkovChannel()
     Id exptlRateTableId = shell->doCreate( "MarkovRateTable", exptlComptId,
                                            "exptlRateTable", size );
 
-    Id mChanGslId = shell->doCreate( "MarkovChannel", gslComptId,
-                                     "mChanGsl", size );
+    Id mChanOdeId = shell->doCreate( "MarkovChannel", gslComptId,
+                                     "mChanOde", size );
     Id mChanExptlId = shell->doCreate( "MarkovChannel", exptlComptId,
                                        "mChanExptl", size );
 
-    Id gslSolverId = shell->doCreate( "MarkovGslSolver", gslComptId,
+    Id gslSolverId = shell->doCreate( "MarkovOdeSolver", gslComptId,
                                       "gslSolver", size );
     Id exptlSolverId = shell->doCreate( "MarkovSolver", exptlComptId,
                                         "exptlSolver", size );
@@ -972,7 +972,7 @@ void testMarkovChannel()
     //via its ChanBase base class, sends back the conductance and current through
     //it.
     ObjId mid = shell->doAddMsg( "Single", ObjId( gslComptId ), "channel",
-                                 ObjId( mChanGslId ), "channel" );
+                                 ObjId( mChanOdeId ), "channel" );
     assert( !mid.bad() );
 
     mid = shell->doAddMsg( "Single", ObjId( exptlComptId ), "channel",
@@ -980,7 +980,7 @@ void testMarkovChannel()
     assert( !mid.bad() );
 
     ////////
-    //Connecting up the MarkovGslSolver.
+    //Connecting up the MarkovOdeSolver.
     ///////
 
     //Connecting Compartment and MarkovRateTable.
@@ -996,20 +996,20 @@ void testMarkovChannel()
                            ObjId( gslRateTableId ), "channel" );
     assert( !mid.bad() );
 
-    //Connecting the MarkovRateTable with the MarkovGslSolver object.
+    //Connecting the MarkovRateTable with the MarkovOdeSolver object.
     //As mentioned earlier, the MarkovRateTable object sends out information
-    //about Q to the MarkovGslSolver. The MarkovGslSolver then churns out
+    //about Q to the MarkovOdeSolver. The MarkovOdeSolver then churns out
     //the state of the system for the next time step.
     mid = shell->doAddMsg("Single", ObjId( gslRateTableId ), "instratesOut",
                           ObjId( gslSolverId ), "handleQ" );
 
-    //Connecting MarkovGslSolver with MarkovChannel.
-    //The MarkovGslSolver object, upon computing the state of the channel,
+    //Connecting MarkovOdeSolver with MarkovChannel.
+    //The MarkovOdeSolver object, upon computing the state of the channel,
     //sends this information to the MarkovChannel object. The MarkovChannel
     //object will compute the expected conductance of the channel and send
     //this information to the compartment.
     mid = shell->doAddMsg( "Single", ObjId( gslSolverId ), "stateOut",
-                           ObjId( mChanGslId ), "handleState" );
+                           ObjId( mChanOdeId ), "handleState" );
     assert( !mid.bad() );
 
     //////////
@@ -1035,7 +1035,7 @@ void testMarkovChannel()
 
     //Get the current values from the GSL solver based channel.
     mid = shell->doAddMsg( "Single", ObjId( gslTableId ), "requestOut",
-                           ObjId( mChanGslId ), "getIk" );
+                           ObjId( mChanOdeId ), "getIk" );
     assert( !mid.bad() );
 
     //Get the current values from the matrix exponential solver based channel.
@@ -1069,10 +1069,10 @@ void testMarkovChannel()
     /////////////////
 
     //Number of states and open states.
-    Field< unsigned int >::set( mChanGslId, "numStates", 4 );
+    Field< unsigned int >::set( mChanOdeId, "numStates", 4 );
     Field< unsigned int >::set( mChanExptlId, "numStates", 4 );
 
-    Field< unsigned int >::set( mChanGslId, "numOpenStates", 1 );
+    Field< unsigned int >::set( mChanOdeId, "numOpenStates", 1 );
     Field< unsigned int >::set( mChanExptlId, "numOpenStates", 1 );
 
     vector< string > stateLabels;
@@ -1085,7 +1085,7 @@ void testMarkovChannel()
     stateLabels.push_back( "B2" );	//State 3.
     stateLabels.push_back( "C" ); 	//State 4.
 
-    Field< vector< string > >::set( mChanGslId, "labels", stateLabels );
+    Field< vector< string > >::set( mChanOdeId, "labels", stateLabels );
     Field< vector< string > >::set( mChanExptlId, "labels", stateLabels );
 
     //Setting up conductance value for single open state.	Value chosen
@@ -1094,7 +1094,7 @@ void testMarkovChannel()
 
     gBar.push_back( 5.431553e-9 );
 
-    Field< vector< double > >::set( mChanGslId, "gbar", gBar );
+    Field< vector< double > >::set( mChanOdeId, "gbar", gBar );
     Field< vector< double > >::set( mChanExptlId, "gbar", gBar );
 
     //Initial state of the system. This is really an arbitrary choice.
@@ -1105,7 +1105,7 @@ void testMarkovChannel()
     initState.push_back( 0.80 );
     initState.push_back( 0.00 );
 
-    Field< vector< double > >::set( mChanGslId, "initialState", initState );
+    Field< vector< double > >::set( mChanOdeId, "initialState", initState );
     Field< vector< double > >::set( mChanExptlId, "initialState", initState );
 
     //This initializes the GSL solver object.
@@ -1254,7 +1254,7 @@ void testMarkovChannel()
                        "process", 2 );
     shell->doUseClock( "/n/gslCompt/gslSolver,/n/exptlCompt/exptlSolver",
                        "process", 3 );
-    shell->doUseClock( "/n/gslCompt/mChanGsl,/n/gslTable","process", 4 );
+    shell->doUseClock( "/n/gslCompt/mChanOde,/n/gslTable","process", 4 );
     shell->doUseClock( "/n/exptlCompt/mChanExptl,/n/exptlTable", "process", 5 );
 
     shell->doReinit();
