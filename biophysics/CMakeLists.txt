@@ -36,7 +36,6 @@ set(BIOPHYSICS_SRCS
     ReadSwc.cpp
     SynChan.cpp
     NMDAChan.cpp
-    testBiophysics.cpp
     IzhikevichNrn.cpp
     DifShellBase.cpp
     DifShell.cpp

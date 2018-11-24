@@ -24,27 +24,50 @@ from moose.neuroml import utils
 import moose.utils as mu
 import moose.print_utils as pu
 
+import logging
+logging.basicConfig( format = moose.LOGGING_FORMAT )
+logger_ = logging.getLogger( 'moose.neuroml.channelml' )
+
 class ChannelML():
 
-    def __init__(self,nml_params):
+    def __init__(self, nml_params = { }, verbose = False):
+        """__init__
 
+        :param nml_params: 
+        :param verbose:
+        """
         self.cml='http://morphml.org/channelml/schema'
         self.temperature = nml_params['temperature']
+        self.verbose = verbose
+        self.nml_params = nml_params
+        if self.verbose:
+            logger_.setLevel( logging.INFO )
+        if os.getenv( 'MOOSE_VERBOSE' ):
+            logger_.setLevel( logging.DEBUG )
 
-    def readChannelMLFromFile(self,filename,params={}):
-        """ specify params as a dict.
-            Currently none implemented.
-            For setting channel temperature,
-             pass in via nml_params during instance creation (see __init__())
-             or set <instance>.temperature."""
-        tree = ET.parse(filename)
+    def readChannelMLFromFile(self, filename, params={}):
+        """readChannelMLFromFile
+        Create a moose channel from a neuroml model.
+
+        :param filename: _str_, filepath.
+        :param params: _dict_, extra arguments. __NOTE__ For setting
+            channel temperature, pass in via nml_params during instance creation
+            (see __init__()) or set <instance>.temperature.
+        :param verbose: If verbose is True, moose prints diagnostics messages as
+            well.
+        """
+        logger_.info( "Parsing NML file %s" % filename )
+        tree = ET.parse( filename )
         channelml_element = tree.getroot()
+
         for channel in channelml_element.findall('.//{'+self.cml+'}channel_type'):
             ## ideally I should read in extra params from within the channel_type element
             ## and put those in also. Global params should override local ones.
             self.readChannelML(channel,params,channelml_element.attrib['units'])
+
         for synapse in channelml_element.findall('.//{'+self.cml+'}synapse_type'):
             self.readSynapseML(synapse,channelml_element.attrib['units'])
+
         for ionConc in channelml_element.findall('.//{'+self.cml+'}ion_concentration'):
             self.readIonConcML(ionConc,channelml_element.attrib['units'])
 
@@ -60,7 +83,10 @@ class ChannelML():
         else:
             pu.fatal("Wrong units %s exiting ..." % units)
             sys.exit(1)
-        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
+
+        # creates /library in MOOSE tree; elif present, wraps
+        moose.element('/library') if moose.exists('/library') \
+                else moose.Neutral('/library')
         synname = synapseElement.attrib['name']
         if utils.neuroml_debug:
            pu.info("Loading synapse : %s into /library" % synname)

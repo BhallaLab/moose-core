@@ -43,6 +43,11 @@ except ImportError:
 
 import csv
 
+# Added logger with default format.
+import logging
+logging.basicConfig( format = moose.LOGGING_FORMAT )
+logger_ = logging.getLogger( 'moose.rdesigneur' )
+
 #EREST_ACT = -70e-3
 
 def _profile(func):
@@ -85,7 +90,7 @@ class rdesigneur:
             useGssa = True,
             combineSegments = True,
             stealCellFromLibrary = False,
-            verbose = True,
+            verbose = False,
             benchmark = False,
             addSomaChemCompt = False,  # Put a soma chemCompt on neuroMesh
             addEndoChemCompt = False,  # Put an endo compartment, typically for ER, on each of the NeuroMesh compartments.
@@ -112,7 +117,7 @@ class rdesigneur:
             stimList = [],
             plotList = [],  # elecpath, geom_expr, object, field, title ['wave' [min max]]
             moogList = [], 
-            params = None
+            params = None,
         ):
         """ Constructor of the rdesigner. This just sets up internal fields
             for the model building, it doesn't actually create any objects.
@@ -124,6 +129,8 @@ class rdesigneur:
         self.combineSegments = combineSegments
         self.stealCellFromLibrary = stealCellFromLibrary
         self.verbose = verbose
+        if self.verbose:
+            logger_.setLevel( logging.DEBUG )
         self.benchmark = benchmark
         self.addSomaChemCompt = addSomaChemCompt
         self.addEndoChemCompt = addEndoChemCompt
@@ -181,9 +188,8 @@ class rdesigneur:
             self.buildSpineProto()
             self.buildChemProto()
         except BuildError as msg:
-            print("Error: rdesigneur: Prototype build failed:", msg)
+            logger_.error("Prototype build failed: %s" % msg)
             quit()
-
 
     ################################################################
     def _printModelStats( self ):
@@ -200,11 +206,11 @@ class rdesigneur:
                 s = moose.element( j.path + '/stoich' )
                 print( "    | In {}, {} voxels X {} pools".format( j.name, j.mesh.num, s.numAllPools ) )
 
-    def buildModel( self, modelPath = '/model' ):
+    def buildModel( self, modelPath = '/model', verbose = False ):
+        self.verbose = verbose
         if moose.exists( modelPath ):
-            print("rdesigneur::buildModel: Build failed. Model '",
-                modelPath, "' already exists.")
-            return
+            logger_.warning("Build failed. Model '%s' already exists." % modelPath )
+            return False
         self.model = moose.Neutral( modelPath )
         self.modelPath = modelPath
         funcs = [self.installCellFromProtos, self.buildPassiveDistrib
@@ -303,23 +309,24 @@ class rdesigneur:
         return False
 
 
-
-    # Checks all protos, builds them and return true. If it was a file
-    # then it has to return false and invite the calling function to build
-    # If it fails then the exception takes over.
     def checkAndBuildProto( self, protoType, protoVec, knownClasses, knownFileTypes ):
+        """checkAndBuildProto
+        Checks all protos, builds them and return true. If it was a file
+        then it has to return false and invite the calling function to build
+        If it fails then the exception takes over.
+
+        :param protoType: _string_,
+        :param protoVec: _list_
+        :param knownClasses: _list_ 
+        :param knownFileTypes: _list_ of known filetypes e.g. ['.nml', '.xml']
+        """
         if len(protoVec) != 2:
-            raise BuildError( \
-                protoType + "Proto: nargs should be 2, is " + \
-                    str( len(protoVec)  ))
+            raise BuildError(protoType + "Proto: nargs should be 2, is %d" % len(protoVec))
         if moose.exists( '/library/' + protoVec[1] ):
             # Assume the job is already done, just skip it.
+            logger_.info( "Channel '%s' already exists in /library" % protoVec[1])
             return True
-            '''
-            raise BuildError( \
-                protoType + "Proto: object /library/" + \
-                    protoVec[1] + " already exists." )
-            '''
+
         # Check and build the proto from a class name
         if protoVec[0][:5] == 'moose':
             protoName = protoVec[0][6:]
@@ -333,6 +340,7 @@ class rdesigneur:
 
         if self.buildProtoFromFunction( protoVec[0], protoVec[1] ):
             return True
+
         # Maybe the proto is already in memory
         # Avoid relative file paths going toward root
         if protoVec[0][:3] != "../":
@@ -346,6 +354,7 @@ class rdesigneur:
                 moose.element( '/library/' + protoVec[0]).name = protoVec[1]
                 #moose.le( '/library' )
                 return True
+
         # Check if there is a matching suffix for file type.
         if self.isKnownClassOrFile( protoVec[0], knownFileTypes ):
             return False
@@ -409,7 +418,8 @@ class rdesigneur:
                 self._loadElec( i[0], i[1] )
 
     def parseChanName( self, name ):
-        if name[-4:] == ".xml":
+        # Both XML and NML extenstions are allowed.
+        if name[-4:].lower() in [".xml", ".nml"]:
             period = name.rfind( '.' )
             slash = name.rfind( '/' )
             if ( slash >= period ):
@@ -426,10 +436,12 @@ class rdesigneur:
             else:
                 chanName = i[1]
             j = [i[0], chanName]
-            if not self.checkAndBuildProto( "chan", j, [], ["xml"] ):
-                cm = ChannelML( {'temperature': self.temperature} )
-                cm.readChannelMLFromFile( i[0] )
-                if ( len( i ) == 2 ):
+            if not self.checkAndBuildProto( "chan", j, [], ["xml", "nml"] ):
+                logger_.info( "Creating channel prototype from NML: %s" % i[0])
+                cm = ChannelML( {'temperature': self.temperature}
+                        , verbose=self.verbose )
+                cm.readChannelMLFromFile(i[0])
+                if len(i) == 2:
                     chan = moose.element( '/library/' + chanName )
                     chan.name = i[1]
 
@@ -439,6 +451,7 @@ class rdesigneur:
                 ["Pool"], ["g", "sbml", "xml" ] ):
                 self._loadChem( i[0], i[1] )
             self.chemid = moose.element( '/library/' + i[1] )
+
     ################################################################
     def _buildElecSoma( self, args ):
         parms = [ 'somaProto', 'soma', 5e-4, 5e-4 ] # somaDia, somaLen
