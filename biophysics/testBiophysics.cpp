@@ -905,6 +905,7 @@ void testMarkovOdeSolver()
             cout << "testMarkovOdeSolver: sample=" << sampleCurrent[i]*1e25 << " calculated=" << vec[i]*1e25 << endl;
         }
         ASSERT_DOUBLE_EQ("", sampleCurrent[i] * 1e25, vec[i] * 1e25 );
+        // cout << sampleCurrent[i] << " " << vec[i] << endl;
     }
     //Currents involved here are incredibly small. Scaling them up is necessary
     //for the doubleEq function to do its job.
