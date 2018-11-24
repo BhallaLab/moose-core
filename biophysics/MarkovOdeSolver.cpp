@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "../basecode/header.h"
+#include "../utility/boost_ode.h"
 #include "MarkovOdeSolver.h"
 
 #ifdef  USE_GSL
@@ -17,6 +18,7 @@
 
 #ifdef  USE_BOOST_ODE
 #include <boost/numeric/odeint.hpp>
+using namespace boost::numeric;
 #endif     /* -----  not USE_BOOST_ODE  ----- */
 
 static SrcFinfo1< vector<double> >* stateOut()
@@ -143,8 +145,8 @@ MarkovOdeSolver::MarkovOdeSolver()
     gslStep_ = 0;
 #endif     /* -----  not USE_GSL  ----- */
     nVars_ = 0;
-    absAccuracy_ = 1.0e-8;
-    relAccuracy_ = 1.0e-8;
+    absAccuracy_ = 1e-6;
+    relAccuracy_ = 1e-6;
     internalStepSize_ = 1.0e-6;
 }
 
@@ -268,9 +270,6 @@ void MarkovOdeSolver::setMethod( string method )
              method << "' not known, using rk5\n";
         gslStepType_ = gsl_odeiv_step_rkf45;
     }
-#else
-    cout << "Warn: You are using BOOST's adaptive solver. You need not set the method manually." 
-        << endl;
 #endif
 }
 
@@ -333,9 +332,9 @@ void MarkovOdeSolver::init( vector< double > initialState )
         gsl_odeiv_evolve_reset(gslEvolve_);
     assert(gslEvolve_ != 0);
     if ( !gslControl_ )
-        gslControl_ = gsl_odeiv_control_y_new( absAccuracy_, relAccuracy_ );
+        gslControl_ = gsl_odeiv_control_y_new( absAccuracy__, relAccuracy_ );
     else
-        gsl_odeiv_control_init(gslControl_,absAccuracy_, relAccuracy_, 1, 0);
+        gsl_odeiv_control_init(gslControl_,absAccuracy__, relAccuracy_, 1, 0);
     assert(gslControl_!= 0);
     gslSys_.function = &MarkovOdeSolver::evalSystem;
     gslSys_.jacobian = 0;
@@ -357,23 +356,47 @@ void MarkovOdeSolver::process( const Eref& e, ProcPtr p )
     for ( unsigned int i = 0; i < nVars_; ++i )
         stateOde_[i] = state_[i];
 
-    while ( t < nextt )
-    {
 
 #ifdef  USE_GSL
-        int status = gsl_odeiv_evolve_apply ( gslEvolve_, gslControl_, gslStep_, &gslSys_,
-                &t, nextt, &internalStepSize_, &stateOde_[0]
-                );
+    int status = gsl_odeiv_evolve_apply ( gslEvolve_, gslControl_, gslStep_, &gslSys_,
+            &t, nextt, &internalStepSize_, &stateOde_[0]
+            );
 #endif
 
 #if USE_BOOST_ODE
-        auto sys = [this](const vector<double>& dy, vector<double>& dydt, const double t)
-        { 
-            this->OdeSystem(dy, dydt); 
-        };
-        int status = boost::numeric::odeint::integrate(sys, stateOde_, t, nextt, p->dt);
-#endif     /* -----  not USE_GSL  ----- */
+    auto sys = [this](const vector<double>& dy, vector<double>& dydt, const double t)
+    { 
+        this->OdeSystem(dy, dydt); 
+    };
 
+    // It works well in practice for this setup. 
+    if( method_ == "rk5" || method_ == "gsl" || method_ == "boost" )
+        odeint::integrate( sys, stateOde_, t, nextt, p->dt );
+    else if( method_ == "rk5a" || method_ == "adaptive" )
+        odeint::integrate_adaptive( 
+                odeint::make_controlled<rk_dopri_stepper_type_>( absAccuracy_, relAccuracy_ )
+                , sys, stateOde_, t, nextt, p->dt
+                );
+    else if( method_ == "rk4" )
+        odeint::integrate_const( rk4_stepper_type_()
+                , sys, stateOde_, t, nextt, p->dt
+                );
+    else if ("rk54" == method_ )
+        odeint::integrate_const( rk_karp_stepper_type_()
+                , sys, stateOde_, t, nextt, p->dt
+                );
+    else if ("rkck" == method_ || "rkcka" == method_)
+        odeint::integrate_adaptive(
+                odeint::make_controlled<rk_karp_stepper_type_>( absAccuracy_, relAccuracy_ )
+                , sys, stateOde_, t, nextt, p->dt
+                );
+    else if( method_ == "rk8a" || "rk8" == method_ )
+        odeint::integrate_adaptive( rk_felhberg_stepper_type_()
+                , sys, stateOde_, t, nextt, p->dt
+                );
+    else
+        odeint::integrate( sys, stateOde_, t, nextt, p->dt );
+#endif     /* -----  not USE_GSL  ----- */
 
         //Simple idea borrowed from Dieter Jaeger's implementation of a Markov
         //channel to deal with potential round-off error.
@@ -388,11 +411,6 @@ void MarkovOdeSolver::process( const Eref& e, ProcPtr p )
         if ( status != GSL_SUCCESS )
             break;
 #endif
-#if USE_BOOST_ODE
-        if( status != 0 )
-            break;
-#endif
-    }
 
     for ( unsigned int i = 0; i < nVars_; ++i )
         state_[i] = stateOde_[i];
@@ -409,7 +427,6 @@ void MarkovOdeSolver::reinit( const Eref& e, ProcPtr info )
              "Initial state has not been set. Solver has not been initialized."
              "Call init() before running.\n";
     }
-
     stateOut()->send( e, state_ );
 }
 
