@@ -6,15 +6,13 @@ from __future__ import print_function, division, absolute_import
 
 import warnings
 import pydoc
-import moose
-import moose.utils as mu
 from io import StringIO
 from os.path import splitext
 from contextlib import closing
 
 # Import function from C++ module into moose namespace.
-#  from moose._moose import *
 import moose._moose as _moose
+import moose.utils as mu
 
 # sbml import.
 sbmlImport_, sbmlError_ = True, ''
@@ -73,10 +71,11 @@ def loadModel(filename, target,method=None):
     else:
         file_name,extension = splitext(filename)
         if extension in [".swc",".p"]:
-            ret = moose._moose.loadModel(filename,target,"Neutral")
+            ret = _moose.loadModel(filename,target,"Neutral")
         elif extension in [".g",".cspace"]:
             #only if genesis or cspace file, then mooseAddChemSolver is called
-            ret = moose._moose.loadModel(filename,target,"ee")
+
+            ret = _moose.loadModel(filename,target,"ee")
 
             method = "ee"
             if solverClass.lower() in ["gssa","gillespie","stochastic","gsolve"]:
@@ -93,7 +92,7 @@ def loadModel(filename, target,method=None):
 # Version
 def version( ):
     # Show user version.
-    return moose._moose.VERSION
+    return _moose.VERSION
 
 # helper functions.
 def currentSimulationTime( ):
@@ -131,7 +130,7 @@ known_types = ['void',
                'melement'] + sequence_types
 
 # SBML related functions.
-def mooseReadSBML(filepath, loadpath, solver='ee'):
+def mooseReadSBML(filepath, loadpath, solver='ee',validate="on"):
     """Load SBML model.
 
     keyword arguments: \n
@@ -143,7 +142,7 @@ def mooseReadSBML(filepath, loadpath, solver='ee'):
     """
     global sbmlImport_
     if sbmlImport_:
-        return _readSBML.mooseReadSBML( filepath, loadpath, solver )
+        return _readSBML.mooseReadSBML( filepath, loadpath, solver,validate )
     else:
         print( sbmlError_ )
         return False
