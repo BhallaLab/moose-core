@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
 
+# Use this format in all logger inside logger. Define it before any moose
+# related module is imported.
+LOGGING_FORMAT = '%(asctime)s %(message)s'
+
 # Bring everything from moose.py to global namespace.
 from moose.moose import *
 
