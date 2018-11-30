@@ -13,11 +13,12 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Friday May 27 12:19:00 2016(+0530)
 Version
-Last-Updated: Wed 21 Nov 15:15:10 2018(+0530)
+Last-Updated: Fri 30 Nov 15:15:10 2018(+0530)
           By: HarshaRani
 **********************************************************************/
 /****************************
 2018
+Nov 30: group id is changed from name to moose_id and group.name is added along with annotation for group listing
 Nov 22: searched for _xfer_ instead of xfer
 Nov 12: xfer cross compartment molecules are not written to SBML instead written the original molecule also for connecting Reaction and Enzyme 
 Nov 06: All the Mesh Cyl,Cube,Neuro,Endo Mesh's can be written into SBML format with annotation field where Meshtype\
@@ -153,20 +154,24 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
                 mplugin = cremodel_.getPlugin("groups")
                 group = mplugin.createGroup()
                 name = str(idBeginWith(moose.element(key).name))
-                group.setId(name)
+                moosegrpId = name +"_" + str(moose.element(key).getId().value) + "_" + str(moose.element(key).getDataIndex())
+                group.setId(moosegrpId)
+                group.setName(name)
+
                 group.setKind("collection")
                 if moose.exists(key.path+'/info'):
                     ginfo = moose.element(key.path+'/info')
                 else:
                     ginfo = moose.Annotator(key.path+'/info')
                 groupCompartment = findCompartment(key)
-                if ginfo.color != '':
-                    grpAnno = "<moose:GroupAnnotation>"
-                    grpAnno = grpAnno + "<moose:Compartment>" + groupCompartment.name + "</moose:Compartment>\n"
-                    if ginfo.color:
-                        grpAnno = grpAnno + "<moose:bgColor>" + ginfo.color + "</moose:bgColor>\n"
-                    grpAnno = grpAnno + "</moose:GroupAnnotation>"
-                    group.setAnnotation(grpAnno)
+                grpAnno = "<moose:GroupAnnotation>"
+                grpAnno = grpAnno + "<moose:Compartment>" + groupCompartment.name + "</moose:Compartment>\n"
+                if moose.element(key.parent).className == "Neutral":
+                    grpAnno = grpAnno + "<moose:Group>" + key.parent.name + "</moose:Group>\n"
+                if ginfo.color:
+                    grpAnno = grpAnno + "<moose:bgColor>" + ginfo.color + "</moose:bgColor>\n"
+                grpAnno = grpAnno + "</moose:GroupAnnotation>"
+                group.setAnnotation(grpAnno)
 
                 for values in value:
                     member = group.createMember()
