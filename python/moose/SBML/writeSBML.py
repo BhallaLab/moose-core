@@ -13,11 +13,12 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Friday May 27 12:19:00 2016(+0530)
 Version
-Last-Updated: Fri 30 Nov 15:15:10 2018(+0530)
+Last-Updated: Tue 3 Dec 15:15:10 2018(+0530)
           By: HarshaRani
 **********************************************************************/
 /****************************
 2018
+Dec 03: add diff and motor constants to pool
 Nov 30: group id is changed from name to moose_id and group.name is added along with annotation for group listing
 Nov 22: searched for _xfer_ instead of xfer
 Nov 12: xfer cross compartment molecules are not written to SBML instead written the original molecule also for connecting Reaction and Enzyme 
@@ -978,39 +979,39 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
 
                     element = moose.element(spe)
                     ele = getGroupinfo(element)
-                    if element.className == "Neutral" or Anno.color or Anno.textColor or sceneitems or Anno.x or Anno.y:
-                        speciannoexist = True
-                    if speciannoexist:
-                        speciAnno = "<moose:ModelAnnotation>\n"
-                        if ele.className == "Neutral":
-                            #speciAnno = speciAnno + "<moose:Group>" + ele.name + "</moose:Group>\n"
-                            if ele not in speGroup:
-                                speGroup[ele]=[spename]
-                            else:
-                                speGroup[ele].append(spename)
-
-
-                        if sceneitems:
-                            #Saved from GUI, then scene co-ordinates are passed
-                            speciAnno = speciAnno + "<moose:xCord>" + \
-                                    str(sceneitems[spe]['x']) + "</moose:xCord>\n" + \
-                                    "<moose:yCord>" + \
-                                    str(sceneitems[spe]['y'])+ "</moose:yCord>\n"
+                    
+                    speciAnno = "<moose:ModelAnnotation>\n"
+                    if ele.className == "Neutral":
+                        #speciAnno = speciAnno + "<moose:Group>" + ele.name + "</moose:Group>\n"
+                        if ele not in speGroup:
+                            speGroup[ele]=[spename]
                         else:
-                            #Saved from cmdline,genesis coordinates are kept as its
-                            # SBML, cspace, python, then auto-coordinates are done
-                            #and coordinates are updated in moose Annotation field
-                            speciAnno = speciAnno + "<moose:xCord>" + \
-                                    str(Anno.x) + "</moose:xCord>\n" + \
-                                    "<moose:yCord>" + \
-                                    str(Anno.y)+ "</moose:yCord>\n"
-                        if Anno.color:
-                            speciAnno = speciAnno + "<moose:bgColor>" + Anno.color + "</moose:bgColor>\n"
-                        if Anno.textColor:
-                            speciAnno = speciAnno + "<moose:textColor>" + \
-                                Anno.textColor + "</moose:textColor>\n"
-                        speciAnno = speciAnno + "</moose:ModelAnnotation>"
-                        s1.setAnnotation(speciAnno)
+                            speGroup[ele].append(spename)
+
+
+                    if sceneitems:
+                        #Saved from GUI, then scene co-ordinates are passed
+                        speciAnno = speciAnno + "<moose:xCord>" + \
+                                str(sceneitems[spe]['x']) + "</moose:xCord>\n" + \
+                                "<moose:yCord>" + \
+                                str(sceneitems[spe]['y'])+ "</moose:yCord>\n"
+                    else:
+                        #Saved from cmdline,genesis coordinates are kept as its
+                        # SBML, cspace, python, then auto-coordinates are done
+                        #and coordinates are updated in moose Annotation field
+                        speciAnno = speciAnno + "<moose:xCord>" + \
+                                str(Anno.x) + "</moose:xCord>\n" + \
+                                "<moose:yCord>" + \
+                                str(Anno.y)+ "</moose:yCord>\n"
+                    if Anno.color:
+                        speciAnno = speciAnno + "<moose:bgColor>" + Anno.color + "</moose:bgColor>\n"
+                    if Anno.textColor:
+                        speciAnno = speciAnno + "<moose:textColor>" + \
+                            Anno.textColor + "</moose:textColor>\n"
+                    speciAnno = speciAnno + "<moose:diffConstant>" + str(spe.diffConst) + "</moose:diffConstant>\n"
+                    speciAnno = speciAnno + "<moose:motorConstant>" + str(spe.motorConst)+ "</moose:motorConstant>\n" 
+                    speciAnno = speciAnno + "</moose:ModelAnnotation>"
+                    s1.setAnnotation(speciAnno)
     return True
 
 

@@ -13,10 +13,11 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Thu May 13 10:19:00 2016(+0530)
 Version
-Last-Updated: Fri Nov 30 17:30:00 2018(+0530)
+Last-Updated: Tue Dec 3 17:30:00 2018(+0530)
           By:HarshaRani
 **********************************************************************/
 2018
+Dec 3:  - reading motor and diffconstant from pool
 Nov 30: - groups and subgroups are read from xml to moose 
 Nov 19: - reading and creating CylMesh and EndoMesh if specified in the Annotation field in compartment
           definition, also checking if EndoMesh missing/wrong surround compartment 
@@ -480,6 +481,10 @@ def getObjAnnotation(obj, modelAnnotationInfo):
                     if nodeName == "Group":
                         annotateMap[nodeName] = nodeValue
                     if nodeName == "Compartment":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "diffConstant":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "motorConstant":
                         annotateMap[nodeName] = nodeValue
     return annotateMap
 
@@ -1211,7 +1216,10 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
                     poolInfo.color = v
                 elif k == 'Color':
                     poolInfo.textColor = v
-                    
+                elif k == 'diffConstant':
+                    poolId.diffConst = float(v)
+                elif k == 'motorConstant':
+                    poolId.motorConst = float(v)    
             specInfoMap[sId] = {
                 "Mpath": poolId,
                 "const": constant,
