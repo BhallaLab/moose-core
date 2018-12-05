@@ -239,8 +239,9 @@ def make_Ca( name ):
         if ( x > EREST_ACT):
             yA[i] = 5.0 * math.exp( -50 * (x - EREST_ACT) )
         else:
-            yA[i] = 0.0
-        #yB[i] = 6.0 - yA[i]
+            yA[i] = 5.0
+        # This is just the beta term: yB[i] = 5.0 - yA[i]
+        # We need alpha+beta term
         yB[i] = 5.0
         x += dx
     ygate.tableA = yA
