@@ -1765,10 +1765,12 @@ PyObject * moose_exists(PyObject * dummy, PyObject * args)
     return Py_BuildValue("i", Id(path) != Id() || string(path) == "/" || string(path) == "/root");
 }
 
-PyDoc_STRVAR(moose_loadModel_documentation,
-             "loadModel(filename, modelpath, solverclass) -> vec\n"
+PyDoc_STRVAR(moose_loadModelInternal_documentation,
+             "loadModelInternal(filename, modelpath, solverclass) -> vec\n"
              "\n"
              "Load model from a file to a specified path.\n"
+             "Note: This function should not be used by users. It is meants for developers. \n"
+             "Please see `moose.loadModel` function.\n"
              "\n"
              "Parameters\n"
              "----------\n"
@@ -1785,11 +1787,11 @@ PyDoc_STRVAR(moose_loadModel_documentation,
              "    loaded model container vec.\n"
             );
 
-PyObject * moose_loadModel(PyObject * dummy, PyObject * args)
+PyObject * moose_loadModelInternal(PyObject * dummy, PyObject * args)
 {
     char * fname = NULL, * modelpath = NULL, * solverclass = NULL;
 
-    if(!PyArg_ParseTuple(args, "ss|s:moose_loadModel", &fname, &modelpath, &solverclass))
+    if(!PyArg_ParseTuple(args, "ss|s:moose_loadModelInternal", &fname, &modelpath, &solverclass))
     {
         cout << "here in moose load";
         return NULL;
@@ -1812,7 +1814,8 @@ PyObject * moose_loadModel(PyObject * dummy, PyObject * args)
     PyObject * ret = reinterpret_cast<PyObject*>(model);
     return ret;
 }
-/*
+
+#if 0
 PyDoc_STRVAR(moose_saveModel_documentation,
              "saveModel(source, filename) -> None\n"
              "\n"
@@ -1869,7 +1872,8 @@ PyObject * moose_saveModel(PyObject * dummy, PyObject * args)
     SHELLPTR->doSaveModel(model, filename);
     Py_RETURN_NONE;
 }
-*/
+#endif 
+
 PyObject * moose_setCwe(PyObject * dummy, PyObject * args)
 {
     PyObject * element = NULL;
@@ -3013,7 +3017,7 @@ static PyMethodDef MooseMethods[] =
     {"stop", (PyCFunction)moose_stop, METH_VARARGS, "Stop simulation"},
     {"isRunning", (PyCFunction)moose_isRunning, METH_VARARGS, "True if the simulation is currently running."},
     {"exists", (PyCFunction)moose_exists, METH_VARARGS, "True if there is an object with specified path."},
-    {"loadModel", (PyCFunction)moose_loadModel, METH_VARARGS, moose_loadModel_documentation},
+    {"loadModelInternal", (PyCFunction)moose_loadModelInternal, METH_VARARGS, moose_loadModelInternal_documentation},
     //{"saveModel", (PyCFunction)moose_saveModel, METH_VARARGS, moose_saveModel_documentation},
     {"connect", (PyCFunction)moose_connect, METH_VARARGS, moose_connect_documentation},
     {"getCwe", (PyCFunction)moose_getCwe, METH_VARARGS, "Get the current working element. 'pwe' is an alias of this function."},

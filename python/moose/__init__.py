@@ -5,12 +5,14 @@ from __future__ import absolute_import, division, print_function
 # related module is imported.
 LOGGING_FORMAT = '%(asctime)s %(message)s'
 
-# Bring everything from moose.py to global namespace.
-from moose.moose import *
-
 # Bring everything from c++ module to global namespace. Not everything is
 # imported by the pervios import statement.
 from moose._moose import *
+
+# Bring everything from moose.py to global namespace. It will overwrite any c++
+# function with the same name.
+from moose.moose import *
+
 
 # create a shorthand for version() call here.
 __version__ = version()
