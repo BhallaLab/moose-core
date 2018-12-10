@@ -18,6 +18,7 @@ Last-Updated: Tue 3 Dec 15:15:10 2018(+0530)
 **********************************************************************/
 /****************************
 2018
+Dec 07: using fixXreac's restoreXreacs function to remove xfer
 Dec 03: add diff and motor constants to pool
 Nov 30: group id is changed from name to moose_id and group.name is added along with annotation for group listing
 Nov 22: searched for _xfer_ instead of xfer
@@ -48,6 +49,7 @@ import moose
 from moose.SBML.validation import validateModel
 from moose.chemUtil.chemConnectUtil import *
 from moose.chemUtil.graphUtils import *
+from moose.fixXreacs import restoreXreacs
 
 foundLibSBML_ = False
 try:
@@ -84,6 +86,7 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
     if not moose.exists(modelpath):
         return False, "Path doesn't exist"
     elif moose.exists(modelpath):
+        moose.fixXreacs.restoreXreacs(modelpath)
         checkCompt = moose.wildcardFind(modelpath+'/##[0][ISA=ChemCompt]')
         
         mObj = moose.wildcardFind(moose.element(modelpath).path+'/##[0][ISA=PoolBase]'+','+
@@ -612,7 +615,7 @@ def processRateLaw(objectCount, cremodel, noofObj, type, mobjEnz):
     nameList_[:] = []
     for value, count in objectCount.items():
         value = moose.element(value)
-
+        '''
         if re.search("_xfer_",value.name):
             modelRoot = value.path[0:value.path.index('/',1)]
             xrefPool = value.name[:value.name.index("_xfer_")]
@@ -620,7 +623,7 @@ def processRateLaw(objectCount, cremodel, noofObj, type, mobjEnz):
             orgCompt = moose.wildcardFind(modelRoot+'/##[FIELD(name)='+xrefCompt+']')[0]
             orgPool = moose.wildcardFind(orgCompt.path+'/##[FIELD(name)='+xrefPool+']')[0]
             value = orgPool
-
+        '''
         nameIndex = value.name + "_" + \
             str(value.getId().value) + "_" + str(value.getDataIndex()) + "_"
         clean_name = (str(idBeginWith(convertSpecialChar(nameIndex))))
