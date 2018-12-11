@@ -82,7 +82,7 @@ try:
 except ImportError:
     pass
 
-def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
+def mooseReadSBML(filepath, loadpath, solver="ee",validate="True"):
     """Load SBML model 
     """
     global foundLibSBML_
@@ -105,7 +105,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
         filep = open(filepath, "r")
         document = libsbml.readSBML(filepath)
         tobecontinue = False
-        if validate == "on":
+        if validate == "True":
             tobecontinue = validateModel(document)
         else:
             tobecontinue = True
