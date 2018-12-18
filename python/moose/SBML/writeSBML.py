@@ -13,11 +13,15 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Friday May 27 12:19:00 2016(+0530)
 Version
-Last-Updated: Thr 12 Nov 14:15:10 2018(+0530)
+Last-Updated: Tue 3 Dec 15:15:10 2018(+0530)
           By: HarshaRani
 **********************************************************************/
 /****************************
 2018
+Dec 07: using fixXreac's restoreXreacs function to remove xfer
+Dec 03: add diff and motor constants to pool
+Nov 30: group id is changed from name to moose_id and group.name is added along with annotation for group listing
+Nov 22: searched for _xfer_ instead of xfer
 Nov 12: xfer cross compartment molecules are not written to SBML instead written the original molecule also for connecting Reaction and Enzyme 
 Nov 06: All the Mesh Cyl,Cube,Neuro,Endo Mesh's can be written into SBML format with annotation field where Meshtype\
         numDiffCompts,isMembraneBound and surround are written out.
@@ -45,6 +49,7 @@ import moose
 from moose.SBML.validation import validateModel
 from moose.chemUtil.chemConnectUtil import *
 from moose.chemUtil.graphUtils import *
+from moose.fixXreacs import restoreXreacs
 
 foundLibSBML_ = False
 try:
@@ -81,6 +86,7 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
     if not moose.exists(modelpath):
         return False, "Path doesn't exist"
     elif moose.exists(modelpath):
+        moose.fixXreacs.restoreXreacs(modelpath)
         checkCompt = moose.wildcardFind(modelpath+'/##[0][ISA=ChemCompt]')
         
         mObj = moose.wildcardFind(moose.element(modelpath).path+'/##[0][ISA=PoolBase]'+','+
@@ -152,20 +158,24 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
                 mplugin = cremodel_.getPlugin("groups")
                 group = mplugin.createGroup()
                 name = str(idBeginWith(moose.element(key).name))
-                group.setId(name)
+                moosegrpId = name +"_" + str(moose.element(key).getId().value) + "_" + str(moose.element(key).getDataIndex())
+                group.setId(moosegrpId)
+                group.setName(name)
+
                 group.setKind("collection")
                 if moose.exists(key.path+'/info'):
                     ginfo = moose.element(key.path+'/info')
                 else:
                     ginfo = moose.Annotator(key.path+'/info')
                 groupCompartment = findCompartment(key)
-                if ginfo.color != '':
-                    grpAnno = "<moose:GroupAnnotation>"
-                    grpAnno = grpAnno + "<moose:Compartment>" + groupCompartment.name + "</moose:Compartment>\n"
-                    if ginfo.color:
-                        grpAnno = grpAnno + "<moose:bgColor>" + ginfo.color + "</moose:bgColor>\n"
-                    grpAnno = grpAnno + "</moose:GroupAnnotation>"
-                    group.setAnnotation(grpAnno)
+                grpAnno = "<moose:GroupAnnotation>"
+                grpAnno = grpAnno + "<moose:Compartment>" + groupCompartment.name + "</moose:Compartment>\n"
+                if moose.element(key.parent).className == "Neutral":
+                    grpAnno = grpAnno + "<moose:Group>" + key.parent.name + "</moose:Group>\n"
+                if ginfo.color:
+                    grpAnno = grpAnno + "<moose:bgColor>" + ginfo.color + "</moose:bgColor>\n"
+                grpAnno = grpAnno + "</moose:GroupAnnotation>"
+                group.setAnnotation(grpAnno)
 
                 for values in value:
                     member = group.createMember()
@@ -605,14 +615,15 @@ def processRateLaw(objectCount, cremodel, noofObj, type, mobjEnz):
     nameList_[:] = []
     for value, count in objectCount.items():
         value = moose.element(value)
-        if re.search("xfer",value.name):
+        '''
+        if re.search("_xfer_",value.name):
             modelRoot = value.path[0:value.path.index('/',1)]
             xrefPool = value.name[:value.name.index("_xfer_")]
             xrefCompt = value.name[value.name.index("_xfer_") + len("_xfer_"):]
             orgCompt = moose.wildcardFind(modelRoot+'/##[FIELD(name)='+xrefCompt+']')[0]
             orgPool = moose.wildcardFind(orgCompt.path+'/##[FIELD(name)='+xrefPool+']')[0]
             value = orgPool
-
+        '''
         nameIndex = value.name + "_" + \
             str(value.getId().value) + "_" + str(value.getDataIndex()) + "_"
         clean_name = (str(idBeginWith(convertSpecialChar(nameIndex))))
@@ -854,7 +865,7 @@ def getGroupinfo(element):
     #   if /modelpath/Compartment/Group/Group1/Pool, then I check and get Group1
     #   And /modelpath is also a NeutralObject,I stop till I find Compartment
 
-    while not mooseIsInstance(element, ["Neutral", "CubeMesh", "CylMesh"]):
+    while not mooseIsInstance(element, ["Neutral", "CubeMesh", "CylMesh","EndoMesh","NeuroMesh"]):
         element = element.parent
     return element
 
@@ -866,7 +877,7 @@ def idBeginWith(name):
     return changedName
 
 def findGroup_compt(melement):
-    while not (mooseIsInstance(melement, ["Neutral","CubeMesh", "CylMesh"])):
+    while not (mooseIsInstance(melement, ["Neutral","CubeMesh", "CylMesh","EndoMesh","NeuroMesh"])):
         melement = melement.parent
     return melement
 
@@ -897,7 +908,7 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
     # getting all the species
     for spe in moose.wildcardFind(modelpath + '/##[0][ISA=PoolBase]'):
         #Eliminating xfer molecules writting
-        if not re.search("xfer",spe.name):
+        if not re.search("_xfer_",spe.name):
             
             sName = convertSpecialChar(spe.name)
             comptVec = findCompartment(spe)
@@ -971,39 +982,39 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
 
                     element = moose.element(spe)
                     ele = getGroupinfo(element)
-                    if element.className == "Neutral" or Anno.color or Anno.textColor or sceneitems or Anno.x or Anno.y:
-                        speciannoexist = True
-                    if speciannoexist:
-                        speciAnno = "<moose:ModelAnnotation>\n"
-                        if ele.className == "Neutral":
-                            #speciAnno = speciAnno + "<moose:Group>" + ele.name + "</moose:Group>\n"
-                            if ele not in speGroup:
-                                speGroup[ele]=[spename]
-                            else:
-                                speGroup[ele].append(spename)
-
-
-                        if sceneitems:
-                            #Saved from GUI, then scene co-ordinates are passed
-                            speciAnno = speciAnno + "<moose:xCord>" + \
-                                    str(sceneitems[spe]['x']) + "</moose:xCord>\n" + \
-                                    "<moose:yCord>" + \
-                                    str(sceneitems[spe]['y'])+ "</moose:yCord>\n"
+                    
+                    speciAnno = "<moose:ModelAnnotation>\n"
+                    if ele.className == "Neutral":
+                        #speciAnno = speciAnno + "<moose:Group>" + ele.name + "</moose:Group>\n"
+                        if ele not in speGroup:
+                            speGroup[ele]=[spename]
                         else:
-                            #Saved from cmdline,genesis coordinates are kept as its
-                            # SBML, cspace, python, then auto-coordinates are done
-                            #and coordinates are updated in moose Annotation field
-                            speciAnno = speciAnno + "<moose:xCord>" + \
-                                    str(Anno.x) + "</moose:xCord>\n" + \
-                                    "<moose:yCord>" + \
-                                    str(Anno.y)+ "</moose:yCord>\n"
-                        if Anno.color:
-                            speciAnno = speciAnno + "<moose:bgColor>" + Anno.color + "</moose:bgColor>\n"
-                        if Anno.textColor:
-                            speciAnno = speciAnno + "<moose:textColor>" + \
-                                Anno.textColor + "</moose:textColor>\n"
-                        speciAnno = speciAnno + "</moose:ModelAnnotation>"
-                        s1.setAnnotation(speciAnno)
+                            speGroup[ele].append(spename)
+
+
+                    if sceneitems:
+                        #Saved from GUI, then scene co-ordinates are passed
+                        speciAnno = speciAnno + "<moose:xCord>" + \
+                                str(sceneitems[spe]['x']) + "</moose:xCord>\n" + \
+                                "<moose:yCord>" + \
+                                str(sceneitems[spe]['y'])+ "</moose:yCord>\n"
+                    else:
+                        #Saved from cmdline,genesis coordinates are kept as its
+                        # SBML, cspace, python, then auto-coordinates are done
+                        #and coordinates are updated in moose Annotation field
+                        speciAnno = speciAnno + "<moose:xCord>" + \
+                                str(Anno.x) + "</moose:xCord>\n" + \
+                                "<moose:yCord>" + \
+                                str(Anno.y)+ "</moose:yCord>\n"
+                    if Anno.color:
+                        speciAnno = speciAnno + "<moose:bgColor>" + Anno.color + "</moose:bgColor>\n"
+                    if Anno.textColor:
+                        speciAnno = speciAnno + "<moose:textColor>" + \
+                            Anno.textColor + "</moose:textColor>\n"
+                    speciAnno = speciAnno + "<moose:diffConstant>" + str(spe.diffConst) + "</moose:diffConstant>\n"
+                    speciAnno = speciAnno + "<moose:motorConstant>" + str(spe.motorConst)+ "</moose:motorConstant>\n" 
+                    speciAnno = speciAnno + "</moose:ModelAnnotation>"
+                    s1.setAnnotation(speciAnno)
     return True
 
 
