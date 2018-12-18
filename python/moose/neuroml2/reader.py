@@ -5,9 +5,9 @@ from __future__ import print_function, division, absolute_import
 # Author: Subhasis Ray, Padraig Gleeson
 # Maintainer:  Dilawar Singh <dilawars@ncbs.res.in>
 # Created: Wed Jul 24 15:55:54 2013 (+0530)
-# Version: 
-# Last-Updated: 15 Jan 2018, pgleeson
-#               16 Jan 2018, dilawar, python3 compatible imports.
+# Notes: 
+#    For updates/logs please see git-blame documentation or browse the github 
+#    repo https://github.com/BhallaLab/moose-core
 
 """Implementation of reader for NeuroML 2 models.
 TODO: handle morphologies of more than one segment...
@@ -37,14 +37,31 @@ import moose.neuroml as mnml
 from .units import SI
 
 def _write_flattened_nml( doc, outfile ):
+    """_write_flattened_nml
+    Concat all NML2 read by moose and generate one flattened NML file.
+    Only useful when debugging.
+
+    :param doc: NML document (nml.doc)
+    :param outfile: Name of the output file.
+    """
     import neuroml.writers
     neuroml.writers.NeuroMLWriter.write( doc, outfile )
     logger_.debug( "Wrote flattened NML model to %s" % outfile )
 
 def _gates_sorted( all_gates ):
-    # If the id of gates are subset of 'x', 'y' or 'z' then sort them so they load in 
-    # X, Y or Z gate respectively. Otherwise do not touch them i.e. first gate
-    # will be loaded into X, second into Y and so on.
+    """_gates_sorted
+
+    Parameters
+    ----------
+    all_gates (list)
+        List of all moose.HHChannel.gates
+
+    Notes
+    -----
+    If the id of gates are subset of 'x', 'y' or 'z' then sort them so they load in 
+    X, Y or Z gate respectively. Otherwise do not touch them i.e. first gate
+    will be loaded into X, second into Y and so on.
+    """
     allMooseGates = ['x', 'y', 'z']
     allGatesDict = { g.id : g for g in all_gates }
     gateNames = [ g.id.lower() for g in all_gates ]
