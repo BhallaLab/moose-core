@@ -5,9 +5,9 @@ from __future__ import print_function, division, absolute_import
 # Author: Subhasis Ray, Padraig Gleeson
 # Maintainer:  Dilawar Singh <dilawars@ncbs.res.in>
 # Created: Wed Jul 24 15:55:54 2013 (+0530)
-# Version: 
-# Last-Updated: 15 Jan 2018, pgleeson
-#               16 Jan 2018, dilawar, python3 compatible imports.
+# Notes: 
+#    For updates/logs please see git-blame documentation or browse the github 
+#    repo https://github.com/BhallaLab/moose-core
 
 """Implementation of reader for NeuroML 2 models.
 TODO: handle morphologies of more than one segment...
@@ -18,10 +18,8 @@ try:
 except ImportError as e:
     pass
 
-import sys
 import os
 import math
-import itertools
 import numpy as np
 import moose
 import logging
@@ -29,20 +27,37 @@ import logging
 logging.basicConfig( format=moose.LOGGING_FORMAT )
 logger_ = logging.getLogger(__name__)
 
-import neuroml as nml
-from pyneuroml import pynml
-
-from .units import SI
+import moose
+import neuroml         as nml
+import pyneuroml.pynml as pynml
+from moose.neuroml2.units import SI
 
 def _write_flattened_nml( doc, outfile ):
+    """_write_flattened_nml
+    Concat all NML2 read by moose and generate one flattened NML file.
+    Only useful when debugging.
+
+    :param doc: NML document (nml.doc)
+    :param outfile: Name of the output file.
+    """
     import neuroml.writers
     neuroml.writers.NeuroMLWriter.write( doc, outfile )
     logger_.debug( "Wrote flattened NML model to %s" % outfile )
 
 def _gates_sorted( all_gates ):
-    # If the id of gates are subset of 'x', 'y' or 'z' then sort them so they load in 
-    # X, Y or Z gate respectively. Otherwise do not touch them i.e. first gate
-    # will be loaded into X, second into Y and so on.
+    """_gates_sorted
+
+    Parameters
+    ----------
+    all_gates (list)
+        List of all moose.HHChannel.gates
+
+    Notes
+    -----
+    If the id of gates are subset of 'x', 'y' or 'z' then sort them so they load in 
+    X, Y or Z gate respectively. Otherwise do not touch them i.e. first gate
+    will be loaded into X, second into Y and so on.
+    """
     allMooseGates = ['x', 'y', 'z']
     allGatesDict = { g.id : g for g in all_gates }
     gateNames = [ g.id.lower() for g in all_gates ]
@@ -61,30 +76,33 @@ def _unique( ls ):
     return res
 
 def sarea(comp):
-    """
-    Return the surface area of compartment from length and
-    diameter.
+    """sarea
+    Return the surface area (2ϖrL) of compartment from length and diameter.
 
-    Parameters
-    ----------
-    comp : Compartment instance.
-
-    Returns
-    -------
-    s : float
-        surface area of `comp`.
-
+    :param comp: Compartment instance.
+    :type comp: str
+    :return: surface area of `comp`.
+    :rtype: float
     """
     if comp.length > 0:
-        return comp.length * comp.diameter * np.pi
+        return math.pi * comp.diameter * comp.length
     else:
-        return comp.diameter * comp.diameter * np.pi
+        return math.pi * comp.diameter * comp.diameter 
 
-def xarea(comp):
+def xarea(compt):
+    """xarea
+    Return the cross sectional area (𝜋r²) from diameter of the compartment. 
+
+    Note:
+    ----
+    How to do it for spherical compartment?
+
+    :param compt: Compartment in moose.
+    :type compt: moose.Compartment
+    :return: cross sectional area.
+    :rtype: float
     """
-    Return the cross sectional area from diameter of the
-    compartment. How to do it for spherical compartment?"""
-    return comp.diameter * comp.diameter * np.pi / 4.0
+    return math.pi * (compt.diameter/2.0)**2.0
 
 def setRa(comp, resistivity):
     """Calculate total raxial from specific value `resistivity`"""
@@ -100,7 +118,6 @@ def setRm(comp, condDensity):
 def setEk(comp, erev):
     """Set reversal potential"""
     comp.setEm(erev)
-
 
 def getSegments(nmlcell, component, sg_to_segments):
     """Get the list of segments the `component` is applied to"""
@@ -362,8 +379,12 @@ class NML2Reader(object):
     def importSpecies(self, nmlcell, properties):
         sg_to_segments = self._cell_to_sg[nmlcell]
         for species in properties.species:
-            if (species.concentration_model is not None) and \
-               (species.concentration_model.id  not in self.proto_pools):
+            # Developer note: Not sure if species.concentration_model should be
+            # a nml element of just plain string. I was getting plain text from
+            # nml file here. 
+            concModel = species.concentration_model
+            if (concModel is not None) and (concModel not in self.proto_pools):
+                logger_.warn("No concentrationModel '%s' found."%concModel)
                 continue
             segments = getSegments(nmlcell, species, sg_to_segments)
             for seg in segments:
@@ -374,22 +395,23 @@ class NML2Reader(object):
         """Copy the prototype pool `species` to compartment. Currently only
         decaying pool of Ca2+ supported"""
         proto_pool = None
-        if species.concentrationModel in self.proto_pools:
-            proto_pool = self.proto_pools[species.concentration_model]
+        concModel = species.concentration_model
+        if concModel in self.proto_pools:
+            proto_pool = self.proto_pools[concModel]
         else:
             for innerReader in self.includes.values():
-                if species.concentrationModel in innerReader.proto_pools:
-                    proto_pool = innerReader.proto_pools[species.concentrationModel]
+                if concModel in innerReader.proto_pools:
+                    proto_pool = innerReader.proto_pools[concModel]
                     break
         if not proto_pool:
-            raise Exception('No prototype pool for %s referred to by %s' % ( 
-                    species.concentration_model, species.id)
-                )
+            msg = 'No prototype pool for %s referred to by %s' % (concModel, species.id)
+            logger_.error(msg)
+            raise RuntimeError(msg)
         pool_id = moose.copy(proto_pool, compartment, species.id)
         pool = moose.element(pool_id)
         pool.B = pool.B / (np.pi * compartment.length * ( 
-            0.5 * compartment.diameter + pool.thickness) * 
-            (0.5 * compartment.diameter - pool.thickness)
+            0.5 * compartment.diameter + pool.thick) * 
+            (0.5 * compartment.diameter - pool.thick)
             )
         return pool
 
