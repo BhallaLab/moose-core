@@ -104,7 +104,7 @@ def sarea(comp):
 
 def xarea(compt):
     """xarea
-    Return the cross sectional area (𝜋r²) from diameter of the compartment. 
+    Return the cross sectional area (𝜋r²) from the diameter of the compartment. 
 
     Note:
     ----
