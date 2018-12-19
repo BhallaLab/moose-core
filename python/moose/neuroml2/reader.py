@@ -88,6 +88,16 @@ def _isConcDep(ct):
         return True
     return False
 
+def _findCaConcVariableName():
+    """_findCaConcVariableName
+    Find a suitable CaConc for computing HHGate tables.
+    This is a hack, though it is likely to work in most cases. 
+    """
+    caConcs = moose.wildcardFind( '/library/##[TYPE=CaConc]' )
+    assert len(caConcs) >= 1, "No moose.CaConc found. Currently moose \
+            supports HHChannel which depends only on moose.CaConc ."
+    return caConcs[0].name
+
 def sarea(comp):
     """sarea
     Return the surface area (2ϖrL) of compartment from length and diameter.
@@ -474,9 +484,11 @@ class NML2Reader(object):
                 # dependant. Here we figure out if nml description of gate is
                 # concentration dependant or note.
                 if _isConcDep(ct):
-                    # concentration dependant. Concentration can't be negative.
-                    # NOTE: What if channel is not dependant on ca_conc.
-                    req_vars  = {'CaPool':'%g'%max(0,v),'vShift':vShift,'temperature':self._getTemperature()}
+                    # Concentration dependant. Concentration can't be negative.
+                    # Find a suitable CaConc from the /library. Currently on Ca
+                    # dependant channels are allowed.
+                    caConcName = _findCaConcVariableName()
+                    req_vars  = {caConcName:'%g'%max(0,v),'vShift':vShift,'temperature':self._getTemperature()}
                 else:
                     req_vars  = {'v':'%sV'%v,'vShift':vShift,'temperature':self._getTemperature()}
                 req_vars.update( self._variables )
