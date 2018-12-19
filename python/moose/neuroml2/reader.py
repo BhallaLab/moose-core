@@ -2,16 +2,15 @@
 from __future__ import print_function, division, absolute_import
 
 # Description: NeuroML2 reader.
+#     Implementation of reader for NeuroML 2 models.
+#     TODO: handle morphologies of more than one segment...
 # Author: Subhasis Ray, Padraig Gleeson
 # Maintainer:  Dilawar Singh <dilawars@ncbs.res.in>
 # Created: Wed Jul 24 15:55:54 2013 (+0530)
 # Notes: 
-#    For updates/logs please see git-blame documentation or browse the github 
+#    For update/log, please see git-blame documentation or browse the github 
 #    repo https://github.com/BhallaLab/moose-core
 
-"""Implementation of reader for NeuroML 2 models.
-TODO: handle morphologies of more than one segment...
-"""
 
 try:
     from future_builtins import zip, map
@@ -74,6 +73,20 @@ def _unique( ls ):
         if l not in res:
             res.append( l )
     return res
+
+def _isConcDep(ct):
+    """_isConcDep
+    Check if componet is dependant on concentration. Most HHGates are
+    dependant on voltage.
+
+    :param ct: ComponentType
+    :type ct: nml.ComponentType 
+
+    :return: True if Component is depenant on conc, False otherwise.
+    """
+    if 'ConcDep' in ct.extends:
+        return True
+    return False
 
 def sarea(comp):
     """sarea
@@ -431,12 +444,13 @@ class NML2Reader(object):
         return False
 
     def evaluate_moose_component(self, ct, variables):
-        print( "[INFO ] May be the expression has moose. " )
+        print( "[INFO ] Not implemented." )
+        return False
     
-
     def calculateRateFn(self, ratefn, vmin, vmax, tablen=3000, vShift='0mV'):
         """Returns A / B table from ngate."""
         from . import hhfit
+
         rate_fn_map = {
             'HHExpRate': hhfit.exponential2,
             'HHSigmoidRate': hhfit.sigmoid2,
@@ -448,25 +462,33 @@ class NML2Reader(object):
         if self._is_standard_nml_rate(ratefn):
             midpoint, rate, scale = map(SI, (ratefn.midpoint, ratefn.rate, ratefn.scale))
             return rate_fn_map[ratefn.type](tab, rate, scale, midpoint)
-        else:
-            for ct in self.doc.ComponentType:
-                if ratefn.type == ct.name:
-                    logger_.info("Using %s to evaluate rate"%ct.name)
-                    rate = []
-                    for v in tab:
-                        req_vars  = {'v':'%sV'%v,'vShift':vShift,'temperature':self._getTemperature()}
-                        req_vars.update( self._variables )
-                        vals = pynml.evaluate_component(ct, req_variables=req_vars)
-                        if 'x' in vals:
-                            rate.append(vals['x'])
-                        if 't' in vals:
-                            rate.append(vals['t'])
-                        if 'r' in vals:
-                            rate.append(vals['r'])
-                    return np.array(rate)
+
+        for ct in self.doc.ComponentType:
+            if ratefn.type != ct.name:
+                continue
+
+            logger_.info("Using %s to evaluate rate"%ct.name)
+            rate = []
+            for v in tab:
+                # Note: MOOSE HHGate are either voltage of concentration
+                # dependant. Here we figure out if nml description of gate is
+                # concentration dependant or note.
+                if _isConcDep(ct):
+                    # concentration dependant. Concentration can't be negative.
+                    # NOTE: What if channel is not dependant on ca_conc.
+                    req_vars  = {'CaPool':'%g'%max(0,v),'vShift':vShift,'temperature':self._getTemperature()}
+                else:
+                    req_vars  = {'v':'%sV'%v,'vShift':vShift,'temperature':self._getTemperature()}
+                req_vars.update( self._variables )
+                vals = pynml.evaluate_component(ct, req_variables=req_vars)
+                v = vals.get('x', vals.get('t', vals.get('r', None)))
+                if v is not None:
+                    rate.append(v)
+            return np.array(rate)
 
         print( "[WARN ] Could not determine rate: %s %s %s" %(ratefn.type,vmin,vmax))
         return np.array([])
+
 
     def importChannelsToCell(self, nmlcell, moosecell, membrane_properties):
         sg_to_segments = self._cell_to_sg[nmlcell]
@@ -487,7 +509,7 @@ class NML2Reader(object):
             
             if self.isPassiveChan(ionChannel):
                 for seg in segments:
-                    comp = self.nml_to_moose[seg]
+                    #  comp = self.nml_to_moose[seg]
                     setRm(self.nml_to_moose[seg], condDensity)
                     setEk(self.nml_to_moose[seg], erev)
             else:
@@ -675,6 +697,5 @@ class NML2Reader(object):
                       # shell volume when copying
         self.proto_pools[concModel.id] = ca
         self.nml_to_moose[name] = ca
-        self._variables[name] = moose.element(ca.path).CaBasal
         self.moose_to_nml[ca] = concModel
         logger_.debug('Created moose element: %s for nml conc %s' % (ca.path, concModel.id))
