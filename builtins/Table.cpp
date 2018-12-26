@@ -254,13 +254,14 @@ void Table::process( const Eref& e, ProcPtr p )
     // Copy incoming data to ret and insert into vector.
     vector< double > ret;
     requestOut()->send( e, &ret );
-	if (useSpikeMode_) {
-		for ( vector< double >::const_iterator
-					i = ret.begin(); i != ret.end(); ++i )
-		spike( *i );
-	} else {
-    	vec().insert( vec().end(), ret.begin(), ret.end() );
-	}
+
+    if (useSpikeMode_) 
+    {
+        for ( vector< double >::const_iterator i = ret.begin(); i != ret.end(); ++i )
+            spike( *i );
+    }
+    else 
+        vec().insert( vec().end(), ret.begin(), ret.end() );
 
     /*  If we are streaming to a file, let's write to a file. And clean the
      *  vector.
@@ -342,15 +343,20 @@ void Table::input( double v )
 
 void Table::spike( double v )
 {
-	if ( fired_ ) { // Wait for it to go below threshold
-		if ( v < threshold_ )
-			fired_ = false;
-	} else {
-		if ( v > threshold_ ) { // wait for it to go above threshold.
-			fired_ = true;
-        	vec().push_back( lastTime_ );
-		}
-	}
+    if ( fired_ ) 
+    { // Wait for it to go below threshold
+        if ( v < threshold_ )
+            fired_ = false;
+    }
+    else
+    {
+        if ( v > threshold_ ) 
+        { 
+            // wait for it to go above threshold.
+            fired_ = true;
+            vec().push_back( lastTime_ );
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////

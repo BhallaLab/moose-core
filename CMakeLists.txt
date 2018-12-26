@@ -78,6 +78,7 @@ option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" OFF)
 option(WITH_GSL             "Use gsl-library. Alternative is WITH_BOOST" ON)
 option(PARALLELIZED_CLOCK   "High level parallelization of moose::Clock (alpha)" OFF )
 option(USE_PRIVATE_RNG      "Stochastic Objects use their private RNG" ON)
+option(WITH_TCP_STREAMER    "Enable TCP Streamer." ON)
 
 
 ############################ BUILD CONFIGURATION #################################
@@ -97,7 +98,7 @@ else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
 		add_definitions(-UDO_UNIT_TESTS -O3 -DDISABLE_DEBUG)
-    
+
     # DO NOT Treat all warnings as errors. With some compilers and newer versions
     # this often causes headache.
     # add_definitions(-Werror)
@@ -353,7 +354,7 @@ if(SYSTEM_SHARED_LIBS)
     list(REMOVE_DUPLICATES SYSTEM_SHARED_LIBS)
 endif( )
 
-# cmake --help-policy CMP0042. Also in pymoose/CMakeLists.txt 
+# cmake --help-policy CMP0042. Also in pymoose/CMakeLists.txt
 # More details:
 # https://gitlab.kitware.com/cmake/community/wikis/doc/cmake/RPATH-handling
 # especially section 'Mac OS X and the RPATH'
@@ -528,8 +529,8 @@ foreach( _py_script ${PY_SCRIPTS} )
     file( READ ${_py_script} pytext)
     string(MD5 _md5 "${pytext}")
     set(TGT_NAME "${_py_name}-${_md5}" )
-    set(PYLINT_OPTIONS --disable=no-member --disable=no-name-in-module 
-            --disable=invalid-unary-operand-type 
+    set(PYLINT_OPTIONS --disable=no-member --disable=no-name-in-module
+            --disable=invalid-unary-operand-type
             --disable=import-error
             --disable=no-method-argument
         )

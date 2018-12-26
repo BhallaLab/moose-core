@@ -71,17 +71,15 @@ public:
     static const Cinfo* initCinfo();
 
 private:
+
     double threshold_;
     double lastTime_;
     double input_;
-	bool fired_;
-	bool useSpikeMode_;
+    bool fired_;
+    bool useSpikeMode_;
 
-    /**
-     * @brief Keep the data, each entry is preceeded by time value.
-     * t0, v0, t1, v1, t2, v2 etc.
-     */
-    vector<double> data_;
+    vector<double> data_;                       /* table data */
+    vector<double> tvec_;                       /* time data */
     vector<string> columns_;                    /* Store the name of tables */
 
     string tablePath_;
