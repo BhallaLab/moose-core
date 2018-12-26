@@ -25,6 +25,7 @@ import socket
 import numpy as np
 import threading
 import moose
+import json
 
 finish_all_ = False
 
@@ -50,15 +51,18 @@ def socket_client(host='127.0.0.1', port = 31416):
 
     # This is client reponsibility to read the data.
     s.settimeout(0.01)
+    data = ''
     while not finish_all_:
         try:
-            data = s.recv(1024)
-            print( data )
+            data += s.recv(1024)
         except socket.timeout as e:
             pass
         except Exception as e:
             print( end = '.' )
             sys.stdout.flush()
+    print( data )
+    d = json.loads(data)
+    print( d )
     s.close()
 
 def sanity_test( ):

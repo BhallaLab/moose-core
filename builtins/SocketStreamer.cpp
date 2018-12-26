@@ -25,13 +25,6 @@ const Cinfo* SocketStreamer::initCinfo()
         , &SocketStreamer::getPort
     );
 
-    static ValueFinfo< SocketStreamer, string > format(
-        "format"
-        , "Format of output file, default is csv"
-        , &SocketStreamer::setFormat
-        , &SocketStreamer::getFormat
-    );
-
     static ReadOnlyValueFinfo< SocketStreamer, size_t > numTables (
         "numTables"
         , "Number of Tables handled by SocketStreamer "
@@ -93,7 +86,7 @@ const Cinfo* SocketStreamer::initCinfo()
 
     static Finfo * socketStreamFinfo[] =
     {
-        &port, &format, &proc, &numTables
+        &port, &proc, &numTables
     };
 
     static string doc[] =
@@ -141,6 +134,9 @@ SocketStreamer::SocketStreamer() :
 
     // This should only be called once. 
     initServer();
+
+    // Launch a thread in background which monitors the any client trying to
+    // make connection to server.
     auto t = std::thread(&SocketStreamer::connect, this);
     t.detach();
     tm_["connect"] = std::move(t);
@@ -161,7 +157,11 @@ SocketStreamer::~SocketStreamer()
         shutdown(sockfd_, SHUT_RD);
         close(sockfd_);
     }
+
+    // Remember we created a background process to monitor the client. Terminate
+    // it now. May be a good idea to wait for a little bit.
     stopThread( "connect" );
+    sleep(0.01);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -273,27 +273,53 @@ bool SocketStreamer::streamData( )
     return false;
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Convert table to string (use scientific notation). 
+ *
+ * @Returns String in JSON like format.
+ */
+/* ----------------------------------------------------------------------------*/
 string SocketStreamer::dataToString( )
 {
     stringstream ss;
+    ss.precision( 7 );
+    ss << std::scientific;
+
     // Else stream the data.
+    ss << "{";
     for( size_t i = 0; i < tables_.size(); i++)
     {
-        ss << "{" << columns_[i+1] << ":[";
-        for( auto v : tables_[i]->getVec() )
-            ss << v << ',';
-        ss << "]}";
+        ss << "\"" << columns_[i+1] << "\":[";
+
+        auto v = tables_[i]->data();
+
+        // CSV.
+        for( size_t ii = 0; ii < v.size()-1; ii++)
+            ss << v[ii] << ',';
+        ss << v.back();
+
+        // Remove the last ,
+        ss << "],";
+
         // clean up table.
         tables_[i]->clearVec();
     }
-    return ss.str();
+
+    // csv: remove last ,
+    string res = ss.str();
+
+    if( ',' == res.back())
+        res.pop_back();
+    res += "}";
+    return res;
 }
 
 void SocketStreamer::connect( )
 {
     Clock* clk = reinterpret_cast<Clock*>( Id(1).eref().data() );
     clientfd_ = accept(sockfd_, NULL, NULL);
-    LOG(moose::info, "Client " << clientfd_ << " is connected." );
+    LOG(moose::debug, "Client " << clientfd_ << " is connected." );
 }
 
 /**
