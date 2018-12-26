@@ -93,12 +93,12 @@ public:
 
 private:
 
-    string format_;
     bool alreadyStreaming_;
 
     // dt_ and tick number of Table's clock
     vector<double> tableDt_;
     vector<unsigned int> tableTick_;
+    double currTime_;
 
     // Used for adding or removing tables
     vector<Id> tableIds_;

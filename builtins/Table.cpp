@@ -461,7 +461,38 @@ void Table::mergeWithTime( const vector<double>& v, vector<double>& data, const 
     size_t N = v.size();
     for (size_t i = 0; i < N; i++)
     {
-        data.push_back(t - (N - i - 1 ) * dt_ );
-        data.push_back(v[i] );
+        data.push_back(t-(N-i-1)*dt_);
+        data.push_back(v[i]);
     }
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis.  Convert table data to JOSN.
+ *
+ * @Param t.  Upto this time.
+ * @Param withTime. Zip with time.
+ *
+ * @Returns string.
+ */
+/* ----------------------------------------------------------------------------*/
+string Table::toJSON(const double t, bool withTime)
+{
+    auto v = data();
+    size_t N = v.size();
+
+    stringstream ss("[");
+    for (size_t i = 0; i < N; i++)
+    {
+        if(withTime)
+            ss << '[' << t-(N-i-1)*dt_ << ',' << v[i] << "],";
+        else
+            ss << v[i] << ',';
+    }
+
+    string res = ss.str();
+    if( ',' == res.back())
+        res.pop_back();
+
+    return res;
 }

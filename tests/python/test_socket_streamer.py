@@ -26,6 +26,7 @@ import numpy as np
 import threading
 import moose
 import json
+from collections import defaultdict
 
 finish_all_ = False
 
@@ -54,16 +55,32 @@ def socket_client(host='127.0.0.1', port = 31416):
     data = ''
     while not finish_all_:
         try:
-            data += s.recv(1024)
+            data += s.recv(256)
         except socket.timeout as e:
             pass
-        except Exception as e:
-            print( end = '.' )
-            sys.stdout.flush()
-    print( data )
-    d = json.loads(data)
-    print( d )
     s.close()
+
+    assert data, "No data streamed"
+    print( 'recieved data:\n', data )
+    res = defaultdict(list)
+    for x in data.split('\n'):
+        if not x:
+            continue
+        d = json.loads(x)
+        for k, v in d.items():
+            res[k] += v
+
+
+    expected = {u'/compt/tabB/tabC': ([25.,1.07754388], [14.71960144,  0.16830373])
+            , u'/compt/a/tab': ([25., 0.42467006], [14.71960144,  0.16766705])
+            , u'/compt/tabB': ([25.,  2.57797725], [14.71960144,  0.16842971])
+            }
+    nd = {}
+    for k in res:
+        v = res[k]
+        nd[k] = (np.mean(v, axis=0), np.std(v, axis=0))
+        assert np.isclose(expected[k], nd[k]).all(), \
+                "Exptected %s, got %s" % (str(expected[k]), str(nd[k]))
 
 def sanity_test( ):
     a = moose.Table( '/t1' )
@@ -141,10 +158,11 @@ def test():
     time.sleep(0.2)
 
     moose.reinit()
-    moose.start( 300, 1)
-    for t in tables:
-        print( t.path, t.vector )
+    moose.start(50)
     print( 'MOOSE is done' )
+
+    # sleep for some time so data can be read.
+    time.sleep(1)
     finish_all_ = True
     client.join()
 

@@ -116,8 +116,8 @@ static const Cinfo* tableStreamCinfo = SocketStreamer::initCinfo();
 // Class function definitions
 
 SocketStreamer::SocketStreamer() :
-    format_("csv")
-    , alreadyStreaming_(false)
+    alreadyStreaming_(false)
+    , currTime_(0.0)
     , sockfd_(-1)
     , clientfd_(-1)
     , ip_( TCP_SOCKET_IP )
@@ -293,33 +293,26 @@ bool SocketStreamer::streamData( )
 string SocketStreamer::dataToString( )
 {
     stringstream ss;
-    ss.precision( 7 );
-    ss << std::scientific;
+
+    // Enabling this would be require quite a lot of characters to be streamed.
+    //ss.precision( 7 );
+    //ss << std::scientific;
+    vector<double> data;
 
     // Else stream the data.
     ss << "{";
     for( size_t i = 0; i < tables_.size(); i++)
     {
         ss << "\"" << columns_[i+1] << "\":[";
-
-        auto v = tables_[i]->data();
-
-        // CSV.
-        for( size_t ii = 0; ii < v.size()-1; ii++)
-            ss << v[ii] << ',';
-        ss << v.back();
-
-        // Remove the last ,
+        ss << tables_[i]->toJSON(currTime_, true);
         ss << "],";
-
     }
 
-    // csv: remove last ,
+    // remove , at the end else it won't be a valid JSON.
     string res = ss.str();
-
     if( ',' == res.back())
         res.pop_back();
-    res += "}";
+    res += "}\n";
     return res;
 }
 
@@ -358,6 +351,7 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
         int tickNum = tId.element()->getTick();
         tableDt_.push_back( clk->getTickDt( tickNum ) );
     }
+    currTime_ = 0.0;
 }
 
 /**
@@ -369,6 +363,7 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
 void SocketStreamer::process(const Eref& e, ProcPtr p)
 {
     // cout << "Calling process" << endl;
+    currTime_ = p->currTime;
     streamData();
 }
 
@@ -420,11 +415,13 @@ void SocketStreamer::removeTable( Id table )
 {
     int matchIndex = -1;
     for (size_t i = 0; i < tableIds_.size(); i++)
+    {
         if( table.path() == tableIds_[i].path() )
         {
             matchIndex = i;
             break;
         }
+    }
 
     if( matchIndex > -1 )
     {
@@ -465,16 +462,4 @@ size_t SocketStreamer::getPort( void ) const
 {
     assert( port_ > 1 );
     return port_;
-}
-
-/* Set the format of all Tables */
-void SocketStreamer::setFormat( string fmt )
-{
-    format_ = fmt;
-}
-
-/*  Get the format of all tables. */
-string SocketStreamer::getFormat( void ) const
-{
-    return format_;
 }

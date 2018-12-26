@@ -51,6 +51,8 @@ public:
     // merge time value among values. e.g. t1, v1, t2, v2, etc.
     void mergeWithTime(const vector<double>& yvec, vector<double>& tvec, const double& t);
 
+    string toJSON(const double t, bool withTime=true);
+
     //////////////////////////////////////////////////////////////////
     // Dest funcs
     //////////////////////////////////////////////////////////////////
