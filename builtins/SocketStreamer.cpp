@@ -259,13 +259,23 @@ bool SocketStreamer::streamData( )
 {
     if( clientfd_ > 0)
     {
-        string msg = dataToString();
-        if(0 > send(clientfd_, msg.c_str(), msg.size(), 0) )
+        buffer_ += dataToString();
+        int sendBytes = send(clientfd_, buffer_.c_str(), buffer_.size(), MSG_MORE);
+        if(0 > sendBytes)
         {
             LOG(moose::warning, "Failed to send. Error: " << strerror(errno)
                 << ". client id: " << clientfd_ );
             return false;
         }
+        // Send sendbytes has been sent. Remove as many characters from the msg
+        // and append to buffer.
+        // cout << "Send bytes " << sendBytes << " " << buffer_ << endl;
+        buffer_ = buffer_.erase(0, sendBytes);
+
+        // clear up the tables.
+        for( auto t : tables_ )
+            t->clearVec();
+
         return true;
     }
     else
@@ -302,8 +312,6 @@ string SocketStreamer::dataToString( )
         // Remove the last ,
         ss << "],";
 
-        // clean up table.
-        tables_[i]->clearVec();
     }
 
     // csv: remove last ,
@@ -334,30 +342,14 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
     // If no incoming connection found. Disable it.
     if( tables_.size() == 0 )
     {
-        moose::showWarn( "No tables found. Disabling SocketStreamer" );
+        moose::showWarn( "No table found. Disabling SocketStreamer.\nDid you forget" 
+                " to call addTables() on SocketStreamer object."
+                );
         e.element()->setTick( -2 );             /* Disable process */
         return;
     }
 
     Clock* clk = reinterpret_cast<Clock*>( Id(1).eref().data() );
-    for (size_t i = 0; i < tableIds_.size(); i++)
-    {
-        int tickNum = tableIds_[i].element()->getTick();
-        double tick = clk->getTickDt( tickNum );
-        tableDt_.push_back( tick );
-        // Make sure that all tables have the same tick.
-        if( i > 0 )
-        {
-            if( tick != tableDt_[0] )
-            {
-                moose::showWarn( "Table " + tableIds_[i].path() + " has "
-                                 " different clock dt. "
-                                 " Make sure all tables added to SocketStreamer have the same "
-                                 " dt value."
-                               );
-            }
-        }
-    }
 
     // Push each table dt_ into vector of dt
     for( size_t i = 0; i < tables_.size(); i++)
@@ -376,6 +368,7 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
  */
 void SocketStreamer::process(const Eref& e, ProcPtr p)
 {
+    // cout << "Calling process" << endl;
     streamData();
 }
 

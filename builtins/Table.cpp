@@ -230,7 +230,7 @@ Table::~Table( )
     // Make sure to write to rest of the entries to file before closing down.
     if( useStreamer_ )
     {
-        zipWithTime( vec(), data_, lastTime_ );
+        mergeWithTime( vec(), data_, lastTime_ );
         StreamerBase::writeToOutFile( outfile_, format_, "a", data_, columns_ );
         clearVec();
         data_.clear();
@@ -271,7 +271,7 @@ void Table::process( const Eref& e, ProcPtr p )
     {
         if( fmod(lastTime_, 5.0) == 0.0 or getVecSize() >= 10000 )
         {
-            zipWithTime( vec(), data_, lastTime_ );
+            mergeWithTime( vec(), data_, lastTime_ );
             StreamerBase::writeToOutFile( outfile_, format_ , "a", data_, columns_ );
             data_.clear();
             clearVec();
@@ -324,7 +324,7 @@ void Table::reinit( const Eref& e, ProcPtr p )
 
     if( useStreamer_ )
     {
-        zipWithTime( vec(), data_, lastTime_ );
+        mergeWithTime( vec(), data_, lastTime_ );
         StreamerBase::writeToOutFile( outfile_, format_, "w", data_, columns_);
         clearVec();
         data_.clear();
@@ -456,15 +456,12 @@ double Table::getDt( void ) const
  * @brief Take the vector from table and timestamp it. It must only be called
  * when packing the data for writing.
  */
-void Table::zipWithTime( const vector<double>& v
-        , vector<double>& tvec
-        , const double& currTime
-        )
+void Table::mergeWithTime( const vector<double>& v, vector<double>& data, const double& t)
 {
     size_t N = v.size();
     for (size_t i = 0; i < N; i++)
     {
-        tvec.push_back( currTime - (N - i - 1 ) * dt_ );
-        tvec.push_back( v[i] );
+        data.push_back(t - (N - i - 1 ) * dt_ );
+        data.push_back(v[i] );
     }
 }

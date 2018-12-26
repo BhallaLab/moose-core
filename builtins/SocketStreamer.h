@@ -27,6 +27,9 @@
 #define TCP_SOCKET_IP  "127.0.0.1"
 #endif
 
+// Before send() can be used with c++.
+#define _XOPEN_SOURCE_EXTENDED 1
+
 // cmake should set include path.
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -113,8 +116,7 @@ private:
     // std::thread processThread_;
     typedef std::map<std::string, std::thread> ThreadMap;
     ThreadMap tm_;
-
-
+    string buffer_;
 };
 
 #endif   /* ----- #ifndef SocketStreamer_INC  ----- */

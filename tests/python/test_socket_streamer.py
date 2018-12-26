@@ -124,9 +124,9 @@ def create_model():
 
 def test():
     global finish_all_
-    t = threading.Thread(target=socket_client, args=())
-    t.daemon = True
-    t.start()
+    client = threading.Thread(target=socket_client, args=())
+    client.daemon = True
+    client.start()
     print( '[INFO] Socket client is running now' )
 
     tables = create_model()
@@ -141,10 +141,12 @@ def test():
     time.sleep(0.2)
 
     moose.reinit()
-    moose.start( 100 )
+    moose.start( 300, 1)
+    for t in tables:
+        print( t.path, t.vector )
     print( 'MOOSE is done' )
     finish_all_ = True
-    t.join()
+    client.join()
 
 def main( ):
     #  sanity_test( )
