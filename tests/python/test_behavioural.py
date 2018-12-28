@@ -19,10 +19,15 @@ print( "[INFO ] Using moose from %s" % moose.__file__ )
 def sanity_test():
     b = moose.BehaviouralNeuron( '/n1' )
     assert b, 'Not created'
-    vs = ('a', 'v', 'tau')
+    vs = ('a', 'tau')
+    eqs = ('dv/dt=I_leak/Cm', 'I_leak=gL*(EL-v)')
     b.variables = vs
+    b.equations = eqs
     assert b.variables  == vs, 'Expected %s got %s' % (vs, b.variables)
+    assert b.equations  == eqs, 'Expected %s got %s' % (eqs, b.equations)
     moose.reinit()
+    moose.start(10)
+    print( 'All done' )
 
 def test():
     sanity_test()

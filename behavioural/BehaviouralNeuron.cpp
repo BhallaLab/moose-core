@@ -14,6 +14,7 @@
 #include "../biophysics/Compartment.h"
 #include "BehaviouralNeuronBase.h"
 #include "BehaviouralNeuron.h"
+#include "OdeSystem.h"
 
 using namespace moose;
 
@@ -35,7 +36,6 @@ const Cinfo* BehaviouralNeuron::initCinfo()
         doc,
         sizeof(doc)/sizeof(string)
     );
-
     return &lifCinfo;
 }
 
@@ -65,7 +65,6 @@ void BehaviouralNeuron::vProcess( const Eref& e, ProcPtr p )
     {
         Vm_ = vReset_;
         sumInject_ = 0.0;
-        VmOut()->send( e, Vm_ );
     }
     else
     {
@@ -82,13 +81,11 @@ void BehaviouralNeuron::vProcess( const Eref& e, ProcPtr p )
             lastEvent_ = p->currTime;
             fired_ = true;
             spikeOut()->send( e, p->currTime );
-            VmOut()->send( e, Vm_ );
         }
         else
-        {
-
-        }
+            Compartment::vProcess(e, p);
     }
+    VmOut()->send( e, Vm_ );
 }
 
 void BehaviouralNeuron::vReinit(  const Eref& e, ProcPtr p )
@@ -96,4 +93,5 @@ void BehaviouralNeuron::vReinit(  const Eref& e, ProcPtr p )
     activation_ = 0.0;
     fired_ = false;
     lastEvent_ = -refractT_; // Allow it to fire right away.
+    pSys_->buildSystem( (void*) this );
 }

@@ -8,14 +8,17 @@
  *        License:  See the LICENSE file.
  */
 
+#include <memory>
 
 #include "../basecode/header.h"
 #include "../basecode/ElementValueFinfo.h"
 #include "../biophysics/CompartmentBase.h"
 #include "../biophysics/Compartment.h"
 #include "BehaviouralNeuronBase.h"
+#include "OdeSystem.h"
 
 using namespace moose;
+using namespace std;
 
 /* This Finfo is used to send out Vm and spike to other elements. */
 SrcFinfo1< double >* BehaviouralNeuronBase::spikeOut()
@@ -45,6 +48,13 @@ const Cinfo* BehaviouralNeuronBase::initCinfo()
         "ODE variables.",
         &BehaviouralNeuronBase::setODEVariables,
         &BehaviouralNeuronBase::getODEVariables
+    );
+
+    static ElementValueFinfo<BehaviouralNeuronBase, vector<string>> equations(
+        "equations",
+        "Set equations.",
+        &BehaviouralNeuronBase::setEquations,
+        &BehaviouralNeuronBase::getEquations
     );
 
     static ElementValueFinfo< BehaviouralNeuronBase, double > vReset(
@@ -86,15 +96,15 @@ const Cinfo* BehaviouralNeuronBase::initCinfo()
 
     static Finfo* behaviouralNeuronFinfos[] =
     {
-        &thresh,                           // Value
-        &variables,                        // Value
-        &vReset,                           // Value
-        &refractoryPeriod,                 // Value
-        &hasFired,                         // ReadOnlyValue
-        &lastEventTime,                    // ReadOnlyValue
-        &activation,                       // DestFinfo
-        BehaviouralNeuronBase::spikeOut(), // MsgSrc
-        BehaviouralNeuronBase::VmOut()     // MsgSrc
+        &thresh,                            // Value
+        &variables,                         // Value
+        &equations,                         // Value
+        &vReset,                            // Value
+        &refractoryPeriod,                  // Value
+        &hasFired,                          // ReadOnlyValue
+        &lastEventTime,                     // ReadOnlyValue
+        &activation,                        // DestFinfo
+        BehaviouralNeuronBase::spikeOut(),  // MsgSrc
     };
 
     static string doc[] =
@@ -119,10 +129,6 @@ const Cinfo* BehaviouralNeuronBase::initCinfo()
 
 static const Cinfo* behaviouralNeuronBaseCinfo = BehaviouralNeuronBase::initCinfo();
 
-//////////////////////////////////////////////////////////////////
-// Here we put the Compartment class functions.
-//////////////////////////////////////////////////////////////////
-
 BehaviouralNeuronBase::BehaviouralNeuronBase() :
     threshold_( 0.0 ),
     vReset_( 0.0 ),
@@ -130,11 +136,14 @@ BehaviouralNeuronBase::BehaviouralNeuronBase() :
     refractT_( 0.0 ),
     lastEvent_( 0.0 ),
     fired_( false )
-{;}
+{
+    pSys_ = new OdeSystem();
+}
 
 BehaviouralNeuronBase::~BehaviouralNeuronBase()
 {
-    ;
+    if(pSys_)
+        delete pSys_;
 }
 
 // Value Field access function definitions.
@@ -195,5 +204,16 @@ void BehaviouralNeuronBase::setODEVariables( const Eref& e, const vector<string>
 vector<string> BehaviouralNeuronBase::getODEVariables( const Eref& e) const
 {
     return variables_;
+}
+
+// Equations.
+void BehaviouralNeuronBase::setEquations( const Eref& e, const vector<string> eqs)
+{
+    pSys_->setEquations(eqs);
+}
+
+vector<string> BehaviouralNeuronBase::getEquations( const Eref& e) const
+{
+    return pSys_->getEquations();
 }
 

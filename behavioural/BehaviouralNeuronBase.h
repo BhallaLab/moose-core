@@ -13,6 +13,8 @@
 
 namespace moose {
 
+class OdeSystem;
+
 class BehaviouralNeuronBase : public Compartment
 
 {
@@ -24,8 +26,13 @@ public:
     void setThresh( const Eref& e,  double val );
     double getThresh( const Eref& e  ) const;
 
-    void setODEVariables( const Eref& e, vector<string> vars);
+    // Get/Set variables.
+    void setODEVariables( const Eref& e, const vector<string> vars);
     vector<string> getODEVariables( const Eref& e ) const;
+
+    // Get/Set equations.
+    void setEquations(const Eref& e, const vector<string> eqs);
+    vector<string> getEquations(const Eref& e) const;
 
     void setVReset( const Eref& e,  double val );
 
@@ -56,7 +63,6 @@ public:
 
     /// Message src for outgoing spikes.
     static SrcFinfo1< double >* spikeOut();
-    static SrcFinfo1< double >* VmOut();
 
     /**
      * Initializes the class info.
@@ -75,6 +81,11 @@ protected:
     vector<string> variables_;
     vector<string> states_;
 
+    // expression in lhs=rhs form. 
+    vector<string> eqs_;
+
+public:
+    OdeSystem* pSys_;
 };
 
 } // namespace

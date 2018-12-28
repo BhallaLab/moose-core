@@ -129,8 +129,8 @@ public:
     void displace( double dx, double dy, double dz );
 
     /// Scales electrical values along with setting length, dia
-    void setGeomAndElec( const Eref& e,
-                         double length, double dia );
+    void setGeomAndElec(const Eref& e, double length, double dia);
+
     /////////////////////////////////////////////////////////////
     // Here we define the virtual functions for each of the above
     // wrappers.

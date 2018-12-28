@@ -175,4 +175,31 @@ string random_string( const unsigned len )
     return s;
 }
 
+/**
+ * @Synopsis  Replace all occurance of 'a' by 'b'.
+ *
+ * @Param expr : String in which "a" is to be replaced by "b".
+ * @Param a    : Replace string "a".
+ * @Param b    : By string "b".
+ */
+std::string replaceAll(const std::string expr, const std::string& a, const std::string& b)
+{
+    string e(expr);
+    if( a.length() < 1)
+        return e;
+
+    if(a == b)
+        return e;
+
+    size_t i = 0;
+    while(true)
+    {
+        i = e.find(a, i); 
+        if(i == std::string::npos)
+            break;
+        e.replace(i, a.length(), b);
+    }
+    return e;
+}
+
 }
