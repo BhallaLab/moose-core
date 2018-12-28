@@ -46,6 +46,7 @@ vector<string> OdeSystem::getEquations(void) const
     return eqs_;
 }
 
+
 void OdeSystem::buildSystem(void* obj)
 {
     LOG( moose::debug, "Building system from following equations:" );
@@ -74,11 +75,13 @@ void OdeSystem::buildSystem(void* obj)
     for( auto v : odeMap_ )
     {
         p.SetExpr(v.second);
-        auto vars = p.GetUsedVar();
-        for( auto vv : vars )
+        for(auto vv : p.GetUsedVar())
+        {
             if( eqsMap_.find(vv.first) != eqsMap_.end() )
                 v.second = moose::replaceAll( v.second, vv.first, "(" + eqsMap_[vv.first] + ")" );
+        }
     }
+
 
     isValid_ = true;
 }
