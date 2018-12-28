@@ -14,6 +14,7 @@
 #include "IntFireBase.h"
 
 using namespace moose;
+
 SrcFinfo1< double >* IntFireBase::spikeOut()
 {
     static SrcFinfo1< double > spikeOut(
@@ -73,13 +74,13 @@ const Cinfo* IntFireBase::initCinfo()
 
     static Finfo* intFireFinfos[] =
     {
-        &thresh,				// Value
-        &vReset,				// Value
-        &refractoryPeriod,		// Value
-        &hasFired,				// ReadOnlyValue
-        &lastEventTime,			// ReadOnlyValue
-        &activation,			// DestFinfo
-        IntFireBase::spikeOut() // MsgSrc
+        &thresh,                    // Value
+        &vReset,                    // Value
+        &refractoryPeriod,          // Value
+        &hasFired,                  // ReadOnlyValue
+        &lastEventTime,             // ReadOnlyValue
+        &activation,                // DestFinfo
+        IntFireBase::spikeOut()     // MsgSrc
     };
 
     static string doc[] =

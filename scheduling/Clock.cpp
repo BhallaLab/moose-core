@@ -30,22 +30,22 @@
  *
  * The system works like this:
  * 1. Assign times to each Tick. This is divided by dt_ and the rounded
- *         value is used for the integral multiple. Zero means the tick is not
- *         scheduled.
+ *    value is used for the integral multiple. Zero means the tick is not
+ *    scheduled.
  * 2. The process call goes through all active ticks in order every
- *         timestep. Each Tick increments its counter and decides if it is
- *         time to fire.
+ *   timestep. Each Tick increments its counter and decides if it is
+ *   time to fire.
  * 4. The Reinit call goes through all active ticks in order, just once.
  * 5. We connect up the Ticks to their target objects.
  * 6. We begin the simulation by calling 'start' or 'step' on the Clock.
- *         'step' executes exactly one timestep (of the minimum dt_),
- *         visiting all ticks as above..
- *         'start' executes an integral number of such timesteps.
+ *   'step' executes exactly one timestep (of the minimum dt_),
+ *   visiting all ticks as above..
+ *   'start' executes an integral number of such timesteps.
  * 7. To interrupt the simulation at some intermediate time, call 'stop'.
- *         This lets the system complete its current step.
+ *   This lets the system complete its current step.
  * 8. To restart the simulation from where it left off, use the same
- *         'start' or 'step' function on the Clock. As all the ticks
- *         retain their state, the simulation can resume smoothly.
+ *   'start' or 'step' function on the Clock. As all the ticks
+ *   retain their state, the simulation can resume smoothly.
  */
 
 #include "../basecode/header.h"
@@ -380,6 +380,8 @@ const Cinfo* Clock::initCinfo()
         "    AdThreshIF            2        50e-6\n"
         "    IzhIF                2        50e-6\n"
         "    IzhikevichNrn        2        50e-6\n"
+        "    BehaviouralNeuron    2        50e-6\n"
+        "    BehaviouralNeuronBase 2        50e-6\n"
         "    SynChan                2        50e-6\n"
         "    NMDAChan            2        50e-6\n"
         "    GapJunction            2        50e-6\n"
@@ -901,6 +903,8 @@ void Clock::buildDefaultTick()
     defaultTick_["AdThreshIF"] = 2;
     defaultTick_["IzhIF"] = 2;
     defaultTick_["IzhikevichNrn"] = 2;
+    defaultTick_["BehaviouralNeuronBase"] = 2;
+    defaultTick_["BehaviouralNeuron"] = 2;
     defaultTick_["SynChan"] = 2;
     defaultTick_["NMDAChan"] = 2;
     defaultTick_["GapJunction"] = 2;
@@ -1034,9 +1038,8 @@ void Clock::buildDefaultTick()
 // Static function
 unsigned int Clock::lookupDefaultTick( const string& className )
 {
-    map< string, unsigned int >::const_iterator i =
-        defaultTick_.find( className );
-    if ( i == defaultTick_.end() )
+    auto i = defaultTick_.find( className );
+    if (i == defaultTick_.end())
     {
         cout << "Warning: unknown className: '" << className << "'.\n" <<
              "Advisable to update the defaultTick table in the Clock class.\n";

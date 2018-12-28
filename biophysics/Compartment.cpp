@@ -13,6 +13,7 @@
 #include "Compartment.h"
 
 using namespace moose;
+
 const double Compartment::EPSILON = 1.0e-15;
 
 /**
@@ -392,4 +393,5 @@ void testCompartmentProcess()
     shell->doDelete( cid );
     cout << "." << flush;
 }
+
 #endif // DO_UNIT_TESTS

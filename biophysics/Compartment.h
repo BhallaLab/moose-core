@@ -11,14 +11,14 @@
 #ifndef _COMPARTMENT_H
 #define _COMPARTMENT_H
 
+namespace moose {
+
 /**
  * The Compartment class sets up an asymmetric compartment for
  * branched nerve calculations. Handles electronic structure and
  * also channels. This is not a particularly efficient way of doing
  * this, so we should use a solver for any substantial calculations.
  */
-namespace moose
-{
 class Compartment: public CompartmentBase
 {
 public:
@@ -135,8 +135,7 @@ private:
     static const double EPSILON;
 
 };
-}
 
-// Used by solver, readcell, etc.
+} // namespace moose
 
 #endif // _COMPARTMENT_H

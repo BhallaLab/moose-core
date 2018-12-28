@@ -324,6 +324,7 @@ add_subdirectory(benchmarks)
 add_subdirectory(kinetics)
 add_subdirectory(synapse)
 add_subdirectory(intfire)
+add_subdirectory(behavioural)
 
 ###################################### LINKING #################################
 list(APPEND MOOSE_LIBRARIES
@@ -338,6 +339,7 @@ list(APPEND MOOSE_LIBRARIES
     kinetics
     synapse
     intfire
+    behavioural
     hsolve
     mesh
     signeur
