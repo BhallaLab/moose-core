@@ -11,10 +11,10 @@
 #ifndef BEHAVIOURAL_NEURON_BASE_H
 #define BEHAVIOURAL_NEURON_BASE_H
 
-namespace moose
-{
+namespace moose {
 
-class BehaviouralNeuronBase
+class BehaviouralNeuronBase : public Compartment
+
 {
 public:
     BehaviouralNeuronBase();
@@ -70,8 +70,6 @@ protected:
     double refractT_;
     double lastEvent_;
     bool fired_;
-    double Vm_;
-    double sumInject_;
 
     // variables
     vector<string> variables_;

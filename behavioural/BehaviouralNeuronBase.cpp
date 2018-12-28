@@ -11,6 +11,8 @@
 
 #include "../basecode/header.h"
 #include "../basecode/ElementValueFinfo.h"
+#include "../biophysics/CompartmentBase.h"
+#include "../biophysics/Compartment.h"
 #include "BehaviouralNeuronBase.h"
 
 using namespace moose;
@@ -24,14 +26,6 @@ SrcFinfo1< double >* BehaviouralNeuronBase::spikeOut()
         "the spike. "
     );
     return &spikeOut;
-}
-
-SrcFinfo1< double >* BehaviouralNeuronBase::VmOut() 
-{
-    static SrcFinfo1< double > VmOut( 
-            "VmOut",
-            "Sends out Vm on each timestep" );
-    return &VmOut;
 }
 
 const Cinfo* BehaviouralNeuronBase::initCinfo()
@@ -112,7 +106,7 @@ const Cinfo* BehaviouralNeuronBase::initCinfo()
     static ZeroSizeDinfo< int > dinfo;
     static Cinfo behaviouralNeuronBaseCinfo(
         "BehaviouralNeuronBase",
-        Neutral::initCinfo(),
+        Compartment::initCinfo(),
         behaviouralNeuronFinfos,
         sizeof( behaviouralNeuronFinfos ) / sizeof (Finfo*),
         &dinfo,
@@ -129,15 +123,13 @@ static const Cinfo* behaviouralNeuronBaseCinfo = BehaviouralNeuronBase::initCinf
 // Here we put the Compartment class functions.
 //////////////////////////////////////////////////////////////////
 
-BehaviouralNeuronBase::BehaviouralNeuronBase()
-    :
+BehaviouralNeuronBase::BehaviouralNeuronBase() :
     threshold_( 0.0 ),
     vReset_( 0.0 ),
     activation_( 0.0 ),
     refractT_( 0.0 ),
     lastEvent_( 0.0 ),
-    fired_( false ),
-    Vm_( 0.0 )
+    fired_( false )
 {;}
 
 BehaviouralNeuronBase::~BehaviouralNeuronBase()
