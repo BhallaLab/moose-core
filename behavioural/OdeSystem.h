@@ -14,6 +14,7 @@
 #include <boost/numeric/odeint.hpp>
 #include <vector>
 #include <map>
+#include "../external/muparser/include/muParser.h"
 
 using namespace std;
 
@@ -40,6 +41,9 @@ private:
     map<string, string> odeMap_;
     map<string, string> eqsMap_;
     vector<string> symbols_;
+
+public:
+    mu::Parser p_;
 };
 
 } // namespace moose

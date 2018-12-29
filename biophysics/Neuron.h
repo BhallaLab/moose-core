@@ -6,8 +6,7 @@
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
-**********************************************************************/
-
+**********************************************************************/ 
 #ifndef _NEURON_H
 #define _NEURON_H
 

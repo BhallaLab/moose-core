@@ -93,5 +93,5 @@ void BehaviouralNeuron::vReinit(  const Eref& e, ProcPtr p )
     activation_ = 0.0;
     fired_ = false;
     lastEvent_ = -refractT_; // Allow it to fire right away.
-    pSys_->buildSystem( (void*) this );
+    buildSystem( );
 }

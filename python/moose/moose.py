@@ -13,6 +13,7 @@ from contextlib import closing
 # Import function from C++ module into moose namespace.
 import moose._moose as _moose
 import moose.utils as mu
+from moose.behavioural import BehavNeuron
 
 # sbml import.
 sbmlImport_, sbmlError_ = True, ''

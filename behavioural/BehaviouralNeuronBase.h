@@ -11,11 +11,12 @@
 #ifndef BEHAVIOURAL_NEURON_BASE_H
 #define BEHAVIOURAL_NEURON_BASE_H
 
+#include "BehaviouralSystem.h"
+#include "../external/muparser/include/muParser.h"
+
 namespace moose {
 
-class OdeSystem;
-
-class BehaviouralNeuronBase : public Compartment
+class BehaviouralNeuronBase : public Compartment, public BehaviouralSystem
 
 {
 public:
@@ -30,6 +31,9 @@ public:
     void setODEVariables( const Eref& e, const vector<string> vars);
     vector<string> getODEVariables( const Eref& e ) const;
 
+    void setODEStates( const Eref& e, const vector<string> ss);
+    vector<string> getODEStates( const Eref& e ) const;
+
     // Get/Set equations.
     void setEquations(const Eref& e, const vector<string> eqs);
     vector<string> getEquations(const Eref& e) const;
@@ -42,6 +46,10 @@ public:
     double getRefractoryPeriod( const Eref& e  ) const;
     double getLastEventTime( const Eref& e  ) const;
     bool hasFired( const Eref& e ) const;
+
+
+    // Build system and setup a ODE system.
+    void buildSystem();
 
     // Dest function definitions.
     /**
@@ -80,12 +88,10 @@ protected:
     // variables
     vector<string> variables_;
     vector<string> states_;
+    map<string, mu::Parser> odeMap_;
 
     // expression in lhs=rhs form. 
     vector<string> eqs_;
-
-public:
-    OdeSystem* pSys_;
 };
 
 } // namespace

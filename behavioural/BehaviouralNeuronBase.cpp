@@ -15,7 +15,10 @@
 #include "../biophysics/CompartmentBase.h"
 #include "../biophysics/Compartment.h"
 #include "BehaviouralNeuronBase.h"
-#include "OdeSystem.h"
+#include "BehaviouralSystem.h"
+
+#include "../utility/print_function.hpp"
+#include "../utility/strutil.h"
 
 using namespace moose;
 using namespace std;
@@ -48,6 +51,13 @@ const Cinfo* BehaviouralNeuronBase::initCinfo()
         "ODE variables.",
         &BehaviouralNeuronBase::setODEVariables,
         &BehaviouralNeuronBase::getODEVariables
+    );
+
+    static ElementValueFinfo< BehaviouralNeuronBase, vector<string> > states(
+        "states",
+        "ODE states.",
+        &BehaviouralNeuronBase::setODEStates,
+        &BehaviouralNeuronBase::getODEStates
     );
 
     static ElementValueFinfo<BehaviouralNeuronBase, vector<string>> equations(
@@ -98,6 +108,7 @@ const Cinfo* BehaviouralNeuronBase::initCinfo()
     {
         &thresh,                            // Value
         &variables,                         // Value
+        &states,                            // Value
         &equations,                         // Value
         &vReset,                            // Value
         &refractoryPeriod,                  // Value
@@ -137,13 +148,10 @@ BehaviouralNeuronBase::BehaviouralNeuronBase() :
     lastEvent_( 0.0 ),
     fired_( false )
 {
-    pSys_ = new OdeSystem();
 }
-
+    
 BehaviouralNeuronBase::~BehaviouralNeuronBase()
 {
-    if(pSys_)
-        delete pSys_;
 }
 
 // Value Field access function definitions.
@@ -206,14 +214,47 @@ vector<string> BehaviouralNeuronBase::getODEVariables( const Eref& e) const
     return variables_;
 }
 
+// States
+void BehaviouralNeuronBase::setODEStates( const Eref& e, const vector<string> ss)
+{
+    states_ = ss;
+}
+
+vector<string> BehaviouralNeuronBase::getODEStates( const Eref& e) const
+{
+    return states_;
+}
+
 // Equations.
 void BehaviouralNeuronBase::setEquations( const Eref& e, const vector<string> eqs)
 {
-    pSys_->setEquations(eqs);
+    eqs_ = eqs;
 }
 
 vector<string> BehaviouralNeuronBase::getEquations( const Eref& e) const
 {
-    return pSys_->getEquations();
+    return eqs_;
 }
 
+
+void BehaviouralNeuronBase::buildSystem( )
+{
+    for( auto eq : eqs_ )
+    {
+        size_t loc = eq.find( '=' );
+        if( loc == std::string::npos)
+        {
+            LOG( moose::warning, "Invalid equation: " << eq << ". Ignored!" );
+            continue;
+        }
+
+        auto lhs = moose::trim(eq.substr(0, loc));
+        auto rhs = moose::trim(eq.substr(loc+1));
+
+        mu::Parser p;
+        p.SetExpr(rhs);
+        // setupParser(p);
+
+        odeMap_[lhs] = p;
+    }
+}

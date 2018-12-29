@@ -17,14 +17,18 @@ import moose
 print( "[INFO ] Using moose from %s" % moose.__file__ )
 
 def sanity_test():
-    b = moose.BehaviouralNeuron( '/n1' )
-    assert b, 'Not created'
-    vs = ('a', 'tau')
+
+    """
+    A behavioural system is described by two equations:
+        dX/dt = AX+B
+        Y     = CX+D   # usually omitted.
+
+    Each behavioural neuron/synapse will have a behavioural system associated
+    with it.
+    """
     eqs = ('dv/dt=I_leak/Cm', 'I_leak=gL*(EL-v)')
-    b.variables = vs
-    b.equations = eqs
-    assert b.variables  == vs, 'Expected %s got %s' % (vs, b.variables)
-    assert b.equations  == eqs, 'Expected %s got %s' % (eqs, b.equations)
+    b = moose.BehavNeuron( '/n1', eqs )
+    assert b, 'Not created'
     moose.reinit()
     moose.start(10)
     print( 'All done' )
