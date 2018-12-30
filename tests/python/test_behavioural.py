@@ -28,9 +28,13 @@ def sanity_test():
     """
     eqs = ('dv/dt=I_leak/Cm', 'I_leak=gL*(EL-v)')
     b = moose.BehavNeuron( '/n1', eqs, gL=1, EL=1, verbose=True)
+    print( b )
+    t = moose.Table( '/n1/tab' )
+    moose.connect( t, 'requestOut', b, 'getVm' )
     assert b, 'Not created'
     moose.reinit()
     moose.start(1e-3)
+    print( t.vector )
     print( 'All done' )
 
 def test():

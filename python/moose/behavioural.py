@@ -74,22 +74,18 @@ def _getODESystem(eqs, **kwargs):
     eqs = ["%s=%s"%(l, _replaceConstInLHS(r,**kwargs)) for (l,r) in odeSys.items()]
     return eqs
 
-class BehavNeuron():
+class BehavNeuron( _moose.BehaviouralNeuron ):
     """BehavNeuron
 
     A neuron whose behaviour is given by equations.
     """
     def __init__(self, path, equations, **kwargs):
-        self.nrn = _moose.BehaviouralNeuron(path)
-        self.equations = equations
+        _moose.BehaviouralNeuron.__init__(self, path)
+        self.__eqs__ = equations
         self.build(**kwargs)
 
     def build(self, **kwargs):
         if kwargs.get('verbose', False):
             logger_.setLevel( logging.DEBUG )
-        odeEqs = _getODESystem(self.equations, **kwargs)
-        logger_.info( "Building behavioural neuron: %s" % odeEqs )
-        self.nrn.equations = odeEqs
-
-    
-
+        self.equations = _getODESystem(self.__eqs__, **kwargs)
+        logger_.info( "Building behavioural neuron: %s" % self.equations )

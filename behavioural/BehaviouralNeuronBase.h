@@ -27,16 +27,20 @@ public:
     void setThresh( const Eref& e,  double val );
     double getThresh( const Eref& e  ) const;
 
-    // Get/Set variables.
+    // Get-Set variables.
     void setODEVariables( const Eref& e, const vector<string> vars);
     vector<string> getODEVariables( const Eref& e ) const;
 
     void setODEStates( const Eref& e, const vector<string> ss);
     vector<string> getODEStates( const Eref& e ) const;
 
-    // Get/Set equations.
+    // Get-Set equations.
     void setEquations(const Eref& e, const vector<string> eqs);
     vector<string> getEquations(const Eref& e) const;
+
+    // Build system and setup a ODE system.
+    void setupParser(mu::Parser& p);
+    void buildSystem();
 
     void setVReset( const Eref& e,  double val );
 
@@ -80,15 +84,21 @@ protected:
     double refractT_;
     double lastEvent_;
     bool fired_;
-
+    bool isBuilt_;
 
     // variables
     vector<string> variables_;
     vector<string> states_;
+
+    // map of y' and its expression parser.
     map<string, mu::Parser> odeMap_;
 
     // expression in lhs=rhs form. 
     vector<string> eqs_; 
+
+    // Map of variables. To be used in parser. Initialized in constructors. It
+    // keep pointer to data.
+    map<string, double*> vals_;
     
 };
 

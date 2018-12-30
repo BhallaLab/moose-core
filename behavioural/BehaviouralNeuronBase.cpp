@@ -146,7 +146,8 @@ BehaviouralNeuronBase::BehaviouralNeuronBase() :
     activation_( 0.0 ),
     refractT_( 0.0 ),
     lastEvent_( 0.0 ),
-    fired_( false )
+    fired_( false ),
+    isBuilt_( false )
 {
 }
     
@@ -236,4 +237,32 @@ vector<string> BehaviouralNeuronBase::getEquations( const Eref& e) const
     return eqs_;
 }
 
+void BehaviouralNeuronBase::setupParser(mu::Parser& p)
+{
+    LOG( moose::debug, "Setting up parser" );
+    for( auto v : vals_ )
+        p.DefineVar( v.first, v.second );
+}
 
+
+void BehaviouralNeuronBase::buildSystem( )
+{
+    for( auto eq : eqs_ )
+    {
+        size_t loc = eq.find( '=' );
+        if( loc == std::string::npos)
+        {
+            LOG( moose::warning, "Invalid equation: " << eq << ". Ignored!" );
+            continue;
+        }
+
+        auto lhs = moose::trim(eq.substr(0, loc));
+        auto rhs = moose::trim(eq.substr(loc+1));
+
+        mu::Parser p;
+        setupParser(p);
+        p.SetExpr(rhs);
+        odeMap_[lhs] = p;
+    }
+    isBuilt_ = true;
+}

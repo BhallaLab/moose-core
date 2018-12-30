@@ -50,15 +50,12 @@ static const Cinfo* lifCinfo = BehaviouralNeuron::initCinfo();
 
 BehaviouralNeuron::BehaviouralNeuron()
 {
-    vals_["tau"] = 0.0;
-    vals_["gL"] = 1.0;
-    vals_["t"] = currTime_;
+    vals_["t"]  = &currTime_;
 
     // Following are inherited from Compartment.
-    vals_["Vm"] = Vm_;
-    vals_["Cm"] = Cm_;
-    vals_["v"] = Vm_;
-    vals_["EL"] = 0.0;
+    vals_["Vm"] = &Vm_;
+    vals_["Cm"] = &Cm_;
+    vals_["v"]  = &Vm_;
 }
 
 BehaviouralNeuron::~BehaviouralNeuron()
@@ -99,25 +96,24 @@ void BehaviouralNeuron::vProcess( const Eref& e, ProcPtr p )
         else
             Compartment::vProcess(e, p);
     }
-    VmOut()->send( e, Vm_ );
 
     // Eval parser.
-    vector<double> dy;
     double v = 0.0;
+    string var;
     for( auto p : odeMap_ )
     {
-        try
-        {
+        try {
             v = p.second.Eval();
-        }
-        catch( mu::ParserError& e )  
-        {
+        } catch(mu::ParserError& e){
             cout << "Error in evaluation: " << e.GetMsg() << endl;
         }
-        dy.push_back(v);
+
+        // p.first is usually x', y' or v'. When updating the variable value,
+        // remove ' from the map.
+        var = p.first; var.pop_back();
+        *(vals_[var]) += v;
     }
-    for( auto y : dy )
-        cout << y << ',';
+    VmOut()->send( e, Vm_ );
 }
 
 void BehaviouralNeuron::vReinit(  const Eref& e, ProcPtr p )
@@ -130,33 +126,3 @@ void BehaviouralNeuron::vReinit(  const Eref& e, ProcPtr p )
 }
 
 
-void BehaviouralNeuron::setupParser(mu::Parser& p)
-{
-    LOG( moose::debug, "Setting up parser" );
-    for( auto v : vals_ )
-        p.DefineVar( v.first, &v.second );
-
-}
-
-void BehaviouralNeuron::buildSystem( )
-{
-    for( auto eq : eqs_ )
-    {
-        size_t loc = eq.find( '=' );
-        if( loc == std::string::npos)
-        {
-            LOG( moose::warning, "Invalid equation: " << eq << ". Ignored!" );
-            continue;
-        }
-
-        auto lhs = moose::trim(eq.substr(0, loc));
-        auto rhs = moose::trim(eq.substr(loc+1));
-
-        mu::Parser p;
-        setupParser(p);
-        p.SetExpr(rhs);
-        odeMap_[lhs] = p;
-    }
-
-    isBuilt_ = true;
-}
