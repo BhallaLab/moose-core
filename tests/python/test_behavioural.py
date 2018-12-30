@@ -29,8 +29,7 @@ def sanity_test():
     """
     eqs = ('dv/dt=I_leak/Cm', 'I_leak=gL*(EL-v)')
     b = moose.BehavNeuron( '/n1', eqs, gL=1e-2, EL=1e-2
-            , thres = -0.05
-            , reset = 0.0
+            , threshold = -0.05, reset = 0.0
             , verbose=True
             )
     t = moose.Table( '/n1/tab' )

@@ -81,6 +81,7 @@ class BehavNeuron( _moose.BehaviouralNeuron ):
     """
 
     def __init__(self, path, equations, **kwargs):
+        #  self.nrn = _moose.BehaviouralNeuron(path)
         _moose.BehaviouralNeuron.__init__(self, path)
         self.__eqs__ = equations
         self.build(**kwargs)
@@ -89,10 +90,7 @@ class BehavNeuron( _moose.BehaviouralNeuron ):
         # Build the system.
         if kwargs.get('verbose', False):
             logger_.setLevel( logging.DEBUG )
-        # Set parameters usually assigned for a behavioural neurons.
-        self.thres = 0.1
-        for p in ['thres', 'reset']:
-            if kwargs.get( p, None) is not None:
-                setattr(self, p, float(kwargs[p]))
-                #  logger_.debug( '%s.%s = %s' % (self, p, getattr(self, p)))
+
+        self.thresh = kwargs.get('threshold', kwargs.get('thresh', 0.0))
+        self.vReset = kwargs.get('reset', kwargs.get('vReset', 0.0))
         self.equations = _getODESystem(self.__eqs__, **kwargs)
