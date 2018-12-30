@@ -28,7 +28,6 @@ public:
 
     void setEquations(const vector<string>& eqs);
     vector<string> getEquations(void) const;
-    void buildSystem(void* obj);
     bool isValid(void);
 
 private:

@@ -27,10 +27,10 @@ def sanity_test():
     with it.
     """
     eqs = ('dv/dt=I_leak/Cm', 'I_leak=gL*(EL-v)')
-    b = moose.BehavNeuron( '/n1', eqs )
+    b = moose.BehavNeuron( '/n1', eqs, gL=1, EL=1, verbose=True)
     assert b, 'Not created'
     moose.reinit()
-    moose.start(10)
+    moose.start(1e-3)
     print( 'All done' )
 
 def test():

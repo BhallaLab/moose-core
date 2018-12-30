@@ -47,10 +47,6 @@ public:
     double getLastEventTime( const Eref& e  ) const;
     bool hasFired( const Eref& e ) const;
 
-
-    // Build system and setup a ODE system.
-    void buildSystem();
-
     // Dest function definitions.
     /**
      * The process function does the object updating and sends out
@@ -85,13 +81,15 @@ protected:
     double lastEvent_;
     bool fired_;
 
+
     // variables
     vector<string> variables_;
     vector<string> states_;
     map<string, mu::Parser> odeMap_;
 
     // expression in lhs=rhs form. 
-    vector<string> eqs_;
+    vector<string> eqs_; 
+    
 };
 
 } // namespace

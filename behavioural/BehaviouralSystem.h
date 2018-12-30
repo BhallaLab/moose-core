@@ -16,28 +16,26 @@
 
 using namespace std;
 
-namespace moose {
+namespace moose
+{
 
 /*
  * =====================================================================================
  *        Class:  BehaviouralSystem
- *  Description:  
+ *  Description:
  * =====================================================================================
  */
-class BehaviouralSystem 
+class BehaviouralSystem
 {
-    public:
-        BehaviouralSystem ();                             /* constructor      */
-        ~BehaviouralSystem ();                            /* destructor       */
+public:
+    BehaviouralSystem ();                             /* constructor      */
+    ~BehaviouralSystem ();                            /* destructor       */
+    OdeSystem* getODE() const;
 
-        void buildSystem();
+protected:
 
-        OdeSystem* getODE() const;
-
-    protected:
-
-    private:
-        OdeSystem* ode_;
+private:
+    OdeSystem* ode_;
 
 }; /* -----  end of class BehaviouralSystem  ----- */
 

@@ -48,13 +48,16 @@ def _flattenAST(a, astDict):
     ast.fix_missing_locations(a)
     return a
 
-def _getODESystem(eqs):
-    """equations2SS
-        X' = AX + B
-        Y  = CX + D
+def _replaceConstInLHS(x, **kwargs):
+    print( kwargs, x )
+    for k, v in kwargs.items():
+        if k in x:
+            x = x.replace(k, '%s'%v)
+    return x
 
-    :param eqs:
-    :return: Return A, B, C, D
+def _getODESystem(eqs, **kwargs):
+    """
+    Get ODE System after replacing values.
     """
     logger_.info( "Generating state space" )
     astD = dict([generateAST(eq) for eq in eqs])
@@ -68,27 +71,23 @@ def _getODESystem(eqs):
                     ).replace('\n', '')
 
     # Now build state space description from new dict
-    return ["%s=%s"%x for x in odeSys.items()]
-
+    eqs = ["%s=%s"%(l, _replaceConstInLHS(r,**kwargs)) for (l,r) in odeSys.items()]
+    return eqs
 
 class BehavNeuron():
     """BehavNeuron
 
     A neuron whose behaviour is given by equations.
     """
-    
-    def __init__(self, path, equations):
+    def __init__(self, path, equations, **kwargs):
         self.nrn = _moose.BehaviouralNeuron(path)
         self.equations = equations
-        # StateSpace 
-        self.ss = ([],[],[],[])
-        self.build()
+        self.build(**kwargs)
 
-
-    def build(self, verbose = True):
-        if verbose:
+    def build(self, **kwargs):
+        if kwargs.get('verbose', False):
             logger_.setLevel( logging.DEBUG )
-        odeEqs = _getODESystem(self.equations)
+        odeEqs = _getODESystem(self.equations, **kwargs)
         logger_.info( "Building behavioural neuron: %s" % odeEqs )
         self.nrn.equations = odeEqs
 

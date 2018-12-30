@@ -30,11 +30,3 @@ OdeSystem* BehaviouralSystem::getODE() const
     return ode_;
 }
 
-
-void BehaviouralSystem::buildSystem ( void )
-{
-    LOG( moose::debug, "Building system" );
-    ode_->buildSystem( (void*) this);
-    return ;
-}		/* -----  end of method BehaviouralSystem::buildSystem  ----- */
-

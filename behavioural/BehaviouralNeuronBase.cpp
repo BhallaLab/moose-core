@@ -237,24 +237,3 @@ vector<string> BehaviouralNeuronBase::getEquations( const Eref& e) const
 }
 
 
-void BehaviouralNeuronBase::buildSystem( )
-{
-    for( auto eq : eqs_ )
-    {
-        size_t loc = eq.find( '=' );
-        if( loc == std::string::npos)
-        {
-            LOG( moose::warning, "Invalid equation: " << eq << ". Ignored!" );
-            continue;
-        }
-
-        auto lhs = moose::trim(eq.substr(0, loc));
-        auto rhs = moose::trim(eq.substr(loc+1));
-
-        mu::Parser p;
-        p.SetExpr(rhs);
-        // setupParser(p);
-
-        odeMap_[lhs] = p;
-    }
-}

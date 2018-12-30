@@ -33,7 +33,6 @@ vector<string> OdeSystem::getEquations(void) const
 }
 
 
-
 bool OdeSystem::isValid(void)
 {
     return isValid_;
