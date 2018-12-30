@@ -72,6 +72,28 @@ void BehaviouralNeuron::vProcess( const Eref& e, ProcPtr p )
     // For parser.
     currTime_ = p->currTime;
 
+    // Eval parser.
+    static double v = 0.0;
+    static string var;
+
+    for( auto p : odeMap_ )
+    {
+        try 
+        {
+            v = p.second.Eval();
+        }
+        catch(mu::ParserError& e)
+        {
+            cout << "Error in evaluation: " << e.GetMsg() << endl;
+        }
+
+        // p.first is usually x', y' or v'. When updating the variable value,
+        // remove ' from the map and update the value in vals_.
+        var = p.first; 
+        var.pop_back(); // remove last ' from the variable name.
+        *(vals_[var]) += v;
+    }
+
     if ( p->currTime < lastEvent_ + refractT_ )
     {
         Vm_ = vReset_;
@@ -97,26 +119,6 @@ void BehaviouralNeuron::vProcess( const Eref& e, ProcPtr p )
             Compartment::vProcess(e, p);
     }
 
-    // Eval parser.
-    double v = 0.0;
-    string var;
-    for( auto p : odeMap_ )
-    {
-        try 
-        {
-            v = p.second.Eval();
-        }
-        catch(mu::ParserError& e)
-        {
-            cout << "Error in evaluation: " << e.GetMsg() << endl;
-        }
-
-        // p.first is usually x', y' or v'. When updating the variable value,
-        // remove ' from the map and update the value in vals_.
-        var = p.first; 
-        var.pop_back();
-        *(vals_[var]) += v;
-    }
     VmOut()->send( e, Vm_ );
 }
 
