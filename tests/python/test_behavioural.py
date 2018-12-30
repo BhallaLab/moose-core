@@ -19,16 +19,20 @@ print( "[INFO ] Using moose from %s" % moose.__file__ )
 def sanity_test():
 
     """
-    A behavioural system is described by two equations:
-        dX/dt = AX+B
-        Y     = CX+D   # usually omitted.
+    A behavioural system is described ODE system. For a neuron it is usually
+        dv/dt = f(v, ...,t) etc.
 
     Each behavioural neuron/synapse will have a behavioural system associated
     with it.
+
+    all units must be in SI.
     """
     eqs = ('dv/dt=I_leak/Cm', 'I_leak=gL*(EL-v)')
-    b = moose.BehavNeuron( '/n1', eqs, gL=1, EL=1, verbose=True)
-    print( b )
+    b = moose.BehavNeuron( '/n1', eqs, gL=1e-2, EL=1e-2
+            , thres = -0.05
+            , reset = 0.0
+            , verbose=True
+            )
     t = moose.Table( '/n1/tab' )
     moose.connect( t, 'requestOut', b, 'getVm' )
     assert b, 'Not created'

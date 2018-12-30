@@ -79,13 +79,20 @@ class BehavNeuron( _moose.BehaviouralNeuron ):
 
     A neuron whose behaviour is given by equations.
     """
+
     def __init__(self, path, equations, **kwargs):
         _moose.BehaviouralNeuron.__init__(self, path)
         self.__eqs__ = equations
         self.build(**kwargs)
 
     def build(self, **kwargs):
+        # Build the system.
         if kwargs.get('verbose', False):
             logger_.setLevel( logging.DEBUG )
+        # Set parameters usually assigned for a behavioural neurons.
+        self.thres = 0.1
+        for p in ['thres', 'reset']:
+            if kwargs.get( p, None) is not None:
+                setattr(self, p, float(kwargs[p]))
+                #  logger_.debug( '%s.%s = %s' % (self, p, getattr(self, p)))
         self.equations = _getODESystem(self.__eqs__, **kwargs)
-        logger_.info( "Building behavioural neuron: %s" % self.equations )

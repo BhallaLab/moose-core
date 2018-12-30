@@ -159,6 +159,7 @@ BehaviouralNeuronBase::~BehaviouralNeuronBase()
 void BehaviouralNeuronBase::setThresh( const Eref& e, double val )
 {
     threshold_ = val;
+    cout << "Threshold is " << threshold_ << endl;
 }
 
 double BehaviouralNeuronBase::getThresh( const Eref& e ) const
@@ -229,6 +230,26 @@ vector<string> BehaviouralNeuronBase::getODEStates( const Eref& e) const
 // Equations.
 void BehaviouralNeuronBase::setEquations( const Eref& e, const vector<string> eqs)
 {
+    // Check for formatting.
+    for( auto eq : eqs )
+    {
+        // Split into lhs=rhs. Make sure that lhs has the form var'.
+        size_t loc = eq.find( '=' );
+        if( loc == std::string::npos)
+        {
+            moose::showError("Invalid equation: " + eq );
+            return;
+        }
+
+        auto lhs = moose::trim(eq.substr(0, loc));
+        if( '\'' != lhs.back())
+        {
+            moose::showError( "Equation LHS " + lhs + " is not in proper format. " 
+                    "Missing ' e.g. v' or x'." 
+                    );
+            return;
+        }
+    }
     eqs_ = eqs;
 }
 
@@ -239,7 +260,6 @@ vector<string> BehaviouralNeuronBase::getEquations( const Eref& e) const
 
 void BehaviouralNeuronBase::setupParser(mu::Parser& p)
 {
-    LOG( moose::debug, "Setting up parser" );
     for( auto v : vals_ )
         p.DefineVar( v.first, v.second );
 }
@@ -247,18 +267,12 @@ void BehaviouralNeuronBase::setupParser(mu::Parser& p)
 
 void BehaviouralNeuronBase::buildSystem( )
 {
+    // function setEquations checks if equations are in correct format.
     for( auto eq : eqs_ )
     {
         size_t loc = eq.find( '=' );
-        if( loc == std::string::npos)
-        {
-            LOG( moose::warning, "Invalid equation: " << eq << ". Ignored!" );
-            continue;
-        }
-
         auto lhs = moose::trim(eq.substr(0, loc));
         auto rhs = moose::trim(eq.substr(loc+1));
-
         mu::Parser p;
         setupParser(p);
         p.SetExpr(rhs);

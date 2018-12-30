@@ -102,15 +102,19 @@ void BehaviouralNeuron::vProcess( const Eref& e, ProcPtr p )
     string var;
     for( auto p : odeMap_ )
     {
-        try {
+        try 
+        {
             v = p.second.Eval();
-        } catch(mu::ParserError& e){
+        }
+        catch(mu::ParserError& e)
+        {
             cout << "Error in evaluation: " << e.GetMsg() << endl;
         }
 
         // p.first is usually x', y' or v'. When updating the variable value,
-        // remove ' from the map.
-        var = p.first; var.pop_back();
+        // remove ' from the map and update the value in vals_.
+        var = p.first; 
+        var.pop_back();
         *(vals_[var]) += v;
     }
     VmOut()->send( e, Vm_ );

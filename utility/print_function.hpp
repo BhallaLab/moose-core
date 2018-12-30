@@ -237,6 +237,7 @@ namespace moose {
     inline void showError( string msg )
     {
         moose::__dump__( msg, moose::error );
+        throw std::runtime_error( msg );
     }
 
     /**
