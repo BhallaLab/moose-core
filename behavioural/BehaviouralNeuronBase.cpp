@@ -240,15 +240,6 @@ void BehaviouralNeuronBase::setEquations( const Eref& e, const vector<string> eq
             moose::showError("Invalid equation: " + eq );
             return;
         }
-
-        auto lhs = moose::trim(eq.substr(0, loc));
-        if( '\'' != lhs.back())
-        {
-            moose::showError( "Equation LHS " + lhs + " is not in proper format. " 
-                    "Missing ' e.g. v' or x'." 
-                    );
-            return;
-        }
     }
     eqs_ = eqs;
 }
@@ -276,7 +267,12 @@ void BehaviouralNeuronBase::buildSystem( )
         mu::Parser p;
         setupParser(p);
         p.SetExpr(rhs);
-        odeMap_[lhs] = p;
+
+        // Put equation in their appropriate maps.
+        if( '\'' == lhs.back() )
+            odeMap_[lhs] = p;
+        else
+            eqMap_[lhs] = p;
     }
     isBuilt_ = true;
 }

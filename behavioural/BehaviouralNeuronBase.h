@@ -92,6 +92,7 @@ protected:
 
     // map of y' and its expression parser.
     map<string, mu::Parser> odeMap_;
+    map<string, mu::Parser> eqMap_;
 
     // expression in lhs=rhs form. 
     vector<string> eqs_; 

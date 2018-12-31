@@ -56,6 +56,7 @@ BehaviouralNeuron::BehaviouralNeuron()
     vals_["Vm"] = &Vm_;
     vals_["Cm"] = &Cm_;
     vals_["v"]  = &Vm_;
+    vals_["I"]  = &inject_;
 }
 
 BehaviouralNeuron::~BehaviouralNeuron()
@@ -76,8 +77,19 @@ void BehaviouralNeuron::vProcess( const Eref& e, ProcPtr p )
     static double _v = 0.0;
     static string _var;
 
+    // Evaluate ODE equations.
     for( auto p : odeMap_ )
     {
+        // p.first is usually x', y' or v'. When updating the variable value,
+        // remove ' from the map and update the value in vals_.
+        _var = p.first; 
+        _var.pop_back(); // remove last ' from the variable name.
+
+        // If this variable not in vals_ map then ignore it. It is not one of
+        // legal state.
+        if(vals_.find(_var) == vals_.end())
+            continue;
+
         try 
         {
             _v = p.second.Eval();
@@ -87,12 +99,29 @@ void BehaviouralNeuron::vProcess( const Eref& e, ProcPtr p )
             cout << "Error in evaluation: " << e.GetMsg() << endl;
         }
 
-        // p.first is usually x', y' or v'. When updating the variable value,
-        // remove ' from the map and update the value in vals_.
-        _var = p.first; 
-        _var.pop_back(); // remove last ' from the variable name.
         *(vals_[_var]) += _v;
     }
+
+    // Evaluate non-ODE equations.
+    for( auto p : eqMap_ )
+    {
+        _var = p.first; 
+        // If this variable not in vals_ map then ignore it. It is not one of
+        // legal state.
+        if(vals_.find(_var) == vals_.end())
+            continue;
+
+        try 
+        {
+            _v = p.second.Eval();
+        }
+        catch(mu::ParserError& e)
+        {
+            cout << "Error in evaluation: " << e.GetMsg() << endl;
+        }
+        *(vals_[_var]) = _v;
+    }
+
 
     if ( p->currTime < lastEvent_ + refractT_ )
     {
@@ -118,7 +147,6 @@ void BehaviouralNeuron::vProcess( const Eref& e, ProcPtr p )
         else
             Compartment::vProcess(e, p);
     }
-
     VmOut()->send( e, Vm_ );
 }
 

@@ -55,13 +55,13 @@ def _replaceConstInLHS(x, **kwargs):
             x = x.replace(k, '%s'%v)
     return x
 
-def _getODESystem(eqs, **kwargs):
+def _rewriteEquations(eqs, **kwargs):
     """
-    Get ODE System after replacing values.
+    Get system of equations after replacing values.
     """
-    logger_.info( "Generating state space" )
     astD = dict([generateAST(eq) for eq in eqs])
     odeSys = {}
+    eqSys = {}
     for k, v in astD.items():
         # Only modify differential equations.
         var = _getODEVarName(k)
@@ -69,9 +69,12 @@ def _getODESystem(eqs, **kwargs):
             odeSys[r"%s'"%var] = unparser.unparse(
                     _flattenAST(v, astD)
                     ).replace('\n', '')
+        else:
+            eqSys[k] = unparser.unparse(_flattenAST(v,astD)).replace('\n','')
 
     # Now build state space description from new dict
     eqs = ["%s=%s"%(l, _replaceConstInLHS(r,**kwargs)) for (l,r) in odeSys.items()]
+    eqs += ["%s=%s"%(l, _replaceConstInLHS(r,**kwargs)) for (l,r) in eqSys.items()]
     return eqs
 
 class BehavNeuron( _moose.BehaviouralNeuron ):
@@ -93,4 +96,6 @@ class BehavNeuron( _moose.BehaviouralNeuron ):
 
         self.thresh = kwargs.get('threshold', kwargs.get('thresh', 0.0))
         self.vReset = kwargs.get('reset', kwargs.get('vReset', 0.0))
-        self.equations = _getODESystem(self.__eqs__, **kwargs)
+        self.refactoryPeriod = kwargs.get('refactoryPeriod', kwargs.get('refactory', 0.0))
+        self.equations = _rewriteEquations(self.__eqs__, **kwargs)
+        logger_.info( str( self.equations ) )
