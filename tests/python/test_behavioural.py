@@ -27,7 +27,7 @@ def sanity_test():
 
     all units must be in SI.
     """
-    eqs = ('dv/dt=I_leak/Cm+(1e-3-v)/tau', 'I_leak=gL*(EL-v)')
+    eqs = ('dv/dt=I_leak/Cm+v/tau', 'I_leak=gL*(EL-v)')
     b = moose.BehavNeuron( '/n1', eqs, gL=1e-2, EL=1e-2
             , threshold=1e-3, reset=0.0, tau=10e-3
             , verbose=True
