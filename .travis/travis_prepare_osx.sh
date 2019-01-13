@@ -22,7 +22,7 @@ set +e
 #rvm get head
 #brew update
 #brew outdated cmake || brew install cmake
-brew install gsl
+brew install gsl || brew update gsl
 brew install hdf5
 brew install python
 brew install numpy
