@@ -23,7 +23,7 @@ def gen_prefix( msg, maxlength = 10 ):
     return msg[:maxlength].encode( 'utf-8' )
 
 def write_data_to_socket(conn, msg):
-    msg = b'%6d%s' % (len(msg), msg)
+    msg = b'%010d%s' % (len(msg), msg)
     conn.sendall(msg)
 
 def gen_payload( args ):
@@ -60,6 +60,27 @@ def loop( sock ):
             print( '.', end='' )
             sys.stdout.flush()
 
+def read_msg(conn):
+    d = conn.recv(1024)
+    return d.decode('utf-8').strip()
+
+def save_bz2(conn, outfile):
+    # first 6 bytes always tell how much to read next. Make sure the submit job
+    # script has it
+    d = conn.recv(10)
+    while len(d) < 10:
+        try:
+            d = conn.recv(10)
+        except Exception as e:
+            print( "[ERROR] Error in format. First 6 bytes are size of msg." )
+            continue
+
+    print( "Needs to get %s bytes" % d )
+    data = conn.recv(int(d))
+    with open(outfile, 'wb') as f:
+        f.write(data)
+    return data
+
 def main( args ):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -75,9 +96,18 @@ def main( args ):
     print( "[INFO ] Total data to send : %d bytes " % len(data), end = '')
     write_data_to_socket(sock, data)
     print( '   [SENT]' )
-    time.sleep(1)
-    print( sock.recv(100) )
-    sock.close()
+    while True:
+        try:
+            d = read_msg( sock )
+            print( d )
+            if '>DONE SIMULATION' in d:
+                break
+        except socket.timeout as e:
+            time.sleep(0.5)
+
+    data = save_bz2(sock, 'results.tar.bz2' )
+    print( "[INFO ] All done" )
+
 
 if __name__ == '__main__':
     import argparse
