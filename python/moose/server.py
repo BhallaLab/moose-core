@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division
 
-"""server.py: 
-TCP socket server to handle incoming requests to simulate model.
-"""
-    
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2019, Dilawar Singh"
 __version__          = "1.0.0"
@@ -20,7 +16,7 @@ import socket
 import tarfile 
 import tempfile 
 import threading 
-import subprocess32 as subprocess
+import subprocess
 
 __all__ = [ 'serve' ]
 
@@ -30,13 +26,36 @@ def split_data( data ):
     prefixLenght = 10
     return data[:prefixLenght].strip(), data[prefixLenght:]
 
+def execute(cmd):
+    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
+    for stdout_line in iter(popen.stdout.readline, ""):
+        yield stdout_line 
+    popen.stdout.close()
+    return_code = popen.wait()
+    if return_code:
+        raise subprocess.CalledProcessError(return_code, cmd)
+
+def send_msg(msg, conn):
+    if not msg.strip():
+        return False
+    print( msg )
+    msg = '%s >>> %s' % (socket.gethostname(), msg)
+    conn.sendall(msg)
+
+def run(cmd, conn, cwd=None):
+    oldCWD = os.getcwd()
+    if cwd is not None:
+        os.chdir(cwd)
+    for line in execute(cmd.split()):
+        send_msg(line, conn)
+    os.chdir(oldCWD)
+
 def find_files_to_run( files ):
     """Any file name starting with __main is to be run."""
     toRun = []
     for f in files:
         if '__main' in os.path.basename(f):
             toRun.append(f)
-
     if toRun:
         return toRun
 
@@ -53,7 +72,16 @@ def find_files_to_run( files ):
     return toRun
 
 def recv_input(conn, size=1024):
-    data = conn.recv(size)
+    # first 6 bytes always tell how much to read next. Make sure the submit job
+    # script has it
+    d = conn.recv(6)
+    while len(d) < 6:
+        try:
+            d = conn.recv(6)
+        except Exception as e:
+            print( "[ERROR] Error in format. First 6 bytes are size of msg." )
+            continue
+    data = conn.recv(int(d))
     return data
 
 def writeTarfile( data ):
@@ -61,47 +89,77 @@ def writeTarfile( data ):
     with open(tfile, 'wb' ) as f:
         print( "[INFO ] Writing %d bytes to %s" % (len(data), tfile))
         f.write(data)
+    # Sleep for some time so that file can be written to disk.
     time.sleep(0.1)
     assert tarfile.is_tarfile(tfile), "Not a valid tarfile %s" % tfile
     return tfile
 
-def run_file(filename):
+def suffixMatplotlibStmt( filename ):
+    outfile = '%s.1.py' % filename
+    with open(filename, 'r') as f:
+        txt = f.read()
+
+    matplotlibText = '''
+from matplotlib.backends.backend_pdf import PdfPages
+import matplotlib.pyplot as plt
+
+def multipage(filename, figs=None, dpi=200):
+    pp = PdfPages(filename)
+    if figs is None:
+        figs = [plt.figure(n) for n in plt.get_fignums()]
+    for fig in figs:
+        fig.savefig(pp, format='pdf')
+    pp.close()
+
+try:
+    multipage("results.pdf")
+    print( 'Saved all data to results.pdf' )
+except Exception as e:
+    pass
+    '''
+    with open(outfile, 'w' ) as f:
+        f.write( txt )
+        f.write( matplotlibText )
+    return outfile
+
+def run_file(filename, conn, cwd=None):
     print( '[INFO] Running %s' % filename )
-    subprocess.run( [ sys.executable, filename] )
+    filename = suffixMatplotlibStmt(filename)
+    run( "%s %s" % (sys.executable, filename), conn, cwd)
     print( '.... DONE' )
 
-def simulate( tfile ):
+def extract_files(tfile, to):
+    userFiles = []
+    with tarfile.open(tfile, 'r' ) as f:
+        userFiles = f.getnames( )
+        f.extractall( to )
+    # now check if all files have been extracted properly
+    print( userFiles )
+    for f in userFiles:
+        if not os.path.exists(f):
+            print( "[ERROR] File %s could not be extracted." % f )
+    return userFiles
+
+def prepareMatplotlib( cwd ):
+    with open(os.path.join(cwd, 'matplotlibrc'), 'w') as f:
+        f.write( 'interactive : True' )
+
+def simulate( tfile, conn ):
     """Simulate a given tar file.
     """
     tdir = os.path.dirname( tfile )
     os.chdir( tdir )
-    userFiles = None
-    with tarfile.open(tfile, 'r' ) as f:
-        userFiles = f.getnames( )
-        f.extractall()
-
-        # Now simulate.
-        toRun = find_files_to_run(userFiles)
-        if len(toRun) < 1:
-            return 1
-        [ run_file( _file ) for _file in toRun ]
-
+    userFiles = extract_files(tfile, tdir)
+    # Now simulate.
+    toRun = find_files_to_run(userFiles)
+    if len(toRun) < 1:
+        return 1
+    prepareMatplotlib(tdir)
+    [ run_file(_file, conn, tdir) for _file in toRun ]
 
 def savePayload( conn ):
-    tarData = b''
-    tarFileStart, tarfileName = False, None
     data = recv_input(conn)
-    if b'<TARFILE>' in data:
-        print( "[INFO ] GETTING PAYLOAD." )
-        tarFileStart = True
-        tarData += data.split( '<TARFILE>' )[1]
-
-    while tarFileStart and (b'</TARFILE>' not in data):
-        tarData += data
-        data = recv_input(conn)
-
-    tarData += data.split( '</TARFILE>' )[0]
-    tarfileName = writeTarfile( tarData )
+    tarfileName = writeTarfile(data)
     return tarfileName
 
 def handle_client(conn, ip, port):
@@ -111,17 +169,17 @@ def handle_client(conn, ip, port):
         tarfileName = savePayload(conn)
         print( "[INFO ] PAYLOAD RECIEVED." )
         if os.path.isfile(tarfileName):
-            simulate(tarfileName)
-            conn.sendall( '>DONE' )
+            simulate(tarfileName, conn)
+            send_msg('>DONE', conn)
             isActive = False
 
 def start_server( host, port, max_requests = 10 ):
     global stop_all_
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    print( "[INFO ] Server created." )
     try:
         soc.bind( (host, port))
+        print( "[INFO ] Server created %s:%s" %(host,port) )
     except Exception as e:
         print( "[ERROR] Failed to bind: %s" % str(sys.exec_info()))
         quit(1)
@@ -145,7 +203,7 @@ def serve(host, port):
 
 def main():
     global stop_all_
-    host, port = 'localhost', 31417
+    host, port = socket.gethostbyname(socket.gethostname()), 31417
     if len(sys.argv) > 1:
         host = sys.argv[1]
     if len(sys.argv) > 2:
