@@ -22,6 +22,10 @@ def gen_prefix( msg, maxlength = 10 ):
         msg += ' ' * (maxlength - len(msg))
     return msg[:maxlength].encode( 'utf-8' )
 
+def write_data_to_socket(conn, msg):
+    msg = b'%6d%s' % (len(msg), msg)
+    conn.sendall(msg)
+
 def gen_payload( args ):
     path = args.path
     archive = os.path.join(tempfile.mkdtemp(), 'data.tar.bz2')
@@ -32,7 +36,10 @@ def gen_payload( args ):
         if len(args.main) > 0:
             for i, f in enumerate(args.main):
                 h.add(f, arcname=os.path.join(os.path.dirname(f),'__main__%d.py'%i))
-        h.add(path)
+        if os.path.isfile(path):
+            h.add(path, os.path.basename(path))
+        else:
+            h.add(path)
 
     with open(archive, 'rb') as f:
         data = f.read()
@@ -65,9 +72,8 @@ def main( args ):
         quit()
 
     data = gen_payload( args )
-    data = b'<TARFILE>' + data + b'</TARFILE>'
     print( "[INFO ] Total data to send : %d bytes " % len(data), end = '')
-    sock.sendall( data )
+    write_data_to_socket(sock, data)
     print( '   [SENT]' )
     time.sleep(1)
     print( sock.recv(100) )
