@@ -15,6 +15,7 @@ __status__           = "Development"
 import sys
 import re
 import os 
+import time
 import socket 
 import tarfile 
 import tempfile 
@@ -22,6 +23,8 @@ import threading
 import subprocess32 as subprocess
 
 __all__ = [ 'serve' ]
+
+stop_all_ = False
 
 def split_data( data ):
     prefixLenght = 10
@@ -56,12 +59,16 @@ def recv_input(conn, size=1024):
 def writeTarfile( data ):
     tfile = os.path.join(tempfile.mkdtemp(), 'data.tar.bz2')
     with open(tfile, 'wb' ) as f:
-        f.write(tfile)
+        print( "[INFO ] Writing %d bytes to %s" % (len(data), tfile))
+        f.write(data)
+    time.sleep(0.1)
     assert tarfile.is_tarfile(tfile), "Not a valid tarfile %s" % tfile
     return tfile
 
 def run_file(filename):
+    print( '[INFO] Running %s' % filename )
     subprocess.run( [ sys.executable, filename] )
+    print( '.... DONE' )
 
 def simulate( tfile ):
     """Simulate a given tar file.
@@ -80,27 +87,36 @@ def simulate( tfile ):
         [ run_file( _file ) for _file in toRun ]
 
 
+def savePayload( conn ):
+    tarData = b''
+    tarFileStart, tarfileName = False, None
+    data = recv_input(conn)
+    if b'<TARFILE>' in data:
+        print( "[INFO ] GETTING PAYLOAD." )
+        tarFileStart = True
+        tarData += data.split( '<TARFILE>' )[1]
+
+    while tarFileStart and (b'</TARFILE>' not in data):
+        tarData += data
+        data = recv_input(conn)
+
+    tarData += data.split( '</TARFILE>' )[0]
+    tarfileName = writeTarfile( tarData )
+    return tarfileName
+
 def handle_client(conn, ip, port):
     isActive = True
-    tarData = ''
-    tarFileStart, tarfileName = False, None
+    tarData = b''
     while isActive:
-        data = recv_input(conn)
-        if '<TARFILE>' in data:
-            tarFileStart = True
-            tarData += data.split( '<TARFILE>' )[1]
-        elif tarFileStart and '</TARFILE>' not in data:
-            tarData += data
-        elif '</TARFILE>' in data:
-            tarData += data.split( '</TARFILE>' )[0]
-            tarfileName = writeTarfile(data)
-            tarFileStart = False
-
+        tarfileName = savePayload(conn)
+        print( "[INFO ] PAYLOAD RECIEVED." )
         if os.path.isfile(tarfileName):
             simulate(tarfileName)
+            conn.sendall( '>DONE' )
             isActive = False
 
 def start_server( host, port, max_requests = 10 ):
+    global stop_all_
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     print( "[INFO ] Server created." )
@@ -120,18 +136,25 @@ def start_server( host, port, max_requests = 10 ):
             t.start()
         except Exception as e:
             print(e)
+        if stop_all_:
+            break
     soc.close()
 
 def serve(host, port):
     start_server(host, port)
 
 def main():
+    global stop_all_
     host, port = 'localhost', 31417
     if len(sys.argv) > 1:
         host = sys.argv[1]
     if len(sys.argv) > 2:
         port = sys.argv[2]
-    serve(host, port)
+    try:
+        serve(host, port)
+    except KeyboardInterrupt as e:
+        stop_all_ = True
+        quit(1)
 
 if __name__ == '__main__':
     main()
