@@ -13,16 +13,13 @@ __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
 import sys
-import os
-import socket
-import tarfile
-import tempfile
+import re
+import os 
+import socket 
+import tarfile 
+import tempfile 
+import threading 
 import subprocess32 as subprocess
-
-try:
-    import socketserver
-except ImportError as e:
-    import SocketServer as socketserver
 
 __all__ = [ 'serve' ]
 
@@ -52,66 +49,81 @@ def find_files_to_run( files ):
                     toRun.append(f)
     return toRun
 
-class MooseServerHandler(socketserver.BaseRequestHandler):
+def recv_input(conn, size=1024):
+    data = conn.recv(size)
+    return data
+
+def writeTarfile( data ):
+    tfile = os.path.join(tempfile.mkdtemp(), 'data.tar.bz2')
+    with open(tfile, 'wb' ) as f:
+        f.write(tfile)
+    assert tarfile.is_tarfile(tfile), "Not a valid tarfile %s" % tfile
+    return tfile
+
+def run_file(filename):
+    subprocess.run( [ sys.executable, filename] )
+
+def simulate( tfile ):
+    """Simulate a given tar file.
     """
-    The request handler class for moose server.
-
-    """
-    def log(self, msg):
-        print( msg )
-        self.request.sendall(msg)
-
-    def handle( self ):
-        print( "[INFO ] Handing request" )
-        data = ''
-        bufsize = 2048
-        while 1:
-            d = self.request.recv(bufsize)
-            if len(d) < 1:
-                break
-            data += d
-
-        prefix, rest = split_data(data)
-        if prefix ==  '>TARFILE':
-            dataFile = os.path.join( tempfile.mkdtemp(), 'data.tar.bz2' )
-            with open(dataFile, 'wb' ) as f:
-                f.write(rest)
-            if tarfile.is_tarfile(dataFile):
-                self.log( "[INFO ] Successfully recieved data.")
-                self.simulate(dataFile)
-            else:
-                self.log( "[ERROR] Data was corrupted. Please retry..." )
-        else:
-            print( 'Unknown command found: %s' % prefix )
-
-    def simulate(self, tfile ):
-        """Simulate a given tar file.
-        """
-        tdir = os.path.dirname( tfile )
-        os.chdir( tdir )
-        userFiles = None
-        with tarfile.open(tfile, 'r' ) as f:
-            userFiles = f.getnames( )
-            f.extractall()
+    tdir = os.path.dirname( tfile )
+    os.chdir( tdir )
+    userFiles = None
+    with tarfile.open(tfile, 'r' ) as f:
+        userFiles = f.getnames( )
+        f.extractall()
 
         # Now simulate.
         toRun = find_files_to_run(userFiles)
         if len(toRun) < 1:
-            self.log( "MOOSE could not determine which file to execute." )
-        [ self.run_file(f) for f in toRun ]
-        self.sendToClient( "<DONE" )
-
-    def sendToClient(self, msg):
+            return 1
+        [ run_file( _file ) for _file in toRun ]
 
 
-    def run_file( self, filename ):
-        #  self.request.sendall( "[INFO ] Running file %s" % filename )
-        subprocess.run( [ sys.executable, filename ] )
+def handle_client(conn, ip, port):
+    isActive = True
+    tarData = ''
+    tarFileStart, tarfileName = False, None
+    while isActive:
+        data = recv_input(conn)
+        if '<TARFILE>' in data:
+            tarFileStart = True
+            tarData += data.split( '<TARFILE>' )[1]
+        elif tarFileStart and '</TARFILE>' not in data:
+            tarData += data
+        elif '</TARFILE>' in data:
+            tarData += data.split( '</TARFILE>' )[0]
+            tarfileName = writeTarfile(data)
+            tarFileStart = False
+
+        if os.path.isfile(tarfileName):
+            simulate(tarfileName)
+            isActive = False
+
+def start_server( host, port, max_requests = 10 ):
+    soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    print( "[INFO ] Server created." )
+    try:
+        soc.bind( (host, port))
+    except Exception as e:
+        print( "[ERROR] Failed to bind: %s" % str(sys.exec_info()))
+        quit(1)
+
+    # listen upto 100 of requests
+    soc.listen(max_requests)
+    while True:
+        conn, (ip, port) = soc.accept()
+        print( "[INFO ] Connected with %s:%s" % (ip, port) )
+        try:
+            t = threading.Thread(target=handle_client, args=(conn, ip, port)) 
+            t.start()
+        except Exception as e:
+            print(e)
+    soc.close()
 
 def serve(host, port):
-    print( "[INFO ] Creating server on %s:%s" % (host,port) )
-    s = socketserver.TCPServer( (host, port), MooseServerHandler )
-    s.serve_forever()
+    start_server(host, port)
 
 def main():
     host, port = 'localhost', 31417
