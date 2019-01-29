@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import division, print_function
-    
+
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2017-, Dilawar Singh"
 __version__          = "1.0.0"
@@ -12,8 +12,9 @@ __status__           = "Development"
 import sys
 import os
 import socket
+import time
 import tarfile
-import tempfile 
+import tempfile
 
 def gen_prefix( msg, maxlength = 10 ):
     msg = '>%s' % msg
@@ -41,23 +42,36 @@ def offload( args ):
     zfile = create_zipfile( args.path )
     send_zip( zfile )
 
+def loop( sock ):
+    sock.settimeout(1e-2)
+    while True:
+        try:
+            d = sock.recv(10).strip()
+            if len(d) > 0:
+                print(d)
+        except socket.timeout as e:
+            print( '.', end='' )
+            sys.stdout.flush()
+
 def main( args ):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    data = gen_payload( args )
     try:
         host, port = args.server.split(':')
         sock.connect( (host, int(port)) )
+        sock.settimeout(1)
     except Exception as e:
         print( "[ERROR] Failed to connect to %s... " % args.server )
         print( e )
         quit()
 
-    data = gen_prefix('TARFILE') + data
+    data = gen_payload( args )
+    data = b'<TARFILE>' + data + b'</TARFILE>'
     print( "[INFO ] Total data to send : %d bytes " % len(data), end = '')
     sock.sendall( data )
-    print( "... [SENT]" )
+    print( '   [SENT]' )
+    time.sleep(1)
+    print( sock.recv(100) )
     sock.close()
-
 
 if __name__ == '__main__':
     import argparse
@@ -69,7 +83,7 @@ if __name__ == '__main__':
         )
     parser.add_argument('--main', '-m', nargs = '+'
         , required = False, default = []
-        , help = 'In case of multiple files, scripts to execute' 
+        , help = 'In case of multiple files, scripts to execute'
                 ' on the server, e.g. -m file1.py -m file2.py.'
                 ' If not given, server will try to guess the best option.'
         )
@@ -78,7 +92,7 @@ if __name__ == '__main__':
         , help = 'IP address and PORT number of moose server e.g.'
                  ' 172.16.1.2:31416'
         )
-    class Args: pass 
+    class Args: pass
     args = Args()
     parser.parse_args(namespace=args)
     main(args)
