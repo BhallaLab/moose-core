@@ -12,7 +12,7 @@ from moose._moose import *
 # Bring everything from moose.py to global namespace. It will overwrite any c++
 # function with the same name.
 from moose.moose import *
-
+from moose.server import *
 
 # create a shorthand for version() call here.
 __version__ = version()
