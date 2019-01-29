@@ -16,4 +16,3 @@ from moose.server import *
 
 # create a shorthand for version() call here.
 __version__ = version()
-

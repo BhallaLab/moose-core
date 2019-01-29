@@ -14,6 +14,8 @@
 #include "IntFireBase.h"
 #include "LIF.h"
 
+using namespace moose;
+
 const Cinfo* LIF::initCinfo()
 {
     static string doc[] =

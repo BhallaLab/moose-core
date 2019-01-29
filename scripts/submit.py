@@ -26,6 +26,9 @@ def write_data_to_socket(conn, msg):
     msg = b'%010d%s' % (len(msg), msg)
     conn.sendall(msg)
 
+def relativePath(path, base):
+    return os.path.relpath(path, base)
+
 def gen_payload( args ):
     path = args.path
     archive = os.path.join(tempfile.mkdtemp(), 'data.tar.bz2')
@@ -35,11 +38,17 @@ def gen_payload( args ):
     with tarfile.open(archive, 'w|bz2', bufsize=2048 ) as h:
         if len(args.main) > 0:
             for i, f in enumerate(args.main):
-                h.add(f, arcname=os.path.join(os.path.dirname(f),'__main__%d.py'%i))
+                h.add(f, arcname='__main__%d.py'%i)
         if os.path.isfile(path):
             h.add(path, os.path.basename(path))
+        elif os.path.isdir(path):
+            for d, ds, fs in os.walk(path):
+                for f in fs:
+                    p = os.path.join(d, f)
+                    h.add(os.path.realpath(p), arcname=relativePath(p, path))
         else:
-            h.add(path)
+            print( "[ERROR] Neither file nor directory %s" % path )
+            
 
     with open(archive, 'rb') as f:
         data = f.read()
@@ -62,7 +71,11 @@ def loop( sock ):
 
 def read_msg(conn):
     d = conn.recv(1024)
-    return d.decode('utf-8').strip()
+    try: 
+        d = d.decode('utf8').strip()
+    except Exception as e:
+        pass
+    return d
 
 def save_bz2(conn, outfile):
     # first 6 bytes always tell how much to read next. Make sure the submit job
@@ -93,9 +106,9 @@ def main( args ):
         quit()
 
     data = gen_payload( args )
-    print( "[INFO ] Total data to send : %d bytes " % len(data), end = '')
+    print( "[INFO ] Total bytes to send: %d" % len(data), end = '')
     write_data_to_socket(sock, data)
-    print( '   [SENT]' )
+    print( ' ... [SENT]' )
     while True:
         try:
             d = read_msg( sock )
@@ -117,7 +130,7 @@ if __name__ == '__main__':
     parser.add_argument('path', metavar='path'
         , help = 'File or directory to execute on server.'
         )
-    parser.add_argument('--main', '-m', nargs = '+'
+    parser.add_argument('--main', '-m', action = 'append'
         , required = False, default = []
         , help = 'In case of multiple files, scripts to execute'
                 ' on the server, e.g. -m file1.py -m file2.py.'

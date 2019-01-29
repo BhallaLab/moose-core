@@ -12,10 +12,12 @@ import sys
 import re
 import os 
 import time
+import shutil
 import socket 
 import tarfile 
 import tempfile 
 import threading 
+import datetime
 import subprocess
 
 __all__ = [ 'serve' ]
@@ -46,6 +48,7 @@ def run(cmd, conn, cwd=None):
     oldCWD = os.getcwd()
     if cwd is not None:
         os.chdir(cwd)
+    print( "[INFO ] Executing in %s" % os.getcwd() )
     for line in execute(cmd.split()):
         send_msg(line, conn)
     os.chdir(oldCWD)
@@ -72,13 +75,13 @@ def find_files_to_run( files ):
     return toRun
 
 def recv_input(conn, size=1024):
-    # first 6 bytes always tell how much to read next. Make sure the submit job
+    # first 10 bytes always tell how much to read next. Make sure the submit job
     # script has it
-    d = conn.recv(6)
-    while len(d) < 6:
+    d = conn.recv(10)
+    while len(d) < 10:
         try:
-            d = conn.recv(6)
-        except Exception as e:
+            d = conn.recv(10)
+        except Exception:
             print( "[ERROR] Error in format. First 6 bytes are size of msg." )
             continue
     data = conn.recv(int(d))
@@ -91,7 +94,9 @@ def writeTarfile( data ):
         f.write(data)
     # Sleep for some time so that file can be written to disk.
     time.sleep(0.1)
-    assert tarfile.is_tarfile(tfile), "Not a valid tarfile %s" % tfile
+    if not tarfile.is_tarfile(tfile):
+        send_msg("[ERROR] Not a valid tarfile %s. Please retry" % tfile)
+        return None
     return tfile
 
 def suffixMatplotlibStmt( filename ):
@@ -132,17 +137,47 @@ def extract_files(tfile, to):
     userFiles = []
     with tarfile.open(tfile, 'r' ) as f:
         userFiles = f.getnames( )
-        f.extractall( to )
+        try:
+            f.extractall( to )
+        except Exception as e:
+            print( e)
     # now check if all files have been extracted properly
-    print( userFiles )
+    success = True
     for f in userFiles:
         if not os.path.exists(f):
             print( "[ERROR] File %s could not be extracted." % f )
+            success = False
+    if success:
+        os.remove(tfile)
     return userFiles
 
 def prepareMatplotlib( cwd ):
     with open(os.path.join(cwd, 'matplotlibrc'), 'w') as f:
         f.write( 'interactive : True' )
+
+def send_bz2(conn, data):
+    data = b'%010d%s' % (len(data), data)
+    conn.sendall(data)
+
+def sendResults(tdir, conn, fromThisTime):
+    # Only send new files.
+    resdir = tempfile.mkdtemp()
+    resfile = os.path.join(resdir, 'results.tar.bz2')
+
+    with tarfile.open( resfile, 'w|bz2') as tf:
+        for d, sd, fs in os.walk(tdir):
+            for f in fs:
+                if datetime.datetime.fromtimestamp(os.path.getmtime(f)) > fromThisTime:
+                    print( "[INFO ] Adding file %s" % f )
+                    tf.add(os.path.join(d, f))
+
+    time.sleep(0.01)
+    # now send the tar file back to client
+    with open(resfile, 'rb' ) as f:
+        data = f.read()
+        print( 'Total bytes in result: %d' % len(data))
+        send_bz2(conn, data)
+    shutil.rmtree(resdir)
 
 def simulate( tfile, conn ):
     """Simulate a given tar file.
@@ -156,6 +191,7 @@ def simulate( tfile, conn ):
         return 1
     prepareMatplotlib(tdir)
     [ run_file(_file, conn, tdir) for _file in toRun ]
+    return userFiles
 
 def savePayload( conn ):
     data = recv_input(conn)
@@ -164,14 +200,18 @@ def savePayload( conn ):
 
 def handle_client(conn, ip, port):
     isActive = True
-    tarData = b''
     while isActive:
         tarfileName = savePayload(conn)
-        print( "[INFO ] PAYLOAD RECIEVED." )
-        if os.path.isfile(tarfileName):
-            simulate(tarfileName, conn)
-            send_msg('>DONE', conn)
+        if tarfileName is None:
             isActive = False
+        print( "[INFO ] PAYLOAD RECIEVED." )
+        if not os.path.isfile(tarfileName):
+            break
+        startSimTime = datetime.datetime.now()
+        isActive = False
+        send_msg('>DONE SIMULATION', conn)
+        # Send results after DONE is sent.
+        sendResults(os.path.dirname(tarfileName), conn, startSimTime)
 
 def start_server( host, port, max_requests = 10 ):
     global stop_all_
@@ -201,18 +241,30 @@ def start_server( host, port, max_requests = 10 ):
 def serve(host, port):
     start_server(host, port)
 
-def main():
+def main( args ):
     global stop_all_
-    host, port = socket.gethostbyname(socket.gethostname()), 31417
-    if len(sys.argv) > 1:
-        host = sys.argv[1]
-    if len(sys.argv) > 2:
-        port = sys.argv[2]
+    host, port = args.host, args.port
     try:
         serve(host, port)
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         stop_all_ = True
         quit(1)
 
 if __name__ == '__main__':
-    main()
+    import argparse
+    # Argument parser.
+    description = '''Run MOOSE server.'''
+    parser = argparse.ArgumentParser(description=description, add_help=False)
+    parser.add_argument( '--help', action='help', help='Show this msg and exit')
+    parser.add_argument('--host', '-h'
+        , required = False, default = socket.gethostbyname(socket.gethostname())
+        , help = 'Server Name'
+        )
+    parser.add_argument('--port', '-p'
+        , required = False, default = 31417, type=int
+        , help = 'Port number'
+        )
+    class Args: pass 
+    args = Args()
+    parser.parse_args(namespace=args)
+    main(args)

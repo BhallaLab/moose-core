@@ -654,6 +654,3 @@ def doc(arg, inherited=True, paged=True):
     else:
         print(text)
 
-
-#
-# moose.py ends here
