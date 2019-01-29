@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function, division
+
 """server.py: 
 TCP socket server to handle incoming requests to simulate model.
 """
@@ -55,6 +57,10 @@ class MooseServerHandler(socketserver.BaseRequestHandler):
     The request handler class for moose server.
 
     """
+    def log(self, msg):
+        print( msg )
+        self.request.sendall(msg)
+
     def handle( self ):
         print( "[INFO ] Handing request" )
         data = ''
@@ -64,16 +70,19 @@ class MooseServerHandler(socketserver.BaseRequestHandler):
             if len(d) < 1:
                 break
             data += d
+
         prefix, rest = split_data(data)
         if prefix ==  '>TARFILE':
             dataFile = os.path.join( tempfile.mkdtemp(), 'data.tar.bz2' )
             with open(dataFile, 'wb' ) as f:
                 f.write(rest)
             if tarfile.is_tarfile(dataFile):
-                self.request.sendall( "[INFO ] Successfully recieved data.")
+                self.log( "[INFO ] Successfully recieved data.")
                 self.simulate(dataFile)
             else:
-                self.request.sendall( "[ERROR] Data was corrupted. Please retry..." )
+                self.log( "[ERROR] Data was corrupted. Please retry..." )
+        else:
+            print( 'Unknown command found: %s' % prefix )
 
     def simulate(self, tfile ):
         """Simulate a given tar file.
@@ -88,21 +97,29 @@ class MooseServerHandler(socketserver.BaseRequestHandler):
         # Now simulate.
         toRun = find_files_to_run(userFiles)
         if len(toRun) < 1:
-            self.request.sendall( "MOOSE could not determine which file to execute." )
+            self.log( "MOOSE could not determine which file to execute." )
         [ self.run_file(f) for f in toRun ]
+        self.sendToClient( "<DONE" )
+
+    def sendToClient(self, msg):
+
 
     def run_file( self, filename ):
-        print( "[INFO ] Running file %s" % filename )
+        #  self.request.sendall( "[INFO ] Running file %s" % filename )
         subprocess.run( [ sys.executable, filename ] )
-        print( 'Done' )
-        
 
-def serve(host='localhost', port=31417):
+def serve(host, port):
+    print( "[INFO ] Creating server on %s:%s" % (host,port) )
     s = socketserver.TCPServer( (host, port), MooseServerHandler )
     s.serve_forever()
 
-def test():
-    serve()
+def main():
+    host, port = 'localhost', 31417
+    if len(sys.argv) > 1:
+        host = sys.argv[1]
+    if len(sys.argv) > 2:
+        port = sys.argv[2]
+    serve(host, port)
 
 if __name__ == '__main__':
-    test()
+    main()
