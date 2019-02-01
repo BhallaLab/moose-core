@@ -37,6 +37,11 @@
 #include <sys/ioctl.h>
 #include <netinet/in.h>
 
+// MSG_MORE is not defined in OSX. So stupid!
+#ifndef MSG_MORE
+#define MSG_MORE 0
+#endif
+
 using namespace std;
 
 class SocketStreamer : public StreamerBase

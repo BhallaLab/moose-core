@@ -161,7 +161,8 @@ SocketStreamer::~SocketStreamer()
     // Remember we created a background process to monitor the client. Terminate
     // it now. May be a good idea to wait for a little bit.
     stopThread( "connect" );
-    sleep(0.01);
+
+    usleep(1000);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -227,8 +228,8 @@ void SocketStreamer::initServer( void )
     addr_.sin_addr.s_addr = INADDR_ANY;
     addr_.sin_port = htons( port_ );
 
-    // Bind.
-    if(0 > bind(sockfd_, (struct sockaddr*) &addr_, sizeof(addr_)))
+    // Bind. Make sure bind is not std::bind
+    if(0 > ::bind(sockfd_, (struct sockaddr*) &addr_, sizeof(addr_)))
     {
         LOG(moose::warning, "Warn: Failed to create server at " << ip_ << ":" << port_
             << ". File descriptor: " << sockfd_
