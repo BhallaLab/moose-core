@@ -147,8 +147,6 @@ def extract_files(tfile, to):
         if not os.path.exists(f):
             print( "[ERROR] File %s could not be extracted." % f )
             success = False
-    if success:
-        os.remove(tfile)
     return userFiles
 
 def prepareMatplotlib( cwd ):
@@ -167,7 +165,8 @@ def sendResults(tdir, conn, fromThisTime):
     with tarfile.open( resfile, 'w|bz2') as tf:
         for d, sd, fs in os.walk(tdir):
             for f in fs:
-                if datetime.datetime.fromtimestamp(os.path.getmtime(f)) > fromThisTime:
+                fpath = os.path.join(d,f)
+                if datetime.datetime.fromtimestamp(os.path.getmtime(fpath)) > fromThisTime:
                     print( "[INFO ] Adding file %s" % f )
                     tf.add(os.path.join(d, f))
 
@@ -206,9 +205,10 @@ def handle_client(conn, ip, port):
             isActive = False
         print( "[INFO ] PAYLOAD RECIEVED." )
         if not os.path.isfile(tarfileName):
+            print( "[WARN ] No file %s. Doing nothing..." % tarfileName )
             break
         startSimTime = datetime.datetime.now()
-        isActive = False
+        simulate( tarfileName, conn )
         send_msg('>DONE SIMULATION', conn)
         # Send results after DONE is sent.
         sendResults(os.path.dirname(tarfileName), conn, startSimTime)
