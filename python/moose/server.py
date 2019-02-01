@@ -19,6 +19,21 @@ import tempfile
 import threading 
 import datetime
 import subprocess
+import logging
+
+# create a logger for this server.
+logging.basicConfig(level=logging.DEBUG,
+    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+    datefmt='%m-%d %H:%M',
+    filename='moose_server.log',
+    filemode='w'
+    )
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+console.setFormatter(formatter)
+_logger = logging.getLogger('')
+_logger.addHandler(console)
 
 __all__ = [ 'serve' ]
 
@@ -40,15 +55,15 @@ def execute(cmd):
 def send_msg(msg, conn):
     if not msg.strip():
         return False
-    print( msg )
-    msg = '%s >>> %s' % (socket.gethostname(), msg)
+    _logger.debug( msg )
+    msg = '%s>>> %s' % (socket.gethostname(), msg)
     conn.sendall(msg)
 
 def run(cmd, conn, cwd=None):
     oldCWD = os.getcwd()
     if cwd is not None:
         os.chdir(cwd)
-    print( "[INFO ] Executing in %s" % os.getcwd() )
+    _logger.debug( "Executing in %s" % os.getcwd() )
     for line in execute(cmd.split()):
         send_msg(line, conn)
     os.chdir(oldCWD)
@@ -82,7 +97,7 @@ def recv_input(conn, size=1024):
         try:
             d = conn.recv(10)
         except Exception:
-            print( "[ERROR] Error in format. First 6 bytes are size of msg." )
+            _logger.error( "Error in format. First 6 bytes are size of msg." )
             continue
     data = conn.recv(int(d))
     return data
@@ -90,7 +105,7 @@ def recv_input(conn, size=1024):
 def writeTarfile( data ):
     tfile = os.path.join(tempfile.mkdtemp(), 'data.tar.bz2')
     with open(tfile, 'wb' ) as f:
-        print( "[INFO ] Writing %d bytes to %s" % (len(data), tfile))
+        _logger.info( "Writing %d bytes to %s" % (len(data), tfile))
         f.write(data)
     # Sleep for some time so that file can be written to disk.
     time.sleep(0.1)
@@ -117,7 +132,7 @@ def multipage(filename, figs=None, dpi=200):
 
 try:
     multipage("results.pdf")
-    print( 'Saved all data to results.pdf' )
+    _logger.info( 'Saved all data to results.pdf' )
 except Exception as e:
     pass
     '''
@@ -127,10 +142,9 @@ except Exception as e:
     return outfile
 
 def run_file(filename, conn, cwd=None):
-    print( '[INFO] Running %s' % filename )
     filename = suffixMatplotlibStmt(filename)
     run( "%s %s" % (sys.executable, filename), conn, cwd)
-    print( '.... DONE' )
+    _logger.info( '.... DONE' )
 
 def extract_files(tfile, to):
     userFiles = []
@@ -267,4 +281,8 @@ if __name__ == '__main__':
     class Args: pass 
     args = Args()
     parser.parse_args(namespace=args)
-    main(args)
+    try:
+        main(args)
+    except KeyboardInterrupt as e:
+        stop_all_ = True
+        quit(1)
