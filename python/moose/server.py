@@ -14,6 +14,7 @@ import os
 import time
 import shutil
 import socket 
+import signal
 import tarfile 
 import tempfile 
 import threading 
@@ -38,6 +39,13 @@ _logger.addHandler(console)
 __all__ = [ 'serve' ]
 
 stop_all_ = False
+
+def handler(signum):
+    global stop_all_
+    stop_all_ = True
+
+
+signal.signal( signal.SIGINT, handler)
 
 def split_data( data ):
     prefixLenght = 10
@@ -92,14 +100,16 @@ def find_files_to_run( files ):
 def recv_input(conn, size=1024):
     # first 10 bytes always tell how much to read next. Make sure the submit job
     # script has it
-    d = conn.recv(10)
+    d = conn.recv(10, socket.MSG_WAITALL)
     while len(d) < 10:
         try:
-            d = conn.recv(10)
+            d = conn.recv(10, socket.MSG_WAITALL)
         except Exception:
             _logger.error( "Error in format. First 6 bytes are size of msg." )
             continue
-    data = conn.recv(int(d))
+    d, data = int(d), b''
+    while len(data) < d:
+        data += conn.recv(d-len(data), socket.MSG_WAITALL)
     return data
 
 def writeTarfile( data ):
@@ -108,8 +118,9 @@ def writeTarfile( data ):
         _logger.info( "Writing %d bytes to %s" % (len(data), tfile))
         f.write(data)
     # Sleep for some time so that file can be written to disk.
-    time.sleep(0.1)
+    time.sleep(0.2)
     if not tarfile.is_tarfile(tfile):
+        _logger.warn( 'Not a valid tar file: %s' % tfile)
         return None
     return tfile
 
@@ -119,7 +130,7 @@ def suffixMatplotlibStmt( filename ):
         txt = f.read()
 
     matplotlibText = '''
-from matplotlib.backends.backend_pdf import PdfPages
+#  from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 
 def multipage(filename, figs=None, dpi=200):
@@ -130,11 +141,18 @@ def multipage(filename, figs=None, dpi=200):
         fig.savefig(pp, format='pdf')
     pp.close()
 
+def saveall(prefix='results', figs=None):
+    if figs is None:
+        figs = [plt.figure(n) for n in plt.get_fignums()]
+    for i, fig in enumerate(figs):
+        fig.savefig('%s.%d.png' %(prefix,i) )
+    plt.close()
+
 try:
-    multipage("results.pdf")
-    _logger.info( 'Saved all data to results.pdf' )
+    #  multipage("results.pdf")
+    saveall()
 except Exception as e:
-    pass
+    print( e )
     '''
     with open(outfile, 'w' ) as f:
         f.write( txt )
@@ -181,7 +199,7 @@ def sendResults(tdir, conn, fromThisTime):
                 fpath = os.path.join(d,f)
                 if datetime.datetime.fromtimestamp(os.path.getmtime(fpath)) > fromThisTime:
                     print( "[INFO ] Adding file %s" % f )
-                    tf.add(os.path.join(d, f))
+                    tf.add(os.path.join(d, f), f)
 
     time.sleep(0.01)
     # now send the tar file back to client
@@ -202,27 +220,37 @@ def simulate( tfile, conn ):
     if len(toRun) < 1:
         return 1
     prepareMatplotlib(tdir)
-    [ run_file(_file, conn, tdir) for _file in toRun ]
-    return userFiles
+    status, msg = 0, ''
+    for _file in toRun:
+        try:
+            run_file(_file, conn, tdir) 
+        except Exception as e:
+            msg += str(e)
+            status = 1
+    return status, msg
 
 def savePayload( conn ):
     data = recv_input(conn)
     tarfileName = writeTarfile(data)
-    return tarfileName
+    return tarfileName, len(data)
 
 def handle_client(conn, ip, port):
     isActive = True
     while isActive:
-        tarfileName = savePayload(conn)
+        tarfileName, nBytes = savePayload(conn)
         if tarfileName is None:
-            send_msg("[ERROR] %s is not a valid tarfile. Retry"%tarfileName, conn)
+            print( "Could not recieve data." )
             isActive = False
-        print( "[INFO ] PAYLOAD RECIEVED." )
+        print( "[INFO ] PAYLOAD RECIEVED: %d" % nBytes )
         if not os.path.isfile(tarfileName):
-            print( "[WARN ] No file %s. Doing nothing..." % tarfileName )
+            send_msg("[ERROR] %s is not a valid tarfile. Retry"%tarfileName, conn)
             break
         startSimTime = datetime.datetime.now()
-        simulate( tarfileName, conn )
+        res, msg = simulate( tarfileName, conn )
+        if not res:
+            send_msg( "Failed to run simulation: %s" % msg, conn)
+            isActive = False
+            time.sleep(0.1)
         send_msg('>DONE SIMULATION', conn)
         # Send results after DONE is sent.
         sendResults(os.path.dirname(tarfileName), conn, startSimTime)

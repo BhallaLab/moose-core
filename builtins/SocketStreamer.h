@@ -76,6 +76,7 @@ public:
 
     void addTable( Id table );
     void addTables( vector<Id> tables);
+    void addTables( vector<ObjId> tables);
 
     void removeTable( Id table );
     void removeTables( vector<Id> table );

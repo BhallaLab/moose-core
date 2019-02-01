@@ -45,7 +45,8 @@ def socket_client(host='127.0.0.1', port = 31416):
             s.connect( (host, port) )
             break
         except Exception as e:
-            print( 'Py:',  e )
+            #  print( 'Py:',  e )
+            pass
 
     if not finish_all_:
         print( 'Py: Connected with socket.' )
@@ -141,6 +142,7 @@ def create_model():
 
 def test():
     global finish_all_
+    os.environ['MOOSE_TCP_STREAMER_ADDRESS'] = '127.0.0.1:31416'
     client = threading.Thread(target=socket_client, args=())
     client.daemon = True
     client.start()
@@ -148,16 +150,15 @@ def test():
 
     tables = create_model()
     # Now create a streamer and use it to write to a stream
-    st = moose.SocketStreamer( '/compt/streamer' )
-    expected = 31416
-    assert st.port == 31416, "Got %s expected %s" % (st.port, expected)
-    st.addTable(tables[0])
-    st.addTables(tables[1:])
-    assert st.numTables == 3
+    #st = moose.SocketStreamer( '/compt/streamer' )
+    #expected = 31416
+    #assert st.port == 31416, "Got %s expected %s" % (st.port, expected)
+    #st.addTable(tables[0])
+    #st.addTables(tables[1:])
+    #assert st.numTables == 3
     # Give some time for socket client to make connection. 
-    time.sleep(0.2)
-
     moose.reinit()
+    time.sleep(0.2)
     moose.start(50)
     print( 'MOOSE is done' )
 

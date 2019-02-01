@@ -337,7 +337,7 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
     if( tables_.size() == 0 )
     {
         moose::showWarn( "No table found. Disabling SocketStreamer.\nDid you forget" 
-                " to call addTables() on SocketStreamer object."
+                " to call addTables() on SocketStreamer object. " + e.objId().path()
                 );
         e.element()->setTick( -2 );             /* Disable process */
         return;
@@ -404,6 +404,14 @@ void SocketStreamer::addTables( vector<Id> tables )
         return;
     for( vector<Id>::const_iterator it = tables.begin(); it != tables.end(); it++)
         addTable( *it );
+}
+
+void SocketStreamer::addTables( vector<ObjId> tables )
+{
+    if( tables.size() == 0 )
+        return;
+    for( auto t : tables )
+        addTable( Id(t) );
 }
 
 

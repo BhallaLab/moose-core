@@ -9,8 +9,8 @@ LOGGING_FORMAT = '%(asctime)s %(message)s'
 # imported by the pervios import statement.
 from moose._moose import *
 
-# Bring everything from moose.py to global namespace. It will overwrite any c++
-# function with the same name.
+# Bring everything from moose.py to global namespace. 
+# IMP: It will overwrite any c++ function with the same name. 
 from moose.moose import *
 from moose.server import *
 
