@@ -95,7 +95,6 @@ def writeTarfile( data ):
     # Sleep for some time so that file can be written to disk.
     time.sleep(0.1)
     if not tarfile.is_tarfile(tfile):
-        send_msg("[ERROR] Not a valid tarfile %s. Please retry" % tfile)
         return None
     return tfile
 
@@ -202,6 +201,7 @@ def handle_client(conn, ip, port):
     while isActive:
         tarfileName = savePayload(conn)
         if tarfileName is None:
+            send_msg("[ERROR] %s is not a valid tarfile. Retry"%tarfileName, conn)
             isActive = False
         print( "[INFO ] PAYLOAD RECIEVED." )
         if not os.path.isfile(tarfileName):
@@ -221,7 +221,7 @@ def start_server( host, port, max_requests = 10 ):
         soc.bind( (host, port))
         print( "[INFO ] Server created %s:%s" %(host,port) )
     except Exception as e:
-        print( "[ERROR] Failed to bind: %s" % str(sys.exec_info()))
+        print( "[ERROR] Failed to bind: %s" % e)
         quit(1)
 
     # listen upto 100 of requests
