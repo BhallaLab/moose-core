@@ -396,8 +396,7 @@ void SocketStreamer::connectAndStream( )
             streamData();
     }
 
-    if(enoughDataToStream(1))
-        streamData();
+    // std::this_thread::sleep_for( std::chrono::milliseconds(100) );
 }
 
 /**

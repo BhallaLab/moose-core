@@ -58,7 +58,6 @@ def socket_client( ):
         print( 'Py: Connected with socket.' )
 
     # This is client reponsibility to read the data.
-    s.settimeout(0.1)
     data = ''
     while not finish_all_:
         try:
