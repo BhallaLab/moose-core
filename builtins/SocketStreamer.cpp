@@ -1,5 +1,12 @@
 /***
- *    Description:  Stream table data to a socket.
+ *       Filename:  SocketStreamer.cpp
+ *
+ *    Description:  TCP and Unix Domain Socket to stream data.
+ *
+ *         Author:  Dilawar Singh <dilawar.s.rajput@gmail.com>
+ *   Organization:  NCBS Bangalore
+ *
+ *        License:  See MOOSE licence.
  */
 
 #include <algorithm>
@@ -159,6 +166,9 @@ SocketStreamer::~SocketStreamer()
         LOG(moose::debug, "Closing socket " << sockfd_ );
         shutdown(sockfd_, SHUT_RD);
         close(sockfd_);
+
+        if( sockType_ == UNIX_DOMAIN_SOCKET )
+            ::unlink( unixSocketFilePath_.c_str() );
     }
     processThread_.join();
 }
@@ -195,9 +205,9 @@ void SocketStreamer::listenToClients(size_t numMaxClients)
     assert( numMaxClients > 0 );
     numMaxClients_ = numMaxClients;
     if(-1 == listen(sockfd_, numMaxClients_))
-    {
-        LOG(moose::error, "Failed listen()" << strerror(errno) );
-    }
+        LOG(moose::error, "Failed listen() on socket " << sockfd_ 
+                << ". Error was: " << strerror(errno) );
+
 }
 
 void SocketStreamer::initServer( void )
@@ -208,52 +218,54 @@ void SocketStreamer::initServer( void )
     else
         initTCPServer();
 
-
     LOG(moose::debug,  "Successfully created SocketStreamer server: " << sockfd_);
     //  Listen for incoming clients. This function does nothing if connection is
     //  already made.
     listenToClients(1);
 }
 
+void SocketStreamer::configureSocketServer( )
+{
+    // One can set socket option using setsockopt function. See manual page
+    // for details. We are making it 'reusable'.
+    int on = 1;
+    if(0 > setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT, (const char *)&on, sizeof(on)))
+        LOG(moose::warning, "Warn: setsockopt() failed");
+
+    if(0 > setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, (const char *)&on, sizeof(on)))
+        LOG(moose::warning, "Warn: setsockopt() failed");
+}
+
 void SocketStreamer::initUDSServer( void )
 {
-    const char* sockPath = address_.substr(7).c_str();
-    bzero(&sockAddrUDS_, sizeof(sockAddrUDS_));
-    sockAddrUDS_.sun_family = AF_UNIX;
-    strncpy(sockAddrUDS_.sun_path, sockPath, sizeof(sockAddrUDS_.sun_path)-1);
-
     // PF_UNIX means that sockets are local.
     sockfd_ = socket(PF_UNIX, SOCK_STREAM, 0);
     if( ! sockfd_) 
     {
         isValid_ = false;
         perror( "Socket" );
-        return;
     }
 
-    // One can set socket option using setsockopt function. See manual page
-    // for details. We are making it 'reusable'.
-    int on = 1;
-#ifdef SO_REUSEPORT
-    if(0 > setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT, (const char *)&on, sizeof(on)))
+    if( sockfd_ > 0 )
     {
-        isValid_ = false;
-        LOG(moose::warning, "Warn: setsockopt() failed");
-        return;
-    }
-#endif
+        unixSocketFilePath_ = address_.substr(7); bzero(&sockAddrUDS_, sizeof(sockAddrUDS_));
+        sockAddrUDS_.sun_family = AF_UNIX; 
+        strncpy(sockAddrUDS_.sun_path, unixSocketFilePath_.c_str(), sizeof(sockAddrUDS_.sun_path)-1);
+        configureSocketServer();
 
-
-    // Bind. Make sure bind is not std::bind
-    if(0 > ::bind(sockfd_, (struct sockaddr*) &sockAddrUDS_, sizeof(sockAddrUDS_)))
-    {
-        isValid_ = false;
-        LOG(moose::warning, "Warn: Failed to create socket at " << sockPath
-            << ". File descriptor: " << sockfd_
-            << ". Erorr: " << strerror(errno)
-           );
-        return;
+        // Bind. Make sure bind is not std::bind
+        if(0 > ::bind(sockfd_, (struct sockaddr*) &sockAddrUDS_, sizeof(sockAddrUDS_)))
+        {
+            isValid_ = false;
+            LOG(moose::warning, "Warn: Failed to create socket at " << unixSocketFilePath_
+                << ". File descriptor: " << sockfd_
+                << ". Erorr: " << strerror(errno)
+               );
+        }
     }
+
+    if( (! isValid_) || (sockfd_ < 0) )
+        ::unlink( unixSocketFilePath_.c_str() );
 }
 
 void SocketStreamer::initTCPServer( void )
@@ -267,17 +279,7 @@ void SocketStreamer::initTCPServer( void )
         return;
     }
 
-    // One can set socket option using setsockopt function. See manual page
-    // for details. We are making it 'reusable'.
-    int on = 1;
-#ifdef SO_REUSEPORT
-    if(0 > setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT, (const char *)&on, sizeof(on)))
-    {
-        isValid_ = false;
-        LOG(moose::warning, "Warn: setsockopt() failed");
-        return;
-    }
-#endif
+    configureSocketServer();
 
     sockAddrTCP_.sin_family = AF_INET;
     sockAddrTCP_.sin_addr.s_addr = INADDR_ANY;
@@ -325,7 +327,6 @@ bool SocketStreamer::streamData( )
         // clear up the tables.
         for( auto t : tables_ )
             t->clearVec();
-
         return true;
     }
     else
@@ -389,7 +390,7 @@ void SocketStreamer::connectAndStream( )
         clientfd_ = ::accept(sockfd_, NULL, NULL);
 
     // Now lets get into a loop to stream data.
-    while( ! all_done_ && clientfd_ )
+    while( (! all_done_) && (clientfd_ > 0) )
     {
         if( enoughDataToStream(10) )
             streamData();

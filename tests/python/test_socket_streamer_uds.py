@@ -62,7 +62,7 @@ def socket_client( ):
     data = ''
     while not finish_all_:
         try:
-            data += s.recv(256, socket.MSG_WAITALL)
+            data += s.recv(512, socket.MSG_WAITALL)
         except socket.timeout as e:
             pass
     s.close()
@@ -89,41 +89,6 @@ def socket_client( ):
         assert np.isclose(expected[k], nd[k]).all(), \
                 "Exptected %s, got %s" % (str(expected[k]), str(nd[k]))
 
-def sanity_test( ):
-    a = moose.Table( '/t1' )
-    b = moose.Table( '/t1/t1' )
-    c = moose.Table( '/t1/t1/t1' )
-    st = moose.SocketStreamer( '/s' )
-    st.addTable( a )
-    assert( st.numTables == 1 )
-    st.addTable( b )
-    assert( st.numTables == 2 )
-    st.addTable( c )
-    assert( st.numTables == 3 )
-    st.addTable( c )
-    assert( st.numTables == 3 )
-    st.addTable( c )
-    assert( st.numTables == 3 )
-
-    st.removeTable( c )
-    assert( st.numTables == 2 )
-    st.removeTable( c )
-    assert( st.numTables == 2 )
-    st.removeTable( a )
-    assert( st.numTables == 1 )
-    st.removeTable( b )
-    assert( st.numTables == 0 )
-    st.removeTable( b )
-    assert( st.numTables == 0 )
-    print( 'Sanity test passed' )
-
-    st.addTables( [a, b, c ])
-    assert st.numTables == 3
-    st.removeTables( [a, a, c] )
-    assert st.numTables == 1
-    moose.delete( '/t1' )
-    moose.delete( '/s' )
-
 def create_model():
     compt = moose.CubeMesh( '/compt' )
     r = moose.Reac( '/compt/r' )
@@ -147,24 +112,6 @@ def create_model():
     moose.connect( tabB, 'requestOut', b, 'getConc' )
     moose.connect( tabC, 'requestOut', c, 'getConc' )
     return [tabA, tabB, tabC]
-
-def test():
-    global finish_all_
-    os.environ['MOOSE_TCP_STREAMER_ADDRESS'] = 'http://127.0.0.1:31416'
-    client = threading.Thread(target=socket_client, args=())
-    #  client.daemon = True
-    client.start()
-    print( '[INFO] Socket client is running now' )
-    tables = create_model()
-    moose.reinit()
-    moose.start(50)
-    print( 'MOOSE is done' )
-
-    # sleep for some time so data can be read.
-    time.sleep(1)
-    finish_all_ = True
-    client.join()
-    print( 'Test 1 passed' )
 
 def test_without_env():
     global finish_all_
@@ -191,7 +138,6 @@ def test_without_env():
     print( 'Test 2 passed' )
 
 def main( ):
-    #  test( )
     test_without_env()
     print( '[INFO] All tests passed' )
 

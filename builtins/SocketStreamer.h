@@ -67,6 +67,9 @@ public:
     void initTCPServer( void );
     void initUDSServer( void );
 
+    /* common configuration options */
+    void configureSocketServer( void );
+
     // Make connection to client
     void listenToClients(size_t numMaxClients);
 
@@ -136,6 +139,7 @@ private:
     string ip_;                                       // ip_ address of server.
     unsigned short port_;                             // port number if socket is TCP_SOCKET
     string address_;                                  // adress of socket. Specified by user.
+    string unixSocketFilePath_;
 
     // address holdder for TCP and UDS sockets.
     struct sockaddr_in sockAddrTCP_;
