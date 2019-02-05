@@ -22,9 +22,17 @@ const Cinfo* SocketStreamer::initCinfo()
      *-----------------------------------------------------------------------------*/
     static ValueFinfo< SocketStreamer, size_t > port(
         "port"
-        , "Set port number for streaming. This Streamer will send data every second."
+        , "Set port number for streaming. Valid only of TCP socket."
         , &SocketStreamer::setPort
         , &SocketStreamer::getPort
+    );
+
+    static ValueFinfo< SocketStreamer, string > address(
+        "address"
+        , "Set adresss for socket e.g. http://localhost:31416 (host:port for TCP SOCKET) "
+        ", or file:///tmp/MOOSE_SOCK for UNIX domain socket."
+        , &SocketStreamer::setAddress
+        , &SocketStreamer::getAddress
     );
 
     static ReadOnlyValueFinfo< SocketStreamer, size_t > numTables (
@@ -88,13 +96,13 @@ const Cinfo* SocketStreamer::initCinfo()
 
     static Finfo * socketStreamFinfo[] =
     {
-        &port, &proc, &numTables
+        &port, &address, &proc, &numTables
     };
 
     static string doc[] =
     {
         "Name", "SocketStreamer",
-        "Author", "Dilawar Singh (@dilawar, github),2018",
+        "Author", "Dilawar Singh (@dilawar, github), 2018",
         "Description", "SocketStreamer: Stream moose.Table data to a socket.\n"
     };
 
@@ -115,16 +123,16 @@ const Cinfo* SocketStreamer::initCinfo()
 
 static const Cinfo* tableStreamCinfo = SocketStreamer::initCinfo();
 
-// Class function definitions
-
+// Constructor
 SocketStreamer::SocketStreamer() :
-    alreadyStreaming_(false)
-    , currTime_(0.0)
+     currTime_(0.0)
+    , numMaxClients_(1)
+    , sockType_ ( UNIX_DOMAIN_SOCKET )
     , sockfd_(-1)
     , clientfd_(-1)
     , ip_( TCP_SOCKET_IP )
     , port_( TCP_SOCKET_PORT )
-    , numMaxClients_(1)
+    , address_ ( "file:///var/run/moose_sock" )
 {
     // Not all compilers allow initialization during the declaration of class
     // methods.
@@ -134,13 +142,6 @@ SocketStreamer::SocketStreamer() :
     tableTick_.resize(0);
     tableDt_.resize(0);
 
-    // This should only be called once. 
-    initServer();
-
-    // Launch a thread in background which monitors the any client trying to
-    // make connection to server.
-    processThread_ = std::thread(&SocketStreamer::connectAndStream, this);
-    // processThread_.detach();
 }
 
 SocketStreamer& SocketStreamer::operator=( const SocketStreamer& st )
@@ -201,18 +202,15 @@ void SocketStreamer::listenToClients(size_t numMaxClients)
 
 void SocketStreamer::initServer( void )
 {
-    // Create a blocking socket.
-    sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
-    int on = 1;
+    setSocketType( );
+    if( sockType_ == UNIX_DOMAIN_SOCKET )
+        initUDSServer();
+    else
+        initTCPServer();
 
     // One can set socket option using setsockopt function. See manual page
     // for details. We are making it 'reusable'.
-    if(0 > setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, (const char *)&on, sizeof(on)))
-    {
-        LOG(moose::warning, "Warn: setsockopt() failed");
-        return;
-    }
-
+    int on = 1;
 #ifdef SO_REUSEPORT
     if(0 > setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT, (const char *)&on, sizeof(on)))
     {
@@ -221,12 +219,12 @@ void SocketStreamer::initServer( void )
     }
 #endif
 
-    addr_.sin_family = AF_INET;
-    addr_.sin_addr.s_addr = INADDR_ANY;
-    addr_.sin_port = htons( port_ );
+    sockAddr_.sin_family = AF_INET;
+    sockAddr_.sin_addr.s_addr = INADDR_ANY;
+    sockAddr_.sin_port = htons( port_ );
 
     // Bind. Make sure bind is not std::bind
-    if(0 > ::bind(sockfd_, (struct sockaddr*) &addr_, sizeof(addr_)))
+    if(0 > ::bind(sockfd_, (struct sockaddr*) &sockAddr_, sizeof(sockAddr_)))
     {
         LOG(moose::warning, "Warn: Failed to create server at " << ip_ << ":" << port_
             << ". File descriptor: " << sockfd_
@@ -237,11 +235,22 @@ void SocketStreamer::initServer( void )
     else
         LOG(moose::debug, "Successfully bound socket." );
 
-    LOG(moose::debug,  "Successfully created SocketStreamer server: " << sockfd_);
+    LOG(moose::info,  "Successfully created SocketStreamer server: " << sockfd_);
 
     //  Listen for incoming clients. This function does nothing if connection is
     //  already made.
     listenToClients(1);
+}
+
+void SocketStreamer::initUDSServer( void )
+{
+    sockfd_ = socket(AF_UNIX, SOCK_STREAM, 0);
+}
+
+void SocketStreamer::initTCPServer( void )
+{
+    // Create a blocking socket.
+    sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
 }
 
 
@@ -349,9 +358,6 @@ void SocketStreamer::connectAndStream( )
  */
 void SocketStreamer::reinit(const Eref& e, ProcPtr p)
 {
-
-    // If no incoming connection found. Disable it.
-    moose::showDebug( "reinit SocketStreamer." );
     if( tables_.size() == 0 )
     {
         moose::showWarn( "No table found. Disabling SocketStreamer.\nDid you forget" 
@@ -372,6 +378,14 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
         tableDt_.push_back( clk->getTickDt( tickNum ) );
     }
     currTime_ = 0.0;
+
+    // This should only be called once. 
+    initServer();
+
+    // Launch a thread in background which monitors the any client trying to
+    // make connection to server.
+    processThread_ = std::thread(&SocketStreamer::connectAndStream, this);
+
 }
 
 /**
@@ -459,6 +473,23 @@ void SocketStreamer::removeTable( Id table )
     }
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Determines socket type from the given address.
+ */
+/* ----------------------------------------------------------------------------*/
+void SocketStreamer::setSocketType( )
+{
+    LOG( moose::debug,  "Socket address is " << address_ );
+    if( "file://" == address_.substr(0, 7))
+        sockType_ = UNIX_DOMAIN_SOCKET;
+    else if( "http://" == address_.substr(0,7))
+        sockType_ = TCP_SOCKET;
+    else
+        sockType_ = UNIX_DOMAIN_SOCKET;
+    return;
+}
+
 /**
  * @brief Remove multiple tables -- if found -- from SocketStreamer.
  *
@@ -490,4 +521,14 @@ size_t SocketStreamer::getPort( void ) const
 {
     assert( port_ > 1 );
     return port_;
+}
+
+void SocketStreamer::setAddress( const string addr )
+{
+    address_ = moose::trim(addr, " ");
+}
+
+string SocketStreamer::getAddress( void ) const
+{
+    return address_;
 }

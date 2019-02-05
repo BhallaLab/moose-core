@@ -78,7 +78,6 @@ option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" OFF)
 option(WITH_GSL             "Use gsl-library. Alternative is WITH_BOOST" ON)
 option(PARALLELIZED_CLOCK   "High level parallelization of moose::Clock (alpha)" OFF )
 option(USE_PRIVATE_RNG      "Stochastic Objects use their private RNG" ON)
-option(WITH_TCP_STREAMER    "Enable TCP Streamer." ON)
 
 
 ############################ BUILD CONFIGURATION #################################

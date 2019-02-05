@@ -20,7 +20,7 @@
 
 // If cmake does not set it, use the default port.
 #ifndef TCP_SOCKET_PORT
-#define TCP_SOCKET_PORT  31415
+#define TCP_SOCKET_PORT  31416
 #endif
 
 #ifndef TCP_SOCKET_IP
@@ -44,6 +44,8 @@
 
 using namespace std;
 
+typedef enum t_socket_type_ {TCP_SOCKET, UNIX_DOMAIN_SOCKET} SocketType; // Type of socket.
+
 class SocketStreamer : public StreamerBase
 {
 
@@ -53,8 +55,16 @@ public:
 
     SocketStreamer& operator=( const SocketStreamer& st );
 
+    string getFormat( void ) const;
+    void setFormat( string format );
+
+    /*-----------------------------------------------------------------------------
+     *  Socket Server
+     *-----------------------------------------------------------------------------*/
     // Initialize server.
     void initServer( void );
+    void initTCPServer( void );
+    void initUDSServer( void );
 
     // Make connection to client
     void listenToClients(size_t numMaxClients);
@@ -62,13 +72,18 @@ public:
     /* Cleaup before quitting */
     void cleanUp( void );
 
-    string getFormat( void ) const;
-    void setFormat( string format );
+    string getAddress( void ) const;
+    void setAddress( const string addr );
 
     size_t getPort( void ) const;
     void setPort( const size_t port );
 
-    // Stream data.
+    SocketType getSocketType( );
+    void setSocketType(void);
+
+    /*-----------------------------------------------------------------------------
+     *  Streaming data.
+     *-----------------------------------------------------------------------------*/
     bool enoughDataToStream(size_t minsize=10);
     bool streamData();
     void connectAndStream( );
@@ -100,8 +115,6 @@ public:
 
 private:
 
-    bool alreadyStreaming_;
-
     // dt_ and tick number of Table's clock
     vector<double> tableDt_;
     vector<unsigned int> tableTick_;
@@ -113,19 +126,28 @@ private:
     vector<string> columns_;
 
     /* Socket related */
-    int sockfd_;        // socket file descriptor.
-    int clientfd_;      // client file descriptor
-    string ip_;         // ip_ address of server.
-    unsigned short port_;
-    struct sockaddr_in addr_;
     int numMaxClients_;
+    SocketType sockType_ = UNIX_DOMAIN_SOCKET;        // Default is UNIX_DOMAIN_SOCKET
 
+    int sockfd_;                                      // socket file descriptor.
+    int clientfd_;                                    // client file descriptor
+    string ip_;                                       // ip_ address of server.
+    unsigned short port_;                             // port number if socket is TCP_SOCKET
+    string address_;                                  // adress of socket. Specified by user.
+
+    // Temp and intermediate variables.
+    struct sockaddr_in sockAddr_;
+
+    /* For data handling */
     bool all_done_ = false;
     std::thread processThread_;
-    // typedef std::map<std::string, std::thread> ThreadMap;
-    // ThreadMap tm_;
     string buffer_;
     double thisDt_;
+
+    // This trick is from here
+    // http://www.bo-yang.net/2017/11/19/cpp-kill-detached-thread
+    // typedef std::map<std::string, std::thread> ThreadMap;
+    // ThreadMap tm_;
 
 };
 
