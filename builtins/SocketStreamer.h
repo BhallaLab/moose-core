@@ -35,6 +35,7 @@
 #include <sys/poll.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
+#include <sys/un.h>
 #include <netinet/in.h>
 
 // MSG_MORE is not defined in OSX. So stupid!
@@ -128,26 +129,24 @@ private:
     /* Socket related */
     int numMaxClients_;
     SocketType sockType_ = UNIX_DOMAIN_SOCKET;        // Default is UNIX_DOMAIN_SOCKET
-
     int sockfd_;                                      // socket file descriptor.
     int clientfd_;                                    // client file descriptor
+
+    // TCP socket.
     string ip_;                                       // ip_ address of server.
     unsigned short port_;                             // port number if socket is TCP_SOCKET
     string address_;                                  // adress of socket. Specified by user.
 
-    // Temp and intermediate variables.
-    struct sockaddr_in sockAddr_;
+    // address holdder for TCP and UDS sockets.
+    struct sockaddr_in sockAddrTCP_;
+    struct sockaddr_un sockAddrUDS_;
 
     /* For data handling */
     bool all_done_ = false;
+    bool isValid_ = true;
     std::thread processThread_;
     string buffer_;
     double thisDt_;
-
-    // This trick is from here
-    // http://www.bo-yang.net/2017/11/19/cpp-kill-detached-thread
-    // typedef std::map<std::string, std::thread> ThreadMap;
-    // ThreadMap tm_;
 
 };
 

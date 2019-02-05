@@ -208,35 +208,8 @@ void SocketStreamer::initServer( void )
     else
         initTCPServer();
 
-    // One can set socket option using setsockopt function. See manual page
-    // for details. We are making it 'reusable'.
-    int on = 1;
-#ifdef SO_REUSEPORT
-    if(0 > setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT, (const char *)&on, sizeof(on)))
-    {
-        LOG(moose::warning, "Warn: setsockopt() failed");
-        return;
-    }
-#endif
 
-    sockAddr_.sin_family = AF_INET;
-    sockAddr_.sin_addr.s_addr = INADDR_ANY;
-    sockAddr_.sin_port = htons( port_ );
-
-    // Bind. Make sure bind is not std::bind
-    if(0 > ::bind(sockfd_, (struct sockaddr*) &sockAddr_, sizeof(sockAddr_)))
-    {
-        LOG(moose::warning, "Warn: Failed to create server at " << ip_ << ":" << port_
-            << ". File descriptor: " << sockfd_
-            << ". Erorr: " << strerror(errno)
-           );
-        return;
-    }
-    else
-        LOG(moose::debug, "Successfully bound socket." );
-
-    LOG(moose::info,  "Successfully created SocketStreamer server: " << sockfd_);
-
+    LOG(moose::debug,  "Successfully created SocketStreamer server: " << sockfd_);
     //  Listen for incoming clients. This function does nothing if connection is
     //  already made.
     listenToClients(1);
@@ -244,13 +217,82 @@ void SocketStreamer::initServer( void )
 
 void SocketStreamer::initUDSServer( void )
 {
-    sockfd_ = socket(AF_UNIX, SOCK_STREAM, 0);
+    const char* sockPath = address_.substr(7).c_str();
+    bzero(&sockAddrUDS_, sizeof(sockAddrUDS_));
+    sockAddrUDS_.sun_family = AF_UNIX;
+    strncpy(sockAddrUDS_.sun_path, sockPath, sizeof(sockAddrUDS_.sun_path)-1);
+
+    // PF_UNIX means that sockets are local.
+    sockfd_ = socket(PF_UNIX, SOCK_STREAM, 0);
+    if( ! sockfd_) 
+    {
+        isValid_ = false;
+        perror( "Socket" );
+        return;
+    }
+
+    // One can set socket option using setsockopt function. See manual page
+    // for details. We are making it 'reusable'.
+    int on = 1;
+#ifdef SO_REUSEPORT
+    if(0 > setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT, (const char *)&on, sizeof(on)))
+    {
+        isValid_ = false;
+        LOG(moose::warning, "Warn: setsockopt() failed");
+        return;
+    }
+#endif
+
+
+    // Bind. Make sure bind is not std::bind
+    if(0 > ::bind(sockfd_, (struct sockaddr*) &sockAddrUDS_, sizeof(sockAddrUDS_)))
+    {
+        isValid_ = false;
+        LOG(moose::warning, "Warn: Failed to create socket at " << sockPath
+            << ". File descriptor: " << sockfd_
+            << ". Erorr: " << strerror(errno)
+           );
+        return;
+    }
 }
 
 void SocketStreamer::initTCPServer( void )
 {
     // Create a blocking socket.
     sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
+    if( ! sockfd_ )
+    {
+        perror("socket");
+        isValid_ = false;
+        return;
+    }
+
+    // One can set socket option using setsockopt function. See manual page
+    // for details. We are making it 'reusable'.
+    int on = 1;
+#ifdef SO_REUSEPORT
+    if(0 > setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT, (const char *)&on, sizeof(on)))
+    {
+        isValid_ = false;
+        LOG(moose::warning, "Warn: setsockopt() failed");
+        return;
+    }
+#endif
+
+    sockAddrTCP_.sin_family = AF_INET;
+    sockAddrTCP_.sin_addr.s_addr = INADDR_ANY;
+    sockAddrTCP_.sin_port = htons( port_ );
+
+    // Bind. Make sure bind is not std::bind
+    if(0 > ::bind(sockfd_, (struct sockaddr*) &sockAddrTCP_, sizeof(sockAddrTCP_)))
+    {
+        isValid_ = false;
+        LOG(moose::warning, "Warn: Failed to create server at " << ip_ << ":" << port_
+            << ". File descriptor: " << sockfd_
+            << ". Erorr: " << strerror(errno)
+           );
+        return;
+    }
 }
 
 
@@ -335,6 +377,13 @@ bool SocketStreamer::enoughDataToStream(size_t minsize)
 
 void SocketStreamer::connectAndStream( )
 {
+    // If server was invalid then there is no point.
+    if( ! isValid_ )
+    {
+        LOG( moose::error, "Server could not set up." );
+        return;
+    }
+
     // Only 1 client is allowed. Once one client is connected, we stream to it.
     while( clientfd_ < 0 )
         clientfd_ = ::accept(sockfd_, NULL, NULL);
