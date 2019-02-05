@@ -4,6 +4,8 @@
 
 #include <algorithm>
 #include <sstream>
+#include <chrono>
+#include <thread>
 #include <unistd.h>
 
 #include "../basecode/global.h"
@@ -137,9 +139,8 @@ SocketStreamer::SocketStreamer() :
 
     // Launch a thread in background which monitors the any client trying to
     // make connection to server.
-    auto t = std::thread(&SocketStreamer::connect, this);
-    t.detach();
-    tm_["connect"] = std::move(t);
+    processThread_ = std::thread(&SocketStreamer::connectAndStream, this);
+    // processThread_.detach();
 }
 
 SocketStreamer& SocketStreamer::operator=( const SocketStreamer& st )
@@ -151,18 +152,14 @@ SocketStreamer& SocketStreamer::operator=( const SocketStreamer& st )
 SocketStreamer::~SocketStreamer()
 {
     // Now cleanup the socket as well.
+    all_done_ = true;
     if(sockfd_ > 0)
     {
         LOG(moose::debug, "Closing socket " << sockfd_ );
         shutdown(sockfd_, SHUT_RD);
         close(sockfd_);
     }
-
-    // Remember we created a background process to monitor the client. Terminate
-    // it now. May be a good idea to wait for a little bit.
-    stopThread( "connect" );
-
-    usleep(1000);
+    processThread_.join();
 }
 
 /* --------------------------------------------------------------------------*/
@@ -173,16 +170,16 @@ SocketStreamer::~SocketStreamer()
  * @Param tname name of thread.
  */
 /* ----------------------------------------------------------------------------*/
-void SocketStreamer::stopThread(const std::string& tname)
-{
-    ThreadMap::const_iterator it = tm_.find(tname);
-    if (it != tm_.end()) 
-    {
-        it->second.std::thread::~thread(); // thread not killed
-        tm_.erase(tname);
-        LOG(moose::debug, "Thread " << tname << " killed." );
-    }
-}
+//void SocketStreamer::stopThread(const std::string& tname)
+//{
+//    ThreadMap::const_iterator it = tm_.find(tname);
+//    if (it != tm_.end()) 
+//    {
+//        it->second.std::thread::~thread(); // thread not killed
+//        tm_.erase(tname);
+//        LOG(moose::debug, "Thread " << tname << " killed." );
+//    }
+//}
 
 
 /* --------------------------------------------------------------------------*/
@@ -268,6 +265,7 @@ bool SocketStreamer::streamData( )
                 << ". client id: " << clientfd_ );
             return false;
         }
+
         // Send sendbytes has been sent. Remove as many characters from the msg
         // and append to buffer.
         // cout << "Send bytes " << sendBytes << " " << buffer_ << endl;
@@ -280,7 +278,8 @@ bool SocketStreamer::streamData( )
         return true;
     }
     else
-        LOG(moose::debug, "No client found to stream data. ClientFD: " << clientfd_ );
+        LOG(moose::warning, "No client found to stream data. ClientFD: " << clientfd_ );
+
     return false;
 }
 
@@ -317,11 +316,29 @@ string SocketStreamer::dataToString( )
     return res;
 }
 
-void SocketStreamer::connect( )
+bool SocketStreamer::enoughDataToStream(size_t minsize)
 {
-    Clock* clk = reinterpret_cast<Clock*>( Id(1).eref().data() );
-    clientfd_ = accept(sockfd_, NULL, NULL);
-    LOG(moose::debug, "Client " << clientfd_ << " is connected." );
+    for( size_t i = 0; i < tables_.size(); i++)
+        if(tables_[i]->getVec().size() >= minsize )
+            return true;
+    return false;
+}
+
+void SocketStreamer::connectAndStream( )
+{
+    // Only 1 client is allowed. Once one client is connected, we stream to it.
+    while( clientfd_ < 0 )
+        clientfd_ = ::accept(sockfd_, NULL, NULL);
+
+    // Now lets get into a loop to stream data.
+    while( ! all_done_ && clientfd_ )
+    {
+        if( enoughDataToStream(10) )
+            streamData();
+    }
+
+    if(enoughDataToStream(1))
+        streamData();
 }
 
 /**
@@ -334,6 +351,7 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
 {
 
     // If no incoming connection found. Disable it.
+    moose::showDebug( "reinit SocketStreamer." );
     if( tables_.size() == 0 )
     {
         moose::showWarn( "No table found. Disabling SocketStreamer.\nDid you forget" 
@@ -344,6 +362,7 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
     }
 
     Clock* clk = reinterpret_cast<Clock*>( Id(1).eref().data() );
+    thisDt_ = clk->getTickDt( e.element()->getTick() );
 
     // Push each table dt_ into vector of dt
     for( size_t i = 0; i < tables_.size(); i++)
@@ -363,9 +382,9 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
  */
 void SocketStreamer::process(const Eref& e, ProcPtr p)
 {
-    // cout << "Calling process" << endl;
+    // It does nothing. See the connectAndStream function.
     currTime_ = p->currTime;
-    streamData();
+    return;
 }
 
 /**

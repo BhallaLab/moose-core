@@ -69,8 +69,9 @@ public:
     void setPort( const size_t port );
 
     // Stream data.
+    bool enoughDataToStream(size_t minsize=10);
     bool streamData();
-    void connect();
+    void connectAndStream( );
 
     size_t getNumTables( void ) const;
 
@@ -83,7 +84,7 @@ public:
 
     string dataToString();
 
-    void stopThread(const std::string& tname);
+    // void stopThread(const std::string& tname);
 
     /** Dest functions.
      * The process function called by scheduler on every tick
@@ -119,10 +120,13 @@ private:
     struct sockaddr_in addr_;
     int numMaxClients_;
 
-    // std::thread processThread_;
-    typedef std::map<std::string, std::thread> ThreadMap;
-    ThreadMap tm_;
+    bool all_done_ = false;
+    std::thread processThread_;
+    // typedef std::map<std::string, std::thread> ThreadMap;
+    // ThreadMap tm_;
     string buffer_;
+    double thisDt_;
+
 };
 
 #endif   /* ----- #ifndef SocketStreamer_INC  ----- */

@@ -22,13 +22,17 @@ import datetime
 import subprocess
 import logging
 
+# setup environment variables for the streamer starts working.
+os.environ['MOOSE_SOCKET_STREAMER_ADDRESS'] = 'ghevar.ncbs.res.in:31416'
+
 # create a logger for this server.
-logging.basicConfig(level=logging.DEBUG,
-    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-    datefmt='%m-%d %H:%M',
-    filename='moose_server.log',
-    filemode='w'
-    )
+logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+        datefmt='%m-%d %H:%M',
+        filename='moose_server.log',
+        filemode='a'
+        )
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)
 formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
@@ -40,10 +44,10 @@ __all__ = [ 'serve' ]
 
 stop_all_ = False
 
-def handler(signum):
+def handler(signum, frame):
     global stop_all_
+    _logger.info( "User terminated all processes." )
     stop_all_ = True
-
 
 signal.signal( signal.SIGINT, handler)
 
@@ -65,7 +69,7 @@ def send_msg(msg, conn):
         return False
     _logger.debug( msg )
     msg = '%s>>> %s' % (socket.gethostname(), msg)
-    conn.sendall(msg)
+    conn.sendall( b'%010d%s' % (len(msg), msg))
 
 def run(cmd, conn, cwd=None):
     oldCWD = os.getcwd()
@@ -171,12 +175,12 @@ def extract_files(tfile, to):
         try:
             f.extractall( to )
         except Exception as e:
-            print( e)
+            _logger.warn( e)
     # now check if all files have been extracted properly
     success = True
     for f in userFiles:
         if not os.path.exists(f):
-            print( "[ERROR] File %s could not be extracted." % f )
+            _logger.error( "File %s could not be extracted." % f )
             success = False
     return userFiles
 
@@ -198,14 +202,14 @@ def sendResults(tdir, conn, fromThisTime):
             for f in fs:
                 fpath = os.path.join(d,f)
                 if datetime.datetime.fromtimestamp(os.path.getmtime(fpath)) > fromThisTime:
-                    print( "[INFO ] Adding file %s" % f )
+                    _logger.info( "Adding file %s" % f )
                     tf.add(os.path.join(d, f), f)
 
     time.sleep(0.01)
     # now send the tar file back to client
     with open(resfile, 'rb' ) as f:
         data = f.read()
-        print( 'Total bytes in result: %d' % len(data))
+        _logger.info( 'Total bytes in result: %d' % len(data))
         send_bz2(conn, data)
     shutil.rmtree(resdir)
 
@@ -239,9 +243,9 @@ def handle_client(conn, ip, port):
     while isActive:
         tarfileName, nBytes = savePayload(conn)
         if tarfileName is None:
-            print( "Could not recieve data." )
+            _logger.warn( "Could not recieve data." )
             isActive = False
-        print( "[INFO ] PAYLOAD RECIEVED: %d" % nBytes )
+        _logger.info( "PAYLOAD RECIEVED: %d" % nBytes )
         if not os.path.isfile(tarfileName):
             send_msg("[ERROR] %s is not a valid tarfile. Retry"%tarfileName, conn)
             break
@@ -261,21 +265,21 @@ def start_server( host, port, max_requests = 10 ):
     soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     try:
         soc.bind( (host, port))
-        print( "[INFO ] Server created %s:%s" %(host,port) )
+        _logger.info( "Server created %s:%s" %(host,port) )
     except Exception as e:
-        print( "[ERROR] Failed to bind: %s" % e)
+        _logger.error( "Failed to bind: %s" % e)
         quit(1)
 
     # listen upto 100 of requests
     soc.listen(max_requests)
     while True:
         conn, (ip, port) = soc.accept()
-        print( "[INFO ] Connected with %s:%s" % (ip, port) )
+        _logger.info( "Connected with %s:%s" % (ip, port) )
         try:
             t = threading.Thread(target=handle_client, args=(conn, ip, port)) 
             t.start()
         except Exception as e:
-            print(e)
+            _logger.warn(e)
         if stop_all_:
             break
     soc.close()

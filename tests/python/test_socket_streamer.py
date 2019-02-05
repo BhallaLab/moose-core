@@ -52,11 +52,11 @@ def socket_client(host='127.0.0.1', port = 31416):
         print( 'Py: Connected with socket.' )
 
     # This is client reponsibility to read the data.
-    s.settimeout(0.01)
+    s.settimeout(0.001)
     data = ''
     while not finish_all_:
         try:
-            data += s.recv(256)
+            data += s.recv(256, socket.MSG_WAITALL)
         except socket.timeout as e:
             pass
     s.close()
@@ -115,6 +115,8 @@ def sanity_test( ):
     assert st.numTables == 3
     st.removeTables( [a, a, c] )
     assert st.numTables == 1
+    moose.delete( '/t1' )
+    moose.delete( '/s' )
 
 def create_model():
     compt = moose.CubeMesh( '/compt' )
@@ -144,21 +146,11 @@ def test():
     global finish_all_
     os.environ['MOOSE_TCP_STREAMER_ADDRESS'] = '127.0.0.1:31416'
     client = threading.Thread(target=socket_client, args=())
-    client.daemon = True
+    #  client.daemon = True
     client.start()
     print( '[INFO] Socket client is running now' )
-
     tables = create_model()
-    # Now create a streamer and use it to write to a stream
-    #st = moose.SocketStreamer( '/compt/streamer' )
-    #expected = 31416
-    #assert st.port == 31416, "Got %s expected %s" % (st.port, expected)
-    #st.addTable(tables[0])
-    #st.addTables(tables[1:])
-    #assert st.numTables == 3
-    # Give some time for socket client to make connection. 
     moose.reinit()
-    time.sleep(0.2)
     moose.start(50)
     print( 'MOOSE is done' )
 
@@ -166,11 +158,37 @@ def test():
     time.sleep(1)
     finish_all_ = True
     client.join()
+    print( 'Test 1 passed' )
+
+def test_without_env():
+    global finish_all_
+    os.environ['MOOSE_TCP_STREAMER_ADDRESS'] = ''
+    client = threading.Thread(target=socket_client, args=())
+    client.daemon = True
+    client.start()
+    print( '[INFO] Socket client is running now' )
+
+    tables = create_model()
+    # Now create a streamer and use it to write to a stream
+    st = moose.SocketStreamer( '/compt/streamer' )
+    expected = 31416
+    assert st.port == 31416, "Got %s expected %s" % (st.port, expected)
+    st.addTable(tables[0])
+    st.addTables(tables[1:])
+    assert st.numTables == 3
+    # Give some time for socket client to make connection. 
+    moose.reinit()
+    moose.start(50)
+    time.sleep(1)
+    print( 'MOOSE is done' )
+    # sleep for some time so data can be read.
+    finish_all_ = True
+    client.join()
+    print( 'Test 2 passed' )
 
 def main( ):
-    #  sanity_test( )
-    #  moose.delete( '/s' )
-    test( )
+    #  test( )
+    test_without_env()
     print( '[INFO] All tests passed' )
 
 if __name__ == '__main__':

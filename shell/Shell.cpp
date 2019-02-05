@@ -9,7 +9,7 @@
 
 #include <string>
 #include <algorithm>
-#include <unistd.h>
+#include <chrono>
 
 #include "../basecode/header.h"
 #include "../basecode/global.h"
@@ -44,6 +44,7 @@ vector< unsigned int > Shell::acked_( 1, 0 );
 bool Shell::doReinit_( 0 );
 bool Shell::isParserIdle_( 0 );
 double Shell::runtime_( 0.0 );
+
 
 const Cinfo* Shell::initCinfo()
 {
@@ -372,41 +373,9 @@ bool isDoingReinit()
     return (reinterpret_cast<const Clock*>(clockId.eref().data()))->isDoingReinit();
 }
 
-void Shell::setupSocketStreamer(const string host, const int port)
-{
-    cout << "Setting stremer: " << host << ":" << port << endl;
-
-    // Craete a SocketStreamer and add all tables.
-    Shell* pShell = reinterpret_cast<Shell*> (Id().eref().data());
-    assert( pShell );
-    Id stBase = pShell->doCreate("Neutral", Id(), "streamer", 1);
-
-    Id st = pShell->doCreate("SocketStreamer", stBase, "tcp", 1);
-
-    // Find all tables.
-    vector< ObjId > tables;
-    wildcardFind( "/##[TYPE=Table2]", tables );
-    wildcardFind( "/##[TYPE=Table]", tables, false );
-
-    SocketStreamer* pSock = reinterpret_cast<SocketStreamer*>(st.eref().data());
-    pSock->addTables(tables);
-
-    cerr << "Info: Sleeping for sometime" << endl;
-    usleep(0.2*1000);
-}
 
 void Shell::doReinit( )
 {
-    const char* envSocketServer = std::getenv( "MOOSE_TCP_STREAMER_ADDRESS" );
-    if(envSocketServer)
-    {
-        string url = string(envSocketServer);
-        size_t colonPos = url.find_last_of(':');
-        string host = url.substr(0, colonPos);
-        string port = url.substr(colonPos+1);
-        setupSocketStreamer(host, std::stoi(port));
-    }
-
     Id clockId( 1 );
     SetGet0::set( clockId, "reinit" );
 }
