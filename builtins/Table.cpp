@@ -210,12 +210,12 @@ const Cinfo* Table::initCinfo()
 
 static const Cinfo* tableCinfo = Table::initCinfo();
 
-Table::Table() : 
-		threshold_( 0.0 ) , 
-		lastTime_( 0.0 ) , 
-		input_( 0.0 ), 
-		fired_(false), 
-		useSpikeMode_(false), 
+Table::Table() :
+		threshold_( 0.0 ) ,
+		lastTime_( 0.0 ) ,
+		input_( 0.0 ),
+		fired_(false),
+		useSpikeMode_(false),
 		dt_( 0.0 )
 {
     // Initialize the directory to which each table should stream.
@@ -230,10 +230,9 @@ Table::~Table( )
     // Make sure to write to rest of the entries to file before closing down.
     if( useStreamer_ )
     {
-        mergeWithTime( vec(), data_, lastTime_ );
+        mergeWithTime( data_ );
         StreamerBase::writeToOutFile( outfile_, format_, "a", data_, columns_ );
-        clearVec();
-        data_.clear();
+        clearAllVecs();
     }
 }
 
@@ -250,17 +249,18 @@ Table& Table::operator=( const Table& tab )
 void Table::process( const Eref& e, ProcPtr p )
 {
     lastTime_ = p->currTime;
+    tvec_.push_back(lastTime_);
 
     // Copy incoming data to ret and insert into vector.
     vector< double > ret;
     requestOut()->send( e, &ret );
 
-    if (useSpikeMode_) 
+    if (useSpikeMode_)
     {
         for ( vector< double >::const_iterator i = ret.begin(); i != ret.end(); ++i )
             spike( *i );
     }
-    else 
+    else
         vec().insert( vec().end(), ret.begin(), ret.end() );
 
     /*  If we are streaming to a file, let's write to a file. And clean the
@@ -271,12 +271,18 @@ void Table::process( const Eref& e, ProcPtr p )
     {
         if( fmod(lastTime_, 5.0) == 0.0 or getVecSize() >= 10000 )
         {
-            mergeWithTime( vec(), data_, lastTime_ );
+            mergeWithTime( data_ );
             StreamerBase::writeToOutFile( outfile_, format_ , "a", data_, columns_ );
-            data_.clear();
-            clearVec();
+            clearAllVecs();
         }
     }
+}
+
+void Table::clearAllVecs()
+{
+    clearVec();
+    tvec_.clear();
+    data_.clear();
 }
 
 /**
@@ -314,21 +320,22 @@ void Table::reinit( const Eref& e, ProcPtr p )
     lastTime_ = 0;
     vector< double > ret;
     requestOut()->send( e, &ret );
-	if (useSpikeMode_) {
-		for ( vector< double >::const_iterator
-					i = ret.begin(); i != ret.end(); ++i )
-		spike( *i );
-	} else {
-    	vec().insert( vec().end(), ret.begin(), ret.end() );
-	}
+
+    if (useSpikeMode_)
+    {
+        for (vector<double>::const_iterator i = ret.begin(); i != ret.end(); ++i )
+            spike( *i );
+    }
+    else
+        vec().insert( vec().end(), ret.begin(), ret.end() );
+
+    tvec_.push_back(lastTime_);
 
     if( useStreamer_ )
     {
-        mergeWithTime( vec(), data_, lastTime_ );
+        mergeWithTime( data_ );
         StreamerBase::writeToOutFile( outfile_, format_, "w", data_, columns_);
-        clearVec();
-        data_.clear();
-        clearVec();
+        clearAllVecs();
     }
 }
 
@@ -343,15 +350,15 @@ void Table::input( double v )
 
 void Table::spike( double v )
 {
-    if ( fired_ ) 
+    if ( fired_ )
     { // Wait for it to go below threshold
         if ( v < threshold_ )
             fired_ = false;
     }
     else
     {
-        if ( v > threshold_ ) 
-        { 
+        if ( v > threshold_ )
+        {
             // wait for it to go above threshold.
             fired_ = true;
             vec().push_back( lastTime_ );
@@ -456,12 +463,12 @@ double Table::getDt( void ) const
  * @brief Take the vector from table and timestamp it. It must only be called
  * when packing the data for writing.
  */
-void Table::mergeWithTime( const vector<double>& v, vector<double>& data, const double& t)
+void Table::mergeWithTime( vector<double>& data )
 {
-    size_t N = v.size();
-    for (size_t i = 0; i < N; i++)
+    auto v = vec();
+    for (size_t i = 0; i < v.size(); i++)
     {
-        data.push_back(t-(N-i-1)*dt_);
+        data.push_back(tvec_[i]);
         data.push_back(v[i]);
     }
 }
@@ -476,23 +483,19 @@ void Table::mergeWithTime( const vector<double>& v, vector<double>& data, const 
  * @Returns string.
  */
 /* ----------------------------------------------------------------------------*/
-string Table::toJSON(const double t, bool withTime)
+string Table::toJSON( bool withTime)
 {
-    auto v = data();
-    size_t N = v.size();
-
-    stringstream ss("[");
-    for (size_t i = 0; i < N; i++)
+    auto v = vec();
+    stringstream ss;
+    for (size_t i = 0; i < v.size(); i++)
     {
         if(withTime)
-            ss << '[' << t-(N-i-1)*dt_ << ',' << v[i] << "],";
+            ss << '[' << tvec_[i] << ',' << v[i] << "],";
         else
             ss << v[i] << ',';
     }
-
     string res = ss.str();
     if( ',' == res.back())
         res.pop_back();
-
     return res;
 }

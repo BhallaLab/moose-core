@@ -441,7 +441,7 @@ void TableBase::compareVec( vector< double > temp, string op )
 
 void TableBase::clearVec()
 {
-    vec_.resize( 0 );
+    vec_.resize(0);
 }
 
 //////////////////////////////////////////////////////////////

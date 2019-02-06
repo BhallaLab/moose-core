@@ -32,7 +32,13 @@ finish_all_ = False
 
 print( '[INFO] Using moose form %s' % moose.__file__ )
 
-def socket_client(host='127.0.0.1', port = 31416):
+def get_msg(s, n=1024):
+    d = s.recv( n, socket.MSG_WAITALL)
+    while len(d) < n:
+        d += s.recv(n-len(d), socket.MSG_WAITALL)
+    return d
+
+def socket_client( host='127.0.0.1', port = 31416):
     # This function waits for socket to be available.
     global finish_all_
     s = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
@@ -46,33 +52,32 @@ def socket_client(host='127.0.0.1', port = 31416):
             s.connect( (host, port) )
             break
         except Exception as e:
+            print(e)
             pass
-        #  sys.stdout.flush()
 
     print( 'Connected' )
     if not finish_all_:
         print( 'Py: Connected with socket.' )
 
     # This is client reponsibility to read the data.
-    s.settimeout(0.1)
-    data = ''
+    s.settimeout(0.01)
+    data = b''
     while not finish_all_:
         try:
-            data += s.recv(256, socket.MSG_WAITALL)
+            data += get_msg(s)
         except socket.timeout as e:
-            pass
-    s.close()
+            print( e, end = ' ' )
 
+    s.close()
     assert data, "No data streamed"
     print( 'recieved data:\n', data )
     res = defaultdict(list)
-    for x in data.split('\n'):
-        if not x:
+    for x in data.split(b'\n'):
+        if not x.strip():
             continue
         d = json.loads(x)
         for k, v in d.items():
             res[k] += v
-
 
     expected = {u'/compt/tabB/tabC': ([25.,1.07754388], [14.71960144,  0.16830373])
             , u'/compt/a/tab': ([25., 0.42467006], [14.71960144,  0.16766705])
@@ -152,6 +157,7 @@ def test():
     client.start()
     print( '[INFO] Socket client is running now' )
     tables = create_model()
+    time.sleep(0.1)
     moose.reinit()
     moose.start(50)
     print( 'MOOSE is done' )
@@ -166,10 +172,9 @@ def test_without_env():
     global finish_all_
     os.environ['MOOSE_TCP_STREAMER_ADDRESS'] = ''
     client = threading.Thread(target=socket_client, args=())
-    client.daemon = True
+    #client.daemon = True
     client.start()
     print( '[INFO] Socket client is running now' )
-
     tables = create_model()
     # Now create a streamer and use it to write to a stream
     st = moose.SocketStreamer( '/compt/streamer' )
@@ -178,7 +183,7 @@ def test_without_env():
     st.addTable(tables[0])
     st.addTables(tables[1:])
     assert st.numTables == 3
-    # Give some time for socket client to make connection. 
+    # Give some time for socket client to make connection.
     moose.reinit()
     moose.start(50)
     time.sleep(1)

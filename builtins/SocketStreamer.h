@@ -47,6 +47,8 @@ using namespace std;
 
 typedef enum t_socket_type_ {TCP_SOCKET, UNIX_DOMAIN_SOCKET} SocketType; // Type of socket.
 
+class Clock;
+
 class SocketStreamer : public StreamerBase
 {
 
@@ -151,6 +153,11 @@ private:
     std::thread processThread_;
     string buffer_;
     double thisDt_;
+
+    size_t frameSize_ = 2048;
+
+    // We need clk_ pointer for handling
+    Clock* clk_ = nullptr;
 
 };
 

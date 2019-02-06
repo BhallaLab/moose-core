@@ -139,8 +139,10 @@ SocketStreamer::SocketStreamer() :
     , clientfd_(-1)
     , ip_( TCP_SOCKET_IP )
     , port_( TCP_SOCKET_PORT )
-    , address_ ( "file:///var/run/moose_sock" )
+    , address_ ( "file://MOOSE" )
 {
+    clk_ = reinterpret_cast<Clock*>( Id(1).eref().data() );
+
     // Not all compilers allow initialization during the declaration of class
     // methods.
     columns_.push_back( "time" );               /* First column is time. */
@@ -157,6 +159,7 @@ SocketStreamer& SocketStreamer::operator=( const SocketStreamer& st )
 }
 
 
+// Deconstructor
 SocketStreamer::~SocketStreamer()
 {
     // Now cleanup the socket as well.
@@ -170,12 +173,14 @@ SocketStreamer::~SocketStreamer()
         if( sockType_ == UNIX_DOMAIN_SOCKET )
             ::unlink( unixSocketFilePath_.c_str() );
     }
-    processThread_.join();
+
+    if( processThread_.joinable() )
+        processThread_.join();
 }
 
 /* --------------------------------------------------------------------------*/
 /**
- * @Synopsis  Stop a thread. 
+ * @Synopsis  Stop a thread.
  * See: http://www.bo-yang.net/2017/11/19/cpp-kill-detached-thread
  *
  * @Param tname name of thread.
@@ -184,7 +189,7 @@ SocketStreamer::~SocketStreamer()
 //void SocketStreamer::stopThread(const std::string& tname)
 //{
 //    ThreadMap::const_iterator it = tm_.find(tname);
-//    if (it != tm_.end()) 
+//    if (it != tm_.end())
 //    {
 //        it->second.std::thread::~thread(); // thread not killed
 //        tm_.erase(tname);
@@ -205,7 +210,7 @@ void SocketStreamer::listenToClients(size_t numMaxClients)
     assert( numMaxClients > 0 );
     numMaxClients_ = numMaxClients;
     if(-1 == listen(sockfd_, numMaxClients_))
-        LOG(moose::error, "Failed listen() on socket " << sockfd_ 
+        LOG(moose::error, "Failed listen() on socket " << sockfd_
                 << ". Error was: " << strerror(errno) );
 
 }
@@ -219,9 +224,10 @@ void SocketStreamer::initServer( void )
         initTCPServer();
 
     LOG(moose::debug,  "Successfully created SocketStreamer server: " << sockfd_);
+
     //  Listen for incoming clients. This function does nothing if connection is
     //  already made.
-    listenToClients(1);
+    listenToClients(2);
 }
 
 void SocketStreamer::configureSocketServer( )
@@ -240,7 +246,7 @@ void SocketStreamer::initUDSServer( void )
 {
     // PF_UNIX means that sockets are local.
     sockfd_ = socket(PF_UNIX, SOCK_STREAM, 0);
-    if( ! sockfd_) 
+    if( ! sockfd_)
     {
         isValid_ = false;
         perror( "Socket" );
@@ -249,7 +255,7 @@ void SocketStreamer::initUDSServer( void )
     if( sockfd_ > 0 )
     {
         unixSocketFilePath_ = address_.substr(7); bzero(&sockAddrUDS_, sizeof(sockAddrUDS_));
-        sockAddrUDS_.sun_family = AF_UNIX; 
+        sockAddrUDS_.sun_family = AF_UNIX;
         strncpy(sockAddrUDS_.sun_path, unixSocketFilePath_.c_str(), sizeof(sockAddrUDS_.sun_path)-1);
         configureSocketServer();
 
@@ -271,8 +277,9 @@ void SocketStreamer::initUDSServer( void )
 void SocketStreamer::initTCPServer( void )
 {
     // Create a blocking socket.
+    LOG( moose::debug, "Creating TCP socket on port: "  << port_ );
     sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
-    if( ! sockfd_ )
+    if( 0 > sockfd_ )
     {
         perror("socket");
         isValid_ = false;
@@ -281,6 +288,7 @@ void SocketStreamer::initTCPServer( void )
 
     configureSocketServer();
 
+    bzero((char*) &sockAddrTCP_, sizeof(sockAddrTCP_));
     sockAddrTCP_.sin_family = AF_INET;
     sockAddrTCP_.sin_addr.s_addr = INADDR_ANY;
     sockAddrTCP_.sin_port = htons( port_ );
@@ -311,18 +319,24 @@ bool SocketStreamer::streamData( )
     if( clientfd_ > 0)
     {
         buffer_ += dataToString();
-        int sendBytes = send(clientfd_, buffer_.c_str(), buffer_.size(), MSG_MORE);
-        if(0 > sendBytes)
+
+        if( buffer_.size() < frameSize_ )
+            buffer_ += string(frameSize_-buffer_.size(), ' ');
+
+        string toSend = buffer_.substr(0, frameSize_);
+
+        int sent = send(clientfd_, buffer_.substr(0, frameSize_).c_str(), frameSize_, MSG_MORE);
+        buffer_ = buffer_.erase(0, sent);
+
+        assert( sent == (int)frameSize_);
+        LOG(moose::debug, "Sent " << sent << " bytes." ); 
+
+        if(0 > sent)
         {
             LOG(moose::warning, "Failed to send. Error: " << strerror(errno)
                 << ". client id: " << clientfd_ );
             return false;
         }
-
-        // Send sendbytes has been sent. Remove as many characters from the msg
-        // and append to buffer.
-        // cout << "Send bytes " << sendBytes << " " << buffer_ << endl;
-        buffer_ = buffer_.erase(0, sendBytes);
 
         // clear up the tables.
         for( auto t : tables_ )
@@ -337,7 +351,7 @@ bool SocketStreamer::streamData( )
 
 /* --------------------------------------------------------------------------*/
 /**
- * @Synopsis  Convert table to string (use scientific notation). 
+ * @Synopsis  Convert table to string (use scientific notation).
  *
  * @Returns String in JSON like format.
  */
@@ -345,7 +359,6 @@ bool SocketStreamer::streamData( )
 string SocketStreamer::dataToString( )
 {
     stringstream ss;
-
     // Enabling this would be require quite a lot of characters to be streamed.
     //ss.precision( 7 );
     //ss << std::scientific;
@@ -356,7 +369,7 @@ string SocketStreamer::dataToString( )
     for( size_t i = 0; i < tables_.size(); i++)
     {
         ss << "\"" << columns_[i+1] << "\":[";
-        ss << tables_[i]->toJSON(currTime_, true);
+        ss << tables_[i]->toJSON(true);
         ss << "],";
     }
 
@@ -378,6 +391,8 @@ bool SocketStreamer::enoughDataToStream(size_t minsize)
 
 void SocketStreamer::connectAndStream( )
 {
+    currTime_ = clk_->getCurrentTime();
+
     // If server was invalid then there is no point.
     if( ! isValid_ )
     {
@@ -385,18 +400,13 @@ void SocketStreamer::connectAndStream( )
         return;
     }
 
-    // Only 1 client is allowed. Once one client is connected, we stream to it.
-    while( clientfd_ < 0 )
-        clientfd_ = ::accept(sockfd_, NULL, NULL);
-
     // Now lets get into a loop to stream data.
-    while( (! all_done_) && (clientfd_ > 0) )
+    while( (! all_done_) )
     {
-        if( enoughDataToStream(10) )
+        clientfd_ = ::accept(sockfd_, NULL, NULL);
+        if( clientfd_ >= 0 )
             streamData();
     }
-
-    // std::this_thread::sleep_for( std::chrono::milliseconds(100) );
 }
 
 /**
@@ -409,32 +419,29 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
 {
     if( tables_.size() == 0 )
     {
-        moose::showWarn( "No table found. Disabling SocketStreamer.\nDid you forget" 
+        moose::showWarn( "No table found. Disabling SocketStreamer.\nDid you forget"
                 " to call addTables() on SocketStreamer object. " + e.objId().path()
                 );
         e.element()->setTick( -2 );             /* Disable process */
         return;
     }
 
-    Clock* clk = reinterpret_cast<Clock*>( Id(1).eref().data() );
-    thisDt_ = clk->getTickDt( e.element()->getTick() );
+    thisDt_ = clk_->getTickDt( e.element()->getTick() );
 
     // Push each table dt_ into vector of dt
     for( size_t i = 0; i < tables_.size(); i++)
     {
         Id tId = tableIds_[i];
         int tickNum = tId.element()->getTick();
-        tableDt_.push_back( clk->getTickDt( tickNum ) );
+        tableDt_.push_back( clk_->getTickDt( tickNum ) );
     }
-    currTime_ = 0.0;
 
-    // This should only be called once. 
+    // This should only be called once.
     initServer();
 
     // Launch a thread in background which monitors the any client trying to
     // make connection to server.
     processThread_ = std::thread(&SocketStreamer::connectAndStream, this);
-
 }
 
 /**
@@ -446,8 +453,7 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
 void SocketStreamer::process(const Eref& e, ProcPtr p)
 {
     // It does nothing. See the connectAndStream function.
-    currTime_ = p->currTime;
-    return;
+    ;
 }
 
 /**
@@ -574,7 +580,7 @@ size_t SocketStreamer::getPort( void ) const
 
 void SocketStreamer::setAddress( const string addr )
 {
-    address_ = moose::trim(addr, " ");
+    address_ = addr;
 }
 
 string SocketStreamer::getAddress( void ) const

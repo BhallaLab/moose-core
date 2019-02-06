@@ -49,9 +49,11 @@ public:
     double getDt ( void ) const;
 
     // merge time value among values. e.g. t1, v1, t2, v2, etc.
-    void mergeWithTime(const vector<double>& yvec, vector<double>& tvec, const double& t);
+    void mergeWithTime( vector<double>& data );
 
-    string toJSON(const double t, bool withTime=true);
+    string toJSON(bool withTime=true);
+
+    void clearAllVecs();
 
     //////////////////////////////////////////////////////////////////
     // Dest funcs
@@ -77,7 +79,7 @@ private:
     bool fired_;
     bool useSpikeMode_;
 
-    vector<double> data_;                       /* table data */
+    vector<double> data_;
     vector<double> tvec_;                       /* time data */
     vector<string> columns_;                    /* Store the name of tables */
 
