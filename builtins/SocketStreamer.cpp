@@ -235,8 +235,11 @@ void SocketStreamer::configureSocketServer( )
     // One can set socket option using setsockopt function. See manual page
     // for details. We are making it 'reusable'.
     int on = 1;
+
+#ifdef SO_REUSEADDR
     if(0 > setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT, (const char *)&on, sizeof(on)))
         LOG(moose::warning, "Warn: setsockopt() failed");
+#endif
 
     if(0 > setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, (const char *)&on, sizeof(on)))
         LOG(moose::warning, "Warn: setsockopt() failed");
@@ -328,7 +331,7 @@ bool SocketStreamer::streamData( )
         buffer_ = buffer_.erase(0, sent);
 
         assert( sent == (int)frameSize_);
-        LOG(moose::debug, "Sent " << sent << " bytes." ); 
+        LOG(moose::debug, "Sent " << sent << " bytes." );
 
         if(0 > sent)
         {
