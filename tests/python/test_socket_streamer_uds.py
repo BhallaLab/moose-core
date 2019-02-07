@@ -20,12 +20,14 @@ __status__           = "Development"
 
 import os
 import sys
+sys.path.append(os.path.dirname(__file__))
 import time
 import socket
 import numpy as np
 import threading
 import moose
 import json
+import models
 from collections import defaultdict
 
 finish_all_ = False
@@ -98,37 +100,13 @@ def socket_client( ):
         assert np.isclose(expected[k], nd[k]).all(), \
                 "Exptected %s, got %s" % (str(expected[k]), str(nd[k]))
 
-def create_model():
-    compt = moose.CubeMesh( '/compt' )
-    r = moose.Reac( '/compt/r' )
-    a = moose.Pool( '/compt/a' )
-    a.concInit = 1
-    b = moose.Pool( '/compt/b' )
-    b.concInit = 2
-    c = moose.Pool( '/compt/c' )
-    c.concInit = 0.5
-    moose.connect( r, 'sub', a, 'reac' )
-    moose.connect( r, 'prd', b, 'reac' )
-    moose.connect( r, 'prd', c, 'reac' )
-    r.Kf = 0.1
-    r.Kb = 0.01
-
-    tabA = moose.Table2( '/compt/a/tab' )
-    tabB = moose.Table2( '/compt/tabB' )
-    tabC = moose.Table2( '/compt/tabB/tabC' )
-    print(tabA, tabB, tabC)
-    moose.connect( tabA, 'requestOut', a, 'getConc' )
-    moose.connect( tabB, 'requestOut', b, 'getConc' )
-    moose.connect( tabC, 'requestOut', c, 'getConc' )
-    return [tabA, tabB, tabC]
-
 def test_without_env():
     global finish_all_
     client = threading.Thread(target=socket_client, args=())
     #client.daemon = True
     client.start()
     print( '[INFO] Socket client is running now' )
-    tables = create_model()
+    tables = models.simple_model_a()
     # Now create a streamer and use it to write to a stream
     st = moose.SocketStreamer( '/compt/streamer' )
     st.address = 'file://%s' % sockFile_

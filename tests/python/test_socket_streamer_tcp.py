@@ -20,11 +20,13 @@ __status__           = "Development"
 
 import os
 import sys
+sys.path.append( os.path.dirname(__file__))
 import time
 import socket
 import numpy as np
 import threading
 import moose
+import models
 import json
 from collections import defaultdict
 
@@ -127,30 +129,6 @@ def sanity_test( ):
     moose.delete( '/t1' )
     moose.delete( '/s' )
 
-def create_model():
-    compt = moose.CubeMesh( '/compt' )
-    r = moose.Reac( '/compt/r' )
-    a = moose.Pool( '/compt/a' )
-    a.concInit = 1
-    b = moose.Pool( '/compt/b' )
-    b.concInit = 2
-    c = moose.Pool( '/compt/c' )
-    c.concInit = 0.5
-    moose.connect( r, 'sub', a, 'reac' )
-    moose.connect( r, 'prd', b, 'reac' )
-    moose.connect( r, 'prd', c, 'reac' )
-    r.Kf = 0.1
-    r.Kb = 0.01
-
-    tabA = moose.Table2( '/compt/a/tab' )
-    tabB = moose.Table2( '/compt/tabB' )
-    tabC = moose.Table2( '/compt/tabB/tabC' )
-    print(tabA, tabB, tabC)
-    moose.connect( tabA, 'requestOut', a, 'getConc' )
-    moose.connect( tabB, 'requestOut', b, 'getConc' )
-    moose.connect( tabC, 'requestOut', c, 'getConc' )
-    return [tabA, tabB, tabC]
-
 def test():
     global finish_all_
     os.environ['MOOSE_STREAMER_ADDRESS'] = 'http://127.0.0.1:31416'
@@ -158,7 +136,7 @@ def test():
     #  client.daemon = True
     client.start()
     print( '[INFO] Socket client is running now' )
-    tables = create_model()
+    tables = models.simple_model_a()
     time.sleep(0.1)
     moose.reinit()
     moose.start(50)
