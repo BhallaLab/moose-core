@@ -38,7 +38,6 @@
 #include "../shell/Shell.h"
 #include "../shell/Wildcard.h"
 #include "../basecode/global.h"
-#include "../builtins/SocketStreamer.h"
 
 #include "moosemodule.h"
 
@@ -111,9 +110,9 @@ double pymoose_mtrand_( void )
     return moose::mtrand( );
 }
 
-bool setupSocketStreamer(const string host, const int port)
+bool setupSocketStreamer(const string addr )
 {
-    moose::showDebug( "Setting stremer: " + host + ":" + std::to_string(port) );
+    LOG(moose::debug, "Setting streamer with addr " << addr );
 
     // Find all tables.
     vector< ObjId > tables;
@@ -121,17 +120,18 @@ bool setupSocketStreamer(const string host, const int port)
     wildcardFind( "/##[TYPE=Table]", tables, false );
 
     if( tables.size() < 1 )
+    {
+        LOG( moose::warning, "No table found. MOOSE will not create a streamer." );
         return false;
+    }
 
     // Craete a SocketStreamer and add all tables.
-    Shell* pShell = reinterpret_cast<Shell*> (Id().eref().data());
-    assert( pShell );
-    Id stBase = pShell->doCreate("Neutral", Id(), "streamer", 1);
-    Id st = pShell->doCreate("SocketStreamer", stBase, "tcp", 1);
+    Id stBase = SHELLPTR->doCreate("Neutral", Id(), "socket", 1);
+    Id st = SHELLPTR->doCreate("SocketStreamer", stBase, "streamer", 1);
+    Field<string>::set(st, "address", addr);
 
-    SocketStreamer* pSock = reinterpret_cast<SocketStreamer*>(st.eref().data());
-    pSock->addTables(tables);
-    SetGet0::set( st, "reinit" );
+    for( auto &t : tables )
+        SetGet1<Id>::set(st, "addTable", t.id );
     return true;
 }
 
@@ -1770,20 +1770,12 @@ PyObject * moose_reinit(PyObject * dummy, PyObject * args)
 {
     // If environment variable MOOSE_TCP_STREAMER_ADDRESS is set then setup the
     // streamer.
-    const char* envSocketServer = std::getenv( "MOOSE_TCP_STREAMER_ADDRESS" );
-    if(envSocketServer)
+    string envSocketServer = moose::getEnv( "MOOSE_STREAMER_ADDRESS" );
+    if(! envSocketServer.empty())
     {
-        string url = moose::trim(string(envSocketServer), " ");
-        if( url.size() > 0 )
-        {
-            size_t colonPos = url.find_last_of(':');
-            string host = url.substr(0, colonPos);
-            string port = url.substr(colonPos+1);
-            int portNum = TCP_SOCKET_PORT;
-            if( port.size() > 2 )
-                portNum = std::stoi(port);
-            tcpSocketStreamerEnabled_ = setupSocketStreamer(host, portNum);
-        }
+        LOG( moose::debug, "Environment variable set of socket" << envSocketServer );
+        if( envSocketServer.size() > 0 )
+            setupSocketStreamer(envSocketServer);
     }
 
     SHELLPTR->doReinit();

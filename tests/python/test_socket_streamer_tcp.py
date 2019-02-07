@@ -49,10 +49,12 @@ def socket_client(host='127.0.0.1', port = 31416):
         #  print('Py: Trying to connect to %s, %s' % (host, port))
         #  print( end = '.' )
         try:
-            s.connect( (host, port) )
+            s.connect( ('', port) )
             break
         except Exception as e:
-            print(e)
+            continue
+            print(e, end = 'x')
+            sys.stdout.flush()
             pass
 
     print( 'Connected' )
@@ -151,7 +153,7 @@ def create_model():
 
 def test():
     global finish_all_
-    os.environ['MOOSE_TCP_STREAMER_ADDRESS'] = 'http://127.0.0.1:31416'
+    os.environ['MOOSE_STREAMER_ADDRESS'] = 'http://127.0.0.1:31416'
     client = threading.Thread(target=socket_client, args=())
     #  client.daemon = True
     client.start()
@@ -170,7 +172,7 @@ def test():
 
 def test_without_env():
     global finish_all_
-    os.environ['MOOSE_TCP_STREAMER_ADDRESS'] = ''
+    os.environ['MOOSE_STREAMER_ADDRESS'] = ''
     client = threading.Thread(target=socket_client, args=())
     #client.daemon = True
     client.start()
@@ -194,8 +196,8 @@ def test_without_env():
     print( 'Test 2 passed' )
 
 def main( ):
-    #  test( )
-    test_without_env()
+    test( )
+    #  test_without_env()
     print( '[INFO] All tests passed' )
 
 if __name__ == '__main__':

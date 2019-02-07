@@ -20,7 +20,10 @@ namespace moose
     char shortType(std::string type);
     char innerType(char typecode);
     char shortFinfo(std::string ftype);
+
+    // In setuptevn.cpp 
     const map<std::string, std::string>& getArgMap();
+    string getEnv( const string& env);
 
     /**
      * @brief Givem path of MOOSE element, return its name. It's behaviour is
@@ -32,6 +35,7 @@ namespace moose
     {
         return path.substr( path.find_last_of('/') + 1 );
     }
+
 }
 
 

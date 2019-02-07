@@ -166,7 +166,8 @@ const Cinfo* Clock::initCinfo()
     );
     static ReadOnlyValueFinfo< Clock, unsigned int > stride(
         "stride",
-        "Number by which the simulation advances the current step on each cycle. stride = smallest active timestep/smallest defined timestep.",
+        "Number by which the simulation advances the current step on each cycle. "
+        "stride = smallest active timestep/smallest defined timestep.",
         &Clock::getStride
     );
     static ReadOnlyValueFinfo< Clock, unsigned long > currentStep(
@@ -827,6 +828,7 @@ void Clock::handleReinit( const Eref& e )
         info_.dt = *j * dt_;
         reinitVec()[*k++]->send( e, &info_ );
     }
+
     info_.dt = dt_;
     doingReinit_ = false;
 }
