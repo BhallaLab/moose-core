@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division, absolute_import
-
 # Author: Subhasis Ray
 # Maintainer: Dilawar Singh, Harsha Rani, Upi Bhalla
 
+from __future__ import print_function, division, absolute_import
 import warnings
 import os
 import pydoc
@@ -653,7 +652,3 @@ def doc(arg, inherited=True, paged=True):
         pager(text)
     else:
         print(text)
-
-
-#
-# moose.py ends here

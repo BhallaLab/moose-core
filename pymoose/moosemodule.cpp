@@ -17,8 +17,9 @@
 #include <map>
 #include <ctime>
 #include <csignal>
+#include <chrono>
+#include <thread>
 #include <exception>
-
 
 #if USE_BOOST_ODE
 #include <boost/format.hpp>
@@ -88,6 +89,8 @@ extern void speedTestMultiNodeIntFireNetwork(
 
 extern void mooseBenchmarks( unsigned int option );
 
+// global variable.
+bool tcpSocketStreamerEnabled_ = false;
 
 /*-----------------------------------------------------------------------------
  *  Random number generator for this module.
@@ -105,6 +108,31 @@ void pymoose_mtseed_( long int seed )
 double pymoose_mtrand_( void )
 {
     return moose::mtrand( );
+}
+
+bool setupSocketStreamer(const string addr )
+{
+    LOG(moose::debug, "Setting streamer with addr " << addr );
+
+    // Find all tables.
+    vector< ObjId > tables;
+    wildcardFind( "/##[TYPE=Table2]", tables );
+    wildcardFind( "/##[TYPE=Table]", tables, false );
+
+    if( tables.size() < 1 )
+    {
+        LOG( moose::warning, "No table found. MOOSE will not create a streamer." );
+        return false;
+    }
+
+    // Craete a SocketStreamer and add all tables.
+    Id stBase = SHELLPTR->doCreate("Neutral", Id(), "socket", 1);
+    Id st = SHELLPTR->doCreate("SocketStreamer", stBase, "streamer", 1);
+    Field<string>::set(st, "address", addr);
+
+    for( auto &t : tables )
+        SetGet1<Id>::set(st, "addTable", t.id );
+    return true;
 }
 
 /**
@@ -1721,10 +1749,8 @@ PyObject * moose_start(PyObject * dummy, PyObject * args )
     sigemptyset(&sigHandler.sa_mask);
     sigHandler.sa_flags = 0;
     sigaction(SIGINT, &sigHandler, NULL);
-
     SHELLPTR->doStart( runtime, notify );
     Py_RETURN_NONE;
-
 }
 
 PyDoc_STRVAR(moose_reinit_documentation,
@@ -1742,9 +1768,20 @@ PyDoc_STRVAR(moose_reinit_documentation,
              "\n");
 PyObject * moose_reinit(PyObject * dummy, PyObject * args)
 {
+    // If environment variable MOOSE_TCP_STREAMER_ADDRESS is set then setup the
+    // streamer.
+    string envSocketServer = moose::getEnv( "MOOSE_STREAMER_ADDRESS" );
+    if(! envSocketServer.empty())
+    {
+        LOG( moose::debug, "Environment variable set of socket" << envSocketServer );
+        if( envSocketServer.size() > 0 )
+            setupSocketStreamer(envSocketServer);
+    }
+
     SHELLPTR->doReinit();
     Py_RETURN_NONE;
 }
+
 PyObject * moose_stop(PyObject * dummy, PyObject * args)
 {
     SHELLPTR->doStop();
@@ -3236,33 +3273,3 @@ PyMODINIT_FUNC MODINIT(_moose)
     return moose_module;
 #endif
 } 
-
-
-//////////////////////////////////////////////
-// Main function
-//////////////////////////////////////////////
-
-// int main(int argc, char* argv[])
-// {
-// #ifdef PY3K
-//     size_t len = strlen(argv[0]);
-//     wchar_t * warg = (wchar_t*)calloc(sizeof(wchar_t), len);
-//     mbstowcs(warg, argv[0], len);
-// #else
-//     char * warg = argv[0];
-// #endif
-//     for (int ii = 0; ii < argc; ++ii){
-//     cout << "ARGV: " << argv[ii];
-// }
-//     cout << endl;
-//     Py_SetProgramName(warg);
-//     Py_Initialize();
-//     MODINIT(_moose);
-// #ifdef PY3K
-//     free(warg);
-// #endif
-//     return 0;
-// }
-
-//
-// moosemodule.cpp ends here
