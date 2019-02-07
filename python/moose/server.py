@@ -21,9 +21,6 @@ import threading
 import logging
 import helper 
 
-# setup environment variables for the streamer starts working.
-os.environ['MOOSE_SOCKET_STREAMER_ADDRESS'] = 'ghevar.ncbs.res.in:31416'
-
 # create a logger for this server.
 logging.basicConfig(
         level=logging.DEBUG,
@@ -33,7 +30,7 @@ logging.basicConfig(
         filemode='a'
         )
 console = logging.StreamHandler()
-console.setLevel(logging.INFO)
+console.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
 console.setFormatter(formatter)
 _logger = logging.getLogger('')
@@ -49,6 +46,7 @@ def handler(signum, frame):
     global stop_all_
     _logger.info( "User terminated all processes." )
     stop_all_ = True
+    time.sleep(1)
 
 # Install a signal handler.
 signal.signal( signal.SIGINT, handler)
@@ -60,7 +58,7 @@ def split_data( data ):
 def send_msg(msg, conn):
     if not msg.strip():
         return False
-    _logger.debug( msg )
+    _logger.debug( msg.strip() )
     msg = '%s>>> %s' % (socket.gethostname(), msg)
     conn.sendall( b'%010d%s' % (len(msg), msg))
 
@@ -69,8 +67,12 @@ def run(cmd, conn, cwd=None):
     oldCWD = os.getcwd()
     if cwd is not None:
         os.chdir(cwd)
-    for line in helper.execute(cmd.split()):
-        send_msg(line, conn)
+    try:
+        for line in helper.execute(cmd.split()):
+            if line:
+                send_msg(line, conn)
+    except Exception as e:
+        send_msg("Simulation failed: %s" % e, conn)
     os.chdir(oldCWD)
 
 def recv_input(conn, size=1024):
@@ -81,7 +83,7 @@ def recv_input(conn, size=1024):
         try:
             d = conn.recv(10, socket.MSG_WAITALL)
         except Exception:
-            _logger.error( "Error in format. First 6 bytes are size of msg." )
+            _logger.error( "Error in format. First 10 bytes are size of msg." )
             continue
     d, data = int(d), b''
     while len(data) < d:
@@ -106,9 +108,8 @@ def suffixMatplotlibStmt( filename ):
         txt = f.read()
 
     matplotlibText = """
-#  from matplotlib.backends.backend_pdf import PdfPages
+print( '>>>> saving all figues')
 import matplotlib.pyplot as plt
-
 def multipage(filename, figs=None, dpi=200):
     pp = PdfPages(filename)
     if figs is None:
@@ -121,21 +122,27 @@ def saveall(prefix='results', figs=None):
     if figs is None:
         figs = [plt.figure(n) for n in plt.get_fignums()]
     for i, fig in enumerate(figs):
-        fig.savefig('%s.%d.png' %(prefix,i) )
+        outfile = '%s.%d.png' % (prefix, i)
+        fig.savefig(outfile)
+        print( '>>>> %s saved.' % outfile )
     plt.close()
 
 try:
-    #  multipage("results.pdf")
     saveall()
 except Exception as e:
-    print( e )
+    print( '>>>> Error in saving: %s' % e )
+    quit(0)
     """
     with open(outfile, 'w' ) as f:
         f.write( txt )
+        f.write( '\n' )
         f.write( matplotlibText )
     return outfile
 
 def run_file(filename, conn, cwd=None):
+    # set environment variable so that socket streamer can start.
+    socketPath = os.path.join(tempfile.mkdtemp(), 'SOCK_TABLE_STREAMER')
+    os.environ['MOOSE_STREAMER_ADDRESS'] = socketPath
     filename = suffixMatplotlibStmt(filename)
     run( "%s %s" % (sys.executable, filename), conn, cwd)
 
@@ -166,12 +173,9 @@ def sendResults(tdir, conn, notTheseFiles):
     resdir = tempfile.mkdtemp()
     resfile = os.path.join(resdir, 'results.tar.bz2')
     with tarfile.open( resfile, 'w|bz2') as tf:
-        for d, sd, fs in os.walk(tdir):
-            for f in fs:
-                fpath = os.path.join(d,f)
-                if fpath not in notTheseFiles:
-                    _logger.info( "Adding file %s" % f )
-                    tf.add(os.path.join(d, f), f)
+        for f in helper.find_files(tdir, ext='png'):
+            _logger.info( "Adding file %s" % f )
+            tf.add(f, os.path.basename(f))
 
     time.sleep(0.01)
     # now send the tar file back to client
@@ -242,7 +246,7 @@ def handle_client(conn, ip, port):
         # list of files before the simulation.
         notthesefiles = helper.find_files(os.path.dirname(tarfileName))
         res, msg = simulate( tarfileName, conn )
-        if not res:
+        if 0 != res:
             send_msg( "Failed to run simulation: %s" % msg, conn)
             isActive = False
             time.sleep(0.1)

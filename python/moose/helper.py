@@ -32,12 +32,15 @@ def execute(cmd):
         raise subprocess.CalledProcessError(return_code, cmd)
 
 
-def find_files( dirname, name_contains=None, text_regex_search=None):
+def find_files( dirname, ext=None, name_contains=None, text_regex_search=None):
     files = []
     for d, sd, fs in os.walk(dirname):
         for f in fs:
             fpath = os.path.join(d,f)
             include = True
+            if ext is not None:
+                if f.split('.')[-1] != ext:
+                    include = False
             if name_contains:
                 if name_contains not in os.path.basename(f):
                     include = False
