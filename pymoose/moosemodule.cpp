@@ -3273,33 +3273,3 @@ PyMODINIT_FUNC MODINIT(_moose)
     return moose_module;
 #endif
 } 
-
-
-//////////////////////////////////////////////
-// Main function
-//////////////////////////////////////////////
-
-// int main(int argc, char* argv[])
-// {
-// #ifdef PY3K
-//     size_t len = strlen(argv[0]);
-//     wchar_t * warg = (wchar_t*)calloc(sizeof(wchar_t), len);
-//     mbstowcs(warg, argv[0], len);
-// #else
-//     char * warg = argv[0];
-// #endif
-//     for (int ii = 0; ii < argc; ++ii){
-//     cout << "ARGV: " << argv[ii];
-// }
-//     cout << endl;
-//     Py_SetProgramName(warg);
-//     Py_Initialize();
-//     MODINIT(_moose);
-// #ifdef PY3K
-//     free(warg);
-// #endif
-//     return 0;
-// }
-
-//
-// moosemodule.cpp ends here

@@ -100,7 +100,7 @@ def socket_client( ):
         assert np.isclose(expected[k], nd[k]).all(), \
                 "Exptected %s, got %s" % (str(expected[k]), str(nd[k]))
 
-def test_without_env():
+def test():
     global finish_all_
     client = threading.Thread(target=socket_client, args=())
     #client.daemon = True
@@ -108,11 +108,8 @@ def test_without_env():
     print( '[INFO] Socket client is running now' )
     tables = models.simple_model_a()
     # Now create a streamer and use it to write to a stream
-    st = moose.SocketStreamer( '/compt/streamer' )
-    st.address = 'file://%s' % sockFile_
-    st.addTable(tables[0])
-    st.addTables(tables[1:])
-    assert st.numTables == 3
+    os.environ['MOOSE_STREAMER_ADDRESS'] = 'file:///tmp/moose' 
+
     # Give some time for socket client to make connection.
     moose.reinit()
     moose.start(50)
@@ -124,7 +121,7 @@ def test_without_env():
     print( 'Test 2 passed' )
 
 def main( ):
-    test_without_env()
+    test()
     print( '[INFO] All tests passed' )
 
 if __name__ == '__main__':
