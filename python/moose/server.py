@@ -18,9 +18,8 @@ import signal
 import tarfile 
 import tempfile 
 import threading 
-import datetime
-import subprocess
 import logging
+import helper 
 
 # setup environment variables for the streamer starts working.
 os.environ['MOOSE_SOCKET_STREAMER_ADDRESS'] = 'ghevar.ncbs.res.in:31416'
@@ -42,27 +41,21 @@ _logger.addHandler(console)
 
 __all__ = [ 'serve' ]
 
+# Global variable to stop all running threads.
 stop_all_ = False
 
+# Signal handler.
 def handler(signum, frame):
     global stop_all_
     _logger.info( "User terminated all processes." )
     stop_all_ = True
 
+# Install a signal handler.
 signal.signal( signal.SIGINT, handler)
 
 def split_data( data ):
     prefixLenght = 10
     return data[:prefixLenght].strip(), data[prefixLenght:]
-
-def execute(cmd):
-    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
-    for stdout_line in iter(popen.stdout.readline, ""):
-        yield stdout_line 
-    popen.stdout.close()
-    return_code = popen.wait()
-    if return_code:
-        raise subprocess.CalledProcessError(return_code, cmd)
 
 def send_msg(msg, conn):
     if not msg.strip():
@@ -72,34 +65,13 @@ def send_msg(msg, conn):
     conn.sendall( b'%010d%s' % (len(msg), msg))
 
 def run(cmd, conn, cwd=None):
+    _logger.info( "Executing %s" % cmd )
     oldCWD = os.getcwd()
     if cwd is not None:
         os.chdir(cwd)
-    _logger.debug( "Executing in %s" % os.getcwd() )
-    for line in execute(cmd.split()):
+    for line in helper.execute(cmd.split()):
         send_msg(line, conn)
     os.chdir(oldCWD)
-
-def find_files_to_run( files ):
-    """Any file name starting with __main is to be run."""
-    toRun = []
-    for f in files:
-        if '__main' in os.path.basename(f):
-            toRun.append(f)
-    if toRun:
-        return toRun
-
-    # Then guess.
-    if len(files) == 1:
-        return files
-
-    for f in files:
-        with open(f, 'r' ) as fh:
-            txt = fh.read()
-            if re.search(r'def\s+main\(', txt):
-                if re.search('^\s+main\(\S+?\)', txt):
-                    toRun.append(f)
-    return toRun
 
 def recv_input(conn, size=1024):
     # first 10 bytes always tell how much to read next. Make sure the submit job
@@ -133,7 +105,7 @@ def suffixMatplotlibStmt( filename ):
     with open(filename, 'r') as f:
         txt = f.read()
 
-    matplotlibText = '''
+    matplotlibText = """
 #  from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 
@@ -157,7 +129,7 @@ try:
     saveall()
 except Exception as e:
     print( e )
-    '''
+    """
     with open(outfile, 'w' ) as f:
         f.write( txt )
         f.write( matplotlibText )
@@ -166,7 +138,6 @@ except Exception as e:
 def run_file(filename, conn, cwd=None):
     filename = suffixMatplotlibStmt(filename)
     run( "%s %s" % (sys.executable, filename), conn, cwd)
-    _logger.info( '.... DONE' )
 
 def extract_files(tfile, to):
     userFiles = []
@@ -177,11 +148,9 @@ def extract_files(tfile, to):
         except Exception as e:
             _logger.warn( e)
     # now check if all files have been extracted properly
-    success = True
     for f in userFiles:
         if not os.path.exists(f):
             _logger.error( "File %s could not be extracted." % f )
-            success = False
     return userFiles
 
 def prepareMatplotlib( cwd ):
@@ -192,16 +161,15 @@ def send_bz2(conn, data):
     data = b'%010d%s' % (len(data), data)
     conn.sendall(data)
 
-def sendResults(tdir, conn, fromThisTime):
+def sendResults(tdir, conn, notTheseFiles):
     # Only send new files.
     resdir = tempfile.mkdtemp()
     resfile = os.path.join(resdir, 'results.tar.bz2')
-
     with tarfile.open( resfile, 'w|bz2') as tf:
         for d, sd, fs in os.walk(tdir):
             for f in fs:
                 fpath = os.path.join(d,f)
-                if datetime.datetime.fromtimestamp(os.path.getmtime(fpath)) > fromThisTime:
+                if fpath not in notTheseFiles:
                     _logger.info( "Adding file %s" % f )
                     tf.add(os.path.join(d, f), f)
 
@@ -209,9 +177,31 @@ def sendResults(tdir, conn, fromThisTime):
     # now send the tar file back to client
     with open(resfile, 'rb' ) as f:
         data = f.read()
-        _logger.info( 'Total bytes in result: %d' % len(data))
+        _logger.info( 'Total bytes to send to client: %d' % len(data))
         send_bz2(conn, data)
     shutil.rmtree(resdir)
+
+def find_files_to_run( files ):
+    """Any file name starting with __main is to be run.
+    Many such files can be recieved by client.
+    """
+    toRun = []
+    for f in files:
+        if '__main' in os.path.basename(f):
+            toRun.append(f)
+    if toRun:
+        return toRun
+    # Else guess.
+    if len(files) == 1:
+        return files
+
+    for f in files:
+        with open(f, 'r' ) as fh:
+            txt = fh.read()
+            if re.search(r'def\s+main\(', txt):
+                if re.search('^\s+main\(\S+?\)', txt):
+                    toRun.append(f)
+    return toRun
 
 def simulate( tfile, conn ):
     """Simulate a given tar file.
@@ -245,11 +235,12 @@ def handle_client(conn, ip, port):
         if tarfileName is None:
             _logger.warn( "Could not recieve data." )
             isActive = False
-        _logger.info( "PAYLOAD RECIEVED: %d" % nBytes )
         if not os.path.isfile(tarfileName):
             send_msg("[ERROR] %s is not a valid tarfile. Retry"%tarfileName, conn)
             break
-        startSimTime = datetime.datetime.now()
+
+        # list of files before the simulation.
+        notthesefiles = helper.find_files(os.path.dirname(tarfileName))
         res, msg = simulate( tarfileName, conn )
         if not res:
             send_msg( "Failed to run simulation: %s" % msg, conn)
@@ -257,7 +248,7 @@ def handle_client(conn, ip, port):
             time.sleep(0.1)
         send_msg('>DONE SIMULATION', conn)
         # Send results after DONE is sent.
-        sendResults(os.path.dirname(tarfileName), conn, startSimTime)
+        sendResults(os.path.dirname(tarfileName), conn, notthesefiles)
 
 def start_server( host, port, max_requests = 10 ):
     global stop_all_
