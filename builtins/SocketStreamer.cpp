@@ -287,7 +287,6 @@ void SocketStreamer::initTCPServer( void )
     }
 
     configureSocketServer();
-
     bzero((char*) &sockAddrTCP_, sizeof(sockAddrTCP_));
     sockAddrTCP_.sin_family = AF_INET;
     sockAddrTCP_.sin_addr.s_addr = INADDR_ANY;

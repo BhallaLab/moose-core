@@ -38,7 +38,7 @@ def get_msg(s, n=1024):
         d += s.recv(n-len(d), socket.MSG_WAITALL)
     return d
 
-def socket_client( host='127.0.0.1', port = 31416):
+def socket_client(host='127.0.0.1', port = 31416):
     # This function waits for socket to be available.
     global finish_all_
     s = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
@@ -60,7 +60,7 @@ def socket_client( host='127.0.0.1', port = 31416):
         print( 'Py: Connected with socket.' )
 
     # This is client reponsibility to read the data.
-    s.settimeout(0.01)
+    s.settimeout(0.1)
     data = b''
     while not finish_all_:
         try:
