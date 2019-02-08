@@ -52,3 +52,32 @@ def find_files( dirname, ext=None, name_contains=None, text_regex_search=None):
             if include:
                 files.append(fpath)
     return files
+
+# Matplotlib text for running simulation. It make sures at each figure is saved
+# to individual png files.
+matplotlibText = """
+print( '>>>> saving all figues')
+import matplotlib.pyplot as plt
+def multipage(filename, figs=None, dpi=200):
+    pp = PdfPages(filename)
+    if figs is None:
+        figs = [plt.figure(n) for n in plt.get_fignums()]
+    for fig in figs:
+        fig.savefig(pp, format='pdf')
+    pp.close()
+
+def saveall(prefix='results', figs=None):
+    if figs is None:
+        figs = [plt.figure(n) for n in plt.get_fignums()]
+    for i, fig in enumerate(figs):
+        outfile = '%s.%d.png' % (prefix, i)
+        fig.savefig(outfile)
+        print( '>>>> %s saved.' % outfile )
+    plt.close()
+
+try:
+    saveall()
+except Exception as e:
+    print( '>>>> Error in saving: %s' % e )
+    quit(0)
+"""
