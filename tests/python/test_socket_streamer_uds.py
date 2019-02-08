@@ -108,7 +108,7 @@ def test():
     print( '[INFO] Socket client is running now' )
     tables = models.simple_model_a()
     # Now create a streamer and use it to write to a stream
-    os.environ['MOOSE_STREAMER_ADDRESS'] = 'file:///tmp/moose' 
+    os.environ['MOOSE_STREAMER_ADDRESS'] = 'file://%s' % sockFile_
 
     # Give some time for socket client to make connection.
     moose.reinit()

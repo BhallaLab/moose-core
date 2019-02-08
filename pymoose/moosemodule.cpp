@@ -1773,11 +1773,10 @@ PyObject * moose_reinit(PyObject * dummy, PyObject * args)
     string envSocketServer = moose::getEnv( "MOOSE_STREAMER_ADDRESS" );
     if(! envSocketServer.empty())
     {
-        LOG( moose::debug, "Environment variable set of socket" << envSocketServer );
+        LOG( moose::debug, "Environment variable MOOSE_STREAMER_ADDRESS: " << envSocketServer );
         if( envSocketServer.size() > 0 )
             setupSocketStreamer(envSocketServer);
     }
-
     SHELLPTR->doReinit();
     Py_RETURN_NONE;
 }

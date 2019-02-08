@@ -134,12 +134,9 @@ static const Cinfo* tableStreamCinfo = SocketStreamer::initCinfo();
 SocketStreamer::SocketStreamer() :
      currTime_(0.0)
     , numMaxClients_(1)
-    , sockType_ ( UNIX_DOMAIN_SOCKET )
     , sockfd_(-1)
     , clientfd_(-1)
-    , ip_( TCP_SOCKET_IP )
-    , port_( TCP_SOCKET_PORT )
-    , address_ ( "file://MOOSE" )
+    , sockInfo_( MooseSocketInfo( "file://MOOSE" ) )
 {
     clk_ = reinterpret_cast<Clock*>( Id(1).eref().data() );
 
@@ -150,7 +147,6 @@ SocketStreamer::SocketStreamer() :
     tableIds_.resize(0);
     tableTick_.resize(0);
     tableDt_.resize(0);
-
 }
 
 SocketStreamer& SocketStreamer::operator=( const SocketStreamer& st )
@@ -170,8 +166,8 @@ SocketStreamer::~SocketStreamer()
         shutdown(sockfd_, SHUT_RD);
         close(sockfd_);
 
-        if( sockType_ == UNIX_DOMAIN_SOCKET )
-            ::unlink( unixSocketFilePath_.c_str() );
+        if( sockInfo_.type == UNIX_DOMAIN_SOCKET )
+            ::unlink( sockInfo_.filepath.c_str() );
     }
 
     if( processThread_.joinable() )
@@ -217,17 +213,17 @@ void SocketStreamer::listenToClients(size_t numMaxClients)
 
 void SocketStreamer::initServer( void )
 {
-    setSocketType( );
-    if( sockType_ == UNIX_DOMAIN_SOCKET )
+    if( sockInfo_.type == UNIX_DOMAIN_SOCKET )
         initUDSServer();
     else
         initTCPServer();
 
-    LOG(moose::debug,  "Successfully created SocketStreamer server: " << sockfd_);
+    LOG(moose::debug,  "Successfully initialized streamer socket: " << sockfd_);
+    LOG(moose::debug, sockInfo_ );
 
     //  Listen for incoming clients. This function does nothing if connection is
     //  already made.
-    listenToClients(2);
+    listenToClients(1);
 }
 
 void SocketStreamer::configureSocketServer( )
@@ -254,16 +250,16 @@ void SocketStreamer::initUDSServer( void )
 
     if( sockfd_ > 0 )
     {
-        unixSocketFilePath_ = address_.substr(7); bzero(&sockAddrUDS_, sizeof(sockAddrUDS_));
+        bzero(&sockAddrUDS_, sizeof(sockAddrUDS_));
         sockAddrUDS_.sun_family = AF_UNIX;
-        strncpy(sockAddrUDS_.sun_path, unixSocketFilePath_.c_str(), sizeof(sockAddrUDS_.sun_path)-1);
+        strncpy(sockAddrUDS_.sun_path, sockInfo_.filepath.c_str(), sizeof(sockAddrUDS_.sun_path)-1);
         configureSocketServer();
 
         // Bind. Make sure bind is not std::bind
         if(0 > ::bind(sockfd_, (struct sockaddr*) &sockAddrUDS_, sizeof(sockAddrUDS_)))
         {
             isValid_ = false;
-            LOG(moose::warning, "Warn: Failed to create socket at " << unixSocketFilePath_
+            LOG(moose::warning, "Warn: Failed to create socket at " << sockInfo_.filepath
                 << ". File descriptor: " << sockfd_
                 << ". Erorr: " << strerror(errno)
                );
@@ -271,13 +267,16 @@ void SocketStreamer::initUDSServer( void )
     }
 
     if( (! isValid_) || (sockfd_ < 0) )
-        ::unlink( unixSocketFilePath_.c_str() );
+    {
+        LOG( moose::warning, "Failed to create socket : " << sockInfo_ );
+        ::unlink( sockInfo_.filepath.c_str() );
+    }
 }
 
 void SocketStreamer::initTCPServer( void )
 {
     // Create a blocking socket.
-    LOG( moose::debug, "Creating TCP socket on port: "  << port_ );
+    LOG( moose::debug, "Creating TCP socket on port: "  << sockInfo_.port );
     sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
     if( 0 > sockfd_ )
     {
@@ -290,15 +289,16 @@ void SocketStreamer::initTCPServer( void )
     bzero((char*) &sockAddrTCP_, sizeof(sockAddrTCP_));
     sockAddrTCP_.sin_family = AF_INET;
     sockAddrTCP_.sin_addr.s_addr = INADDR_ANY;
-    sockAddrTCP_.sin_port = htons( port_ );
+    sockAddrTCP_.sin_port = htons( sockInfo_.port );
 
     // Bind. Make sure bind is not std::bind
     if(0 > ::bind(sockfd_, (struct sockaddr*) &sockAddrTCP_, sizeof(sockAddrTCP_)))
     {
         isValid_ = false;
-        LOG(moose::warning, "Warn: Failed to create server at " << ip_ << ":" << port_
-            << ". File descriptor: " << sockfd_
-            << ". Erorr: " << strerror(errno)
+        LOG(moose::warning, "Warn: Failed to create server at " 
+                << sockInfo_.host << ":" << sockInfo_.port
+                << ". File descriptor: " << sockfd_
+                << ". Erorr: " << strerror(errno)
            );
         return;
     }
@@ -527,23 +527,6 @@ void SocketStreamer::removeTable( Id table )
     }
 }
 
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis  Determines socket type from the given address.
- */
-/* ----------------------------------------------------------------------------*/
-void SocketStreamer::setSocketType( )
-{
-    LOG( moose::debug,  "Socket address is " << address_ );
-    if( "file://" == address_.substr(0, 7))
-        sockType_ = UNIX_DOMAIN_SOCKET;
-    else if( "http://" == address_.substr(0,7))
-        sockType_ = TCP_SOCKET;
-    else
-        sockType_ = UNIX_DOMAIN_SOCKET;
-    return;
-}
-
 /**
  * @brief Remove multiple tables -- if found -- from SocketStreamer.
  *
@@ -568,21 +551,20 @@ size_t SocketStreamer::getNumTables( void ) const
 
 void SocketStreamer::setPort( const size_t port )
 {
-    port_ = port;
+    sockInfo_.port = port;
 }
 
 size_t SocketStreamer::getPort( void ) const
 {
-    assert( port_ > 1 );
-    return port_;
+    return sockInfo_.port;
 }
 
 void SocketStreamer::setAddress( const string addr )
 {
-    address_ = addr;
+    sockInfo_.setAddress(addr);
 }
 
 string SocketStreamer::getAddress( void ) const
 {
-    return address_;
+    return sockInfo_.address;
 }

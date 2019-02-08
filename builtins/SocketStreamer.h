@@ -16,6 +16,7 @@
 #include <atomic>
 
 #include "StreamerBase.h"
+#include "MooseSocketInfo.h"
 #include "Table.h"
 
 // If cmake does not set it, use the default port.
@@ -45,9 +46,9 @@
 
 using namespace std;
 
-typedef enum t_socket_type_ {TCP_SOCKET, UNIX_DOMAIN_SOCKET} SocketType; // Type of socket.
 
 class Clock;
+
 
 class SocketStreamer : public StreamerBase
 {
@@ -83,9 +84,6 @@ public:
 
     size_t getPort( void ) const;
     void setPort( const size_t port );
-
-    SocketType getSocketType( );
-    void setSocketType(void);
 
     /*-----------------------------------------------------------------------------
      *  Streaming data.
@@ -133,15 +131,8 @@ private:
 
     /* Socket related */
     int numMaxClients_;
-    SocketType sockType_ = UNIX_DOMAIN_SOCKET;        // Default is UNIX_DOMAIN_SOCKET
     int sockfd_;                                      // socket file descriptor.
     int clientfd_;                                    // client file descriptor
-
-    // TCP socket.
-    string ip_;                                       // ip_ address of server.
-    unsigned short port_;                             // port number if socket is TCP_SOCKET
-    string address_;                                  // adress of socket. Specified by user.
-    string unixSocketFilePath_;
 
     // address holdder for TCP and UDS sockets.
     struct sockaddr_in sockAddrTCP_;
@@ -159,6 +150,8 @@ private:
     // We need clk_ pointer for handling
     Clock* clk_ = nullptr;
 
+    // Socket Info
+    MooseSocketInfo sockInfo_;     
 };
 
 #endif   /* ----- #ifndef SocketStreamer_INC  ----- */
