@@ -15,26 +15,32 @@ print( 'Using from %s. VERSION: %s' % (moose.__file__, moose.__version__))
 sockPath = '/tmp/MOOSE'
 os.environ['MOOSE_STREAMER_ADDRESS'] = 'file://%s' % sockPath
 
-def streamer_handler(stop=False):
+all_done_ = False
+
+def streamer_handler( ):
     global sockPath
+    global all_done_
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     while not os.path.exists(sockPath):
         time.sleep(0.01)
-        if stop:
+        if all_done_:
             break
-    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     s.connect( sockPath )
     print( "[INFO ] Connected" )
-    s.settimeout(0.2)
+    s.settimeout(0.1)
+    data = b''
     while True:
-        if stop:
+        if all_done_:
             break
         try:
-            data = s.recv(256, socket.MSG_WAITALL)
-            if data.strip():
-                print( data )
+            d = s.recv(256, socket.MSG_WAITALL)
+            if d.strip():
+                data += d
         except socket.timeout as e:
             print( '.', end = '')
             sys.stdout.flush()
+
+    print(data)
 
 def make_network():
     """
@@ -44,14 +50,12 @@ def make_network():
     It is a good example for using the IntFire, setting up random
     connectivity, and using SynHandlers.
     """
-
-    stop = False
-    th = threading.Thread(target=streamer_handler, args=(stop,))
+    th = threading.Thread(target=streamer_handler)
     th.start()
 
     size = 1024
     dt = 0.2
-    runsteps = 50
+    runsteps = 10
     delayMin = 0
     delayMax = 4
     weightMax = 1
@@ -103,34 +107,24 @@ def make_network():
             moose.connect( network.vec[k], 'spikeOut', stats.vec[i], 'addSpike' )
     moose.connect( plots, 'requestOut', stats, 'getMean', 'OneToOne' )
 
-    moose.useClock( 0, '/network/syns', 'process' )
-    moose.useClock( 1, '/network', 'process' )
-    moose.useClock( 2, '/stats', 'process' )
-    moose.useClock( 3, '/plot', 'process' )
-    moose.setClock( 0, dt )
-    moose.setClock( 1, dt )
-    moose.setClock( 2, dt )
-    moose.setClock( 3, dt )
-    moose.setClock( 9, dt )
     t1 = time.time()
     moose.reinit()
     print('reinit time t = %.3f'%(time.time() - t1))
     network.vec.Vm = np.random.rand( size ) * Vmax
     print('setting Vm , t = %.3f'%(time.time() - t1))
     t1 = time.time()
-    moose.start(runsteps * dt)
+    moose.start(runsteps * dt, 1)
+    all_done_ = True
+    time.sleep(0.1)
+    th.join()
+    print( 'All done' )
+
     print('runtime, t = %.3f'%(time.time() - t1))
     print(network.vec.Vm[99:103], network.vec.Vm[900:903])
     t = [i * dt for i in range( plots.vec[0].vector.size )]
     for i, p in enumerate(plots.vec):
         #  print(p.vector)
         i += 1
-
-    stop = True
-    time.sleep(1)
-    th.join()
-    print( 'All done' )
-
 
 if __name__ == '__main__':
     make_network()
