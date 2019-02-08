@@ -51,7 +51,7 @@ public:
     // merge time value among values. e.g. t1, v1, t2, v2, etc.
     void mergeWithTime( vector<double>& data );
 
-    pair<size_t, string> toJSON(const size_t start_from=0, bool withTime=true);
+    string toJSON(bool withTime=true, bool clear = false);
 
     void clearAllVecs();
 
@@ -83,8 +83,11 @@ private:
     vector<double> tvec_;                       /* time data */
     vector<string> columns_;                    /* Store the name of tables */
 
-    string tablePath_;
+    // Upto which indices we have read the data. This variable is used when
+    // SocketStreamer is used.
+    size_t lastN_;
 
+    string tablePath_;
 
     /**
      * @brief Column name of this table. Use it when writing data to a datafile.
@@ -96,7 +99,7 @@ private:
      * of outfile_ is table path starting from `pwd`/_tables_ . On table, set
      * streamToFile to true.
      */
-    bool useStreamer_;
+    bool useFileStreamer_;
 
     /**
      * @brief Table directory into which dump the stream data.

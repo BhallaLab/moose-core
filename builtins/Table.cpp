@@ -220,7 +220,7 @@ Table::Table() :
 {
     // Initialize the directory to which each table should stream.
     rootdir_ = "_tables";
-    useStreamer_ = false;
+    useFileStreamer_ = false;
     format_ = "csv";
     outfileIsSet_ = false;
 }
@@ -228,7 +228,7 @@ Table::Table() :
 Table::~Table( )
 {
     // Make sure to write to rest of the entries to file before closing down.
-    if( useStreamer_ )
+    if( useFileStreamer_ )
     {
         mergeWithTime( data_ );
         StreamerBase::writeToOutFile( outfile_, format_, "a", data_, columns_ );
@@ -267,7 +267,7 @@ void Table::process( const Eref& e, ProcPtr p )
      *  vector.
      *  Write at every 5 seconds or whenever size of vector is more than 10k.
      */
-    if( useStreamer_ )
+    if( useFileStreamer_ )
     {
         if( fmod(lastTime_, 5.0) == 0.0 or getVecSize() >= 10000 )
         {
@@ -300,7 +300,7 @@ void Table::reinit( const Eref& e, ProcPtr p )
 	fired_ = false;
 
     /** Create the default filepath for this table.  */
-    if( useStreamer_ )
+    if( useFileStreamer_ )
     {
         // The first column is variable time.
         columns_.push_back( "time" );
@@ -331,7 +331,7 @@ void Table::reinit( const Eref& e, ProcPtr p )
 
     tvec_.push_back(lastTime_);
 
-    if( useStreamer_ )
+    if( useFileStreamer_ )
     {
         mergeWithTime( data_ );
         StreamerBase::writeToOutFile( outfile_, format_, "w", data_, columns_);
@@ -412,12 +412,12 @@ void Table::setColumnName( const string colname )
 /* Enable/disable streamer support. */
 void Table::setUseStreamer( bool useStreamer )
 {
-    useStreamer_ = useStreamer;
+    useFileStreamer_ = useStreamer;
 }
 
 bool Table::getUseStreamer( void ) const
 {
-    return useStreamer_;
+    return useFileStreamer_;
 }
 
 /* Enable/disable spike mode. */
@@ -477,19 +477,17 @@ void Table::mergeWithTime( vector<double>& data )
 /**
  * @Synopsis.  Convert table data to JOSN.
  *
- * @Param t.  Upto this time.
- * @Param withTime. Zip with time.
- *
  * @Returns string.
  */
 /* ----------------------------------------------------------------------------*/
-pair<size_t, string> Table::toJSON(const size_t start_from, bool withTime)
+string Table::toJSON(bool withTime, bool clear)
 {
-    auto v = vec();
-    assert( v.size() >= start_from );
-
     stringstream ss;
-    for (size_t i = start_from; i < v.size(); i++)
+    auto v = vec();
+    if( clear )
+        lastN_ = 0;
+
+    for (size_t i = lastN_; i < v.size(); i++)
     {
         if(withTime)
             ss << '[' << tvec_[i] << ',' << v[i] << "],";
@@ -499,5 +497,11 @@ pair<size_t, string> Table::toJSON(const size_t start_from, bool withTime)
     string res = ss.str();
     if( ',' == res.back())
         res.pop_back();
-    return make_pair(v.size()-start_from, res);
+
+    if( clear )
+        clearAllVecs();
+    else
+        lastN_ += v.size();
+
+    return res;
 }

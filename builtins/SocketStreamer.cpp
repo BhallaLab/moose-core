@@ -315,13 +315,10 @@ void SocketStreamer::initTCPServer( void )
 /* ----------------------------------------------------------------------------*/
 bool SocketStreamer::streamData( )
 {
-    static size_t startFrom_ = 0;
     if( clientfd_ > 0)
     {
-        auto s = dataToString( startFrom_ );
-        startFrom_ += s.size();
+        auto s = dataToString( );
         buffer_ += s;
-
         if( buffer_.empty() )
             return false;
 
@@ -332,9 +329,7 @@ bool SocketStreamer::streamData( )
 
         int sent = send(clientfd_, buffer_.substr(0, frameSize_).c_str(), frameSize_, MSG_MORE);
         buffer_ = buffer_.erase(0, sent);
-
         assert( sent == (int)frameSize_);
-        LOG(moose::debug, "Sent " << sent << " bytes." ); 
 
         if(0 > sent)
         {
@@ -342,7 +337,6 @@ bool SocketStreamer::streamData( )
                 << ". client id: " << clientfd_ );
             return false;
         }
-        // DO NOT FLUSH THE TABLE.
         return true;
     }
     else
@@ -355,12 +349,10 @@ bool SocketStreamer::streamData( )
 /**
  * @Synopsis  Convert data to JSON. 
  *
- * @Param start_from : Read table data from this index.
- *
  * @Returns JSON representation.
  */
 /* ----------------------------------------------------------------------------*/
-string SocketStreamer::dataToString( size_t& start_from )
+string SocketStreamer::dataToString( )
 {
     stringstream ss;
     // Enabling this would be require quite a lot of characters to be streamed.
@@ -369,19 +361,23 @@ string SocketStreamer::dataToString( size_t& start_from )
     vector<double> data;
 
     // Else stream the data.
-    ss << "{";
+    bool allEmpty = true;
 
+    ss << "{";
     size_t n = 0;
     for( size_t i = 0; i < tables_.size(); i++)
     {
-        ss << "\"" << columns_[i+1] << "\":[";
-        auto res = tables_[i]->toJSON(start_from, true);
-        n = res.first;
-        ss << res.second;
-        ss << "],";
+        string json = tables_[i]->toJSON(true, false);
+        if( ! json.empty() )
+        {
+            allEmpty = false;
+            ss << "\"" << columns_[i+1] << "\":[" << json << "],";
+        }
     }
 
-    start_from += n;
+    // If nothing is found in all tables, then don't return empty {};
+    if( allEmpty )
+        return "";
 
     // remove , at the end else it won't be a valid JSON.
     string res = ss.str();
@@ -411,12 +407,14 @@ void SocketStreamer::connectAndStream( )
         return;
     }
 
+    clientfd_ = ::accept(sockfd_, NULL, NULL);
     // Now lets get into a loop to stream data.
-    while( (! all_done_) )
+    while(clientfd_ > 0)
     {
-        clientfd_ = ::accept(sockfd_, NULL, NULL);
-        if( clientfd_ >= 0 )
-            streamData();
+        streamData();
+        std::this_thread::sleep_for(std::chrono::microseconds(processTickMicroSec/2));
+        if( all_done_ )
+            break;
     }
 }
 
@@ -453,6 +451,7 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
     // Launch a thread in background which monitors the any client trying to
     // make connection to server.
     processThread_ = std::thread(&SocketStreamer::connectAndStream, this);
+    timeStamp_ = std::chrono::high_resolution_clock::now();
 }
 
 /**
@@ -463,8 +462,9 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
  */
 void SocketStreamer::process(const Eref& e, ProcPtr p)
 {
-    // It does nothing. See the connectAndStream function.
-    ;
+    processTickMicroSec = std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::high_resolution_clock::now() - timeStamp_).count();
+    timeStamp_ = std::chrono::high_resolution_clock::now();
 }
 
 /**
@@ -502,9 +502,9 @@ void SocketStreamer::addTables( vector<ObjId> tables )
     if( tables.size() == 0 )
         return;
 
-    for(auto t : tables ) addTable(t);
+    for(auto t : tables) 
+        addTable(t);
 }
-
 
 /**
  * @brief Remove a table from SocketStreamer.

@@ -76,6 +76,9 @@ public:
     // Make connection to client
     void listenToClients(size_t numMaxClients);
 
+    // Find minimum number of elements in tables.
+    pair<size_t, size_t> minMaxNumberOfElemementsInTables( );
+
     /* Cleaup before quitting */
     void cleanUp( void );
 
@@ -100,9 +103,7 @@ public:
     void removeTable( ObjId table );
     void removeTables( vector<ObjId> table );
 
-    string dataToString(size_t& start_from);
-
-    // void stopThread(const std::string& tname);
+    string dataToString( );
 
     /** Dest functions.
      * The process function called by scheduler on every tick
@@ -144,13 +145,17 @@ private:
     string buffer_;
     double thisDt_;
 
-    size_t frameSize_ = 2048;
+    size_t frameSize_ = 512;
 
     // We need clk_ pointer for handling
     Clock* clk_ = nullptr;
 
     // Socket Info
     MooseSocketInfo sockInfo_;     
+
+    // How long it takes between process calls.
+    size_t processTickMicroSec;        
+    std::chrono::high_resolution_clock::time_point timeStamp_;
 };
 
 #endif   /* ----- #ifndef SocketStreamer_INC  ----- */
