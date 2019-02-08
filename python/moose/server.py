@@ -18,6 +18,7 @@ import sys
 import re
 import os 
 import time
+import math
 import shutil
 import socket 
 import signal
@@ -48,6 +49,16 @@ __all__ = [ 'serve' ]
 stop_all_ = False
 sock_     = None
 
+# Use prefixL_ bytes to encode the size of stream. One can probably use just one
+# byte to do. Lets go with the inefficient one for now.
+prefixL_  = 9
+
+def prefix_data_with_size(data):
+    global prefixL_
+    prefix = b'0'*(prefixL_-int(math.log10(len(data)))-1) + b'%d' % len(data)
+    assert len(prefix) == prefixL_
+    return b'%s%s' % (prefix, data)
+
 # Signal handler.
 def signal_handler(signum, frame):
     global stop_all_
@@ -61,15 +72,19 @@ def signal_handler(signum, frame):
 
 
 def split_data( data ):
-    prefixLenght = 10
-    return data[:prefixLenght].strip(), data[prefixLenght:]
+    global prefixL_
+    return data[:prefixL_].strip(), data[prefixL_:]
+
+def send_table_data(msg, conn):
+    msg = 'DATA:' + msg
+    conn.sendall(prefix_data_with_size(msg))
 
 def send_msg(msg, conn):
     if not msg.strip():
         return False
     _logger.debug( msg.strip() )
-    msg = '%s>>> %s' % (socket.gethostname(), msg)
-    conn.sendall( b'%010d%s' % (len(msg), msg))
+    msg = 'LOGS:%s>>> %s' % (socket.gethostname(), msg)
+    conn.sendall(prefix_data_with_size(msg))
 
 def run(cmd, conn, cwd=None):
     _logger.info( "Executing %s" % cmd )
@@ -87,12 +102,12 @@ def run(cmd, conn, cwd=None):
 def recv_input(conn, size=1024):
     # first 10 bytes always tell how much to read next. Make sure the submit job
     # script has it
-    d = conn.recv(10, socket.MSG_WAITALL)
-    while len(d) < 10:
+    d = conn.recv(prefixL_, socket.MSG_WAITALL)
+    while len(d) < prefixL_:
         try:
-            d = conn.recv(10, socket.MSG_WAITALL)
+            d = conn.recv(prefixL_, socket.MSG_WAITALL)
         except Exception:
-            _logger.error( "Error in format. First 10 bytes are size of msg." )
+            _logger.error("MSG FORMAT: %d bytes are size of msg."%prefixL_)
             continue
     d, data = int(d), b''
     while len(data) < d:
@@ -105,7 +120,7 @@ def writeTarfile( data ):
         _logger.info( "Writing %d bytes to %s" % (len(data), tfile))
         f.write(data)
     # Sleep for some time so that file can be written to disk.
-    time.sleep(0.2)
+    time.sleep(0.1)
     if not tarfile.is_tarfile(tfile):
         _logger.warn( 'Not a valid tar file: %s' % tfile)
         return None
@@ -141,16 +156,16 @@ def streamer_client(socketPath, conn, stop = False):
     # send streaming data back to client. The streamer send fixed size messages
     # of 1024/2048 bytes each (see the c++ implmenetation).
     _logger.info( "Socket Streamer is connected with server." )
-    stClient.settimeout(0.1)
+    stClient.settimeout(0.05)
     while not stop:
         data = b''
         try:
-            data = stClient.recv(1024, socket.MSG_WAITALL)
+            data = stClient.recv(512, socket.MSG_WAITALL)
+            if len(data.strip()) > 0:
+                _logger.debug( "Got data from tables: %d bytes" % len(data)) 
+                send_table_data(data, conn)
         except socket.timeout as e:
             continue
-        if data:
-            _logger.debug( "Got some data: %s" % data )
-            conn.sendall(data)
     stClient.close()
     if os.path.isfile(socketPath):
         os.unlink(socketPath)
@@ -190,8 +205,8 @@ def prepareMatplotlib( cwd ):
         f.write( 'interactive : True' )
 
 def send_bz2(conn, data):
-    data = b'%010d%s' % (len(data), data)
-    conn.sendall(data)
+    global prefixL_
+    conn.sendall(prefix_data_with_size(data))
 
 def sendResults(tdir, conn, notTheseFiles):
     # Only send new files.

@@ -101,7 +101,7 @@ public:
     void removeTable( Id table );
     void removeTables( vector<Id> table );
 
-    string dataToString();
+    string dataToString( const size_t start_from=0 );
 
     // void stopThread(const std::string& tname);
 

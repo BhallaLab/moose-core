@@ -483,11 +483,11 @@ void Table::mergeWithTime( vector<double>& data )
  * @Returns string.
  */
 /* ----------------------------------------------------------------------------*/
-string Table::toJSON( bool withTime)
+string Table::toJSON(const size_t start_from, bool withTime)
 {
     auto v = vec();
     stringstream ss;
-    for (size_t i = 0; i < v.size(); i++)
+    for (size_t i = start_from; i < v.size(); i++)
     {
         if(withTime)
             ss << '[' << tvec_[i] << ',' << v[i] << "],";

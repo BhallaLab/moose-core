@@ -315,9 +315,12 @@ void SocketStreamer::initTCPServer( void )
 /* ----------------------------------------------------------------------------*/
 bool SocketStreamer::streamData( )
 {
+    static size_t startFrom_ = 0;
     if( clientfd_ > 0)
     {
-        buffer_ += dataToString();
+        auto s = dataToString( startFrom_ );
+        startFrom_ += s.size();
+        buffer_ += s;
 
         if( buffer_.size() < frameSize_ )
             buffer_ += string(frameSize_-buffer_.size(), ' ');
@@ -336,10 +339,7 @@ bool SocketStreamer::streamData( )
                 << ". client id: " << clientfd_ );
             return false;
         }
-
-        // clear up the tables.
-        for( auto t : tables_ )
-            t->clearVec();
+        // DO NOT FLUSH THE TABLE.
         return true;
     }
     else
@@ -350,12 +350,14 @@ bool SocketStreamer::streamData( )
 
 /* --------------------------------------------------------------------------*/
 /**
- * @Synopsis  Convert table to string (use scientific notation).
+ * @Synopsis  Convert data to JSON. 
  *
- * @Returns String in JSON like format.
+ * @Param start_from : Read table data from this index.
+ *
+ * @Returns JSON representation.
  */
 /* ----------------------------------------------------------------------------*/
-string SocketStreamer::dataToString( )
+string SocketStreamer::dataToString( const size_t start_from )
 {
     stringstream ss;
     // Enabling this would be require quite a lot of characters to be streamed.
@@ -368,7 +370,7 @@ string SocketStreamer::dataToString( )
     for( size_t i = 0; i < tables_.size(); i++)
     {
         ss << "\"" << columns_[i+1] << "\":[";
-        ss << tables_[i]->toJSON(true);
+        ss << tables_[i]->toJSON(start_from, true);
         ss << "],";
     }
 
