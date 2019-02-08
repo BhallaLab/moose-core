@@ -89,9 +89,6 @@ extern void speedTestMultiNodeIntFireNetwork(
 
 extern void mooseBenchmarks( unsigned int option );
 
-// global variable.
-bool tcpSocketStreamerEnabled_ = false;
-
 /*-----------------------------------------------------------------------------
  *  Random number generator for this module.
  *
@@ -113,7 +110,6 @@ double pymoose_mtrand_( void )
 bool setupSocketStreamer(const string addr )
 {
     LOG(moose::debug, "Setting streamer with addr " << addr );
-
     // Find all tables.
     vector< ObjId > tables;
     wildcardFind( "/##[TYPE=Table2]", tables );
@@ -130,8 +126,9 @@ bool setupSocketStreamer(const string addr )
     Id st = SHELLPTR->doCreate("SocketStreamer", stBase, "streamer", 1);
     Field<string>::set(st, "address", addr);
 
+    LOG(moose::debug, "Found " << tables.size() << " tables.");
     for( auto &t : tables )
-        SetGet1<Id>::set(st, "addTable", t.id );
+        SetGet1<ObjId>::set(st, "addTable", t );
     return true;
 }
 

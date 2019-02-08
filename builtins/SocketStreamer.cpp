@@ -66,25 +66,25 @@ const Cinfo* SocketStreamer::initCinfo()
     static DestFinfo addTable(
         "addTable"
         , "Add a table to SocketStreamer"
-        , new OpFunc1<SocketStreamer, Id>(&SocketStreamer::addTable)
+        , new OpFunc1<SocketStreamer, ObjId>(&SocketStreamer::addTable)
     );
 
     static DestFinfo addTables(
         "addTables"
         , "Add many tables to SocketStreamer"
-        , new OpFunc1<SocketStreamer, vector<Id> >(&SocketStreamer::addTables)
+        , new OpFunc1<SocketStreamer, vector<ObjId> >(&SocketStreamer::addTables)
     );
 
     static DestFinfo removeTable(
         "removeTable"
         , "Remove a table from SocketStreamer"
-        , new OpFunc1<SocketStreamer, Id>(&SocketStreamer::removeTable)
+        , new OpFunc1<SocketStreamer, ObjId>(&SocketStreamer::removeTable)
     );
 
     static DestFinfo removeTables(
         "removeTables"
         , "Remove tables -- if found -- from SocketStreamer"
-        , new OpFunc1<SocketStreamer, vector<Id>>(&SocketStreamer::removeTables)
+        , new OpFunc1<SocketStreamer, vector<ObjId>>(&SocketStreamer::removeTables)
     );
 
     /*-----------------------------------------------------------------------------
@@ -322,6 +322,9 @@ bool SocketStreamer::streamData( )
         startFrom_ += s.size();
         buffer_ += s;
 
+        if( buffer_.empty() )
+            return false;
+
         if( buffer_.size() < frameSize_ )
             buffer_ += string(frameSize_-buffer_.size(), ' ');
 
@@ -357,7 +360,7 @@ bool SocketStreamer::streamData( )
  * @Returns JSON representation.
  */
 /* ----------------------------------------------------------------------------*/
-string SocketStreamer::dataToString( const size_t start_from )
+string SocketStreamer::dataToString( size_t& start_from )
 {
     stringstream ss;
     // Enabling this would be require quite a lot of characters to be streamed.
@@ -367,12 +370,18 @@ string SocketStreamer::dataToString( const size_t start_from )
 
     // Else stream the data.
     ss << "{";
+
+    size_t n = 0;
     for( size_t i = 0; i < tables_.size(); i++)
     {
         ss << "\"" << columns_[i+1] << "\":[";
-        ss << tables_[i]->toJSON(start_from, true);
+        auto res = tables_[i]->toJSON(start_from, true);
+        n = res.first;
+        ss << res.second;
         ss << "],";
     }
+
+    start_from += n;
 
     // remove , at the end else it won't be a valid JSON.
     string res = ss.str();
@@ -393,6 +402,7 @@ bool SocketStreamer::enoughDataToStream(size_t minsize)
 void SocketStreamer::connectAndStream( )
 {
     currTime_ = clk_->getCurrentTime();
+    LOG(moose::debug, "Total " << tables_.size() << " tables found.");
 
     // If server was invalid then there is no point.
     if( ! isValid_ )
@@ -462,7 +472,7 @@ void SocketStreamer::process(const Eref& e, ProcPtr p)
  *
  * @param table Id of table.
  */
-void SocketStreamer::addTable( Id table )
+void SocketStreamer::addTable( ObjId table )
 {
     // If this table is not already in the vector, add it.
     for( size_t i = 0; i < tableIds_.size(); i++)
@@ -487,20 +497,12 @@ void SocketStreamer::addTable( Id table )
  *
  * @param tables
  */
-void SocketStreamer::addTables( vector<Id> tables )
-{
-    if( tables.size() == 0 )
-        return;
-    for( vector<Id>::const_iterator it = tables.begin(); it != tables.end(); it++)
-        addTable( *it );
-}
-
 void SocketStreamer::addTables( vector<ObjId> tables )
 {
     if( tables.size() == 0 )
         return;
-    for( auto t : tables )
-        addTable( Id(t) );
+
+    for(auto t : tables ) addTable(t);
 }
 
 
@@ -509,7 +511,7 @@ void SocketStreamer::addTables( vector<ObjId> tables )
  *
  * @param table. Id of table.
  */
-void SocketStreamer::removeTable( Id table )
+void SocketStreamer::removeTable( ObjId table )
 {
     int matchIndex = -1;
     for (size_t i = 0; i < tableIds_.size(); i++)
@@ -534,9 +536,9 @@ void SocketStreamer::removeTable( Id table )
  *
  * @param tables
  */
-void SocketStreamer::removeTables( vector<Id> tables )
+void SocketStreamer::removeTables( vector<ObjId> tables )
 {
-    for( vector<Id>::const_iterator it = tables.begin(); it != tables.end(); it++)
+    for( vector<ObjId>::const_iterator it = tables.begin(); it != tables.end(); it++)
         removeTable( *it );
 }
 

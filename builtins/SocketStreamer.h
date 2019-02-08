@@ -94,14 +94,13 @@ public:
 
     size_t getNumTables( void ) const;
 
-    void addTable( Id table );
-    void addTables( vector<Id> tables);
+    void addTable( ObjId table );
     void addTables( vector<ObjId> tables);
 
-    void removeTable( Id table );
-    void removeTables( vector<Id> table );
+    void removeTable( ObjId table );
+    void removeTables( vector<ObjId> table );
 
-    string dataToString( const size_t start_from=0 );
+    string dataToString(size_t& start_from);
 
     // void stopThread(const std::string& tname);
 

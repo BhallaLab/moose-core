@@ -51,7 +51,7 @@ public:
     // merge time value among values. e.g. t1, v1, t2, v2, etc.
     void mergeWithTime( vector<double>& data );
 
-    string toJSON(const size_t start_from=0, bool withTime=true);
+    pair<size_t, string> toJSON(const size_t start_from=0, bool withTime=true);
 
     void clearAllVecs();
 

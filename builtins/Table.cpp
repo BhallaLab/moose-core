@@ -211,12 +211,12 @@ const Cinfo* Table::initCinfo()
 static const Cinfo* tableCinfo = Table::initCinfo();
 
 Table::Table() :
-		threshold_( 0.0 ) ,
-		lastTime_( 0.0 ) ,
-		input_( 0.0 ),
-		fired_(false),
-		useSpikeMode_(false),
-		dt_( 0.0 )
+    threshold_( 0.0 ) ,
+    lastTime_( 0.0 ) ,
+    input_( 0.0 ),
+    fired_(false),
+    useSpikeMode_(false),
+    dt_( 0.0 )
 {
     // Initialize the directory to which each table should stream.
     rootdir_ = "_tables";
@@ -483,9 +483,11 @@ void Table::mergeWithTime( vector<double>& data )
  * @Returns string.
  */
 /* ----------------------------------------------------------------------------*/
-string Table::toJSON(const size_t start_from, bool withTime)
+pair<size_t, string> Table::toJSON(const size_t start_from, bool withTime)
 {
     auto v = vec();
+    assert( v.size() >= start_from );
+
     stringstream ss;
     for (size_t i = start_from; i < v.size(); i++)
     {
@@ -497,5 +499,5 @@ string Table::toJSON(const size_t start_from, bool withTime)
     string res = ss.str();
     if( ',' == res.back())
         res.pop_back();
-    return res;
+    return make_pair(v.size()-start_from, res);
 }
