@@ -40,16 +40,19 @@ __all__ = [ 'serve' ]
 
 # Global variable to stop all running threads.
 stop_all_ = False
+sock_     = None
 
 # Signal handler.
-def handler(signum, frame):
+def signal_handler(signum, frame):
     global stop_all_
+    global sock_
     _logger.info( "User terminated all processes." )
     stop_all_ = True
+    #  sock_.shutdown( socket.SHUT_RDWR )
+    sock_.close()
     time.sleep(1)
+    quit(1)
 
-# Install a signal handler.
-signal.signal( signal.SIGINT, handler)
 
 def split_data( data ):
     prefixLenght = 10
@@ -256,28 +259,34 @@ def handle_client(conn, ip, port):
 
 def start_server( host, port, max_requests = 10 ):
     global stop_all_
-    soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    global sock_
+    sock_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock_.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     try:
-        soc.bind( (host, port))
+        sock_.bind( (host, port))
         _logger.info( "Server created %s:%s" %(host,port) )
     except Exception as e:
         _logger.error( "Failed to bind: %s" % e)
         quit(1)
 
-    # listen upto 100 of requests
-    soc.listen(max_requests)
+    # listen upto 10 of requests
+    sock_.listen(max_requests)
     while True:
-        conn, (ip, port) = soc.accept()
+        if stop_all_:
+            break
+        sock_.settimeout(10)
+        try:
+            conn, (ip, port) = sock_.accept()
+        except socket.timeout as e:
+            continue
+        sock_.settimeout(0.0)
         _logger.info( "Connected with %s:%s" % (ip, port) )
         try:
             t = threading.Thread(target=handle_client, args=(conn, ip, port)) 
             t.start()
         except Exception as e:
             _logger.warn(e)
-        if stop_all_:
-            break
-    soc.close()
+    sock_.close()
 
 def serve(host, port):
     start_server(host, port)
@@ -285,11 +294,9 @@ def serve(host, port):
 def main( args ):
     global stop_all_
     host, port = args.host, args.port
-    try:
-        serve(host, port)
-    except KeyboardInterrupt:
-        stop_all_ = True
-        quit(1)
+    # Install a signal handler.
+    signal.signal( signal.SIGINT, signal_handler)
+    serve(host, port)
 
 if __name__ == '__main__':
     import argparse
