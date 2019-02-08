@@ -37,9 +37,9 @@ print( '[INFO] Using moose form %s' % moose.__file__ )
 sockFile_ = '/tmp/MOOSE'
 
 def get_msg(s, n=1024):
-    d = s.recv(n)
+    d = s.recv(n, socket.MSG_WAITALL)
     while(len(d) < n):
-        d1 = s.recv(n-len(d))
+        d1 = s.recv(n-len(d), socket.MSG_WAITALL)
         d += d1
     return d
 
@@ -47,32 +47,25 @@ def socket_client( ):
     # This function waits for socket to be available.
     global finish_all_
     global sockFile_
-    s = socket.socket( socket.AF_UNIX, socket.SOCK_STREAM )
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     address = sockFile_
-    while 1:
-        if finish_all_:
-            print( '[INFO] MOOSE is done before I could connect' )
-            break
-        #  print('Py: Trying to connect to %s, %s' % (host, port))
-        #  print( end = '.' )
-        try:
-            s.connect( address )
-            break
-        except Exception as e:
-            pass
+    while not finish_all_:
+        if not os.path.exists(address):
+            continue
 
-    if not finish_all_:
-        print( 'Py: Connected with socket.' )
+    s.connect( address )
+    print( 'Py: Connected with socket.' )
+    print(s)
 
     # This is client reponsibility to read the data.
+    print( 'Py: Fetching...' )
     data = b''
-    s.settimeout(1)
-    while not finish_all_:
-        try:
-            d = get_msg(s, 1024)
-            data += d
-        except socket.timeout as e:
-            pass
+    s.settimeout(0.1)
+    while True:
+        data += get_msg(s, 2048)
+        if finish_all_:
+            print( 'Simulation is over' )
+            break
     s.close()
 
     assert data, "No data streamed"
@@ -103,17 +96,16 @@ def socket_client( ):
 def test():
     global finish_all_
     client = threading.Thread(target=socket_client, args=())
-    #client.daemon = True
     client.start()
     print( '[INFO] Socket client is running now' )
-    tables = models.simple_model_a()
+
     # Now create a streamer and use it to write to a stream
     os.environ['MOOSE_STREAMER_ADDRESS'] = 'file://%s' % sockFile_
+    tables = models.simple_model_a()
 
     # Give some time for socket client to make connection.
     moose.reinit()
     moose.start(50)
-    time.sleep(0.1)
     finish_all_ = True
     print( 'MOOSE is done' )
     # sleep for some time so data can be read.

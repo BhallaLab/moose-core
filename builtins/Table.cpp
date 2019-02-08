@@ -223,6 +223,7 @@ Table::Table() :
     useFileStreamer_ = false;
     format_ = "csv";
     outfileIsSet_ = false;
+    lastN_ = 0;
 }
 
 Table::~Table( )
@@ -494,6 +495,7 @@ string Table::toJSON(bool withTime, bool clear)
         else
             ss << v[i] << ',';
     }
+
     string res = ss.str();
     if( ',' == res.back())
         res.pop_back();

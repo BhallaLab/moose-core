@@ -85,7 +85,7 @@ private:
 
     // Upto which indices we have read the data. This variable is used when
     // SocketStreamer is used.
-    size_t lastN_;
+    size_t lastN_ = 0;
 
     string tablePath_;
 

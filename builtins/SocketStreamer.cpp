@@ -163,15 +163,26 @@ SocketStreamer::~SocketStreamer()
     if(sockfd_ > 0)
     {
         LOG(moose::debug, "Closing socket " << sockfd_ );
-        shutdown(sockfd_, SHUT_RD);
+        shutdown(sockfd_, SHUT_RDWR);
         close(sockfd_);
 
         if( sockInfo_.type == UNIX_DOMAIN_SOCKET )
             ::unlink( sockInfo_.filepath.c_str() );
     }
 
-    if( processThread_.joinable() )
+    if( processThread_.joinable())
         processThread_.join();
+
+    // Close the client as well.
+    if( clientfd_ > -1 )
+    {
+        shutdown(clientfd_, SHUT_RDWR);
+        close(clientfd_);
+    }
+
+
+
+
 }
 
 /* --------------------------------------------------------------------------*/
@@ -313,36 +324,25 @@ void SocketStreamer::initTCPServer( void )
  *          on a successful return from this function.
  */
 /* ----------------------------------------------------------------------------*/
-bool SocketStreamer::streamData( )
+int SocketStreamer::streamData( )
 {
-    if( clientfd_ > 0)
-    {
-        auto s = dataToString( );
-        buffer_ += s;
-        if( buffer_.empty() )
-            return false;
+    auto s = dataToString( );
+    buffer_ += s;
+    if( buffer_.empty() )
+        return 0;
 
-        if( buffer_.size() < frameSize_ )
-            buffer_ += string(frameSize_-buffer_.size(), ' ');
+    if( buffer_.size() < frameSize_ )
+        buffer_ += string(frameSize_-buffer_.size(), ' ');
 
-        string toSend = buffer_.substr(0, frameSize_);
+    string toSend = buffer_.substr(0, frameSize_);
 
-        int sent = send(clientfd_, buffer_.substr(0, frameSize_).c_str(), frameSize_, MSG_MORE);
-        buffer_ = buffer_.erase(0, sent);
-        assert( sent == (int)frameSize_);
+    int sent = send(clientfd_, buffer_.substr(0, frameSize_).c_str(), frameSize_, MSG_MORE);
+    if( sent < 0 )
+        return errno;
 
-        if(0 > sent)
-        {
-            LOG(moose::warning, "Failed to send. Error: " << strerror(errno)
-                << ". client id: " << clientfd_ );
-            return false;
-        }
-        return true;
-    }
-    else
-        LOG(moose::warning, "No client found to stream data. ClientFD: " << clientfd_ );
-
-    return false;
+    buffer_ = buffer_.erase(0, sent);
+    assert( sent == (int)frameSize_);
+    return 0;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -390,7 +390,7 @@ string SocketStreamer::dataToString( )
 bool SocketStreamer::enoughDataToStream(size_t minsize)
 {
     for( size_t i = 0; i < tables_.size(); i++)
-        if(tables_[i]->getVec().size() >= minsize )
+        if(tables_[i]->getVec().size() >= minsize)
             return true;
     return false;
 }
@@ -408,14 +408,17 @@ void SocketStreamer::connectAndStream( )
     }
 
     clientfd_ = ::accept(sockfd_, NULL, NULL);
-    // Now lets get into a loop to stream data.
+
     while(clientfd_ > 0)
     {
-        streamData();
+        if( EPIPE == streamData() )
+            break;
+
         std::this_thread::sleep_for(std::chrono::microseconds(processTickMicroSec/2));
         if( all_done_ )
             break;
     }
+    LOG( moose::debug, "Streamer server is closed" );
 }
 
 /**
@@ -451,6 +454,8 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
     // Launch a thread in background which monitors the any client trying to
     // make connection to server.
     processThread_ = std::thread(&SocketStreamer::connectAndStream, this);
+
+    // NOw introduce some delay.
     timeStamp_ = std::chrono::high_resolution_clock::now();
 }
 

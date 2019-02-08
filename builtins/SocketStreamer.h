@@ -92,7 +92,7 @@ public:
      *  Streaming data.
      *-----------------------------------------------------------------------------*/
     bool enoughDataToStream(size_t minsize=10);
-    bool streamData();
+    int streamData();
     void connectAndStream( );
 
     size_t getNumTables( void ) const;
