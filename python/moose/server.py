@@ -280,6 +280,7 @@ def savePayload( conn ):
 
 def handle_client(conn, ip, port):
     isActive = True
+    _logger.info( "Serving request from %s:%s" % (ip, port) )
     while isActive:
         tarfileName, nBytes = savePayload(conn)
         if tarfileName is None:
@@ -296,9 +297,11 @@ def handle_client(conn, ip, port):
             send_msg( "Failed to run simulation: %s" % msg, conn)
             isActive = False
             time.sleep(0.1)
-        send_msg('>DONE SIMULATION', conn)
         # Send results after DONE is sent.
+        send_msg('>DONE SIMULATION', conn)
         sendResults(os.path.dirname(tarfileName), conn, notthesefiles)
+        break
+
 
 def start_server( host, port, max_requests = 10 ):
     global stop_all_
@@ -323,12 +326,8 @@ def start_server( host, port, max_requests = 10 ):
         except socket.timeout as e:
             continue
         sock_.settimeout(0.0)
-        _logger.info( "Connected with %s:%s" % (ip, port) )
-        try:
-            t = threading.Thread(target=handle_client, args=(conn, ip, port)) 
-            t.start()
-        except Exception as e:
-            _logger.warn(e)
+        t = threading.Thread(target=handle_client, args=(conn, ip, port)) 
+        t.start()
     sock_.close()
 
 def serve(host, port):
