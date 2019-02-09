@@ -7,18 +7,22 @@ from __future__ import print_function, division
 import os
 import random
 import time
-import sys
 import multiprocessing as mp
 import socket
 import moose
+import json
+import struct
 import numpy as np
+import moose.utils as mu
+
 
 print('Using from %s. VERSION: %s' % (moose.__file__, moose.__version__))
 
 sockPath = '/tmp/MOOSE'
 os.environ['MOOSE_STREAMER_ADDRESS'] = 'file://%s' % sockPath
 
-def streamer_handler(done):
+
+def streamer_handler(done, q):
     # Streamer handler
     global sockPath
     global all_done_
@@ -35,15 +39,14 @@ def streamer_handler(done):
         if done.value == 1:
             break
         try:
-            d = s.recv(2048, socket.MSG_WAITALL)
+            d = s.recv(1024, socket.MSG_WAITALL)
             if d.strip():
                 data += d
-                print(d)
         except socket.timeout:
             pass
 
-    print( "Got following data" )
-    print(data)
+    res = mu.decode_data(data)
+    q.put(res)
 
 def make_network():
     """
@@ -55,7 +58,8 @@ def make_network():
     """
     global all_done_
     done = mp.Value('i', 0)
-    th = mp.Process(target=streamer_handler, args=(done,))
+    q = mp.Queue()
+    th = mp.Process(target=streamer_handler, args=(done, q))
     th.start()
 
     size = 1024
@@ -121,15 +125,20 @@ def make_network():
     moose.start(runsteps * dt, 1)
     done.value = 1
     time.sleep(0.1)
-    th.join()
-    print( 'All done' )
-
     print('runtime, t = %.3f'%(time.time() - t1))
     print(network.vec.Vm[99:103], network.vec.Vm[900:903])
-    #  t = [i * dt for i in range( plots.vec[0].vector.size )]
-    for i, p in enumerate(plots.vec):
-        #  print(p.vector)
-        i += 1
+    res = q.get()
+
+    for tabPath in res:
+        aWithTime = res[tabPath]
+        a = aWithTime[1::2]
+        b = moose.element(tabPath).vector
+        print( tabPath, len(a), len(b) )
+        assert (a == b).all()
+
+
+    th.join()
+    print( 'All done' )
 
 if __name__ == '__main__':
     make_network()

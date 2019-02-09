@@ -18,6 +18,7 @@ import re
 
 from moose.moose_constants import *
 from moose.print_utils import *
+from moose.streamer_utils import decode_data
 
 # Print and Plot utilities.
 try:

@@ -507,3 +507,31 @@ string Table::toJSON(bool withTime, bool clear)
 
     return res;
 }
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Collect data in given vector. Its similar to toJSON function.
+ *
+ * @Param data
+ * @Param withTime
+ * @Param clear
+ */
+/* ----------------------------------------------------------------------------*/
+void Table::collectData(vector<double>& data, bool withTime, bool clear)
+{
+    auto v = vec();
+    if( clear )
+        lastN_ = 0;
+
+    for (size_t i = lastN_; i < v.size(); i++)
+    {
+        if(withTime)
+            data.push_back(tvec_[i]);
+        data.push_back(v[i]);
+    }
+
+    if( clear )
+        clearAllVecs();
+    else
+        lastN_ += v.size();
+}

@@ -179,31 +179,13 @@ SocketStreamer::~SocketStreamer()
         shutdown(clientfd_, SHUT_RDWR);
         close(clientfd_);
     }
-
-
-
-
 }
 
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis  Stop a thread.
- * See: http://www.bo-yang.net/2017/11/19/cpp-kill-detached-thread
- *
- * @Param tname name of thread.
- */
-/* ----------------------------------------------------------------------------*/
-//void SocketStreamer::stopThread(const std::string& tname)
-//{
-//    ThreadMap::const_iterator it = tm_.find(tname);
-//    if (it != tm_.end())
-//    {
-//        it->second.std::thread::~thread(); // thread not killed
-//        tm_.erase(tname);
-//        LOG(moose::debug, "Thread " << tname << " killed." );
-//    }
-//}
-
+void SocketStreamer::addStringToDoubleVec(vector<double>&res, const string s)
+{
+    for(char c : s)
+        res.push_back((double)c);
+}
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -335,19 +317,35 @@ void SocketStreamer::initTCPServer( void )
 /* ----------------------------------------------------------------------------*/
 int SocketStreamer::streamData( )
 {
-    auto s = dataToString( );
-    buffer_ += s;
-    if( buffer_.empty() )
-    {
-        LOG(moose::warning, "Empty buffer." ); 
+    map<string, vector<double>> data;
+    dataToStream(data);
+
+    if( data.empty())
         return 0;
+
+    // Construct a void* array to send over the socket. Serialize the data.
+    // e.g. H 10 / a / t a b l e / a V 4 0.1 0.2 0.3 0.2 
+    // H => Header start (chars)
+    // V => Value starts (double)
+    for(auto v: data)
+    {
+        // First header.
+        vecToStream_.push_back((double)'H');
+        vecToStream_.push_back(v.first.size());
+        addStringToDoubleVec(vecToStream_, v.first);
+
+        // Now data.
+        vecToStream_.push_back((double)'V');
+        vecToStream_.push_back(v.second.size());
+        vecToStream_.insert(vecToStream_.end(), v.second.begin(), v.second.end());
     }
 
-    int sent = send(clientfd_, buffer_.c_str(), buffer_.size(), MSG_MORE);
+    size_t dtypeSize = sizeof(double);
+    int sent = send(clientfd_, (void*) &vecToStream_[0], dtypeSize*vecToStream_.size(), MSG_MORE);
     if( sent < 0 )
         return errno;
 
-    buffer_ = buffer_.erase(0, sent);
+    vecToStream_.erase(vecToStream_.begin(), vecToStream_.begin()+(sent/dtypeSize));
     return 0;
 }
 
@@ -358,39 +356,23 @@ int SocketStreamer::streamData( )
  * @Returns JSON representation.
  */
 /* ----------------------------------------------------------------------------*/
-string SocketStreamer::dataToString( )
+void SocketStreamer::dataToStream(map<string, vector<double>>& data)
 {
-    stringstream ss;
-    // Enabling this would be require quite a lot of characters to be streamed.
-    //ss.precision( 7 );
-    //ss << std::scientific;
-    vector<double> data;
-
-    // Else stream the data.
     bool allEmpty = true;
 
-    ss << "{";
     size_t n = 0;
+
     for( size_t i = 0; i < tables_.size(); i++)
     {
-        string json = tables_[i]->toJSON(true, false);
-        if( ! json.empty() )
+        // Else stream the data.
+        vector<double> vec;
+        tables_[i]->collectData(vec, true, false);
+        if( ! vec.empty() )
         {
             allEmpty = false;
-            ss << "\"" << columns_[i+1] << "\":[" << json << "],";
+            data[columns_[i+1]] = vec;
         }
     }
-
-    // If nothing is found in all tables, then don't return empty {};
-    if( allEmpty )
-        return "";
-
-    // remove , at the end else it won't be a valid JSON.
-    string res = ss.str();
-    if( ',' == res.back())
-        res.pop_back();
-    res += "}\n";
-    return res;
 }
 
 bool SocketStreamer::enoughDataToStream(size_t minsize)
@@ -553,8 +535,7 @@ void SocketStreamer::removeTable( ObjId table )
  */
 void SocketStreamer::removeTables( vector<ObjId> tables )
 {
-    for( vector<ObjId>::const_iterator it = tables.begin(); it != tables.end(); it++)
-        removeTable( *it );
+    for(auto &t: tables) removeTable(t);
 }
 
 /**

@@ -53,6 +53,9 @@ public:
 
     string toJSON(bool withTime=true, bool clear = false);
 
+    void collectData(vector<double>& data, bool withTime=true, bool clear = false);
+
+
     void clearAllVecs();
 
     //////////////////////////////////////////////////////////////////

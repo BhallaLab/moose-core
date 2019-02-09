@@ -5,10 +5,9 @@
 #ifndef  SocketStreamer_INC
 #define  SocketStreamer_INC
 
-#define STRINGSTREAM_DOUBLE_PRECISION       10
-
 #include <iostream>
 #include <string>
+#include <vector>
 #include <map>
 #include <fstream>
 #include <sstream>
@@ -105,7 +104,9 @@ public:
     void removeTable( ObjId table );
     void removeTables( vector<ObjId> table );
 
-    string dataToString( );
+    void dataToStream(map<string, vector<double>>& vec);
+
+    static void addStringToDoubleVec(vector<double>&res, const string s);
 
     /** Dest functions.
      * The process function called by scheduler on every tick
@@ -118,6 +119,7 @@ public:
     void reinit(const Eref& e, ProcPtr p);
 
     static const Cinfo * initCinfo();
+
 
 private:
 
@@ -145,9 +147,8 @@ private:
     bool isValid_ = true;
     std::thread processThread_;
     string buffer_;
+    vector<double> vecToStream_;
     double thisDt_;
-
-    size_t frameSize_ = 512;
 
     // We need clk_ pointer for handling
     Clock* clk_ = nullptr;
