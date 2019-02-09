@@ -48,6 +48,7 @@ __all__ = [ 'serve' ]
 # Global variable to stop all running threads.
 stop_all_ = False
 sock_     = None
+stop_streamer_ = {}
 
 # Use prefixL_ bytes to encode the size of stream. One can probably use just one
 # byte to do. Lets go with the inefficient one for now.
@@ -137,14 +138,17 @@ def suffixMatplotlibStmt( filename ):
         f.write( helper.matplotlibText )
     return outfile
 
-def streamer_client(socketPath, conn, stop = False):
+def streamer_client(socketPath, conn):
     # Connect to running socket server.
+    global stop_streamer_
+    stop = False
     _logger.debug( "Trying to connect to server at : %s" % socketPath )
     while not os.path.exists( socketPath ):
-        print( 'socket %s is not available yet.' % socketPath )
-        time.sleep(0.5)
+        #print( 'socket %s is not available yet.' % socketPath )
+        time.sleep(0.1)
+        stop = stop_streamer_[threading.currentThread().name]
         if stop:
-            break
+            return
 
     stClient = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     try:
@@ -158,6 +162,7 @@ def streamer_client(socketPath, conn, stop = False):
     _logger.info( "Socket Streamer is connected with server." )
     stClient.settimeout(0.05)
     while not stop:
+        stop = stop_streamer_[threading.currentThread().name]
         data = b''
         try:
             data = stClient.recv(512, socket.MSG_WAITALL)
@@ -172,16 +177,17 @@ def streamer_client(socketPath, conn, stop = False):
 
 def run_file(filename, conn, cwd=None):
     # set environment variable so that socket streamer can start.
+    global stop_streamer_
     socketPath = os.path.join(tempfile.mkdtemp(), 'SOCK_TABLE_STREAMER')
     os.environ['MOOSE_STREAMER_ADDRESS'] = socketPath
-    stopStreamerClient = False
     streamerThread = threading.Thread(target=streamer_client
-            , args=(socketPath, conn, stopStreamerClient))
-    streamerThread.daemon = True
+            , args=(socketPath, conn,))
+    stop_streamer_[streamerThread.name] = False
+    #streamerThread.daemon = True
     streamerThread.start()
     filename = suffixMatplotlibStmt(filename)
     run( "%s %s" % (sys.executable, filename), conn, cwd)
-    stopStreamerClient = True
+    stop_streamer_[streamerThread.name] = True
     streamerThread.join( timeout = 1)
     if streamerThread.is_alive():
         _logger.error( "The socket streamer client is still running...")
