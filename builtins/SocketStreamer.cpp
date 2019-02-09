@@ -275,6 +275,12 @@ void SocketStreamer::initUDSServer( void )
                 << ". Erorr: " << strerror(errno)
                );
         }
+
+        if(! moose::filepath_exists(sockInfo_.filepath))
+        {
+            LOG( moose::warning, "No file " << sockInfo_.filepath << " exists." );
+            isValid_ = false;
+        }
     }
 
     if( (! isValid_) || (sockfd_ < 0) )
@@ -329,19 +335,16 @@ int SocketStreamer::streamData( )
     auto s = dataToString( );
     buffer_ += s;
     if( buffer_.empty() )
+    {
+        LOG(moose::warning, "Empty buffer." ); 
         return 0;
+    }
 
-    if( buffer_.size() < frameSize_ )
-        buffer_ += string(frameSize_-buffer_.size(), ' ');
-
-    string toSend = buffer_.substr(0, frameSize_);
-
-    int sent = send(clientfd_, buffer_.substr(0, frameSize_).c_str(), frameSize_, MSG_MORE);
+    int sent = send(clientfd_, buffer_.c_str(), buffer_.size(), MSG_MORE);
     if( sent < 0 )
         return errno;
 
     buffer_ = buffer_.erase(0, sent);
-    assert( sent == (int)frameSize_);
     return 0;
 }
 
@@ -395,7 +398,7 @@ bool SocketStreamer::enoughDataToStream(size_t minsize)
     return false;
 }
 
-void SocketStreamer::connectAndStream( )
+void SocketStreamer::connect( )
 {
     currTime_ = clk_->getCurrentTime();
     LOG(moose::debug, "Total " << tables_.size() << " tables found.");
@@ -406,19 +409,22 @@ void SocketStreamer::connectAndStream( )
         LOG( moose::error, "Server could not set up." );
         return;
     }
-
     clientfd_ = ::accept(sockfd_, NULL, NULL);
+    assert( clientfd_ );
+}
 
-    while(clientfd_ > 0)
+void SocketStreamer::stream( void )
+{
+    if(clientfd_ > 0)
     {
-        if( EPIPE == streamData() )
-            break;
-
-        std::this_thread::sleep_for(std::chrono::microseconds(processTickMicroSec/2));
-        if( all_done_ )
-            break;
+        LOG(moose::debug, "Streaming ... " ); if( EPIPE == streamData() )
+        {
+            LOG( moose::warning, "Broken pipe. Couldn't stream." );
+            return;
+        }
     }
-    LOG( moose::debug, "Streamer server is closed" );
+    else
+        LOG( moose::debug, "No client." );
 }
 
 /**
@@ -453,7 +459,7 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
 
     // Launch a thread in background which monitors the any client trying to
     // make connection to server.
-    processThread_ = std::thread(&SocketStreamer::connectAndStream, this);
+    processThread_ = std::thread(&SocketStreamer::connect, this);
 
     // NOw introduce some delay.
     timeStamp_ = std::chrono::high_resolution_clock::now();
@@ -470,6 +476,7 @@ void SocketStreamer::process(const Eref& e, ProcPtr p)
     processTickMicroSec = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::high_resolution_clock::now() - timeStamp_).count();
     timeStamp_ = std::chrono::high_resolution_clock::now();
+    stream();
 }
 
 /**

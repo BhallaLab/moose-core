@@ -93,7 +93,9 @@ public:
      *-----------------------------------------------------------------------------*/
     bool enoughDataToStream(size_t minsize=10);
     int streamData();
-    void connectAndStream( );
+    // connect is monitored in a thread.
+    void connect( void );
+    void stream(void);
 
     size_t getNumTables( void ) const;
 

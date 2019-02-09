@@ -95,7 +95,6 @@ namespace moose {
         string mapToString(const map<A, B>& m, bool value=true)
         {
             unsigned int width = 81;
-            unsigned int mapSize = m.size();
             unsigned int size = 0;
 
             vector<string> row;

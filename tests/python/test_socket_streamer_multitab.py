@@ -1,45 +1,48 @@
 # -*- coding: utf-8 -*-
+'''
+Here is some docstring.
+'''
 from __future__ import print_function, division
 
 import os
 import random
 import time
-import numpy as np
 import sys
-import threading
-import moose
+import multiprocessing as mp
 import socket
+import moose
+import numpy as np
 
-print( 'Using from %s. VERSION: %s' % (moose.__file__, moose.__version__))
+print('Using from %s. VERSION: %s' % (moose.__file__, moose.__version__))
 
 sockPath = '/tmp/MOOSE'
 os.environ['MOOSE_STREAMER_ADDRESS'] = 'file://%s' % sockPath
 
-all_done_ = False
-
-def streamer_handler( ):
+def streamer_handler(done):
+    # Streamer handler
     global sockPath
     global all_done_
     s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     while not os.path.exists(sockPath):
         time.sleep(0.01)
-        if all_done_:
+        if done.value == 1:
             break
     s.connect( sockPath )
     print( "[INFO ] Connected" )
-    s.settimeout(0.1)
+    s.settimeout(1e-3)
     data = b''
     while True:
-        if all_done_:
+        if done.value == 1:
             break
         try:
-            d = s.recv(256, socket.MSG_WAITALL)
+            d = s.recv(2048, socket.MSG_WAITALL)
             if d.strip():
                 data += d
-        except socket.timeout as e:
-            print( '.', end = '')
-            sys.stdout.flush()
+                print(d)
+        except socket.timeout:
+            pass
 
+    print( "Got following data" )
     print(data)
 
 def make_network():
@@ -50,7 +53,9 @@ def make_network():
     It is a good example for using the IntFire, setting up random
     connectivity, and using SynHandlers.
     """
-    th = threading.Thread(target=streamer_handler)
+    global all_done_
+    done = mp.Value('i', 0)
+    th = mp.Process(target=streamer_handler, args=(done,))
     th.start()
 
     size = 1024
@@ -91,9 +96,9 @@ def make_network():
     numTotSyn = sum( numSynVec )
     print((numSynVec.size, ', tot = ', numTotSyn,  ', numSynVec = ', numSynVec))
     for item in syns.vec:
-        sh = moose.element(item)
-        sh.synapse.delay = delayMin + (delayMax-delayMin) * np.random.rand(len(sh.synapse))
-        sh.synapse.weight = np.random.rand(len(sh.synapse)) * weightMax
+        h = moose.element(item)
+        h.synapse.delay = delayMin + (delayMax-delayMin) * np.random.rand(len(h.synapse))
+        h.synapse.weight = np.random.rand(len(h.synapse)) * weightMax
     print('After setup, t = %.3f'%(time.time()-t0))
 
     numStats = 100
@@ -114,14 +119,14 @@ def make_network():
     print('setting Vm , t = %.3f'%(time.time() - t1))
     t1 = time.time()
     moose.start(runsteps * dt, 1)
-    all_done_ = True
+    done.value = 1
     time.sleep(0.1)
     th.join()
     print( 'All done' )
 
     print('runtime, t = %.3f'%(time.time() - t1))
     print(network.vec.Vm[99:103], network.vec.Vm[900:903])
-    t = [i * dt for i in range( plots.vec[0].vector.size )]
+    #  t = [i * dt for i in range( plots.vec[0].vector.size )]
     for i, p in enumerate(plots.vec):
         #  print(p.vector)
         i += 1
