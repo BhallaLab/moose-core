@@ -165,7 +165,7 @@ def streamer_client(socketPath, conn):
         stop = stop_streamer_[threading.currentThread().name]
         data = b''
         try:
-            data = stClient.recv(512, socket.MSG_WAITALL)
+            data = stClient.recv(1024)
             if len(data.strip()) > 0:
                 _logger.debug( "Got data from tables: %d bytes" % len(data)) 
                 send_table_data(data, conn)
@@ -183,7 +183,7 @@ def run_file(filename, conn, cwd=None):
     streamerThread = threading.Thread(target=streamer_client
             , args=(socketPath, conn,))
     stop_streamer_[streamerThread.name] = False
-    #streamerThread.daemon = True
+    streamerThread.daemon = True
     streamerThread.start()
     filename = suffixMatplotlibStmt(filename)
     run( "%s %s" % (sys.executable, filename), conn, cwd)
