@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division
+from __future__ import print_function, division, absolute_import
 
 # This is moose.server.
 # It accepts simulation request on a specified TCP port (default 31417).
@@ -26,7 +26,7 @@ import tarfile
 import tempfile 
 import threading 
 import logging
-import helper 
+import moose.helper 
 
 # create a logger for this server.
 logging.basicConfig(
@@ -93,7 +93,7 @@ def run(cmd, conn, cwd=None):
     if cwd is not None:
         os.chdir(cwd)
     try:
-        for line in helper.execute(cmd.split()):
+        for line in moose.helper.execute(cmd.split()):
             if line:
                 send_msg(line, conn)
     except Exception as e:
@@ -135,7 +135,7 @@ def suffixMatplotlibStmt( filename ):
     with open(outfile, 'w' ) as f:
         f.write( txt )
         f.write( '\n' )
-        f.write( helper.matplotlibText )
+        f.write( moose.helper.matplotlibText )
     return outfile
 
 def streamer_client(socketPath, conn):
@@ -219,7 +219,7 @@ def sendResults(tdir, conn, notTheseFiles):
     resdir = tempfile.mkdtemp()
     resfile = os.path.join(resdir, 'results.tar.bz2')
     with tarfile.open( resfile, 'w|bz2') as tf:
-        for f in helper.find_files(tdir, ext='png'):
+        for f in moose.helper.find_files(tdir, ext='png'):
             _logger.info( "Adding file %s" % f )
             tf.add(f, os.path.basename(f))
 
@@ -291,7 +291,7 @@ def handle_client(conn, ip, port):
             break
 
         # list of files before the simulation.
-        notthesefiles = helper.find_files(os.path.dirname(tarfileName))
+        notthesefiles = moose.helper.find_files(os.path.dirname(tarfileName))
         res, msg = simulate( tarfileName, conn )
         if 0 != res:
             send_msg( "Failed to run simulation: %s" % msg, conn)
