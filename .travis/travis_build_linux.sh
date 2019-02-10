@@ -58,14 +58,14 @@ if type $PYTHON3 > /dev/null; then
     sudo apt-get install -qq python3-networkx || echo "Error with apt"
     # GSL.
     (
-        mkdir -p _GSL_BUILD2 && cd _GSL_BUILD2 && \
+        mkdir -p _GSL_BUILD_PY3 && cd _GSL_BUILD_PY3 && \
             cmake -DPYTHON_EXECUTABLE="$PYTHON3" -DDEBUG=ON ..
         $MAKE && ctest --output-on-failure
     )
 
     # BOOST
     (
-        mkdir -p _BOOST_BUILD2 && cd _BOOST_BUILD2 && \
+        mkdir -p _BOOST_BUILD_PY3 && cd _BOOST_BUILD_PY3 && \
             cmake -DWITH_BOOST_ODE=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
         $MAKE && ctest --output-on-failure
     )
