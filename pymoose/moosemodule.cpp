@@ -1905,7 +1905,7 @@ PyObject * moose_saveModel(PyObject * dummy, PyObject * args)
     SHELLPTR->doSaveModel(model, filename);
     Py_RETURN_NONE;
 }
-#endif 
+#endif
 
 PyObject * moose_setCwe(PyObject * dummy, PyObject * args)
 {
@@ -2967,17 +2967,17 @@ PyObject * moose_element(PyObject* dummy, PyObject * args)
     unsigned nid = 0, did = 0, fidx = 0;
     Id id;
     unsigned int numData = 0;
-    if (PyArg_ParseTuple(args, "s", &path))
+
+    // Parse into str or bytes-like object. Using 's' parses into const char*
+    // which is portable with bytes often returned when working with python3.
+    if (PyArg_ParseTuple(args, "s*", &path))
     {
         oid = ObjId(path);
-        //            cout << "Original Path " << path << ", Element Path: " << oid.path() << endl;
         if ( oid.bad() )
         {
-            PyErr_SetString(PyExc_ValueError, ( std::string("moose_element: '")
-                                                + std::string(path)
-                                                + std::string("' does not exist!")
-                                              ).c_str()
-                           );
+            PyErr_SetString(PyExc_ValueError
+                    , (std::string("moose_element: '") + std::string(path) + std::string("' does not exist!")).c_str()
+                    );
             return NULL;
         }
         PyObject * new_obj = oid_to_element(oid);
@@ -3268,4 +3268,4 @@ PyMODINIT_FUNC MODINIT(_moose)
 #ifdef PY3K
     return moose_module;
 #endif
-} 
+}

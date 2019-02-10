@@ -33,13 +33,13 @@ def streamer_handler(done, q):
             break
     s.connect( sockPath )
     print( "[INFO ] Connected" )
-    s.settimeout(1e-3)
+    s.settimeout(1e-5)
     data = b''
     while True:
         if done.value == 1:
             break
         try:
-            d = s.recv(1024, socket.MSG_WAITALL)
+            d = s.recv(10240)
             if d.strip():
                 data += d
         except socket.timeout:
@@ -51,7 +51,7 @@ def streamer_handler(done, q):
 def make_network():
     """
     This snippet sets up a recurrent network of IntFire objects, using
-    SimpleSynHandlers to deal with spiking events. 
+    SimpleSynHandlers to deal with spiking events.
     It isn't very satisfactory as activity runs down after a while.
     It is a good example for using the IntFire, setting up random
     connectivity, and using SynHandlers.

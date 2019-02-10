@@ -74,7 +74,7 @@ def test():
 
     # Now create a streamer and use it to write to a stream
     os.environ['MOOSE_STREAMER_ADDRESS'] = 'file://%s' % sockFile_
-    tables = models.simple_model_a()
+    models.simple_model_a()
 
     # Give some time for socket client to make connection.
     moose.reinit()
@@ -88,8 +88,7 @@ def test():
         a = aWithTime[1::2]
         b = moose.element(k).vector
         print(k, len(a), len(b))
-        print( a )
-        print( b )
+        assert (a == b).all()
 
     # sleep for some time so data can be read.
     client.join()

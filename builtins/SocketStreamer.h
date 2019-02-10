@@ -37,6 +37,7 @@
 #include <sys/ioctl.h>
 #include <sys/un.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 // MSG_MORE is not defined in OSX. So stupid!
 #ifndef MSG_MORE
@@ -154,10 +155,10 @@ private:
     Clock* clk_ = nullptr;
 
     // Socket Info
-    MooseSocketInfo sockInfo_;     
+    MooseSocketInfo sockInfo_;
 
     // How long it takes between process calls.
-    size_t processTickMicroSec;        
+    size_t processTickMicroSec;
     std::chrono::high_resolution_clock::time_point timeStamp_;
 };
 

@@ -296,7 +296,7 @@ void SocketStreamer::initTCPServer( void )
     if(0 > ::bind(sockfd_, (struct sockaddr*) &sockAddrTCP_, sizeof(sockAddrTCP_)))
     {
         isValid_ = false;
-        LOG(moose::warning, "Warn: Failed to create server at " 
+        LOG(moose::warning, "Warn: Failed to create server at "
                 << sockInfo_.host << ":" << sockInfo_.port
                 << ". File descriptor: " << sockfd_
                 << ". Erorr: " << strerror(errno)
@@ -307,7 +307,7 @@ void SocketStreamer::initTCPServer( void )
 
 /* --------------------------------------------------------------------------*/
 /**
- * @Synopsis  Convert data to JSON. 
+ * @Synopsis  Convert data to JSON.
  *
  * @Returns JSON representation.
  */
@@ -337,10 +337,13 @@ int SocketStreamer::streamData( )
     dataToStream(data);
 
     if(data.empty())
+    {
+        LOG(moose::debug, "No data in tables.");
         return 0;
+    }
 
     // Construct a void* array to send over the socket. Serialize the data.
-    // e.g. H 10 / a / t a b l e / a V 4 0.1 0.2 0.3 0.2 
+    // e.g. H 10 / a / t a b l e / a V 4 0.1 0.2 0.3 0.2
     // H => Header start (chars)
     // V => Value starts (double)
     for(auto v: data)
@@ -358,7 +361,7 @@ int SocketStreamer::streamData( )
 
     size_t dtypeSize = sizeof(double);
     int sent = send(clientfd_, (void*) &vecToStream_[0], dtypeSize*vecToStream_.size(), MSG_MORE);
-    // LOG(moose::debug, "Sent " << sent << " bytes." );
+    LOG(moose::debug, "Sent " << sent << " bytes." );
     if( sent < 0 )
         return errno;
 
@@ -377,15 +380,33 @@ bool SocketStreamer::enoughDataToStream(size_t minsize)
 
 void SocketStreamer::connect( )
 {
-    currTime_ = clk_->getCurrentTime();
     // If server was invalid then there is no point.
     if( ! isValid_ )
-    {
-        LOG( moose::error, "Server could not set up." );
         return;
-    }
-    clientfd_ = ::accept(sockfd_, NULL, NULL);
+
+    struct sockaddr_storage clientAddr;
+    socklen_t addrLen = sizeof(clientAddr);
+    clientfd_ = ::accept(sockfd_,(struct sockaddr*) &clientAddr, &addrLen);
     assert( clientfd_ );
+
+    char ipstr[INET6_ADDRSTRLEN];
+    int port = -1;
+    // deal with both IPv4 and IPv6:
+    if (clientAddr.ss_family == AF_INET)
+    {
+        struct sockaddr_in *s = (struct sockaddr_in *)&clientAddr;
+        port = ntohs(s->sin_port);
+        inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
+    }
+    else
+    { // AF_INET6
+        struct sockaddr_in6 *s = (struct sockaddr_in6 *)&clientAddr;
+        port = ntohs(s->sin6_port);
+        inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
+    }
+
+    LOG(moose::info, "Connected to " << ipstr << ':' << port);
+    return;
 }
 
 void SocketStreamer::stream( void )
@@ -489,7 +510,7 @@ void SocketStreamer::addTables( vector<ObjId> tables )
     if( tables.size() == 0 )
         return;
 
-    for(auto t : tables) 
+    for(auto t : tables)
         addTable(t);
 }
 

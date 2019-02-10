@@ -9,10 +9,10 @@
 
 typedef enum t_socket_type_ {TCP_SOCKET, UNIX_DOMAIN_SOCKET} SocketType; // Type of socket.
 
-class MooseSocketInfo 
+class MooseSocketInfo
 {
 public:
-    MooseSocketInfo( const string& addr = "" ) 
+    MooseSocketInfo( const string& addr = "" )
         : address(addr), valid(false)
     {
         if( addr.size() > 0 )
@@ -46,8 +46,8 @@ public:
             }
             else
             {
-                host = address.substr(colPos);
-                port = std::stoi(address.substr(0, colPos));
+                host = address.substr(0, colPos);
+                port = std::stoi(address.substr(colPos+1));
             }
             valid = true;
         }
