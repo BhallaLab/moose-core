@@ -497,7 +497,7 @@ string Table::toJSON(bool withTime, bool clear)
     }
 
     string res = ss.str();
-    if( ',' == res.back())
+    if(',' == res.back())
         res.pop_back();
 
     if( clear )
@@ -533,5 +533,5 @@ void Table::collectData(vector<double>& data, bool withTime, bool clear)
     if( clear )
         clearAllVecs();
     else
-        lastN_ += v.size();
+        lastN_ = v.size();
 }

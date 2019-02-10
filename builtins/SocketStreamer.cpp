@@ -211,8 +211,7 @@ void SocketStreamer::initServer( void )
     else
         initTCPServer();
 
-    LOG(moose::debug,  "Successfully initialized streamer socket: " << sockfd_);
-    LOG(moose::debug, sockInfo_ );
+    LOG(moose::info,  "Successfully initialized streamer socket: " << sockfd_);
 
     //  Listen for incoming clients. This function does nothing if connection is
     //  already made.
@@ -306,6 +305,23 @@ void SocketStreamer::initTCPServer( void )
     }
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Convert data to JSON. 
+ *
+ * @Returns JSON representation.
+ */
+/* ----------------------------------------------------------------------------*/
+void SocketStreamer::dataToStream(map<string, vector<double>>& data)
+{
+    for( size_t i = 0; i < tables_.size(); i++)
+    {
+        vector<double> vec;
+        tables_[i]->collectData(vec, true, false);
+        if( ! vec.empty() )
+            data[columns_[i+1]] = vec;
+    }
+}
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -320,7 +336,7 @@ int SocketStreamer::streamData( )
     map<string, vector<double>> data;
     dataToStream(data);
 
-    if( data.empty())
+    if(data.empty())
         return 0;
 
     // Construct a void* array to send over the socket. Serialize the data.
@@ -342,6 +358,7 @@ int SocketStreamer::streamData( )
 
     size_t dtypeSize = sizeof(double);
     int sent = send(clientfd_, (void*) &vecToStream_[0], dtypeSize*vecToStream_.size(), MSG_MORE);
+    // LOG(moose::debug, "Sent " << sent << " bytes." );
     if( sent < 0 )
         return errno;
 
@@ -349,31 +366,6 @@ int SocketStreamer::streamData( )
     return 0;
 }
 
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis  Convert data to JSON. 
- *
- * @Returns JSON representation.
- */
-/* ----------------------------------------------------------------------------*/
-void SocketStreamer::dataToStream(map<string, vector<double>>& data)
-{
-    bool allEmpty = true;
-
-    size_t n = 0;
-
-    for( size_t i = 0; i < tables_.size(); i++)
-    {
-        // Else stream the data.
-        vector<double> vec;
-        tables_[i]->collectData(vec, true, false);
-        if( ! vec.empty() )
-        {
-            allEmpty = false;
-            data[columns_[i+1]] = vec;
-        }
-    }
-}
 
 bool SocketStreamer::enoughDataToStream(size_t minsize)
 {
@@ -386,8 +378,6 @@ bool SocketStreamer::enoughDataToStream(size_t minsize)
 void SocketStreamer::connect( )
 {
     currTime_ = clk_->getCurrentTime();
-    LOG(moose::debug, "Total " << tables_.size() << " tables found.");
-
     // If server was invalid then there is no point.
     if( ! isValid_ )
     {
@@ -402,14 +392,14 @@ void SocketStreamer::stream( void )
 {
     if(clientfd_ > 0)
     {
-        LOG(moose::debug, "Streaming ... " ); if( EPIPE == streamData() )
+        if( EPIPE == streamData() )
         {
             LOG( moose::warning, "Broken pipe. Couldn't stream." );
             return;
         }
     }
     else
-        LOG( moose::debug, "No client." );
+        LOG( moose::warning, "No client." );
 }
 
 /**
@@ -458,9 +448,9 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
  */
 void SocketStreamer::process(const Eref& e, ProcPtr p)
 {
-    processTickMicroSec = std::chrono::duration_cast<std::chrono::microseconds>(
-            std::chrono::high_resolution_clock::now() - timeStamp_).count();
-    timeStamp_ = std::chrono::high_resolution_clock::now();
+    // processTickMicroSec = std::chrono::duration_cast<std::chrono::microseconds>(
+            // std::chrono::high_resolution_clock::now() - timeStamp_).count();
+    // timeStamp_ = std::chrono::high_resolution_clock::now();
     stream();
 }
 
