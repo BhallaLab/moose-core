@@ -123,8 +123,8 @@ def make_network():
     print('setting Vm , t = %.3f'%(time.time() - t1))
     t1 = time.time()
     moose.start(runsteps * dt, 1)
-    done.value = 1
     time.sleep(0.1)
+    done.value = 1
     print('runtime, t = %.3f'%(time.time() - t1))
     print(network.vec.Vm[99:103], network.vec.Vm[900:903])
     res = q.get()
@@ -134,7 +134,7 @@ def make_network():
         a = aWithTime[1::2]
         b = moose.element(tabPath).vector
         print( tabPath, len(a), len(b) )
-        assert (a == b).all()
+        assert np.equal(a, b).all(), (len(a), len(b))
 
 
     th.join()
