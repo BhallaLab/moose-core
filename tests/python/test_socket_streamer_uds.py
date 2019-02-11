@@ -50,7 +50,7 @@ def socket_client(done, q):
     # This is client reponsibility to read the data.
     print( 'Py: Fetching...' )
     data = b''
-    s.settimeout(0.1)
+    s.settimeout(0.01)
     while True:
         try:
             data += s.recv(64)
@@ -61,7 +61,11 @@ def socket_client(done, q):
             print( 'Simulation is over' )
             break
     s.close()
-    assert data, "No data streamed"
+    if not data:
+        print("No data streamed")
+        done.value = 1
+        q.put({})
+        return
     res = mu.decode_data(data)
     q.put(res)
 
@@ -71,6 +75,7 @@ def test():
     client = mp.Process(target=socket_client, args=(done, q))
     client.start()
     print( '[INFO] Socket client is running now' )
+    time.sleep(0.1)
 
     # Now create a streamer and use it to write to a stream
     os.environ['MOOSE_STREAMER_ADDRESS'] = 'file://%s' % sockFile_
@@ -83,6 +88,8 @@ def test():
     done.value = 1
 
     res = q.get()
+    if not res:
+        raise RuntimeWarning( 'Nothing was streamed')
     for k in res:
         aWithTime = res[k]
         a = aWithTime[1::2]

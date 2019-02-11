@@ -24,23 +24,30 @@ from collections import defaultdict
 
 print( '[INFO] Using moose form %s' % moose.__file__ )
 
-def socket_client(q, done, port=31416):
+port_ = 3114
+
+def socket_client(q, done):
+    global port_
     # This function waits for socket to be available.
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
     while 1:
         if 1 == done.value:
             print( '[INFO] MOOSE is done before I could connect' )
+            q.put({})
             return
+        s.settimeout(0.5)
         try:
-            s.connect( ('', port) )
+            s.connect( ('127.0.0.1', port_) )
+        except socket.timeout as e:
+            print(e)
             break
-        except Exception:
-            continue
 
     print( 'Py: Connected' )
 
     # This is client reponsibility to read the data.
-    s.settimeout(0.1)
+    s.settimeout(0.01)
     data = b''
     while True:
         try:
@@ -52,36 +59,43 @@ def socket_client(q, done, port=31416):
     if data:
         res = mu.decode_data(data)
         q.put(res)
+    else:
+        q.put({})
     s.close()
     return
 
 def test():
     global finish_all_
-    os.environ['MOOSE_STREAMER_ADDRESS'] = 'http://127.0.0.1:31416'
+    os.environ['MOOSE_STREAMER_ADDRESS'] = 'http://127.0.0.1:%d'%port_
     done = mp.Value('d', 0)
     q = mp.Queue()
     client = mp.Process(target=socket_client, args=(q, done))
     client.start()
 
+    time.sleep(0.1)
+
     print( '[INFO] Socket client is running now' )
     ts = models.simple_model_a()
     moose.reinit()
+    time.sleep(0.1)
     # If TCP socket is created, some delay is often neccessary before start. Don't
     # know why. probably some latency in a fresh TCP socket. A TCP guru can
     # tell.
-    time.sleep(0.0)
     moose.start(50)
-    time.sleep(1)
-    done.value = 1
     print( 'MOOSE is done' )
+
+    time.sleep(0.5)
+    done.value = 1
     res = q.get()
+    client.join()
+
+    if not res:
+        raise RuntimeWarning('Nothing was streamed')
     for k in res:
         a = res[k][1::2]
         b = moose.element(k).vector
         print(k, len(a), len(b))
         assert( (a==b).all())
-    # sleep for some time so data can be read.
-    client.join()
     print( 'Test 1 passed' )
 
 def main( ):
