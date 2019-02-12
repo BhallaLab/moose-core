@@ -26,7 +26,7 @@ import tarfile
 import tempfile 
 import threading 
 import logging
-import moose.helper 
+import subprocess
 
 # create a logger for this server.
 logging.basicConfig(
@@ -54,6 +54,75 @@ stop_streamer_ = {}
 # byte to do. Lets go with the inefficient one for now.
 prefixL_  = 9
 
+# Matplotlib text for running simulation. It make sures at each figure is saved
+# to individual png files.
+matplotlibText = """
+print( '>>>> saving all figues')
+import matplotlib.pyplot as plt
+def multipage(filename, figs=None, dpi=200):
+    pp = PdfPages(filename)
+    if figs is None:
+        figs = [plt.figure(n) for n in plt.get_fignums()]
+    for fig in figs:
+        fig.savefig(pp, format='pdf')
+    pp.close()
+
+def saveall(prefix='results', figs=None):
+    if figs is None:
+        figs = [plt.figure(n) for n in plt.get_fignums()]
+    for i, fig in enumerate(figs):
+        outfile = '%s.%d.png' % (prefix, i)
+        fig.savefig(outfile)
+        print( '>>>> %s saved.' % outfile )
+    plt.close()
+
+try:
+    saveall()
+except Exception as e:
+    print( '>>>> Error in saving: %s' % e )
+    quit(0)
+"""
+
+
+def execute(cmd):
+    """execute: Execute a given command.
+
+    :param cmd: string, given command.
+
+    Return:
+    ------
+        Return a iterator over output.
+    """
+    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
+    for stdout_line in iter(popen.stdout.readline, ""):
+        yield stdout_line 
+    popen.stdout.close()
+    return_code = popen.wait()
+    if return_code:
+        raise subprocess.CalledProcessError(return_code, cmd)
+
+
+def find_files( dirname, ext=None, name_contains=None, text_regex_search=None):
+    files = []
+    for d, sd, fs in os.walk(dirname):
+        for f in fs:
+            fpath = os.path.join(d,f)
+            include = True
+            if ext is not None:
+                if f.split('.')[-1] != ext:
+                    include = False
+            if name_contains:
+                if name_contains not in os.path.basename(f):
+                    include = False
+            if text_regex_search:
+                with open(fpath, 'r' ) as f:
+                    txt = f.read()
+                    if re.search(text_regex_search, txt) is None:
+                        include = False
+            if include:
+                files.append(fpath)
+    return files
+
 def prefix_data_with_size(data):
     global prefixL_
     prefix = b'0'*(prefixL_-int(math.log10(len(data)))-1) + b'%d' % len(data)
@@ -76,15 +145,14 @@ def split_data( data ):
     global prefixL_
     return data[:prefixL_].strip(), data[prefixL_:]
 
-def send_table_data(msg, conn):
-    msg = 'DATA:' + msg
-    conn.sendall(prefix_data_with_size(msg))
-
-def send_msg(msg, conn):
+def send_msg(msg, conn, prefix='LOG'):
     if not msg.strip():
         return False
-    _logger.debug( msg.strip() )
-    msg = 'LOGS:%s>>> %s' % (socket.gethostname(), msg)
+    if prefix != 'TAB':
+        _logger.debug(msg)
+    else:
+        _logger.debug( 'Sending msg with size %d' % len(msg))
+    msg = '<%s>%s' % (prefix, msg)
     conn.sendall(prefix_data_with_size(msg))
 
 def run(cmd, conn, cwd=None):
@@ -93,7 +161,7 @@ def run(cmd, conn, cwd=None):
     if cwd is not None:
         os.chdir(cwd)
     try:
-        for line in moose.helper.execute(cmd.split()):
+        for line in execute(cmd.split()):
             if line:
                 send_msg(line, conn)
     except Exception as e:
@@ -135,7 +203,7 @@ def suffixMatplotlibStmt( filename ):
     with open(outfile, 'w' ) as f:
         f.write( txt )
         f.write( '\n' )
-        f.write( moose.helper.matplotlibText )
+        f.write( matplotlibText )
     return outfile
 
 def streamer_client(socketPath, conn):
@@ -161,15 +229,15 @@ def streamer_client(socketPath, conn):
     # of 1024/2048 bytes each (see the c++ implmenetation).
     _logger.info( "Socket Streamer is connected with server." )
     stClient.settimeout(0.05)
+    send_msg( b'Now streaming table data.', conn, 'TAB')
     while not stop:
         stop = stop_streamer_[threading.currentThread().name]
         data = b''
         try:
             data = stClient.recv(1024)
             if len(data.strip()) > 0:
-                _logger.debug( "Got data from tables: %d bytes" % len(data)) 
-                send_table_data(data, conn)
-        except socket.timeout as e:
+                send_msg(data, conn, 'TAB')
+        except socket.timeout:
             continue
     stClient.close()
     if os.path.isfile(socketPath):
@@ -212,14 +280,14 @@ def prepareMatplotlib( cwd ):
 
 def send_bz2(conn, data):
     global prefixL_
-    conn.sendall(prefix_data_with_size(data))
+    send_msg(data, conn, 'TAR')
 
 def sendResults(tdir, conn, notTheseFiles):
     # Only send new files.
     resdir = tempfile.mkdtemp()
     resfile = os.path.join(resdir, 'results.tar.bz2')
     with tarfile.open( resfile, 'w|bz2') as tf:
-        for f in moose.helper.find_files(tdir, ext='png'):
+        for f in find_files(tdir, ext='png'):
             _logger.info( "Adding file %s" % f )
             tf.add(f, os.path.basename(f))
 
@@ -291,14 +359,15 @@ def handle_client(conn, ip, port):
             break
 
         # list of files before the simulation.
-        notthesefiles = moose.helper.find_files(os.path.dirname(tarfileName))
+        notthesefiles = find_files(os.path.dirname(tarfileName))
         res, msg = simulate( tarfileName, conn )
         if 0 != res:
             send_msg( "Failed to run simulation: %s" % msg, conn)
             isActive = False
             time.sleep(0.1)
+
         # Send results after DONE is sent.
-        send_msg('>DONE SIMULATION', conn)
+        send_msg('All done', conn, 'EOS')
         sendResults(os.path.dirname(tarfileName), conn, notthesefiles)
         break
 
