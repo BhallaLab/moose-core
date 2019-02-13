@@ -45,7 +45,7 @@ echo "Currently in `pwd`"
 (
     mkdir -p _GSL_BUILD && cd _GSL_BUILD
     cmake -DDEBUG=ON -DPYTHON_EXECUTABLE="$PYTHON2" ..
-    $MAKE && ctest --output-on-failure
+    $MAKE && ctest --output-on-failure -E ".*socket_streamer.*"
     sudo make install && cd  /tmp
     $PYTHON2 -c 'import moose;print(moose.__file__);print(moose.version())'
 )
@@ -60,14 +60,14 @@ if type $PYTHON3 > /dev/null; then
     (
         mkdir -p _GSL_BUILD_PY3 && cd _GSL_BUILD_PY3 && \
             cmake -DPYTHON_EXECUTABLE="$PYTHON3" -DDEBUG=ON ..
-        $MAKE && ctest --output-on-failure
+        $MAKE && ctest --output-on-failure -E ".*socket_streamer.*"
     )
 
     # BOOST
     (
         mkdir -p _BOOST_BUILD_PY3 && cd _BOOST_BUILD_PY3 && \
             cmake -DWITH_BOOST_ODE=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
-        $MAKE && ctest --output-on-failure
+        $MAKE && ctest --output-on-failure -E ".*socket_streamer.*"
     )
     echo "All done"
 else
