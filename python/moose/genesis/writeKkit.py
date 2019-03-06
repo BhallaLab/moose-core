@@ -574,9 +574,9 @@ def writeplot( tgraphs,f ):
                     fg = getColorCheck(fg,GENESIS_COLOR_SEQUENCE)
                     tabPath = re.sub("\[[0-9]+\]", "", tabPath)
                     if tabPath.find("conc1") >= 0 or tabPath.find("conc2") >= 0:
-                        first = first + "simundump xplot " + tabPath + " 3 524288 \\\n" + "\"delete_plot.w <s> <d>; edit_plot.D <w>\" " + fg + " 0 0 1\n"
+                        first = first + "simundump xplot " + tabPath + " 3 524288 \\\n" + "\"delete_plot.w <s> <d>; edit_plot.D <w>\" " + str(fg) + " 0 0 1\n"
                     if tabPath.find("conc3") >= 0 or tabPath.find("conc4") >= 0:
-                        second = second + "simundump xplot " + tabPath + " 3 524288 \\\n" + "\"delete_plot.w <s> <d>; edit_plot.D <w>\" " + fg + " 0 0 1\n"
+                        second = second + "simundump xplot " + tabPath + " 3 524288 \\\n" + "\"delete_plot.w <s> <d>; edit_plot.D <w>\" " + str(fg) + " 0 0 1\n"
     return first,second
 
 def writePool(modelpath,f,volIndex,sceneitems):
