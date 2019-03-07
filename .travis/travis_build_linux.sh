@@ -59,14 +59,14 @@ if type $PYTHON3 > /dev/null; then
     # GSL.
     (
         mkdir -p _GSL_BUILD_PY3 && cd _GSL_BUILD_PY3 && \
-            cmake -DPYTHON_EXECUTABLE="$PYTHON3" -DDEBUG=ON ..
+            cmake -DWITH_NSDF=ON -DPYTHON_EXECUTABLE="$PYTHON3" -DDEBUG=ON ..
         $MAKE && ctest --output-on-failure -E ".*socket_streamer.*"
     )
 
     # BOOST
     (
         mkdir -p _BOOST_BUILD_PY3 && cd _BOOST_BUILD_PY3 && \
-            cmake -DWITH_BOOST_ODE=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
+            cmake -DWITH_NSDF=ON -DWITH_BOOST_ODE=ON -DPYTHON_EXECUTABLE="$PYTHON3" ..
         $MAKE && ctest --output-on-failure -E ".*socket_streamer.*"
     )
     echo "All done"
