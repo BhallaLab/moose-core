@@ -178,19 +178,7 @@ def setupMeshObj(modelRoot):
                 xmax = max(xcord)
                 ymin = min(ycord)
                 ymax = max(ycord)
-    return meshEntry,xmin,xmax,ymin,ymax,positionInfoExist,listOfitems
-
-def getxyCordColor(xcord,ycord,list1):
-    for item in list1:
-        # if isinstance(item,Function):
-        #     objInfo = element(item.parent).path+'/info'
-        # else:
-        #     objInfo = item.path+'/info'
-        if not isinstance(item,Function):
-            objInfo = item.path+'/info'
-            xcord.append(xyPosition(objInfo,'x'))
-            ycord.append(xyPosition(objInfo,'y'))
-            
+    return meshEntry,xmin,xmax,ymin,ymax,positionInfoExist,listOfitems         
             
 def getxyCord(xcord,ycord,list1,listOfitems):
     for item in list1:
