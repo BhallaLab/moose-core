@@ -49,7 +49,7 @@ import re
 import os
 import moose
 from moose.SBML.validation import validateModel
-from moose.chemUtil.chemConnectUtil import xyPosition,mooseIsInstance,findCompartment,getColor
+from moose.chemUtil.chemConnectUtil import xyPosition,mooseIsInstance,findCompartment,getColor,setupItem
 from moose.chemUtil.graphUtils import *
 from moose.fixXreacs import restoreXreacs
 import numpy as np

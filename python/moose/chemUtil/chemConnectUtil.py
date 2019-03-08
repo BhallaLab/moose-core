@@ -178,7 +178,7 @@ def setupMeshObj(modelRoot):
                 xmax = max(xcord)
                 ymin = min(ycord)
                 ymax = max(ycord)
-    return meshEntry,xmin,xmax,ymin,ymax,positionInfoExist,listOfitems         
+    return meshEntry,xmin,xmax,ymin,ymax,positionInfoExist,listOfitems
             
 def getxyCord(xcord,ycord,list1,listOfitems):
     for item in list1:
