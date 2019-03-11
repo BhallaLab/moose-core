@@ -9,7 +9,7 @@ __version__          = "1.0.0"
 __maintainer__       = "Harsha Rani"
 __email__            = "hrani@ncbs.res.in"
 __status__           = "Development"
-__updated__          = "Jan 29 2019"
+__updated__          = "Mar 11 2019"
 
 import moose
 import numpy as np
@@ -47,13 +47,13 @@ def getColor(iteminfo):
     """
     textcolor = moose.element(iteminfo).textColor
     bgcolor   = moose.element(iteminfo).color
-    
     if(textcolor == ''): textcolor = 'green'
     
     if(bgcolor == ''): bgcolor = 'orange'
 
     if(textcolor == bgcolor):
         textcolor = getRandColor()
+
     textcolor = colorCheck(textcolor)
     bgcolor = colorCheck(bgcolor)
     # if moose.exists(iteminfo):
@@ -71,8 +71,7 @@ def colorCheck(fc_bgcolor):
             fc_bgcolor = fc_bgcolor
         elif fc_bgcolor.isdigit():
             """ color is int  a map from int to r,g,b triplets from pickled color map file """
-            tc = int(fc_bgcolor)
-            tc = tc*2
+            tc = (int(fc_bgcolor))*2
             if tc < len(colorMap):
                 pickledColor = colorMap[tc]
             else:
@@ -83,10 +82,16 @@ def colorCheck(fc_bgcolor):
             fc_bgcolor = validColorcheck(fc_bgcolor)
             
         else:
-            for r in ['[',']']:
+            for r in ['[',']','(',')']:
                 fc_bgcolor = fc_bgcolor.replace(r,"")
-            fc_bgcolor = '#%02x%02x%02x' % (eval(fc_bgcolor))
-
+            fc_bgcolor = fc_bgcolor.split(",")
+            c = 0
+            hexlist ="#"
+            for n in fc_bgcolor:
+                if c < 3:
+                    hexlist = hexlist+str("%02x" % int(n))
+                    c = c+1;
+            fc_bgcolor = hexlist
         return(fc_bgcolor)
 
 def validColorcheck(color):
