@@ -732,6 +732,15 @@ void Ksolve::setNumPools( unsigned int numPoolSpecies )
     }
 }
 
+void Ksolve::setNumVarTotPools( unsigned int var, unsigned int tot )
+{
+    unsigned int numVoxels = pools_.size();
+    for ( unsigned int i = 0 ; i < numVoxels; ++i )
+    {
+        pools_[i].resizeArrays( tot );
+    }
+}
+
 unsigned int Ksolve::getNumPools() const
 {
     if ( pools_.size() > 0 )

@@ -113,6 +113,7 @@ public:
      */
     void setNumPools( unsigned int num );
     unsigned int getNumPools() const;
+    void setNumVarTotPools( unsigned int var, unsigned int tot );
 
     VoxelPoolsBase* pools( unsigned int i );
     double volume( unsigned int i ) const;
