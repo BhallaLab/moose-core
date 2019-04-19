@@ -224,7 +224,7 @@ void SocketStreamer::configureSocketServer( )
     // for details. We are making it 'reusable'.
     int on = 1;
 
-#ifdef SO_REUSEADDR
+#ifdef SO_REUSEPORT
     if(0 > setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT, (const char *)&on, sizeof(on)))
         LOG(moose::warning, "Warn: setsockopt() failed");
 #endif
