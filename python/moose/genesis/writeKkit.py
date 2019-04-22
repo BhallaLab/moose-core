@@ -9,9 +9,10 @@ __version__          = "1.0.0"
 __maintainer__       = "Harsha Rani"
 __email__            = "hrani@ncbs.res.in"
 __status__           = "Development"
-__updated__          = "Nov 22 2018"
+__updated__          = "Dec 08 2018"
 
 # 2018
+# Dec 08: using restoreXreacs from fixXreacs 
 # Nov 22: searched for _xfer_ instead of xfer
 # Nov 21: xfer pool are not written and cleaned up if part of Reaction/Enzyme or notes, 
 #         group are checked under all the mesh
@@ -27,7 +28,8 @@ import re
 import moose
 from moose.chemUtil.chemConnectUtil import *
 from moose.chemUtil.graphUtils import *
-
+from moose.fixXreacs import restoreXreacs
+        
 foundmatplotlib_ = False
 try:
     import matplotlib
@@ -75,7 +77,7 @@ def mooseWriteKkit( modelpath, filename, sceneitems={}):
         global cmin,cmax,xmin,xmax,ymin,ymax
         cmin, xmin, ymin = 0, 0, 0
         cmax, xmax, ymax = 1, 1, 1
-
+        moose.fixXreacs.restoreXreacs(modelpath)
         compt = moose.wildcardFind(modelpath+'/##[0][ISA=ChemCompt]')
         maxVol = estimateDefaultVol(compt)
         positionInfoExist = True
@@ -184,12 +186,10 @@ def calPrime(x):
 
 def storeCplxEnzMsgs( enz, f ):
     for sub in enz.neighbors["subOut"]:
-        sub = xfer(sub)
         s = "addmsg /kinetics/" + trimPath( moose.element(sub) ) + " /kinetics/" + trimPath(enz) + " SUBSTRATE n \n";
         s = s+ "addmsg /kinetics/" + trimPath( enz ) + " /kinetics/" + trimPath( sub ) +        " REAC sA B \n";
         f.write(s)
     for prd in enz.neighbors["prd"]:
-        prd = xfer(prd)
         s = "addmsg /kinetics/" + trimPath( enz ) + " /kinetics/" + trimPath(prd) + " MM_PRD pA\n";
         f.write( s )
     for enzOut in enz.neighbors["enzOut"]:
@@ -202,13 +202,11 @@ def storeMMenzMsgs( enz, f):
     prdList = enz.neighbors["prd"]
     enzDestList = enz.neighbors["enzDest"]
     for esub in subList:
-        esub = xfer(esub)
         es = "addmsg /kinetics/" + trimPath(moose.element(esub)) + " /kinetics/" + trimPath(enz) + " SUBSTRATE n \n";
         es = es+"addmsg /kinetics/" + trimPath(enz) + " /kinetics/" + trimPath(moose.element(esub)) + " REAC sA B \n";
         f.write(es)
 
     for eprd in prdList:
-        eprd = xfer(eprd)
         es = "addmsg /kinetics/" + trimPath( enz ) + " /kinetics/" + trimPath( moose.element(eprd)) + " MM_PRD pA \n";
         f.write(es)
     for eenzDest in enzDestList:
@@ -222,16 +220,6 @@ def storeEnzMsg( enzList, f):
             storeMMenzMsgs(enz, f)
         else:
             storeCplxEnzMsgs( enz, f )
-
-def xfer(xferpool):
-    if re.search("_xfer_",xferpool.name):
-        modelRoot = xferpool.path[0:xferpool.path.index('/',1)]
-        xrefPool = xferpool.name[:xferpool.name.index("_xfer_")]
-        xrefCompt = xferpool.name[xferpool.name.index("_xfer_") + len("_xfer_"):]
-        orgCompt = moose.wildcardFind(modelRoot+'/##[FIELD(name)='+xrefCompt+']')[0]
-        orgPool = moose.wildcardFind(orgCompt.path+'/##[FIELD(name)='+xrefPool+']')[0]
-        xferpool = orgPool
-    return xferpool
 
 def storeChanMsg(chanList,f):
     for channel in chanList:
@@ -283,9 +271,9 @@ def writeConcChan(modelpath,f,sceneitems):
                 else:
                     error = error + "\n x and y co-ordinates are not specified for `" + cChan.name+ "` zero will be assigned \n "
                 if color == "" or color == " ":
-                    color = getRandColor()
+                    color = getRandomColor()
                 if textcolor == ""  or textcolor == " ":
-                    textcolor = getRandColor()
+                    textcolor = getRandomColor()
                 f.write("simundump kchan /kinetics/" + trimPath(cChan)+ " " + str(int(1)) + " " + str(cChan.permeability)+  " " +
                     str(int(0)) + " " +
                     str(int(0)) + " " +
@@ -356,9 +344,9 @@ def writeEnz( modelpath,f,sceneitems):
                 else:
                     error = error + "\n x and y co-ordinates are not specified for `" + enz.name+ "` zero will be assigned \n "
                 if color == "" or color == " ":
-                    color = getRandColor()
+                    color = getRandomColor()
                 if textcolor == ""  or textcolor == " ":
-                    textcolor = getRandColor()
+                    textcolor = getRandomColor()
             
                 f.write("simundump kenz /kinetics/" + trimPath(enz) + " " + str(int(0))+  " " +
                     str(concInit) + " " +
@@ -392,13 +380,11 @@ def storeReacMsg(reacList,f):
         sublist = reac.neighbors["subOut"]
         prdlist = reac.neighbors["prd"]
         for sub in sublist:
-            sub = xfer(sub)
             s = "addmsg /kinetics/" + trimPath( sub ) + " /kinetics/" + reacPath +  " SUBSTRATE n \n";
             s =  s + "addmsg /kinetics/" + reacPath + " /kinetics/" + trimPath( sub ) +  " REAC A B \n";
             f.write(s)
 
         for prd in prdlist:
-            prd = xfer(prd)
             s = "addmsg /kinetics/" + trimPath( prd ) + " /kinetics/" + reacPath + " PRODUCT n \n";
             s = s + "addmsg /kinetics/" + reacPath + " /kinetics/" + trimPath( prd ) +  " REAC B A\n";
             f.write( s)
@@ -435,9 +421,9 @@ def writeReac(modelpath,f,sceneitems):
                 y = 0
                 error = error + "\n x and y co-ordinates are not specified for `" + reac.name+ "` zero will be assigned \n "
             if color == "" or color == " ":
-                color = getRandColor()
+                color = getRandomColor()
             if textcolor == ""  or textcolor == " ":
-                textcolor = getRandColor()
+                textcolor = getRandomColor()
             f.write("simundump kreac /kinetics/" + trimPath(reac) + " " +str(0) +" "+ str(kf) + " " + str(kb) + " \"\" " +
                     str(color) + " " + str(textcolor) + " " + str(int(x)) + " " + str(int(y))  + " "+ str(0)+"\n")
     return reacList,error
@@ -588,9 +574,9 @@ def writeplot( tgraphs,f ):
                     fg = getColorCheck(fg,GENESIS_COLOR_SEQUENCE)
                     tabPath = re.sub("\[[0-9]+\]", "", tabPath)
                     if tabPath.find("conc1") >= 0 or tabPath.find("conc2") >= 0:
-                        first = first + "simundump xplot " + tabPath + " 3 524288 \\\n" + "\"delete_plot.w <s> <d>; edit_plot.D <w>\" " + fg + " 0 0 1\n"
+                        first = first + "simundump xplot " + tabPath + " 3 524288 \\\n" + "\"delete_plot.w <s> <d>; edit_plot.D <w>\" " + str(fg) + " 0 0 1\n"
                     if tabPath.find("conc3") >= 0 or tabPath.find("conc4") >= 0:
-                        second = second + "simundump xplot " + tabPath + " 3 524288 \\\n" + "\"delete_plot.w <s> <d>; edit_plot.D <w>\" " + fg + " 0 0 1\n"
+                        second = second + "simundump xplot " + tabPath + " 3 524288 \\\n" + "\"delete_plot.w <s> <d>; edit_plot.D <w>\" " + str(fg) + " 0 0 1\n"
     return first,second
 
 def writePool(modelpath,f,volIndex,sceneitems):
@@ -599,64 +585,63 @@ def writePool(modelpath,f,volIndex,sceneitems):
     textcolor = ""
 
     for p in moose.wildcardFind(modelpath+'/##[0][ISA=PoolBase]'):
-        if not re.search("xfer",p.name):
-            if findCompartment(p) == moose.element('/'):
-                error = error + " \n "+p.path+ " doesn't have compartment ignored to write to genesis"
-            else:
-                slave_enable = 0
-                if (p.className == "BufPool" or p.className == "ZombieBufPool"):
-                    pool_children = p.children
-                    if pool_children== 0:
-                        slave_enable = 4
-                    else:
-                        for pchild in pool_children:
-                            if not(pchild.className == "ZombieFunction") and not(pchild.className == "Function"):
-                                slave_enable = 4
-                            else:
-                                slave_enable = 0
-                                break
-                if (p.parent.className != "Enz" and p.parent.className !='ZombieEnz'):
-                    #Assuming "p.parent.className !=Enzyme is cplx which is not written to genesis"
+        if findCompartment(p) == moose.element('/'):
+            error = error + " \n "+p.path+ " doesn't have compartment ignored to write to genesis"
+        else:
+            slave_enable = 0
+            if (p.className == "BufPool" or p.className == "ZombieBufPool"):
+                pool_children = p.children
+                if pool_children== 0:
+                    slave_enable = 4
+                else:
+                    for pchild in pool_children:
+                        if not(pchild.className == "ZombieFunction") and not(pchild.className == "Function"):
+                            slave_enable = 4
+                        else:
+                            slave_enable = 0
+                            break
+            if (p.parent.className != "Enz" and p.parent.className !='ZombieEnz'):
+                #Assuming "p.parent.className !=Enzyme is cplx which is not written to genesis"
 
-                    # x = sceneitems[p]['x']
-                    # y = sceneitems[p]['y']
-                    # if sceneitems != None:
-                    #     value = sceneitems[p]
-                    #     x = calPrime(value['x'])
-                    #     y = calPrime(value['y'])
-                        
-                    pinfo = p.path+'/info'
-                    if moose.exists(pinfo):
-                        x = sceneitems[p]['x']
-                        y = sceneitems[p]['y']
-                    else:
-                        x = 0
-                        y = 0
-                        error = error  + " \n x and y co-ordinates are not specified for `" + p.name+ "` zero will be assigned"+ " \n "
+                # x = sceneitems[p]['x']
+                # y = sceneitems[p]['y']
+                # if sceneitems != None:
+                #     value = sceneitems[p]
+                #     x = calPrime(value['x'])
+                #     y = calPrime(value['y'])
+                    
+                pinfo = p.path+'/info'
+                if moose.exists(pinfo):
+                    x = sceneitems[p]['x']
+                    y = sceneitems[p]['y']
+                else:
+                    x = 0
+                    y = 0
+                    error = error  + " \n x and y co-ordinates are not specified for `" + p.name+ "` zero will be assigned"+ " \n "
 
-                    if moose.exists(pinfo):
-                        color = moose.Annotator(pinfo).getField('color')
-                        color = getColorCheck(color,GENESIS_COLOR_SEQUENCE)
-                        textcolor = moose.Annotator(pinfo).getField('textColor')
-                        textcolor = getColorCheck(textcolor,GENESIS_COLOR_SEQUENCE)
-                    poolsCmpt = findCompartment(p)
-                    geometryName = volIndex[float(poolsCmpt.volume)]
-                    volume = p.volume * NA * 1e-3
-                    if color == "" or color == " ":
-                        color = getRandColor()
-                    if textcolor == ""  or textcolor == " ":
-                        textcolor = getRandColor()
-                    f.write("simundump kpool /kinetics/" + trimPath(p) + " 0 " +
-                            str(p.diffConst) + " " +
-                            str(0) + " " +
-                            str(0) + " " +
-                            str(0) + " " +
-                            str(p.nInit) + " " +
-                            str(0) + " " + str(0) + " " +
-                            str(volume)+ " " +
-                            str(slave_enable) +
-                            " /kinetics"+ geometryName + " " +
-                            str(color) +" " + str(textcolor) + " " + str(int(x)) + " " + str(int(y)) + " "+ str(0)+"\n")
+                if moose.exists(pinfo):
+                    color = moose.Annotator(pinfo).getField('color')
+                    color = getColorCheck(color,GENESIS_COLOR_SEQUENCE)
+                    textcolor = moose.Annotator(pinfo).getField('textColor')
+                    textcolor = getColorCheck(textcolor,GENESIS_COLOR_SEQUENCE)
+                poolsCmpt = findCompartment(p)
+                geometryName = volIndex[float(poolsCmpt.volume)]
+                volume = p.volume * NA * 1e-3
+                if color == "" or color == " ":
+                    color = getRandomColor()
+                if textcolor == ""  or textcolor == " ":
+                    textcolor = getRandomColor()
+                f.write("simundump kpool /kinetics/" + trimPath(p) + " 0 " +
+                        str(p.diffConst) + " " +
+                        str(0) + " " +
+                        str(0) + " " +
+                        str(0) + " " +
+                        str(p.nInit) + " " +
+                        str(0) + " " + str(0) + " " +
+                        str(volume)+ " " +
+                        str(slave_enable) +
+                        " /kinetics"+ geometryName + " " +
+                        str(color) +" " + str(textcolor) + " " + str(int(x)) + " " + str(int(y)) + " "+ str(0)+"\n")
     return error
 
 def getColorCheck(color,GENESIS_COLOR_SEQUENCE):
@@ -688,7 +673,7 @@ def getColorCheck(color,GENESIS_COLOR_SEQUENCE):
     else:
         raise Exception("Invalid Color Value!")
 
-def getRandColor():
+def getRandomColor():
     ignoreColor= ["mistyrose","antiquewhite","aliceblue","azure","bisque","black","blanchedalmond","blue","cornsilk","darkolivegreen","darkslategray","dimgray","floralwhite","gainsboro","ghostwhite","honeydew","ivory","lavender","lavenderblush","lemonchiffon","lightcyan","lightgoldenrodyellow","lightgray","lightyellow","linen","mediumblue","mintcream","navy","oldlace","papayawhip","saddlebrown","seashell","snow","wheat","white","whitesmoke","aquamarine","lightsalmon","moccasin","limegreen","snow","sienna","beige","dimgrey","lightsage"]
     matplotcolor = {}
     for name,hexno in matplotlib.colors.cnames.items():
@@ -696,7 +681,7 @@ def getRandColor():
 
     k = random.choice(list(matplotcolor.keys()))
     if k in ignoreColor:
-        return getRandColor()
+        return getRandomColor()
     else:
         return k
 def writeCompartment(modelpath,compts,f):

@@ -97,7 +97,7 @@ else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
 		add_definitions(-UDO_UNIT_TESTS -O3 -DDISABLE_DEBUG)
-    
+
     # DO NOT Treat all warnings as errors. With some compilers and newer versions
     # this often causes headache.
     # add_definitions(-Werror)
@@ -180,72 +180,6 @@ endif()
 if(WITH_BOOST_ODE)
     add_definitions(-DUSE_BOOST_ODE -UUSE_GSL)
 endif()
-
-# NSDF5 support. Disabled by default.
-if(WITH_NSDF)
-    find_package(HDF5 COMPONENTS CXX HL)
-    if(NOT HDF5_FOUND)
-        message(
-            "==================================================================\n"
-            " HDF5 not found. Disabling NSDF support.\n\n"
-            " If you need NSDF support, please install hdf5-dev or hdf5-devel\n"
-            " package or equivalent.\n\n"
-            "     $ sudo apt-get install libhdf5-dev \n"
-            "     $ sudo yum install libhdf5-devel \n"
-            "     $ brew install hdf5 \n\n"
-            " Otherwise, continue with 'make' and 'make install' \n"
-            " If you install hdf5 to non-standard path, export environment \n"
-            " variable HDF5_ROOT to the location. Rerun cmake \n"
-            "================================================================ \n"
-            )
-    endif(NOT HDF5_FOUND)
-
-    if(HDF5_FOUND)
-        include_directories( ${HDF5_INCLUDE_DIRS} )
-        add_definitions( -DUSE_HDF5 -DENABLE_NSDF )
-        if(HDF5_USE_STATIC_LIBRARIES)
-            message(STATUS "Finding static HDF5 libraries in $ENV{HDF5_ROOT}")
-            find_library(HDF5_CXX_LIBRARIES NAMES libhdf5.a
-                PATHS $ENV{HDF5_ROOT}/lib $ENV{HDF5_ROOT}/lib64
-                )
-            find_library(HDF5_HL_LIBRARIES NAMES libhdf5_hl.a
-                PATHS $ENV{HDF5_ROOT}/lib $ENV{HDF5_ROOT}/lib64
-                )
-            set(HDF5_LIBRARIES ${HDF5_CXX_LIBRARIES} ${HDF5_HL_LIBRARIES})
-        endif()
-
-
-        # Make sure, HDF5_HL_LIBRARIES are set. The COMPONENTS in find_package may
-        # or may not work. See BhallaLab/moose-core#163.
-        if(NOT HDF5_HL_LIBRARIES)
-            set(HDF5_HL_LIBRARIES ${HDF5_HL_LIBRARIES})
-        endif(NOT HDF5_HL_LIBRARIES)
-        list(APPEND HDF5_LIBRARIES ${HDF5_HL_LIBRARIES})
-
-        # message(STATUS "MOOSE will use following HDF5 ${HDF5_LIBRARIES}" )
-        foreach(HDF5_LIB ${HDF5_LIBRARIES})
-            if(HDF5_LIB)
-                get_filename_component( HDF5_LIB_EXT ${HDF5_LIB} EXT )
-                if(HDF5_LIB_EXT)
-                    if(${HDF5_LIB_EXT} STREQUAL ".a")
-                        list(APPEND STATIC_LIBRARIES ${HDF5_LIB} )
-                    else( )
-                        list(APPEND SYSTEM_SHARED_LIBS ${HDF5_LIB} )
-                    endif( )
-                endif()
-            endif( )
-        endforeach( )
-    else( HDF5_FOUND )
-        message(STATUS "HDF5 is not found" )
-    endif( HDF5_FOUND )
-    # This is a fix for new HDF5 package on Debian/Ubuntu which installs hdf5
-    # headers in non-standard path. issue #80.
-    if(HDF5_LIBRARY_DIRS)
-        set_target_properties( libmoose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
-    endif()
-else(WITH_NSDF)
-    message(STATUS "NSDF support is disabled" )
-endif(WITH_NSDF)
 
 # Openmpi
 if(WITH_MPI)
@@ -353,7 +287,7 @@ if(SYSTEM_SHARED_LIBS)
     list(REMOVE_DUPLICATES SYSTEM_SHARED_LIBS)
 endif( )
 
-# cmake --help-policy CMP0042. Also in pymoose/CMakeLists.txt 
+# cmake --help-policy CMP0042. Also in pymoose/CMakeLists.txt
 # More details:
 # https://gitlab.kitware.com/cmake/community/wikis/doc/cmake/RPATH-handling
 # especially section 'Mac OS X and the RPATH'
@@ -528,8 +462,8 @@ foreach( _py_script ${PY_SCRIPTS} )
     file( READ ${_py_script} pytext)
     string(MD5 _md5 "${pytext}")
     set(TGT_NAME "${_py_name}-${_md5}" )
-    set(PYLINT_OPTIONS --disable=no-member --disable=no-name-in-module 
-            --disable=invalid-unary-operand-type 
+    set(PYLINT_OPTIONS --disable=no-member --disable=no-name-in-module
+            --disable=invalid-unary-operand-type
             --disable=import-error
             --disable=no-method-argument
         )

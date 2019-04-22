@@ -33,11 +33,13 @@
 #include <string>
 #include <sstream>
 #include <cstdlib>
+
 using namespace std;
 
 extern unsigned getNumCores();
 
 namespace moose {
+
     const map<string, string>& getArgMap()
     {
         static map<string, string> argmap;
@@ -103,6 +105,23 @@ namespace moose {
 
         }
         return argmap;
+    }
+
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Get environment valus.
+     *
+     * @Param env Name of the environment variable.
+     *
+     * @Returns  value of environment if set, empty string otherwise.
+     */
+    /* ----------------------------------------------------------------------------*/
+    string getEnv( const string& env )
+    {
+        const char* pEnv = std::getenv( env.c_str() );
+        if( pEnv )
+            return string(pEnv);
+        return "";
     }
 
 }
