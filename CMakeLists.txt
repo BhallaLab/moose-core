@@ -437,9 +437,13 @@ endif()
 
 ## PyMOOSE tests.
 set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)
+set(MOOSE_ALPHA_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/alpha)
 
 # Collect all python script in tests folder and run them.
 file(GLOB PY_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.py" )
+
+# Move these tests to PYMOOSE_TEST_DIRECTORY when feature development is complete.
+file(GLOB PY_ALPHA_TEST_SCRIPTS "${PYMOOSE_ALPHA_TEST_DIRECTORY}/*.py" )
 
 # Run python tests.
 foreach( _test_script ${PY_TEST_SCRIPTS} )
@@ -447,6 +451,19 @@ foreach( _test_script ${PY_TEST_SCRIPTS} )
     add_test( NAME ${_test_name}
         COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
         WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+        )
+     set_tests_properties( ${_test_name}
+         PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python"
+        )
+endforeach( )
+
+# Alpha tests. These should not run by default.
+foreach( _test_script ${PY_ALPHA_TEST_SCRIPTS} )
+    get_filename_component( _test_name ${_test_script} NAME_WE)
+    add_test( NAME ${_test_name}
+        COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
+	CONFIGURATIONS Devel
+	WORKING_DIRECTORY ${PYMOOSE_ALPHA_TEST_DIRECTORY}
         )
      set_tests_properties( ${_test_name}
          PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python"
@@ -476,4 +493,5 @@ foreach( _py_script ${PY_SCRIPTS} )
 endforeach( )
 
 ############################ CPACK ######################################
+# This is not maintained anymore since packaging is done using OpenBuildService 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_cpack.cmake)
