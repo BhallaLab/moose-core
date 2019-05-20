@@ -38,14 +38,14 @@ set -e
         -DPYTHON_EXECUTABLE=$PYTHON3 \
         ..
     make pylint -j3
-    make && ctest --output-on-failure -E ".*socket_streamer.*"
+    make && ctest --output-on-failure 
 
     cd .. # Now with boost.
     mkdir -p _BOOST_BUILD && cd _BOOST_BUILD \
         && cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON \
         -DPYTHON_EXECUTABLE=`which python3` ..
 
-    make -j4 && ctest --output-on-failure -E ".*socket_streamer.*"
+    make -j4 && ctest --output-on-failure 
     cd ..
     set +e
 

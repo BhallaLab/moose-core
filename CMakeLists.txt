@@ -143,11 +143,10 @@ set(STATIC_LIBRARIES "" )
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 
 # BOOST ode library performs better than GSL and ideally should be made default.
-# Making boost default means that we get rid of gsl. Boost does not have a very
-# good matrix library; it has ublas which is not well maintained and emit a lot
+# Unfortunately Boost does not have a very good matrix library; it has ublas
+# which is not well maintained and emit a lot
 # of warning during compilation. Nonetheless, WITH_BOOST_ODE works fine and
-# produce results quicker than GSL. Both boost ode and ublas are in moose source
-# tree ./external/odeint-v2 and ./external/boost-numeric-bindings
+# produce results quicker than GSL. 
 if(WITH_GSL)
     find_package(GSL 1.16 REQUIRED)
     if(NOT GSL_FOUND)
@@ -172,7 +171,7 @@ if(WITH_GSL)
     # top level.
     include_directories( ${GSL_INCLUDE_DIRS} )
 elseif(WITH_BOOST_ODE)
-    find_package(Boost 1.44 REQUIRED)
+    find_package(Boost 1.53 REQUIRED)
     find_package(LAPACK REQUIRED)
 endif()
 
