@@ -11,4 +11,4 @@ if False:
     moose.reinit()
     moose.start( 10 )
 else:
-    return True
+    quit(0)
