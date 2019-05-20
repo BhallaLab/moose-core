@@ -28,6 +28,8 @@ brew install python
 brew install numpy
 brew install boost
 
+PYTHON3=$(which python3)
+
 #brew outdated python || brew install python
 #brew outdated numpy || brew install homebrew/python/numpy
 brew unlink numpy && brew link numpy || echo "Failed to link numpy"
@@ -38,7 +40,8 @@ brew unlink numpy && brew link numpy || echo "Failed to link numpy"
 # To make sure that we do not pick python from /opt etc.
 PATH=/usr/local/bin:/usr/bin:$PATH
 # ensurepip
-python3 -m ensurepip
-python3 -m pip install matplotlib --user --upgrade
-python3 -m pip install pyNeuroML libNeuroML --user
-python3 -m pip install scipy --user
+$PYTHON3 -m ensurepip
+$PYTHON3 -m pip install matplotlib --user --upgrade
+$PYTHON3 -m pip install pyNeuroML libNeuroML --user
+$PYTHON3 -m pip install scipy --user
+$PYTHON3 -m pip install pylint --user
