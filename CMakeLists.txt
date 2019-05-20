@@ -437,13 +437,10 @@ endif()
 
 ## PyMOOSE tests.
 set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)
-set(MOOSE_ALPHA_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/alpha)
 
 # Collect all python script in tests folder and run them.
 file(GLOB PY_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.py" )
 
-# Move these tests to PYMOOSE_TEST_DIRECTORY when feature development is complete.
-file(GLOB PY_ALPHA_TEST_SCRIPTS "${PYMOOSE_ALPHA_TEST_DIRECTORY}/*.py" )
 
 # Run python tests.
 foreach( _test_script ${PY_TEST_SCRIPTS} )
@@ -458,12 +455,29 @@ foreach( _test_script ${PY_TEST_SCRIPTS} )
 endforeach( )
 
 # Alpha tests. These should not run by default.
+set(MOOSE_ALPHA_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/alpha)
+file(GLOB PY_ALPHA_TEST_SCRIPTS "${PYMOOSE_ALPHA_TEST_DIRECTORY}/*.py" )
 foreach( _test_script ${PY_ALPHA_TEST_SCRIPTS} )
     get_filename_component( _test_name ${_test_script} NAME_WE)
     add_test( NAME ${_test_name}
         COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
 	CONFIGURATIONS Devel
 	WORKING_DIRECTORY ${PYMOOSE_ALPHA_TEST_DIRECTORY}
+        )
+     set_tests_properties( ${_test_name}
+         PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python"
+        )
+endforeach( )
+
+# Regression and github issues. These should not run by default.
+set(PYMOOSE_ISSUES_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/issues)
+file(GLOB PY_ISSUES_SCRIPTS "${PYMOOSE_ISSUES_DIRECTORY}/*.py" )
+foreach( _test_script ${PY_ISSUES_SCRIPTS} )
+    get_filename_component( _test_name ${_test_script} NAME_WE)
+    add_test( NAME ${_test_name}
+        COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
+	CONFIGURATIONS Devel
+	WORKING_DIRECTORY ${PYMOOSE_ISSUES_DIRECTORY}
         )
      set_tests_properties( ${_test_name}
          PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python"
