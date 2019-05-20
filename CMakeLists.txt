@@ -173,12 +173,13 @@ if(WITH_GSL)
     include_directories( ${GSL_INCLUDE_DIRS} )
 elseif(WITH_BOOST_ODE)
     find_package(Boost 1.44 REQUIRED)
-    find_package( LAPACK REQUIRED )
+    find_package(LAPACK REQUIRED)
 endif()
 
 # if boost ode is being used, don't use GSL.
 if(WITH_BOOST_ODE)
     add_definitions(-DUSE_BOOST_ODE -UUSE_GSL)
+    include_directories(${Boost_INCLUDE_DIRS})
 endif()
 
 # Openmpi
