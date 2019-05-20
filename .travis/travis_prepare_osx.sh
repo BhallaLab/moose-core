@@ -32,13 +32,13 @@ brew install boost
 #brew outdated numpy || brew install homebrew/python/numpy
 brew unlink numpy && brew link numpy || echo "Failed to link numpy"
 # Numpy caveats
-mkdir -p $HOME/Library/Python/2.7/lib/python/site-packages
-echo 'import sys; sys.path.insert(1, "/usr/local/lib/python2.7/site-packages")' >> $HOME/Library/Python/2.7/lib/python/site-packages/homebrew.pth
+#mkdir -p $HOME/Library/Python/2.7/lib/python/site-packages
+#echo 'import sys; sys.path.insert(1, "/usr/local/lib/python2.7/site-packages")' >> $HOME/Library/Python/2.7/lib/python/site-packages/homebrew.pth
 
 # To make sure that we do not pick python from /opt etc.
 PATH=/usr/local/bin:/usr/bin:$PATH
 # ensurepip
-python -m ensurepip
-python -m pip install matplotlib --user --upgrade
-python -m pip install pyNeuroML libNeuroML --user
-python -m pip install scipy --user
+python3 -m ensurepip
+python3 -m pip install matplotlib --user --upgrade
+python3 -m pip install pyNeuroML libNeuroML --user
+python3 -m pip install scipy --user
