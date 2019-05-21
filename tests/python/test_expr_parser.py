@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
 
 """test_muparser.py:
-
 Modified from https://elifesciences.org/articles/25827 , Fig4.py
-
 """
 import sys
 import os
 import numpy as np
-import matplotlib as mpl
-mpl.use('Agg')
 import sys
 import numpy as np
 import moose
 import abstrModelEqns9 as ame
 import rdesigneur as rd
+print( "[INFO ] Using moose from %s" % moose.__file__ )
+
 
 
 def singleCompt( name, params ):
@@ -27,8 +25,8 @@ def singleCompt( name, params ):
     runtime = params['preStimTime'] + params['postStimTime']
     steptime = 50
 
-    CaStim.expr += ' + x2 * (t > 100+' + str( runtime ) + ' ) * ( t < 100+' + str( runtime + steptime ) +  ' )'
-    print(CaStim.expr)
+    CaStim.expr += '+x2*(t>100+'+str(runtime)+')*(t<100+'+str(runtime+steptime)+ ')'
+    print("CaStim.expr=%s" % CaStim.expr)
     tab = moose.Table2( '/model/' + name + '/Atab' )
     ampl = moose.element( mod.path + '/ampl' )
     phase = moose.element( mod.path + '/phase' )

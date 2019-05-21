@@ -54,6 +54,8 @@ public:
     const unsigned int getTarget() const;
     void setTarget( unsigned int tgt );
 
+    void setTime(const double t);
+
     void setVolScale( double vs );
     double getVolScale() const;
 

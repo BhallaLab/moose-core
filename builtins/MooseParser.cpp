@@ -192,17 +192,17 @@ namespace moose
 
     bool MooseParser::SetExpr( const string& user_expr )
     {
-        string expr = Reformat( user_expr );
+        string expr = Reformat( moose::trim(user_expr) );
+
         if( moose::trim(expr).size() < 1 || moose::trim(expr) == "0" || moose::trim(expr) == "0.0" )
         {
             expr_ = "";
             return false;
         }
 
-        expression_.register_symbol_table( symbol_table_ );
+        expression_.register_symbol_table( symbol_table_);
         if( ! parser_.compile(expr, expression_) )
         {
-            cerr << "Parser Error: " << parser_.error() << endl;
             for (std::size_t i = 0; i < parser_.error_count(); ++i)
             {
                 Parser::error_t error = parser_.get_error(i);

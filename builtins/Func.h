@@ -69,7 +69,7 @@ class Func
     // get a list of variable identifiers.
     // this is created by the parser
     vector<string> getVars() const;
-    void setVarValues(vector< string > vars, vector < double > vals);
+    void setVarValues(vector<string> vars, vector<double> vals);
 
 
     // get/set the value of variable `name`

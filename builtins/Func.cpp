@@ -354,7 +354,7 @@ void Func::_showError(moose::Parser::exception_type &e) const
  */
 static double _addVar(const char *name, void *data)
 {
-    Func* func = reinterpret_cast< Func * >(data);
+    Func* func = reinterpret_cast<Func*>(data);
     double ret = 0.0;
     func->_varbuf.push_back(ret);
     return ret;
@@ -363,11 +363,9 @@ static double _addVar(const char *name, void *data)
 void Func::setExpr( const string expr)
 {
     _valid = false;
-    moose::Parser::varmap_type vars;
     try
     {
         _parser.SetExpr(expr);
-        vars = _parser.GetUsedVar();
     }
     catch (moose::Parser::exception_type &e)
     {
@@ -375,6 +373,9 @@ void Func::setExpr( const string expr)
         _clearBuffer();
         return;
     }
+
+    moose::Parser::varmap_type vars = _parser.GetUsedVar();
+
     moose::Parser::varmap_type::iterator v = vars.find("x");
     if (v != vars.end())
     {
@@ -385,6 +386,7 @@ void Func::setExpr( const string expr)
         v = vars.begin();
         _x = v->second;
     }
+
     v = vars.find("y");
     if (v != vars.end())
     {
@@ -396,6 +398,7 @@ void Func::setExpr( const string expr)
         ++v;
         _y = v->second;
     }
+
     v = vars.find("z");
     if (v != vars.end())
     {

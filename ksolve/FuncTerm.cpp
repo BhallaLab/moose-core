@@ -63,7 +63,7 @@ void FuncTerm::setReactantIndex( const vector< unsigned int >& mol )
 
     // Define a 't' variable even if we don't always use it.
     args_[mol.size()] = 0.0;
-    addVar( "t", mol.size() );
+    parser_.DefineVar( "t", &args_[mol.size()]);
 }
 
 const vector< unsigned int >& FuncTerm::getReactantIndex() const
@@ -147,11 +147,11 @@ double FuncTerm::operator() ( const double* S, double t ) const
     if ( !args_ )
         return 0.0;
 
-    size_t  i = 0;
-    for ( i = 0; i < reactantIndex_.size(); ++i )
+    for (size_t i = 0; i < reactantIndex_.size(); ++i)
         args_[i] = S[reactantIndex_[i]];
 
-    args_[i] = t;
+    // Add symbol 't' to the parser.
+    args_[reactantIndex_.size()] = t;
 
     try
     {
