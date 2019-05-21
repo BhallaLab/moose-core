@@ -476,9 +476,8 @@ endif()
 
 ############################ CTEST ######################################
 include( CTest )
-# If CTEST_OUTPUT_ON_FAILURE environment variable is set, the output is printed
-# onto the console if a test fails.
-set(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
+set(CTEST_NIGHTLY_START_TIME "05:30:00 UTC")
+set(CTEST_SUBMIT_URL "http://my.cdash.org/submit.php?project=moose")
 
 if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     # Run this test in debug mode. In Release mode, this does not do anything.
