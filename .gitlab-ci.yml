@@ -9,7 +9,7 @@ build:
   # instead of calling g++ directly you can also use some build toolkit like make
   # install the necessary build tools when needed
   before_script:
-     -apt update && apt -y install cmake libgsl-devel python-devel python-numpy
+     - apt update && apt -y install cmake libgsl-devel python-devel python-numpy
   script:
     - mkdir build && cd build && make -j5 && ctest --output-on-failure
  
