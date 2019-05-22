@@ -26,6 +26,7 @@ def singleCompt( name, params ):
     print( '[INFO] CaStim.expr(before) = %s' % CaStim.expr )
     CaStim.expr += '+x2*(t>100+'+str(runtime)+')*(t<100+'+str(runtime+steptime)+ ')'
     print("[INFO] CaStim.expr = %s" % CaStim.expr)
+    quit()
     tab = moose.Table2( '/model/' + name + '/Atab' )
     ampl = moose.element( mod.path + '/ampl' )
     phase = moose.element( mod.path + '/phase' )

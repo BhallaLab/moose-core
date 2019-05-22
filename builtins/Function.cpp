@@ -331,10 +331,10 @@ Function::Function(const Function& rhs):
     _independent = rhs._independent;
 
     // Copy the constants
-    moose::Parser::varmap_type cmap = rhs._parser.GetConst();
+    moose::Parser::varmap_type cmap = rhs.parser_.GetConst();
     if (cmap.size() > 0)
         for (auto item = cmap.begin(); item!=cmap.end(); ++item)
-            _parser.DefineConst(item->first, item->second);
+            parser_.DefineConst(item->first, item->second);
 
     setExpr(er, rhs.getExpr( er ));
 
@@ -361,11 +361,11 @@ Function& Function::operator=(const Function rhs)
     _independent = rhs._independent;
 
     // Copy the constants
-    moose::Parser::varmap_type cmap = rhs._parser.GetConst();
+    moose::Parser::varmap_type cmap = rhs.parser_.GetConst();
 
     if ( ! cmap.empty() )
         for ( auto item = cmap.begin(); item != cmap.end(); ++item )
-            _parser.DefineConst(item->first.c_str(), item->second);
+            parser_.DefineConst(item->first.c_str(), item->second);
 
     // Copy the values from the var pointers in rhs
     setExpr(er, rhs.getExpr( er ));
@@ -392,7 +392,7 @@ Function::~Function()
 void Function::_clearBuffer()
 {
     _numVar = 0;
-    _parser.ClearVariables();
+    parser_.ClearVariables();
     for (unsigned int ii = 0; ii < _varbuf.size(); ++ii)
     {
         if ( _varbuf[ii] )
@@ -540,6 +540,7 @@ void Function::innerSetExpr(const Eref& eref, string expr)
     // Find all variables x\d+ or y\d+ etc, and add them to variable buffer.
     vector<string> xs;
     vector<string> ys;
+
     moose::MooseParser::findXsYs( expr, xs, ys);
 
     // Now create a map which maps the variable name to location of values. This
@@ -551,7 +552,11 @@ void Function::innerSetExpr(const Eref& eref, string expr)
         // get the address of Variable's value. Is it safe in multi-threaded
         // environment? I hope so.
         map_[xs[i]] = &(_varbuf[i]->value);
+
     }
+
+    cout << endl;
+
     for( size_t i = 0; i < ys.size(); i++ )
     {
         _functionAddVar( ys[i].c_str(),  this);
@@ -561,8 +566,8 @@ void Function::innerSetExpr(const Eref& eref, string expr)
     try
     {
         // Set parser expression. Send the map and the array of values as well.
-        _parser.SetVariableMap( map_ );
-        _valid = _parser.SetExpr( expr );
+        parser_.SetVariableMap( map_ );
+        _valid = parser_.SetExpr( expr );
         return;
     }
     catch (moose::Parser::exception_type &e)
@@ -582,7 +587,7 @@ string Function::getExpr( const Eref& e ) const
         cout << "Error: " << e.objId().path() << "::getExpr() - invalid parser state" << endl;
         return "";
     }
-    return _parser.GetExpr();
+    return parser_.GetExpr();
 }
 
 void Function::setMode(unsigned int mode)
@@ -617,7 +622,7 @@ bool Function::getDoEvalAtReinit() const
 
 double Function::getValue() const
 {
-    return _parser.Eval( );
+    return parser_.Eval( );
 }
 
 
@@ -658,13 +663,13 @@ double Function::getDerivative() const
         cout << "Error: Function::getDerivative() - invalid state" << endl;
         return value;
     }
-    moose::Parser::varmap_type variables = _parser.GetVar();
+    moose::Parser::varmap_type variables = parser_.GetVar();
     moose::Parser::varmap_type::const_iterator item = variables.find(_independent);
     if (item != variables.end())
     {
         try
         {
-            value = _parser.Diff(item->second, item->second);
+            value = parser_.Diff(item->second, item->second);
         }
         catch (moose::Parser::exception_type &e)
         {
@@ -709,12 +714,12 @@ Variable * Function::getVar(unsigned int ii)
 
 void Function::setConst(string name, double value)
 {
-    _parser.DefineConst(name.c_str(), value);
+    parser_.DefineConst(name.c_str(), value);
 }
 
 double Function::getConst(string name) const
 {
-    moose::Parser::varmap_type cmap = _parser.GetConst();
+    moose::Parser::varmap_type cmap = parser_.GetConst();
     if (! cmap.empty() )
     {
         moose::Parser::varmap_type::const_iterator it = cmap.find(name);

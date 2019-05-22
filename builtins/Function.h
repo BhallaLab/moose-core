@@ -26,7 +26,8 @@ double *_functionAddVar(const char *name, void *data);
 
 class Function
 {
-  public:
+
+public:
     static const int VARMAX;
     Function();
     Function(const Function& rhs);
@@ -111,7 +112,7 @@ protected:
     map< string, double *> _constbuf;  // for constants
     string _independent; // index of independent variable
 
-    moose::MooseParser _parser;
+    moose::MooseParser parser_;
 
     void _clearBuffer();
     void _showError(moose::Parser::exception_type &e) const;

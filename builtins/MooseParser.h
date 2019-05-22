@@ -18,7 +18,6 @@
 #include <map>
 #include <iostream>
 
-#define exprtk_enable_debugging
 #include "../external/exprtk/exprtk.hpp"
 
 using namespace std;
@@ -78,19 +77,8 @@ public:
 
     void DefineFun1( const string& funcName, double (&func)(double) );
 
-    /* --------------------------------------------------------------------------*/
-    /**
-     * @Synopsis Compile expression using tinyexpr library. Further calls
-     * uses this compiled expression.
-     *
-     * @Param expr Expression. It can only contain following variables:
-     *  t, x0, x1, ..., y0, y1, .., * c0, c1 etc.
-     *
-     * @Returns True if expression is compiled succcessfully, false
-     * otherwise.
-     */
-    /* ----------------------------------------------------------------------------*/
     bool SetExpr( const string& expr );
+
     bool CompileExpr();
 
     // Reformat the expression to meet TkExpr.

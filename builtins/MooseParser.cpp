@@ -16,6 +16,7 @@
 #include "../utility/strutil.h"
 #include "../basecode/global.h"
 #include "MooseParser.h"
+#define DEBUG_HERE
 
 using namespace std;
 
@@ -107,7 +108,7 @@ void MooseParser::DefineVar( const string& varName, double& val)
     // create the new variable.
     if(0 == symbol_table_->variable_ref(varName))
     {
-#ifdef exprtk_enable_debugging
+#ifdef DEBUG_HERE
         MOOSE_DEBUG( "++ Adding var " << varName << "=" << val << "(" << &val << ")");
 #endif
         symbol_table_->add_variable(varName, val);
@@ -208,10 +209,12 @@ bool MooseParser::CompileExpr()
 {
     // User should make sure that symbol table has been setup. Do not raise
     // exception here. User can set expression again.
-    if( expr_.empty() )
+    MOOSE_DEBUG( "Compiling " << expr_ );
+
+    if(expr_.empty())
         return false;
 
-    if( ! parser_.compile(expr_, expression_) )
+    if(! parser_.compile(expr_, expression_))
     {
         stringstream ss;
         for (std::size_t i = 0; i < parser_.error_count(); ++i)
@@ -239,7 +242,7 @@ void MooseParser::SetVariableMap( const map<string, double*> m )
 
 double MooseParser::Eval( ) const
 {
-#ifdef exprtk_enable_debugging
+#ifdef DEBUG_HERE
     // Print symbol table.
     vector<std::pair<string, double>> vars;
     auto symbTable = GetSymbolTable();
@@ -298,7 +301,6 @@ void MooseParser::SetVarFactory( double* (*fn)(const char*, void*), void *)
     MOOSE_WARN( "setVarFactory is not implemented." );
     throw;
 }
-
 
 
 } // namespace moose.
