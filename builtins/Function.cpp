@@ -392,7 +392,7 @@ Function::~Function()
 void Function::_clearBuffer()
 {
     _numVar = 0;
-    _parser.ClearVar();
+    _parser.ClearVariables();
     for (unsigned int ii = 0; ii < _varbuf.size(); ++ii)
     {
         if ( _varbuf[ii] )

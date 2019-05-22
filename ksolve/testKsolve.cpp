@@ -6,6 +6,7 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+
 #include "../basecode/header.h"
 #include "../utility/testing_macros.hpp"
 #include "../basecode/SparseMatrix.h"
@@ -318,10 +319,10 @@ void testFuncTerm()
     mol[1] = 0;
     ft.setReactantIndex(mol);
     
-    // Where is the link to 't'.
+    cout << "+++ Setting expression in testFuncTerm " << endl;
     ft.setExpr("x0+x1*t");
     ans = ft(args, 10.0);
-    assert( doubleEq(ans, 13.0));
+    assert(doubleEq(ans, 13.0));
 
     mol[0] = 0;
     mol[1] = 9;

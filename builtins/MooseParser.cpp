@@ -10,7 +10,6 @@
 
 #include <vector>
 #include <cassert>
-using namespace std;
 
 #include "../utility/testing_macros.hpp"
 #include "../utility/print_function.hpp"
@@ -18,10 +17,12 @@ using namespace std;
 #include "../basecode/global.h"
 #include "MooseParser.h"
 
+using namespace std;
+
 namespace moose
 {
 
-    MooseParser::MooseParser() 
+    MooseParser::MooseParser() : symbol_tables_registered_(false)
     {
         symbol_table_.clear();
 
@@ -106,21 +107,31 @@ namespace moose
         return expression_;
     }
 
-    void MooseParser::RegisterSymbolTable( Parser::symbol_table_t tab )
+    void MooseParser::RegisterSymbolTable(bool errorOnDuplicate)
     {
-        symbol_table_ = tab;
-        expression_.register_symbol_table( symbol_table_ );
+        if(! symbol_tables_registered_)
+        {
+            expression_.register_symbol_table(symbol_table_);
+            symbol_tables_registered_ = true;
+        }
+        if(errorOnDuplicate)
+            throw runtime_error( "You tried to add another symbol table." );
     }
 
     /*-----------------------------------------------------------------------------
      *  Other function.
      *-----------------------------------------------------------------------------*/
-    void MooseParser::DefineVar( const string& varName, double* val) 
+    void MooseParser::DefineVar( const string& varName, double& val) 
     {
-        MOOSE_DEBUG( "Adding variable " << varName << " with val " << val << "(" << &val << ")" );
-        symbol_table_.add_variable( varName, *val );
+        // If this variable alreay exists, then delete the previous instance and
+        // create the new variable.
+        if(0 == symbol_table_.variable_ref(varName))
+        {
+            symbol_table_.add_variable(varName, val);
+            return;
+        }
+        throw runtime_error("Variable " + varName + " already exists parser's table.");
     }
-
 
     void MooseParser::DefineConst( const string& constName, const double value )
     {
@@ -192,15 +203,15 @@ namespace moose
 
     bool MooseParser::SetExpr( const string& user_expr )
     {
-        string expr = Reformat( moose::trim(user_expr) );
-
-        if( moose::trim(expr).size() < 1 || moose::trim(expr) == "0" || moose::trim(expr) == "0.0" )
-        {
-            expr_ = "";
+        expr_ = moose::trim(user_expr);
+        string expr = Reformat(expr_);
+        if(expr.empty())
             return false;
-        }
 
-        expression_.register_symbol_table( symbol_table_);
+        // User should make sure that symbol table has been setup. Do not raise
+        // exception here. User can set expression again.
+        RegisterSymbolTable(false);
+
         if( ! parser_.compile(expr, expression_) )
         {
             for (std::size_t i = 0; i < parser_.error_count(); ++i)
@@ -213,7 +224,7 @@ namespace moose
             return false;
         }
 
-        expr_ = moose::trim(expr);
+        MOOSE_DEBUG( "Parser expression is set to " << expr_ );
         return true;
     }
 
@@ -229,11 +240,18 @@ namespace moose
 
     double MooseParser::Eval( ) const
     {
-        double v = 0.0;
-
-        if( expr_.size() > 0 )
-            v = expression_.value();
-        return v;
+#ifdef exprtk_enable_debugging
+        // Print symbol table.
+        vector<std::pair<string, double>> vars;
+        auto n = symbol_table_.get_variable_list(vars);
+        cout << " Total variables " << n << ".";
+        for (auto i : vars)
+        {
+            cout << "\t" << i.first << "=" << i.second << " " << &symbol_table_.get_variable(i.first)->ref();
+        }
+        cout << endl;
+#endif
+        return expr_.empty()?0.0:expression_.value();
     }
 
     Parser::varmap_type MooseParser::GetVar() const
@@ -252,15 +270,17 @@ namespace moose
         return const_map_;
     }
 
+
     Parser::varmap_type MooseParser::GetUsedVar( )
     {
         return used_vars_;
     }
 
-    void MooseParser::ClearVar( )
+    void MooseParser::ClearVariables( )
     {
         const_map_.clear();
         var_map_.clear();
+        symbol_table_.clear_variables();
     }
 
     const string MooseParser::GetExpr( ) const

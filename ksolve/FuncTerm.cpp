@@ -24,49 +24,50 @@
 #include <memory>
 using namespace std;
 
+
 #include "FuncTerm.h"
 #include "../utility/numutil.h"
 #include "../builtins/MooseParser.h"
 #include "../builtins/Variable.h"
+#include "../utility/testing_macros.hpp"
+#include "../utility/utility.h"
 
 FuncTerm::FuncTerm()
     : reactantIndex_( 1, 0 ),
       volScale_( 1.0 ),
       target_( ~0U)
 {
-    args_ = 0;
+    args_ = unique_ptr<double[]>(nullptr);
 }
 
 FuncTerm::~FuncTerm()
 {
-    if (args_)
-    {
-        delete[] args_;
-    }
 }
 
-void FuncTerm::setReactantIndex( const vector< unsigned int >& mol )
+void FuncTerm::setReactantIndex(const vector<unsigned int>& mol)
 {
     reactantIndex_ = mol;
-    if ( args_ )
-    {
-        delete[] args_;
-        args_ = 0;
-    }
 
-    args_ = new double[ mol.size() + 1 ];
-    for ( unsigned int i = 0; i < mol.size(); ++i )
+    // NOTE: If args_ has been setup up before and symbol table has been setup
+    // and we must not change the address here.
+    if(nullptr == args_.get())
     {
-        args_[i] = 0.0;
-        addVar( "x"+to_string(i), i );
-    }
+        args_ = unique_ptr<double[]>(new double[mol.size()+1]);
+        for ( unsigned int i = 0; i < mol.size(); ++i )
+        {
+            // Initialize the value.
+            args_[i] = 0.0;
+            addVar( "x"+to_string(i), i );
+        }
 
-    // Define a 't' variable even if we don't always use it.
-    args_[mol.size()] = 0.0;
-    parser_.DefineVar( "t", &args_[mol.size()]);
+        // Define a 't' variable even if we don't always use it.
+        addVar( "t", mol.size());
+    }
+    else
+        MOOSE_WARN( "Do not change args_ dynamically.");
 }
 
-const vector< unsigned int >& FuncTerm::getReactantIndex() const
+const vector<unsigned int>& FuncTerm::getReactantIndex() const
 {
     return reactantIndex_;
 }
@@ -121,21 +122,17 @@ double FuncTerm::getVolScale() const
 
 const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
 {
-    args_ = 0; // Don't delete it, the original one is still using it.
+    args_.reset( other.args_.get() ); // unique_ptr
     expr_ = other.expr_;
     volScale_ = other.volScale_;
     target_ = other.target_;
     setReactantIndex( other.reactantIndex_ );
-
-    // Parser can't be copied. Copy symbol table and expression.
-    parser_.RegisterSymbolTable( other.parser_.GetSymbolTable() );
-
     return *this;
 }
 
 void FuncTerm::addVar( const string& name, size_t i )
 {
-    parser_.DefineVar( name, &args_[i] );
+    parser_.DefineVar(name, args_[i]);
 }
 
 /**
@@ -146,16 +143,22 @@ double FuncTerm::operator() ( const double* S, double t ) const
 {
     if ( !args_ )
         return 0.0;
-
+    
     for (size_t i = 0; i < reactantIndex_.size(); ++i)
         args_[i] = S[reactantIndex_[i]];
 
-    // Add symbol 't' to the parser.
+    // update value of t.
     args_[reactantIndex_.size()] = t;
+
+    //cout << "FuncTerm::operator() :: ";
+    //for (size_t i = 0; i < reactantIndex_.size(); i++)
+    //   cout << args_[i] << "(" << reactantIndex_[i] << "), ";
+    //cout << args_[reactantIndex_.size()] << endl;
 
     try
     {
         double result = parser_.Eval() * volScale_;
+        //cout << " Result= " << result << endl;
         return result;
     }
     catch (moose::Parser::exception_type &e )
@@ -170,7 +173,8 @@ void FuncTerm::evalPool( double* S, double t ) const
 {
     if ( !args_ || target_ == ~0U )
         return;
-    unsigned int i;
+
+    size_t i;
     for ( i = 0; i < reactantIndex_.size(); ++i )
         args_[i] = S[reactantIndex_[i]];
     args_[i] = t;

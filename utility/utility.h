@@ -11,6 +11,7 @@
 
 #ifndef _UTILITY_H
 
+#include <memory>
 #include "strutil.h"
 
 // See types.cpp file for definitions.
@@ -20,7 +21,7 @@ namespace moose
     char shortType(std::string type);
     char innerType(char typecode);
     char shortFinfo(std::string ftype);
-    const map<std::string, std::string>& getArgMap();
+    const std::map<std::string, std::string>& getArgMap();
 
     /**
      * @brief Givem path of MOOSE element, return its name. It's behaviour is
@@ -32,7 +33,6 @@ namespace moose
     {
         return path.substr( path.find_last_of('/') + 1 );
     }
-
 }
 
 

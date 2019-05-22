@@ -349,8 +349,8 @@ void SeqSynHandler::updateKernel()
     double x = 0;
     double t = 0;
     moose::MooseParser p;
-    p.DefineVar("x", &x);
-    p.DefineVar("t", &t);
+    p.DefineVar("x", x);
+    p.DefineVar("t", t);
     p.SetExpr( kernelEquation_ );
     kernel_.clear();
     int nh = numHistory();

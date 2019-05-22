@@ -363,9 +363,11 @@ static double _addVar(const char *name, void *data)
 void Func::setExpr( const string expr)
 {
     _valid = false;
+    moose::Parser::varmap_type vars;
     try
     {
         _parser.SetExpr(expr);
+        vars = _parser.GetUsedVar();
     }
     catch (moose::Parser::exception_type &e)
     {
@@ -374,7 +376,6 @@ void Func::setExpr( const string expr)
         return;
     }
 
-    moose::Parser::varmap_type vars = _parser.GetUsedVar();
 
     moose::Parser::varmap_type::iterator v = vars.find("x");
     if (v != vars.end())
@@ -412,6 +413,12 @@ void Func::setExpr( const string expr)
         _z = v->second;
     }
     _valid = true;
+
+    // cout << MOOSE_DEBUG( "Setting expression " << expr);
+    // for (auto& i : vars)
+        // cout << i->first << '=' << i->second << ", ";
+    // cout << endl;
+
 }
 
 string Func::getExpr() const

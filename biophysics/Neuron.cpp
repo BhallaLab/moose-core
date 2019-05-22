@@ -40,18 +40,18 @@ public:
         oldVal(0.0), // Original value of field, if needed.
         useOldVal( false ) // is the 'orig' field needed?
     {
-        DefineVar( "p",      &p );
-        DefineVar( "g",      &g );
-        DefineVar( "L",      &L );
-        DefineVar( "len",    &len );
-        DefineVar( "dia",    &dia );
-        DefineVar( "maxP",   &maxP );
-        DefineVar( "maxG",   &maxG );
-        DefineVar( "maxL",   &maxL );
-        DefineVar( "x",      &x );
-        DefineVar( "y",      &y );
-        DefineVar( "z",      &z );
-        DefineVar( "oldVal", &oldVal );
+        DefineVar( "p",      p );
+        DefineVar( "g",      g );
+        DefineVar( "L",      L );
+        DefineVar( "len",    len );
+        DefineVar( "dia",    dia );
+        DefineVar( "maxP",   maxP );
+        DefineVar( "maxG",   maxG );
+        DefineVar( "maxL",   maxL );
+        DefineVar( "x",      x );
+        DefineVar( "y",      y );
+        DefineVar( "z",      z );
+        DefineVar( "oldVal", oldVal );
         DefineFun1( "H",     nuParser::H );
 
         if ( expr.find( "oldVal" ) != string::npos )

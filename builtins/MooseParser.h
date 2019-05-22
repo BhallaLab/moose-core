@@ -67,12 +67,12 @@ class MooseParser
         void SetSymbolTable( Parser::symbol_table_t tab );
         void SetExpression( Parser::expression_t& expr );
 
-        void RegisterSymbolTable( Parser::symbol_table_t tab );
+        void RegisterSymbolTable(bool errorOnDuplicate=true);
 
         /*-----------------------------------------------------------------------------
          *  User interface.
          *-----------------------------------------------------------------------------*/
-        void DefineVar( const string& varName, double* v );
+        void DefineVar( const string& varName, double& v );
 
         void DefineConst( const string& cname, const double val );
 
@@ -114,7 +114,7 @@ class MooseParser
         Parser::varmap_type GetConst( ) const;
         Parser::varmap_type GetUsedVar( );
 
-        void ClearVar( );
+        void ClearVariables( );
         const string GetExpr( ) const;
         void SetVarFactory( double* (*fn)(const char*, void*), void *);
 
@@ -145,6 +145,8 @@ class MooseParser
         Parser::expression_t   expression_;     /* expression type */
         Parser::parser_t       parser_;          /* parser */
         size_t num_user_defined_funcs_ = 0;
+
+        bool symbol_tables_registered_;
 };
 
 } // namespace moose.

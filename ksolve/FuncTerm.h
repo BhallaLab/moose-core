@@ -45,8 +45,8 @@ public:
      * S. It returns the number of indices found, which are the
      * entries in molIndex.
      */
-    void setReactantIndex( const vector< unsigned int >& mol );
-    const vector< unsigned int >& getReactantIndex() const;
+    void setReactantIndex(const vector<unsigned int>& mol);
+    const vector<unsigned int>& getReactantIndex() const;
 
     const string& getExpr() const;
     void setExpr( const string& e );
@@ -61,7 +61,8 @@ public:
 
 private:
 
-    double* args_;
+    unique_ptr<double[]> args_;
+    // vector<double> args_;
 
     // Look up reactants in the S vec.
     vector< unsigned int > reactantIndex_;
