@@ -13,8 +13,6 @@ import abstrModelEqns9 as ame
 import rdesigneur as rd
 print( "[INFO ] Using moose from %s" % moose.__file__ )
 
-
-
 def singleCompt( name, params ):
     mod = moose.copy( '/library/' + name + '/' + name, '/model' )
     A = moose.element( mod.path + '/A' )
@@ -25,8 +23,9 @@ def singleCompt( name, params ):
     runtime = params['preStimTime'] + params['postStimTime']
     steptime = 50
 
+    print( '[INFO] CaStim.expr(before) = %s' % CaStim.expr )
     CaStim.expr += '+x2*(t>100+'+str(runtime)+')*(t<100+'+str(runtime+steptime)+ ')'
-    print("CaStim.expr=%s" % CaStim.expr)
+    print("[INFO] CaStim.expr = %s" % CaStim.expr)
     tab = moose.Table2( '/model/' + name + '/Atab' )
     ampl = moose.element( mod.path + '/ampl' )
     phase = moose.element( mod.path + '/phase' )
@@ -47,7 +46,7 @@ def singleCompt( name, params ):
     return name, t, tab.vector
 
 
-def plotPanelC():
+def run():
     panelC = []
     panelCticks = []
     panelC.append( singleCompt( 'negFB', ame.makeNegFB( [] ) ) )
@@ -120,46 +119,8 @@ def makePassiveSoma( name, length, diameter ):
     dend.x = length
     return elecid
 
-def plotOnePanel( tLabel, dt, tplot, numSyn, plotRange, tick ):
-    t = np.arange( 0, len( tplot[0] ), 1.0 ) * dt
-    for i in range( 5 ):
-        print( tplot[i] )
-
-
-def plotPanelDEFG( seq, row ):
-    makePassiveSoma( 'cell', 100e-6, 10e-6 )
-    start = (row -1) * 4
-    tLabel = chr( ord( 'B' ) + row - 1 )
-    xLabel = chr( ord( 'D' ) + row - 1 )
-    xplot = []
-
-
-    dt, tplot, avec = runPanelDEFG( 'negFB', 5.0, 2.0, 5, seq, 1.0 )
-    xplot.append( avec )
-    t = np.arange( 0, len( tplot[0] ), 1.0 ) * dt
-
-    dt, tplot, avec = runPanelDEFG( 'negFF', 10.0, 1.0, 5, seq, 1.0 )
-    xplot.append( avec )
-    t = np.arange( 0, len( tplot[0] ), 1.0 ) * dt
-    dt, tplot, avec = runPanelDEFG( 'fhn', 5.0, 1.5, 5, seq, 0.4 )
-    xplot.append( avec )
-    t = np.arange( 0, len( tplot[0] ), 1.0 ) * dt
-
-    dt, tplot, avec = runPanelDEFG( 'bis', 15.0, 2.0, 5, seq, 1.0 )
-    xplot.append( avec )
-    t = np.arange( 0, len( tplot[0] ), 1.0 ) * dt
-    ref = np.array( [0.04840247926323106, 0.060446860947786119
-        , 0.047612129439079991, 0.081329604404641223, 0.050365470686926379] )
-    res = np.array( [ np.mean( x )  for x in tplot ] )
-    assert np.isclose( ref.all(), res.all() ), "Expected %s got %s" % (ref,res)
-
 if __name__ == '__main__':
     moose.Neutral( '/library' )
     moose.Neutral( '/model' )
-    plotPanelC()
-    #if sys.version_info[0] == 2:
-    #    plotPanelDEFG( [0,1,2,3,4], 3 )
-    #    plotPanelDEFG( [4,1,0,3,2], 4 )
-    #else:
-    #    print( 'TODO: Running any of the following two functions causes seg-fault' )
+    run()
     print( 'All done' )

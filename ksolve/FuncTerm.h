@@ -62,7 +62,6 @@ public:
 private:
 
     unique_ptr<double[]> args_;
-    // vector<double> args_;
 
     // Look up reactants in the S vec.
     vector< unsigned int > reactantIndex_;

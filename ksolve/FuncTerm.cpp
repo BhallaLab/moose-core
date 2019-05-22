@@ -48,23 +48,23 @@ void FuncTerm::setReactantIndex(const vector<unsigned int>& mol)
 {
     reactantIndex_ = mol;
 
-    // NOTE: If args_ has been setup up before and symbol table has been setup
-    // and we must not change the address here.
-    if(nullptr == args_.get())
-    {
-        args_ = unique_ptr<double[]>(new double[mol.size()+1]);
-        for ( unsigned int i = 0; i < mol.size(); ++i )
-        {
-            // Initialize the value.
-            args_[i] = 0.0;
-            addVar( "x"+to_string(i), i );
-        }
+    // The address of args_ has changed now. Any previous mapping with ExprTK
+    // symbol table is now invalidated and thus can't be used anymore. We need
+    // to re-assign parser as well
+    // The address of args_ has changed now. Any previous mapping with ExprTK
+    // symbol table is now invalidated and thus can't be used anymore. We need
+    // to re-assign parser.
+    parser_.Reinit();
+    args_ = unique_ptr<double[]>(new double[mol.size()+1]());
+    for ( unsigned int i = 0; i < mol.size(); ++i )
+        addVar( "x"+to_string(i), i );
 
-        // Define a 't' variable even if we don't always use it.
-        addVar( "t", mol.size());
-    }
-    else
-        MOOSE_WARN( "Do not change args_ dynamically.");
+    // Define a 't' variable even if we don't always use it.
+    addVar( "t", mol.size());
+
+    // Need to compile else we get garbage value. Not sure why ExprTK is so
+    // finicy about it.
+    parser_.CompileExpr();
 }
 
 const vector<unsigned int>& FuncTerm::getReactantIndex() const
@@ -150,15 +150,19 @@ double FuncTerm::operator() ( const double* S, double t ) const
     // update value of t.
     args_[reactantIndex_.size()] = t;
 
-    //cout << "FuncTerm::operator() :: ";
-    //for (size_t i = 0; i < reactantIndex_.size(); i++)
-    //   cout << args_[i] << "(" << reactantIndex_[i] << "), ";
-    //cout << args_[reactantIndex_.size()] << endl;
+#ifdef exprtk_enable_debugging
+    cout << "FuncTerm::operator() :: ";
+    for (size_t i = 0; i < reactantIndex_.size(); i++)
+      cout << args_[i] << "(" << reactantIndex_[i] << "), ";
+    cout << args_[reactantIndex_.size()] << endl;
+#endif
 
     try
     {
         double result = parser_.Eval() * volScale_;
-        //cout << " Result= " << result << endl;
+#ifdef exprtk_enable_debugging
+        cout << " Result= " << result << endl;
+#endif
         return result;
     }
     catch (moose::Parser::exception_type &e )

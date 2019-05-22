@@ -319,7 +319,6 @@ void testFuncTerm()
     mol[1] = 0;
     ft.setReactantIndex(mol);
     
-    cout << "+++ Setting expression in testFuncTerm " << endl;
     ft.setExpr("x0+x1*t");
     ans = ft(args, 10.0);
     assert(doubleEq(ans, 13.0));
