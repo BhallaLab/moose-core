@@ -329,25 +329,14 @@ Function& Function::operator=(const Function& rhs)
     independent_ = rhs.independent_;
     stoich_ = rhs.stoich_;
 
-    // new parser.
-    parser_ = new moose::MooseParser();
-
-    // Copy the constants
-    moose::Parser::varmap_type cmap = rhs.parser_->GetConst();
-    if (! cmap.empty())
-        for (auto item = cmap.begin(); item != cmap.end(); ++item)
-            parser_->DefineConst(item->first.c_str(), item->second);
-
-    // Now add the variables to the map.
-    parser_->SetVariableMap(rhs.vars_);
-    parser_->CompileExpr();
+    // shared parser.
+    parser_ = rhs.parser_;
     return *this;
 }
 
 Function::~Function()
 {
     clearBuffer();
-    delete parser_;
 }
 
 // do not know what to do about Variables that have already been

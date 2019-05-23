@@ -112,7 +112,7 @@ protected:
     vector<shared_ptr<double>> ys_;
 
     // parser. It is often copied.
-    moose::MooseParser* parser_;
+    shared_ptr<moose::MooseParser> parser_;
 
     // Used by kinetic solvers when this is zombified.
     void* stoich_;
