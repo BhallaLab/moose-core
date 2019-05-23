@@ -2,6 +2,8 @@
 import os
 import sys
 import moose
+print( "[INFO ] Using moose from %s" % moose.__file__ )
+
 import numpy as np
 import fixXreacs
 
@@ -14,6 +16,7 @@ def main( standalone = False ):
     mfile = os.path.join( os.path.dirname( __file__), 'OSC_diff_vols.g' )
     runtime = 4000.0
     modelId = moose.loadModel( mfile, 'model', 'ee' )
+    print( 'model loaded' )
     kin = moose.element( '/model/kinetics' )
     compt1 = moose.element( '/model/compartment_1' )
     compt1.x1 += kin.x1

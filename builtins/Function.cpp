@@ -318,6 +318,7 @@ Function& Function::operator=(const Function& rhs)
     if( this == &rhs)
         return *this;
 
+    MOOSE_DEBUG( " Copy assignment " );
     valid_ = rhs.valid_;
     numVar_ = rhs.numVar_;
     lastValue_ = rhs.lastValue_;
@@ -336,6 +337,7 @@ Function& Function::operator=(const Function& rhs)
 
 Function::~Function()
 {
+    cout << " Destructor ... " << endl;
     clearBuffer();
 }
 
@@ -377,11 +379,9 @@ void Function::showError(moose::Parser::exception_type &e) const
    at evaluation of the same, i.e. when you access `value` of the
    Function object.
  */
-double* Function::addVariable(const char* name)
+void Function::addVariable(const char* name)
 {
-    double* ret = nullptr;
     string strname(name);
-
     // Names starting with x are variables, everything else is constant.
     if (strname[0] == 'x')
     {
@@ -397,10 +397,12 @@ double* Function::addVariable(const char* name)
         }
 
         if( xs_[index] == nullptr)
-            xs_[index] = std::move(unique_ptr<Variable>(new Variable()));
-
+        {
+            xs_[index].reset(new Variable());
+            parser_->DefineVar(name, xs_[index]->value);
+        }
         numVar_ = xs_.size();
-        return &(xs_[index]->value);
+        return;
     }
 
     if (strname[0] == 'y')
@@ -416,12 +418,18 @@ double* Function::addVariable(const char* name)
         }
 
         if (ys_[index] == nullptr)
-            ys_[index] = std::move(unique_ptr<double>(new double()));
-        return ys_[index].get();
+        {
+            ys_[index].reset(new double());
+            parser_->DefineVar(name, *ys_[index].get());
+        }
+        return;
     }
 
     if (strname == "t")
-        return &t_;
+    {
+        parser_->DefineVar("t", t_);
+        return;
+    }
 
     cerr << "Got an undefined symbol: " << name << endl
          << "Variables must be named xi, yi, where i is integer index."
@@ -429,7 +437,6 @@ double* Function::addVariable(const char* name)
          " = value"
          << endl;
     throw moose::Parser::ParserException("Undefined constant.");
-    return nullptr;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -443,7 +450,6 @@ double* Function::addVariable(const char* name)
 
 void Function::setExpr(const Eref& eref, string expr)
 {
-    MOOSE_DEBUG( this << " : Setting expression " <<  expr );
     this->innerSetExpr( eref, expr ); // Refer to the virtual function here.
 }
 
@@ -460,14 +466,14 @@ void Function::innerSetExpr(const Eref& eref, string expr)
     // Now create a map which maps the variable name to location of values. This
     // is critical to make sure that pointers remain valid when multi-threaded
     // encironment is used.
-    vars_["t"] = addVariable("t");
-    for(auto &x : xs) vars_[x] = addVariable(x.c_str());
-    for(auto &y : ys) vars_[y] = addVariable(y.c_str());
+    MOOSE_DEBUG( this << ": Setting expression " <<  expr );
+    addVariable("t");
+    for(auto &x : xs) addVariable(x.c_str());
+    for(auto &y : ys) addVariable(y.c_str());
 
     try
     {
         // Set parser expression. Send the map and the array of values as well.
-        parser_->SetVariableMap(vars_);
         valid_ = parser_->SetExpr( expr );
     }
     catch (moose::Parser::exception_type &e)
@@ -582,7 +588,6 @@ double Function::getDerivative() const
 
 void Function::setNumVar(const unsigned int num)
 {
-    clearBuffer();
     for (unsigned int ii = 0; ii < num; ++ii)
         addVariable(("x"+std::to_string(ii)).c_str());
 }

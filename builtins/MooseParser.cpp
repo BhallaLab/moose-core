@@ -17,7 +17,8 @@
 #include "../utility/strutil.h"
 #include "../basecode/global.h"
 #include "MooseParser.h"
-// #define DEBUG_HERE
+
+#define DEBUG_HERE
 
 using namespace std;
 
@@ -90,19 +91,19 @@ Parser::expression_t MooseParser::GetExpression( ) const
 /*-----------------------------------------------------------------------------
  *  Other function.
  *-----------------------------------------------------------------------------*/
-void MooseParser::DefineVar( const string& varName, double& val)
+void MooseParser::DefineVar( const string varName, double& val)
 {
     // If this variable alreay exists, then delete the previous instance and
     // create the new variable.
     if(0 == symbol_table_->variable_ref(varName))
     {
 #ifdef DEBUG_HERE
-        MOOSE_DEBUG( "++ Adding var " << varName << "=" << val << "(" << &val << ")");
+        MOOSE_DEBUG( "\tAdding var " << varName << "=" << val << "(" << &val << ")");
 #endif
         symbol_table_->add_variable(varName, val);
         return;
     }
-    //throw runtime_error("Variable " + varName + " already exists parser's table.");
+    throw runtime_error("Variable " + varName + " already exists parser's table.");
 }
 
 /* --------------------------------------------------------------------------*/
@@ -177,7 +178,7 @@ bool MooseParser::CompileExpr()
 {
     // User should make sure that symbol table has been setup. Do not raise
     // exception here. User can set expression again.
-    //cout <<  this << ": Compiling " << expr_ << ": ";
+    cout <<  "\t" << this << " : Compiling " << expr_ << ": ";
     // GCC specific
     //cout << __builtin_return_address(0) << "\t";
     //cout << __builtin_return_address(1) << endl;
@@ -194,6 +195,17 @@ bool MooseParser::CompileExpr()
             ss << "Error[" << i << "] Position: " << error.token.position
                  << " Type: [" << exprtk::parser_error::to_str(error.mode)
                  << "] Msg: " << error.diagnostic << endl;
+            
+            // map is
+            auto symbTable = GetSymbolTable();
+            vector<std::pair<string, double>> vars;
+            auto n = symbTable.get_variable_list(vars);
+            ss << "Total variables " << n << ".";
+            for (auto i : vars)
+            {
+                ss << "\t" << i.first << "=" << i.second << " " << &symbol_table_->get_variable(i.first)->ref();
+            }
+            ss << endl;
         }
         throw runtime_error("Error in compilation: " + expr_ + "\n" + ss.str());
     }
@@ -202,12 +214,8 @@ bool MooseParser::CompileExpr()
 
 void MooseParser::SetVariableMap( const map<string, double*> m )
 {
-    map_.clear();
     for( auto &v : m )
-    {
-        map_[v.first] = v.second;
         symbol_table_->add_variable( v.first, *v.second );
-    }
 }
 
 double MooseParser::Eval( ) const

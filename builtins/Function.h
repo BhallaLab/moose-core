@@ -82,7 +82,7 @@ public:
     void process(const Eref& e, ProcPtr p);
     void reinit(const Eref& e, ProcPtr p);
 
-    double* addVariable(const char* name);
+    void addVariable(const char* name);
 
 
     void clearBuffer();

@@ -74,7 +74,7 @@ public:
     /*-----------------------------------------------------------------------------
      *  User interface.
      *-----------------------------------------------------------------------------*/
-    void DefineVar( const string& varName, double& v );
+    void DefineVar( const string varName, double& v );
 
     void DefineConst( const string& cname, const double val );
 
