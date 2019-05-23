@@ -177,7 +177,10 @@ bool MooseParser::CompileExpr()
 {
     // User should make sure that symbol table has been setup. Do not raise
     // exception here. User can set expression again.
-    MOOSE_DEBUG( this << ": Compiling " << expr_ );
+    //cout <<  this << ": Compiling " << expr_ << ": ";
+    // GCC specific
+    //cout << __builtin_return_address(0) << "\t";
+    //cout << __builtin_return_address(1) << endl;
 
     if(expr_.empty())
         return false;

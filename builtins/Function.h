@@ -26,8 +26,7 @@ public:
     Function();
     ~Function();
 
-    // Needs to copy the function.
-    Function(const Function& rhs);
+    // copy operator.
     Function& operator=(const Function& rhs);
 
     static const Cinfo * initCinfo();
@@ -113,7 +112,7 @@ protected:
     vector<shared_ptr<double>> ys_;
 
     // parser. It is often copied.
-    std::shared_ptr<moose::MooseParser> parser_;
+    moose::MooseParser* parser_;
 
     // Used by kinetic solvers when this is zombified.
     void* stoich_;

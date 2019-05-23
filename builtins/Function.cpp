@@ -305,34 +305,13 @@ Function::Function():
     , value_(0.0), rate_(0.0), mode_(1)
     , useTrigger_(false), doEvalAtReinit_(false)
     , t_(0.0), independent_("x0")
-    , parser_( unique_ptr<moose::MooseParser>(new moose::MooseParser()) )
+    , parser_( new moose::MooseParser() )
     , stoich_(nullptr)
 {
-    // Parser gets it t variable from  here.
-    parser_->DefineVar("t", t_);
+
 }
 
-Function::Function(const Function& rhs):
-    valid_(rhs.valid_),
-    numVar_(rhs.numVar_),
-    lastValue_(rhs.lastValue_),
-    value_(rhs.value_), rate_(rhs.rate_),
-    mode_(rhs.mode_),
-    useTrigger_( rhs.useTrigger_),
-    t_(rhs.t_), independent_(rhs.independent_),
-    parser_(std::move(rhs.parser_) ),
-    stoich_(nullptr),
-    vars_(rhs.vars_)
-{
-    xs_.clear();
-    for (size_t i = 0; i < rhs.xs_.size(); i++)
-        xs_.push_back(std::move(rhs.xs_[i]));
-
-    ys_.clear();
-    for (size_t i = 0; i < rhs.ys_.size(); i++)
-        ys_.push_back(std::move(rhs.ys_[i]));
-}
-
+// Careful: This is a critical function.
 Function& Function::operator=(const Function& rhs)
 {
     // protect from self-assignment.
@@ -345,10 +324,13 @@ Function& Function::operator=(const Function& rhs)
     value_ = rhs.value_;
     mode_ = rhs.mode_;
     useTrigger_ = rhs.useTrigger_;
+    t_ = rhs.t_;
     rate_ = rhs.rate_;
     independent_ = rhs.independent_;
+    stoich_ = rhs.stoich_;
 
-    parser_ = std::move(rhs.parser_);
+    // new parser.
+    parser_ = new moose::MooseParser();
 
     // Copy the constants
     moose::Parser::varmap_type cmap = rhs.parser_->GetConst();
@@ -356,22 +338,16 @@ Function& Function::operator=(const Function& rhs)
         for (auto item = cmap.begin(); item != cmap.end(); ++item)
             parser_->DefineConst(item->first.c_str(), item->second);
 
-    // Move unique_ptr 
-    xs_.clear();
-    for (unsigned int ii = 0; ii < rhs.xs_.size(); ++ii)
-       xs_.push_back(std::move(rhs.xs_[ii]));
-
-    // move unique_ptr
-    ys_.clear();
-    for (unsigned int ii = 0; ii < rhs.ys_.size(); ++ii)
-        ys_.push_back(std::move(rhs.ys_[ii]));
-
+    // Now add the variables to the map.
+    parser_->SetVariableMap(rhs.vars_);
+    parser_->CompileExpr();
     return *this;
 }
 
 Function::~Function()
 {
     clearBuffer();
+    delete parser_;
 }
 
 // do not know what to do about Variables that have already been
