@@ -89,12 +89,10 @@ public:
 
     void SetVariableMap( const map<string, double*> map );
 
-    static void findAllVars( const string& expr, vector<string>& vars, char start );
-    static void findXsYs( const string& expr, vector<string>& xs, vector<string>& ys );
+    static void findAllVars( const string& expr, set<string>& vars, const string& start );
+    static void findXsYs(const string& expr, set<string>& xs, set<string>& ys);
 
     double Eval( ) const;
-
-    bool IsConstantExpr( const string& expr );
 
     Parser::varmap_type GetVar() const;
 

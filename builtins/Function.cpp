@@ -322,7 +322,7 @@ Function::Function(const Function& rhs):
     t_(rhs.t_), independent_(rhs.independent_),
     parser_(std::move(rhs.parser_) ),
     stoich_(nullptr),
-    map_(rhs.map_)
+    vars_(rhs.vars_)
 {
     xs_.clear();
     for (size_t i = 0; i < rhs.xs_.size(); i++)
@@ -432,12 +432,8 @@ double* Function::addVariable(const char* name)
         }
 
         if( xs_[index] == nullptr)
-        {
             xs_[index] = std::move(unique_ptr<Variable>(new Variable()));
-            // Add this varibale to parser. If already exists then
-            // following function does nothing.
-            parser_->DefineVar(strname, xs_[index]->value);
-        }
+
         numVar_ = xs_.size();
         return &(xs_[index]->value);
     }
@@ -445,26 +441,22 @@ double* Function::addVariable(const char* name)
     if (strname[0] == 'y')
     {
         int index = atoi(strname.substr(1).c_str());
-        if ((unsigned)index >= ys_.size())
+        // Only when i of xi is larger than the size of current xs_, we need to
+        // resize the container.
+        if ((size_t)index >= ys_.size())
         {
-            ys_.reserve(index+1);
-            for (int ii = 0; ii <= index; ++ii)
-            {
-                if (ys_[ii] == nullptr)
-                {
-                    ys_[ii] = std::move(unique_ptr<double>(new double()));
-                    parser_->DefineVar(strname, *ys_[ii].get());
-                }
-            }
+            // Equality with index because we cound from 0.
+            for (size_t i = ys_.size(); i <= (size_t) index; i++) 
+                ys_.push_back(nullptr);
         }
+
+        if (ys_[index] == nullptr)
+            ys_[index] = std::move(unique_ptr<double>(new double()));
         return ys_[index].get();
     }
 
     if (strname == "t")
-    {
-        parser_->DefineVar(strname, t_);
         return &t_;
-    }
 
     cerr << "Got an undefined symbol: " << name << endl
          << "Variables must be named xi, yi, where i is integer index."
@@ -494,40 +486,23 @@ void Function::setExpr(const Eref& eref, string expr)
 void Function::innerSetExpr(const Eref& eref, string expr)
 {
     valid_ = false;
-    clearBuffer();
-    xs_.resize(numVar_);
-
-    // Reinitialize the parser.
-    parser_->Reinit();
 
     // Find all variables x\d+ or y\d+ etc, and add them to variable buffer.
-    vector<string> xs;
-    vector<string> ys;
-
-    moose::MooseParser::findXsYs( expr, xs, ys);
+    set<string> xs;
+    set<string> ys;
+    moose::MooseParser::findXsYs(expr, xs, ys);
 
     // Now create a map which maps the variable name to location of values. This
     // is critical to make sure that pointers remain valid when multi-threaded
     // encironment is used.
-    addVariable("t");
-    for( size_t i = 0; i < xs.size(); i++ )
-    {
-        addVariable( xs[i].c_str());
-        // get the address of Variable's value. Is it safe in multi-threaded
-        // environment? I hope so.
-        map_[xs[i]] = &(xs_[i]->value);
-    }
-
-    for( size_t i = 0; i < ys.size(); i++ )
-    {
-        addVariable( ys[i].c_str());
-        map_[ys[i]] = ys_[i].get();
-    }
+    vars_["t"] = addVariable("t");
+    for(auto &x : xs) vars_[x] = addVariable(x.c_str());
+    for(auto &y : ys) vars_[y] = addVariable(y.c_str());
 
     try
     {
         // Set parser expression. Send the map and the array of values as well.
-        parser_->SetVariableMap( map_ );
+        parser_->SetVariableMap(vars_);
         valid_ = parser_->SetExpr( expr );
     }
     catch (moose::Parser::exception_type &e)

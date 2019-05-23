@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <cassert>
+#include <regex>
 
 #include "../utility/testing_macros.hpp"
 #include "../utility/print_function.hpp"
@@ -129,35 +130,15 @@ void MooseParser::DefineFun1( const string& funcName, double (&func)(double) )
     symbol_table_->add_function( funcName, func );
 }
 
-bool MooseParser::IsConstantExpr( const string& expr )
+void MooseParser::findAllVars( const string& expr, set<string>& vars, const string& pattern)
 {
-    vector<string> xs;
-    vector<string> ys;
-    findXsYs( expr, xs, ys );
-    if( 0 < (xs.size() + ys.size()) )
-        return false;
-    return true;
-}
-
-void MooseParser::findAllVars( const string& expr, vector<string>& vars, char start )
-{
-    int startVar=-1;
-    string temp = expr + "!"; // To make sure we compare the last element as well.
-    for( size_t i = 0; i < temp.size(); i++)
+    const regex xpat(pattern);
+    smatch sm;
+    string temp(expr);
+    while(regex_search(temp, sm, xpat)) 
     {
-        if( startVar == -1 && start == expr[i] )
-        {
-            startVar = i;
-            continue;
-        }
-        if( startVar > -1 )
-        {
-            if( ! isdigit( expr[i] ) )
-            {
-                vars.push_back( expr.substr(startVar, i - startVar ) );
-                startVar = -1;
-            }
-        }
+        vars.insert(sm.str());
+        temp = sm.suffix();
     }
 }
 
@@ -177,10 +158,10 @@ string MooseParser::Reformat( const string user_expr )
     return expr;
 }
 
-void MooseParser::findXsYs( const string& expr, vector<string>& xs, vector<string>& ys )
+void MooseParser::findXsYs( const string& expr, set<string>& xs, set<string>& ys )
 {
-    findAllVars( expr, xs, 'x' );
-    findAllVars( expr, ys, 'y' );
+    findAllVars( expr, xs, "x\\d+");
+    findAllVars( expr, ys, "y\\d+" );
 }
 
 bool MooseParser::SetExpr( const string& user_expr )

@@ -120,7 +120,7 @@ protected:
 
     // These variables may be redundant but used for interfacing with
     // MooseParser.
-    map<string, double*> map_;
+    map<string, double*> vars_;
 };
 
 #endif /* end of include guard: FUNCTIONH_ */
