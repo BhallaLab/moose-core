@@ -17,6 +17,8 @@ def create_func( funcname, expr ):
     f.expr = expr
     t = moose.Table( funcname + 'tab' )
     moose.connect( t, 'requestOut', f, 'getValue' )
+    moose.setClock( f.tick, 0.1)
+    moose.setClock( t.tick, 0.1)
     return f, t
 
 def test_var_order():
@@ -73,32 +75,23 @@ def test_var_order():
     print( 'Passed order vars' )
 
 def test_t( ):
-    f = moose.Function( '/funct' )
-    f.expr = 't/2.0'
-    t = moose.Table( '/table1' )
-    moose.setClock( f.tick, 0.1)
-    moose.setClock( t.tick, 0.1)
-    moose.connect( t, 'requestOut', f, 'getValue' )
+    f, t = create_func( 'funct', 't/2.0')
     moose.reinit()
-    moose.start( 1 )
+    moose.start(1)
     y = t.vector
     d = np.diff( y[1:] ) 
     assert np.mean(d) == d[0]
     print( 'Passed t/2' )
 
 def test_trig( ):
-    f = moose.Function( '/func2' )
-    f.expr = 'sin(t)^2+cos(t)^2'
-    t = moose.Table( '/table2' )
-    moose.setClock( f.tick, 0.1)
-    moose.setClock( t.tick, 0.1)
-    moose.connect( t, 'requestOut', f, 'getValue' )
+    f, t = create_func('func2', '(sin(t)^2+cos(t)^2)-1')
     moose.reinit()
     moose.start( 1 )
     y = t.vector
-    assert np.mean(y) == 1.0
+    print(y)
+    assert np.mean(y) == 0.0
     assert np.std(y) == 0.0
-    print( 'Passed sin^2 x + cos^x==1' )
+    print( 'Passed sin^2 x + cos^x=1' )
 
 def test_rand( ):
     moose.seed( 10 )
@@ -109,18 +102,22 @@ def test_rand( ):
             , 0.26556613, 0.15037787, 0.81660184, 0.89081653 
             , 0.03061665, 0.72743551, 0.13145815 ]
     assert np.isclose(t.vector, expected ).all()
-    print( 'passed test random' )
+    print( 'Passed test random' )
 
 def test_fmod( ):
     f, t = create_func( 'fmod', 'fmod(t, 2)' )
     moose.reinit()
     moose.start( 20 )
     y = t.vector
-    assert( np.max(y) <= 2 ), y
+    assert (np.fmod(y, 2) == y).all()
+    assert(np.isclose(np.max(y), 1.9)), np.max(y)
+    assert(np.isclose(np.min(y), 0.0)), np.min(y)
+    print('Passed fmod(t,2)')
+
 
 if __name__ == '__main__':
     test_var_order()
-    test_t( )
-    test_trig( )
-    test_rand( )
-    test_fmod( )
+    test_t()
+    test_trig()
+    test_rand()
+    test_fmod()

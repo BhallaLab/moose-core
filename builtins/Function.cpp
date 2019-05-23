@@ -310,25 +310,25 @@ const Cinfo * Function::initCinfo()
 
 static const Cinfo * functionCinfo = Function::initCinfo();
 
-Function::Function(): _t(0.0), _valid(false), _numVar(0), _lastValue(0.0),
-    _value(0.0), _rate(0.0), _mode(1),
-    _useTrigger( false ), _doEvalAtReinit( false ), _stoich(0)
+Function::Function(): t_(0.0), valid_(false), numVar_(0), lastValue_(0.0),
+    value_(0.0), rate_(0.0), mode_(1),
+    useTrigger_( false ), doEvalAtReinit_( false ), stoich_(0)
 {
-    _independent = "x0";
-    map_["t"] = &_t;
+    independent_ = "x0";
+    map_["t"] = &t_;
 }
 
 Function::Function(const Function& rhs):
-    _numVar(rhs._numVar),
-    _lastValue(rhs._lastValue),
-    _value(rhs._value), _rate(rhs._rate),
-    _mode(rhs._mode),
-    _useTrigger( rhs._useTrigger),
-    _stoich(0),
+    numVar_(rhs.numVar_),
+    lastValue_(rhs.lastValue_),
+    value_(rhs.value_), rate_(rhs.rate_),
+    mode_(rhs.mode_),
+    useTrigger_( rhs.useTrigger_),
+    stoich_(0),
     map_(rhs.map_)
 {
     static Eref er;
-    _independent = rhs._independent;
+    independent_ = rhs.independent_;
 
     // Copy the constants
     moose::Parser::varmap_type cmap = rhs.parser_.GetConst();
@@ -336,29 +336,29 @@ Function::Function(const Function& rhs):
         for (auto item = cmap.begin(); item!=cmap.end(); ++item)
             parser_.DefineConst(item->first, item->second);
 
-    setExpr(er, rhs.getExpr( er ));
+    setExpr(er, rhs.getExpr(er));
 
     // Copy the values from the var pointers in rhs
-    assert(_varbuf.size() == rhs._varbuf.size());
-    for (size_t ii = 0; ii < rhs._varbuf.size(); ++ii)
-        _varbuf[ii]->value = rhs._varbuf[ii]->value;
+    assert(varbuf_.size() == rhs.varbuf_.size());
+    for (size_t ii = 0; ii < rhs.varbuf_.size(); ++ii)
+        varbuf_[ii]->value = rhs.varbuf_[ii]->value;
 
-    assert(_pullbuf.size() == rhs._pullbuf.size());
+    assert(pullbuf_.size() == rhs.pullbuf_.size());
 
-    for (unsigned int ii = 0; ii < rhs._pullbuf.size(); ++ii)
-        *_pullbuf[ii] = *(rhs._pullbuf[ii]);
+    for (unsigned int ii = 0; ii < rhs.pullbuf_.size(); ++ii)
+        *pullbuf_[ii] = *(rhs.pullbuf_[ii]);
 
 }
 
 Function& Function::operator=(const Function rhs)
 {
     static Eref er;
-    _clearBuffer();
-    _mode = rhs._mode;
-    _lastValue = rhs._lastValue;
-    _value = rhs._value;
-    _rate = rhs._rate;
-    _independent = rhs._independent;
+    clearBuffer();
+    mode_ = rhs.mode_;
+    lastValue_ = rhs.lastValue_;
+    value_ = rhs.value_;
+    rate_ = rhs.rate_;
+    independent_ = rhs.independent_;
 
     // Copy the constants
     moose::Parser::varmap_type cmap = rhs.parser_.GetConst();
@@ -369,49 +369,49 @@ Function& Function::operator=(const Function rhs)
 
     // Copy the values from the var pointers in rhs
     setExpr(er, rhs.getExpr( er ));
-    assert(_varbuf.size() == rhs._varbuf.size());
+    assert(varbuf_.size() == rhs.varbuf_.size());
 
-    for (unsigned int ii = 0; ii < rhs._varbuf.size(); ++ii)
-        _varbuf[ii]->value = rhs._varbuf[ii]->value;
+    for (unsigned int ii = 0; ii < rhs.varbuf_.size(); ++ii)
+        varbuf_[ii]->value = rhs.varbuf_[ii]->value;
 
-    assert(_pullbuf.size() == rhs._pullbuf.size());
+    assert(pullbuf_.size() == rhs.pullbuf_.size());
 
-    for (unsigned int ii = 0; ii < rhs._pullbuf.size(); ++ii)
-        *_pullbuf[ii] = *(rhs._pullbuf[ii]);
+    for (unsigned int ii = 0; ii < rhs.pullbuf_.size(); ++ii)
+        *pullbuf_[ii] = *(rhs.pullbuf_[ii]);
 
     return *this;
 }
 
 Function::~Function()
 {
-    _clearBuffer();
+    clearBuffer();
 }
 
 // do not know what to do about Variables that have already been
 // connected by message.
-void Function::_clearBuffer()
+void Function::clearBuffer()
 {
-    _numVar = 0;
+    numVar_ = 0;
     parser_.ClearVariables();
-    for (unsigned int ii = 0; ii < _varbuf.size(); ++ii)
+    for (unsigned int ii = 0; ii < varbuf_.size(); ++ii)
     {
-        if ( _varbuf[ii] )
+        if ( varbuf_[ii] )
         {
-            delete _varbuf[ii];
+            delete varbuf_[ii];
         }
     }
-    _varbuf.clear();
-    for (unsigned int ii = 0; ii < _pullbuf.size(); ++ii)
+    varbuf_.clear();
+    for (unsigned int ii = 0; ii < pullbuf_.size(); ++ii)
     {
-        if ( _pullbuf[ii] )
+        if ( pullbuf_[ii] )
         {
-            delete _pullbuf[ii];
+            delete pullbuf_[ii];
         }
     }
-    _pullbuf.clear();
+    pullbuf_.clear();
 }
 
-void Function::_showError(moose::Parser::exception_type &e) const
+void Function::showError(moose::Parser::exception_type &e) const
 {
     cout << "Error occurred in parser.\n"
          << "Message:  " << e.GetMsg() << "\n"
@@ -441,7 +441,7 @@ void Function::_showError(moose::Parser::exception_type &e) const
    at evaluation of the same, i.e. when you access `value` of the
    Function object.
  */
-double * _functionAddVar(const char *name, void *data)
+double * functionAddVar_(const char *name, void *data)
 {
     // MOOSE_DEBUG( "Adding xs,ys, or t to function. Current #var " << name );
     Function* function = static_cast< Function * >(data);
@@ -453,40 +453,40 @@ double * _functionAddVar(const char *name, void *data)
     if (strname[0] == 'x')
     {
         int index = atoi(strname.substr(1).c_str());
-        if ((unsigned)index >= function->_varbuf.size())
+        if ((unsigned)index >= function->varbuf_.size())
         {
-            function->_varbuf.resize(index+1, 0);
+            function->varbuf_.resize(index+1, 0);
             for (int ii = 0; ii <= index; ++ii)
             {
-                if (function->_varbuf[ii] == 0)
+                if (function->varbuf_[ii] == 0)
                 {
-                    function->_varbuf[ii] = new Variable();
+                    function->varbuf_[ii] = new Variable();
                 }
             }
-            function->_numVar = function->_varbuf.size();
+            function->numVar_ = function->varbuf_.size();
         }
-        return &(function->_varbuf[index]->value);
+        return &(function->varbuf_[index]->value);
     }
 
     if (strname[0] == 'y')
     {
         int index = atoi(strname.substr(1).c_str());
-        if ((unsigned)index >= function->_pullbuf.size())
+        if ((unsigned)index >= function->pullbuf_.size())
         {
-            function->_pullbuf.resize(index+1, 0 );
+            function->pullbuf_.resize(index+1, 0 );
             for (int ii = 0; ii <= index; ++ii)
             {
-                if (function->_pullbuf[ii] == 0)
+                if (function->pullbuf_[ii] == 0)
                 {
-                    function->_pullbuf[ii] = new double();
+                    function->pullbuf_[ii] = new double();
                 }
             }
         }
-        return function->_pullbuf[index];
+        return function->pullbuf_[index];
     }
 
     if (strname == "t")
-        return &function->_t;
+        return &function->t_;
 
     cerr << "Got an undefined symbol: " << name << endl
          << "Variables must be named xi, yi, where i is integer index."
@@ -495,25 +495,6 @@ double * _functionAddVar(const char *name, void *data)
          << endl;
     throw moose::Parser::ParserException("Undefined constant.");
     return nullptr;
-}
-
-/**
-   This function is for automatically adding variables when setVar
-   messages are connected.
-
-   There are two ways new variables can be created :
-
-   (1) When the user sets the expression, muParser calls _functionAddVar to
-   get the address of the storage for each variable name in the
-   expression.
-
-   (2) When the user connects a setVar message to a Variable. ??
-
-   This is called by Variable::addMsgCallback - which is unused.
- */
-unsigned int Function::addVar()
-{
-    return 0;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -533,9 +514,9 @@ void Function::setExpr(const Eref& eref, string expr)
 // Virtual function, this does the work.
 void Function::innerSetExpr(const Eref& eref, string expr)
 {
-    _valid = false;
-    _clearBuffer();
-    _varbuf.resize(_numVar);
+    valid_ = false;
+    clearBuffer();
+    varbuf_.resize(numVar_);
 
     // Find all variables x\d+ or y\d+ etc, and add them to variable buffer.
     vector<string> xs;
@@ -548,41 +529,38 @@ void Function::innerSetExpr(const Eref& eref, string expr)
     // encironment is used.
     for( size_t i = 0; i < xs.size(); i++ )
     {
-        _functionAddVar( xs[i].c_str(),  this);
+        functionAddVar_( xs[i].c_str(),  this);
         // get the address of Variable's value. Is it safe in multi-threaded
         // environment? I hope so.
-        map_[xs[i]] = &(_varbuf[i]->value);
-
+        map_[xs[i]] = &(varbuf_[i]->value);
     }
-
-    cout << endl;
 
     for( size_t i = 0; i < ys.size(); i++ )
     {
-        _functionAddVar( ys[i].c_str(),  this);
-        map_[ys[i]] = _pullbuf[i];
+        functionAddVar_( ys[i].c_str(),  this);
+        map_[ys[i]] = pullbuf_[i];
     }
 
     try
     {
         // Set parser expression. Send the map and the array of values as well.
         parser_.SetVariableMap( map_ );
-        _valid = parser_.SetExpr( expr );
+        valid_ = parser_.SetExpr( expr );
         return;
     }
     catch (moose::Parser::exception_type &e)
     {
         cerr << "Error setting expression on: " << eref.objId().path() << endl;
-        _valid = false;
-        _showError(e);
-        _clearBuffer();
+        valid_ = false;
+        showError(e);
+        clearBuffer();
         return;
     }
 }
 
 string Function::getExpr( const Eref& e ) const
 {
-    if (!_valid)
+    if (!valid_)
     {
         cout << "Error: " << e.objId().path() << "::getExpr() - invalid parser state" << endl;
         return "";
@@ -592,32 +570,32 @@ string Function::getExpr( const Eref& e ) const
 
 void Function::setMode(unsigned int mode)
 {
-    _mode = mode;
+    mode_ = mode;
 }
 
 unsigned int Function::getMode() const
 {
-    return _mode;
+    return mode_;
 }
 
 void Function::setUseTrigger(bool useTrigger )
 {
-    _useTrigger = useTrigger;
+    useTrigger_ = useTrigger;
 }
 
 bool Function::getUseTrigger() const
 {
-    return _useTrigger;
+    return useTrigger_;
 }
 
 void Function::setDoEvalAtReinit(bool doEvalAtReinit )
 {
-    _doEvalAtReinit = doEvalAtReinit;
+    doEvalAtReinit_ = doEvalAtReinit;
 }
 
 bool Function::getDoEvalAtReinit() const
 {
-    return _doEvalAtReinit;
+    return doEvalAtReinit_;
 }
 
 double Function::getValue() const
@@ -628,29 +606,29 @@ double Function::getValue() const
 
 double Function::getRate() const
 {
-    if (!_valid)
+    if (!valid_)
     {
         cout << "Error: Function::getValue() - invalid state" << endl;
     }
-    return _rate;
+    return rate_;
 }
 
 void Function::setIndependent(string var)
 {
-    _independent = var;
+    independent_ = var;
 }
 
 string Function::getIndependent() const
 {
-    return _independent;
+    return independent_;
 }
 
 vector< double > Function::getY() const
 {
-    vector < double > ret(_pullbuf.size());
+    vector < double > ret(pullbuf_.size());
     for (unsigned int ii = 0; ii < ret.size(); ++ii)
     {
-        ret[ii] = *_pullbuf[ii];
+        ret[ii] = *pullbuf_[ii];
     }
     return ret;
 }
@@ -658,13 +636,13 @@ vector< double > Function::getY() const
 double Function::getDerivative() const
 {
     double value = 0.0;
-    if (!_valid)
+    if (!valid_)
     {
         cout << "Error: Function::getDerivative() - invalid state" << endl;
         return value;
     }
     moose::Parser::varmap_type variables = parser_.GetVar();
-    moose::Parser::varmap_type::const_iterator item = variables.find(_independent);
+    moose::Parser::varmap_type::const_iterator item = variables.find(independent_);
     if (item != variables.end())
     {
         try
@@ -673,7 +651,7 @@ double Function::getDerivative() const
         }
         catch (moose::Parser::exception_type &e)
         {
-            _showError(e);
+            showError(e);
         }
     }
     return value;
@@ -681,21 +659,21 @@ double Function::getDerivative() const
 
 void Function::setNumVar(const unsigned int num)
 {
-    _clearBuffer();
+    clearBuffer();
     for (unsigned int ii = 0; ii < num; ++ii)
-        _functionAddVar( ("x"+std::to_string(ii)).c_str(), this);
+        functionAddVar_( ("x"+std::to_string(ii)).c_str(), this);
 }
 
 unsigned int Function::getNumVar() const
 {
-    return _numVar;
+    return numVar_;
 }
 
 void Function::setVar(unsigned int index, double value)
 {
     cout << "varbuf[" << index << "]->setValue(" << value << ")" << endl;
-    if (index < _varbuf.size())
-        _varbuf[index]->setValue(value);
+    if (index < varbuf_.size())
+        varbuf_[index]->setValue(value);
     else
         cerr << "Function: index " << index << " out of bounds." << endl;
 }
@@ -703,12 +681,12 @@ void Function::setVar(unsigned int index, double value)
 Variable * Function::getVar(unsigned int ii)
 {
     static Variable dummy;
-    if ( ii < _varbuf.size())
-        return _varbuf[ii];
+    if ( ii < varbuf_.size())
+        return varbuf_[ii];
 
     MOOSE_WARN( "Warning: Function::getVar: index: "
          << ii << " is out of range: "
-         << _varbuf.size() );
+         << varbuf_.size() );
     return &dummy;
 }
 
@@ -733,92 +711,92 @@ double Function::getConst(string name) const
 
 void Function::process(const Eref &e, ProcPtr p)
 {
-    if( ! _valid )
+    if( ! valid_ )
         return;
 
     // Update values of incoming variables.
     vector < double > databuf;
     requestOut()->send(e, &databuf);
 
-    _t = p->currTime;
-    _value = getValue();
-    _rate = (_value - _lastValue) / p->dt;
+    t_ = p->currTime;
+    value_ = getValue();
+    rate_ = (value_ - lastValue_) / p->dt;
 
 
-    for (size_t ii = 0; (ii < databuf.size()) && (ii < _pullbuf.size()); ++ii)
-        *_pullbuf[ii] = databuf[ii];
+    for (size_t ii = 0; (ii < databuf.size()) && (ii < pullbuf_.size()); ++ii)
+        *pullbuf_[ii] = databuf[ii];
 
-    if ( _useTrigger && _value < TriggerThreshold )
+    if ( useTrigger_ && value_ < TriggerThreshold )
     {
-        _lastValue = _value;
+        lastValue_ = value_;
         return;
     }
 
-    if( 1 == _mode )
+    if( 1 == mode_ )
     {
-        valueOut()->send(e, _value);
-        _lastValue = _value;
+        valueOut()->send(e, value_);
+        lastValue_ = value_;
         return;
     }
-    if( 2 == _mode )
+    if( 2 == mode_ )
     {
         derivativeOut()->send(e, getDerivative());
-        _lastValue = _value;
+        lastValue_ = value_;
         return;
     }
-    if( 3 == _mode )
+    if( 3 == mode_ )
     {
-        rateOut()->send(e, _rate);
-        _lastValue = _value;
+        rateOut()->send(e, rate_);
+        lastValue_ = value_;
         return;
     }
     else
     {
-        valueOut()->send(e, _value);
+        valueOut()->send(e, value_);
         derivativeOut()->send(e, getDerivative());
-        rateOut()->send(e, _rate);
-        _lastValue = _value;
+        rateOut()->send(e, rate_);
+        lastValue_ = value_;
         return;
     }
 }
 
 void Function::reinit(const Eref &e, ProcPtr p)
 {
-    if (!_valid)
+    if (!valid_)
     {
         cout << "Error: Function::reinit() - invalid parser state. Will do nothing." << endl;
         return;
     }
 
-    _t = p->currTime;
+    t_ = p->currTime;
 
-    if (_doEvalAtReinit)
-        _lastValue = _value = getValue();
+    if (doEvalAtReinit_)
+        lastValue_ = value_ = getValue();
     else
-        _lastValue = _value = 0.0;
+        lastValue_ = value_ = 0.0;
 
-    _rate = 0.0;
+    rate_ = 0.0;
 
-    if (1 == _mode)
+    if (1 == mode_)
     {
-        valueOut()->send(e, _value);
+        valueOut()->send(e, value_);
         return;
     }
-    if( 2 == _mode )
+    if( 2 == mode_ )
     {
         derivativeOut()->send(e, 0.0);
         return;
     }
-    if( 3 == _mode )
+    if( 3 == mode_ )
     {
-        rateOut()->send(e, _rate);
+        rateOut()->send(e, rate_);
         return;
     }
     else
     {
-        valueOut()->send(e, _value);
+        valueOut()->send(e, value_);
         derivativeOut()->send(e, 0.0);
-        rateOut()->send(e, _rate);
+        rateOut()->send(e, rate_);
         return;
     }
 }

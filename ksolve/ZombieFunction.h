@@ -7,8 +7,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _ZOMBIE_FUNCTION_H
-#define _ZOMBIE_FUNCTION_H
+#ifndef ZOMBIE_FUNCTION_H_
+#define ZOMBIE_FUNCTION_H_
 
 class ZombieFunction: public Function
 {
@@ -40,4 +40,4 @@ class ZombieFunction: public Function
 	private:
 };
 
-#endif	// _ZOMBIE_FUNCTION_H
+#endif	// ZOMBIE_FUNCTION_H_

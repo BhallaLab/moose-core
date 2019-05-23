@@ -115,7 +115,7 @@ ZombieFunction::~ZombieFunction()
 //////////////////////////////////////////////////////////////
 void ZombieFunction::process(const Eref &e, ProcPtr p)
 {
-	_t = p->currTime;
+	t_ = p->currTime;
 }
 
 void ZombieFunction::reinit(const Eref &e, ProcPtr p)
@@ -128,8 +128,8 @@ void ZombieFunction::reinit(const Eref &e, ProcPtr p)
 void ZombieFunction::innerSetExpr( const Eref& e, string v )
 {
 	Function::innerSetExpr( e, v );
-	if ( _stoich ) {
-		Stoich* s = reinterpret_cast< Stoich* >( _stoich );
+	if ( stoich_ ) {
+		Stoich* s = reinterpret_cast< Stoich* >( stoich_ );
 		s->setFunctionExpr( e, v );
 	} else {
 		// I had this warning here but it is triggered needlessly when we
@@ -147,16 +147,16 @@ void ZombieFunction::setSolver( Id ksolve, Id dsolve )
 	if ( ksolve.element()->cinfo()->isA( "Ksolve" ) ||
 					ksolve.element()->cinfo()->isA( "Gsolve" ) ) {
 		Id sid = Field< Id >::get( ksolve, "stoich" );
-		_stoich = ObjId( sid, 0 ).data();
-		if ( _stoich == 0 )
+		stoich_ = ObjId( sid, 0 ).data();
+		if ( stoich_ == 0 )
 			cout << "Warning:ZombieFunction::setSolver: Empty Stoich on Ksolve" << ksolve.path() << endl;
 	} else if ( ksolve == Id() ) {
-			_stoich = 0;
+			stoich_ = 0;
 	} else {
 			cout << "Warning:ZombieFunction::setSolver: solver class " <<
 					ksolve.element()->cinfo()->name() <<
 					" not known.\nShould be Ksolve or Gsolve\n";
-			_stoich = 0;
+			stoich_ = 0;
 	}
 
 	/*

@@ -16,7 +16,7 @@
 #include "../utility/strutil.h"
 #include "../basecode/global.h"
 #include "MooseParser.h"
-#define DEBUG_HERE
+// #define DEBUG_HERE
 
 using namespace std;
 
@@ -39,19 +39,6 @@ MooseParser::MooseParser() : symbol_tables_registered_(false)
 MooseParser::~MooseParser()
 {
 }
-
-#if 0
-MooseParser& MooseParser::operator=(const moose::MooseParser& other)
-{
-    symbol_table_ = other.symbol_table_;
-    // Copy the expression and symbol table.
-    expression_.register_symbol_table( symbol_table_ );
-    // parser_ = other.parser_;
-    MOOSE_WARN( "Beware! Parser will NOT be copied." );
-    return *this;
-}
-#endif
-
 
 /*-----------------------------------------------------------------------------
  *  User defined function here.

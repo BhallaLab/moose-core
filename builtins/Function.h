@@ -1,16 +1,12 @@
 // Function.h ---
-//
-// Filename: Function.h
-// Description:
+// Description: moose.Function class.
 // Author: Subhasis Ray
-// Maintainer:
-// Created: Fri May 30 19:34:13 2014 (+0530)
-// Version:
+// Maintainer: Dilawar Singh
+// Version: See git logs.
 
-#ifndef _MOOSE_FUNCTION_H_
-#define _MOOSE_FUNCTION_H_
+#ifndef FUNCTIONH_
+#define FUNCTIONH_
 
-#define MAX_VARS_IN_FUNCTION 100
 
 #include "../builtins/MooseParser.h"
 #include "../basecode/header.h"
@@ -18,28 +14,26 @@
 class Variable;
 
 /**
-   Simple function parser and evaluator for MOOSE. This can take a mathematical
-   expression in standard C form and a list of variables values and
-   evaluate the results.
+   Expression parser and evaluator based on ExprTK. 
  */
-double *_functionAddVar(const char *name, void *data);
+double *functionAddVar_(const char *name, void *data);
 
 class Function
 {
 
 public:
-    static const int VARMAX;
     Function();
     Function(const Function& rhs);
     ~Function();
     virtual void innerSetExpr( const Eref& e, string expr);
+
     void setExpr( const Eref& e, string expr);
     string getExpr( const Eref& e ) const;
 
     // get a list of variable identifiers.
     // this is created by the parser
     vector<string> getVars() const;
-    void setVarValues(vector< string > vars, vector < double > vals);
+    void setVarValues(vector<string> vars, vector<double> vals);
 
 
     // get/set the value of variable `name`
@@ -48,7 +42,6 @@ public:
 
     // get function eval result
     double getValue() const;
-
     double getRate() const;
 
     // get/set operation mode
@@ -89,40 +82,40 @@ public:
     static const Cinfo * initCinfo();
 
 protected:
-    friend double * _functionAddVar(const char * name, void *data);
-    double _t; // local storage for current time
-    bool _valid;
-    unsigned int _numVar;
-    double _lastValue;
-    double _value;
-    double _rate;
-    unsigned int _mode;
-    bool _useTrigger;
-    bool _doEvalAtReinit;
+    friend double * functionAddVar_(const char * name, void *data);
+    double t_;                  // local storage for current time
+    bool valid_;
+    unsigned int numVar_;
+    double lastValue_;
+    double value_;
+    double rate_;
+    unsigned int mode_;
+    bool useTrigger_;
+    bool doEvalAtReinit_;
 
-    // Stores variables received via incoming messages, identifiers of the form x{i} 
+    // Stores variables received via incoming messages, identifiers of the form x{i}
     // are included in this.
-    vector<Variable *> _varbuf;
+    vector<Variable *> varbuf_;
 
-
-    // this stores variable values pulled by sending request. 
+    // this stores variable values pulled by sending request.
     // identifiers of the form y{i} are included in this
-    vector< double * > _pullbuf;
+    vector<double *> pullbuf_;
 
-    map< string, double *> _constbuf;  // for constants
-    string _independent; // index of independent variable
+    map< string, double *> constbuf_;       // for constants
+    string independent_;                    // index of independent variable
 
+    // Here is our parser.
     moose::MooseParser parser_;
 
-    void _clearBuffer();
-    void _showError(moose::Parser::exception_type &e) const;
+    void clearBuffer();
+    void showError(moose::Parser::exception_type &e) const;
 
     // Used by kinetic solvers when this is zombified.
-    char* _stoich;
+    char* stoich_;
 
     // These variables may be redundant but used for interfacing with
     // MooseParser.
     map<string, double*> map_;
 };
 
-#endif
+#endif /* end of include guard: FUNCTIONH_ */
