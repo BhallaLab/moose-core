@@ -112,8 +112,6 @@ public:
     const string GetExpr( ) const;
     void SetVarFactory( double* (*fn)(const char*, void*), void *);
 
-
-
     /*-----------------------------------------------------------------------------
      *  User defined function of parser.
      *-----------------------------------------------------------------------------*/

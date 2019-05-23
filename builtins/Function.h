@@ -6,26 +6,33 @@
 
 #ifndef FUNCTIONH_
 #define FUNCTIONH_
-
-
-#include "../builtins/MooseParser.h"
-#include "../basecode/header.h"
+#include <memory>
 
 class Variable;
+class Eref;
+class Cinfo;
+
+#include "../builtins/MooseParser.h"
 
 /**
    Expression parser and evaluator based on ExprTK. 
  */
-double *functionAddVar_(const char *name, void *data);
+// double *functionAddVar_(const char *name, void *data);
 
 class Function
 {
 
 public:
     Function();
-    Function(const Function& rhs);
     ~Function();
-    virtual void innerSetExpr( const Eref& e, string expr);
+
+    // Needs to copy the function.
+    Function(const Function& rhs);
+    Function& operator=(const Function& rhs);
+
+    static const Cinfo * initCinfo();
+
+    void innerSetExpr( const Eref& e, string expr);
 
     void setExpr( const Eref& e, string expr);
     string getExpr( const Eref& e ) const;
@@ -34,7 +41,6 @@ public:
     // this is created by the parser
     vector<string> getVars() const;
     void setVarValues(vector<string> vars, vector<double> vals);
-
 
     // get/set the value of variable `name`
     void setVar(unsigned int index, double value);
@@ -71,19 +77,21 @@ public:
 
     void findXsYs( const string& expr, vector<string>& vars );
 
-    Function& operator=(const Function rhs);
-
     unsigned int addVar();
     /* void dropVar(unsigned int msgLookup); */
 
     void process(const Eref& e, ProcPtr p);
     void reinit(const Eref& e, ProcPtr p);
 
-    static const Cinfo * initCinfo();
+    double* addVariable(const char* name);
+
+
+    void clearBuffer();
+    void showError(moose::Parser::exception_type &e) const;
+
 
 protected:
-    friend double * functionAddVar_(const char * name, void *data);
-    double t_;                  // local storage for current time
+    // friend double * functionAddVar_(const char * name, void *data);
     bool valid_;
     unsigned int numVar_;
     double lastValue_;
@@ -93,25 +101,22 @@ protected:
     bool useTrigger_;
     bool doEvalAtReinit_;
 
-    // Stores variables received via incoming messages, identifiers of the form x{i}
-    // are included in this.
-    vector<Variable *> varbuf_;
+    double t_;                             // local storage for current time
+    string independent_;                   // To take derivative.
 
-    // this stores variable values pulled by sending request.
-    // identifiers of the form y{i} are included in this
-    vector<double *> pullbuf_;
+    // this stores variables received via incoming messages, identifiers of
+    // the form x{i} are included in this
+    vector<shared_ptr<Variable>> xs_;
 
-    map< string, double *> constbuf_;       // for constants
-    string independent_;                    // index of independent variable
+    // this stores variable values pulled by sending request. identifiers of
+    // the form y{i} are included in this
+    vector<shared_ptr<double>> ys_;
 
-    // Here is our parser.
-    moose::MooseParser parser_;
-
-    void clearBuffer();
-    void showError(moose::Parser::exception_type &e) const;
+    // parser. It is often copied.
+    std::shared_ptr<moose::MooseParser> parser_;
 
     // Used by kinetic solvers when this is zombified.
-    char* stoich_;
+    void* stoich_;
 
     // These variables may be redundant but used for interfacing with
     // MooseParser.

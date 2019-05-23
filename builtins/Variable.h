@@ -9,6 +9,7 @@
 #define _VARIABLE_H
 
 #include "../utility/print_function.hpp"
+class ObjId;
 
 /** This class is used as FieldElement in Function. It is used as named
    variable of type double.

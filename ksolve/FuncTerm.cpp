@@ -24,13 +24,14 @@
 #include <memory>
 using namespace std;
 
-
 #include "FuncTerm.h"
+
 #include "../utility/numutil.h"
 #include "../builtins/MooseParser.h"
 #include "../builtins/Variable.h"
 #include "../utility/testing_macros.hpp"
 #include "../utility/utility.h"
+
 
 FuncTerm::FuncTerm()
     : reactantIndex_( 1, 0 ),

@@ -14,9 +14,10 @@
 using namespace std;
 
 #include "../builtins/MooseParser.h"
-#include "../builtins/Function.h"
 
 class Variable;
+class Eref;
+class Cinfo;
 
 class FuncTerm 
 {

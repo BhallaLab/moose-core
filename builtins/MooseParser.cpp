@@ -211,7 +211,6 @@ bool MooseParser::CompileExpr()
                  << " Type: [" << exprtk::parser_error::to_str(error.mode)
                  << "] Msg: " << error.diagnostic << endl;
         }
-        // return false;
         throw runtime_error("Error in compilation: " + expr_ + "\n" + ss.str());
     }
     return true;
