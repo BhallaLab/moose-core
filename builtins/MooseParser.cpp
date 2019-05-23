@@ -196,7 +196,7 @@ bool MooseParser::CompileExpr()
 {
     // User should make sure that symbol table has been setup. Do not raise
     // exception here. User can set expression again.
-    MOOSE_DEBUG( "Compiling " << expr_ );
+    MOOSE_DEBUG( this << ": Compiling " << expr_ );
 
     if(expr_.empty())
         return false;
@@ -241,6 +241,8 @@ double MooseParser::Eval( ) const
     }
     cout << endl;
 #endif
+    if( expr_.empty())
+        return 0.0;
     return expression_();
 }
 

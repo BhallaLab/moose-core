@@ -4,9 +4,6 @@
 Modified from https://elifesciences.org/articles/25827 , Fig4.py
 """
 import sys
-import os
-import numpy as np
-import sys
 import numpy as np
 import moose
 import abstrModelEqns9 as ame
@@ -14,19 +11,20 @@ import rdesigneur as rd
 print( "[INFO ] Using moose from %s" % moose.__file__ )
 
 def singleCompt( name, params ):
+    print('=============')
+    print('[INFO] Making compartment %s' % name)
     mod = moose.copy( '/library/' + name + '/' + name, '/model' )
     A = moose.element( mod.path + '/A' )
     Z = moose.element( mod.path + '/Z' )
     Z.nInit = 1
     Ca = moose.element( mod.path + '/Ca' )
     CaStim = moose.element( Ca.path + '/CaStim' )
+
+    print( '\n\n[INFO] CaStim %s' % CaStim.path )
     runtime = params['preStimTime'] + params['postStimTime']
     steptime = 50
-
-    print( '[INFO] CaStim.expr(before) = %s' % CaStim.expr )
     CaStim.expr += '+x2*(t>100+'+str(runtime)+')*(t<100+'+str(runtime+steptime)+ ')'
     print("[INFO] CaStim.expr = %s" % CaStim.expr)
-    quit()
     tab = moose.Table2( '/model/' + name + '/Atab' )
     ampl = moose.element( mod.path + '/ampl' )
     phase = moose.element( mod.path + '/phase' )
@@ -40,6 +38,7 @@ def singleCompt( name, params ):
     stoich.ksolve = ksolve
     stoich.path = mod.path + '/##'
 
+    print( 'REINIT AND START' )
     moose.reinit()
     runtime += 100 + steptime*2
     moose.start( runtime )

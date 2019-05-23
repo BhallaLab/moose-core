@@ -60,6 +60,9 @@ public:
     // produce unexptected results. I.e. FuncTerm must have its own parser.
     MooseParser& operator=(const moose::MooseParser&) = delete;
 
+    // Other functions.
+    void Reinit();
+
     /*-----------------------------------------------------------------------------
      *  Set/Get
      *-----------------------------------------------------------------------------*/
@@ -109,8 +112,6 @@ public:
     const string GetExpr( ) const;
     void SetVarFactory( double* (*fn)(const char*, void*), void *);
 
-    // Other functions.
-    void Reinit();
 
 
     /*-----------------------------------------------------------------------------

@@ -30,8 +30,8 @@ static const double TriggerThreshold = 0.0;
 static SrcFinfo1<double> *valueOut()
 {
     static SrcFinfo1<double> valueOut("valueOut",
-            "Evaluated value of the function for the current variable values."
-            );
+                                      "Evaluated value of the function for the current variable values."
+                                     );
     return &valueOut;
 }
 
@@ -39,15 +39,15 @@ static SrcFinfo1< double > *derivativeOut()
 {
     static SrcFinfo1< double > derivativeOut("derivativeOut",
             "Value of derivative of the function for the current variable values"
-            );
+                                            );
     return &derivativeOut;
 }
 
 static SrcFinfo1< double > *rateOut()
 {
     static SrcFinfo1< double > rateOut("rateOut",
-            "Value of time-derivative of the function for the current variable values"
-            );
+                                       "Value of time-derivative of the function for the current variable values"
+                                      );
     return &rateOut;
 }
 
@@ -67,7 +67,7 @@ const Cinfo * Function::initCinfo()
         "value",
         "Result of the function evaluation with current variable values.",
         &Function::getValue
-        );
+    );
 
     static ReadOnlyValueFinfo< Function, double > derivative(
         "derivative",
@@ -77,7 +77,7 @@ const Cinfo * Function::initCinfo()
         " independent variable. Note that unlike hand-calculated derivatives,"
         " numerical derivatives are not exact.",
         &Function::getDerivative
-        );
+    );
 
     static ReadOnlyValueFinfo< Function, double > rate(
         "rate",
@@ -85,7 +85,7 @@ const Cinfo * Function::initCinfo()
         " as the difference of the current and previous value of the function"
         " divided by the time step.",
         &Function::getRate
-        );
+    );
 
     static ValueFinfo< Function, unsigned int > mode(
         "mode",
@@ -96,7 +96,7 @@ const Cinfo * Function::initCinfo()
         " anything else: all three, value, derivative and rate will be sent out.\n",
         &Function::setMode,
         &Function::getMode
-        );
+    );
 
     static ValueFinfo< Function, bool > useTrigger(
         "useTrigger",
@@ -107,7 +107,7 @@ const Cinfo * Function::initCinfo()
         "Defaults to *false*. \n",
         &Function::setUseTrigger,
         &Function::getUseTrigger
-        );
+    );
 
     static ValueFinfo< Function, bool > doEvalAtReinit(
         "doEvalAtReinit",
@@ -118,7 +118,7 @@ const Cinfo * Function::initCinfo()
         "Defaults to *false*. \n",
         &Function::setDoEvalAtReinit,
         &Function::getDoEvalAtReinit
-        );
+    );
 
     static ElementValueFinfo< Function, string > expr(
         "expr",
@@ -202,13 +202,13 @@ const Cinfo * Function::initCinfo()
         " specifying the function expression.",
         &Function::setConst,
         &Function::getConst
-        );
+    );
 
     static ReadOnlyValueFinfo< Function, vector < double > > y(
         "y",
         "Variable values received from target fields by requestOut",
         &Function::getY
-        );
+    );
 
     static ValueFinfo< Function, string > independent(
         "independent",
@@ -216,33 +216,33 @@ const Cinfo * Function::initCinfo()
         " to the first assigned variable.",
         &Function::setIndependent,
         &Function::getIndependent
-        );
+    );
 
     ///////////////////////////////////////////////////////////////////
     // Shared messages
     ///////////////////////////////////////////////////////////////////
     static DestFinfo process( "process",
-            "Handles process call, updates internal time stamp.",
-            new ProcOpFunc< Function >( &Function::process ) 
-            );
+                              "Handles process call, updates internal time stamp.",
+                              new ProcOpFunc< Function >( &Function::process )
+                            );
 
     static DestFinfo reinit( "reinit",
-            "Handles reinit call.",
-            new ProcOpFunc< Function >( &Function::reinit ) 
-            );
+                             "Handles reinit call.",
+                             new ProcOpFunc< Function >( &Function::reinit )
+                           );
 
     static Finfo* processShared[] = { &process, &reinit };
 
     static SharedFinfo proc( "proc",
-            "This is a shared message to receive Process messages "
-            "from the scheduler objects."
-            "The first entry in the shared msg is a MsgDest "
-            "for the Process operation. It has a single argument, "
-            "ProcInfo, which holds lots of information about current "
-            "time, thread, dt and so on. The second entry is a MsgDest "
-            "for the Reinit operation. It also uses ProcInfo. ",
-            processShared, sizeof( processShared ) / sizeof( Finfo* )
-            );
+                             "This is a shared message to receive Process messages "
+                             "from the scheduler objects."
+                             "The first entry in the shared msg is a MsgDest "
+                             "for the Process operation. It has a single argument, "
+                             "ProcInfo, which holds lots of information about current "
+                             "time, thread, dt and so on. The second entry is a MsgDest "
+                             "for the Reinit operation. It also uses ProcInfo. ",
+                             processShared, sizeof( processShared ) / sizeof( Finfo* )
+                           );
 
 
     static Finfo *functionFinfos[] =
@@ -445,7 +445,7 @@ double * functionAddVar_(const char *name, void *data)
 {
     // MOOSE_DEBUG( "Adding xs,ys, or t to function. Current #var " << name );
     Function* function = static_cast< Function * >(data);
-    double * ret = NULL;
+    double * ret = nullptr;
 
     string strname(name);
 
@@ -459,9 +459,7 @@ double * functionAddVar_(const char *name, void *data)
             for (int ii = 0; ii <= index; ++ii)
             {
                 if (function->varbuf_[ii] == 0)
-                {
                     function->varbuf_[ii] = new Variable();
-                }
             }
             function->numVar_ = function->varbuf_.size();
         }
@@ -477,9 +475,7 @@ double * functionAddVar_(const char *name, void *data)
             for (int ii = 0; ii <= index; ++ii)
             {
                 if (function->pullbuf_[ii] == 0)
-                {
                     function->pullbuf_[ii] = new double();
-                }
             }
         }
         return function->pullbuf_[index];
@@ -508,6 +504,7 @@ double * functionAddVar_(const char *name, void *data)
 
 void Function::setExpr(const Eref& eref, string expr)
 {
+    MOOSE_DEBUG( this << " : Setting expression " <<  expr );
     this->innerSetExpr( eref, expr ); // Refer to the virtual function here.
 }
 
@@ -517,6 +514,9 @@ void Function::innerSetExpr(const Eref& eref, string expr)
     valid_ = false;
     clearBuffer();
     varbuf_.resize(numVar_);
+
+    // Reinitialize the parser.
+    parser_.Reinit();
 
     // Find all variables x\d+ or y\d+ etc, and add them to variable buffer.
     vector<string> xs;
@@ -685,8 +685,8 @@ Variable * Function::getVar(unsigned int ii)
         return varbuf_[ii];
 
     MOOSE_WARN( "Warning: Function::getVar: index: "
-         << ii << " is out of range: "
-         << varbuf_.size() );
+                << ii << " is out of range: "
+                << varbuf_.size() );
     return &dummy;
 }
 
