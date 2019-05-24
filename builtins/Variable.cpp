@@ -39,14 +39,14 @@ const Cinfo * Variable::initCinfo()
     static Dinfo< Variable > dinfo;
 
     static Cinfo variableCinfo("Variable",
-                               Neutral::initCinfo(),
-                               variableFinfos,
-                               sizeof(variableFinfos) / sizeof(Finfo*),
-                               &dinfo,
-                               doc,
-                               sizeof(doc) / sizeof(string),
-                               true // is FieldElement, not to be created directly
-                               );
+            Neutral::initCinfo(),
+            variableFinfos,
+            sizeof(variableFinfos) / sizeof(Finfo*),
+            &dinfo,
+            doc,
+            sizeof(doc) / sizeof(string),
+            true // is FieldElement, not to be created directly
+            );
     return & variableCinfo;
 }
 

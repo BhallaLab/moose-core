@@ -31,8 +31,6 @@ public:
 
     static const Cinfo * initCinfo();
 
-    void innerSetExpr( const Eref& e, string expr);
-
     void setExpr( const Eref& e, string expr);
     string getExpr( const Eref& e ) const;
 

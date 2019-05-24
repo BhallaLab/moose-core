@@ -258,11 +258,4 @@ const string MooseParser::GetExpr( ) const
     return expr_;
 }
 
-void MooseParser::SetVarFactory( double* (*fn)(const char*, void*), void *)
-{
-    MOOSE_WARN( "setVarFactory is not implemented." );
-    throw;
-}
-
-
 } // namespace moose.

@@ -96,9 +96,6 @@ public:
 
     Parser::varmap_type GetVar() const;
 
-    void SetVarFactory( const char* varName, void* data );
-
-
     double Diff( const double a, const double b) const;
 
     Parser::varmap_type GetConst( ) const;
@@ -108,7 +105,6 @@ public:
     void ClearAll( );
 
     const string GetExpr( ) const;
-    void SetVarFactory( double* (*fn)(const char*, void*), void *);
 
     /*-----------------------------------------------------------------------------
      *  User defined function of parser.

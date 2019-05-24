@@ -125,9 +125,9 @@ void ZombieFunction::reinit(const Eref &e, ProcPtr p)
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-void ZombieFunction::innerSetExpr( const Eref& e, string v )
+void ZombieFunction::setExpr( const Eref& e, string v )
 {
-	Function::innerSetExpr( e, v );
+	Function::setExpr( e, v );
 	if ( stoich_ ) {
 		Stoich* s = reinterpret_cast< Stoich* >( stoich_ );
 		s->setFunctionExpr( e, v );

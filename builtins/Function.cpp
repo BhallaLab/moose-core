@@ -15,6 +15,8 @@
 #include "Function.h"
 #include "ElementValueFinfo.h"
 
+#define DEBUG_HERE
+
 static const double TriggerThreshold = 0.0;
 
 static SrcFinfo1<double> *valueOut()
@@ -381,29 +383,25 @@ void Function::addVariable(const char* name)
 {
     string strname(name);
     // Names starting with x are variables, everything else is constant.
+
+    stringstream ss;
     if (strname[0] == 'x')
     {
         int index = atoi(strname.substr(1).c_str());
 
         // Only when i of xi is larger than the size of current xs_, we need to
-        // resize the container.
+        // resize the container. Fill them with variables. 
         if ((size_t)index >= xs_.size())
         {
             // Equality with index because we cound from 0.
             for (size_t i = xs_.size(); i <= (size_t) index; i++) 
-                xs_.push_back(nullptr);
+                xs_.push_back(unique_ptr<Variable>(new Variable()));
         }
 
-        if( xs_[index] == nullptr)
-        {
-            xs_[index].reset(new Variable());
-            parser_->DefineVar(name, xs_[index]->value);
-        }
+        parser_->DefineVar(name, xs_[index]->value);
         numVar_ = xs_.size();
-        return;
     }
-
-    if (strname[0] == 'y')
+    else if (strname[0] == 'y')
     {
         int index = atoi(strname.substr(1).c_str());
         // Only when i of xi is larger than the size of current xs_, we need to
@@ -420,21 +418,20 @@ void Function::addVariable(const char* name)
             ys_[index].reset(new double());
             parser_->DefineVar(name, *ys_[index].get());
         }
-        return;
     }
-
-    if (strname == "t")
+    else if (strname == "t")
     {
         parser_->DefineVar("t", t_);
-        return;
     }
-
-    cerr << "Got an undefined symbol: " << name << endl
-         << "Variables must be named xi, yi, where i is integer index."
-         << " You must define the constants beforehand using LookupField c: c[name]"
-         " = value"
-         << endl;
-    throw moose::Parser::ParserException("Undefined constant.");
+    else 
+    {
+        cerr << "Got an undefined symbol: " << name << endl
+             << "Variables must be named xi, yi, where i is integer index."
+             << " You must define the constants beforehand using LookupField c: c[name]"
+             " = value"
+             << endl;
+        throw moose::Parser::ParserException("Undefined constant.");
+    }
 }
 
 /* --------------------------------------------------------------------------*/
@@ -448,12 +445,6 @@ void Function::addVariable(const char* name)
 
 void Function::setExpr(const Eref& eref, string expr)
 {
-    this->innerSetExpr( eref, expr ); // Refer to the virtual function here.
-}
-
-// Virtual function, this does the work.
-void Function::innerSetExpr(const Eref& eref, string expr)
-{
     valid_ = false;
 
     // Find all variables x\d+ or y\d+ etc, and add them to variable buffer.
@@ -461,12 +452,16 @@ void Function::innerSetExpr(const Eref& eref, string expr)
     set<string> ys;
     moose::MooseParser::findXsYs(expr, xs, ys);
 
+    // Clear parser variables.
+    parser_->ClearVariables();
+
+    cout << "Setting expression " << expr << endl;
     // Now create a map which maps the variable name to location of values. This
     // is critical to make sure that pointers remain valid when multi-threaded
     // encironment is used.
-    addVariable("t");
     for(auto &x : xs) addVariable(x.c_str());
     for(auto &y : ys) addVariable(y.c_str());
+    addVariable("t");
 
     try
     {

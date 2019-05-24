@@ -1081,10 +1081,7 @@ void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
 
     unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
     vector< pair< Id, unsigned int> > srcPools;
-#ifndef NDEBUG
-    unsigned int n =
-#endif
-        ei.element()->getInputsWithTgtIndex( srcPools, df );
+    unsigned int n = ei.element()->getInputsWithTgtIndex( srcPools, df );
     ASSERT_EQ( numSrc, n, "NumMsgVsYs" );
     vector< unsigned int > poolIndex( numSrc, 0 );
     for ( unsigned int i = 0; i < numSrc; ++i )
@@ -1135,10 +1132,7 @@ void Stoich::installAndUnschedFuncRate( Id func, Id pool )
 
     unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
     vector< pair< Id, unsigned int > > srcPools;
-#ifndef NDEBUG
-    unsigned int n =
-#endif
-        ei.element()->getInputsWithTgtIndex( srcPools, df );
+    unsigned int n = ei.element()->getInputsWithTgtIndex( srcPools, df );
     ASSERT_EQ( numSrc, n, "NumMsgXS" );
     vector< unsigned int > poolIndex( numSrc, 0 );
     for ( unsigned int i = 0; i < numSrc; ++i )
