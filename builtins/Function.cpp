@@ -396,15 +396,18 @@ void Function::addVariable(const char* name)
         {
             // Equality with index because we cound from 0.
             for (size_t i = xs_.size(); i <= (size_t) index; i++)
-                xs_.push_back(nullptr);
+                xs_.push_back( new Variable() );
         }
 
-        // if current variable is linked to nullptr.
-        if( ! xs_[index] )
+        // This must be true.
+        if(  xs_[index] )
         {
-            xs_[index].reset(new Variable());
+            // xs_[index] = new Variable();
             parser_->DefineVar(name, xs_[index]->value);
         }
+        else
+            throw runtime_error( "Empty Variable." );
+
         numVar_ = xs_.size();
     }
     else if (strname[0] == 'y')
@@ -421,8 +424,8 @@ void Function::addVariable(const char* name)
 
         if (ys_[index] == nullptr)
         {
-            ys_[index].reset(new double());
-            parser_->DefineVar(name, *ys_[index].get());
+            ys_[index] = new double();
+            parser_->DefineVar(name, *ys_[index]);
         }
     }
     else if (strname == "t")
@@ -616,7 +619,7 @@ Variable * Function::getVar(unsigned int ii)
 {
     static Variable dummy;
     if ( ii < xs_.size())
-        return xs_[ii].get();
+        return xs_[ii];
 
     MOOSE_WARN( "Warning: Function::getVar: index: "
                 << ii << " is out of range: "

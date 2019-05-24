@@ -328,7 +328,6 @@ def run():
     panelC.append( singleCompt( 'negFF', makeNegFF( [] ) ) )
     panelC.append( singleCompt( 'fhn', makeFHN( [] ) ) )
     panelC.append( singleCompt( 'bis', makeBis( [] ) ) )
-
     panelCticks.append( np.arange( 0, 15.00001, 5 ) )
     panelCticks.append( np.arange( 0, 1.50001, 0.5 ) )
     panelCticks.append( np.arange( 0, 5.00002, 1 ) )

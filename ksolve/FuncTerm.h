@@ -27,8 +27,6 @@ public:
     FuncTerm();
     ~FuncTerm();
 
-    friend  double * _functionAddVar(const char *name, void *data);
-
     /**
      * This computes the value. The time t is an argument needed by
      * some functions.
@@ -66,7 +64,6 @@ private:
 
     // Look up reactants in the S vec.
     vector< unsigned int > reactantIndex_;
-    string expr_;
 
     /**
      * Scale factor to account for pool volume if we are assigning conc
@@ -77,11 +74,8 @@ private:
     unsigned int target_; /// Index of the entity to be updated by Func
 
     // parser
-    vector< unique_ptr<Variable> > varbuf_;
-    vector<double*>   pullbuf_;
     map<string, double*> map_;
-    double t_;           // Variable t.
-
+    string expr_;
     shared_ptr<moose::MooseParser> parser_;
 };
 
