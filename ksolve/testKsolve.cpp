@@ -19,7 +19,8 @@
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
 
-#include "../external/muparser/include/muParser.h"
+#include "../builtins/MooseParser.h"
+#include "../utility/testing_macros.hpp"
 
 /**
  * Tab controlled by table

@@ -64,6 +64,7 @@ set(SRCS
     Stats.cpp
     Interpol2D.cpp
     SpikeStats.cpp
+    MooseParser.cpp
     SocketStreamer.cpp
     testBuiltins.cpp
     )
