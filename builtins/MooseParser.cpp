@@ -18,8 +18,6 @@
 #include "../basecode/global.h"
 #include "MooseParser.h"
 
-#define DEBUG_HERE
-
 using namespace std;
 
 namespace moose
@@ -178,11 +176,7 @@ bool MooseParser::CompileExpr()
 {
     // User should make sure that symbol table has been setup. Do not raise
     // exception here. User can set expression again.
-    cout <<  "\t" << this << " : Compiling " << expr_ << ": ";
     // GCC specific
-    //cout << __builtin_return_address(0) << "\t";
-    //cout << __builtin_return_address(1) << endl;
-
     if(expr_.empty())
         return false;
 
@@ -200,7 +194,7 @@ bool MooseParser::CompileExpr()
             auto symbTable = GetSymbolTable();
             vector<std::pair<string, double>> vars;
             auto n = symbTable.get_variable_list(vars);
-            ss << "Total variables " << n << ".";
+            ss << "MORE INFORMATION:\nTotal variables " << n << ".";
             for (auto i : vars)
             {
                 ss << "\t" << i.first << "=" << i.second << " " << &symbol_table_->get_variable(i.first)->ref();
@@ -220,18 +214,6 @@ void MooseParser::SetVariableMap( const map<string, double*> m )
 
 double MooseParser::Eval( ) const
 {
-#ifdef DEBUG_HERE
-    // Print symbol table.
-    vector<std::pair<string, double>> vars;
-    auto symbTable = GetSymbolTable();
-    auto n = symbTable.get_variable_list(vars);
-    cout << "Eval(): Total variables " << n << ".";
-    for (auto i : vars)
-    {
-        cout << "\t" << i.first << "=" << i.second << " " << &symbol_table_->get_variable(i.first)->ref();
-    }
-    cout << endl;
-#endif
     if( expr_.empty())
         return 0.0;
     return expression_();

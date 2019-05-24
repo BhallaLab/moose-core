@@ -318,7 +318,6 @@ Function& Function::operator=(const Function& rhs)
     if( this == &rhs)
         return *this;
 
-    MOOSE_DEBUG( " Copy assignment " );
     valid_ = rhs.valid_;
     numVar_ = rhs.numVar_;
     lastValue_ = rhs.lastValue_;
@@ -337,7 +336,6 @@ Function& Function::operator=(const Function& rhs)
 
 Function::~Function()
 {
-    cout << " Destructor ... " << endl;
     clearBuffer();
 }
 
@@ -466,14 +464,14 @@ void Function::innerSetExpr(const Eref& eref, string expr)
     // Now create a map which maps the variable name to location of values. This
     // is critical to make sure that pointers remain valid when multi-threaded
     // encironment is used.
-    MOOSE_DEBUG( this << ": Setting expression " <<  expr );
     addVariable("t");
     for(auto &x : xs) addVariable(x.c_str());
     for(auto &y : ys) addVariable(y.c_str());
 
     try
     {
-        // Set parser expression. Send the map and the array of values as well.
+        // Set parser expression. Note that the symbol table is popultated by
+        // addVariable function above.
         valid_ = parser_->SetExpr( expr );
     }
     catch (moose::Parser::exception_type &e)
@@ -483,8 +481,6 @@ void Function::innerSetExpr(const Eref& eref, string expr)
         showError(e);
         clearBuffer();
     }
-
-    MOOSE_DEBUG( this << "   Valid = " << valid_);
 }
 
 string Function::getExpr( const Eref& e ) const
@@ -588,8 +584,10 @@ double Function::getDerivative() const
 
 void Function::setNumVar(const unsigned int num)
 {
-    for (unsigned int ii = 0; ii < num; ++ii)
-        addVariable(("x"+std::to_string(ii)).c_str());
+    cout << "Info: numVar has no effect. I can infer the number of variables "
+        " from the expression. " << endl;
+    //for (unsigned int ii = 0; ii < num; ++ii)
+    //    addVariable(("x"+std::to_string(ii)).c_str());
 }
 
 unsigned int Function::getNumVar() const
