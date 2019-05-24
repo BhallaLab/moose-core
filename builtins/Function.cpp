@@ -15,8 +15,6 @@
 #include "Function.h"
 #include "../basecode/ElementValueFinfo.h"
 
-#define DEBUG_HERE
-
 static const double TriggerThreshold = 0.0;
 
 static SrcFinfo1<double> *valueOut()
@@ -302,7 +300,7 @@ const Cinfo * Function::initCinfo()
 
 static const Cinfo * functionCinfo = Function::initCinfo();
 
-Function::Function(): 
+Function::Function():
     valid_(false), numVar_(0), lastValue_(0.0)
     , value_(0.0), rate_(0.0), mode_(1)
     , useTrigger_(false), doEvalAtReinit_(false)
@@ -320,6 +318,9 @@ Function& Function::operator=(const Function& rhs)
     if( this == &rhs)
         return *this;
 
+    cout << "+ Assignment operator()= " << this << " on Function "
+        << rhs.parser_->GetExpr() << endl;
+
     valid_ = rhs.valid_;
     numVar_ = rhs.numVar_;
     lastValue_ = rhs.lastValue_;
@@ -332,7 +333,7 @@ Function& Function::operator=(const Function& rhs)
     stoich_ = rhs.stoich_;
 
     // shared parser.
-    parser_ = rhs.parser_;
+    parser_ = std::move(rhs.parser_);
     return *this;
 }
 
@@ -382,6 +383,7 @@ void Function::showError(moose::Parser::exception_type &e) const
 void Function::addVariable(const char* name)
 {
     string strname(name);
+    cout << "- variable " << name << endl;
 
     // Names starting with x are variables, everything else is constant.
     if (strname[0] == 'x')
@@ -389,15 +391,20 @@ void Function::addVariable(const char* name)
         int index = atoi(strname.substr(1).c_str());
 
         // Only when i of xi is larger than the size of current xs_, we need to
-        // resize the container. Fill them with variables. 
+        // resize the container. Fill them with variables.
         if ((size_t)index >= xs_.size())
         {
             // Equality with index because we cound from 0.
-            for (size_t i = xs_.size(); i <= (size_t) index; i++) 
-                xs_.push_back(unique_ptr<Variable>(new Variable()));
+            for (size_t i = xs_.size(); i <= (size_t) index; i++)
+                xs_.push_back(nullptr);
         }
 
-        parser_->DefineVar(name, xs_[index]->value);
+        // if current variable is linked to nullptr.
+        if( ! xs_[index] )
+        {
+            xs_[index].reset(new Variable());
+            parser_->DefineVar(name, xs_[index]->value);
+        }
         numVar_ = xs_.size();
     }
     else if (strname[0] == 'y')
@@ -408,7 +415,7 @@ void Function::addVariable(const char* name)
         if ((size_t)index >= ys_.size())
         {
             // Equality with index because we cound from 0.
-            for (size_t i = ys_.size(); i <= (size_t) index; i++) 
+            for (size_t i = ys_.size(); i <= (size_t) index; i++)
                 ys_.push_back(nullptr);
         }
 
@@ -422,7 +429,7 @@ void Function::addVariable(const char* name)
     {
         parser_->DefineVar("t", t_);
     }
-    else 
+    else
     {
         cerr << "Got an undefined symbol: " << name << endl
              << "Variables must be named xi, yi, where i is integer index."
@@ -444,6 +451,12 @@ void Function::addVariable(const char* name)
 
 void Function::setExpr(const Eref& eref, string expr)
 {
+    if(expr == parser_->GetExpr())
+    {
+        MOOSE_WARN( "No change in expression.");
+        return;
+    }
+
     valid_ = false;
 
     // Find all variables x\d+ or y\d+ etc, and add them to variable buffer.
@@ -451,10 +464,11 @@ void Function::setExpr(const Eref& eref, string expr)
     set<string> ys;
     moose::MooseParser::findXsYs(expr, xs, ys);
 
-    // Clear parser variables.
-    parser_->ClearVariables();
+    // Clear previously stored variables. For the sake of simplicity; let just
+    // get rid of previous parser.
+    // parser_.reset( new moose::MooseParser() );
 
-    cout << "Setting expression " << expr << endl;
+    cout << this << "+ Setting expression " << expr << endl;
     // Now create a map which maps the variable name to location of values. This
     // is critical to make sure that pointers remain valid when multi-threaded
     // encironment is used.
@@ -591,7 +605,7 @@ unsigned int Function::getNumVar() const
 
 void Function::setVar(unsigned int index, double value)
 {
-    cout << "xs_[" << index << "]->setValue(" << value << ")" << endl;
+    //cout << "xs_[" << index << "]->setValue(" << value << ")" << endl;
     if (index < xs_.size())
         xs_[index]->setValue(value);
     else

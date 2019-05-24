@@ -75,9 +75,8 @@ if(WITH_NSDF AND HDF5_FOUND)
     NSDFWriter.cpp
     HDF5DataWriter.cpp
     SpikeStats.cpp
-    MooseParser.cpp
     testBuiltins.cpp
-    #testNSDF.cpp
+    testNSDF.cpp
     )
 endif()
 

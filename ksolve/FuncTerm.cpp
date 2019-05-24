@@ -36,7 +36,8 @@ using namespace std;
 FuncTerm::FuncTerm()
     : reactantIndex_( 1, 0 ),
       volScale_( 1.0 ),
-      target_( ~0U)
+      target_( ~0U),
+      parser_( new moose::MooseParser() )
 {
     args_ = unique_ptr<double[]>(nullptr);
 }
@@ -55,7 +56,7 @@ void FuncTerm::setReactantIndex(const vector<unsigned int>& mol)
     // The address of args_ has changed now. Any previous mapping with ExprTK
     // symbol table is now invalidated and thus can't be used anymore. We need
     // to re-assign parser.
-    parser_.Reinit();
+    parser_->Reinit();
     args_ = unique_ptr<double[]>(new double[mol.size()+1]());
     for ( unsigned int i = 0; i < mol.size(); ++i )
         addVar( "x"+to_string(i), i );
@@ -65,7 +66,7 @@ void FuncTerm::setReactantIndex(const vector<unsigned int>& mol)
 
     // Need to compile else we get garbage value. Not sure why ExprTK is so
     // finicy about it.
-    parser_.CompileExpr();
+    parser_->CompileExpr();
 }
 
 const vector<unsigned int>& FuncTerm::getReactantIndex() const
@@ -86,7 +87,7 @@ void FuncTerm::setExpr( const string& expr )
     // Find all variables x\d+ or y\d+ etc, and add them to variable buffer.
     try
     {
-        parser_.SetExpr( expr );
+        parser_->SetExpr( expr );
         expr_ = expr;
     }
     catch(moose::Parser::exception_type &e)
@@ -127,13 +128,13 @@ const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
     expr_ = other.expr_;
     volScale_ = other.volScale_;
     target_ = other.target_;
-    setReactantIndex( other.reactantIndex_ );
+    parser_ = other.parser_;
     return *this;
 }
 
 void FuncTerm::addVar( const string& name, size_t i )
 {
-    parser_.DefineVar(name, args_[i]);
+    parser_->DefineVar(name, args_[i]);
 }
 
 /**
@@ -144,7 +145,7 @@ double FuncTerm::operator() ( const double* S, double t ) const
 {
     if ( !args_ )
         return 0.0;
-    
+
     for (size_t i = 0; i < reactantIndex_.size(); ++i)
         args_[i] = S[reactantIndex_[i]];
 
@@ -154,13 +155,13 @@ double FuncTerm::operator() ( const double* S, double t ) const
 #ifdef exprtk_enable_debugging
     cout << "FuncTerm::operator() :: ";
     for (size_t i = 0; i < reactantIndex_.size(); i++)
-      cout << args_[i] << "(" << reactantIndex_[i] << "), ";
+        cout << args_[i] << "(" << reactantIndex_[i] << "), ";
     cout << args_[reactantIndex_.size()] << endl;
 #endif
 
     try
     {
-        double result = parser_.Eval() * volScale_;
+        double result = parser_->Eval() * volScale_;
 #ifdef exprtk_enable_debugging
         cout << " Result= " << result << endl;
 #endif
@@ -186,7 +187,7 @@ void FuncTerm::evalPool( double* S, double t ) const
 
     try
     {
-        S[ target_] = parser_.Eval() * volScale_;
+        S[ target_] = parser_->Eval() * volScale_;
     }
     catch ( moose::Parser::exception_type & e )
     {

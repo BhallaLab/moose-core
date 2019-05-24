@@ -19,7 +19,7 @@ class Variable;
 class Eref;
 class Cinfo;
 
-class FuncTerm 
+class FuncTerm
 {
 
 public:
@@ -66,7 +66,6 @@ private:
 
     // Look up reactants in the S vec.
     vector< unsigned int > reactantIndex_;
-    moose::MooseParser parser_;
     string expr_;
 
     /**
@@ -77,11 +76,13 @@ private:
     double volScale_;
     unsigned int target_; /// Index of the entity to be updated by Func
 
-    // parser 
+    // parser
     vector< unique_ptr<Variable> > varbuf_;
     vector<double*>   pullbuf_;
     map<string, double*> map_;
     double t_;           // Variable t.
+
+    shared_ptr<moose::MooseParser> parser_;
 };
 
 #endif // _FUNC_TERM_H

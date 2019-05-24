@@ -18,6 +18,8 @@
 #include "../basecode/global.h"
 #include "MooseParser.h"
 
+#define DEBUG_HERE
+
 using namespace std;
 
 namespace moose
@@ -96,7 +98,7 @@ void MooseParser::DefineVar( const string varName, double& val)
     if(0 == symbol_table_->variable_ref(varName))
     {
 #ifdef DEBUG_HERE
-        MOOSE_DEBUG( "\tAdding var " << varName << "=" << val << "(" << &val << ")");
+        cout << "-- Adding var " << varName << "=" << val << "(" << &val << ")" << endl;
 #endif
         symbol_table_->add_variable(varName, val);
         return;
@@ -134,7 +136,7 @@ void MooseParser::findAllVars( const string& expr, set<string>& vars, const stri
     const regex xpat(pattern);
     smatch sm;
     string temp(expr);
-    while(regex_search(temp, sm, xpat)) 
+    while(regex_search(temp, sm, xpat))
     {
         vars.insert(sm.str());
         temp = sm.suffix();
@@ -180,6 +182,7 @@ bool MooseParser::CompileExpr()
     if(expr_.empty())
         return false;
 
+    cout << "--- Compiling expression " << expr_ << endl;
     if(! parser_.compile(expr_, expression_))
     {
         stringstream ss;
@@ -189,7 +192,7 @@ bool MooseParser::CompileExpr()
             ss << "Error[" << i << "] Position: " << error.token.position
                  << " Type: [" << exprtk::parser_error::to_str(error.mode)
                  << "] Msg: " << error.diagnostic << endl;
-            
+
             // map is
             auto symbTable = GetSymbolTable();
             vector<std::pair<string, double>> vars;
@@ -243,7 +246,8 @@ Parser::varmap_type MooseParser::GetUsedVar( )
 
 void MooseParser::ClearVariables( )
 {
-    symbol_table_->clear_variables();
+    // Do not invalidate the reference.
+    symbol_table_->clear_variables(false);
 }
 
 void MooseParser::ClearAll( )
