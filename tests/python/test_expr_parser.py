@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """test_muparser.py:
 
-Modified from https://elifesciences.org/articles/25827 
+odified from https://elifesciences.org/articles/25827 
 Fig4.py
 """
 import sys
@@ -91,7 +91,7 @@ def makeChemProto( name, Aexpr, Bexpr, params ):
     return compt
 
 
-def makeBis( args ):
+def makeBis( args = None ):
     params = {
         'k0a':0.1,  # Constant
         'k1a':-5.0,  # Coeff for A
@@ -126,7 +126,7 @@ def makeBis( args ):
         params )
     return params
 
-def makeFHN( args ):
+def makeFHN( args = None ):
     params = {
         'k_t':2.5,  # Time-const.
         'k_a':0.7,  # Coeff1
@@ -162,7 +162,7 @@ def makeFHN( args ):
     return params
 
 
-def makeNegFB( args ):
+def makeNegFB( args = None ):
     params = {
         'k1a':-0.1,  # Coeff for decay of A, slow.
         'k2a':-0.2,  # Coeff for turnoff of A by B, medium.
@@ -195,7 +195,7 @@ def makeNegFB( args ):
     return params
 
 # Was negFF2 in earlier versions of abstrModelEqns
-def makeNegFF( args ):
+def makeNegFF( args = None ):
     params = {
         'k1a':-0.1,  # Coeff for decay of A, slow.
         'k2a':-0.01,  # Coeff for turnoff of A by B, medium.

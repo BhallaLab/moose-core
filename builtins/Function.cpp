@@ -13,7 +13,7 @@
 #include "Variable.h"
 
 #include "Function.h"
-#include "ElementValueFinfo.h"
+#include "../basecode/ElementValueFinfo.h"
 
 #define DEBUG_HERE
 
@@ -382,9 +382,8 @@ void Function::showError(moose::Parser::exception_type &e) const
 void Function::addVariable(const char* name)
 {
     string strname(name);
-    // Names starting with x are variables, everything else is constant.
 
-    stringstream ss;
+    // Names starting with x are variables, everything else is constant.
     if (strname[0] == 'x')
     {
         int index = atoi(strname.substr(1).c_str());

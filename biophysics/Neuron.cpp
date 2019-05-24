@@ -10,14 +10,14 @@
 #include "../basecode/header.h"
 #include "../basecode/ElementValueFinfo.h"
 #include "../basecode/LookupElementValueFinfo.h"
-#include "shell/Shell.h"
-#include "shell/Wildcard.h"
+#include "../shell/Shell.h"
+#include "../shell/Wildcard.h"
 #include "ReadCell.h"
-#include "utility/Vec.h"
+#include "../utility/Vec.h"
 #include "SwcSegment.h"
 #include "Spine.h"
 #include "Neuron.h"
-#include "basecode/global.h"
+#include "../basecode/global.h"
 
 #include "../builtins/MooseParser.h"
 
@@ -321,7 +321,13 @@ const Cinfo* Neuron::initCinfo()
         "one length constant from the soma, and zero elsewhere. \n"
         "Available spine parameters are: \n"
         "spacing, minSpacing, size, sizeDistrib "
-        "angle, angleDistrib \n",
+        "angle, angleDistrib \n"
+		"minSpacing sets the granularity of sampling (typically about 0.1*"
+	    "spacing) for the usual case where spines are spaced randomly. "
+		"If minSpacing < 0 then the spines are spaced equally at "
+		"'spacing', unless the dendritic segment length is smaller than "
+		"'spacing'. In that case it falls back to the regular random "
+		"placement method.",
         &Neuron::setSpineDistribution,
         &Neuron::getSpineDistribution
     );
@@ -1137,10 +1143,29 @@ void Neuron::setChannelDistribution( const Eref& e, vector< string > v )
     vector< vector< string > > lines;
     if ( parseDistrib( lines, v ) )
     {
+		unsigned int index = 0;
+		vector< unsigned int > chanIndices;
+		vector< unsigned int > temp;
         channelDistribution_ = v;
+		// We need to ensure that Ca_concs are created before any channels
+		// since the channels may want to connect to them.
         for ( unsigned int i = 0; i < lines.size(); ++i )
         {
-            vector< string >& temp = lines[i];
+    		Id proto( "/library/" + lines[i][0] );
+    		if ( proto != Id() ) {
+				if ( proto.element()->cinfo()->isA( "CaConcBase" ) ) {
+					chanIndices.push_back( i );
+				} else {
+					temp.push_back( i );
+				}
+			}
+		}
+		chanIndices.insert( chanIndices.end(), temp.begin(), temp.end() );
+		assert( chanIndices.size() == lines.size() );
+
+        for ( unsigned int i = 0; i < lines.size(); ++i )
+        {
+            vector< string >& temp = lines[chanIndices[i]];
             vector< ObjId > elist;
             vector< double > val;
             buildElist( e, temp, elist, val );
@@ -1790,6 +1815,19 @@ static void addPos( unsigned int segIndex, unsigned int eIndex,
                     vector< unsigned int >& elistIndex,
                     vector< double >& pos )
 {
+	if ( minSpacing < 0.0 ) {
+		// Use uniform spacing
+		for ( double position = spacing * 0.5;
+				position < dendLength; position += spacing ) {
+			seglistIndex.push_back( segIndex );
+			elistIndex.push_back( eIndex );
+			pos.push_back( position );
+		}
+		if ( dendLength > spacing * 0.5 )
+			return;
+		// If the dend length is too small for regular placement, 
+		// fall back to using probability to decide if segment gets spine
+	}
     if ( minSpacing < spacing * 0.1 && minSpacing < 1e-7 )
         minSpacing = spacing * 0.1;
     if ( minSpacing > spacing * 0.5 )
@@ -1862,13 +1900,6 @@ void Neuron::makeSpacingDistrib( const vector< ObjId >& elist,
             {
                 double spacing = val[ j + nuParser::EXPR ];
                 double spacingDistrib = parser.eval( val.begin() + j );
-                if ( spacingDistrib > spacing || spacingDistrib < 0 )
-                {
-                    cout << "Warning: Neuron::makeSpacingDistrib: " <<
-                         "0 < " << spacingDistrib << " < " << spacing <<
-                         " fails on " << elist[i].path() << ". Using 0.\n";
-                    spacingDistrib = 0.0;
-                }
                 map< Id, unsigned int>::const_iterator
                 lookupDend = segIndex_.find( elist[i] );
                 if ( lookupDend != segIndex_.end() )

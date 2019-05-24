@@ -7,14 +7,12 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifdef ENABLE_CPP11
-#include <memory>
-#endif
-
-#include "header.h"
+#include "../basecode/header.h"
+#include "../basecode/global.h"
+#include "../randnum/RNG.h"
 #include "RateTerm.h"
 #include "FuncTerm.h"
-#include "SparseMatrix.h"
+#include "../basecode/SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
@@ -23,8 +21,6 @@
 #include "Stoich.h"
 #include "GssaSystem.h"
 #include "GssaVoxelPools.h"
-#include "../randnum/RNG.h"
-#include "../basecode/global.h"
 
 /**
  * The SAFETY_FACTOR Protects against the total propensity exceeding
@@ -208,11 +204,7 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
             assert( rindex < v_.size() );
         }
 
-#if ENABLE_CPP11
         double sign = std::copysign( 1, v_[rindex] );
-#else
-        double sign = double(v_[rindex] >= 0) - double(0 > v_[rindex] );
-#endif
 
         g->transposeN.fireReac( rindex, Svec(), sign );
         numFire_[rindex]++;
@@ -238,6 +230,7 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 
     double* n = varS();
 
+    double totalN = 0;
     if( g->useRandInit )
     {
         vector<double> error(numVarPools, 0.0);
@@ -248,6 +241,7 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
             error[i] = n[i];
             double base = std::floor( n[i] );
             assert( base >= 0.0 );
+            totalN += n[i];
             double frac = n[i] - base;
             if ( rng_.uniform() >= frac )
                 n[i] = base;
@@ -255,38 +249,28 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
                 n[i] = base + 1.0;
 
             error[i] -= n[i];
-
-            //if( true )
-            //{
-            //    //NOTE: Thats how I get the name of the pool at this index.
-            //    Eref e = g->stoich->getPoolByIndex( i ).eref();
-            //    groupByVal[n[i]].push_back( e );
-
-            //    // Guess the fix the error.
-            //}
-
-
         }
 
         double extra = std::accumulate( error.begin(), error.end(), 0.0 );
-        if( std::abs(extra) > 0.1 )
+
+        // Show warning to user if extra molecules in the system after
+        // converting flots to integer is larger 1%.
+        if( std::abs(extra) / totalN > 0.01 )
         {
-            cout << "WARNING: Extra " << extra
-                << " molecules in system after converting fractional to integer e.g. 1.1 = 1 (~90% of times) or 2 (~10% of times)." << endl;
+            cout << "Warn: Extra " << extra
+                << " molecules in system after converting fractional to integer e.g. 1.1 becomes  "
+                " 1 roughly 90% of times or 2 roughly 10% of times." 
+                << endl;
         }
     }
     else     // Just round to the nearest int.
     {
         for ( unsigned int i = 0; i < numVarPools; ++i )
         {
-#if ENABLE_CPP11
             // Just like rint but does not raise exception.
             // See http://en.cppreference.com/w/cpp/numeric/math/nearbyint for
             // details.
             n[i] = std::nearbyint(n[i]);
-#else
-            n[i] = round( n[i] );
-#endif
         }
     }
 

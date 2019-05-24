@@ -23,20 +23,26 @@ set -e
 # NOTE: On travis, don't enable -j`nproc` option. It may not compile properly.
 
 (
-
     # Make sure not to pick up python from /opt.
-    PATH=/usr/bin:/usr/local/bin:$PATH
+    PATH=/usr/local/bin:/usr/bin:$PATH
+
+    # Get pylint
+    python -m pip install pylint --user
+    python -m pip install python-libsbml --user
+    python -m pip install pyneuroml --user
+
     mkdir -p _GSL_BUILD && cd _GSL_BUILD \
         && cmake -DDEBUG=ON \
         -DPYTHON_EXECUTABLE=`which python` ..
-    make && ctest --output-on-failure
+    make pylint -j3
+    make && ctest --output-on-failure -E ".*socket_streamer.*"
 
     cd .. # Now with boost.
     mkdir -p _BOOST_BUILD && cd _BOOST_BUILD \
         && cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON \
         -DPYTHON_EXECUTABLE=`which python` ..
 
-    make && ctest --output-on-failure
+    make && ctest --output-on-failure -E ".*socket_streamer.*"
     cd ..
     set +e
 

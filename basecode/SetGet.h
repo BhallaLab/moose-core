@@ -57,10 +57,14 @@ class SetGet
 {
 public:
     SetGet()
-    {;}
+    {
+        ;
+    }
 
     virtual ~SetGet()
-    {;}
+    {
+        ;
+    }
 
     /**
      * Utility function to check that the target field matches this
@@ -101,7 +105,9 @@ class SetGet0: public SetGet
 {
 public:
     SetGet0()
-    {;}
+    {
+        ;
+    }
 
     /**
      * Blocking, typed 'Set' call
@@ -156,7 +162,9 @@ template< class A > class SetGet1: public SetGet
 {
 public:
     SetGet1()
-    {;}
+    {
+        ;
+    }
 
     /**
      * Blocking, typed 'Set' call
@@ -166,8 +174,7 @@ public:
         FuncId fid;
         ObjId tgt( dest );
         const OpFunc* func = checkSet( field, tgt, fid );
-        const OpFunc1Base< A >* op =
-            dynamic_cast< const OpFunc1Base< A >* >( func );
+        const OpFunc1Base< A >* op = dynamic_cast< const OpFunc1Base< A >* >( func );
         if ( op )
         {
             if ( tgt.isOffNode() )
@@ -254,7 +261,9 @@ template< class A > class Field: public SetGet1< A >
 {
 public:
     Field()
-    {;}
+    {
+        ;
+    }
 
     /**
      * Blocking, typed 'Set' call
@@ -305,7 +314,6 @@ public:
 
         const OpFunc* func = SetGet::checkSet( fullFieldName, tgt, fid );
         const GetOpFuncBase< A >* gof = dynamic_cast< const GetOpFuncBase< A >* >( func );
-
         if ( gof )
         {
             if ( tgt.isDataHere() )
@@ -378,7 +386,9 @@ template< class A1, class A2 > class SetGet2: public SetGet
 {
 public:
     SetGet2()
-    {;}
+    {
+        ;
+    }
 
     /**
      * Blocking, typed 'Set' call
@@ -485,7 +495,9 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 public:
     LookupField( const ObjId& dest )
         : SetGet2< L, A >( dest )
-    {;}
+    {
+        ;
+    }
 
     /**
      * Blocking, typed 'Set' call. Identical to SetGet2::set.
@@ -650,7 +662,9 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 {
 public:
     SetGet3()
-    {;}
+    {
+        ;
+    }
 
     /**
      * Blocking, typed 'Set' call
@@ -715,7 +729,9 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 {
 public:
     SetGet4()
-    {;}
+    {
+        ;
+    }
 
     /**
      * Blocking, typed 'Set' call
@@ -784,7 +800,9 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 {
 public:
     SetGet5()
-    {;}
+    {
+        ;
+    }
 
     static bool set( const ObjId& dest, const string& field,
                      A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5 )
@@ -854,7 +872,9 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 > class Set
 {
 public:
     SetGet6()
-    {;}
+    {
+        ;
+    }
 
     /**
      * Blocking, typed 'Set' call

@@ -27,10 +27,8 @@
 
 import math
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import moose
-import fixXreacs
+import moose.fixXreacs as fixXreacs
 
 diffConst = 1e-16
 

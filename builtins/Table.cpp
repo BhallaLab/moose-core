@@ -7,13 +7,13 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
-#include "global.h"
+#include "../basecode/header.h"
+#include "../basecode/global.h"
 #include <fstream>
 
 #include "TableBase.h"
 #include "Table.h"
-#include "Clock.h"
+#include "../scheduling/Clock.h"
 #include "StreamerBase.h"
 
 static SrcFinfo1< vector< double >* > *requestOut()
@@ -216,20 +216,20 @@ Table::Table() :
 {
     // Initialize the directory to which each table should stream.
     rootdir_ = "_tables";
-    useStreamer_ = false;
+    useFileStreamer_ = false;
     format_ = "csv";
     outfileIsSet_ = false;
+    lastN_ = 0;
 }
 
 Table::~Table( )
 {
     // Make sure to write to rest of the entries to file before closing down.
-    if( useStreamer_ )
+    if( useFileStreamer_ )
     {
-        zipWithTime( vec(), data_, lastTime_ );
+        mergeWithTime( data_ );
         StreamerBase::writeToOutFile( outfile_, format_, "a", data_, columns_ );
-        clearVec();
-        data_.clear();
+        clearAllVecs();
     }
 }
 
@@ -246,6 +246,7 @@ Table& Table::operator=( const Table& tab )
 void Table::process( const Eref& e, ProcPtr p )
 {
     lastTime_ = p->currTime;
+    tvec_.push_back(lastTime_);
 
     // Copy incoming data to ret and insert into vector.
     vector< double > ret;
@@ -263,16 +264,22 @@ void Table::process( const Eref& e, ProcPtr p )
      *  vector.
      *  Write at every 5 seconds or whenever size of vector is more than 10k.
      */
-    if( useStreamer_ )
+    if( useFileStreamer_ )
     {
         if( fmod(lastTime_, 5.0) == 0.0 || getVecSize() >= 10000 )
         {
-            zipWithTime( vec(), data_, lastTime_ );
+            mergeWithTime( data_ );
             StreamerBase::writeToOutFile( outfile_, format_, "a", data_, columns_ );
-            data_.clear();
-            clearVec();
+            clearAllVecs();
+        }
         }
     }
+
+void Table::clearAllVecs()
+{
+    clearVec();
+    tvec_.clear();
+    data_.clear();
 }
 
 /**
@@ -291,7 +298,7 @@ void Table::reinit( const Eref& e, ProcPtr p )
     fired_ = false;
 
     /** Create the default filepath for this table.  */
-    if( useStreamer_ )
+    if( useFileStreamer_ )
     {
         // The first column is variable time.
         columns_.push_back( "time" );
@@ -320,13 +327,13 @@ void Table::reinit( const Eref& e, ProcPtr p )
     else
         vec().insert( vec().end(), ret.begin(), ret.end() );
 
-    if( useStreamer_ )
+    tvec_.push_back(lastTime_);
+
+    if( useFileStreamer_ )
     {
-        zipWithTime( vec(), data_, lastTime_ );
+        mergeWithTime( data_ );
         StreamerBase::writeToOutFile( outfile_, format_, "w", data_, columns_);
-        clearVec();
-        data_.clear();
-        clearVec();
+        clearAllVecs();
     }
 }
 
@@ -341,16 +348,16 @@ void Table::input( double v )
 
 void Table::spike( double v )
 {
-    // Wait for it to go below threshold
     if ( fired_ )
-    {
+    { // Wait for it to go below threshold
         if ( v < threshold_ )
             fired_ = false;
     }
     else
     {
-        if ( v > threshold_ )   // wait for it to go above threshold.
+        if ( v > threshold_ )
         {
+            // wait for it to go above threshold.
             fired_ = true;
             vec().push_back( lastTime_ );
         }
@@ -401,12 +408,12 @@ void Table::setColumnName( const string colname )
 /* Enable/disable streamer support. */
 void Table::setUseStreamer( bool useStreamer )
 {
-    useStreamer_ = useStreamer;
+    useFileStreamer_ = useStreamer;
 }
 
 bool Table::getUseStreamer( void ) const
 {
-    return useStreamer_;
+    return useFileStreamer_;
 }
 
 /* Enable/disable spike mode. */
@@ -452,15 +459,74 @@ double Table::getDt( void ) const
  * @brief Take the vector from table and timestamp it. It must only be called
  * when packing the data for writing.
  */
-void Table::zipWithTime( const vector<double>& v
-        , vector<double>& tvec
-        , const double& currTime
-    )
+void Table::mergeWithTime( vector<double>& data )
 {
-    size_t N = v.size();
-    for (size_t i = 0; i < N; i++)
+    auto v = vec();
+    for (size_t i = 0; i < v.size(); i++)
     {
-        tvec.push_back( currTime - (N - i - 1 ) * dt_ );
-        tvec.push_back( v[i] );
+        data.push_back(tvec_[i]);
+        data.push_back(v[i]);
     }
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis.  Convert table data to JOSN.
+ *
+ * @Returns string.
+ */
+/* ----------------------------------------------------------------------------*/
+string Table::toJSON(bool withTime, bool clear)
+{
+    stringstream ss;
+    auto v = vec();
+    if( clear )
+        lastN_ = 0;
+
+    for (size_t i = lastN_; i < v.size(); i++)
+    {
+        if(withTime)
+            ss << '[' << tvec_[i] << ',' << v[i] << "],";
+        else
+            ss << v[i] << ',';
+    }
+
+    string res = ss.str();
+    if(',' == res.back())
+        res.pop_back();
+
+    if( clear )
+        clearAllVecs();
+    else
+        lastN_ += v.size();
+
+    return res;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Collect data in given vector. Its similar to toJSON function.
+ *
+ * @Param data
+ * @Param withTime
+ * @Param clear
+ */
+/* ----------------------------------------------------------------------------*/
+void Table::collectData(vector<double>& data, bool withTime, bool clear)
+{
+    auto v = vec();
+    if( clear )
+        lastN_ = 0;
+
+    for (size_t i = lastN_; i < v.size(); i++)
+    {
+        if(withTime)
+            data.push_back(tvec_[i]);
+        data.push_back(v[i]);
+    }
+
+    if( clear )
+        clearAllVecs();
+    else
+        lastN_ = v.size();
 }

@@ -7,12 +7,10 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
-#include <stdio.h>
+#include "../basecode/header.h"
 #include "Neutral.h"
 #include "Shell.h"
 #include "Wildcard.h"
-// #define NOINDEX (UINT_MAX - 2)
 
 static int wildcardRelativeFind( ObjId start, const vector< string >& path,
                                  unsigned int depth, vector< ObjId >& ret );
@@ -103,18 +101,6 @@ static int innerFind( const string& path, vector< ObjId >& ret)
         Shell* s = reinterpret_cast< Shell* >( ObjId().data() );
         start = s->getCwe();
     }
-
-    /*
-    if ( path[0] == '/' ) {
-    // separateString puts in a blank first entry if the first char
-    // is a separator.
-    separateString( path.substr( 1 ) , names, "/" );
-    } else {
-    Shell* s = reinterpret_cast< Shell* >( Id.eref().data() );
-    separateString( path, names, "/" );
-    start = s->getCwe();
-    }
-    */
     return wildcardRelativeFind( start, names, 0, ret );
 }
 
@@ -141,7 +127,6 @@ int simpleWildcardFind( const string& path, vector< ObjId >& ret)
     unsigned int n = ret.size();
     vector< string > wildcards;
     Shell::chopString( path, wildcards, ',' );
-    // separateString( path, wildcards, "," );
     vector< string >::iterator i;
     for ( i = wildcards.begin(); i != wildcards.end(); ++i )
         innerFind( *i, ret );
@@ -166,9 +151,10 @@ static void myUnique(vector<ObjId>& ret)
         ret.resize(j);
 }
 
-int wildcardFind(const string& path, vector<ObjId>& ret)
+int wildcardFind(const string& path, vector<ObjId>& ret, bool clear)
 {
-    ret.resize( 0 );
+    if(clear)
+        ret.resize( 0 );
     simpleWildcardFind( path, ret );
     myUnique( ret );
     return ret.size();

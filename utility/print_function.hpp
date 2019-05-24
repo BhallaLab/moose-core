@@ -234,7 +234,6 @@ namespace moose {
     inline void showDebug( const string msg )
     {
 #ifdef DISABLE_DEBUG
-
 #else
         moose::__dump__(msg, moose::debug );
 #endif
@@ -256,7 +255,9 @@ namespace moose {
 #ifdef  NDEBUG
 #define LOG(t, a ) ((void)0);
 #else      /* -----  not NDEBUG  ----- */
-#define LOG(t, a) { stringstream __ss__;  __ss__ << a; moose::__dump__(__ss__.str(), t ); }
+#define LOG(t, a) { stringstream __ss__; \
+    __ss__ << __func__ << ": " << a; moose::__dump__(__ss__.str(), t); \
+}
 #endif     /* -----  not NDEBUG  ----- */
 
     /*-----------------------------------------------------------------------------

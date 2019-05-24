@@ -16,8 +16,9 @@
 #include <map>
 #include <ctime>
 #include <csignal>
+#include <chrono>
+#include <thread>
 #include <exception>
-
 
 #if USE_BOOST_ODE
 #include <boost/format.hpp>
@@ -35,9 +36,9 @@
 #include "../utility/utility.h"
 #include "../shell/Shell.h"
 #include "../shell/Wildcard.h"
+#include "../basecode/global.h"
 
 #include "moosemodule.h"
-#include "global.h"
 
 using namespace std;
 
@@ -87,7 +88,6 @@ extern void speedTestMultiNodeIntFireNetwork(
 
 extern void mooseBenchmarks( unsigned int option );
 
-
 /*-----------------------------------------------------------------------------
  *  Random number generator for this module.
  *
@@ -104,6 +104,31 @@ void pymoose_mtseed_( long int seed )
 double pymoose_mtrand_( void )
 {
     return moose::mtrand( );
+}
+
+bool setupSocketStreamer(const string addr )
+{
+    LOG(moose::debug, "Setting streamer with addr " << addr );
+    // Find all tables.
+    vector< ObjId > tables;
+    wildcardFind( "/##[TYPE=Table2]", tables );
+    wildcardFind( "/##[TYPE=Table]", tables, false );
+
+    if( tables.size() < 1 )
+    {
+        LOG( moose::warning, "No table found. MOOSE will not create a streamer." );
+        return false;
+    }
+
+    // Craete a SocketStreamer and add all tables.
+    Id stBase = SHELLPTR->doCreate("Neutral", Id(), "socket", 1);
+    Id st = SHELLPTR->doCreate("SocketStreamer", stBase, "streamer", 1);
+    Field<string>::set(st, "address", addr);
+
+    LOG(moose::debug, "Found " << tables.size() << " tables.");
+    for( auto &t : tables )
+        SetGet1<ObjId>::set(st, "addTable", t );
+    return true;
 }
 
 /**
@@ -163,8 +188,8 @@ int verbosity = 1;
 // static int isSingleThreaded = 0;
 static int isInfinite = 0;
 static unsigned int numNodes = 1;
-static unsigned int numCores = 1;
-static unsigned int myNode = 0;
+// static unsigned int numCores = 1;
+// static unsigned int myNode = 0;
 // static unsigned int numProcessThreads = 0;
 static int doUnitTests = 0;
 static int doRegressionTests = 0;
@@ -898,6 +923,7 @@ vector <string> setup_runtime_env()
             args.push_back("-i");
         }
     }
+#if 0
     it = argmap.find("NUMNODES");
     if (it != argmap.end())
     {
@@ -916,6 +942,7 @@ vector <string> setup_runtime_env()
     //     args.push_back("-t");
     //     args.push_back(it->second);
     // }
+#endif
     it = argmap.find("QUIT");
     if (it != argmap.end())
     {
@@ -1716,18 +1743,8 @@ PyObject * moose_start(PyObject * dummy, PyObject * args )
     sigemptyset(&sigHandler.sa_mask);
     sigHandler.sa_flags = 0;
     sigaction(SIGINT, &sigHandler, NULL);
-
-#if 0
-    // NOTE: (dilawar) Does not know if Py_BEGIN_ALLOW_THREADS is
-    // neccessary.
-    // Py_BEGIN_ALLOW_THREADS
-    SHELLPTR->doStart(runtime);
-    // Py_END_ALLOW_THREADS
-    Py_RETURN_NONE;
-#endif
     SHELLPTR->doStart( runtime, notify );
     Py_RETURN_NONE;
-
 }
 
 PyDoc_STRVAR(moose_reinit_documentation,
@@ -1745,9 +1762,19 @@ PyDoc_STRVAR(moose_reinit_documentation,
              "\n");
 PyObject * moose_reinit(PyObject * dummy, PyObject * args)
 {
+    // If environment variable MOOSE_TCP_STREAMER_ADDRESS is set then setup the
+    // streamer.
+    string envSocketServer = moose::getEnv( "MOOSE_STREAMER_ADDRESS" );
+    if(! envSocketServer.empty())
+    {
+        LOG( moose::debug, "Environment variable MOOSE_STREAMER_ADDRESS: " << envSocketServer );
+        if( envSocketServer.size() > 0 )
+            setupSocketStreamer(envSocketServer);
+    }
     SHELLPTR->doReinit();
     Py_RETURN_NONE;
 }
+
 PyObject * moose_stop(PyObject * dummy, PyObject * args)
 {
     SHELLPTR->doStop();
@@ -1768,10 +1795,12 @@ PyObject * moose_exists(PyObject * dummy, PyObject * args)
     return Py_BuildValue("i", Id(path) != Id() || string(path) == "/" || string(path) == "/root");
 }
 
-PyDoc_STRVAR(moose_loadModel_documentation,
-             "loadModel(filename, modelpath, solverclass) -> vec\n"
+PyDoc_STRVAR(moose_loadModelInternal_documentation,
+             "loadModelInternal(filename, modelpath, solverclass) -> vec\n"
              "\n"
              "Load model from a file to a specified path.\n"
+             "Note: This function should not be used by users. It is meants for developers. \n"
+             "Please see `moose.loadModel` function.\n"
              "\n"
              "Parameters\n"
              "----------\n"
@@ -1788,11 +1817,11 @@ PyDoc_STRVAR(moose_loadModel_documentation,
              "    loaded model container vec.\n"
             );
 
-PyObject * moose_loadModel(PyObject * dummy, PyObject * args)
+PyObject * moose_loadModelInternal(PyObject * dummy, PyObject * args)
 {
     char * fname = NULL, * modelpath = NULL, * solverclass = NULL;
 
-    if(!PyArg_ParseTuple(args, "ss|s:moose_loadModel", &fname, &modelpath, &solverclass))
+    if(!PyArg_ParseTuple(args, "ss|s:moose_loadModelInternal", &fname, &modelpath, &solverclass))
     {
         cout << "here in moose load";
         return NULL;
@@ -1815,7 +1844,8 @@ PyObject * moose_loadModel(PyObject * dummy, PyObject * args)
     PyObject * ret = reinterpret_cast<PyObject*>(model);
     return ret;
 }
-/*
+
+#if 0
 PyDoc_STRVAR(moose_saveModel_documentation,
              "saveModel(source, filename) -> None\n"
              "\n"
@@ -1872,7 +1902,8 @@ PyObject * moose_saveModel(PyObject * dummy, PyObject * args)
     SHELLPTR->doSaveModel(model, filename);
     Py_RETURN_NONE;
 }
-*/
+#endif
+
 PyObject * moose_setCwe(PyObject * dummy, PyObject * args)
 {
     PyObject * element = NULL;
@@ -2933,16 +2964,16 @@ PyObject * moose_element(PyObject* dummy, PyObject * args)
     unsigned nid = 0, did = 0, fidx = 0;
     Id id;
     unsigned int numData = 0;
-    if (PyArg_ParseTuple(args, "s", &path))
+
+    // Parse into str or bytes-like object. Using 's' parses into const char*
+    // which is portable with bytes often returned when working with python3.
+    if (PyArg_ParseTuple(args, "s*", &path))
     {
         oid = ObjId(path);
-        //            cout << "Original Path " << path << ", Element Path: " << oid.path() << endl;
         if ( oid.bad() )
         {
-            PyErr_SetString(PyExc_ValueError, ( std::string("moose_element: '")
-                                                + std::string(path)
-                                                + std::string("' does not exist!")
-                                              ).c_str()
+            PyErr_SetString(PyExc_ValueError
+                    , (std::string("moose_element: '") + std::string(path) + std::string("' does not exist!")).c_str()
                            );
             return NULL;
         }
@@ -3016,7 +3047,7 @@ static PyMethodDef MooseMethods[] =
     {"stop", (PyCFunction)moose_stop, METH_VARARGS, "Stop simulation"},
     {"isRunning", (PyCFunction)moose_isRunning, METH_VARARGS, "True if the simulation is currently running."},
     {"exists", (PyCFunction)moose_exists, METH_VARARGS, "True if there is an object with specified path."},
-    {"loadModel", (PyCFunction)moose_loadModel, METH_VARARGS, moose_loadModel_documentation},
+    {"loadModelInternal", (PyCFunction)moose_loadModelInternal, METH_VARARGS, moose_loadModelInternal_documentation},
     //{"saveModel", (PyCFunction)moose_saveModel, METH_VARARGS, moose_saveModel_documentation},
     {"connect", (PyCFunction)moose_connect, METH_VARARGS, moose_connect_documentation},
     {"getCwe", (PyCFunction)moose_getCwe, METH_VARARGS, "Get the current working element. 'pwe' is an alias of this function."},
@@ -3196,10 +3227,10 @@ PyMODINIT_FUNC MODINIT(_moose)
     PyModule_AddObject(moose_module, "DestField", (PyObject*)&moose_DestField);
 
     // PyModule_AddIntConstant(moose_module, "SINGLETHREADED", isSingleThreaded);
-    PyModule_AddIntConstant(moose_module, "NUMCORES", numCores);
-    PyModule_AddIntConstant(moose_module, "NUMNODES", numNodes);
+    // PyModule_AddIntConstant(moose_module, "NUMCORES", numCores);
+    // PyModule_AddIntConstant(moose_module, "NUMNODES", numNodes);
     // PyModule_AddIntConstant(moose_module, "NUMPTHREADS", numProcessThreads);
-    PyModule_AddIntConstant(moose_module, "MYNODE", myNode);
+    // PyModule_AddIntConstant(moose_module, "MYNODE", myNode);
     PyModule_AddIntConstant(moose_module, "INFINITE", isInfinite);
     PyModule_AddStringConstant(moose_module, "__version__", SHELLPTR->doVersion().c_str());
     PyModule_AddStringConstant(moose_module, "VERSION", SHELLPTR->doVersion().c_str());
@@ -3230,40 +3261,8 @@ PyMODINIT_FUNC MODINIT(_moose)
        );
 
     if (doUnitTests)
-    {
         test_moosemodule();
-    }
 #ifdef PY3K
     return moose_module;
 #endif
-} //! init_moose
-
-
-//////////////////////////////////////////////
-// Main function
-//////////////////////////////////////////////
-
-// int main(int argc, char* argv[])
-// {
-// #ifdef PY3K
-//     size_t len = strlen(argv[0]);
-//     wchar_t * warg = (wchar_t*)calloc(sizeof(wchar_t), len);
-//     mbstowcs(warg, argv[0], len);
-// #else
-//     char * warg = argv[0];
-// #endif
-//     for (int ii = 0; ii < argc; ++ii){
-//     cout << "ARGV: " << argv[ii];
-// }
-//     cout << endl;
-//     Py_SetProgramName(warg);
-//     Py_Initialize();
-//     MODINIT(_moose);
-// #ifdef PY3K
-//     free(warg);
-// #endif
-//     return 0;
-// }
-
-//
-// moosemodule.cpp ends here
+}

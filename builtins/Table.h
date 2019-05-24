@@ -48,11 +48,15 @@ public:
     // Access the dt_ of table.
     double getDt ( void ) const;
 
-    void zipWithTime (
-        const vector<double>& yvec
-        , vector<double>& tvec
-        , const double& lasttime
-    );
+    // merge time value among values. e.g. t1, v1, t2, v2, etc.
+    void mergeWithTime( vector<double>& data );
+
+    string toJSON(bool withTime=true, bool clear = false);
+
+    void collectData(vector<double>& data, bool withTime=true, bool clear = false);
+
+
+    void clearAllVecs();
 
     //////////////////////////////////////////////////////////////////
     // Dest funcs
@@ -71,21 +75,22 @@ public:
     static const Cinfo* initCinfo();
 
 private:
+
     double threshold_;
     double lastTime_;
     double input_;
-	bool fired_;
-	bool useSpikeMode_;
+    bool fired_;
+    bool useSpikeMode_;
 
-    /**
-     * @brief Keep the data, each entry is preceeded by time value.
-     * t0, v0, t1, v1, t2, v2 etc.
-     */
     vector<double> data_;
+    vector<double> tvec_;                       /* time data */
     vector<string> columns_;                    /* Store the name of tables */
 
-    string tablePath_;
+    // Upto which indices we have read the data. This variable is used when
+    // SocketStreamer is used.
+    size_t lastN_ = 0;
 
+    string tablePath_;
 
     /**
      * @brief Column name of this table. Use it when writing data to a datafile.
@@ -97,7 +102,7 @@ private:
      * of outfile_ is table path starting from `pwd`/_tables_ . On table, set
      * streamToFile to true.
      */
-    bool useStreamer_;
+    bool useFileStreamer_;
 
     /**
      * @brief Table directory into which dump the stream data.

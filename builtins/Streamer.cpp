@@ -17,11 +17,11 @@
 #include <algorithm>
 #include <sstream>
 
-#include "global.h"
-#include "header.h"
+#include "../basecode/global.h"
+#include "../basecode/header.h"
 #include "Streamer.h"
-#include "Clock.h"
-#include "utility/utility.h"
+#include "../scheduling/Clock.h"
+#include "../utility/utility.h"
 #include "../shell/Shell.h"
 
 
@@ -201,7 +201,7 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
     {
         Id tId = tableIds_[i];
         int tickNum = tId.element()->getTick();
-        tableDt_.push_back( clk->getTickDt( tickNum ) );
+        tableDt_.push_back( clk->getTickDt(tickNum) );
     }
 
     // Make sure all tables have same dt_ else disable the streamer.

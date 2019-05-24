@@ -9,6 +9,7 @@
 #define _STRINGUTIL_H
 
 #include <string>
+#include <sstream>
 #include <vector>
 
 namespace moose
@@ -53,16 +54,28 @@ namespace moose
      */
     std::string random_string( const unsigned size );
 
+
     /* --------------------------------------------------------------------------*/
     /**
-     * @Synopsis  Replace a with b in given string.
+     * @Synopsis Converts a vector to string.
      *
-     * @Param str
-     * @Param a
-     * @Param b
+     * @Param vec
+     *
+     * @Returns   
      */
     /* ----------------------------------------------------------------------------*/
-    void str_replace_all( std::string& str, const std::string& a, const std::string& b);
+    template<typename T=double>
+    std::string vectorToCSV( const std::vector<T>& vec)
+    {
+        std::stringstream ss;
+        for(size_t i = 0; i < vec.size(); i++)
+            ss << vec[i] << ',';
+        auto res = ss.str();
+        if( ',' == res.back())
+            res.pop_back();
+        return res;
+    }
+
 }
 
 #endif //_STRINGUTIL_H
