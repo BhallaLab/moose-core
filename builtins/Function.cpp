@@ -333,7 +333,7 @@ Function& Function::operator=(const Function& rhs)
     stoich_ = rhs.stoich_;
 
     // shared parser.
-    parser_ = std::move(rhs.parser_);
+    parser_ = rhs.parser_;
     return *this;
 }
 
@@ -380,57 +380,52 @@ void Function::showError(moose::Parser::exception_type &e) const
    at evaluation of the same, i.e. when you access `value` of the
    Function object.
  */
-void Function::addVariable(const char* name)
+void Function::addVariable(const string& name)
 {
-    string strname(name);
     cout << "- variable " << name << endl;
-
     // Names starting with x are variables, everything else is constant.
-    if (strname[0] == 'x')
+    if (name[0] == 'x')
     {
-        int index = atoi(strname.substr(1).c_str());
+        size_t index = (size_t)stoull(name.substr(1));
 
         // Only when i of xi is larger than the size of current xs_, we need to
         // resize the container. Fill them with variables.
-        if ((size_t)index >= xs_.size())
+        if (index >= xs_.size())
         {
             // Equality with index because we cound from 0.
             for (size_t i = xs_.size(); i <= (size_t) index; i++)
-                xs_.push_back( new Variable() );
+                xs_.push_back( make_shared<Variable>() );
         }
 
         // This must be true.
         if(  xs_[index] )
         {
             // xs_[index] = new Variable();
-            parser_->DefineVar(name, xs_[index]->value);
+            parser_->DefineVar(name, &xs_[index]->value);
         }
         else
             throw runtime_error( "Empty Variable." );
 
         numVar_ = xs_.size();
     }
-    else if (strname[0] == 'y')
+    else if (name[0] == 'y')
     {
-        int index = atoi(strname.substr(1).c_str());
+        size_t index = (size_t)stoull(name.substr(1).c_str());
         // Only when i of xi is larger than the size of current xs_, we need to
         // resize the container.
-        if ((size_t)index >= ys_.size())
+        if (index >= ys_.size())
         {
             // Equality with index because we cound from 0.
             for (size_t i = ys_.size(); i <= (size_t) index; i++)
-                ys_.push_back(nullptr);
+                ys_.push_back(make_shared<double>());
         }
 
-        if (ys_[index] == nullptr)
-        {
-            ys_[index] = new double();
-            parser_->DefineVar(name, *ys_[index]);
-        }
+        if (ys_[index])
+            parser_->DefineVar(name, ys_[index].get());
     }
-    else if (strname == "t")
+    else if (name == "t")
     {
-        parser_->DefineVar("t", t_);
+        parser_->DefineVar("t", &t_);
     }
     else
     {
@@ -619,7 +614,7 @@ Variable * Function::getVar(unsigned int ii)
 {
     static Variable dummy;
     if ( ii < xs_.size())
-        return xs_[ii];
+        return xs_[ii].get();
 
     MOOSE_WARN( "Warning: Function::getVar: index: "
                 << ii << " is out of range: "

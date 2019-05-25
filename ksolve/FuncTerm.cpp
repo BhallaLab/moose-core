@@ -134,7 +134,7 @@ const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
 
 void FuncTerm::addVar( const string& name, size_t i )
 {
-    parser_->DefineVar(name, args_[i]);
+    parser_->DefineVar(name, &args_[i]);
 }
 
 /**

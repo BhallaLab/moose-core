@@ -27,19 +27,21 @@ namespace moose
 
 MooseParser::MooseParser() : symbol_tables_registered_(false)
 {
-    symbol_table_ = unique_ptr<Parser::symbol_table_t>(new Parser::symbol_table_t());
+    // symbol_table_ = unique_ptr<Parser::symbol_table_t>(new Parser::symbol_table_t());
 
     // And add user defined functions.
-    symbol_table_->add_function( "rand", MooseParser::Rand );
-    symbol_table_->add_function( "srand", MooseParser::SRand );
-    symbol_table_->add_function( "rand2", MooseParser::Rand2 );
-    symbol_table_->add_function( "srand2", MooseParser::SRand2 );
-    symbol_table_->add_function( "fmod", MooseParser::Fmod );
-    expression_.register_symbol_table(*symbol_table_.get());
+    symbol_table_.add_function( "rand", MooseParser::Rand );
+    symbol_table_.add_function( "srand", MooseParser::SRand );
+    symbol_table_.add_function( "rand2", MooseParser::Rand2 );
+    symbol_table_.add_function( "srand2", MooseParser::SRand2 );
+    symbol_table_.add_function( "fmod", MooseParser::Fmod );
+    expression_.register_symbol_table(symbol_table_);
 }
 
 MooseParser::~MooseParser()
 {
+    symbol_table_.clear();
+    expression_.release();
 }
 
 /*-----------------------------------------------------------------------------
@@ -91,19 +93,11 @@ Parser::expression_t MooseParser::GetExpression( ) const
 /*-----------------------------------------------------------------------------
  *  Other function.
  *-----------------------------------------------------------------------------*/
-void MooseParser::DefineVar( const string varName, double& val)
+bool MooseParser::DefineVar( const string varName, double* val)
 {
     // If this variable alreay exists, then delete the previous instance and
     // create the new variable.
-    if(0 == symbol_table_->variable_ref(varName))
-    {
-#ifdef DEBUG_HERE
-        cout << "-- Adding var " << varName << "=" << val << "(" << &val << ")" << endl;
-#endif
-        symbol_table_->add_variable(varName, val);
-        return;
-    }
-    throw runtime_error("Variable " + varName + " already exists parser's table.");
+    return symbol_table_.add_variable(varName, *val, false);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -115,7 +109,7 @@ void MooseParser::DefineVar( const string varName, double& val)
 void MooseParser::Reinit( )
 {
     ClearVariables();
-    expression_.register_symbol_table(*symbol_table_.get());
+    // expression_.register_symbol_table(*symbol_table_.get());
 }
 
 void MooseParser::DefineConst( const string& constName, const double value )
@@ -128,7 +122,7 @@ void MooseParser::DefineFun1( const string& funcName, double (&func)(double) )
     // Add a function. This function currently handles only one argument
     // function.
     num_user_defined_funcs_ += 1;
-    symbol_table_->add_function( funcName, func );
+    symbol_table_.add_function( funcName, func );
 }
 
 void MooseParser::findAllVars( const string& expr, set<string>& vars, const string& pattern)
@@ -200,7 +194,7 @@ bool MooseParser::CompileExpr()
             ss << "MORE INFORMATION:\nTotal variables " << n << ".";
             for (auto i : vars)
             {
-                ss << "\t" << i.first << "=" << i.second << " " << &symbol_table_->get_variable(i.first)->ref();
+                ss << "\t" << i.first << "=" << i.second << " " << &symbol_table_.get_variable(i.first)->ref();
             }
             ss << endl;
         }
@@ -212,7 +206,7 @@ bool MooseParser::CompileExpr()
 void MooseParser::SetVariableMap( const map<string, double*> m )
 {
     for( auto &v : m )
-        symbol_table_->add_variable( v.first, *v.second );
+        symbol_table_.add_variable( v.first, *v.second );
 }
 
 double MooseParser::Eval( ) const
@@ -247,7 +241,7 @@ Parser::varmap_type MooseParser::GetUsedVar( )
 void MooseParser::ClearVariables( )
 {
     // Do not invalidate the reference.
-    symbol_table_->clear_variables(false);
+    symbol_table_.clear_variables(false);
 }
 
 void MooseParser::ClearAll( )

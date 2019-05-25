@@ -74,7 +74,7 @@ public:
     /*-----------------------------------------------------------------------------
      *  User interface.
      *-----------------------------------------------------------------------------*/
-    void DefineVar( const string varName, double& v );
+    bool DefineVar( const string varName, double* v );
 
     void DefineConst( const string& cname, const double val );
 
@@ -128,7 +128,8 @@ private:
     map<string, double*> map_;
 
     /* Parser related */
-    unique_ptr<Parser::symbol_table_t> symbol_table_;   /* symbol table */
+    // unique_ptr<Parser::symbol_table_t> symbol_table_;   [> symbol table <]
+    Parser::symbol_table_t symbol_table_;
     Parser::expression_t   expression_;     /* expression type */
     Parser::parser_t       parser_;          /* parser */
     size_t num_user_defined_funcs_ = 0;
