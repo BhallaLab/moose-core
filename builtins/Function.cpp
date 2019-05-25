@@ -476,7 +476,7 @@ double * _functionAddVar(const char *name, void *data)
     string strname(name);
 
     // Names starting with x are variables, everything else is constant.
-    if (strname[0] == 'x')
+    if (name[0] == 'x')
     {
         int index = atoi(strname.substr(1).c_str());
         if ((unsigned)index >= function->_varbuf.size()){
@@ -490,7 +490,7 @@ double * _functionAddVar(const char *name, void *data)
         }
         ret = &(function->_varbuf[index]->value);
     } 
-    else if (strname[0] == 'y')
+    else if (name[0] == 'y')
     {
         int index = atoi(strname.substr(1).c_str());
         if ((unsigned)index >= function->_pullbuf.size()){

@@ -4,7 +4,6 @@ project(pymoose)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
-include(FindPkgConfig)
 
 # getgit revision number
 find_program( GIT_EXEC git )
@@ -78,6 +77,7 @@ option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" OFF)
 option(WITH_GSL             "Use gsl-library. Alternative is WITH_BOOST" ON)
 option(PARALLELIZED_CLOCK   "High level parallelization of moose::Clock (alpha)" OFF )
 option(USE_PRIVATE_RNG      "Stochastic Objects use their private RNG" ON)
+option(WITH_ASN             "Use AddressSanitizer [Only when DEBUG=ON]." OFF)
 
 
 ############################ BUILD CONFIGURATION #################################
@@ -109,8 +109,11 @@ if(GPROF AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
 endif()
 
-find_package(Threads)
-
+if(WITH_ASN AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    message(STATUS "Compiling with ASN")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+    set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+endif()
 
 ################################### TARGETS ####################################
 
@@ -131,8 +134,6 @@ endif(WITH_BOOST)
 if(WITH_BOOST_ODE)
     set(WITH_GSL OFF)
 endif(WITH_BOOST_ODE)
-
-include_directories(msg basecode)
 
 set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
@@ -202,6 +203,7 @@ if(WITH_BOOST_ODE)
     list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
 endif(WITH_BOOST_ODE)
 
+find_package( Threads )
 list(APPEND SYSTEM_SHARED_LIBS ${CMAKE_THREAD_LIBS_INIT})
 
 # These libraries could be static of dynamic. We need to discrimate between
