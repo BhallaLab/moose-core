@@ -62,7 +62,7 @@ def main( nT ):
     # Run and plot it.
     moose.reinit()
     updateDt = 50
-    runtime = updateDt * 10
+    runtime = updateDt * 3
     t1 = time.time()
     res = []
     clk = moose.element( '/clock' )

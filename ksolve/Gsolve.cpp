@@ -226,7 +226,8 @@ Gsolve::Gsolve() :
     dsolvePtr_(nullptr),
     useClockedUpdate_( false )
 {
-    ;
+    // Initialize with global seed.
+    rng_.setSeed(moose::getGlobalSeed());
 }
 
 Gsolve& Gsolve::operator=(const Gsolve& )
@@ -403,13 +404,7 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 #if SIMPLE_ROUNDING
             *i = std::round( *i );
 #else
-            double base = floor( *i );
-
-            // Use global RNG.
-            if ( moose::mtrand() >= (*i - base) )
-                *i = base;
-            else
-                *i = base + 1.0;
+            *i = approximateWithInteger(*i, moose::rng);
 #endif
         }
         setBlock( dvalues );

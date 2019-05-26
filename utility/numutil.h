@@ -95,16 +95,16 @@ bool almostEqual(long double x, long double y, long double epsilon = LDBL_EPSILO
  * @Returns   
  */
 /* ----------------------------------------------------------------------------*/
-inline double approximateWithInteger(double x, moose::RNG& rng)
+inline double approximateWithInteger(const double x, moose::RNG& rng)
 {
     assert(x >= 0.0);
-
-    double base = x - std::floor(x);
+    double xf = std::floor(x);
+    double base = x - xf;
     if( base == 0.0)
         return x;
     if( rng.uniform() < base)
-        return x+1.0;
-    return x;
+        return xf+1.0;
+    return xf;
 }
 
 #endif
