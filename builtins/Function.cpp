@@ -318,9 +318,6 @@ Function& Function::operator=(const Function& rhs)
     if( this == &rhs)
         return *this;
 
-    cout << "+ Assignment operator()= " << this << " on Function "
-        << rhs.parser_->GetExpr() << endl;
-
     valid_ = rhs.valid_;
     numVar_ = rhs.numVar_;
     lastValue_ = rhs.lastValue_;
@@ -352,12 +349,8 @@ void Function::clearBuffer()
 
 void Function::showError(moose::Parser::exception_type &e) const
 {
-    cout << "Error occurred in parser.\n"
+    cerr << "Error occurred in parser.\n"
          << "Message:  " << e.GetMsg() << "\n"
-         // << "Formula:  " << e.GetExpr() << "\n"
-         // << "Token:    " << e.GetToken() << "\n"
-         // << "Position: " << e.GetPos() << "\n"
-         // << "Error code:     " << e.GetCode() << endl;
          << endl;
 }
 
@@ -382,7 +375,6 @@ void Function::showError(moose::Parser::exception_type &e) const
  */
 void Function::addVariable(const string& name)
 {
-    cout << "- variable " << name << endl;
     // Names starting with x are variables, everything else is constant.
     if (name[0] == 'x')
     {
@@ -400,12 +392,10 @@ void Function::addVariable(const string& name)
         // This must be true.
         if(  xs_[index] )
         {
-            // xs_[index] = new Variable();
             parser_->DefineVar(name, &xs_[index]->value);
         }
         else
             throw runtime_error( "Empty Variable." );
-
         numVar_ = xs_.size();
     }
     else if (name[0] == 'y')
@@ -429,11 +419,10 @@ void Function::addVariable(const string& name)
     }
     else
     {
-        cerr << "Got an undefined symbol: " << name << endl
+        MOOSE_WARN( "Got an undefined symbol: " << name << endl
              << "Variables must be named xi, yi, where i is integer index."
              << " You must define the constants beforehand using LookupField c: c[name]"
-             " = value"
-             << endl;
+             " = value");
         throw moose::Parser::ParserException("Undefined constant.");
     }
 }
@@ -590,10 +579,8 @@ double Function::getDerivative() const
 
 void Function::setNumVar(const unsigned int num)
 {
-    cout << "Info: numVar has no effect. I can infer the number of variables "
+    cerr << "Deprecated: numVar has no effect. MOOSE can infer number of variables "
         " from the expression. " << endl;
-    //for (unsigned int ii = 0; ii < num; ++ii)
-    //    addVariable(("x"+std::to_string(ii)).c_str());
 }
 
 unsigned int Function::getNumVar() const

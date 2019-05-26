@@ -21,6 +21,7 @@
 #include <cmath>
 #include <cfloat>
 #include <limits>
+#include "../randnum/RNG.h"
 
 const int WORD_LENGTH = 32; // number of bits in a word - check for portability
 const double LN2 = 0.69314718055994528622676;
@@ -85,10 +86,25 @@ bool almostEqual(float x, float y, float epsilon = FLT_EPSILON);
 bool almostEqual(double x, double y, double epsilon = DBL_EPSILON);
 bool almostEqual(long double x, long double y, long double epsilon = LDBL_EPSILON);
 
-// round, isinf and isnan are not defined in VC++ or Borland C++
-#if defined(__TURBOC__) || defined(__BORLANDC__) || defined(_MSC_VER)
-#define isinf(param) !_finite(param)
-#define isnan(param) _isnan(param)
-#define round(param) floor(param+0.5)
-#endif
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Convert a positive double to integer using probabistic method.
+ *
+ * @Param x  double.
+ *
+ * @Returns   
+ */
+/* ----------------------------------------------------------------------------*/
+inline double approximateWithInteger(double x, moose::RNG& rng)
+{
+    assert(x >= 0.0);
+
+    double base = x - std::floor(x);
+    if( base == 0.0)
+        return x;
+    if( rng.uniform() < base)
+        return x+1.0;
+    return x;
+}
+
 #endif

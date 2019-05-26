@@ -95,8 +95,7 @@ Parser::expression_t MooseParser::GetExpression( ) const
  *-----------------------------------------------------------------------------*/
 bool MooseParser::DefineVar( const string varName, double* val)
 {
-    // If this variable alreay exists, then delete the previous instance and
-    // create the new variable.
+    // Does not add duplicate variables.
     return symbol_table_.add_variable(varName, *val, false);
 }
 
@@ -109,7 +108,6 @@ bool MooseParser::DefineVar( const string varName, double* val)
 void MooseParser::Reinit( )
 {
     ClearVariables();
-    // expression_.register_symbol_table(*symbol_table_.get());
 }
 
 void MooseParser::DefineConst( const string& constName, const double value )
@@ -176,7 +174,6 @@ bool MooseParser::CompileExpr()
     if(expr_.empty())
         return false;
 
-    cout << "--- Compiling expression " << expr_ << endl;
     if(! parser_.compile(expr_, expression_))
     {
         stringstream ss;
@@ -191,14 +188,13 @@ bool MooseParser::CompileExpr()
             auto symbTable = GetSymbolTable();
             vector<std::pair<string, double>> vars;
             auto n = symbTable.get_variable_list(vars);
-            ss << "MORE INFORMATION:\nTotal variables " << n << ".";
+            ss << "More Information:\nTotal variables " << n << ".";
             for (auto i : vars)
-            {
                 ss << "\t" << i.first << "=" << i.second << " " << &symbol_table_.get_variable(i.first)->ref();
-            }
             ss << endl;
         }
-        throw runtime_error("Error in compilation: " + expr_ + "\n" + ss.str());
+        cerr <<  ss.str() << endl;
+        return false;
     }
     return true;
 }

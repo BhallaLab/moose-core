@@ -18,11 +18,8 @@
 #ifndef _NUMUTIL_CPP
 #define _NUMUTIL_CPP
 
-#ifdef  ENABLE_CPP11
-#include <ctgmath>
-#else      /* -----  not ENABLE_CPP11  ----- */
 #include <cmath>
-#endif     /* -----  not ENABLE_CPP11  ----- */
+#include "../randnum/RNG.h"
 
 bool almostEqual(float x, float y, float epsilon)
 {
@@ -60,5 +57,7 @@ bool almostEqual(long double x, long double y, long double epsilon)
         return std::fabs((x - y) / y) < epsilon;
     }
 }
+
+
 
 #endif

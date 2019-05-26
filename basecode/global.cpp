@@ -49,7 +49,7 @@ namespace moose {
         { "HSolve", {0.0, 0} }
     };
 
-    moose::RNG<double> rng;
+    moose::RNG rng;
 
     /* Check if path is OK */
     int checkPath( const string& path  )

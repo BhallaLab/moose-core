@@ -56,7 +56,7 @@ extern unsigned int totalTests;
 namespace moose
 {
 
-    extern moose::RNG<double> rng;
+    extern moose::RNG rng;
 
     extern map<string, valarray<double>> solverProfMap;
 

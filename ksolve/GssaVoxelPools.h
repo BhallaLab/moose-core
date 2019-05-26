@@ -21,17 +21,17 @@ public:
 
     virtual ~GssaVoxelPools();
 
-
-    //////////////////////////////////////////////////////////////////
     // Solver interface functions
-    //////////////////////////////////////////////////////////////////
     void advance( const ProcInfo* p );
+
     void recalcTime( const GssaSystem* g, double currTime );
-    void updateDependentMathExpn(
-        const GssaSystem* g, unsigned int rindex, double time );
-    void updateDependentRates(
-        const vector< unsigned int >& deps, const Stoich* stoich );
+
+    void updateDependentMathExpn( const GssaSystem* g, unsigned int rindex, double time );
+
+    void updateDependentRates( const vector< unsigned int >& deps, const Stoich* stoich );
+
     unsigned int pickReac();
+
     void setNumReac( unsigned int n );
 
     void advance( const ProcInfo* p, const GssaSystem* g );
@@ -51,13 +51,13 @@ public:
     void reinit( const GssaSystem* g );
 
     void updateAllRateTerms( const vector< RateTerm* >& rates,
-                             unsigned int numCoreRates	);
+            unsigned int numCoreRates	);
     void updateRateTerms( const vector< RateTerm* >& rates,
-                          unsigned int numCoreRates, unsigned int index );
+            unsigned int numCoreRates, unsigned int index );
 
     double getReacVelocity( unsigned int r, const double* s ) const;
     void updateReacVelocities( const GssaSystem* g,
-                               const double* s, vector< double >& v ) const;
+            const double* s, vector< double >& v ) const;
 
     /**
      * Assign the volume, and handle the cascading effects by scaling
@@ -70,7 +70,7 @@ public:
      * Sums the changes in the values onto the specified pools.
      */
     void xferIn( XferInfo& xf,
-                 unsigned int voxelIndex, const GssaSystem* g );
+            unsigned int voxelIndex, const GssaSystem* g );
 
     void setStoich( const Stoich* stoichPtr );
 
@@ -96,8 +96,7 @@ private:
     /**
      * @brief RNG.
      */
-    moose::RNG<double> rng_;
-
+    moose::RNG rng_;
 };
 
 #endif	// _GSSA_VOXEL_POOLS_H

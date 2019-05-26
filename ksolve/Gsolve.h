@@ -10,7 +10,10 @@
 #ifndef _GSOLVE_H
 #define _GSOLVE_H
 
+#include "../randnum/RNG.h"
+
 class Stoich;
+
 class Gsolve: public ZombiePoolInterface
 {
 public:
@@ -30,6 +33,7 @@ public:
 
     unsigned int getNumLocalVoxels() const;
     unsigned int getNumAllVoxels() const;
+
     /**
      * Assigns the number of voxels used in the entire reac-diff
      * system. Note that fewer than this may be used on any given node.
@@ -70,8 +74,7 @@ public:
     void fillMmEnzDep();
     void fillPoolFuncDep();
     void fillIncrementFuncDep();
-    void insertMathDepReacs( unsigned int mathDepIndex,
-                             unsigned int firedReac );
+    void insertMathDepReacs(unsigned int mathDepIndex, unsigned int firedReac);
     void makeReacDepsUnique();
 
     //////////////////////////////////////////////////////////////////
@@ -137,6 +140,9 @@ private:
     unsigned int numThreads_;
 
     GssaSystem sys_;
+
+    moose::RNG rng_;
+
     /**
      * Each VoxelPools entry handles all the pools in a single voxel.
      * Each entry knows how to update itself in order to complete

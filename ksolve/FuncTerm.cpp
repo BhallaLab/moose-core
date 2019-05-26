@@ -33,13 +33,13 @@ using namespace std;
 #include "../utility/utility.h"
 
 
-FuncTerm::FuncTerm()
-    : reactantIndex_( 1, 0 ),
-      volScale_( 1.0 ),
-      target_( ~0U),
-      parser_( new moose::MooseParser() )
+FuncTerm::FuncTerm(): 
+    args_(nullptr)
+    , reactantIndex_(1, 0)
+    , volScale_(1.0)
+    , target_( ~0U)
+    , parser_(new moose::MooseParser())
 {
-    args_ = unique_ptr<double[]>(nullptr);
 }
 
 FuncTerm::~FuncTerm()
@@ -124,7 +124,7 @@ double FuncTerm::getVolScale() const
 
 const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
 {
-    args_.reset( other.args_.get() ); // unique_ptr
+    args_ = other.args_;
     expr_ = other.expr_;
     volScale_ = other.volScale_;
     target_ = other.target_;

@@ -60,7 +60,7 @@ public:
 
 private:
 
-    unique_ptr<double[]> args_;
+    shared_ptr<double[]> args_;
 
     // Look up reactants in the S vec.
     vector< unsigned int > reactantIndex_;
@@ -76,6 +76,7 @@ private:
     // parser
     map<string, double*> map_;
     string expr_;
+
     shared_ptr<moose::MooseParser> parser_;
 };
 
