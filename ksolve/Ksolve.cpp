@@ -6,6 +6,7 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+
 #include "../basecode/header.h"
 #include "../basecode/global.h"
 #ifdef USE_GSL

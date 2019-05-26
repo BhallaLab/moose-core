@@ -406,7 +406,6 @@ void Stoich::setElist( const Eref& e, const vector< ObjId >& elist )
     zombifyModel( e, temp );
     if ( kinterface_ )
     {
-        cout << " ... setting dsolve in ksolve " << endl;
         kinterface_->setDsolve( dsolve_ );
         kinterface_->updateRateTerms();
     }

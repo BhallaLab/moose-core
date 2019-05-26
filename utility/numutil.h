@@ -22,22 +22,7 @@
 #include <cfloat>
 #include <limits>
 #include "../randnum/RNG.h"
-
-const int WORD_LENGTH = 32; // number of bits in a word - check for portability
-const double LN2 = 0.69314718055994528622676;
-const unsigned long LN2BYTES = 0xB1721814;
-const double NATURAL_E = 2.718281828459045;
-
-//extern const double getMachineEpsilon();
-//extern const double EPSILON;
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-#ifndef M_E
-#define M_E  2.7182818284590452353
-#endif
+#include "../basecode/global.h"
 
 
 /**
@@ -105,6 +90,11 @@ inline double approximateWithInteger(const double x, moose::RNG& rng)
     if( rng.uniform() < base)
         return xf+1.0;
     return xf;
+}
+
+inline double approximateWithInteger(const double x)
+{
+    return approximateWithInteger(x, moose::rng);
 }
 
 #endif

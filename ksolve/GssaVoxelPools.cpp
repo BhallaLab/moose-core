@@ -230,7 +230,7 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
         for ( unsigned int i = 0; i < numVarPools; ++i )
         {
             _prev = n[i];
-            n[i] = approximateWithInteger(_prev, rng_);
+            n[i] = pproximateWithInteger(_prev, rng_);
             error += (_prev - n[i]);
         }
 

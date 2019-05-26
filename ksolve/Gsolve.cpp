@@ -227,7 +227,7 @@ Gsolve::Gsolve() :
     useClockedUpdate_( false )
 {
     // Initialize with global seed.
-    rng_.setSeed(moose::getGlobalSeed());
+    // rng_.setSeed(moose::getGlobalSeed());
 }
 
 Gsolve& Gsolve::operator=(const Gsolve& )
@@ -404,7 +404,7 @@ void Gsolve::process( const Eref& e, ProcPtr p )
 #if SIMPLE_ROUNDING
             *i = std::round( *i );
 #else
-            *i = approximateWithInteger(*i, moose::rng);
+            *i = approximateWithInteger(*i);
 #endif
         }
         setBlock( dvalues );
@@ -433,7 +433,7 @@ void Gsolve::process( const Eref& e, ProcPtr p )
     {
         if( numThreads_ > 1 )
         {
-            cerr << "Warn: Not enough voxels or threads. Reverting to serial mode. " << endl;
+            cerr << "Warn: Not enough voxel. Reverting back to serial mode. " << endl;
             numThreads_ = 1;
         }
 
@@ -452,10 +452,11 @@ void Gsolve::process( const Eref& e, ProcPtr p )
         {
             // Use lambda. It is roughly 10% faster than std::bind and does not
             // involve copying data.
-            std::thread  t( 
-                    [this, i, grainSize, p](){ this->advance_chunk(i*grainSize, (i+1)*grainSize, p); }
+            vecThreads.push_back( 
+                    std::thread( 
+                        [this, i, grainSize, p](){ this->advance_chunk(i*grainSize, (i+1)*grainSize, p); }
+                        )
                     );
-            vecThreads.push_back( std::move(t) );
         }
 
         for( auto &v : vecThreads )
@@ -478,10 +479,10 @@ void Gsolve::process( const Eref& e, ProcPtr p )
             {
                 // Use lambda. It is roughly 10% faster than std::bind and does not
                 // involve copying data.
-                std::thread  t( 
-                        [this, i, grainSize, p](){ this->recalcTimeChunk(i*grainSize, (i+1)*grainSize, p); }
-                        );
-                vecThreads.push_back( std::move(t) );
+                vecThreads.push_back( 
+                        std::thread( 
+                            [this, i, grainSize, p](){ this->recalcTimeChunk(i*grainSize, (i+1)*grainSize, p); }
+                            ));
             }
 
             for( auto &v : vecThreads )

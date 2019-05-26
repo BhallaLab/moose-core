@@ -22,10 +22,9 @@ def main( nT ):
     # define the geometry
     compt = moose.CylMesh( '/cylinder' )
     compt.r0 = compt.r1 = 100e-9
-    compt.x1 = 200e-9
+    compt.x1 = 200e-09
     compt.diffLength = 0.2e-9
-    assert( compt.numDiffCompts == compt.x1/compt.diffLength )
-    printCompt(compt)
+    assert( compt.numDiffCompts == compt.x1/compt.diffLength)
 
     #define the molecule. Its geometry is defined by its parent volume, cylinder
     c = moose.Pool( '/cylinder/pool' )
@@ -67,11 +66,12 @@ def main( nT ):
     res = []
     clk = moose.element( '/clock' )
     for t in range( 0, runtime-1, updateDt ):
-        moose.start( updateDt )
         y = c.vec.n
+        print(y)
+        res.append((np.mean(y), np.std(y)) )
+        moose.start( updateDt )
         currTime = clk.currentTime
         print( 'Currrent time %f' % currTime )
-        res.append((np.mean(y), np.std(y)) )
 
     expected = [(9.0, 0.0), (6.0, 0.0), (5.0, 0.0), (3.0, 0.0), (2.0, 0.0),
         (2.0, 0.0), (2.0, 0.0), (1.0, 0.0), (1.0, 0.0), (1.0, 0.0)]
