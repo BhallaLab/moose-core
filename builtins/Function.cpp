@@ -442,7 +442,7 @@ void Function::_clearBuffer()
 
 void Function::_showError(mu::Parser::exception_type &e) const
 {
-    cout << "Error occurred in parser.\n"
+    cerr << "Error occurred in parser.\n"
          << "Message:  " << e.GetMsg() << "\n"
          << "Formula:  " << e.GetExpr() << "\n"
          << "Token:    " << e.GetToken() << "\n"
@@ -509,7 +509,7 @@ double * _functionAddVar(const char *name, void *data)
     }
     else 
     {
-        cerr << "Got an undefined symbol: " << name << endl
+        MOOSE_WARN( "Got an undefined symbol: " << name << endl
              << "Variables must be named xi, yi, where i is integer index."
 	     << " You must define the constants beforehand using LookupField c: c[name]"
                 " = value"

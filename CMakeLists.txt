@@ -77,7 +77,7 @@ option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" OFF)
 option(WITH_GSL             "Use gsl-library. Alternative is WITH_BOOST" ON)
 option(PARALLELIZED_CLOCK   "High level parallelization of moose::Clock (alpha)" OFF )
 option(USE_PRIVATE_RNG      "Stochastic Objects use their private RNG" ON)
-option(WITH_ASN             "Use AddressSanitizer [Only when DEBUG=ON]." OFF)
+option(WITH_ASAN            "Use AddressSanitizer in DEBUG mode." OFF)
 
 
 ############################ BUILD CONFIGURATION #################################
@@ -109,10 +109,13 @@ if(GPROF AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
 endif()
 
-if(WITH_ASN AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    message(STATUS "Compiling with ASN")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
-    set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+if(WITH_ASAN AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    message(STATUS "Compiling with ASAN")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} \
+        -fno-omit-frame-pointer -fsanitize=leak -fsanitize=address")
+    set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} \
+        -fno-omit-frame-pointer -fsanitize=leak -fsanitize=address")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address")
 endif()
 
 ################################### TARGETS ####################################
@@ -267,6 +270,7 @@ list(APPEND MOOSE_LIBRARIES
     msg
     benchmarks
     shell
+    randnum
     scheduling
     moose_mpi
     biophysics

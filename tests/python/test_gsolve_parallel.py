@@ -4,6 +4,10 @@ print( '[INFO] Using moose from %s' % moose.__file__ )
 import time
 moose.seed( 10 )
 
+def printCompt(compt):
+    print( 'x0=%s, x1=%s, diffLength=%s, numDiffCompt=%d' % (compt.x0, compt.x1,
+        compt.diffLength, compt.numDiffCompts))
+
 def main( nT ):
     """
     This example implements a reaction-diffusion like system which is
@@ -14,25 +18,23 @@ def main( nT ):
     uses a reaction plus a function object to control its rates.
     """
     print( 'Using %d threads' % nT )
-
     dt = 0.1
-
     # define the geometry
     compt = moose.CylMesh( '/cylinder' )
     compt.r0 = compt.r1 = 100e-9
-    compt.x1 = 200e-09
-    compt.diffLength = 20e-9
-    assert( compt.numDiffCompts == compt.x1/compt.diffLength)
+    compt.x1 = 200e-9
+    compt.diffLength = 0.2e-9
+    assert( compt.numDiffCompts == compt.x1/compt.diffLength )
+    printCompt(compt)
 
     #define the molecule. Its geometry is defined by its parent volume, cylinder
     c = moose.Pool( '/cylinder/pool' )
     c.diffConst = 1e-13 # define diffusion constant
 
-
     # Here we set up a function calculation
     func = moose.Function( '/cylinder/pool/func' )
-    func.expr = "(-x0 * (30e-9 - x0) * (100e-9 - x0))*0.0001"
-    func.x.num = 1 #specify number of input variables.
+    func.expr = "(-x0*(30e-9-x0)*(100e-9-x0))*0.0001"
+    #  func.x.num = 1 #specify number of input variables.
 
     #Connect the molecules to the func
     moose.connect( c, 'nOut', func.x[0], 'input' )
@@ -45,6 +47,7 @@ def main( nT ):
         ksolve.numThreads = nT
     except Exception as e:
         print( 'OLD MOOSE. Does not support multithreading' )
+
     dsolve = moose.Dsolve( '/cylinder/dsolve' )
     stoich = moose.Stoich( '/cylinder/stoich' )
     stoich.compartment = compt
@@ -62,6 +65,7 @@ def main( nT ):
     runtime = updateDt * 10
     t1 = time.time()
     res = []
+    clk = moose.element( '/clock' )
     for t in range( 0, runtime-1, updateDt ):
         y = c.vec.n
         print(y)
@@ -69,13 +73,14 @@ def main( nT ):
         res.append((np.mean(y), np.std(y)) )
         moose.start( updateDt )
         y = c.vec.n
-        res.append( (np.mean(y), np.std(y)) )
+        currTime = clk.currentTime
+        print( 'Currrent time %f' % currTime )
+        res.append((np.mean(y), np.std(y)) )
 
     expected = [(9.0, 0.0), (6.0, 0.0), (5.0, 0.0), (3.0, 0.0), (2.0, 0.0),
         (2.0, 0.0), (2.0, 0.0), (1.0, 0.0), (1.0, 0.0), (1.0, 0.0)]
-    print(("Time = ", time.time() - t1))
-    print( res )
-    assert res == expected
+    print("Time = ", time.time() - t1)
+    assert res == expected, "Got %s, expected %s" % (res, expected)
 
 if __name__ == '__main__':
     import sys

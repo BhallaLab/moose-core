@@ -147,10 +147,7 @@ const Cinfo* Gsolve::initCinfo()
         &Gsolve::getNumFire
     );
 
-    ///////////////////////////////////////////////////////
     // DestFinfo definitions
-    ///////////////////////////////////////////////////////
-
     static DestFinfo process( "process",
                               "Handles process call",
                               new ProcOpFunc< Gsolve >( &Gsolve::process ) );
@@ -172,13 +169,12 @@ const Cinfo* Gsolve::initCinfo()
                                  "Handles initReinit call from Clock",
                                  new ProcOpFunc< Gsolve >( &Gsolve::initReinit ) );
 
-    ///////////////////////////////////////////////////////
     // Shared definitions
-    ///////////////////////////////////////////////////////
     static Finfo* procShared[] =
     {
         &process, &reinit
     };
+
     static SharedFinfo proc( "proc",
                              "Shared message for process and reinit",
                              procShared, sizeof( procShared ) / sizeof( const Finfo* )
@@ -236,7 +232,7 @@ Gsolve::Gsolve() :
     pools_( 1 ),
     startVoxel_( 0 ),
     dsolve_(),
-    dsolvePtr_( 0 ),
+    dsolvePtr_(nullptr),
     useClockedUpdate_( false )
 {
     // Initialize with global seed.
@@ -267,8 +263,7 @@ void Gsolve::setCompartment( Id compt )
     if ( ( compt.element()->cinfo()->isA( "ChemCompt" ) ) )
     {
         compartment_ = compt;
-        vector< double > vols =
-            Field< vector< double > >::get( compt, "voxelVolume" );
+        vector< double > vols = Field< vector< double > >::get( compt, "voxelVolume" );
         if ( vols.size() > 0 )
         {
             pools_.resize( vols.size() );
@@ -346,7 +341,7 @@ void Gsolve::setNvec( unsigned int voxel, vector< double > nVec )
         double* s = pools_[voxel].varS();
         for ( unsigned int i = 0; i < nVec.size(); ++i )
         {
-            s[i] = round( nVec[i] );
+            s[i] = std::round( nVec[i] );
             if ( s[i] < 0.0 )
                 s[i] = 0.0;
         }
@@ -571,20 +566,17 @@ void Gsolve::reinit( const Eref& e, ProcPtr p )
 {
     if ( !stoichPtr_ )
         return;
+
     if ( !sys_.isReady )
         rebuildGssaSystem();
+
     // First reinit concs.
-    for ( vector< GssaVoxelPools >::iterator
-            i = pools_.begin(); i != pools_.end(); ++i )
-    {
+    for (auto i = pools_.begin(); i != pools_.end(); ++i )
         i->reinit( &sys_ );
-    }
+
     // Second, update the atots.
-    for ( vector< GssaVoxelPools >::iterator
-            i = pools_.begin(); i != pools_.end(); ++i )
-    {
+    for ( auto i = pools_.begin(); i != pools_.end(); ++i )
         i->refreshAtot( &sys_ );
-    }
 
     // LoadBalancing. Recompute the optimal number of threads.
     size_t nvPools = pools_.size( );
@@ -608,10 +600,9 @@ void Gsolve::initReinit( const Eref& e, ProcPtr p )
 {
     if ( !stoichPtr_ )
         return;
-    for ( unsigned int i = 0 ; i < pools_.size(); ++i )
-    {
+
+    for( size_t i = 0 ; i < pools_.size(); ++i )
         pools_[i].reinit( &sys_ );
-    }
 }
 //////////////////////////////////////////////////////////////
 // Solver setup
@@ -902,11 +893,8 @@ void Gsolve::makeReacDepsUnique()
         vector< unsigned int >::iterator k = dep.begin();
 
         /// STL stuff follows, with the usual weirdness.
-        vector< unsigned int >::iterator pos =
-            unique( dep.begin(), dep.end() );
+        vector<unsigned int>::iterator pos = unique( dep.begin(), dep.end() );
         dep.resize( pos - dep.begin() );
-        /*
-        */
     }
 }
 
@@ -921,7 +909,7 @@ unsigned int Gsolve::getPoolIndex( const Eref& e ) const
 unsigned int Gsolve::getVoxelIndex( const Eref& e ) const
 {
     unsigned int ret = e.dataIndex();
-    if ( ret < startVoxel_  || ret >= startVoxel_ + pools_.size() )
+    if ( (ret < startVoxel_) || (ret >= startVoxel_ + pools_.size()))
         return OFFNODE;
     return ret - startVoxel_;
 }
@@ -936,8 +924,7 @@ void Gsolve::setDsolve( Id dsolve )
     else if ( dsolve.element()->cinfo()->isA( "Dsolve" ) )
     {
         dsolve_ = dsolve;
-        dsolvePtr_ = reinterpret_cast< ZombiePoolInterface* >(
-                         dsolve.eref().data() );
+        dsolvePtr_ = reinterpret_cast<ZombiePoolInterface*>(dsolve.eref().data());
     }
     else
     {
@@ -967,7 +954,7 @@ void Gsolve::setN( const Eref& e, double v )
         }
         else
         {
-            pools_[vox].setN( getPoolIndex( e ), round( v ) );
+            pools_[vox].setN( getPoolIndex( e ), std::round( v ) );
         }
     }
 }

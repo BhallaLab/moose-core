@@ -39,13 +39,10 @@
  */
 const double SAFETY_FACTOR = 1.0 + 1.0e-9;
 
-//////////////////////////////////////////////////////////////
-// Class definitions
-//////////////////////////////////////////////////////////////
 
-GssaVoxelPools::GssaVoxelPools() :
-    VoxelPoolsBase(), t_( 0.0 ), atot_( 0.0 )
-{ ; }
+// Class definitions
+GssaVoxelPools::GssaVoxelPools(): VoxelPoolsBase(), t_( 0.0 ), atot_( 0.0 )
+{;}
 
 GssaVoxelPools::~GssaVoxelPools()
 {
@@ -88,14 +85,13 @@ void GssaVoxelPools::updateDependentMathExpn(
 void GssaVoxelPools::updateDependentRates(
     const vector< unsigned int >& deps, const Stoich* stoich )
 {
-    for ( vector< unsigned int >::const_iterator
-            i = deps.begin(); i != deps.end(); ++i )
+    for ( auto i = deps.cbegin(); i != deps.end(); ++i )
     {
         atot_ -= fabs( v_[ *i ] );
-        // atot_ += ( v[ *i ] = ( *rates_[ *i ] )( S() );
         atot_ += fabs( v_[ *i ] = getReacVelocity( *i, S() ) );
     }
 }
+
 
 unsigned int GssaVoxelPools::pickReac()
 {
@@ -108,8 +104,7 @@ unsigned int GssaVoxelPools::pickReac()
     // of overhead in managing the tree.
     // Slepoy, Thompson and Plimpton 2008
     // report a linear time version.
-    for ( vector< double >::const_iterator
-            i = v_.begin(); i != v_.end(); ++i )
+    for ( auto i = v_.cbegin(); i != v_.end(); ++i )
     {
         if ( r < ( sum += fabs( *i ) ) )
         {
@@ -140,12 +135,12 @@ bool GssaVoxelPools::refreshAtot( const GssaSystem* g )
     atot_ = 0;
     for ( auto i = v_.cbegin(); i != v_.cend(); ++i )
         atot_ += fabs(*i);
+
     atot_ *= SAFETY_FACTOR;
+
     // Check if the system is in a stuck state. If so, terminate.
     if ( atot_ <= 0.0 )
-    {
         return false;
-    }
     return true;
 }
 
@@ -207,32 +202,29 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
         numFire_[rindex]++;
 
         double r = rng_.uniform();
-
         while ( r <= 0.0 )
             r = rng_.uniform();
 
         t_ -= ( 1.0 / atot_ ) * log( r );
         g->stoich->updateFuncs( varS(), t_ );
-        // updateDependentMathExpn( g, rindex, t_ );
         updateDependentRates( g->dependency[ rindex ], g->stoich );
     }
 }
 
 void GssaVoxelPools::reinit( const GssaSystem* g )
 {
-    rng_.setSeed( moose::__rng_seed__ );
+    rng_.setSeed( moose::getGlobalSeed() );
     VoxelPoolsBase::reinit(); // Assigns S = Sinit;
     unsigned int numVarPools = g->stoich->getNumVarPools();
     g->stoich->updateFuncs( varS(), 0 );
 
     double* n = varS();
 
-    double totalN = 0;
+    double error = 0.0;
+    double _prev = 0.0;
     if( g->useRandInit )
     {
-        vector<double> error(numVarPools, 0.0);
         map<double, vector<Eref>> groupByVal;
-
         for ( unsigned int i = 0; i < numVarPools; ++i )
         {
             _prev = n[i];
@@ -240,27 +232,19 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
             error += (_prev - n[i]);
         }
 
-        double extra = std::accumulate( error.begin(), error.end(), 0.0 );
-
         // Show warning to user if extra molecules in the system after
         // converting flots to integer is larger 1%.
-        if( std::abs(extra) / totalN > 0.01 )
+        if( std::abs(error) >= 1.0 )
         {
-            cout << "Warn: Extra " << extra
-                << " molecules in system after converting fractional to integer e.g. 1.1 becomes  "
-                " 1 roughly 90% of times or 2 roughly 10% of times." 
-                << endl;
+            MOOSE_WARN( "Extra " << error
+                    << " molecules in system after converting fractional to integer."
+                    );
         }
     }
     else     // Just round to the nearest int.
     {
         for ( unsigned int i = 0; i < numVarPools; ++i )
-        {
-            // Just like rint but does not raise exception.
-            // See http://en.cppreference.com/w/cpp/numeric/math/nearbyint for
-            // details.
-            n[i] = std::nearbyint(n[i]);
-        }
+            n[i] = std::round(n[i]);
     }
 
     t_ = 0.0;
@@ -351,7 +335,6 @@ void GssaVoxelPools::setVolumeAndDependencies( double vol )
     updateAllRateTerms(stoichPtr_->getRateTerms(), stoichPtr_->getNumCoreRates());
 }
 
-//////////////////////////////////////////////////////////////
 // Handle cross compartment reactions
 void GssaVoxelPools::xferIn( XferInfo& xf, unsigned int voxelIndex, const GssaSystem* g )
 {
@@ -360,17 +343,14 @@ void GssaVoxelPools::xferIn( XferInfo& xf, unsigned int voxelIndex, const GssaSy
     auto j = xf.lastValues.cbegin() + offset;
     auto m = xf.subzero.begin() + offset;
     double* s = varS();
-    bool hasChanged = false;
-    for ( vector< unsigned int >::const_iterator
-            k = xf.xferPoolIdx.begin(); k != xf.xferPoolIdx.end(); ++k )
+
+    for ( auto k = xf.xferPoolIdx.cbegin(); k != xf.xferPoolIdx.end(); ++k )
     {
         double& x = s[*k];
-        // cout << x << "	i = " << *i << *j << "	m = " << *m << endl;
         double dx = *i++ - *j++;
         // x += approximateWithInteger_debug(__FUNCTION__, dx, rng_);
         x += approximateWithInteger(dx, rng_);
 
-        // x += round( *i++ - *j );
         if ( x < *m )
         {
             *m -= x;
@@ -381,23 +361,13 @@ void GssaVoxelPools::xferIn( XferInfo& xf, unsigned int voxelIndex, const GssaSy
             x -= *m;
             *m = 0;
         }
-        /*
-        double y = fabs( x - *j );
-        // hasChanged |= ( fabs( x - *j ) < 0.1 ); // they are all integers.
-        hasChanged |= ( y > 0.1 ); // they are all integers.
-        */
-        // j++;
         m++;
     }
     // If S has changed, then I should update rates of all affected reacs.
     // Go through stoich matrix to find affected reacs for each mol
     // Store in list, since some may be hit more than once in this func.
     // When done, go through and update all affected ones.
-    /*
-    if ( hasChanged ) {
-    	refreshAtot( g );
-    }
-    */
+
     // Does this fix the problem of negative concs?
     refreshAtot( g );
 }

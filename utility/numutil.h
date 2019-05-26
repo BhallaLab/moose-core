@@ -12,6 +12,7 @@
 #include <cmath>
 #include <cfloat>
 #include <limits>
+#include "../randnum/RNG.h"
 
 #include "../randnum/RNG.h"
 
