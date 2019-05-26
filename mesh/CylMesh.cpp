@@ -13,17 +13,17 @@
 #include "../utility/Vec.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
-// #include "Stencil.h"
 #include "ChemCompt.h"
 #include "MeshCompt.h"
 #include "CubeMesh.h"
 #include "CylBase.h"
 #include "NeuroNode.h"
-// #include "NeuroStencil.h"
 #include "NeuroMesh.h"
 #include "CylMesh.h"
 #include "EndoMesh.h"
 #include "../utility/numutil.h"
+#include "../utility/testing_macros.hpp"
+
 const Cinfo* CylMesh::initCinfo()
 {
         //////////////////////////////////////////////////////////////
@@ -293,12 +293,12 @@ void CylMesh::setX1( const Eref& e, double v )
     size_t numVoxels = (v - x0_) / diffLength_;
     if( numVoxels > SM_MAX_COLUMNS )
     {
-        cout << "Warn: Compartment is too big. With diffusion-length of " << diffLength_ 
-            << " total " << numVoxels << " would be generated which is larger than maximum "
-            <<  SM_MAX_COLUMNS << " allowed. Ignoring .." << endl;
-        return;
+        MOOSE_WARN( "Warn: Too many voxels (" << numVoxels << ") would be created  "
+            << " with current diffusion-length of " << diffLength_ 
+            << "(maximum voxels allowed=" <<  SM_MAX_COLUMNS << "). "
+            << " Rescaling diffLength." );
+        diffLength_ = (v-x0_)/(SM_MAX_COLUMNS-1);
     }
-
     vector< double > childConcs;
     getChildConcs( e, childConcs );
     x1_ = v;
