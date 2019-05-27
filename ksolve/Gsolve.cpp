@@ -10,6 +10,7 @@
 #include "../basecode/global.h"
 
 #include "../mesh/VoxelJunction.h"
+#include "../utility/print_function.hpp"
 
 #include "VoxelPoolsBase.h"
 #include "XferInfo.h"
@@ -41,6 +42,14 @@
 
 
 #define SIMPLE_ROUNDING 0
+
+// When set use std::async rather than std::thread
+// TODO: Profiling.
+#define USING_ASYNC 1
+
+#if USING_ASYNC
+#define THREAD_LAUNCH_POLICY std::launch::async
+#endif
 
 const unsigned int OFFNODE = ~0;
 
@@ -230,7 +239,8 @@ Gsolve::Gsolve() :
     dsolvePtr_( 0 ),
     useClockedUpdate_( false )
 {
-    ;
+    // Initialize with global seed.
+    rng_.setSeed(moose::getGlobalSeed());
 }
 
 Gsolve& Gsolve::operator=(const Gsolve& )
@@ -402,45 +412,25 @@ void Gsolve::process( const Eref& e, ProcPtr p )
         // one would use a stochastic (integral) diffusion method with
         // the GSSA, but in mixed models it may be more complicated.
         vector< double >::iterator i = dvalues.begin() + 4;
-
         for ( ; i != dvalues.end(); ++i )
         {
-            //    cout << *i << "    " << round( *i ) << "        ";
 #if SIMPLE_ROUNDING
-            *i = round( *i );
+            *i = std::round( *i );
 #else
-            double base = floor( *i );
-
-            // Use global RNG.
-            if ( moose::mtrand() >= (*i - base) )
-                *i = base;
-            else
-                *i = base + 1.0;
+            // *i = approximateWithInteger_debug(__FUNCTION__, *i, rng_);
+            *i = approximateWithInteger(*i, rng_);
 #endif
         }
         setBlock( dvalues );
     }
 
-    // Third: Fix the rates if we have had any diffusion or xreacs
-    // happening. This is very inefficient at this point, need to fix.
     if ( dsolvePtr_ )
     {
         for ( auto i = pools_.begin(); i != pools_.end(); ++i )
             i->refreshAtot( &sys_ );
     }
 
-    // Fourth, update the mol #s.
-    // First we advance the simulation.
-    size_t nvPools = pools_.size( );
-
-    // Third, do the numerical integration for all reactions.
-    size_t grainSize = max( (size_t)1, min( nvPools, nvPools / numThreads_));
-
-    // Make sure that we cover all the pools.
-    while( (numThreads_ * grainSize) < nvPools )
-        grainSize += 1;
-
-    if( 1 == numThreads_ || 1 == nvPools )
+    if( 1 == numThreads_ || 1 == pools_.size())
     {
         if( numThreads_ > 1 )
         {
@@ -448,7 +438,7 @@ void Gsolve::process( const Eref& e, ProcPtr p )
             numThreads_ = 1;
         }
 
-        for ( size_t i = 0; i < nvPools; i++ )
+        for ( size_t i = 0; i < pools_.size(); i++ )
             pools_[i].advance( p, &sys_ );
     }
     else
@@ -457,20 +447,37 @@ void Gsolve::process( const Eref& e, ProcPtr p )
          *  Somewhat complicated computation to compute the number of threads. 1
          *  thread per (at least) voxel pool is ideal situation.
          *-----------------------------------------------------------------------------*/
-        vector<std::thread> vecThreads;
+#if USING_ASYNC
+        vector<std::future<size_t>> vecFutures;
+        for (size_t i = 0; i < numThreads_; i++) 
+            vecFutures.push_back( 
+                std::async( THREAD_LAUNCH_POLICY
+                    , [this, i, p](){ 
+                        return this->advance_chunk(i*this->grainSize_, (i+1)*this->grainSize_, p); 
+                    })
+                );
+        // Block in same order
+        size_t tot = 0;
+        for (auto& fut : vecFutures) tot += fut.get();
 
+        // We have processed all the pools.
+        assert( tot >= pools_.size() );
+#else
+        vector<std::thread> vecThreads;
         for (size_t i = 0; i < numThreads_; i++)
         {
             // Use lambda. It is roughly 10% faster than std::bind and does not
             // involve copying data.
-            std::thread  t( 
-                    [this, i, grainSize, p](){ this->advance_chunk(i*grainSize, (i+1)*grainSize, p); }
-                    );
-            vecThreads.push_back( std::move(t) );
+            vecThreads.push_back( 
+                std::thread( 
+                    [this, i, p](){ this->advance_chunk(i*this->grainSize_, (i+1)*this->grainSize_, p); }
+                    )
+                );
         }
 
         for( auto &v : vecThreads )
             v.join();
+#endif
 
     }
 
@@ -483,20 +490,38 @@ void Gsolve::process( const Eref& e, ProcPtr p )
         }
         else
         {
+#if USING_ASYNC
+        vector<std::future<size_t>> vecFutures;
+        for (size_t i = 0; i < numThreads_; i++) 
+            vecFutures.push_back( 
+                std::async( THREAD_LAUNCH_POLICY
+                    , [this, i, p](){ 
+                        return this->recalcTimeChunk(i*this->grainSize_, (i+1)*this->grainSize_, p); 
+                    })
+                );
+        // Block in same order
+        size_t tot = 0;
+        for (auto& fut : vecFutures) tot += fut.get();
+        assert( tot >= pools_.size() ); // We have processed all the pools.
+#else
             vector<std::thread> vecThreads;
 
             for (size_t i = 0; i < numThreads_; i++)
             {
                 // Use lambda. It is roughly 10% faster than std::bind and does not
                 // involve copying data.
-                std::thread  t( 
-                        [this, i, grainSize, p](){ this->recalcTimeChunk(i*grainSize, (i+1)*grainSize, p); }
-                        );
-                vecThreads.push_back( std::move(t) );
+                vecThreads.push_back( 
+                        std::thread( 
+                            [this, i, p](){ 
+                                this->recalcTimeChunk(i*this->grainSize_, (i+1)*this->grainSize_, p); 
+                            }
+                        )
+                    );
             }
-
             for( auto &v : vecThreads )
                 v.join();
+#endif
+
         }
     }
 
@@ -518,16 +543,28 @@ void Gsolve::process( const Eref& e, ProcPtr p )
     }
 }
 
-void Gsolve::recalcTimeChunk( const size_t begin, const size_t end, ProcPtr p)
+size_t Gsolve::recalcTimeChunk( const size_t begin, const size_t end, ProcPtr p)
 {
-    for (size_t i = begin; i < std::min(pools_.size(), end); i++) 
+    assert( begin >= std::min(pools_.size(), end));
+
+    size_t tot = 0;
+    for (size_t i = begin; i < std::min(pools_.size(), end); i++)  {
+        tot += 1;
         pools_[i].recalcTime( &sys_, p->currTime );
+    }
+    return tot;
 }
 
-void Gsolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )
+size_t Gsolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )
 {
+    assert( begin <= std::min(end, pools_.size()) );
+    size_t tot = 0;
     for (size_t i = begin; i < std::min(end, pools_.size() ); i++)
+    {
         pools_[i].advance( p, &sys_ );
+        tot += 1;
+    }
+    return tot;
 }
 
 void Gsolve::reinit( const Eref& e, ProcPtr p )
@@ -549,7 +586,14 @@ void Gsolve::reinit( const Eref& e, ProcPtr p )
         i->refreshAtot( &sys_ );
     }
 
-    if( 1 < getNumThreads( ) )
+    // LoadBalancing. Recompute the optimal number of threads.
+    size_t nvPools = pools_.size( );
+    grainSize_ = (size_t) std::ceil((double)nvPools / (double)numThreads_);
+    assert( grainSize_ * numThreads_ >= nvPools);
+    numThreads_ = nvPools / grainSize_;
+    MOOSE_DEBUG( "Grain size is " << grainSize_ << ". Num threads " << numThreads_);
+
+    if(1 < getNumThreads())
         cout << "Info: Setting up threaded gsolve with " << getNumThreads( )
              << " threads. " << endl;
 }

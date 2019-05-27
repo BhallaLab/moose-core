@@ -15,12 +15,7 @@
  ** See the file COPYING.LIB for the full notice.
  **********************************************************************/
 
-#ifndef _NUMUTIL_CPP
-#define _NUMUTIL_CPP
-
-#ifdef  ENABLE_CPP11
-#include <ctgmath>
-#else      /* -----  not ENABLE_CPP11  ----- */
+#include "numutil.h"
 #include <cmath>
 #endif     /* -----  not ENABLE_CPP11  ----- */
 
@@ -61,4 +56,32 @@ bool almostEqual(long double x, long double y, long double epsilon)
     }
 }
 
-#endif
+double approximateWithInteger_debug(const char* name, const double x, moose::RNG& rng)
+{
+    static size_t n = 0;
+    n += 1;
+    cerr << name << ' ' << ':' << x;
+    auto y = approximateWithInteger(x, rng);
+    cout << ' ' << y << ", ";
+    if( std::fmod(n, 4) == 0)
+        cerr << endl;
+    return y;
+}
+
+double approximateWithInteger(const double x, moose::RNG& rng)
+{
+    assert(x >= 0.0);
+    double xf = std::floor(x);
+    double base = x - xf;
+    if( base == 0.0)
+        return x;
+    if( rng.uniform() < base)
+        return xf+1.0;
+    return xf;
+}
+
+double approximateWithInteger(const double x)
+{
+    return approximateWithInteger(x, moose::rng);
+}
+

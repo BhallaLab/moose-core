@@ -138,8 +138,7 @@ bool GssaVoxelPools::refreshAtot( const GssaSystem* g )
     g->stoich->updateFuncs( varS(), t_ );
     updateReacVelocities( g, S(), v_ );
     atot_ = 0;
-    for ( vector< double >::const_iterator
-            i = v_.begin(); i != v_.end(); ++i )
+    for ( auto i = v_.cbegin(); i != v_.cend(); ++i )
         atot_ += fabs(*i);
     atot_ *= SAFETY_FACTOR;
     // Check if the system is in a stuck state. If so, terminate.
@@ -175,7 +174,6 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
         {
             t_ = nextt;
             g->stoich->updateFuncs( varS(), t_ );
-            // updateDependentMathExpn( g, 0, t_ );
             return;
         }
         unsigned int rindex = pickReac();
@@ -188,7 +186,6 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
             {
                 t_ = nextt;
                 g->stoich->updateFuncs( varS(), t_ );
-                // updateDependentMathExpn( g, 0, t_ );
                 return;
             }
             // We had a roundoff error, fixed it, but now need to be sure
@@ -238,17 +235,9 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
 
         for ( unsigned int i = 0; i < numVarPools; ++i )
         {
-            error[i] = n[i];
-            double base = std::floor( n[i] );
-            assert( base >= 0.0 );
-            totalN += n[i];
-            double frac = n[i] - base;
-            if ( rng_.uniform() >= frac )
-                n[i] = base;
-            else
-                n[i] = base + 1.0;
-
-            error[i] -= n[i];
+            _prev = n[i];
+            n[i] = approximateWithInteger(_prev, rng_);
+            error += (_prev - n[i]);
         }
 
         double extra = std::accumulate( error.begin(), error.end(), 0.0 );
@@ -347,10 +336,7 @@ double GssaVoxelPools::getReacVelocity(
     unsigned int r, const double* s ) const
 {
     double v = rates_[r]->operator()( s );
-    // assert( v >= 0.0 );
     return v;
-
-    // return rates_[r]->operator()( s );
 }
 
 void GssaVoxelPools::setStoich( const Stoich* stoichPtr )
@@ -362,32 +348,17 @@ void GssaVoxelPools::setStoich( const Stoich* stoichPtr )
 void GssaVoxelPools::setVolumeAndDependencies( double vol )
 {
     VoxelPoolsBase::setVolumeAndDependencies( vol );
-    updateAllRateTerms( stoichPtr_->getRateTerms(),
-                        stoichPtr_->getNumCoreRates() );
+    updateAllRateTerms(stoichPtr_->getRateTerms(), stoichPtr_->getNumCoreRates());
 }
 
 //////////////////////////////////////////////////////////////
 // Handle cross compartment reactions
-//////////////////////////////////////////////////////////////
-
-/*
- * Not sure if we need it. Hold off for now.
-static double integralTransfer( double propensity )
-{
-	double t= floor( propensity );
-	if ( rng_.uniform() < propensity - t )
-		return t + 1;
-	return t;
-}
-*/
-
-void GssaVoxelPools::xferIn( XferInfo& xf,
-                             unsigned int voxelIndex, const GssaSystem* g )
+void GssaVoxelPools::xferIn( XferInfo& xf, unsigned int voxelIndex, const GssaSystem* g )
 {
     unsigned int offset = voxelIndex * xf.xferPoolIdx.size();
-    vector< double >::const_iterator i = xf.values.begin() + offset;
-    vector< double >::const_iterator j = xf.lastValues.begin() + offset;
-    vector< double >::iterator m = xf.subzero.begin() + offset;
+    auto i = xf.values.cbegin() + offset;
+    auto j = xf.lastValues.cbegin() + offset;
+    auto m = xf.subzero.begin() + offset;
     double* s = varS();
     bool hasChanged = false;
     for ( vector< unsigned int >::const_iterator
@@ -396,11 +367,8 @@ void GssaVoxelPools::xferIn( XferInfo& xf,
         double& x = s[*k];
         // cout << x << "	i = " << *i << *j << "	m = " << *m << endl;
         double dx = *i++ - *j++;
-        double base = floor( dx );
-        if ( rng_.uniform() >= (dx - base) )
-            x += base;
-        else
-            x += base + 1.0;
+        // x += approximateWithInteger_debug(__FUNCTION__, dx, rng_);
+        x += approximateWithInteger(dx, rng_);
 
         // x += round( *i++ - *j );
         if ( x < *m )
