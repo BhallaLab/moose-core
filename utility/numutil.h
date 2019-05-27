@@ -70,31 +70,8 @@ bool isClose( T a, T b, T tolerance )
 bool almostEqual(float x, float y, float epsilon = FLT_EPSILON);
 bool almostEqual(double x, double y, double epsilon = DBL_EPSILON);
 bool almostEqual(long double x, long double y, long double epsilon = LDBL_EPSILON);
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis  Convert a positive double to integer using probabistic method.
- *
- * @Param x  double.
- *
- * @Returns   
- */
-/* ----------------------------------------------------------------------------*/
-inline double approximateWithInteger(const double x, moose::RNG& rng)
-{
-    assert(x >= 0.0);
-    double xf = std::floor(x);
-    double base = x - xf;
-    if( base == 0.0)
-        return x;
-    if( rng.uniform() < base)
-        return xf+1.0;
-    return xf;
-}
-
-inline double approximateWithInteger(const double x)
-{
-    return approximateWithInteger(x, moose::rng);
-}
+double approximateWithInteger(const double x, moose::RNG& rng);
+double approximateWithInteger(const double x);
+double approximateWithInteger_debug(const char* name, const double x, moose::RNG& rng);
 
 #endif

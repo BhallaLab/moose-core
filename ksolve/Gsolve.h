@@ -112,8 +112,8 @@ public:
     void updateRateTerms( unsigned int index );
 
     // Function for multithreading.
-    void advance_chunk( const size_t begin, const size_t end, ProcPtr p );
-    void recalcTimeChunk( const size_t begin, const size_t end, ProcPtr p);
+    size_t advance_chunk( const size_t begin, const size_t end, ProcPtr p );
+    size_t recalcTimeChunk( const size_t begin, const size_t end, ProcPtr p);
 
     //////////////////////////////////////////////////////////////////
     /// Flag: returns true if randomized round to integers is done.
@@ -137,7 +137,8 @@ private:
      * @brief Number of threads to use when parallel version of Gsolve is
      * used.
      */
-    unsigned int numThreads_;
+    size_t numThreads_;
+    size_t grainSize_;
 
     GssaSystem sys_;
 

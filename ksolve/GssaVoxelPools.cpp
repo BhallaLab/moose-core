@@ -133,7 +133,7 @@ bool GssaVoxelPools::refreshAtot( const GssaSystem* g )
     g->stoich->updateFuncs( varS(), t_ );
     updateReacVelocities( g, S(), v_ );
     atot_ = 0;
-    for ( auto i = v_.cbegin(); i != v_.end(); ++i )
+    for ( auto i = v_.cbegin(); i != v_.cend(); ++i )
         atot_ += fabs(*i);
 
     atot_ *= SAFETY_FACTOR;
@@ -169,7 +169,6 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
         {
             t_ = nextt;
             g->stoich->updateFuncs( varS(), t_ );
-            // updateDependentMathExpn( g, 0, t_ );
             return;
         }
         unsigned int rindex = pickReac();
@@ -182,7 +181,6 @@ void GssaVoxelPools::advance( const ProcInfo* p, const GssaSystem* g )
             {
                 t_ = nextt;
                 g->stoich->updateFuncs( varS(), t_ );
-                // updateDependentMathExpn( g, 0, t_ );
                 return;
             }
             // We had a roundoff error, fixed it, but now need to be sure
@@ -230,7 +228,7 @@ void GssaVoxelPools::reinit( const GssaSystem* g )
         for ( unsigned int i = 0; i < numVarPools; ++i )
         {
             _prev = n[i];
-            n[i] = pproximateWithInteger(_prev, rng_);
+            n[i] = approximateWithInteger(_prev, rng_);
             error += (_prev - n[i]);
         }
 
@@ -322,10 +320,7 @@ double GssaVoxelPools::getReacVelocity(
     unsigned int r, const double* s ) const
 {
     double v = rates_[r]->operator()( s );
-    // assert( v >= 0.0 );
     return v;
-
-    // return rates_[r]->operator()( s );
 }
 
 void GssaVoxelPools::setStoich( const Stoich* stoichPtr )
@@ -337,24 +332,23 @@ void GssaVoxelPools::setStoich( const Stoich* stoichPtr )
 void GssaVoxelPools::setVolumeAndDependencies( double vol )
 {
     VoxelPoolsBase::setVolumeAndDependencies( vol );
-    updateAllRateTerms( stoichPtr_->getRateTerms(),
-                        stoichPtr_->getNumCoreRates() );
+    updateAllRateTerms(stoichPtr_->getRateTerms(), stoichPtr_->getNumCoreRates());
 }
 
 // Handle cross compartment reactions
-void GssaVoxelPools::xferIn( XferInfo& xf,
-                             unsigned int voxelIndex, const GssaSystem* g )
+void GssaVoxelPools::xferIn( XferInfo& xf, unsigned int voxelIndex, const GssaSystem* g )
 {
     unsigned int offset = voxelIndex * xf.xferPoolIdx.size();
-    vector< double >::const_iterator i = xf.values.begin() + offset;
-    vector< double >::const_iterator j = xf.lastValues.begin() + offset;
-    vector< double >::iterator m = xf.subzero.begin() + offset;
+    auto i = xf.values.cbegin() + offset;
+    auto j = xf.lastValues.cbegin() + offset;
+    auto m = xf.subzero.begin() + offset;
     double* s = varS();
 
     for ( auto k = xf.xferPoolIdx.cbegin(); k != xf.xferPoolIdx.end(); ++k )
     {
         double& x = s[*k];
         double dx = *i++ - *j++;
+        // x += approximateWithInteger_debug(__FUNCTION__, dx, rng_);
         x += approximateWithInteger(dx, rng_);
 
         if ( x < *m )

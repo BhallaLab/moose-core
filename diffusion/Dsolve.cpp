@@ -150,10 +150,11 @@ const Cinfo* Dsolve::initCinfo()
     {
         &process, &reinit
     };
+
     static SharedFinfo proc( "proc",
-                             "Shared message for process and reinit",
-                             procShared, sizeof( procShared ) / sizeof( const Finfo* )
-                           );
+            "Shared message for process and reinit",
+            procShared, sizeof( procShared ) / sizeof( const Finfo* )
+            );
 
     static Finfo* dsolveFinfos[] =
     {
