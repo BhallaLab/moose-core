@@ -46,7 +46,7 @@ GssaVoxelPools::GssaVoxelPools(): VoxelPoolsBase(), t_( 0.0 ), atot_( 0.0 )
 
 GssaVoxelPools::~GssaVoxelPools()
 {
-    for ( unsigned int i = 0; i < rates_.size(); ++i )
+    for ( size_t i = 0; i < rates_.size(); ++i )
         delete( rates_[i] );
 }
 

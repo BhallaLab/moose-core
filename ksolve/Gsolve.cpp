@@ -43,10 +43,9 @@
 
 #define SIMPLE_ROUNDING 0
 
-// When set use std::async rather than std::thread
-// TODO: Profiling.
+// When set use std::async rather than std::thread. This is slightly faster
+// (roughly 3% with gcc7).
 #define USING_ASYNC 1
-
 #if USING_ASYNC
 #define THREAD_LAUNCH_POLICY std::launch::async
 #endif
@@ -578,16 +577,18 @@ void Gsolve::reinit( const Eref& e, ProcPtr p )
     for ( auto i = pools_.begin(); i != pools_.end(); ++i )
         i->refreshAtot( &sys_ );
 
+
     // LoadBalancing. Recompute the optimal number of threads.
     size_t nvPools = pools_.size( );
     grainSize_ = (size_t) std::ceil((double)nvPools / (double)numThreads_);
     assert( grainSize_ * numThreads_ >= nvPools);
-    numThreads_ = nvPools / grainSize_;
+    numThreads_ = (size_t) std::ceil((double)nvPools / (double)grainSize_);
     MOOSE_DEBUG( "Grain size is " << grainSize_ << ". Num threads " << numThreads_);
 
-    if(1 < getNumThreads())
+    if(1 < numThreads_)
         cout << "Info: Setting up threaded gsolve with " << getNumThreads( )
              << " threads. " << endl;
+
 }
 
 //////////////////////////////////////////////////////////////

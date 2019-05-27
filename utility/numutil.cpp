@@ -70,6 +70,9 @@ double approximateWithInteger_debug(const char* name, const double x, moose::RNG
 
 double approximateWithInteger(const double x, moose::RNG& rng)
 {
+#if 0
+    return std::round(x);
+#else
     assert(x >= 0.0);
     double xf = std::floor(x);
     double base = x - xf;
@@ -78,6 +81,7 @@ double approximateWithInteger(const double x, moose::RNG& rng)
     if( rng.uniform() < base)
         return xf+1.0;
     return xf;
+#endif
 }
 
 double approximateWithInteger(const double x)

@@ -451,11 +451,6 @@ void Function::setExpr(const Eref& eref, string expr)
     set<string> ys;
     moose::MooseParser::findXsYs(expr, xs, ys);
 
-    // Clear previously stored variables. For the sake of simplicity; let just
-    // get rid of previous parser.
-    // parser_.reset( new moose::MooseParser() );
-
-    cout << this << "+ Setting expression " << expr << endl;
     // Now create a map which maps the variable name to location of values. This
     // is critical to make sure that pointers remain valid when multi-threaded
     // encironment is used.
