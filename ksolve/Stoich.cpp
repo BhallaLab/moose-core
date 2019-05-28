@@ -274,7 +274,7 @@ Stoich::Stoich()
 
 Stoich::~Stoich()
 {
-    //unZombifyModel();
+    unZombifyModel();
 
     // Note that we cannot do the unZombify here, because it is too
     // prone to problems with the ordering of the delete operations
@@ -1393,7 +1393,7 @@ void Stoich::unZombifyModel()
     static const Cinfo* zombieEnzCinfo = Cinfo::find( "ZombieEnz");
     static const Cinfo* zombieFunctionCinfo = Cinfo::find( "ZombieFunction");
 
-    unZombifyPools();
+    //unZombifyPools();
 
     vector< Id > temp = reacVec_;
     temp.insert( temp.end(),
