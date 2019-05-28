@@ -20,7 +20,7 @@ class Ksolve: public ZombiePoolInterface
 {
 public:
     Ksolve();
-    ~Ksolve();
+    virtual ~Ksolve();
 
     //////////////////////////////////////////////////////////////////
     // Field assignment stuff

@@ -193,16 +193,17 @@ const Cinfo* Stoich::initCinfo()
     // MsgDest Definitions
     //////////////////////////////////////////////////////////////
     static DestFinfo unzombify( "unzombify",
-                                "Restore all zombies to their native state",
-                                new OpFunc0< Stoich >( &Stoich::unZombifyModel )
-                              );
+            "Restore all zombies to their native state",
+            new OpFunc0< Stoich >( &Stoich::unZombifyModel )
+            );
+
     static DestFinfo scaleBufsAndRates( "scaleBufsAndRates",
-                                        "Args: voxel#, volRatio\n"
-                                        "Handles requests for runtime volume changes in the specified "
-                                        "voxel#, Used in adaptors changing spine vols.",
-                                        new OpFunc2< Stoich, unsigned int, double >(
-                                            &Stoich::scaleBufsAndRates )
-                                      );
+            "Args: voxel#, volRatio\n"
+            "Handles requests for runtime volume changes in the specified "
+            "voxel#, Used in adaptors changing spine vols.",
+            new OpFunc2< Stoich, unsigned int, double >(
+                &Stoich::scaleBufsAndRates )
+            );
 
     //////////////////////////////////////////////////////////////
     // SrcFinfo Definitions
@@ -273,7 +274,7 @@ Stoich::Stoich()
 
 Stoich::~Stoich()
 {
-    unZombifyModel();
+    //unZombifyModel();
 
     // Note that we cannot do the unZombify here, because it is too
     // prone to problems with the ordering of the delete operations
@@ -1067,8 +1068,8 @@ void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
         unsigned int j = srcPools[i].second;
         if ( j >= numSrc )
         {
-            MOOSE_WARN( "Stoich::installAndUnschedFunc: tgt index not allocated, " 
-                    << j << ",	" << numSrc );
+            MOOSE_WARN( "Stoich::installAndUnschedFunc: tgt index not allocated, "
+                        << j << ",	" << numSrc );
             continue;
         }
         poolIndex[j] = convertIdToPoolIndex( srcPools[i].first );
@@ -1361,8 +1362,10 @@ void Stoich::unZombifyPools()
     for ( i = 0; i < varPoolVec_.size(); ++i )
     {
         Element* e = varPoolVec_[i].element();
+
         if ( !e || e->isDoomed() )
             continue;
+
         if ( e != 0 &&  e->cinfo() == zombiePoolCinfo )
             PoolBase::zombify( e, poolCinfo, Id(), Id() );
     }
@@ -1370,8 +1373,10 @@ void Stoich::unZombifyPools()
     for ( i = 0; i < bufPoolVec_.size(); ++i )
     {
         Element* e = bufPoolVec_[i].element();
+
         if ( !e || e->isDoomed() )
             continue;
+
         if ( e != 0 &&  e->cinfo() == zombieBufPoolCinfo )
             PoolBase::zombify( e, bufPoolCinfo, Id(), Id() );
     }
@@ -2093,7 +2098,7 @@ const vector< Id >& Stoich::offSolverPoolMap( Id compt ) const
 void Stoich::updateFuncs( double* s, double t ) const
 {
     for ( auto i = funcs_.cbegin(); i != funcs_.end(); ++i )
-        if ( *i ) 
+        if ( *i )
             (*i)->evalPool( s, t );
 }
 

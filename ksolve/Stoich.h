@@ -157,9 +157,8 @@ public:
      *  16: Warning: No objects found on path
      */
     int getStatus() const;
-    //////////////////////////////////////////////////////////////////
+
     // Model traversal and building functions
-    //////////////////////////////////////////////////////////////////
     /**
      * Internal function which sets up the model based on the provided
      * elist of all elements managed by this solver.

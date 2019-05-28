@@ -443,8 +443,7 @@ void PoolBase::zombify( Element* orig, const Cinfo* zClass,
     for ( unsigned int i = 0; i < num; ++i )
     {
         Eref er( orig, i + start );
-        const PoolBase* pb =
-            reinterpret_cast< const PoolBase* >( er.data() );
+        const PoolBase* pb = reinterpret_cast< const PoolBase* >( er.data() );
         species[ i ] = pb->getSpecies( er );
         concInit[ i ] = pb->getConcInit( er );
         diffConst[ i ] = pb->getDiffConst( er );
