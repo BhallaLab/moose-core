@@ -60,7 +60,9 @@ public:
 
 private:
 
-    shared_ptr<double[]> args_;
+    // Store address of variables.
+    // shared_ptr<double> args_;
+    double* args_;
 
     // Look up reactants in the S vec.
     vector< unsigned int > reactantIndex_;

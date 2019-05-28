@@ -44,6 +44,8 @@ FuncTerm::FuncTerm():
 
 FuncTerm::~FuncTerm()
 {
+    if(args_)
+        delete[] args_;
 }
 
 void FuncTerm::setReactantIndex(const vector<unsigned int>& mol)
@@ -57,7 +59,9 @@ void FuncTerm::setReactantIndex(const vector<unsigned int>& mol)
     // symbol table is now invalidated and thus can't be used anymore. We need
     // to re-assign parser.
     parser_->Reinit();
-    args_ = unique_ptr<double[]>(new double[mol.size()+1]());
+
+    args_ = new double[mol.size()+1];
+
     for ( unsigned int i = 0; i < mol.size(); ++i )
         addVar( "x"+to_string(i), i );
 
@@ -124,17 +128,27 @@ double FuncTerm::getVolScale() const
 
 const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
 {
-    args_ = other.args_;
+    // NOTE: This object is used at many places. Run test_gsolve_parallel and
+    // test_expr together. We don't want deconstructor to destroy args_ (since
+    // original may be using it). When copying it, we make sure to set it to
+    // nullptr. Gsolve needs to set this value by itself after copying the
+    // FuncTerm.
+    args_ = nullptr; 
+
     expr_ = other.expr_;
     volScale_ = other.volScale_;
     target_ = other.target_;
     parser_ = other.parser_;
+
+    // This is neccessary for Gsolve and others to work.
+    setReactantIndex( other.reactantIndex_ );
+
     return *this;
 }
 
 void FuncTerm::addVar( const string& name, size_t i )
 {
-    parser_->DefineVar(name, &args_[i]);
+    parser_->DefineVar(name, args_+i);
 }
 
 /**
@@ -187,7 +201,7 @@ void FuncTerm::evalPool( double* S, double t ) const
 
     try
     {
-        S[ target_] = parser_->Eval() * volScale_;
+        S[target_] = parser_->Eval() * volScale_;
     }
     catch ( moose::Parser::exception_type & e )
     {

@@ -88,18 +88,18 @@ public:
 
 
 protected:
-    // friend double * functionAddVar_(const char * name, void *data);
-    bool valid_;
-    unsigned int numVar_;
-    double lastValue_;
-    double value_;
-    double rate_;
-    unsigned int mode_;
-    bool useTrigger_;
-    bool doEvalAtReinit_;
 
-    double t_;                             // local storage for current time
-    string independent_;                   // To take derivative.
+    bool            valid_;
+    unsigned int    numVar_;
+    double          lastValue_;
+    double          value_;
+    double          rate_;
+    unsigned int    mode_;
+    bool            useTrigger_;
+    bool            doEvalAtReinit_;
+
+    double          t_;                    // local storage for current time
+    string          independent_;          // To take derivative.
 
     // this stores variables received via incoming messages, identifiers of
     // the form x{i} are included in this

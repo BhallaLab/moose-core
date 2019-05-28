@@ -280,18 +280,6 @@ Stoich::~Stoich()
     for ( vector< RateTerm* >::iterator j = rates_.begin();
             j != rates_.end(); ++j )
         delete *j;
-
-    for ( vector< FuncTerm* >::iterator j = funcs_.begin();
-            j != funcs_.end(); ++j )
-        delete *j;
-
-    /*
-     * Do NOT delete FuncTerms, they are just pointers stolen from
-     * the non-zombified objects.
-    for ( vector< FuncTerm* >::iterator i = funcs_.begin();
-    	i != funcs_.end(); ++i )
-    	delete *i;
-    	*/
 }
 
 //////////////////////////////////////////////////////////////
@@ -588,7 +576,7 @@ const FuncTerm* Stoich::funcs( unsigned int i ) const
 {
     assert( i < funcs_.size() );
     assert( funcs_[i]);
-    return funcs_[i];
+    return funcs_[i].get();
 }
 
 bool Stoich::isFuncTarget( unsigned int poolIndex ) const
@@ -1058,6 +1046,7 @@ void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
     static const Finfo* funcInputFinfo = varCinfo->findFinfo( "input" );
     static const DestFinfo* df = dynamic_cast< const DestFinfo* >( funcInputFinfo );
     assert( df );
+
     // Unsched Func
     func.element()->setTick( -2 ); // Disable with option to resurrect.
 
@@ -1069,21 +1058,25 @@ void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
     unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
     vector< pair< Id, unsigned int> > srcPools;
     unsigned int n = ei.element()->getInputsWithTgtIndex( srcPools, df );
-    ASSERT_EQ( numSrc, n, "NumMsgVsYs" );
+    ASSERT_EQ( numSrc, n, "Stoich::installAndUnschedFunc" );
+
     vector< unsigned int > poolIndex( numSrc, 0 );
     for ( unsigned int i = 0; i < numSrc; ++i )
     {
         unsigned int j = srcPools[i].second;
         if ( j >= numSrc )
         {
-            cout << "Warning: Stoich::installAndUnschedFunc: tgt index not allocated, " << j << ",	" << numSrc << endl;
+            MOOSE_WARN( "Stoich::installAndUnschedFunc: tgt index not allocated, " 
+                    << j << ",	" << numSrc );
             continue;
         }
         poolIndex[j] = convertIdToPoolIndex( srcPools[i].first );
     }
+
     ft->setReactantIndex( poolIndex );
     string expr = Field< string >::get( func, "expr" );
     ft->setExpr( expr );
+
     // Tie the output of the FuncTerm to the pool it controls.
     unsigned int targetIndex = convertIdToPoolIndex( pool );
     ft->setTarget( targetIndex );
@@ -1092,7 +1085,7 @@ void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
     assert( funcIndex != ~0U );
     // funcTarget_ vector tracks which pools are controlled by which func.
     funcTarget_[targetIndex] = funcIndex;
-    funcs_[ funcIndex ] = ft;
+    funcs_[ funcIndex ].reset(ft);
 }
 
 void Stoich::installAndUnschedFuncRate( Id func, Id pool )
@@ -1109,6 +1102,7 @@ void Stoich::installAndUnschedFuncRate( Id func, Id pool )
     unsigned int tempIndex = convertIdToPoolIndex( pool );
     assert( rateIndex != ~0U );
     assert( tempIndex != ~0U );
+
     // Install the FuncReac
     FuncRate* fr = new FuncRate( 1.0, tempIndex );
     rates_[rateIndex] = fr;
@@ -1120,7 +1114,8 @@ void Stoich::installAndUnschedFuncRate( Id func, Id pool )
     unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
     vector< pair< Id, unsigned int > > srcPools;
     unsigned int n = ei.element()->getInputsWithTgtIndex( srcPools, df );
-    ASSERT_EQ( numSrc, n, "NumMsgXS" );
+    ASSERT_EQ( numSrc, n, "Stoich::installAndUnschedFuncRate" );
+
     vector< unsigned int > poolIndex( numSrc, 0 );
     for ( unsigned int i = 0; i < numSrc; ++i )
     {
@@ -1132,6 +1127,7 @@ void Stoich::installAndUnschedFuncRate( Id func, Id pool )
         }
         poolIndex[j] = convertIdToPoolIndex( srcPools[i].first );
     }
+
     fr->setFuncArgIndex( poolIndex );
     string expr = Field< string >::get( func, "expr" );
     fr->setExpr( expr );
@@ -1162,14 +1158,13 @@ void Stoich::installAndUnschedFuncReac( Id func, Id reac )
 
     unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
     vector< Id > srcPools;
-#ifndef NDEBUG
-    unsigned int n =
-#endif
-        ei.element()->getNeighbors( srcPools, funcSrcFinfo);
-    assert( numSrc == n );
+    unsigned int n = ei.element()->getNeighbors( srcPools, funcSrcFinfo);
+    ASSERT_EQ( numSrc, n, "Stoich::installAndUnschedFuncReac" );
+
     vector< unsigned int > poolIndex( numSrc, 0 );
     for ( unsigned int i = 0; i < numSrc; ++i )
         poolIndex[i] = convertIdToPoolIndex( srcPools[i] );
+
     fr->setFuncArgIndex( poolIndex );
     string expr = Field< string >::get( func, "expr" );
     fr->setExpr( expr );
@@ -2019,8 +2014,8 @@ void Stoich::setFunctionExpr( const Eref& e, string expr )
         index = convertIdToFuncIndex( e.id() );
         if ( index != ~0U )
         {
-            FuncTerm *ft = dynamic_cast< FuncTerm* >( funcs_[index] );
-            if ( ft )
+            FuncTerm* ft = dynamic_cast< FuncTerm* >( funcs_[index].get() );
+            if (ft)
             {
                 ft->setExpr( expr );
                 return;

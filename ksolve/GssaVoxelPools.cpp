@@ -11,16 +11,15 @@
 #include "../basecode/global.h"
 #include "../randnum/RNG.h"
 #include "RateTerm.h"
-#include "FuncTerm.h"
 #include "../basecode/SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
 #include "XferInfo.h"
 #include "ZombiePoolInterface.h"
-#include "Stoich.h"
 #include "GssaSystem.h"
 #include "GssaVoxelPools.h"
+#include "Stoich.h"
 
 /**
  * The SAFETY_FACTOR Protects against the total propensity exceeding

@@ -89,7 +89,9 @@ public:
 
     void SetVariableMap( const map<string, double*> map );
 
-    static void findAllVars( const string& expr, set<string>& vars, const string& start );
+    static void findAllVarsRegex( const string& expr, set<string>& vars, const string& start );
+    static void findAllVars( const string& expr, set<string>& vars, const char p);
+
     static void findXsYs(const string& expr, set<string>& xs, set<string>& ys);
 
     double Eval( ) const;

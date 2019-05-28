@@ -60,10 +60,6 @@ def makeChemProto( name, Aexpr, Bexpr, params ):
     Bdot.expr = parseExpr( Bexpr, params, False )
     CaStim.expr = 'x2 * exp( -((x0 - t)^2)/(2* ' + str(sw*sw) + ') )'
 
-    #print Adot.expr
-    #print Bdot.expr
-    #print CaStim.expr
-
     # Connections
     Adot.x.num = 4
     moose.connect( Ca, 'nOut', Adot.x[0], 'input' )
@@ -301,7 +297,6 @@ def runPanelDEFG( name, dist, seqDt, numSpine, seq, stimAmpl ):
     moose.reinit()
     runtime = 50
     snapshot = preStim + seqDt * (numSpine - 0.8)
-    print(snapshot)
     moose.start( snapshot )
     avec = moose.vec( '/model/chem/dend/A' ).n
     moose.start( runtime - snapshot )

@@ -123,7 +123,8 @@ void MooseParser::DefineFun1( const string& funcName, double (&func)(double) )
     symbol_table_.add_function( funcName, func );
 }
 
-void MooseParser::findAllVars( const string& expr, set<string>& vars, const string& pattern)
+// Don't use it with gcc-4.8.x . It has a broken support for <regex>
+void MooseParser::findAllVarsRegex( const string& expr, set<string>& vars, const string& pattern)
 {
     const regex xpat(pattern);
     smatch sm;
@@ -132,6 +133,27 @@ void MooseParser::findAllVars( const string& expr, set<string>& vars, const stri
     {
         vars.insert(sm.str());
         temp = sm.suffix();
+    }
+}
+
+void MooseParser::findAllVars( const string& expr, set<string>& vars, const char p)
+{
+    size_t i = 0;
+    while(i < expr.size()-1)
+    {
+        if( expr[i] == p && std::isdigit(expr[i+1]))
+        {
+            string v = expr.substr(i, 2);
+            i += 2;
+            while(std::isdigit(expr[i]))
+            {
+                v += expr[i];
+                i += 1;
+            }
+            vars.insert(v);
+        }
+        else
+            i += 1;
     }
 }
 
@@ -153,8 +175,13 @@ string MooseParser::Reformat( const string user_expr )
 
 void MooseParser::findXsYs( const string& expr, set<string>& xs, set<string>& ys )
 {
-    findAllVars( expr, xs, "x\\d+");
-    findAllVars( expr, ys, "y\\d+" );
+#if USE_REGEX
+    findAllVarsRegex( expr, xs, "x\\d+");
+    findAllVarsRegex( expr, ys, "y\\d+" );
+#else
+    findAllVars( expr, xs, 'x');
+    findAllVars( expr, ys, 'y' );
+#endif
 }
 
 bool MooseParser::SetExpr( const string& user_expr )

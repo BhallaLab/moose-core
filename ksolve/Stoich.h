@@ -10,6 +10,8 @@
 #ifndef _STOICH_H
 #define _STOICH_H
 
+#include <memory>
+
 /**
  * Stoich is the class that handles the stoichiometry matrix for a
  * reaction system, and also setting up the computations for reaction
@@ -45,6 +47,9 @@
  * - Set the stoich path.
  * - Reinit.
  */
+
+// Forward declarations.
+class FuncTerm;
 
 class Stoich
 {
@@ -540,7 +545,7 @@ private:
     unsigned int numVoxels_;
 
     /// The FuncTerms handle mathematical ops on mol levels.
-    vector< FuncTerm* > funcs_;
+    vector< std::shared_ptr<FuncTerm> > funcs_;
 
     /// N_ is the stoichiometry matrix. All pools * all reac terms.
     KinSparseMatrix N_;
