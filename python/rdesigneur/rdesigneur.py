@@ -772,7 +772,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
         moose.reinit()
         moose.start( runtime )
         if block:
-            self.display( len( self.moogNames ) + 1 )
+            self.display( len(self.moogNames) + 1 )
 
     def display( self, startIndex = 0 ):
         for i in self.plotNames:
@@ -796,7 +796,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
         if len( self.moogList ) or len( self.wavePlotNames ) > 0:
             plt.ion()
         # Here we build the plots and lines for the waveplots
-        self.initWavePlots( startIndex )
+        self.initWavePlots( int(startIndex) )
         if len( self.wavePlotNames ) > 0:
             for i in range( 3 ):
                 self.displayWavePlots()

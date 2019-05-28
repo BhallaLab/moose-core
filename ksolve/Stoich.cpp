@@ -274,6 +274,7 @@ Stoich::Stoich()
 Stoich::~Stoich()
 {
     unZombifyModel();
+
     // Note that we cannot do the unZombify here, because it is too
     // prone to problems with the ordering of the delete operations
     // relative to the zombies.

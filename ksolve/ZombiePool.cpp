@@ -101,9 +101,9 @@ void ZombiePool::vSetNinit( const Eref& e, double v )
 
 double ZombiePool::vGetNinit( const Eref& e ) const
 {
-	if ( ksolve_ != 0 )
+	if ( ksolve_ )
 		return ksolve_->getNinit( e );
-	else if ( dsolve_ != 0 )
+	else if ( dsolve_ )
 		return dsolve_->getNinit( e );
 	return 0.0;
 }

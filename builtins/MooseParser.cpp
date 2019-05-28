@@ -40,8 +40,7 @@ MooseParser::MooseParser() : symbol_tables_registered_(false)
 
 MooseParser::~MooseParser()
 {
-    symbol_table_.clear();
-    expression_.release();
+    // Parser will take care of it
 }
 
 /*-----------------------------------------------------------------------------

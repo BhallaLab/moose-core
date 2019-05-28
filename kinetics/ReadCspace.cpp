@@ -21,8 +21,7 @@ const double ReadCspace::DEFAULT_RATE = 0.1;
 const double ReadCspace::DEFAULT_KM = 1.0;
 const bool ReadCspace::USE_PIPE = 1;
 
-ReadCspace::ReadCspace()
-	:
+ReadCspace::ReadCspace() :
 		base_(),
 		compt_(),
 		mesh_(),
