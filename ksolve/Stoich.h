@@ -544,7 +544,7 @@ private:
     unsigned int numVoxels_;
 
     /// The FuncTerms handle mathematical ops on mol levels.
-    vector< std::shared_ptr<FuncTerm> > funcs_;
+    vector< FuncTerm* > funcs_;
 
     /// N_ is the stoichiometry matrix. All pools * all reac terms.
     KinSparseMatrix N_;

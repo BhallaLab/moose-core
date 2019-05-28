@@ -32,8 +32,7 @@
 #include "../shell/Wildcard.h"
 #include "../utility/testing_macros.hpp"
 
-const Cinfo* Stoich::initCinfo()
-{
+const Cinfo* Stoich::initCinfo() {
     //////////////////////////////////////////////////////////////
     // Field Definitions
     //////////////////////////////////////////////////////////////
@@ -279,8 +278,10 @@ Stoich::~Stoich()
     // Note that we cannot do the unZombify here, because it is too
     // prone to problems with the ordering of the delete operations
     // relative to the zombies.
-    for ( vector< RateTerm* >::iterator j = rates_.begin();
-            j != rates_.end(); ++j )
+    for ( auto j = rates_.begin(); j != rates_.end(); ++j )
+        delete *j;
+
+    for ( auto j = funcs_.begin(); j != funcs_.end(); ++j )
         delete *j;
 }
 
@@ -578,7 +579,7 @@ const FuncTerm* Stoich::funcs( unsigned int i ) const
 {
     assert( i < funcs_.size() );
     assert( funcs_[i]);
-    return funcs_[i].get();
+    return funcs_[i];
 }
 
 bool Stoich::isFuncTarget( unsigned int poolIndex ) const
@@ -934,7 +935,7 @@ void Stoich::resizeArrays()
         mmEnzVec_.size() + offSolverMMenzVec_.size() +
         incrementFuncVec_.size();
     rates_.resize( totNumRates, 0 );
-    funcs_.resize( poolFuncVec_.size(), 0 );
+    funcs_.resize( poolFuncVec_.size(), nullptr );
     N_.setSize( totNumPools, totNumRates );
     if ( kinterface_ )
         kinterface_->setNumPools( totNumPools );
@@ -1087,7 +1088,7 @@ void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
     assert( funcIndex != ~0U );
     // funcTarget_ vector tracks which pools are controlled by which func.
     funcTarget_[targetIndex] = funcIndex;
-    funcs_[ funcIndex ].reset(ft);
+    funcs_[ funcIndex ] = ft;
 }
 
 void Stoich::installAndUnschedFuncRate( Id func, Id pool )
@@ -2020,7 +2021,7 @@ void Stoich::setFunctionExpr( const Eref& e, string expr )
         index = convertIdToFuncIndex( e.id() );
         if ( index != ~0U )
         {
-            FuncTerm* ft = dynamic_cast< FuncTerm* >( funcs_[index].get() );
+            FuncTerm* ft = dynamic_cast< FuncTerm* >( funcs_[index] );
             if (ft)
             {
                 ft->setExpr( expr );
