@@ -87,7 +87,7 @@ add_definitions(-DUSE_GENESIS_PARSER)
 
 if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     message(STATUS "Building for Debug/Unit testing")
-    add_definitions(-DDO_UNIT_TESTS)
+    add_definitions(-DDO_UNIT_TESTS -O)
     set(CMAKE_BUILD_TYPE Debug)
 elseif(ENABLE_UNIT_TESTS)
     MESSAGE(STATUS "Enabled Unit tests")
