@@ -90,6 +90,7 @@ public:
 
     // Reformat the expression to meet TkExpr.
     string Reformat(const string user_expr);
+    string SymbolTable2String( );
 
     void SetVariableMap(const map<string, double*> map);
 

@@ -192,6 +192,26 @@ bool MooseParser::SetExpr( const string& user_expr )
     return CompileExpr();
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Symbol table to string (for debugging purpose).
+ *
+ * @Returns   
+ */
+/* ----------------------------------------------------------------------------*/
+string MooseParser::SymbolTable2String( )
+{
+    stringstream ss;
+    // map is
+    auto symbTable = GetSymbolTable();
+    vector<std::pair<string, double>> vars;
+    auto n = symbTable.get_variable_list(vars);
+    ss << "More Information:\nTotal variables " << n << ".";
+    for (auto i : vars)
+        ss << "\t" << i.first << "=" << i.second << " " << &symbol_table_.get_variable(i.first)->ref();
+    return ss.str();
+}
+
 bool MooseParser::CompileExpr()
 {
     // User should make sure that symbol table has been setup. Do not raise
@@ -211,14 +231,7 @@ bool MooseParser::CompileExpr()
                  << " Type: [" << exprtk::parser_error::to_str(error.mode)
                  << "] Msg: " << error.diagnostic << endl;
 
-            // map is
-            auto symbTable = GetSymbolTable();
-            vector<std::pair<string, double>> vars;
-            auto n = symbTable.get_variable_list(vars);
-            ss << "More Information:\nTotal variables " << n << ".";
-            for (auto i : vars)
-                ss << "\t" << i.first << "=" << i.second << " " << &symbol_table_.get_variable(i.first)->ref();
-            ss << endl;
+            ss << SymbolTable2String() << endl;
         }
         cerr <<  ss.str() << endl;
         return false;

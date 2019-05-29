@@ -388,13 +388,11 @@ void Function::addVariable(const string &name)
 
 void Function::setExpr(const Eref &eref, string expr)
 {
-    if (expr == parser_->GetExpr()) {
-        MOOSE_WARN("No change in expression.");
-        return;
-    }
-
     valid_ = false;
-    // parser_->ClearVariables();
+
+    // Delete the old parser if already set.
+    if(parser_->GetExpr().size() > 0)
+        parser_.reset(new moose::MooseParser());
 
     // Find all variables x\d+ or y\d+ etc, and add them to variable buffer.
     set<string> xs;
