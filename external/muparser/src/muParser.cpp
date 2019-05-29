@@ -51,7 +51,7 @@ namespace mu
 {
 
     // Initialize the RNG with random time.
-    moose::RNG<double> rng;
+    moose::RNG rng;
 
   //---------------------------------------------------------------------------
   // Trigonometric function

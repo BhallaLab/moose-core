@@ -38,7 +38,6 @@ namespace moose
  * =====================================================================================
  */
 
-template < typename T >
 class RNG
 {
     public:
@@ -58,7 +57,7 @@ class RNG
         }
 
         /* ====================  ACCESSORS     ======================================= */
-        T getSeed( void )
+        double getSeed( void )
         {
             return seed_;
         }
@@ -87,7 +86,7 @@ class RNG
          * @param a Lower limit (inclusive)
          * @param b Upper limit (inclusive).
          */
-        T uniform( const T a, const T b)
+        double uniform( const double a, const double b)
         {
             return ( b - a ) * dist_( rng_ ) + a;
         }
@@ -98,7 +97,7 @@ class RNG
          *
          * @return randum number.
          */
-        T uniform( void )
+        double uniform( void )
         {
             return dist_( rng_ );
         }
@@ -106,8 +105,8 @@ class RNG
 
     private:
         /* ====================  DATA MEMBERS  ======================================= */
-        T res_;
-        T seed_;
+        double res_;
+        size_t seed_;
 
         moose::MOOSE_RNG_DEFAULT_ENGINE rng_;
         moose::MOOSE_UNIFORM_DISTRIBUTION<double> dist_;
