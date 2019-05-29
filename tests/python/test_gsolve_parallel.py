@@ -72,6 +72,7 @@ def main( nT ):
         s = np.sum(y)
         v = (np.mean(y), np.max(y), np.min(y), s)
         print(v)
+        assert sum(v) > 1, v
         res.append(v)
         moose.start( updateDt )
         currTime = clk.currentTime
