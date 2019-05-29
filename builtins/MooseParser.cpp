@@ -101,12 +101,12 @@ bool MooseParser::DefineVar( const string varName, double* val)
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis  Reinit the parser. Reassign symbol table, recompile the
- * expression.
+ * expression. Called from FuncTerm.
  */
 /* ----------------------------------------------------------------------------*/
 void MooseParser::Reinit( )
 {
-    ClearVariables();
+    ClearAll();
 }
 
 void MooseParser::DefineConst( const string& constName, const double value )

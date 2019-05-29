@@ -38,7 +38,7 @@ FuncTerm::FuncTerm():
     , reactantIndex_(1, 0)
     , volScale_(1.0)
     , target_( ~0U)
-    , parser_(new moose::MooseParser())
+    , parser_( make_shared<moose::MooseParser>())
 {
 }
 
@@ -58,7 +58,7 @@ void FuncTerm::setReactantIndex(const vector<unsigned int>& mol)
     // The address of args_ has changed now. Any previous mapping with ExprTK
     // symbol table is now invalidated and thus can't be used anymore. We need
     // to re-assign parser.
-    parser_->Reinit();
+    parser_->ClearAll();
 
     args_ = new double[mol.size()+1];
 
@@ -138,7 +138,9 @@ const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
     expr_ = other.expr_;
     volScale_ = other.volScale_;
     target_ = other.target_;
-    parser_ = other.parser_;
+
+    // std::move makes sure that we have properly initialized parser.
+    parser_ = std::move(other.parser_);
 
     // This is neccessary for Gsolve and others to work.
     setReactantIndex( other.reactantIndex_ );
