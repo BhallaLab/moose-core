@@ -200,12 +200,13 @@ bool MooseParser::CompileExpr()
     if(expr_.empty())
         return false;
 
-    if(! parser_.compile(expr_, expression_))
+    Parser::parser_t       parser;
+    if(! parser.compile(expr_, expression_))
     {
         stringstream ss;
-        for (std::size_t i = 0; i < parser_.error_count(); ++i)
+        for (std::size_t i = 0; i < parser.error_count(); ++i)
         {
-            Parser::error_t error = parser_.get_error(i);
+            Parser::error_t error = parser.get_error(i);
             ss << "Error[" << i << "] Position: " << error.token.position
                  << " Type: [" << exprtk::parser_error::to_str(error.mode)
                  << "] Msg: " << error.diagnostic << endl;

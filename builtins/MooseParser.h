@@ -133,7 +133,6 @@ private:
     // unique_ptr<Parser::symbol_table_t> symbol_table_;   [> symbol table <]
     Parser::symbol_table_t symbol_table_;
     Parser::expression_t   expression_;     /* expression type */
-    Parser::parser_t       parser_;          /* parser */
     size_t num_user_defined_funcs_ = 0;
 
     bool symbol_tables_registered_;
