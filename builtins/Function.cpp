@@ -305,7 +305,7 @@ Function::Function():
     , value_(0.0), rate_(0.0), mode_(1)
     , useTrigger_(false), doEvalAtReinit_(false)
     , t_(0.0), independent_("x0")
-    , parser_( new moose::MooseParser() )
+    , parser_( make_shared<moose::MooseParser>() )
     , stoich_(nullptr)
 {
 
@@ -328,8 +328,6 @@ Function& Function::operator=(const Function& rhs)
     rate_ = rhs.rate_;
     independent_ = rhs.independent_;
     stoich_ = rhs.stoich_;
-
-    // shared parser.
     parser_ = rhs.parser_;
     return *this;
 }
