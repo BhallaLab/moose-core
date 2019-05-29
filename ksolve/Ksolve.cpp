@@ -414,7 +414,6 @@ Id Ksolve::getDsolve() const
 
 void Ksolve::setDsolve( Id dsolve )
 {
-    cout << "  BBB  Setting dsolve in ksolve " << endl;
     if ( dsolve == Id () )
     {
         dsolvePtr_ = nullptr;
@@ -569,7 +568,6 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     // Assemble and send the integrated values off for the Dsolve.
     if ( dsolvePtr_ )
     {
-        cout << " Dsolve " << endl;
         vector< double > kvalues( 4 );
         kvalues[0] = 0;
         kvalues[1] = getNumLocalVoxels();

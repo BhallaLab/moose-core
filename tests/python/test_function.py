@@ -101,10 +101,8 @@ def test_var_order():
         moose.setClock(ii, dt)
     moose.reinit()
     moose.start(simtime)
-<<<<<<< HEAD
     for ii in range(len(z1.vector)):
         print(ii, z1.vector[ii])
-=======
     expected = [0, 1.1, 2.211, 3.322, 4.433, 5.544]
     assert np.allclose(z1.vector, expected), "Excepted %s, got %s" % (expected, z1.vector )
 
@@ -118,11 +116,10 @@ def test_t( ):
     moose.connect( t, 'requestOut', f, 'getValue' )
     moose.reinit()
     moose.start( 1 )
-    y = t.vector
+    y = t.vector[1:]
     print( 'Raw', y )
     print( 'Diff', np.diff(y) )
-    assert (np.diff(y) == 0.1).all(), np.diff(y)
->>>>>>> c5fded807... removed npy support. On large files, it was not working properly. Only
+    assert np.isclose(np.diff(y), 0.1).all(), np.diff(y)
 
 
 
