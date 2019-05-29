@@ -114,6 +114,18 @@ namespace moose
      */
     double mtrand( void );
 
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Overloaded function. Random number between a and b
+     *
+     * @Param a lower limit.
+     * @Param b Upper limit.
+     *
+     * @Returns   
+     */
+    /* ----------------------------------------------------------------------------*/
+    double mtrand( double a, double b );
+
     /**
      * @brief Create a POSIX compatible path from a given string.
      * Remove/replace bad characters.

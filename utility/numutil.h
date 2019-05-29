@@ -72,7 +72,6 @@ bool almostEqual(double x, double y, double epsilon = DBL_EPSILON);
 bool almostEqual(long double x, long double y, long double epsilon = LDBL_EPSILON);
 
 double approximateWithInteger(const double x, moose::RNG& rng);
-double approximateWithInteger(const double x);
 double approximateWithInteger_debug(const char* name, const double x, moose::RNG& rng);
 
 #endif

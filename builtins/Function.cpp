@@ -48,13 +48,11 @@
 #include "../basecode/header.h"
 #include "../utility/utility.h"
 #include "../utility/numutil.h"
+#include "../utility/print_function.hpp"
 #include "Variable.h"
 
 #include "Function.h"
 #include "../basecode/ElementValueFinfo.h"
-
-#define PARSER_MAXVARS 100
-
 
 static const double TriggerThreshold = 0.0;
 
@@ -509,11 +507,11 @@ double * _functionAddVar(const char *name, void *data)
     }
     else 
     {
-        MOOSE_WARN( "Got an undefined symbol: " << name << endl
-             << "Variables must be named xi, yi, where i is integer index."
-	     << " You must define the constants beforehand using LookupField c: c[name]"
+        MOOSE_WARN( "Got an undefined symbol: " << strname << ".\n"
+                << "Variables must be named xi, yi, where i is integer index."
+                << " You must define the constants beforehand using LookupField c: c[name]"
                 " = value"
-             << endl;
+                );
         throw mu::ParserError("Undefined constant.");
     }
 
@@ -743,23 +741,23 @@ void Function::process(const Eref &e, ProcPtr p)
     switch (_mode){
         case 1: {
             valueOut()->send(e, _value);
-        return;
+            return;
         }
         case 2: {
             derivativeOut()->send(e, getDerivative());
-        return;
+            return;
         }
         case 3: {
             rateOut()->send(e, _rate);
-        return;
+            return;
         }
         default: {
             valueOut()->send(e, _value);
             derivativeOut()->send(e, getDerivative());
             rateOut()->send(e, _rate);
-        return;
+            return;
+        }
     }
-
     _lastValue = _value;
 }
 
@@ -803,13 +801,4 @@ void Function::reinit(const Eref &e, ProcPtr p)
     }
 }
 
-#if 0
-mu::value_type Function::muCallbackFMod( mu::value_type a, mu::value_type b)
-{
-    cerr << "Callback: " << a << " " << b << endl;
-    return fmod(a, b);
-}
-#endif
-
-//
 // Function.cpp ends here

@@ -71,7 +71,3 @@ double approximateWithInteger(const double x, moose::RNG& rng)
     return xf;
 }
 
-double approximateWithInteger(const double x)
-{
-    return approximateWithInteger(x, moose::rng);
-}

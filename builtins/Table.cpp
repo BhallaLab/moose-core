@@ -59,7 +59,7 @@ const Cinfo* Table::initCinfo()
         "useSpikeMode"
         , "When set to true, look for spikes in a time-series."
         " Normally used for monitoring Vm for action potentials."
-		" Could be used for any thresholded event. Default is False."
+        " Could be used for any thresholded event. Default is False."
         , &Table::setUseSpikeMode
         , &Table::getUseSpikeMode
     );
@@ -254,7 +254,7 @@ void Table::process( const Eref& e, ProcPtr p )
 
     if (useSpikeMode_)
     {
-        for ( vector< double >::const_iterator i = ret.begin(); i != ret.end(); ++i )
+        for ( auto i = ret.begin(); i != ret.end(); ++i )
             spike( *i );
     }
     else
@@ -268,19 +268,12 @@ void Table::process( const Eref& e, ProcPtr p )
     {
         if( fmod(lastTime_, 5.0) == 0.0 || getVecSize() >= 10000 )
         {
-<<<<<<< HEAD
             mergeWithTime( data_ );
-            StreamerBase::writeToOutFile( outfile_, format_ , "a", data_, columns_ );
-            clearAllVecs();
-=======
-            zipWithTime( vec(), data_, lastTime_ );
             StreamerBase::writeToOutFile( outfile_, format_, "a", data_, columns_ );
-            data_.clear();
-            clearVec();
->>>>>>> c5fded807... removed npy support. On large files, it was not working properly. Only
+            clearAllVecs();
+        }
         }
     }
-}
 
 void Table::clearAllVecs()
 {
@@ -302,7 +295,7 @@ void Table::reinit( const Eref& e, ProcPtr p )
     Clock* clk = reinterpret_cast<Clock*>(Id(1).eref().data());
 
     dt_ = clk->getTickDt( numTick );
-	fired_ = false;
+    fired_ = false;
 
     /** Create the default filepath for this table.  */
     if( useFileStreamer_ )
@@ -316,8 +309,8 @@ void Table::reinit( const Eref& e, ProcPtr p )
         // with rootdit as path.
         if( ! outfileIsSet_ )
             setOutfile( rootdir_ +
-                    moose::moosePathToUserPath(tablePath_) + '.' + format_
-                    );
+                        moose::moosePathToUserPath(tablePath_) + '.' + format_
+                      );
     }
 
     input_ = 0.0;
@@ -328,20 +321,13 @@ void Table::reinit( const Eref& e, ProcPtr p )
 
     if (useSpikeMode_)
     {
-<<<<<<< HEAD
-        for (vector<double>::const_iterator i = ret.begin(); i != ret.end(); ++i )
-=======
         for ( auto i = ret.begin(); i != ret.end(); ++i )
->>>>>>> c5fded807... removed npy support. On large files, it was not working properly. Only
             spike( *i );
     }
     else
         vec().insert( vec().end(), ret.begin(), ret.end() );
-<<<<<<< HEAD
 
     tvec_.push_back(lastTime_);
-=======
->>>>>>> c5fded807... removed npy support. On large files, it was not working properly. Only
 
     if( useFileStreamer_ )
     {
@@ -362,27 +348,16 @@ void Table::input( double v )
 
 void Table::spike( double v )
 {
-<<<<<<< HEAD
     if ( fired_ )
     { // Wait for it to go below threshold
-=======
-    // Wait for it to go below threshold
-    if ( fired_ )
-    {
->>>>>>> c5fded807... removed npy support. On large files, it was not working properly. Only
         if ( v < threshold_ )
             fired_ = false;
     }
     else
     {
-<<<<<<< HEAD
         if ( v > threshold_ )
         {
             // wait for it to go above threshold.
-=======
-        if ( v > threshold_ )   // wait for it to go above threshold.
-        {
->>>>>>> c5fded807... removed npy support. On large files, it was not working properly. Only
             fired_ = true;
             vec().push_back( lastTime_ );
         }
@@ -408,7 +383,7 @@ void Table::setFormat( string format )
         format_ = format;
     else
         LOG( moose::warning
-                , "Unsupported format " << format
+             , "Unsupported format " << format
              << " only sv is supported"
            );
 }

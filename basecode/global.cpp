@@ -104,6 +104,11 @@ namespace moose {
         return moose::rng.uniform( );
     }
 
+    double mtrand( double a, double b )
+    {
+        return (b-a) * mtrand() + a; 
+    }
+
     // MOOSE suffixes [0] to all elements to path. Remove [0] with null
     // character whenever possible. For n > 0, [n] should not be touched. Its
     // the user job to take the pain and write the correct path.
