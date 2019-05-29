@@ -112,6 +112,7 @@ void MooseParser::Reinit( )
 void MooseParser::DefineConst( const string& constName, const double value )
 {
     const_map_[constName] = value;
+    symbol_table_.add_constant(constName, value);
 }
 
 void MooseParser::DefineFun1( const string& funcName, double (&func)(double) )
@@ -249,12 +250,19 @@ double MooseParser::Eval( ) const
 {
     if( expr_.empty())
         return 0.0;
-    return expression_();
+    return expression_.value();
 }
 
-Parser::varmap_type MooseParser::GetVar() const
+vector<string> MooseParser::GetVariables() const
 {
-    return var_map_;
+    vector<string> vars;
+    symbol_table_.get_variable_list(vars);
+    return vars;
+}
+
+double variable_ptr MooseParser::GetVar(const string& name) const
+{
+    return symbol_table_.get_variable(name)->ref();
 }
 
 

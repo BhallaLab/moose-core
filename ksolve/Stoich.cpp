@@ -1162,7 +1162,7 @@ void Stoich::installAndUnschedFuncReac( Id func, Id reac )
     unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
     vector< Id > srcPools;
     unsigned int n = ei.element()->getNeighbors( srcPools, funcSrcFinfo);
-    ASSERT_EQ( numSrc, n, "Stoich::installAndUnschedFuncReac" );
+    //ASSERT_EQ( numSrc, n, "Stoich::installAndUnschedFuncReac" );
 
     vector< unsigned int > poolIndex( numSrc, 0 );
     for ( unsigned int i = 0; i < numSrc; ++i )

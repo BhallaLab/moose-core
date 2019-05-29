@@ -179,8 +179,8 @@ const Cinfo *Function::initCinfo()
         &Function::setConst, &Function::getConst);
 
     static ReadOnlyValueFinfo<Function, vector<double>> y(
-        "y", "Variable values received from target fields by requestOut",
-        &Function::getY);
+                "y", "Variable values received from target fields by requestOut",
+                &Function::getY);
 
     static ValueFinfo<Function, string> independent(
         "independent",
@@ -212,13 +212,16 @@ const Cinfo *Function::initCinfo()
         "for the Reinit operation. It also uses ProcInfo. ",
         processShared, sizeof(processShared) / sizeof(Finfo *));
 
-    static Finfo *functionFinfos[] = {
+    static Finfo *functionFinfos[] =
+    {
         &value,       &rate,           &derivative,  &mode,
         &useTrigger,  &doEvalAtReinit, &expr,        &numVars,
         &inputs,      &constants,      &independent, &proc,
-        requestOut(), valueOut(),      rateOut(),    derivativeOut(), };
+        requestOut(), valueOut(),      rateOut(),    derivativeOut(),
+    };
 
-    static string doc[] = {
+    static string doc[] =
+    {
         "Name", "Function", "Author", "Subhasis Ray/Dilawar Singh",
         "Description",
         "General purpose function calculator using real numbers.\n"
@@ -243,7 +246,8 @@ const Cinfo *Function::initCinfo()
         " and connecting the messages should happen in the same order as the"
         " y indices.\n"
         " This class handles only real numbers (C-double). Predefined constants"
-        " are: pi=3.141592..., e=2.718281..."};
+        " are: pi=3.141592..., e=2.718281..."
+    };
 
     static Dinfo<Function> dinfo;
     static Cinfo functionCinfo("Function", Neutral::initCinfo(), functionFinfos,
@@ -335,44 +339,55 @@ void Function::showError(moose::Parser::exception_type &e) const
 void Function::addVariable(const string &name)
 {
     // Names starting with x are variables, everything else is constant.
-    if (name[0] == 'x') {
+    if (name[0] == 'x')
+    {
         size_t index = (size_t)stoull(name.substr(1));
 
         // Only when i of xi is larger than the size of current xs_, we need to
         // resize the container. Fill them with variables.
-        if (index >= xs_.size()) {
+        if (index >= xs_.size())
+        {
             // Equality with index because we cound from 0.
             for (size_t i = xs_.size(); i <= (size_t)index; i++)
+            {
                 xs_.push_back(make_shared<Variable>());
+                parser_->DefineVar(name, &xs_[index]->value);
+            }
         }
 
         // This must be true.
-        if (xs_[index]) {
-            parser_->DefineVar(name, &xs_[index]->value);
-        } else
-            throw runtime_error("Empty Variable.");
+        //if (xs_[index])
+        //    parser_->DefineVar(name, &xs_[index]->value);
+
         numVar_ = xs_.size();
-    } else if (name[0] == 'y') {
+    }
+    else if (name[0] == 'y')
+    {
         size_t index = (size_t)stoull(name.substr(1).c_str());
         // Only when i of xi is larger than the size of current xs_, we need to
         // resize the container.
-        if (index >= ys_.size()) {
+        if (index >= ys_.size())
+        {
             // Equality with index because we cound from 0.
             for (size_t i = ys_.size(); i <= (size_t)index; i++)
                 ys_.push_back(make_shared<double>());
         }
 
         if (ys_[index]) parser_->DefineVar(name, ys_[index].get());
-    } else if (name == "t") {
+    }
+    else if (name == "t")
+    {
         parser_->DefineVar("t", &t_);
-    } else {
+    }
+    else
+    {
         MOOSE_WARN(
             "Got an undefined symbol: "
             << name << endl
             << "Variables must be named xi, yi, where i is integer index."
             << " You must define the constants beforehand using LookupField c: "
-               "c[name]"
-               " = value");
+            "c[name]"
+            " = value");
         throw moose::Parser::ParserException("Undefined constant.");
     }
 }
@@ -423,7 +438,8 @@ void Function::setExpr(const Eref &eref, string expr)
 
 string Function::getExpr(const Eref &e) const
 {
-    if (!valid_) {
+    if (!valid_)
+    {
         cout << "Error: " << e.objId().path()
              << "::getExpr() - invalid parser state" << endl;
         return "";
@@ -468,7 +484,8 @@ double Function::getValue() const
 
 double Function::getRate() const
 {
-    if (!valid_) {
+    if (!valid_)
+    {
         cout << "Error: Function::getValue() - invalid state" << endl;
     }
     return rate_;
@@ -487,7 +504,8 @@ string Function::getIndependent() const
 vector<double> Function::getY() const
 {
     vector<double> ret(ys_.size());
-    for (unsigned int ii = 0; ii < ret.size(); ++ii) {
+    for (unsigned int ii = 0; ii < ret.size(); ++ii)
+    {
         ret[ii] = *ys_[ii];
     }
     return ret;
@@ -496,14 +514,17 @@ vector<double> Function::getY() const
 double Function::getDerivative() const
 {
     double value = 0.0;
-    if (!valid_) {
+    if (!valid_)
+    {
         cout << "Error: Function::getDerivative() - invalid state" << endl;
         return value;
     }
-    moose::Parser::varmap_type variables = parser_->GetVar();
-    moose::Parser::varmap_type::const_iterator item =
-        variables.find(independent_);
-    if (item != variables.end()) {
+
+    auto variables = parser_->GetVariables();
+    auto item = variables.find(independent_);
+
+    if (item != variables.end())
+    {
         try
         {
             value = parser_->Diff(item->second, item->second);
@@ -519,8 +540,8 @@ double Function::getDerivative() const
 void Function::setNumVar(const unsigned int num)
 {
     cerr << "Deprecated: numVar has no effect. MOOSE can infer number of "
-            "variables "
-            " from the expression. " << endl;
+         "variables "
+         " from the expression. " << endl;
 }
 
 unsigned int Function::getNumVar() const
@@ -555,9 +576,11 @@ void Function::setConst(string name, double value)
 double Function::getConst(string name) const
 {
     moose::Parser::varmap_type cmap = parser_->GetConst();
-    if (!cmap.empty()) {
+    if (!cmap.empty())
+    {
         moose::Parser::varmap_type::const_iterator it = cmap.find(name);
-        if (it != cmap.end()) {
+        if (it != cmap.end())
+        {
             return it->second;
         }
     }
@@ -579,26 +602,32 @@ void Function::process(const Eref &e, ProcPtr p)
     for (size_t ii = 0; (ii < databuf.size()) && (ii < ys_.size()); ++ii)
         *ys_[ii] = databuf[ii];
 
-    if (useTrigger_ && value_ < TriggerThreshold) {
+    if (useTrigger_ && value_ < TriggerThreshold)
+    {
         lastValue_ = value_;
         return;
     }
 
-    if (1 == mode_) {
+    if (1 == mode_)
+    {
         valueOut()->send(e, value_);
         lastValue_ = value_;
         return;
     }
-    if (2 == mode_) {
+    if (2 == mode_)
+    {
         derivativeOut()->send(e, getDerivative());
         lastValue_ = value_;
         return;
     }
-    if (3 == mode_) {
+    if (3 == mode_)
+    {
         rateOut()->send(e, rate_);
         lastValue_ = value_;
         return;
-    } else {
+    }
+    else
+    {
         valueOut()->send(e, value_);
         derivativeOut()->send(e, getDerivative());
         rateOut()->send(e, rate_);
@@ -609,9 +638,10 @@ void Function::process(const Eref &e, ProcPtr p)
 
 void Function::reinit(const Eref &e, ProcPtr p)
 {
-    if (!valid_) {
+    if (!valid_)
+    {
         cout << "Error: Function::reinit() - invalid parser state. Will do "
-                "nothing." << endl;
+             "nothing." << endl;
         return;
     }
 
@@ -624,18 +654,23 @@ void Function::reinit(const Eref &e, ProcPtr p)
 
     rate_ = 0.0;
 
-    if (1 == mode_) {
+    if (1 == mode_)
+    {
         valueOut()->send(e, value_);
         return;
     }
-    if (2 == mode_) {
+    if (2 == mode_)
+    {
         derivativeOut()->send(e, 0.0);
         return;
     }
-    if (3 == mode_) {
+    if (3 == mode_)
+    {
         rateOut()->send(e, rate_);
         return;
-    } else {
+    }
+    else
+    {
         valueOut()->send(e, value_);
         derivativeOut()->send(e, 0.0);
         rateOut()->send(e, rate_);

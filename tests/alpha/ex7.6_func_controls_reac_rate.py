@@ -22,6 +22,8 @@ import moose
 import pylab
 import rdesigneur as rd
 
+t = moose.Table2('/a')
+
 
 def makeFuncRate():
     model = moose.Neutral( '/library' )
@@ -33,10 +35,10 @@ def makeFuncRate():
     C = moose.Pool( '/library/chem/compt/C' )
     reac = moose.Reac( '/library/chem/compt/reac' )
     func = moose.Function( '/library/chem/compt/reac/func' )
-    #  func.x.num = 1
     func.expr = "(x0/1e8)^2"
     moose.connect( C, 'nOut', func.x[0], 'input' )
     moose.connect( func, 'valueOut', reac, 'setNumKf' )
+    moose.connect( t, 'requestOut', func, 'getValue' )
     moose.connect( reac, 'sub', A, 'reac' )
     moose.connect( reac, 'prd', B, 'reac' )
 
@@ -51,7 +53,7 @@ makeFuncRate()
 rdes = rd.rdesigneur(
         turnOffElec = True,
         #This subdivides the 50-micron cylinder into 2 micron voxels
-        diffusionLength = 2e-6,
+        diffusionLength = 1e-6,
         cellProto = [['somaProto', 'soma', 5e-6, 50e-6]],
         chemProto = [['chem', 'chem']],
         chemDistrib = [['chem', 'soma', 'install', '1' ]],
@@ -64,4 +66,5 @@ C = moose.element( '/model/chem/dend/C' )
 C.vec.concInit = [ 1+np.sin(x/5.0) for x in range( len(C.vec) ) ]
 moose.reinit()
 moose.start(10)
+print( t.vector )
 rdes.display()

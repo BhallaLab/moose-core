@@ -49,8 +49,6 @@ struct ParserException : public std::exception
 };
 
 typedef ParserException exception_type;
-typedef double value_type;
-typedef map<string, value_type> varmap_type;
 
 }  // namespace Parser
 
@@ -104,12 +102,10 @@ public:
 
     double Eval() const;
 
-    Parser::varmap_type GetVar() const;
+    vector<string> GetVariables() const;
+    double& GetVar(const string& name) const;
 
     double Diff(const double a, const double b) const;
-
-    Parser::varmap_type GetConst() const;
-    Parser::varmap_type GetUsedVar();
 
     void ClearVariables();
     void ClearAll();
@@ -129,9 +125,7 @@ private:
     /* data */
     string expr_;
     double value = 0.0;
-    Parser::varmap_type var_map_;
-    Parser::varmap_type const_map_;
-    Parser::varmap_type used_vars_;
+    map<string, double> const_map_;
 
     /* Map to variable names and pointer to their values. */
     map<string, double*> map_;
