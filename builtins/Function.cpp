@@ -48,13 +48,11 @@
 #include "../basecode/header.h"
 #include "../utility/utility.h"
 #include "../utility/numutil.h"
+#include "../utility/print_function.hpp"
 #include "Variable.h"
 
 #include "Function.h"
 #include "../basecode/ElementValueFinfo.h"
-
-#define PARSER_MAXVARS 100
-
 
 static const double TriggerThreshold = 0.0;
 
@@ -345,12 +343,14 @@ Function::Function(): _t(0.0), _valid(false), _numVar(0), _lastValue(0.0),
     _valid = true;
 }
 
-Function::Function(const Function& rhs): _numVar(rhs._numVar),
+Function::Function(const Function& rhs):
+    _numVar(rhs._numVar),
     _lastValue(rhs._lastValue),
     _value(rhs._value), _rate(rhs._rate),
     _mode(rhs._mode),
     _useTrigger( rhs._useTrigger),
-    _stoich(0)
+    _stoich(0),
+    map_(rhs.map_)
 {
     static Eref er;
     _independent = rhs._independent;
@@ -440,7 +440,7 @@ void Function::_clearBuffer()
 
 void Function::_showError(mu::Parser::exception_type &e) const
 {
-    cout << "Error occurred in parser.\n"
+    cerr << "Error occurred in parser.\n"
          << "Message:  " << e.GetMsg() << "\n"
          << "Formula:  " << e.GetExpr() << "\n"
          << "Token:    " << e.GetToken() << "\n"
@@ -474,7 +474,7 @@ double * _functionAddVar(const char *name, void *data)
     string strname(name);
 
     // Names starting with x are variables, everything else is constant.
-    if (strname[0] == 'x')
+    if (name[0] == 'x')
     {
         int index = atoi(strname.substr(1).c_str());
         if ((unsigned)index >= function->_varbuf.size()){
@@ -488,7 +488,7 @@ double * _functionAddVar(const char *name, void *data)
         }
         ret = &(function->_varbuf[index]->value);
     } 
-    else if (strname[0] == 'y')
+    else if (name[0] == 'y')
     {
         int index = atoi(strname.substr(1).c_str());
         if ((unsigned)index >= function->_pullbuf.size()){
@@ -507,11 +507,11 @@ double * _functionAddVar(const char *name, void *data)
     }
     else 
     {
-        cerr << "Got an undefined symbol: " << name << endl
-             << "Variables must be named xi, yi, where i is integer index."
-	     << " You must define the constants beforehand using LookupField c: c[name]"
+        MOOSE_WARN( "Got an undefined symbol: " << strname << ".\n"
+                << "Variables must be named xi, yi, where i is integer index."
+                << " You must define the constants beforehand using LookupField c: c[name]"
                 " = value"
-             << endl;
+                );
         throw mu::ParserError("Undefined constant.");
     }
 
@@ -741,21 +741,21 @@ void Function::process(const Eref &e, ProcPtr p)
     switch (_mode){
         case 1: {
             valueOut()->send(e, _value);
-            break;
+            return;
         }
         case 2: {
             derivativeOut()->send(e, getDerivative());
-            break;
+            return;
         }
         case 3: {
             rateOut()->send(e, _rate);
-            break;
+            return;
         }
         default: {
             valueOut()->send(e, _value);
             derivativeOut()->send(e, getDerivative());
             rateOut()->send(e, _rate);
-            break;
+            return;
         }
     }
     _lastValue = _value;
@@ -801,13 +801,4 @@ void Function::reinit(const Eref &e, ProcPtr p)
     }
 }
 
-#if 0
-mu::value_type Function::muCallbackFMod( mu::value_type a, mu::value_type b)
-{
-    cerr << "Callback: " << a << " " << b << endl;
-    return fmod(a, b);
-}
-#endif
-
-//
 // Function.cpp ends here

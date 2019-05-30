@@ -4,7 +4,6 @@ project(pymoose)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
-include(FindPkgConfig)
 
 # getgit revision number
 find_program( GIT_EXEC git )
@@ -78,6 +77,7 @@ option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" OFF)
 option(WITH_GSL             "Use gsl-library. Alternative is WITH_BOOST" ON)
 option(PARALLELIZED_CLOCK   "High level parallelization of moose::Clock (alpha)" OFF )
 option(USE_PRIVATE_RNG      "Stochastic Objects use their private RNG" ON)
+option(WITH_ASAN            "Use AddressSanitizer in DEBUG mode." OFF)
 
 
 ############################ BUILD CONFIGURATION #################################
@@ -87,7 +87,7 @@ add_definitions(-DUSE_GENESIS_PARSER)
 
 if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     message(STATUS "Building for Debug/Unit testing")
-    add_definitions(-DDO_UNIT_TESTS)
+    add_definitions(-DDO_UNIT_TESTS -O)
     set(CMAKE_BUILD_TYPE Debug)
 elseif(ENABLE_UNIT_TESTS)
     MESSAGE(STATUS "Enabled Unit tests")
@@ -109,8 +109,14 @@ if(GPROF AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
 endif()
 
-find_package(Threads)
-
+if(WITH_ASAN AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    message(STATUS "Compiling with ASAN")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} \
+        -fno-omit-frame-pointer -fsanitize=leak -fsanitize=address")
+    set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} \
+        -fno-omit-frame-pointer -fsanitize=leak -fsanitize=address")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address")
+endif()
 
 ################################### TARGETS ####################################
 
@@ -131,8 +137,6 @@ endif(WITH_BOOST)
 if(WITH_BOOST_ODE)
     set(WITH_GSL OFF)
 endif(WITH_BOOST_ODE)
-
-include_directories(msg basecode)
 
 set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
@@ -202,6 +206,7 @@ if(WITH_BOOST_ODE)
     list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
 endif(WITH_BOOST_ODE)
 
+find_package( Threads )
 list(APPEND SYSTEM_SHARED_LIBS ${CMAKE_THREAD_LIBS_INIT})
 
 # These libraries could be static of dynamic. We need to discrimate between
@@ -265,6 +270,7 @@ list(APPEND MOOSE_LIBRARIES
     msg
     benchmarks
     shell
+    randnum
     scheduling
     moose_mpi
     biophysics

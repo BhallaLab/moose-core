@@ -67,11 +67,11 @@ def main( nT ):
         y = c.vec.n
         res.append( (np.mean(y), np.std(y)) )
 
-    expected = [(9.0, 0.0), (6.0, 0.0), (5.0, 0.0), (3.0, 0.0), (2.0, 0.0),
-        (2.0, 0.0), (2.0, 0.0), (1.0, 0.0), (1.0, 0.0), (1.0, 0.0)]
-    print(("Time = ", time.time() - t1))
+    expected = [(11.0, 0.0), (6.0, 0.0), (5.0, 0.0), (5.0, 0.0), (3.0, 0.0),
+            (3.0, 0.0), (3.0, 0.0), (3.0, 0.0), (3.0, 0.0), (3.0, 0.0)]
+    print("Time = ", time.time() - t1)
     print( res )
-    assert res == expected
+    assert np.isclose(res, expected, 0.1, 0.1).all(), (res, expected)
 
 if __name__ == '__main__':
     import sys

@@ -53,6 +53,7 @@ class FuncTerm
          */
         double volScale_;
         unsigned int target_; /// Index of the entity to be updated by Func
+
 };
 
 #endif // _FUNC_TERM_H
