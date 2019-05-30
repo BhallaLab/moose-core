@@ -142,6 +142,7 @@ private:
 
     GssaSystem sys_;
 
+    moose::RNG rng_;
     /**
      * Each VoxelPools entry handles all the pools in a single voxel.
      * Each entry knows how to update itself in order to complete

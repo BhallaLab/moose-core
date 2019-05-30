@@ -354,13 +354,8 @@ void Function::addVariable(const string &name)
                 parser_->DefineVar(name, &xs_[index]->value);
             }
         }
-
-        // This must be true.
-        //if (xs_[index])
-        //    parser_->DefineVar(name, &xs_[index]->value);
-
-        numVar_ = xs_.size();
-    }
+        ret = &(function->_varbuf[index]->value);
+    } 
     else if (name[0] == 'y')
     {
         size_t index = (size_t)stoull(name.substr(1).c_str());

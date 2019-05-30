@@ -13,6 +13,7 @@ endif()
 
 IF(WITH_BOOST_ODE)
     include_directories(${Boost_INCLUDE_DIRS})
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/boost-numeric-bindings)
 elseif(WITH_GSL)
     include_directories( ${GSL_INCLUDE_DIRS} )
 endif(WITH_BOOST_ODE)

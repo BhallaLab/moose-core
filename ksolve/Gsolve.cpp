@@ -577,7 +577,6 @@ void Gsolve::reinit( const Eref& e, ProcPtr p )
     for ( auto i = pools_.begin(); i != pools_.end(); ++i )
         i->refreshAtot( &sys_ );
 
-
     // LoadBalancing. Recompute the optimal number of threads.
     size_t nvPools = pools_.size( );
     grainSize_ = (size_t) std::ceil((double)nvPools / (double)numThreads_);
