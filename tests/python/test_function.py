@@ -95,13 +95,13 @@ def test_trig( ):
 
 def test_rand( ):
     moose.seed( 10 )
-    f, t = create_func( 'random', 'rand()')
+    f, t = create_func( 'random', 'rnd()')
     moose.reinit()
     moose.start(1)
-    expected = [0.29876116, 0.49458993, 0.83191136, 0.02517173 
-            , 0.26556613, 0.15037787, 0.81660184, 0.89081653 
-            , 0.03061665, 0.72743551, 0.13145815 ]
-    assert np.isclose(t.vector, expected ).all()
+    expected = [0.49458993, 0.44301495, 0.58332174, 0.70920801, 0.26360285,
+            0.68381843, 0.33607158, 0.19812181, 0.87761494, 0.54088093,
+            0.41366738]
+    assert np.isclose(t.vector, expected ).all(), t.vector
     print( 'Passed test random' )
 
 def test_fmod( ):
