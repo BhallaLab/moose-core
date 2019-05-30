@@ -71,7 +71,7 @@ def example():
     # mode 3 - evaluate rate
     function.mode = 0
     function.independent = 'y0'
-    nsteps = 10000
+    nsteps = 1000
     xarr = np.linspace(0.0, 1.0, nsteps)
     # Stimulus tables allow you to store sequences of numbers which
     # are delivered via the 'output' message at each time step. This
@@ -118,7 +118,7 @@ def example():
     z = function.c['c0'] * np.exp(function.c['c1'] * xarr) * np.cos(yarr) + np.sin(np.arange(len(xarr)) * dt)
     zz = result.vector[1:]
     err = z[1:] - zz[1:]
-    assert (np.abs(err) <= 0.05).all(), err
+    assert (np.abs(err) <= 0.05).all(), err[err > 0.05]
     assert (np.mean(err) <= 0.001), np.mean(err)
 
     if plot_:
@@ -133,8 +133,8 @@ def example():
         # derivatives computed by putting x values in the analytical formula
     dzdy = function.c['c0'] * np.exp(function.c['c1'] * xarr) * (- np.sin(yarr))
     err = np.abs(dzdy - derivative.vector[1:])
-    assert (err < 1e-2).all(), err
-    assert (np.mean(err) < 1e-3), np.mean(err)
+    assert (err < 0.05).all(), (err[err>1e-2])
+    assert (np.mean(err) < 1e-2), np.mean(err)
 
     if plot_:
         plt.plot(yarr, dzdy, 'b--', label='numpy computed')
