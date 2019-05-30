@@ -260,7 +260,7 @@ vector<string> MooseParser::GetVariables() const
     return vars;
 }
 
-double variable_ptr MooseParser::GetVar(const string& name) const
+double& MooseParser::GetVar(const string& name) const
 {
     return symbol_table_.get_variable(name)->ref();
 }
@@ -271,16 +271,11 @@ double MooseParser::Diff( const double a, const double b ) const
     return a-b;
 }
 
-Parser::varmap_type MooseParser::GetConst( ) const
+map<string, double> MooseParser::GetConst( ) const
 {
     return const_map_;
 }
 
-
-Parser::varmap_type MooseParser::GetUsedVar( )
-{
-    return used_vars_;
-}
 
 void MooseParser::ClearVariables( )
 {
@@ -291,7 +286,6 @@ void MooseParser::ClearVariables( )
 void MooseParser::ClearAll( )
 {
     const_map_.clear();
-    var_map_.clear();
     ClearVariables();
 }
 

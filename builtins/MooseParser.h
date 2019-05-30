@@ -70,6 +70,7 @@ public:
      *-----------------------------------------------------------------------------*/
     Parser::symbol_table_t GetSymbolTable() const;
     Parser::expression_t GetExpression() const;
+    map<string, double> GetConst( ) const;
 
     void SetSymbolTable(Parser::symbol_table_t tab);
 

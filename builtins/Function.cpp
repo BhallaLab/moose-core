@@ -354,7 +354,6 @@ void Function::addVariable(const string &name)
                 parser_->DefineVar(name, &xs_[index]->value);
             }
         }
-        ret = &(function->_varbuf[index]->value);
     } 
     else if (name[0] == 'y')
     {
@@ -516,13 +515,13 @@ double Function::getDerivative() const
     }
 
     auto variables = parser_->GetVariables();
-    auto item = variables.find(independent_);
+    auto item = std::find(variables.begin(), variables.end(), independent_);
 
     if (item != variables.end())
     {
         try
         {
-            value = parser_->Diff(item->second, item->second);
+            // value = parser_->Diff(item->second, item->second);
         }
         catch (moose::Parser::exception_type &e)
         {
@@ -570,10 +569,10 @@ void Function::setConst(string name, double value)
 
 double Function::getConst(string name) const
 {
-    moose::Parser::varmap_type cmap = parser_->GetConst();
+    auto cmap = parser_->GetConst();
     if (!cmap.empty())
     {
-        moose::Parser::varmap_type::const_iterator it = cmap.find(name);
+        auto it = cmap.find(name);
         if (it != cmap.end())
         {
             return it->second;

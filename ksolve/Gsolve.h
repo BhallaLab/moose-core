@@ -169,8 +169,6 @@ private:
     /// Flag: True if atot should be updated every clock tick
     bool useClockedUpdate_;
 
-    // private rng.
-    moose::RNG rng_;
 };
 
 #endif	// _GSOLVE_H
