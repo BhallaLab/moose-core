@@ -11,7 +11,9 @@
 #ifndef MOOSEPARSER_H
 #define MOOSEPARSER_H
 
-class MooseParser
+#include "../external/muparser/include/muParser.h"
+
+class MooseParser : public mu::Parser
 {
     public:
         MooseParser();

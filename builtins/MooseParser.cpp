@@ -10,4 +10,9 @@
 
 #include "MooseParser.h"
 
+MooseParser::MooseParser()
+{}
+
+MooseParser::~MooseParser()
+{}
 
