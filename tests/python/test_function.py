@@ -89,8 +89,8 @@ def test_trig( ):
     moose.start( 1 )
     y = t.vector
     print(y)
-    assert np.mean(y) == 0.0
-    assert np.std(y) == 0.0
+    assert np.isclose(np.mean(y),  0.0), np.mean(y)
+    assert np.isclose(np.std(y), 0.0), np.std(y)
     print( 'Passed sin^2 x + cos^x=1' )
 
 def test_rand( ):
