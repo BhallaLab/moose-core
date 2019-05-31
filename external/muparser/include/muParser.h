@@ -107,7 +107,8 @@ namespace mu
     static value_type  Rand2(value_type, value_type, value_type);
 
      // Random number between 0 and 1, non-deterministic seed.
-    static value_type  Rand( value_type  );
+    static value_type  Rand( value_type seed );
+    static value_type  Rnd( );
 
     // Prefix operators
     // !!! Unary Minus is a MUST if you want to use negative signs !!!

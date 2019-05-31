@@ -12,43 +12,12 @@
 // URL:
 // Keywords:
 // Compatibility:
-//
-//
 
-// Commentary:
-//
-// A new version of Func with FieldElements to collect data.
-//
-//
-
-// Change log:
-//
-//
-//
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as
-// published by the Free Software Foundation; either version 3, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; see the file COPYING.  If not, write to
-// the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-// Floor, Boston, MA 02110-1301, USA.
-//
-//
-
-// Code:
 
 #ifndef _MOOSE_FUNCTION_H_
 #define _MOOSE_FUNCTION_H_
 
-#include "../external/muparser/include/muParser.h"
+#include "MooseParser.h"
 
 /**
    Simple function parser and evaluator for MOOSE. This can take a mathematical
@@ -158,7 +127,7 @@ protected:
     map< string, double *> _constbuf;  // for constants
     string _independent; // index of independent variable
 
-    mu::Parser _parser;
+    MooseParser _parser;
 
     void _clearBuffer();
     void _showError(mu::Parser::exception_type &e) const;
