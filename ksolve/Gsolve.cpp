@@ -454,7 +454,6 @@ void Gsolve::process( const Eref& e, ProcPtr p )
         // Block in same order
         size_t tot = 0;
         for (auto& fut : vecFutures) tot += fut.get();
-
         // We have processed all the pools.
         assert( tot >= pools_.size() );
 #else

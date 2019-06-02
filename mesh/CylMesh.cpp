@@ -290,17 +290,17 @@ void CylMesh::setX1( const Eref& e, double v )
 {
 
     size_t numVoxels = (v - x0_) / diffLength_;
+    x1_ = v;
     if( numVoxels > SM_MAX_COLUMNS )
     {
         MOOSE_WARN( "Warn: Too many voxels (" << numVoxels << ") would be created  "
                 << " with current diffusion-length of " << diffLength_ 
                 << "(maximum voxels allowed=" <<  SM_MAX_COLUMNS << "). "
-                << " Rescaling diffLength." );
-        diffLength_ = (v-x0_)/(SM_MAX_COLUMNS-1);
+                << " Rescaling length of compartment." );
+        x1_ = diffLength_ * SM_MAX_COLUMNS;
     }
     vector< double > childConcs;
     getChildConcs( e, childConcs );
-    x1_ = v;
     updateCoords( e, childConcs );
 }
 
