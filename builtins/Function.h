@@ -1,23 +1,9 @@
-// Function.h ---
-//
-// Filename: Function.h
 // Description:
 // Author: Subhasis Ray
-// Maintainer:
-// Created: Fri May 30 19:34:13 2014 (+0530)
-// Version:
-// Last-Updated:
-//           By:
-//     Update #: 0
-// URL:
-// Keywords:
-// Compatibility:
-
 
 #ifndef _MOOSE_FUNCTION_H_
 #define _MOOSE_FUNCTION_H_
 
-#include "MooseParser.h"
 
 /**
    Simple function parser and evaluator for MOOSE. This can take a mathematical
@@ -28,7 +14,7 @@ double *_functionAddVar(const char *name, void *data);
 
 class Function
 {
-  public:
+public:
     static const int VARMAX;
     Function();
     Function(const Function& rhs);
@@ -56,11 +42,11 @@ class Function
     void setMode(unsigned int mode);
     unsigned int getMode() const;
 
-	// set/get flag to use trigger mode.
+    // set/get flag to use trigger mode.
     void setUseTrigger(bool useTrigger);
     bool getUseTrigger() const;
 
-	// set/get flag to do function evaluation at reinit
+    // set/get flag to do function evaluation at reinit
     void setDoEvalAtReinit(bool doEvalAtReinit);
     bool getDoEvalAtReinit() const;
 
@@ -76,24 +62,6 @@ class Function
     vector < double > getY() const;
 
     double getDerivative() const;
-
-#if 0
-    /**
-     * @brief Extend standard muparser library. This add some binary operators
-     * and user-defined functions.
-     */
-    void extendMuParser( void );
-
-    /**
-     * @brief callback function for floating point mod-operator.
-     *
-     * @param a double
-     * @param b double
-     *
-     * @return  double using std::fmod(a, b)
-     */
-    static mu::value_type muCallbackFMod( mu::value_type a, mu::value_type b );
-#endif
 
     Function& operator=(const Function rhs);
 
@@ -130,19 +98,10 @@ protected:
     MooseParser _parser;
 
     void _clearBuffer();
-    void _showError(mu::Parser::exception_type &e) const;
+    void _showError(moose::Parser::exception_type &e) const;
 
     // Used by kinetic solvers when this is zombified.
     char* _stoich;
-
-    // These variables may be redundant but used for interfacing with
-    // MooseParser.
-    map<string, double*> map_;
 };
 
-
 #endif
-
-
-//
-//// Function.h ends here_parser.DefineVar( _T("t"),

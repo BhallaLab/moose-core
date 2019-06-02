@@ -51,7 +51,6 @@ set(SRCS
     Arith.cpp
     Group.cpp
     Mstring.cpp
-    # Func.cpp
     MooseParser.cpp
     Function.cpp
     Variable.cpp
