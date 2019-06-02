@@ -59,20 +59,15 @@ def test( ):
     moose.reinit( )
     [ print_table( x) for x in [tabA, tabB, tabC] ]
     runtime = 1000
-    print( 'Starting moose for %s' % runtime )
+    print( 'Starting moose for %d secs' % runtime )
     moose.start( runtime, 1 )
     print( ' MOOSE is done' )
 
     # Now read the numpy and csv and check the results.
-    a = np.load( '_tables/compt/a/tabA.npy' )
+    a = np.loadtxt( '_tables/compt/a/tabA.csv', skiprows=1 )
     b = np.load( 'table2.npy' )
     c = np.loadtxt( 'tablec.csv', skiprows=1 )
-    print( a )
-    print( b )
-    print( c )
-    print(a['time'])
-    print(b['time'])
-    assert len(a['time']) == len(a['/compt/a/tabA'])
+    assert (len(a) == len(b) == len(c))
 
 def main( ):
     test( )

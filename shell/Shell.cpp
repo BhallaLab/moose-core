@@ -22,6 +22,7 @@
 #include "../msg/OneToAllMsg.h"
 #include "../msg/SparseMsg.h"
 #include "../builtins/SocketStreamer.h"
+#include "../builtins/Streamer.h"
 
 #include "Shell.h"
 #include "Wildcard.h"

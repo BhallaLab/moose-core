@@ -48,42 +48,40 @@
 #include "../basecode/header.h"
 #include "../utility/utility.h"
 #include "../utility/numutil.h"
+#include "../utility/print_function.hpp"
 #include "Variable.h"
 
 #include "Function.h"
 #include "../basecode/ElementValueFinfo.h"
-
-#define PARSER_MAXVARS 100
-
 
 static const double TriggerThreshold = 0.0;
 
 static SrcFinfo1<double> *valueOut()
 {
     static SrcFinfo1<double> valueOut("valueOut",
-                                      "Evaluated value of the function for the current variable values.");
+            "Evaluated value of the function for the current variable values.");
     return &valueOut;
 }
 
 static SrcFinfo1< double > *derivativeOut()
 {
     static SrcFinfo1< double > derivativeOut("derivativeOut",
-                                             "Value of derivative of the function for the current variable values");
+            "Value of derivative of the function for the current variable values");
     return &derivativeOut;
 }
 
 static SrcFinfo1< double > *rateOut()
 {
     static SrcFinfo1< double > rateOut("rateOut",
-                                             "Value of time-derivative of the function for the current variable values");
+            "Value of time-derivative of the function for the current variable values");
     return &rateOut;
 }
 
 static SrcFinfo1< vector < double > *> *requestOut()
 {
     static SrcFinfo1< vector < double > * > requestOut(
-        "requestOut",
-        "Sends request for input variable from a field on target object");
+            "requestOut",
+            "Sends request for input variable from a field on target object");
     return &requestOut;
 
 }
@@ -170,8 +168,9 @@ const Cinfo * Function::initCinfo()
         "max         var.    max of all arguments\n"
         "sum         var.    sum of all arguments\n"
         "avg         var.    mean value of all arguments\n"
+        "rnd         0       rand(), random float between 0 and 1, honors global moose.seed.\n"
         "rand        1       rand(seed), random float between 0 and 1, \n"
-        "                    if seed = -1, then a 'random' seed is created.\n"
+        "                    if seed = -1, then a 'random' seed is used.\n"
         "rand2       3       rand(a, b, seed), random float between a and b, \n"
         "                    if seed = -1, a 'random' seed is created using either\n"
         "                    by random_device or by reading system clock\n"
@@ -237,89 +236,89 @@ const Cinfo * Function::initCinfo()
     // Shared messages
     ///////////////////////////////////////////////////////////////////
     static DestFinfo process( "process",
-                              "Handles process call, updates internal time stamp.",
-                              new ProcOpFunc< Function >( &Function::process ) );
+            "Handles process call, updates internal time stamp.",
+            new ProcOpFunc< Function >( &Function::process ) );
     static DestFinfo reinit( "reinit",
-                             "Handles reinit call.",
-                             new ProcOpFunc< Function >( &Function::reinit ) );
+            "Handles reinit call.",
+            new ProcOpFunc< Function >( &Function::reinit ) );
     static Finfo* processShared[] = { &process, &reinit };
 
     static SharedFinfo proc( "proc",
-                             "This is a shared message to receive Process messages "
-                             "from the scheduler objects."
-                             "The first entry in the shared msg is a MsgDest "
-                             "for the Process operation. It has a single argument, "
-                             "ProcInfo, which holds lots of information about current "
-                             "time, thread, dt and so on. The second entry is a MsgDest "
-                             "for the Reinit operation. It also uses ProcInfo. ",
-                             processShared, sizeof( processShared ) / sizeof( Finfo* )
-                             );
-	/*
-    static DestFinfo trigger( "trigger",
-		"Handles trigger input. Argument is timestamp of event. This is "
-		"compatible with spike events as well as chemical ones. ",
-        new OpFunc1< Function, double >( &Function::trigger ) );
-		*/
+            "This is a shared message to receive Process messages "
+            "from the scheduler objects."
+            "The first entry in the shared msg is a MsgDest "
+            "for the Process operation. It has a single argument, "
+            "ProcInfo, which holds lots of information about current "
+            "time, thread, dt and so on. The second entry is a MsgDest "
+            "for the Reinit operation. It also uses ProcInfo. ",
+            processShared, sizeof( processShared ) / sizeof( Finfo* )
+            );
+    /*
+       static DestFinfo trigger( "trigger",
+       "Handles trigger input. Argument is timestamp of event. This is "
+       "compatible with spike events as well as chemical ones. ",
+       new OpFunc1< Function, double >( &Function::trigger ) );
+       */
 
     static Finfo *functionFinfos[] =
-            {
-                &value,
-                &rate,
-                &derivative,
-                &mode,
-				&useTrigger,
-				&doEvalAtReinit,
-                &expr,
-                &numVars,
-                &inputs,
-                &constants,
-                &independent,
-                &proc,
-                requestOut(),
-                valueOut(),
-                rateOut(),
-                derivativeOut(),
-            };
+    {
+        &value,
+        &rate,
+        &derivative,
+        &mode,
+        &useTrigger,
+        &doEvalAtReinit,
+        &expr,
+        &numVars,
+        &inputs,
+        &constants,
+        &independent,
+        &proc,
+        requestOut(),
+        valueOut(),
+        rateOut(),
+        derivativeOut(),
+    };
 
     static string doc[] =
-            {
-                "Name", "Function",
-                "Author", "Subhasis Ray",
-                "Description",
-                "General purpose function calculator using real numbers.\n"
-                "It can parse mathematical expression defining a function and evaluate"
-                " it and/or its derivative for specified variable values."
-                "You can assign expressions of the form::\n"
-                "\n"
-                "f(c0, c1, ..., cM, x0, x1, ..., xN, y0,..., yP ) \n"
-                "\n"
-                " where `ci`'s are constants and `xi`'s and `yi`'s are variables."
+    {
+        "Name", "Function",
+        "Author", "Subhasis Ray",
+        "Description",
+        "General purpose function calculator using real numbers.\n"
+            "It can parse mathematical expression defining a function and evaluate"
+            " it and/or its derivative for specified variable values."
+            "You can assign expressions of the form::\n"
+            "\n"
+            "f(c0, c1, ..., cM, x0, x1, ..., xN, y0,..., yP ) \n"
+            "\n"
+            " where `ci`'s are constants and `xi`'s and `yi`'s are variables."
 
-                "The constants must be defined before setting the expression and"
-                " variables are connected via messages. The constants can have any"
-                " name, but the variable names must be of the form x{i} or y{i}"
-                "  where i is increasing integer starting from 0.\n"
-                " The variables can be input from other moose objects."
-                " Such variables must be named `x{i}` in the expression and the source"
-                " field is connected to Function.x[i]'s `input` destination field.\n"
-                " In case the input variable is not available as a source field, but is"
-                " a value field, then the value can be requested by connecting the"
-                " `requestOut` message to the `get{Field}` destination on the target"
-                " object. Such variables must be specified in the expression as y{i}"
-                " and connecting the messages should happen in the same order as the"
-                " y indices.\n"
-                " This class handles only real numbers (C-double). Predefined constants"
-                " are: pi=3.141592..., e=2.718281..."
-            };
+            "The constants must be defined before setting the expression and"
+            " variables are connected via messages. The constants can have any"
+            " name, but the variable names must be of the form x{i} or y{i}"
+            "  where i is increasing integer starting from 0.\n"
+            " The variables can be input from other moose objects."
+            " Such variables must be named `x{i}` in the expression and the source"
+            " field is connected to Function.x[i]'s `input` destination field.\n"
+            " In case the input variable is not available as a source field, but is"
+            " a value field, then the value can be requested by connecting the"
+            " `requestOut` message to the `get{Field}` destination on the target"
+            " object. Such variables must be specified in the expression as y{i}"
+            " and connecting the messages should happen in the same order as the"
+            " y indices.\n"
+            " This class handles only real numbers (C-double). Predefined constants"
+            " are: pi=3.141592..., e=2.718281..."
+    };
 
     static Dinfo< Function > dinfo;
     static Cinfo functionCinfo("Function",
-                               Neutral::initCinfo(),
-                               functionFinfos,
-                               sizeof(functionFinfos) / sizeof(Finfo*),
-                               &dinfo,
-                               doc,
-                               sizeof(doc)/sizeof(string));
+            Neutral::initCinfo(),
+            functionFinfos,
+            sizeof(functionFinfos) / sizeof(Finfo*),
+            &dinfo,
+            doc,
+            sizeof(doc)/sizeof(string));
     return &functionCinfo;
 
 }
@@ -345,12 +344,14 @@ Function::Function(): _t(0.0), _valid(false), _numVar(0), _lastValue(0.0),
     _valid = true;
 }
 
-Function::Function(const Function& rhs): _numVar(rhs._numVar),
+Function::Function(const Function& rhs):
+    _numVar(rhs._numVar),
     _lastValue(rhs._lastValue),
     _value(rhs._value), _rate(rhs._rate),
     _mode(rhs._mode),
     _useTrigger( rhs._useTrigger),
-    _stoich(0)
+    _stoich(0),
+    map_(rhs.map_)
 {
     static Eref er;
     _independent = rhs._independent;
@@ -440,7 +441,7 @@ void Function::_clearBuffer()
 
 void Function::_showError(mu::Parser::exception_type &e) const
 {
-    cout << "Error occurred in parser.\n"
+    cerr << "Error occurred in parser.\n"
          << "Message:  " << e.GetMsg() << "\n"
          << "Formula:  " << e.GetExpr() << "\n"
          << "Token:    " << e.GetToken() << "\n"
@@ -474,7 +475,7 @@ double * _functionAddVar(const char *name, void *data)
     string strname(name);
 
     // Names starting with x are variables, everything else is constant.
-    if (strname[0] == 'x')
+    if (name[0] == 'x')
     {
         int index = atoi(strname.substr(1).c_str());
         if ((unsigned)index >= function->_varbuf.size()){
@@ -488,7 +489,7 @@ double * _functionAddVar(const char *name, void *data)
         }
         ret = &(function->_varbuf[index]->value);
     } 
-    else if (strname[0] == 'y')
+    else if (name[0] == 'y')
     {
         int index = atoi(strname.substr(1).c_str());
         if ((unsigned)index >= function->_pullbuf.size()){
@@ -507,11 +508,11 @@ double * _functionAddVar(const char *name, void *data)
     }
     else 
     {
-        cerr << "Got an undefined symbol: " << name << endl
-             << "Variables must be named xi, yi, where i is integer index."
-	     << " You must define the constants beforehand using LookupField c: c[name]"
+        MOOSE_WARN( "Got an undefined symbol: " << strname << ".\n"
+                << "Variables must be named xi, yi, where i is integer index."
+                << " You must define the constants beforehand using LookupField c: c[name]"
                 " = value"
-             << endl;
+                );
         throw mu::ParserError("Undefined constant.");
     }
 
@@ -741,21 +742,21 @@ void Function::process(const Eref &e, ProcPtr p)
     switch (_mode){
         case 1: {
             valueOut()->send(e, _value);
-            break;
+            return;
         }
         case 2: {
             derivativeOut()->send(e, getDerivative());
-            break;
+            return;
         }
         case 3: {
             rateOut()->send(e, _rate);
-            break;
+            return;
         }
         default: {
             valueOut()->send(e, _value);
             derivativeOut()->send(e, getDerivative());
             rateOut()->send(e, _rate);
-            break;
+            return;
         }
     }
     _lastValue = _value;
@@ -801,13 +802,4 @@ void Function::reinit(const Eref &e, ProcPtr p)
     }
 }
 
-#if 0
-mu::value_type Function::muCallbackFMod( mu::value_type a, mu::value_type b)
-{
-    cerr << "Callback: " << a << " " << b << endl;
-    return fmod(a, b);
-}
-#endif
-
-//
 // Function.cpp ends here

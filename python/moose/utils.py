@@ -18,8 +18,6 @@ import re
 
 from moose.moose_constants import *
 from moose.print_utils import *
-from moose.streamer_utils import decode_data
-
 # Print and Plot utilities.
 try:
     from moose.plot_utils import *
@@ -337,6 +335,12 @@ def autoposition(root):
         # been processed before - saves against inadvertent loops.
         stack.extend([childcomp for childcomp in map(moose.element, comp.neighbors['raxial']) if childcomp.z == 0])
     return ret
+
+def loadModel(filename, target,method='ee'):
+    moose.loadModel(filename,target)
+    moose.mooseAddChemSolver(target,method)
+    if moose.exists(target+'/kinetics/info'):
+        moose.element(target+'/kinetics/info').solver = method
 
 def readcell_scrambled(filename, target, method='ee'):
     """A special version for handling cases where a .p file has a line
