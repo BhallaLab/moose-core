@@ -289,18 +289,19 @@ double CylMesh::getR0( const Eref& e ) const
 void CylMesh::setX1( const Eref& e, double v )
 {
 
-    size_t numVoxels = (v - x0_) / diffLength_;
-    if( numVoxels > SM_MAX_COLUMNS )
+    x1_ = v;
+    size_t numVoxels = (x1_ - x0_) / diffLength_;
+    if( numVoxels >= SM_MAX_COLUMNS)
     {
-        MOOSE_WARN( "Warn: Too many voxels (" << numVoxels << ") would be created  "
-                << " with current diffusion-length of " << diffLength_ 
-                << "(maximum voxels allowed=" <<  SM_MAX_COLUMNS << "). "
-                << " Rescaling diffLength." );
-        diffLength_ = (v-x0_)/(SM_MAX_COLUMNS-1);
+        diffLength_ = (x1_-x0_)/(SM_MAX_COLUMNS-1);
+        MOOSE_WARN( "Too many voxels (" << numVoxels << ") would be created"
+                << " for current length " << (x1_ - x0_) << " and diffLength "
+                << diffLength_ << " (maximum " <<  SM_MAX_COLUMNS << " voxels allowed)."
+                << " Rescaling diffLength of compartment to "  << diffLength_ << ". "
+                );
     }
     vector< double > childConcs;
     getChildConcs( e, childConcs );
-    x1_ = v;
     updateCoords( e, childConcs );
 }
 
@@ -399,9 +400,18 @@ vector< double > CylMesh::getCoords( const Eref& e ) const
 
 void CylMesh::setDiffLength( const Eref& e, double v )
 {
+    diffLength_ = v;
+    size_t numVoxels = (size_t) ((x1_-x0_)/diffLength_);
+    if( numVoxels >= SM_MAX_COLUMNS )
+    {
+        x1_ = x0_ + diffLength_ * (SM_MAX_COLUMNS - 1);
+        MOOSE_WARN( "Too many voxels (" << numVoxels << ") would be created  "
+                << "for diffLength of " << diffLength_ 
+                << " (maximum " <<  SM_MAX_COLUMNS << " allowed). "
+                << " Changing compartment length to " << (x1_ - x0_) << ".");
+    }
     vector< double > childConcs;
     getChildConcs( e, childConcs );
-    diffLength_ = v;
     updateCoords( e, childConcs );
 }
 
