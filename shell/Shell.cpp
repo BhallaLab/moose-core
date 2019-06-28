@@ -21,8 +21,11 @@
 #include "../msg/OneToOneMsg.h"
 #include "../msg/OneToAllMsg.h"
 #include "../msg/SparseMsg.h"
-#include "../builtins/SocketStreamer.h"
 #include "../builtins/Streamer.h"
+
+#ifdef UNIX
+#include "../builtins/SocketStreamer.h"
+#endif
 
 #include "Shell.h"
 #include "Wildcard.h"

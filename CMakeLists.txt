@@ -5,6 +5,12 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 
+if(UNIX)
+    add_definitions(-DUNIX)
+else()
+    add_definitions(-DNOT_UNIX)
+endif()
+
 # getgit revision number
 find_program( GIT_EXEC git )
 if(GIT_EXEC)
@@ -17,6 +23,7 @@ else(GIT_EXEC)
     set(GIT_HEAD 'HEAD')
     message(STATUS "Couldn't fetch version from git repo" )
 endif()
+
 
 # If from command line, version info is not passed, use the git to generate a
 # version file. If GIT fails, use the previous known version.
@@ -362,7 +369,7 @@ endif()
 # Save the binary distribution (tar.gz) to PYMOOSE_BDIST_DIR.
 find_package(PythonInterp REQUIRED)
 if(NOT PYMOOSE_BDIST_DIR)
-    set(PYMOOSE_BDIST_DIR ${CMAKE_BINARY_DIR}/bdist)
+    set(PYMOOSE_BDIST_DIR ${CMAKE_CURRENT_BINARY_DIR}/bdist)
 endif( )
 
 # If no one hsa set the PYMOOSE bdist installation directory, use default.
@@ -380,8 +387,7 @@ add_custom_target(bdist ALL DEPENDS  ${PYMOOSE_BDIST_FILE} )
 # Any command using setup.cmake.py must run in the same directory. Use option
 # `--relative` to prefix is aways fixed.
 add_custom_command( OUTPUT ${PYMOOSE_BDIST_FILE}
-    COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py bdist_dumb -p ${_platform}
-        -d ${PYMOOSE_BDIST_DIR} --relative
+    COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py bdist_dumb 
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
     COMMENT "bdist is saved to ${PYMOOSE_BDIST_DIR}"
     VERBATIM
@@ -403,7 +409,7 @@ add_custom_target(copy_pymoose DEPENDS ${PYTHON_SRCS}
     )
 
 add_dependencies( bdist copy_pymoose )
-add_dependencies( copy_pymoose _moose )
+add_dependencies( copy_pymoose moose )
 
 ######################### INSTALL ##############################################
 

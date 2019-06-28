@@ -257,6 +257,7 @@ def mergeChemModel(src,des):
     else:
         print ('\nSource file has no objects to copy(\'%s\')' %(modelA))
         return moose.element('/')
+
 def functionMerge(comptA,comptB,key):
     funcNotallowed, funcExist = [], []
     comptApath = moose.element(comptA[key]).path

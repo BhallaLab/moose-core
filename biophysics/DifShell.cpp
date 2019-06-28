@@ -9,6 +9,7 @@
  **********************************************************************/
 
 #include "../basecode/header.h"
+#include "../utility/numutil.h"
 #include "DifShellBase.h"
 #include "DifShell.h"
 

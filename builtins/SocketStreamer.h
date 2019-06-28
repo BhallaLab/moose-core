@@ -31,6 +31,9 @@
 #define _XOPEN_SOURCE_EXTENDED 1
 
 // cmake should set include path.
+#ifdef WINDOWS
+#include <winsock.h>
+#else
 #include <sys/socket.h>
 #include <sys/poll.h>
 #include <sys/types.h>
@@ -38,6 +41,7 @@
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#endif
 
 // MSG_MORE is not defined in OSX. So stupid!
 #ifndef MSG_MORE

@@ -20,7 +20,10 @@
 #include "../scheduling/Clock.h"
 #include "../utility/utility.h"
 #include "../shell/Shell.h"
+
+#ifdef POSIX_PLATFORM
 #include "SocketStreamer.h"
+#endif
 
 const Cinfo* SocketStreamer::initCinfo()
 {

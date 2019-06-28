@@ -65,9 +65,13 @@ set(SRCS
     Stats.cpp
     Interpol2D.cpp
     SpikeStats.cpp
-    SocketStreamer.cpp
     testBuiltins.cpp
     )
+
+if(UNIX)
+    list(APPEND SRCS SocketStreamer.cpp)
+endif()
+    
 
 if(WITH_NSDF AND HDF5_FOUND)
     list(APPEND SRCS

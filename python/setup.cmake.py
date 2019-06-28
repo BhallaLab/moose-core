@@ -32,7 +32,7 @@ with open( os.path.join( script_dir, 'VERSION'), 'r' ) as f:
     version = f.read( )
 print( 'Got %s from VERSION file' % version )
 
-# importlib is available only for python3. Since we build wheels, prefer .so
+# importlib is available only for python3. For building wheels, prefer .so
 # extension. This way a wheel built by any python3.x will work with any python3.
 suffix = '.so'
 try:
@@ -59,5 +59,5 @@ setup(
                                 ],
         install_requires       = [ 'numpy' ],
         package_dir            = { 'moose' : 'moose', 'rdesigneur' : 'rdesigneur' },
-        package_data           = { 'moose' : ['_moose' + suffix, 'neuroml2/schema/NeuroMLCoreDimensions.xml','chemUtil/rainbow2.pkl'] },
+        package_data           = { 'moose' : ['moose' + suffix, 'neuroml2/schema/NeuroMLCoreDimensions.xml','chemUtil/rainbow2.pkl'] },
         )

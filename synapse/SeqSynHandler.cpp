@@ -10,6 +10,7 @@
 #include <queue>
 #include "../basecode/global.h"
 #include "../basecode/header.h"
+#include "../utility/numutil.h" 
 #include "Synapse.h"
 #include "SynEvent.h"
 #include "SynHandlerBase.h"

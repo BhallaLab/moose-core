@@ -1738,12 +1738,15 @@ PyObject * moose_start(PyObject * dummy, PyObject * args )
         return NULL;
     }
 
+#ifdef UNIX
     // This is from http://stackoverflow.com/questions/1641182/how-can-i-catch-a-ctrl-c-event-c
     struct sigaction sigHandler;
     sigHandler.sa_handler = handle_keyboard_interrupts;
     sigemptyset(&sigHandler.sa_mask);
     sigHandler.sa_flags = 0;
     sigaction(SIGINT, &sigHandler, NULL);
+#endif 
+
     SHELLPTR->doStart( runtime, notify );
     Py_RETURN_NONE;
 }
@@ -3121,7 +3124,7 @@ static struct PyModuleDef MooseModuleDef =
 #define MODINIT(name) init##name()
 #endif
 
-PyMODINIT_FUNC MODINIT(_moose)
+PyMODINIT_FUNC MODINIT(moose)
 {
     clock_t modinit_start = clock();
 

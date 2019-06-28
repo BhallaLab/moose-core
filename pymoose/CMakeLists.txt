@@ -8,7 +8,7 @@ find_package(PythonInterp REQUIRED)
 # Find Numpy
 find_package(NumPy REQUIRED)
 include_directories(${NUMPY_INCLUDE_DIRS})
-add_definitions( -std=c++11 )
+add_definitions(-std=c++11)
 add_definitions(-DUSE_NUMPY)
 add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
 
@@ -39,7 +39,7 @@ set(PYMOOSE_SRCS
 
 # Build python module in source directory and them copy everything to
 # current binary directory using cmake.
-add_library( _moose MODULE ${PYMOOSE_SRCS} )
+add_library(moose MODULE ${PYMOOSE_SRCS} )
 set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../python/moose")
 message(STATUS "Python module will be saved to ${PYMOOSE_OUTPUT_DIRECTORY}" )
 
@@ -60,7 +60,7 @@ else()
          OUTPUT_STRIP_TRAILING_WHITESPACE
          )
      message( STATUS "Python include flags: ${PYTHON_INCLUDE_FLAGS}" )
-     set_target_properties(_moose PROPERTIES
+     set_target_properties(moose PROPERTIES
          COMPILE_DEFINITIONS "PYMOOSE"
          COMPILE_FLAGS "${PYTHON_INCLUDE_FLAGS}"
         )
@@ -69,9 +69,9 @@ endif()
 
 # Remove prefix lib from python module.
 if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
-    set_target_properties(_moose PROPERTIES SUFFIX ${PYTHON_SO_EXTENSION})
+    set_target_properties(moose PROPERTIES SUFFIX ${PYTHON_SO_EXTENSION})
 endif()
-set_target_properties(_moose PROPERTIES
+set_target_properties(moose PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
     PREFIX ""
     SUFFIX ${PYTHON_SO_EXTENSION}
@@ -79,7 +79,7 @@ set_target_properties(_moose PROPERTIES
 
 # see issue #80
 if(HDF5_FOUND AND WITH_NSDF)
-    set_target_properties( _moose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
+    set_target_properties(moose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
 endif()
 
 if(APPLE)
@@ -89,20 +89,20 @@ endif(APPLE)
 
 # cmake --help-policy CMP0042
 if(APPLE)
-    set_target_properties( _moose PROPERTIES MACOSX_RPATH OFF)
+    set_target_properties(moose PROPERTIES MACOSX_RPATH OFF)
 endif(APPLE)
 
 if(APPLE)
-    target_link_libraries( _moose
+    target_link_libraries(moose
         "-Wl,-all_load"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
         )
-    target_link_libraries(_moose
+    target_link_libraries(moose
         ${SYSTEM_SHARED_LIBS}
         )
 else(APPLE)
-    target_link_libraries(_moose
+    target_link_libraries(moose
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
@@ -110,7 +110,14 @@ else(APPLE)
         ${SYSTEM_SHARED_LIBS}
         )
 endif(APPLE)
-add_custom_command(TARGET _moose POST_BUILD
+
+if(MSYS)
+    message(STATUS "Building under MSYS")
+    find_package(PythonLibs REQUIRED)
+    target_link_libraries(moose ${PYTHON_LIBRARIES})
+endif()
+
+add_custom_command(TARGET moose POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan
         "MOOSE python extention is successfully built. Now "
         " Run 'sudo make install' to install it. "
