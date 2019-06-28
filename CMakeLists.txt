@@ -28,13 +28,14 @@ endif()
 # If from command line, version info is not passed, use the git to generate a
 # version file. If GIT fails, use the previous known version.
 if(NOT VERSION_MOOSE)
-    set(VERSION_MOOSE "3.2.0-${GIT_HEAD}")
+    string(TIMESTAMP TODAY "%Y%m%d")
+    set(VERSION_MOOSE "3.2.0.${TODAY}")
 endif()
 
 add_definitions( -DMOOSE_VERSION="${VERSION_MOOSE}")
 message( STATUS "MOOSE Version ${VERSION_MOOSE}" )
 
-# Write VERSION to a file VERSION so that setup.cmake.py can use it.
+# Write VERSION to a file VERSION so that setup.py can use it.
 set(VERSION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/python/VERSION)
 file(WRITE ${VERSION_FILE} ${VERSION_MOOSE} )
 message(STATUS "| Writing ${VERSION_MOOSE} to ${VERSION_FILE}" )
@@ -384,19 +385,25 @@ set(PYMOOSE_BDIST_FILE ${PYMOOSE_BDIST_DIR}/pymoose-${VERSION_MOOSE}.${_platform
 message(STATUS "binary distribution file ${PYMOOSE_BDIST_FILE}")
 add_custom_target(bdist ALL DEPENDS  ${PYMOOSE_BDIST_FILE} )
 
-# Any command using setup.cmake.py must run in the same directory. Use option
-# `--relative` to prefix is aways fixed.
-add_custom_command( OUTPUT ${PYMOOSE_BDIST_FILE}
-    COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py bdist_dumb 
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
-    COMMENT "bdist is saved to ${PYMOOSE_BDIST_DIR}"
-    VERBATIM
-    )
-add_custom_command(TARGET bdist POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E chdir ${PYMOOSE_BDIST_INSTALL_DIR} tar xf ${PYMOOSE_BDIST_FILE}
-    COMMENT "Unarchiving bdist file ${PYMOOSE_BDIST_FILE} to ${PYMOOSE_BDIST_INSTALL_DIR}"
-    VERBATIM
-    )
+if(UNIX)
+    # Any command using setup.py must run in the same directory. Use option
+    # `--relative` to prefix is aways fixed.
+    add_custom_command( OUTPUT ${PYMOOSE_BDIST_FILE}
+        COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_dumb -p ${_platform}
+        -d ${PYMOOSE_BDIST_DIR} --relative
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
+        COMMENT "bdist is saved to ${PYMOOSE_BDIST_DIR}"
+        VERBATIM
+        )
+
+    add_custom_command(TARGET bdist POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E chdir ${PYMOOSE_BDIST_INSTALL_DIR} tar xf ${PYMOOSE_BDIST_FILE}
+        COMMENT "Unarchiving bdist file ${PYMOOSE_BDIST_FILE} to ${PYMOOSE_BDIST_INSTALL_DIR}"
+        VERBATIM
+        )
+else(MSYS)
+
+endif()
 
 # Copy python files from source to current binary directory. Make sure to call
 # this before building bdist.
