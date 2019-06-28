@@ -29,7 +29,7 @@ endif()
 # version file. If GIT fails, use the previous known version.
 if(NOT VERSION_MOOSE)
     string(TIMESTAMP TODAY "%Y%m%d")
-    set(VERSION_MOOSE "3.2.0.${TODAY}")
+    set(VERSION_MOOSE "3.2.dev${TODAY}")
 endif()
 
 add_definitions( -DMOOSE_VERSION="${VERSION_MOOSE}")
@@ -273,11 +273,13 @@ add_subdirectory(synapse)
 add_subdirectory(intfire)
 
 ###################################### LINKING #################################
+# WARN: If library A depends on library B, then library A must appear before
+# library B in the following list.
 list(APPEND MOOSE_LIBRARIES
-    moose_builtins
-    msg
     benchmarks
     shell
+    moose_builtins
+    msg
     randnum
     scheduling
     moose_mpi
@@ -334,10 +336,8 @@ else(APPLE)
 endif(APPLE)
 
 add_dependencies(moose.bin libmoose)
-target_link_libraries(moose.bin moose ${CMAKE_DL_LIBS})
-if( WITH_BOOST )
-    target_link_libraries( moose.bin ${Boost_LIBRARIES} )
-endif( WITH_BOOST )
+target_link_libraries(moose.bin ${MOOSE_LIBRARIES} ${STATIC_LIBRARIES} ${CMAKE_DL_LIBS})
+target_link_libraries(moose.bin ${SYSTEM_SHARED_LIBS} )
 
 
 ######################### BUILD PYMOOSE ########################################
@@ -369,23 +369,25 @@ endif()
 # Target for creating bdist. This is handy for creating bdist for packaging.
 # Save the binary distribution (tar.gz) to PYMOOSE_BDIST_DIR.
 find_package(PythonInterp REQUIRED)
-if(NOT PYMOOSE_BDIST_DIR)
-    set(PYMOOSE_BDIST_DIR ${CMAKE_CURRENT_BINARY_DIR}/bdist)
-endif( )
-
-# If no one hsa set the PYMOOSE bdist installation directory, use default.
-if(NOT PYMOOSE_BDIST_INSTALL_DIR)
-    set(PYMOOSE_BDIST_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/pymoose_bdist_install)
-endif()
-file(MAKE_DIRECTORY ${PYMOOSE_BDIST_INSTALL_DIR})
-
-# We need a custom name for bdist; same on all platform.
-set(_platform "CMAKE" )
-set(PYMOOSE_BDIST_FILE ${PYMOOSE_BDIST_DIR}/pymoose-${VERSION_MOOSE}.${_platform}.tar.gz)
-message(STATUS "binary distribution file ${PYMOOSE_BDIST_FILE}")
-add_custom_target(bdist ALL DEPENDS  ${PYMOOSE_BDIST_FILE} )
 
 if(UNIX)
+
+    if(NOT PYMOOSE_BDIST_DIR)
+        set(PYMOOSE_BDIST_DIR ${CMAKE_CURRENT_BINARY_DIR}/bdist)
+    endif( )
+
+    # If no one hsa set the PYMOOSE bdist installation directory, use default.
+    if(NOT PYMOOSE_BDIST_INSTALL_DIR)
+        set(PYMOOSE_BDIST_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/pymoose_bdist_install)
+    endif()
+    file(MAKE_DIRECTORY ${PYMOOSE_BDIST_INSTALL_DIR})
+
+    # We need a custom name for bdist; same on all platform.
+    set(_platform "CMAKE" )
+    set(PYMOOSE_BDIST_FILE ${PYMOOSE_BDIST_DIR}/pymoose-${VERSION_MOOSE}.${_platform}.tar.gz)
+    message(STATUS "binary distribution file ${PYMOOSE_BDIST_FILE}")
+    add_custom_target(bdist ALL DEPENDS  ${PYMOOSE_BDIST_FILE} )
+
     # Any command using setup.py must run in the same directory. Use option
     # `--relative` to prefix is aways fixed.
     add_custom_command( OUTPUT ${PYMOOSE_BDIST_FILE}
@@ -401,22 +403,23 @@ if(UNIX)
         COMMENT "Unarchiving bdist file ${PYMOOSE_BDIST_FILE} to ${PYMOOSE_BDIST_INSTALL_DIR}"
         VERBATIM
         )
-else(MSYS)
 
-endif()
-
-# Copy python files from source to current binary directory. Make sure to call
-# this before building bdist.
-file(GLOB_RECURSE PYTHON_SRCS "${CMAKE_SOURCE_DIR}/python/*")
-add_custom_target(copy_pymoose DEPENDS ${PYTHON_SRCS}
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    # Copy python files from source to current binary directory. Make sure to call
+    # this before building bdist.
+    file(GLOB_RECURSE PYTHON_SRCS "${CMAKE_SOURCE_DIR}/python/*")
+    add_custom_target(copy_pymoose DEPENDS ${PYTHON_SRCS}
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/python ${CMAKE_CURRENT_BINARY_DIR}/python
-    COMMENT "Copying required python files and other files to build directory"
-    VERBATIM
-    )
+        COMMENT "Copying required python files and other files to build directory"
+        VERBATIM
+        )
 
-add_dependencies( bdist copy_pymoose )
-add_dependencies( copy_pymoose moose )
+    add_dependencies( bdist copy_pymoose )
+    add_dependencies( copy_pymoose moose )
+
+else(MSYS)
+    message(STATUS "Warn: I won't generate install target under MSYS")
+endif()
 
 ######################### INSTALL ##############################################
 
