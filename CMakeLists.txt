@@ -418,7 +418,8 @@ if(UNIX)
     add_dependencies( copy_pymoose moose )
 
 else(MSYS)
-    message(STATUS "Warn: I won't generate install target under MSYS")
+    message(STATUS "Warn: I won't generate install target under MSYS but I'll create a wheel")
+    # see the pymoose/CMakeLists.txt file.
 endif()
 
 ######################### INSTALL ##############################################
@@ -437,7 +438,7 @@ if(${CMAKE_BUILD_TOOL} MATCHES "make")
     message(
         "=======================================\n"
         "If cmake did not report any error, run \n"
-	" 'make' to build  MOOSE \n"
+	    " 'make' to build  MOOSE \n"
         "=======================================\n"
         )
 endif()

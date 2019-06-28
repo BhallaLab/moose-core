@@ -117,12 +117,21 @@ if(MSYS)
     target_link_libraries(moose ${PYTHON_LIBRARIES})
 endif()
 
-add_custom_command(TARGET moose POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan
+if(UNIX)
+    add_custom_command(TARGET moose POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan
         "MOOSE python extention is successfully built. Now "
         " Run 'sudo make install' to install it. "
         " "
         "NOTE: Run 'pip uninstall moose' to uninstall moose."
-    VERBATIM
-    )
-
+        VERBATIM
+        )
+elseif(MSYS)
+    add_custom_command(TARGET moose POST_BUILD 
+        COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_wheel 
+            -p win_amd64 -d ${CMAKE_BINARY_DIR} -q
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/python 
+        COMMENT "Generating wheel"
+        VERBATIM
+        )
+endif()
