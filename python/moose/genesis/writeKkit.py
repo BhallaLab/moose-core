@@ -664,7 +664,8 @@ def getColorCheck(color,GENESIS_COLOR_SEQUENCE):
             index = color
             return index
     elif isinstance(color, tuple):
-        color = [int(x) for x in color[0:3]]
+        #color = [int(x) for x in color[0:3]]
+        color = map(int,color)[0:3]
         index = nearestColorIndex(color, GENESIS_COLOR_SEQUENCE)
         return index
     elif isinstance(color, int):
@@ -691,8 +692,8 @@ def writeCompartment(modelpath,compts,f):
         if compt.name != "kinetics":
             x = xmin+6
             y = ymax+1
-            f.write("simundump group /kinetics/" + compt.name + " 0 " + "blue" + " " + "green"       + " x 0 0 \"\" defaultfile \\\n" )
-            f.write( "  defaultfile.g 0 0 0 " + str(int(x)) + " " + str(int(y)) + " 0\n")
+            #f.write("simundump group /kinetics/" + compt.name + " 0 " + "blue" + " " + "green"       + " x 0 0 \"\" defaultfile \\\n" )
+            #f.write( "  defaultfile.g 0 0 0 " + str(int(x)) + " " + str(int(y)) + " 0\n")
     i = 0
     l = len(compts)
     geometry = ""

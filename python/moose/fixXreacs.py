@@ -188,7 +188,10 @@ def restoreXreacs( basepath ):
                 args = j.split( ' ' )
                 assert( len( args ) == 4 )
                 #_moose.showfield( args[0] )
-                _moose.connect( args[0], args[1], args[2], args[3] )
+                #check to see if object exist before moose.connect, cases where object is deleted but
+                #_xref_ annotation info field still holds the reference
+                if (_moose.exists(args[0]) and _moose.exists(args[2])):
+                    _moose.connect( args[0], args[1], args[2], args[3] )
                 #print( "Reconnecting {}".format( args ) )
                 #_moose.showfield( args[0] )
         restoreOldRates( oldRates, msgs )

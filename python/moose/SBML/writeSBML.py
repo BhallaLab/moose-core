@@ -13,11 +13,14 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Friday May 27 12:19:00 2016(+0530)
 Version
-Last-Updated: Tue 29 Jan 15:15:10 2019(+0530)
+Last-Updated: Thr 18 July 15:15:10 2019(+0530)
           By: HarshaRani
 **********************************************************************/
 /****************************
 2019
+July 18: added a call for autolayout, this was required for cspace model while trying to write from cmd line
+         while writting file, the filepath is checked
+         now even for cplxpool's x and y co-ordinates,diff and motor constant are added
 Jan 29: getColor are taken from chemConnectUtil, group's width and height are written
 2018
 Dec 07: using fixXreac's restoreXreacs function to remove xfer
@@ -49,7 +52,7 @@ import re
 import os
 import moose
 from moose.SBML.validation import validateModel
-from moose.chemUtil.chemConnectUtil import xyPosition,mooseIsInstance,findCompartment,getColor,setupItem
+from moose.chemUtil.chemConnectUtil import xyPosition,mooseIsInstance,findCompartment,getColor,setupItem,setupMeshObj
 from moose.chemUtil.graphUtils import *
 from moose.fixXreacs import restoreXreacs
 import numpy as np
@@ -60,6 +63,21 @@ try:
     foundLibSBML_ = True
 except Exception as e:
     pass
+
+def checkPath( dirName):
+    path = dirName
+    if (dirName == "~" or not dirName ):
+        if dirName:
+            dirName = os.path.expanduser(dirName)
+        else:
+            dirName = os.getcwd()
+    
+    if os.access(dirName, os.W_OK) is not True:
+        dirName = os.getcwd()
+        print(path +" not writable, writting to "+dirName+ " directory")
+        return dirName
+    else:
+        return dirName
 
 def mooseWriteSBML(modelpath, filename, sceneitems={}):
     global foundLibSBML_
@@ -74,6 +92,7 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
 
     #sbmlDoc = SBMLDocument(3, 1)
     filepath, filenameExt = os.path.split(filename)
+    filepath = checkPath(filepath)
     if filenameExt.find('.') != -1:
         filename = filenameExt[:filenameExt.find('.')]
     else:
@@ -188,13 +207,14 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
                 
                 if moose.exists(key.path+'/info'):
                     ginfo = moose.element(key.path+'/info')
+                    textColor,color = getColor(ginfo)
                     if ginfo.height and ginfo.width:
                         grpAnno = grpAnno + "<moose:x>" + str(ginfo.x) + "</moose:x>\n"
                         grpAnno = grpAnno + "<moose:y>" + str(ginfo.y) + "</moose:y>\n"
                         grpAnno = grpAnno + "<moose:width>" + str(ginfo.width) + "</moose:width>\n"
                         grpAnno = grpAnno + "<moose:height>" + str(ginfo.height) + "</moose:height>\n"
                     if ginfo.color:
-                        grpAnno = grpAnno + "<moose:bgColor>" + ginfo.color + "</moose:bgColor>\n"
+                        grpAnno = grpAnno + "<moose:bgColor>" + color + "</moose:bgColor>\n"
                     if ginfo.notes:
                         grpAnno = grpAnno + "<moose:Notes>" + ginfo.notes + "</moose:Notes>\n"
                 grpAnno = grpAnno + "</moose:GroupAnnotation>"
@@ -207,11 +227,16 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
         consistencyMessages = ""
         SBMLok = validateModel(sbmlDoc)
         if (SBMLok):
-            writeTofile = filepath + "/" + filename + '.xml'
+            if filepath != [" ","\/","/"]:
+                writeTofile = filepath + "/" + filename + '.xml'
+            else:
+                writeTofile = filename+'.xml'
+
+            #writeTofile = filepath + "/" + filename + '.xml'
             writeSBMLToFile(sbmlDoc, writeTofile)
             return True, consistencyMessages, writeTofile
         
-        if (not SBMLok):
+        else:
             #cerr << "Errors encountered " << endl
             consistencyMessages = "Errors encountered"
             return -1, consistencyMessages
@@ -952,6 +977,14 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
                 if spename.find(
                         "cplx") != -1 and isinstance(moose.element(spe.parent), moose.EnzBase):
                     enz = spe.parent
+                    if not moose.exists(spe.path+'/info'):
+                        cplxinfo = moose.Annotator(spe.path+'/info')
+                        enzpath = moose.element(spe.parent.path+'/info')
+                        
+                        cplxinfo.x = moose.element(moose.element(spe.parent.path+'/info').x)
+                        
+                        cplxinfo.y = int((moose.element(spe.parent.path+'/info').y))+10
+                 
                     if (moose.element(enz.parent), moose.PoolBase):
                         # print " found a cplx name ",spe.parent,
                         # moose.element(spe.parent).parent
@@ -1036,6 +1069,13 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
                             Anno.textColor + "</moose:textColor>\n"
                     speciAnno = speciAnno + "<moose:diffConstant>" + str(spe.diffConst) + "</moose:diffConstant>\n"
                     speciAnno = speciAnno + "<moose:motorConstant>" + str(spe.motorConst)+ "</moose:motorConstant>\n" 
+                    speciAnno = speciAnno + "</moose:ModelAnnotation>"
+                    s1.setAnnotation(speciAnno)
+                else:
+                    #E.g cplx doesn't have info field but findsim layout expecting diffConstant and motorConstant.
+                    speciAnno = "<moose:ModelAnnotation>\n"
+                    speciAnno = speciAnno + "<moose:diffConstant>" + str(0.0) + "</moose:diffConstant>\n"
+                    speciAnno = speciAnno + "<moose:motorConstant>" + str(0.0)+ "</moose:motorConstant>\n" 
                     speciAnno = speciAnno + "</moose:ModelAnnotation>"
                     s1.setAnnotation(speciAnno)
     return True
@@ -1205,6 +1245,11 @@ def recalculatecoordinates(modelpath, mObjlist,xcord,ycord):
     else:
         srcdesConnection = {}
         setupItem(modelpath,srcdesConnection)
+        meshEntry,xmin,xmax,ymin,ymax,positionInfoExist,sceneitems = setupMeshObj(modelpath)
+        if not positionInfoExist:
+            sceneitems = autoCoordinates(meshEntry,srcdesConnection)
+        sceneitems = autoCoordinates(meshEntry,srcdesConnection)
+
         #print srcdesConnection
         '''
         #meshEntry,xmin,xmax,ymin,ymax,positionInfoExist,sceneitems = setupMeshObj(modelpath)
