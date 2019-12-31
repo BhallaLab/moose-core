@@ -428,7 +428,7 @@ void Dsolve::calcJnChan( const DiffJunction& jn, Dsolve* other, double dt )
             double chanN = chanDv.getN( j->first );
 			// Stick in a conversion factor for the myN and otherN into
 			// concentrations. Note that SI is millimolar.
-            double perm = myChan.permeability * chanN * 1000.0 / NA;
+            double perm = myChan.permeability * chanN / NA;
             myN = integ( myN, perm * myN/j->firstVol,
                          perm * otherN/j->secondVol, dt );
             otherN += lastN - myN;	// Mass consv
@@ -469,7 +469,7 @@ void Dsolve::calcOtherJnChan( const DiffJunction& jn, Dsolve* other, double dt )
             double chanN = chanDv.getN( j->second );
 			// Stick in a conversion factor for the myN and otherN into
 			// concentrations. Note that SI is millimolar.
-            double perm = otherChan.permeability * chanN * 1000.0 / NA;
+            double perm = otherChan.permeability * chanN / NA;
             myN = integ( myN, perm * myN/j->firstVol,
                          perm * otherN/j->secondVol, dt );
             otherN += lastN - myN;	// Mass consv
@@ -508,7 +508,7 @@ void Dsolve::calcLocalChan( double dt )
 				double vol = vols[i];
 				// Stick in a conversion factor for the myN and otherN into
 				// concentrations. Note that SI is millimolar.
-            	double perm = ch->permeability * chanN * 1000.0 / NA;
+            	double perm = ch->permeability * chanN / NA;
             	myN = integ( myN, perm * myN/vol, perm * otherN/vol, dt );
             	otherN += lastN - myN;	// Mass consv
             	if ( otherN < 0.0 )   // Avoid negatives
