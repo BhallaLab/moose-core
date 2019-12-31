@@ -13,10 +13,12 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Thu May 13 10:19:00 2016(+0530)
 Version
-Last-Updated: Sat Jan 19 10:30:00 2019(+0530)
+Last-Updated: Mon Jun 16 10:30:00 2019(+0530)
           By:HarshaRani
 **********************************************************************/
 2019:
+Jun 06: - both compartment name and Id is mapped to the values in comptSbmlidMooseIdMap
+May 23: - check for interger for Assignment expr
 Jan 19: - validator flag is set 'on' from True
          - groupname if missing in the sbml file then groupid is taken, 
          if both are missing then its not a valide sbml file
@@ -149,7 +151,8 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
                     groupInfo  = {}
                     funcDef = {}
                     modelAnnotaInfo = {}
-                    comptSbmlidMooseIdMap = {}
+                    #comptSbmlidMooseIdMap = {}
+                    comptSbmlidMooseIdMap = dict()
                     globparameterIdValue = {}
 
                     mapParameter(model, globparameterIdValue)
@@ -277,7 +280,7 @@ def checkGroup(basePath,model,comptSbmlidMooseIdMap):
                     moosegrpinfo = moose.Annotator(moosegrp.path+'/info')
                     moosegrpinfo.color = groupAnnoInfo["bgColor"]
                 else:
-                    print ("Compartment not found")
+                    print ("Group's compartment not found in xml file")
             if p.getKind() == 2:
                 if p.getId() not in groupInfo:
                     memlists = []
@@ -934,6 +937,7 @@ def getMembers(node, ruleMemlist):
     found = True
     if node == None:
         pass
+
     elif node.getType() == libsbml.AST_POWER:
         pass
     
@@ -1009,6 +1013,12 @@ def getMembers(node, ruleMemlist):
         for i in range (0,node.getNumBvars()):
             ruleMemlist.append(node.getChild(i).getName())
         #funcD[funcName] = {"bvar" : bvar, "MathML":node.getRightChild()}
+
+    elif node.getType() == libsbml.AST_INTEGER:
+        #value is constant
+        #ruleMemlist.append(node.getValue())
+        pass
+    
     elif node.getType() == libsbml.AST_FUNCTION_POWER:
         msg = msg + "\n moose is yet to handle \""+node.getName() + "\" operator"
         found = False
@@ -1104,7 +1114,7 @@ def createRules(model, specInfoMap, globparameterIdValue):
                                     funcId.numVars = numVars + 1
 
                                 elif not(i in globparameterIdValue):
-                                    msg = msg + "check the variable name in mathML, this object neither pool or a constant \"" + i+"\" in assignmentRule " +rule.getVariable()
+                                    msg = msg + "check the variable name in mathML, this object neither pool or a constant \"" + str(i)+"\" in assignmentRule " +rule.getVariable()
 
                                 exp = rule.getFormula()
                                 exprOK = True
@@ -1437,9 +1447,11 @@ def createCompartment(basePath, model, comptSbmlidMooseIdMap):
                 mooseCmptId = moose.CubeMesh(basePath.path+'/'+name)
             
             mooseCmptId.volume = (msize * unitfactor)
-    
-            comptSbmlidMooseIdMap[sbmlCmptId] = {
-                "MooseId": mooseCmptId, "spatialDim": dimension, "size": msize}
+            #both compartment name and Id is mapped to the values
+            comptSbmlidMooseIdMap.update(dict.fromkeys([sbmlCmptId,name], {"MooseId": mooseCmptId, "spatialDim": dimension, "size": msize}))
+
+            #comptSbmlidMooseIdMap[sbmlCmptId] = {
+            #    "MooseId": mooseCmptId, "spatialDim": dimension, "size": msize}
         
         for key,value in endo_surr.items():
             if value in comptSbmlidMooseIdMap:
