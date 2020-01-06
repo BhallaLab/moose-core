@@ -947,8 +947,8 @@ void Stoich::resizeArrays()
     N_.setSize( totNumPools, totNumRates );
     if ( kinterface_ )
         kinterface_->setNumPools( totNumPools );
-    if ( dinterface_ ) // Only set up var pools managed locally.
-        dinterface_->setNumPools( varPoolVec_.size() );
+    if ( dinterface_ ) // Need to set both the numVar and numTot
+        dinterface_->setNumVarTotPools( varPoolVec_.size(), totNumPools );
 }
 
 /// Calculate sizes of all arrays, and allocate them.

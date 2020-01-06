@@ -46,6 +46,7 @@ public:
      */
     void setNumPools( unsigned int num ); /// Inherited.
     unsigned int getNumPools() const; /// Inherited.
+    void setNumVarTotPools( unsigned int var, unsigned int tot );//Inherited
     VoxelPoolsBase* pools( unsigned int i ); /// Inherited.
     double volume( unsigned int i ) const;
 

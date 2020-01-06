@@ -460,6 +460,9 @@ class rdesigneur:
         stimObj = []
         for i in dendCompts + spineCompts:
             vclamp = make_vclamp( name = 'vclamp', parent = i.path )
+
+            # Assume SI units. Scale by Cm to get reasonable gain.
+            vclamp.gain = i.Cm * 1e4 
             moose.connect( i, 'VmOut', vclamp, 'sensedIn' )
             moose.connect( vclamp, 'currentOut', i, 'injectMsg' )
             stimObj.append( vclamp )
@@ -1267,6 +1270,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             #print( "SortedClist= {}".format( sortedComptList[i] ))
             if sortedComptList[i].name != sortedNames[i]:
                 sortedComptList[i].name = sortedNames[i]
+            #print( "SortedClist= {}     {}".format( sortedNames[i], sortedComptList[i].volume ))
         return sortedComptList
 
 
