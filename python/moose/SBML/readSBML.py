@@ -18,7 +18,7 @@ Last-Updated: Mon Jun 16 10:30:00 2019(+0530)
 **********************************************************************/
 2019:
 Jun 06: - both compartment name and Id is mapped to the values in comptSbmlidMooseIdMap
-May 23: - check for interger for Assignment expr
+May 23: - checking for integer in Assignment expr
 Jan 19: - validator flag is set 'on' from True
          - groupname if missing in the sbml file then groupid is taken, 
          if both are missing then its not a valide sbml file
@@ -935,6 +935,7 @@ def unitsforRates(model):
 def getMembers(node, ruleMemlist):
     msg = ""
     found = True
+
     if node == None:
         pass
 
@@ -942,17 +943,9 @@ def getMembers(node, ruleMemlist):
         pass
     
     elif node.getType() == libsbml.AST_FUNCTION:
-        #print " function"
-        #funcName = node.getName()
-        #funcValue = []
-        #functionfound = False
         for i in range(0,node.getNumChildren()):
-            #functionfound = True
-            #print " $$ ",node.getChild(i).getName()
-            #funcValue.append(node.getChild(i).getName())
             getMembers(node.getChild(i),ruleMemlist)
-        #funcKL[node.getName()] = funcValue
-
+    
     elif node.getType() == libsbml.AST_PLUS:
         #print " plus ", node.getNumChildren()
         if node.getNumChildren() == 0:
@@ -996,7 +989,6 @@ def getMembers(node, ruleMemlist):
         for i in range(1, node.getNumChildren()):
             # Multiplication
             getMembers(node.getChild(i), ruleMemlist)
-
     elif node.getType() == libsbml.AST_LAMBDA:
         #In lambda get Bvar values and getRighChild which will be kineticLaw
         if node.getNumChildren() == 0:
@@ -1013,15 +1005,15 @@ def getMembers(node, ruleMemlist):
         for i in range (0,node.getNumBvars()):
             ruleMemlist.append(node.getChild(i).getName())
         #funcD[funcName] = {"bvar" : bvar, "MathML":node.getRightChild()}
-
     elif node.getType() == libsbml.AST_INTEGER:
         #value is constant
         #ruleMemlist.append(node.getValue())
         pass
-    
+
     elif node.getType() == libsbml.AST_FUNCTION_POWER:
         msg = msg + "\n moose is yet to handle \""+node.getName() + "\" operator"
         found = False
+    
     elif node.getType() == libsbml.AST_FUNCTION_PIECEWISE:
         #print " piecewise ", libsbml.formulaToL3String(node)
         msg = msg + "\n moose is yet to handle \""+node.getName() + "\" operator"
@@ -1037,7 +1029,6 @@ def getMembers(node, ruleMemlist):
             getMembers(rchild, ruleMemlist)
         '''
     else:
-        #print(" this case need to be handled", node.getName())
         msg = msg + "\n moose is yet to handle \""+node.getName() + "\" operator"
         found = False
     # if len(ruleMemlist) > 2:
@@ -1122,7 +1113,6 @@ def createRules(model, specInfoMap, globparameterIdValue):
                             for mem in ruleMemlist:
                                 if (mem in specInfoMap):
                                     #exp1 = exp.replace(mem, str(speFunXterm[mem]))
-                                    #print " mem ",mem, "$ ", speFunXterm[mem], "$$ ",exp
                                     exp1 = re.sub(r'\b%s\b'% (mem), speFunXterm[mem], exp)
                                     exp = exp1
                                 elif(mem in globparameterIdValue):
@@ -1449,10 +1439,8 @@ def createCompartment(basePath, model, comptSbmlidMooseIdMap):
             mooseCmptId.volume = (msize * unitfactor)
             #both compartment name and Id is mapped to the values
             comptSbmlidMooseIdMap.update(dict.fromkeys([sbmlCmptId,name], {"MooseId": mooseCmptId, "spatialDim": dimension, "size": msize}))
-
             #comptSbmlidMooseIdMap[sbmlCmptId] = {
             #    "MooseId": mooseCmptId, "spatialDim": dimension, "size": msize}
-        
         for key,value in endo_surr.items():
             if value in comptSbmlidMooseIdMap:
                 endomesh = comptSbmlidMooseIdMap[key]["MooseId"]
