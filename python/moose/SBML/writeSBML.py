@@ -97,6 +97,7 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
         filename = filenameExt[:filenameExt.find('.')]
     else:
         filename = filenameExt
+    
     # validatemodel
     sbmlOk = False
     global spe_constTrue
@@ -231,7 +232,6 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
                 writeTofile = filepath + "/" + filename + '.xml'
             else:
                 writeTofile = filename+'.xml'
-
             #writeTofile = filepath + "/" + filename + '.xml'
             writeSBMLToFile(sbmlDoc, writeTofile)
             return True, consistencyMessages, writeTofile
@@ -1027,6 +1027,7 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
                     s1.setConstant(False)
                 s1.setUnits("substance")
                 s1.setHasOnlySubstanceUnits(False)
+
                 if moose.exists(spe.path + '/info'):
                     Anno = moose.Annotator(spe.path + '/info')
                     if Anno.notes != "":
@@ -1067,6 +1068,7 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
                     if Anno.textColor:
                         speciAnno = speciAnno + "<moose:textColor>" + \
                             Anno.textColor + "</moose:textColor>\n"
+                    
                     speciAnno = speciAnno + "<moose:diffConstant>" + str(spe.diffConst) + "</moose:diffConstant>\n"
                     speciAnno = speciAnno + "<moose:motorConstant>" + str(spe.motorConst)+ "</moose:motorConstant>\n" 
                     speciAnno = speciAnno + "</moose:ModelAnnotation>"
@@ -1247,6 +1249,7 @@ def recalculatecoordinates(modelpath, mObjlist,xcord,ycord):
         setupItem(modelpath,srcdesConnection)
         meshEntry,xmin,xmax,ymin,ymax,positionInfoExist,sceneitems = setupMeshObj(modelpath)
         if not positionInfoExist:
+
             sceneitems = autoCoordinates(meshEntry,srcdesConnection)
         sceneitems = autoCoordinates(meshEntry,srcdesConnection)
 
@@ -1256,7 +1259,7 @@ def recalculatecoordinates(modelpath, mObjlist,xcord,ycord):
         #if not positionInfoExist:
             #cmin,cmax,sceneitems = autoCoordinates(meshEntry,srcdesConnection)
             sceneitems = autoCoordinates(meshEntry,srcdesConnection)
-        '''
+	'''        
 def writeUnits(cremodel_):
     unitVol = cremodel_.createUnitDefinition()
     unitVol.setId("volume")
