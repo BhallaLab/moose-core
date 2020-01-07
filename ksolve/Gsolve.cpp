@@ -1018,6 +1018,10 @@ void Gsolve::setNumPools( unsigned int numPoolSpecies )
     }
 }
 
+void Gsolve::setNumVarTotPools( unsigned int var, unsigned int tot ) {
+	setNumPools( tot );
+}
+
 unsigned int Gsolve::getNumPools() const
 {
     if ( pools_.size() > 0 )
