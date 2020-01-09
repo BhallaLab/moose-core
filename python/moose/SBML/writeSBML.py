@@ -13,10 +13,13 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Friday May 27 12:19:00 2016(+0530)
 Version
-Last-Updated: Thr 18 July 15:15:10 2019(+0530)
+Last-Updated: Wed 8 Jan 14:15:10 2020(+0530)
           By: HarshaRani
 **********************************************************************/
 /****************************
+2020
+Jan 08: added function to write Concchannel in form of MMenz
+        Km in the kinetic law for MMenz is written to the power based on the number of substrate
 2019
 July 18: added a call for autolayout, this was required for cspace model while trying to write from cmd line
          while writting file, the filepath is checked
@@ -164,6 +167,7 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
     if modelAnno:
         cremodel_.setAnnotation(modelAnno)
     groupInfo = {}
+    reacGroup = {}
     compterrors =""
     compartexist, groupInfo,compterrors = writeCompt(modelpath, cremodel_)
     
@@ -171,8 +175,9 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
         species = writeSpecies( modelpath,cremodel_,sbmlDoc,sceneitems,groupInfo)
         if species:
             writeFunc(modelpath, cremodel_)
-        reacGroup = {}
         
+        writeChannel(modelpath,cremodel_,sceneitems,groupInfo)
+
         writeReac(modelpath, cremodel_, sceneitems,groupInfo)
         
         writeEnz(modelpath, cremodel_, sceneitems,groupInfo)
@@ -245,7 +250,102 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
             return False, compterrors
         else:
             return False,"Atleast one compartment should exist to write SBML"
-    
+
+def writeChannel(modelpath, cremodel_, sceneitems,groupInfo):
+    for chan in moose.wildcardFind(modelpath + '/##[0][ISA=ConcChan]'):
+        chanannoexist = False
+        chanGpnCorCol = " "
+        cleanChanname = convertSpecialChar(chan.name)
+        compt = ""
+        notesE = ""
+        groupName = moose.element("/")
+
+        if moose.exists(chan.path + '/info'):
+            Anno = moose.Annotator(chan.path + '/info')
+            notesE = Anno.notes
+            element = moose.element(chan)
+            ele = getGroupinfo(element)
+            ele = findGroup_compt(element)
+            chanAnno = " "
+            if ele.className == "Neutral" or sceneitems or Anno.x or Anno.y:
+                    chanannoexist = True
+            if chanannoexist:
+                chanAnno = "<moose:ModelAnnotation>\n"
+                if ele.className == "Neutral":
+                    groupName = ele
+                if sceneitems:
+                    #Saved from GUI, then scene co-ordinates are passed
+                    chanGpnCorCol = chanGpnCorCol + "<moose:xCord>" + \
+                            str(sceneitems[chan]['x']) + "</moose:xCord>\n" + \
+                            "<moose:yCord>" + \
+                            str(sceneitems[chan]['y'])+ "</moose:yCord>\n"
+                else:
+                    #Saved from cmdline,genesis coordinates are kept as its
+                    # SBML, cspace, python, then auto-coordinates are done
+                    #and coordinates are updated in moose Annotation field
+                    chanGpnCorCol = chanGpnCorCol + "<moose:xCord>" + \
+                            str(Anno.x) + "</moose:xCord>\n" + \
+                            "<moose:yCord>" + \
+                            str(Anno.y)+ "</moose:yCord>\n"
+                chanGpnCorCol = chanGpnCorCol+"<moose:Permeability>"+str(chan.permeability)+"</moose:Permeability>\n"
+        chanSub = chan.neighbors["in"]
+        chanPrd = chan.neighbors["out"]
+        if (len(chanSub) != 0 and len(chanPrd) != 0):
+            chanCompt = findCompartment(chan)
+            if not isinstance(moose.element(chanCompt), moose.ChemCompt):
+                return -2
+            else:
+                compt = chanCompt.name + "_" + \
+                    str(chanCompt.getId().value) + "_" + \
+                    str(chanCompt.getDataIndex()) + "_"
+  
+            channel = cremodel_.createReaction()
+            if notesE != "":
+                cleanNotesE = convertNotesSpecialChar(notesE)
+                notesStringE = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t" + \
+                    cleanNotesE + "\n\t </body>"
+                channel.setNotes(notesStringE)
+
+            chansetId = str(idBeginWith(cleanChanname +
+                                         "_" +
+                                         str(chan.getId().value) +
+                                         "_" +
+                                         str(chan.getDataIndex()) +
+                                         "_"))
+            channel.setId(chansetId)
+            
+            if groupName != moose.element('/'):
+                if groupName not in groupInfo:
+                    groupInfo[groupName]=[chansetId]
+                else:
+                    groupInfo[groupName].append(chansetId)
+
+            channel.setName(str(idBeginWith(convertSpecialCharshot(chan.name))))
+            channel.setReversible(True)
+            channel.setFast(False)        
+            if chanannoexist:
+                canAnno = chanAnno + chanGpnCorCol
+                chanAnno = "<moose:ConcChannel>\n" + \
+                    chanGpnCorCol + "</moose:ConcChannel>"
+                channel.setAnnotation(chanAnno)
+            noofSub, sRateLawS = getSubprd(cremodel_, False, "sub", chanSub)
+            # Modifier
+            chanMod = chan.neighbors["setNumChan"]
+            noofMod, sRateLawM = getSubprd(cremodel_, False, "enz", chanMod)
+            
+            noofPrd, sRateLawP = getSubprd(cremodel_, False, "prd", chanPrd)
+            
+            kl = channel.createKineticLaw()
+            
+            fRate_law = compt + " * ( Permeability) * " + sRateLawM + " * (" + sRateLawS+ " - " + sRateLawP  +")"
+            kl.setFormula(fRate_law)
+            kl.setNotes(
+                "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" +
+                fRate_law +
+                "\n \t </body>")
+            
+            channelUnit = permeablUnit(cremodel_)
+            printParameters(kl, "Permeability", chan.permeability, channelUnit)    
 def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
     for enz in moose.wildcardFind(modelpath + '/##[0][ISA=EnzBase]'):
         enzannoexist = False
@@ -535,8 +635,14 @@ def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
                 enzPrd = enz.neighbors["prd"]
                 noofPrd, sRateLawP = getSubprd(cremodel_, False, "prd", enzPrd)
                 kl = enzyme.createKineticLaw()
-                fRate_law = compt + " * ( kcat * " + sRateLawS + " * " + sRateLawM + \
-                    " / ( Km" + " + " + sRateLawS + "))"
+                #rate_law = clean_name + "^" + str(count)
+                fRate_law = compt + " * ( kcat * " + sRateLawS + " * " + sRateLawM + "/(Km"
+                
+                if len(enzSub) > 1:
+                    fRate_law = fRate_law +"^" +str(len(enzSub))  
+                    print("enzyme ",enzyme.name, "number of substrate is greater than 1, kinetics Law Km is written to the power of substrate assumed that km value is factored")
+                fRate_law = fRate_law +" + " + sRateLawS + "))"
+
                 kl.setFormula(fRate_law)
                 kl.setNotes(
                     "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" +
@@ -553,6 +659,38 @@ def printParameters(kl, k, kvalue, unit):
     para.setId(str(idBeginWith(k)))
     para.setValue(kvalue)
     para.setUnits(unit)
+
+def permeablUnit(cremodel_):
+    unit_stream = "litre_per_mmole_per_second"
+    lud = cremodel_.getListOfUnitDefinitions()
+    flag = False
+    for i in range(0, len(lud)):
+        ud = lud.get(i)
+        if (ud.getId() == unit_stream):
+            flag = True
+            break
+    if (not flag):
+        unitdef = cremodel_.createUnitDefinition()
+        unitdef.setId(unit_stream)
+        
+        unit = unitdef.createUnit()
+        unit.setKind(UNIT_KIND_LITRE)
+        unit.setExponent(1)
+        unit.setMultiplier(1)
+        unit.setScale(0)
+
+        unit = unitdef.createUnit()
+        unit.setKind(UNIT_KIND_MOLE)
+        unit.setExponent(-1)
+        unit.setMultiplier(1)
+        unit.setScale(-3)
+        
+        unit = unitdef.createUnit()
+        unit.setKind(UNIT_KIND_SECOND)
+        unit.setExponent(-1)
+        unit.setMultiplier(1)
+        unit.setScale(0)
+    return unit_stream
 
 def KmUnit(cremodel_):
     unit_stream = "mmole_per_litre"
@@ -647,7 +785,7 @@ def getSubprd(cremodel_, mobjEnz, type, neighborslist):
             rate_law = processRateLaw(
                 reacPrdCou, cremodel_, noofPrd, "prd", mobjEnz)
             return len(reacPrd), rate_law
-    elif type == "enz":
+    elif type == "enz"  or type == "chan":
         enzModifier = neighborslist
         enzModCou = Counter(enzModifier)
         noofMod = len(enzModCou)
