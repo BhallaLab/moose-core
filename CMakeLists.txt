@@ -1,14 +1,5 @@
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-
-if(COMMAND cmake_policy)
-    cmake_policy(SET CMP0003 NEW)
-    cmake_policy(SET CMP0004 OLD)
-    if(POLICY CMP0050)
-        cmake_policy(SET CMP0050 OLD)
-    endif(POLICY CMP0050)
-endif(COMMAND cmake_policy)
-
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 project(MOOSE)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
@@ -98,6 +89,7 @@ option(DEBUG "Build with debug support" OFF)
 option(GPROF "Build for profiling using gprof" OFF)
 option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
+option(WITH_PYTHON2 "Build native python2 extension" OFF)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_BOOST "Use boost library instead of GSL" OFF)
 option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
@@ -392,9 +384,13 @@ endif( WITH_BOOST )
 
 ######################### BUILD PYMOOSE ########################################
 # Root of all python module.
-if(WITH_PYTHON)
-    add_subdirectory( pymoose )
-endif(WITH_PYTHON)
+if(WITH_PYTHON2)
+    find_package(Python2 COMPONENTS Interpreter Development)
+    add_subdirectory(pymoose)
+elseif(WITH_PYTHON)
+    find_package(Python3 COMPONENTS Interpreter Development)
+    add_subdirectory(pymoose)
+endif()
 
 ######################### INSTALL ##############################################
 

@@ -44,6 +44,7 @@
 #include <cstring>
 #include <map>
 #include <ctime>
+#include <cstring>
 #include <csignal>
 #include <exception>
 
@@ -2717,15 +2718,18 @@ int defineDestFinfos(const Cinfo * cinfo)
         // if (name.find("get") == 0 || name.find("set") == 0){
         //     continue;
         // }
-        PyGetSetDef destFieldGetSet;
+        PyGetSetDef destFieldGetSet = {.name = name.c_str(), .doc="Destination field" };
         vec.push_back(destFieldGetSet);
 
-        vec[currIndex].name = (char*)calloc(name.size() + 1, sizeof(char));
-        strncpy(vec[currIndex].name,
-                const_cast<char*>(name.c_str()),
-                name.size());
-
-        vec[currIndex].doc = (char*) "Destination field";
+        // Dilawar: 
+        // strncpy can not write to const char* especially with clang++.
+        // Ref: https://docs.python.org/3/c-api/structures.html#c.PyGetSetDef 
+        //vec[currIndex].name = (char*)calloc(name.size() + 1, sizeof(char));
+        //strncpy(vec[currIndex].name,
+        //        const_cast<char*>(name.c_str()),
+        //        name.size());
+        // vec[currIndex].doc = (char*) "Destination field";
+        
         vec[currIndex].get = (getter)moose_ObjId_get_destField_attr;
         PyObject * args = PyTuple_New(1);
         if (args == NULL)

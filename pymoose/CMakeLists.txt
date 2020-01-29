@@ -10,34 +10,32 @@ set(PYMOOSE_SRCS
     test_moosemodule.cpp 
     PyRun.cpp
     )
+
+if(WITH_PYTHON2)
+    include_directories(${Python_NumPy_INCLUDE_DIRS} ${Python2_INCLUDE_DIRS})
+    execute_process(
+        COMMAND ${Python2_EXECUTABLE} -c "import numpy; print(numpy.get_include())"
+        OUTPUT_VARIABLE Python_NumPy_INCLUDE_DIRS
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+elseif(WITH_PYTHON)
+    execute_process(
+        COMMAND ${Python3_EXECUTABLE} -c "import numpy; print(numpy.get_include())"
+        OUTPUT_VARIABLE Python_NumPy_INCLUDE_DIRS
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    include_directories(${Python_NumPy_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS})
+endif()
+
+message(STATUS "NumPy include path: ${Python_NumPy_INCLUDE_DIRS}")
+
 add_library( _moose MODULE ${PYMOOSE_SRCS} )
-
 set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
-EXEC_PROGRAM(${PYTHON_EXECUTABLE}
-    ARGS "-c 'try: import importlib.machinery; print(importlib.machinery.EXTENSION_SUFFIXES[0])
-except Exception: pass'"
-    OUTPUT_VARIABLE PYTHON_SO_EXTENSION
-    )
-message( STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
 
-find_package(NumPy REQUIRED)
-include_directories(${NUMPY_INCLUDE_DIRS})
 add_definitions(-DUSE_NUMPY)
-
 add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
+target_include_directories(_moose PRIVATE ${Python_INCLUDE_DIRS})
 
-execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --includes
-    OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --libs
-    OUTPUT_VARIABLE PYTHON_LIBRARIES
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-message( STATUS "Python include flags: ${PYTHON_INCLUDE_FLAGS}" )
 set_target_properties(_moose PROPERTIES 
     COMPILE_DEFINITIONS "PYMOOSE"
-    COMPILE_FLAGS "${PYTHON_INCLUDE_FLAGS}"
     LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
     PREFIX ""
     SUFFIX ".so"

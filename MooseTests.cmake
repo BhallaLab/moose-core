@@ -1,7 +1,5 @@
 ENABLE_TESTING()
 
-FIND_PACKAGE(PythonInterp REQUIRED)
-
 # If CTEST_OUTPUT_ON_FAILURE environment variable is set, the output is printed
 # onto the console if a test fails.
 SET(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
@@ -13,7 +11,12 @@ ADD_TEST(NAME moose.bin-raw-run
 
 # Configure tests here.
 set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)
-set(TEST_COMMAND ${PYTHON_EXECUTABLE})
+if(WITH_PYTHON2)
+    set(TEST_COMMAND ${Python2_EXECUTABLE})
+elseif(WITH_PYTHON)
+    set(TEST_COMMAND ${Python3_EXECUTABLE})
+endif()
+
 if(WITH_MPI)
     SET(TEST_COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 4
         ${MPIEXEC_PREFLAGS} ${PYTHON_EXECUTABLE} ${MPIEXEC_POSTFLAGS}
