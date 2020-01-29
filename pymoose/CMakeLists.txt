@@ -33,6 +33,7 @@ add_definitions(-DUSE_NUMPY)
 add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
 target_include_directories(_moose PRIVATE ${Python_INCLUDE_DIRS})
 
+set(PYTHON_SO_EXTENSION ".so")
 set_target_properties(_moose PROPERTIES 
     COMPILE_DEFINITIONS "PYMOOSE"
     LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
@@ -40,10 +41,6 @@ set_target_properties(_moose PROPERTIES
     SUFFIX ${PYTHON_SO_EXTENSION}
     )
 
-if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
-    set_target_properties(_moose PROPERTIES
-    SUFFIX ${PYTHON_SO_EXTENSION})
-endif()
 
 # see issue #80
 if(HDF5_LIBRARY_DIRS)
