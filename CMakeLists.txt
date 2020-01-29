@@ -378,9 +378,13 @@ endif( WITH_BOOST )
 # Root of all python module.
 if(WITH_PYTHON2)
     find_package(Python2 COMPONENTS Interpreter Development)
+    set(PYTHON_EXECUTABLE ${Python2_EXECUTABLE})
+    set(PYTHON_INCLUDE_DIRS ${Python2_INCLUDE_DIRS})
     add_subdirectory(pymoose)
 elseif(WITH_PYTHON)
     find_package(Python3 COMPONENTS Interpreter Development)
+    set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
+    set(PYTHON_INCLUDE_DIRS ${Python3_INCLUDE_DIRS})
     add_subdirectory(pymoose)
 endif()
 
