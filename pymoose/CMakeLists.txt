@@ -2,14 +2,22 @@ add_definitions(-DPYMOOSE)
 include_directories(../basecode ../msg)
 
 set(PYMOOSE_SRCS
-    moosemodule.cpp
-    vec.cpp
-    mfield.cpp
-    pymooseinit.cpp
-    melement.cpp
-    test_moosemodule.cpp
-    PyRun.cpp)
+  moosemodule.cpp
+  vec.cpp
+  mfield.cpp
+  pymooseinit.cpp
+  melement.cpp
+  test_moosemodule.cpp
+  PyRun.cpp)
 
+# Python development.
+execute_process(COMMAND ${PYTHON_EXECUTABLE}-config --includes
+  OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+message(STATUS "Python include paths: ${PYTHON_INCLUDE_FLAGS}")
+
+
+# Numpy
 execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import numpy; print(numpy.get_include())"
     OUTPUT_VARIABLE Python_NumPy_INCLUDE_DIRS
     OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -26,6 +34,7 @@ target_include_directories(_moose
 set(PYTHON_SO_EXTENSION ".so")
 set_target_properties(_moose PROPERTIES 
     COMPILE_DEFINITIONS "PYMOOSE"
+    COMPILE_FLAGS ${PYTHON_INCLUDE_FLAGS}
     LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
     PREFIX ""
     SUFFIX ${PYTHON_SO_EXTENSION}
