@@ -2,42 +2,37 @@ set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 project(MOOSE)
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 include(FindPkgConfig)
-include(GetRevision)
+
+# getgit revision number
+find_program( GIT_EXEC git )
+if(GIT_EXEC)
+    execute_process(
+        COMMAND ${GIT_EXEC} rev-parse --short HEAD
+        OUTPUT_VARIABLE GIT_HEAD
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+else(GIT_EXEC)
+    set(GIT_HEAD 'HEAD')
+    message(STATUS "Couldn't fetch version from git repo" )
+endif()
 
 # If from command line, version info is not passed, use the git to generate a
 # version file. If GIT fails, use the previous known version.
-set(VERSION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/VERSION)
-find_program(GIT_EXEC "git")
-message( STATUS "Looking for git ${GIT_EXEC}" )
-if( (NOT MOOSE_VERSION) AND GIT_EXEC)
-    execute_process( 
-        COMMAND ${GIT_EXEC} describe --tags --long
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE MOOSE_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-endif( )
+if(NOT VERSION_MOOSE)
+    set(VERSION_MOOSE "3.1.3-${GIT_HEAD}")
+endif()
 
-# Default to current date.
-if( (NOT MOOSE_VERSION)  )
-    NOW(TIMESTAMP)
-    set(MOOSE_VERSION "nightly-${TIMESTAMP}" )
-elseif(MOOSE_VERSION)
-    message(STATUS "+ Using user specified VERSION = ${MOOSE_VERSION}" )
-else()
-    message(FATAL_ERROR "Could not determine MOOSE_VERSION" )
-endif( )
+add_definitions( -DMOOSE_VERSION="${VERSION_MOOSE}")
+message( STATUS "MOOSE Version ${VERSION_MOOSE}" )
 
-add_definitions( -DMOOSE_VERSION="${MOOSE_VERSION}")
-message( STATUS "MOOSE Version ${MOOSE_VERSION}" )
-
-# Write VERSION to a file VERSION so that setup.py can use it.
-message(STATUS "+ Writing ${MOOSE_VERSION} to ${VERSION_FILE}" )
-file(WRITE ${VERSION_FILE} ${MOOSE_VERSION} )
+# Write VERSION to a file VERSION so that setup.cmake.py can use it.
+set(VERSION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/python/VERSION)
+file(WRITE ${VERSION_FILE} ${VERSION_MOOSE} )
+message(STATUS "| Writing ${VERSION_MOOSE} to ${VERSION_FILE}" )
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -46,7 +41,7 @@ file(WRITE ${VERSION_FILE} ${MOOSE_VERSION} )
 # (which would end up getting picked up by header search, instead of the correct
 # versions).
 if( CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
-    message(FATAL_ERROR 
+    message(FATAL_ERROR
         "======================================================================\n"
         "In-source builds are not allowed. Remove CMakeCache.txt and CMakeFiles\n"
         "directory and do something like this inside this directory \n"
@@ -82,9 +77,6 @@ else()
 endif()
 
 ################################ CMAKE OPTIONS ##################################
-
-option(VERBOSITY "Set MOOSE verbosity level (deprecated)" 0)
-## Unit testing and debug mode.
 option(DEBUG "Build with debug support" OFF)
 option(GPROF "Build for profiling using gprof" OFF)
 option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
@@ -93,6 +85,8 @@ option(WITH_PYTHON2 "Build native python2 extension" OFF)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_BOOST "Use boost library instead of GSL" OFF)
 option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
+option(PARALLELIZED_SOLVERS "Use parallel version of GSOLVE. (alpha)" OFF )
+option(PARALLELIZED_CLOCK "High level parallelization of moose::Clock (alpha)" OFF )
 
 
 ############################ BUILD CONFIGURATION #################################
@@ -120,6 +114,7 @@ if(GPROF AND DEBUG)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
 endif()
 
+
 ################################### TARGETS ####################################
 
 add_library(libmoose SHARED basecode/main.cpp)
@@ -145,11 +140,11 @@ set(STATIC_LIBRARIES "" )
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 
 if(WITH_GSL)
-    find_package(GSL 1.16)
+    find_package(GSL 1.16 REQUIRED)
     if(NOT GSL_FOUND)
-        message(FATAL_ERROR 
+        message(FATAL_ERROR
             "=====================================================================\n"
-            " FATAL gsl(>1.16) not found.\n\n"
+            " FATAL gsl(>=1.16) not found.\n\n"
             " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
             " Please install the `dev` or `devel` package e.g. \n"
             "     $ sudo apt-get install libgsl0-dev \n"
@@ -204,18 +199,18 @@ if(HDF5_FOUND)
     add_definitions( -DUSE_HDF5 )
     if(HDF5_USE_STATIC_LIBRARIES)
 	message(STATUS "Finding static HDF5 libraries in $ENV{HDF5_ROOT}")
-        find_library(HDF5_CXX_LIBRARIES NAMES libhdf5.a 
+        find_library(HDF5_CXX_LIBRARIES NAMES libhdf5.a
             PATHS $ENV{HDF5_ROOT}/lib $ENV{HDF5_ROOT}/lib64
             )
         find_library(HDF5_HL_LIBRARIES NAMES libhdf5_hl.a
-            PATHS $ENV{HDF5_ROOT}/lib $ENV{HDF5_ROOT}/lib64 
+            PATHS $ENV{HDF5_ROOT}/lib $ENV{HDF5_ROOT}/lib64
             )
         set(HDF5_LIBRARIES ${HDF5_CXX_LIBRARIES} ${HDF5_HL_LIBRARIES})
     endif()
 
-    
+
     # Make sure, HDF5_HL_LIBRARIES are set. The COMPONENTS in find_package may
-    # or may not work. See BhallaLab/moose-core#163. 
+    # or may not work. See BhallaLab/moose-core#163.
     if(NOT HDF5_HL_LIBRARIES)
         set(HDF5_HL_LIBRARIES ${HDF5_HL_LIBRARIES})
     endif(NOT HDF5_HL_LIBRARIES)
@@ -244,14 +239,6 @@ if(HDF5_LIBRARY_DIRS)
     set_target_properties( libmoose PROPERTIES LINK_FLAGS "-L${HDF5_LIBRARY_DIRS}" )
 endif()
 
-find_package(Termcap)
-find_package(Readline)
-
-if(READLINE_FOUND AND TERMCAP_FOUND)
-    add_definitions(-DUSE_READLINE)
-    include_directories(${Readline_INCLUDE_DIR})
-endif()
-
 # Openmpi
 if(WITH_MPI)
     find_package(MPI REQUIRED)
@@ -277,19 +264,24 @@ endif(WITH_BOOST)
 # these two types because of --whole-archive option. See
 # BhallaLab/moose-core#66,
 if(WITH_GSL)
-    message(STATUS "Using gsl libraries: ${GSL_LIBRARIES}")
-    foreach(GSL_LIB ${GSL_LIBRARIES} )
-        if(GSL_LIB)
-            get_filename_component( GSL_LIB_EXT ${GSL_LIB} EXT )
-            if(GSL_LIB_EXT)
-                if(GSL_LIB_EXT STREQUAL ".a" )
-                    list(APPEND STATIC_LIBRARIES ${GSL_LIB})
-                else()
-                    list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIB})
-                endif( )
-            endif( )
-        endif( )
-    endforeach( )
+    if(GSL_STATIC_LIBRARIES)
+       message( STATUS "Using static libraries ${GSL_STATIC_LIBRARIES}" )
+       list(APPEND STATIC_LIBRARIES ${GSL_STATIC_LIBRARIES})
+    else( )
+       message(STATUS "Using gsl libraries: ${GSL_LIBRARIES}")
+       foreach(GSL_LIB ${GSL_LIBRARIES} )
+           if(GSL_LIB)
+               get_filename_component( GSL_LIB_EXT ${GSL_LIB} EXT )
+               if(GSL_LIB_EXT)
+                   if(GSL_LIB_EXT STREQUAL ".a" )
+                       list(APPEND STATIC_LIBRARIES ${GSL_LIB})
+                   else()
+                       list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIB})
+                   endif( )
+               endif( )
+           endif( )
+       endforeach( )
+   endif( )
 endif()
 
 if(WITH_MPI)
@@ -332,15 +324,15 @@ list(APPEND MOOSE_LIBRARIES
     randnum
     scheduling
     moose_mpi
-    biophysics 
-    utility 
-    kinetics 
+    biophysics
+    utility
+    kinetics
     synapse
     intfire
-    hsolve 
+    hsolve
     mesh
     signeur
-    diffusion 
+    diffusion
     ksolve
     device
     basecode
@@ -366,7 +358,7 @@ if(MACOSX)
         ${CMAKE_DL_LIBS}
         )
 ELSE(MACOSX)
-    target_link_libraries(libmoose 
+    target_link_libraries(libmoose
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
@@ -376,11 +368,11 @@ ELSE(MACOSX)
 endif(MACOSX)
 
 add_dependencies(moose.bin libmoose)
-
 target_link_libraries(moose.bin moose ${CMAKE_DL_LIBS})
 if( WITH_BOOST )
     target_link_libraries( moose.bin ${Boost_LIBRARIES} )
 endif( WITH_BOOST )
+
 
 ######################### BUILD PYMOOSE ########################################
 # Root of all python module.
@@ -392,47 +384,85 @@ elseif(WITH_PYTHON)
     add_subdirectory(pymoose)
 endif()
 
-######################### INSTALL ##############################################
-
-install(TARGETS moose.bin
-    DESTINATION bin
-    )
-
-install(TARGETS libmoose
-    DESTINATION lib
-    )
-
-install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
-    DESTINATION bin
-    )
-
-# INSTALL python module.
-# This target is built by pymoose/CMakeLists.txt file. Using the --prefix option
 # always override debian default installation directory. It will be installed in
-# site-packages instead of dist-packages. 
+# site-packages instead of dist-packages.
 # See https://bugs.launchpad.net/ubuntu/+source/python2.6/+bug/362570
 # HACK: Get platform information from python and use it to fix the layout.
-execute_process( 
-    COMMAND ${PYTHON_EXECUTABLE} -mplatform OUTPUT_VARIABLE _platform_desc 
+execute_process(COMMAND ${PYTHON_EXECUTABLE} -mplatform OUTPUT_VARIABLE _platform_desc)
+message(STATUS "Platform: ${_platform_desc}")
+
+# DISTUTILS_EXTRA_ARGS may come of top-level cmake script. On DEBIAN/UBUNTU, it
+# is most likely to be --install-layout=deb .
+set(EXTRA_ARGS "--prefix ${CMAKE_INSTALL_PREFIX} ${DISTUTILS_EXTRA_ARGS}")
+
+# On Debian/Ubuntu install using debian layout.
+# NOTE: Also create setup.cfg file which setup prefix and install-layout
+# suitable for DEBIAN systems.
+if(${_platform_desc} MATCHES ".*(Ubuntu|Debian).*")
+    list(APPEND EXTRA_ARGS "--install-layout=deb")
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/python/setup.cfg
+         "[install]\nprefix=/usr\ninstall-layout=deb"
+       )
+endif()
+
+# Set PYMOOSE binary distribution build and install directories.
+# Target for creating bdist. This is handy for creating bdist for packaging.
+# Save the binary distribution (tar.gz) to PYMOOSE_BDIST_DIR.
+find_package(PythonInterp REQUIRED)
+if(NOT PYMOOSE_BDIST_DIR)
+    set(PYMOOSE_BDIST_DIR ${CMAKE_BINARY_DIR}/bdist)
+endif( )
+set(PYMOOSE_BDIST_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/pymoose_bdist_install)
+file(MAKE_DIRECTORY ${PYMOOSE_BDIST_INSTALL_DIR})
+
+# We need a custom name for bdist; same on all platform.
+set(_platform "CMAKE" )
+set(PYMOOSE_BDIST_FILE ${PYMOOSE_BDIST_DIR}/pymoose-${VERSION_MOOSE}.${_platform}.tar.gz)
+message(STATUS "binary distribution file ${PYMOOSE_BDIST_FILE}")
+add_custom_target(bdist ALL DEPENDS  ${PYMOOSE_BDIST_FILE} )
+
+# Any command using setup.cmake.py must run in the same directory.
+add_custom_command( OUTPUT ${PYMOOSE_BDIST_FILE}
+    COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py bdist_dumb -p ${_platform}
+        -d ${PYMOOSE_BDIST_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
+    COMMENT "bdist is saved to ${PYMOOSE_BDIST_DIR}"
+    VERBATIM
     )
-message( STATUS "Platform ${_platform_desc}" )
+add_custom_command(TARGET bdist POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E chdir ${PYMOOSE_BDIST_INSTALL_DIR} tar xvf ${PYMOOSE_BDIST_FILE}
+    COMMENT "Unarchiving bdist file ${PYMOOSE_BDIST_FILE} to ${PYMOOSE_BDIST_INSTALL_DIR}"
+    VERBATIM
+    )
 
-if(WITH_PYTHON)
-    set(EXTRA_ARGS "--prefix ${CMAKE_INSTALL_PREFIX}")
-    if( ${_platform_desc} MATCHES ".*(Ubuntu|Debian).*" )
-        list( APPEND EXTRA_ARGS "--install-layout=deb" )
-    endif( )
+# Copy python files from source to current binary directory. Make sure to call
+# this before building bdist.
+file(GLOB_RECURSE PYTHON_SRCS "${CMAKE_SOURCE_DIR}/python/*")
+add_custom_target(copy_pymoose DEPENDS ${PYTHON_SRCS} _moose
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/python ${CMAKE_CURRENT_BINARY_DIR}/python
+        COMMENT "Copying required python files from
+        ${CMAKE_CURRENT_SOURCE_DIR}/python to  to build directory"
+    VERBATIM
+    )
 
-    install(CODE 
-        "
-        execute_process(
-            COMMAND ${PYTHON_EXECUTABLE} setup.py install --prefix=${CMAKE_INSTALL_PREFIX}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
-            )
-        "
-        )
+add_dependencies( bdist copy_pymoose )
 
-endif(WITH_PYTHON)
+######################### INSTALL ##############################################
+
+install(TARGETS moose.bin DESTINATION bin CONFIGURATIONS Debug)
+
+install(TARGETS libmoose DESTINATION lib CONFIGURATIONS Debug)
+
+install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/moose
+    DESTINATION bin CONFIGURATIONS Debug
+    )
+
+# install pymoose bdist.
+install(DIRECTORY ${PYMOOSE_BDIST_INSTALL_DIR}/usr/
+    DESTINATION ${CMAKE_INSTALL_PREFIX}
+    CONFIGURATIONS Release
+    )
 
 # Print message to start build process
 if(${CMAKE_BUILD_TOOL} MATCHES "make")
@@ -446,8 +476,36 @@ endif()
 
 
 ############################ CTEST ######################################
+include( CTest )
+# If CTEST_OUTPUT_ON_FAILURE environment variable is set, the output is printed
+# onto the console if a test fails.
+set(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/MooseTests.cmake)
+if(DEBUG)
+    # Run this test in debug mode. In Release mode, this does not do anything.
+    set(MOOSE_BIN_LOCATION $<TARGET_FILE:moose.bin>)
+    message(STATUS "Executable moose.bin will be at ${MOOSE_BIN_LOCATION}" )
+
+    add_test(NAME moose.bin-raw-run COMMAND moose.bin -u -q)
+endif(DEBUG)
+
+## PyMOOSE tests.
+set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)
+
+# Collect all python script in tests folder and run them.
+file(GLOB PY_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.py" )
+
+# Run python tests.
+foreach( _test_script ${PY_TEST_SCRIPTS} )
+    get_filename_component( _test_name ${_test_script} NAME_WE)
+    add_test( NAME ${_test_name}
+        COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
+        WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+        )
+     set_tests_properties( ${_test_name}
+         PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python"
+        )
+endforeach( )
 
 ############################ CPACK ######################################
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_cpack.cmake)

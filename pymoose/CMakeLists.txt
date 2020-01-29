@@ -1,13 +1,13 @@
 add_definitions(-DPYMOOSE)
 include_directories(../basecode ../msg)
 
-set(PYMOOSE_SRCS 
+set(PYMOOSE_SRCS
     moosemodule.cpp
     vec.cpp
     mfield.cpp
     pymooseinit.cpp
     melement.cpp
-    test_moosemodule.cpp 
+    test_moosemodule.cpp
     PyRun.cpp
     )
 
@@ -29,7 +29,6 @@ message(STATUS "NumPy include path: ${Python_NumPy_INCLUDE_DIRS}")
 
 add_library( _moose MODULE ${PYMOOSE_SRCS} )
 set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/moose")
-
 add_definitions(-DUSE_NUMPY)
 add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
 target_include_directories(_moose PRIVATE ${Python_INCLUDE_DIRS})
@@ -38,13 +37,13 @@ set_target_properties(_moose PROPERTIES
     COMPILE_DEFINITIONS "PYMOOSE"
     LIBRARY_OUTPUT_DIRECTORY ${PYMOOSE_OUTPUT_DIRECTORY}
     PREFIX ""
-    SUFFIX ".so"
+    SUFFIX ${PYTHON_SO_EXTENSION}
     )
 
-#if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
-#    set_target_properties(_moose PROPERTIES
-#    SUFFIX ${PYTHON_SO_EXTENSION})
-#endif()
+if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
+    set_target_properties(_moose PROPERTIES
+    SUFFIX ${PYTHON_SO_EXTENSION})
+endif()
 
 # see issue #80
 if(HDF5_LIBRARY_DIRS)
@@ -58,7 +57,7 @@ if(MACOSX)
 endif(MACOSX)
 
 if(MACOSX)
-    target_link_libraries( _moose 
+    target_link_libraries( _moose
         "-Wl,-all_load"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
@@ -66,25 +65,22 @@ if(MACOSX)
     target_link_libraries(_moose
         ${SYSTEM_SHARED_LIBS}
         )
-ELSE(MACOSX)
-    target_link_libraries(_moose 
+else(MACOSX)
+    target_link_libraries(_moose
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
         "-Wl,--no-whole-archive"
-        ${PYTHON_LIBRARIES}
+        # ${PYTHON_LIBRARIES}
         ${SYSTEM_SHARED_LIBS}
         )
 endif(MACOSX)
-
-# Make this target dependant on all python files in python folder.
-add_custom_target(copy_python_files ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/python ${CMAKE_BINARY_DIR}/python
-    COMMAND ${CMAKE_COMMAND} -E copy 
-        ${CMAKE_SOURCE_DIR}/VERSION ${CMAKE_BINARY_DIR}/VERSION 
-    COMMENT "Copying required python files and other files to build directory"
+add_custom_command(TARGET _moose POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan
+        "MOOSE python extention is successfully built. Now "
+        " Run 'sudo make install' to install it. "
+        " "
+        "NOTE: Run 'pip uninstall moose' to uninstall moose."
     VERBATIM
     )
 
-add_dependencies(_moose copy_python_files)
