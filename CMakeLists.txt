@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-project(pymoose)
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+project(MOOSE)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
 include(CheckCXXCompiler.cmake)
@@ -333,8 +333,19 @@ endif( WITH_BOOST )
 
 
 ######################### BUILD PYMOOSE ########################################
+
+# We find python executable here. Though mainly used inside pymoose. 
+# FIXME: When cmake 3.12 is widely available use the following:
+#   find_package(Python3 COMPONENTS Interpreter Numpy)
+#   set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
+# See the cmake doc.
+# Till then, stay with the old macro.
+set(Python_ADDITIONAL_VERSIONS 2.7)
+find_package(PythonInterp 3.4)
+
 # This target is built by pymoose/CMakeLists.txt file.
-add_subdirectory( pymoose )
+add_subdirectory(pymoose)
+
 
 # always override debian default installation directory. It will be installed in
 # site-packages instead of dist-packages.
