@@ -2776,7 +2776,9 @@ int defineDestFinfos(const Cinfo * cinfo)
         //     continue;
         // }
         PyGetSetDef destFieldGetSet = {.name = (char*) name.c_str()
-          , .doc= (char*) "Destination field" };
+	  , .get=nullptr, .set=nullptr
+          , .doc= (char*) "Destination field"
+	  , .closure=nullptr};
         vec.push_back(destFieldGetSet);
 
         // Dilawar:
