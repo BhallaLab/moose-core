@@ -83,7 +83,7 @@ option(ENABLE_UNIT_TESTS "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_PYTHON "Build native python extension" ON)
 option(WITH_MPI  "Enable Openmpi support" OFF)
 option(WITH_BOOST "Use boost library instead of GSL" OFF)
-option(WITH_GSL  "Use gsl-library. Alternative is WITH_BOOST" ON)
+option(WITH_GSL  "Use gsl library. Alternative is WITH_BOOST" ON)
 option(PARALLELIZED_SOLVERS "Use parallel version of GSOLVE. (alpha)" OFF )
 option(PARALLELIZED_CLOCK "High level parallelization of moose::Clock (alpha)" OFF )
 
@@ -356,7 +356,7 @@ if(MACOSX)
         ${SYSTEM_SHARED_LIBS}
         ${CMAKE_DL_LIBS}
         )
-ELSE(MACOSX)
+else(MACOSX)
     target_link_libraries(libmoose
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
