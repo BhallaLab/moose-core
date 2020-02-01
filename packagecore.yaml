@@ -21,7 +21,7 @@ packages:
       builddeps:
         - g++
         - cmake
-        - libgsl-devel
+        - libgsl-dev
         - python-numpy
         - python-matplotlib
         - python-dev
