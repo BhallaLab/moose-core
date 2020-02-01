@@ -63,6 +63,8 @@ class build_ext(build_ext_orig):
         os.chdir(str(sdir_))
 
 
+
+
 with open("README.md") as f:
     readme = f.read()
 
@@ -93,5 +95,5 @@ setup(
         ]
     },
     ext_modules=[CMakeExtension('.')],
-    cmdclass={'build_ext': build_ext},
+    cmdclass={'build_ext': build_ext, 'test': DiscoverTest},
 )
