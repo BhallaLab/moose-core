@@ -1,7 +1,7 @@
-__author__ = "Dilawar Singh"
-__copyright__ = "Copyright 2019-, Dilawar Singh"
+__author__     = "Dilawar Singh"
+__copyright__  = "Copyright 2019-, Dilawar Singh"
 __maintainer__ = "Dilawar Singh"
-__email__ = "dilawars@ncbs.res.in"
+__email__      = "dilawars@ncbs.res.in"
 
 import os
 import sys
@@ -9,15 +9,10 @@ import pathlib
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext as build_ext_orig
 
-# Read version from VERSION created by cmake file. This file must be present for
-# setup.cmake.py to work perfectly.
-script_dir = os.path.dirname(os.path.abspath(__file__))
+sdir_ = pathlib.Path().absolute()
+numCores_ = os.cpu_count() - 1
 
-# Version file must be available. It MUST be written by cmake. Or create
-# it manually before running this script.
-with open(os.path.join(script_dir, 'python', 'VERSION'), 'r') as f:
-    version = f.read()
-print('Got %s from VERSION file' % version)
+version = '3.1.2'
 
 # importlib is available only for python3. Since we build wheels, prefer .so
 # extension. This way a wheel built by any python3.x will work with any python3.
@@ -30,14 +25,10 @@ except Exception as e:
     suffix = '.so'
 print('[INFO] Suffix for python SO: %s' % suffix)
 
-numCores_ = os.cpu_count() - 1
-
-
 class CMakeExtension(Extension):
     def __init__(self, name):
         # don't invoke the original build_ext for this special extension
         super().__init__(name, sources=[])
-
 
 class build_ext(build_ext_orig):
     def run(self):
@@ -47,7 +38,7 @@ class build_ext(build_ext_orig):
 
     def build_cmake(self, ext):
         global numCores_
-        cwd = pathlib.Path().absolute()
+        global sdir_
 
         # These dirs will be created in build_py, so if you don't have
         # any python sources to bundle, the dirs will be missing
@@ -66,10 +57,10 @@ class build_ext(build_ext_orig):
         print("[INFO ] Building pymoose in %s ..." % build_temp)
         build_args = ['--config', config, '--', '-j%d' % numCores_]
         os.chdir(str(build_temp))
-        self.spawn(['cmake', str(cwd)] + cmake_args)
+        self.spawn(['cmake', str(sdir_)] + cmake_args)
         if not self.dry_run:
             self.spawn(['cmake', '--build', '.'] + build_args)
-        os.chdir(str(cwd))
+        os.chdir(str(sdir_))
 
 
 with open("README.md") as f:
