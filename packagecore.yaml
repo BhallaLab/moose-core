@@ -9,14 +9,18 @@ packages:
     archlinux:
         container: archlinux/base
         builddeps:
+            - gawk
             - gcc
             - cmake 
             - gsl
+            - python
+            - python-matplotlib
             - python-numpy
     ubuntu18.04:
         builddeps:
-            - gcc-c++
+            - g++
             - cmake
             - libgsl-devel
             - python-numpy
+            - python-matplotlib
             - python-dev
