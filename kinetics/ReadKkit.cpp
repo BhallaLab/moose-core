@@ -1192,7 +1192,8 @@ Id ReadKkit::buildChan( const vector< string >& args )
 	//
 	double permeability = atof( args[ chanMap_["perm"] ].c_str() );
 	Id chan = shell_->doCreate( "ConcChan", pa, tail, 1 );
-	Field< double >::set( chan, "permeability", permeability );
+	// Convert from perm in uM in GENESIS, to mM for MOOSE.
+	Field< double >::set( chan, "permeability", permeability *1000.0 );
 	assert( chan != Id() );
 	string chanPath = clean.substr( 10 );
 	chanIds_[ chanPath ] = chan;

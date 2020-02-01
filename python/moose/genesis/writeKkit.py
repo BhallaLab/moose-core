@@ -9,8 +9,10 @@ __version__          = "1.0.0"
 __maintainer__       = "Harsha Rani"
 __email__            = "hrani@ncbs.res.in"
 __status__           = "Development"
-__updated__          = "Dec 08 2018"
-
+__updated__          = "Jan 08 2020"
+#Jan 8: added a line to add compartment info
+#       permeability from moose is in uM which to be converted to mM for genesis
+#2020
 # 2018
 # Dec 08: using restoreXreacs from fixXreacs 
 # Nov 22: searched for _xfer_ instead of xfer
@@ -274,7 +276,7 @@ def writeConcChan(modelpath,f,sceneitems):
                     color = getRandomColor()
                 if textcolor == ""  or textcolor == " ":
                     textcolor = getRandomColor()
-                f.write("simundump kchan /kinetics/" + trimPath(cChan)+ " " + str(int(1)) + " " + str(cChan.permeability)+  " " +
+                f.write("simundump kchan /kinetics/" + trimPath(cChan)+ " " + str(int(1)) + " " + str(cChan.permeability/1000.0 )+  " " +
                     str(int(0)) + " " +
                     str(int(0)) + " " +
                     str(int(0)) + " " +
@@ -665,6 +667,7 @@ def getColorCheck(color,GENESIS_COLOR_SEQUENCE):
             return index
     elif isinstance(color, tuple):
         color = [int(x) for x in color[0:3]]
+        #color = map(int,color)
         index = nearestColorIndex(color, GENESIS_COLOR_SEQUENCE)
         return index
     elif isinstance(color, int):
