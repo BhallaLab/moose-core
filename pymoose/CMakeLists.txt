@@ -110,11 +110,11 @@ else(APPLE)
     ${SYSTEM_SHARED_LIBS})
 endif()
 
-add_custom_command(TARGET _moose POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan
-        "MOOSE python extention is successfully built. Now "
-        " Run 'sudo make install' to install it. "
-        " "
-        "NOTE: Run 'pip uninstall moose' to uninstall moose."
-    VERBATIM)
+#add_custom_command(TARGET _moose POST_BUILD
+#    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan
+#        "MOOSE python extention is successfully built. Now "
+#        " Run 'sudo make install' to install it. "
+#        " "
+#        "NOTE: Run 'pip uninstall moose' to uninstall moose."
+#    VERBATIM)
 

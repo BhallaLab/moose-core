@@ -368,64 +368,15 @@ if(${_platform_desc} MATCHES ".*(Ubuntu|debian).*")
        )
 endif()
 
-# Set PYMOOSE binary distribution build and install directories.
-# Target for creating bdist. This is handy for creating bdist for packaging.
-# Save the binary distribution (tar.gz) to PYMOOSE_BDIST_DIR.
-find_package(PythonInterp REQUIRED)
-if(NOT PYMOOSE_BDIST_DIR)
-    set(PYMOOSE_BDIST_DIR ${CMAKE_BINARY_DIR}/bdist)
-endif( )
-
-# If no one hsa set the PYMOOSE bdist installation directory, use default.
-if(NOT PYMOOSE_BDIST_INSTALL_DIR)
-    set(PYMOOSE_BDIST_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/pymoose_bdist_install)
-endif()
-file(MAKE_DIRECTORY ${PYMOOSE_BDIST_INSTALL_DIR})
-
-# We need a custom name for bdist; same on all platform.
-set(_platform "CMAKE" )
-set(PYMOOSE_BDIST_FILE ${PYMOOSE_BDIST_DIR}/pymoose-${VERSION_MOOSE}.${_platform}.tar.gz)
-message(STATUS "binary distribution file ${PYMOOSE_BDIST_FILE}")
-add_custom_target(bdist ALL DEPENDS  ${PYMOOSE_BDIST_FILE} )
-
-# Any command using setup.cmake.py must run in the same directory. Use option
-# `--relative` to prefix is aways fixed.
-add_custom_command( OUTPUT ${PYMOOSE_BDIST_FILE}
-    COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py bdist_dumb -p ${_platform}
-        -d ${PYMOOSE_BDIST_DIR} --relative
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
-    COMMENT "bdist is saved to ${PYMOOSE_BDIST_DIR}"
-    VERBATIM
-    )
-add_custom_command(TARGET bdist POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E chdir ${PYMOOSE_BDIST_INSTALL_DIR} tar xf ${PYMOOSE_BDIST_FILE}
-    COMMENT "Unarchiving bdist file ${PYMOOSE_BDIST_FILE} to ${PYMOOSE_BDIST_INSTALL_DIR}"
-    VERBATIM
-    )
-
-# Copy python files from source to current binary directory. Make sure to call
-# this before building bdist.
-file(GLOB_RECURSE PYTHON_SRCS "${CMAKE_SOURCE_DIR}/python/*")
-add_custom_target(copy_pymoose DEPENDS ${PYTHON_SRCS}
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/python ${CMAKE_CURRENT_BINARY_DIR}/python
-    COMMENT "Copying required python files and other files to build directory"
-    VERBATIM
-    )
-
-add_dependencies( bdist copy_pymoose )
-add_dependencies( copy_pymoose _moose )
 
 ######################### INSTALL ##############################################
-
 install(TARGETS moose.bin DESTINATION bin CONFIGURATIONS Debug)
 install(TARGETS libmoose DESTINATION lib CONFIGURATIONS Debug)
 
 # install pymoose bdist.
 install(DIRECTORY ${PYMOOSE_BDIST_INSTALL_DIR}/
     DESTINATION ${CMAKE_INSTALL_PREFIX}
-    CONFIGURATIONS Release Debug
-    )
+    CONFIGURATIONS Release Debug)
 
 # Print message to start build process
 if(${CMAKE_BUILD_TOOL} MATCHES "make")
@@ -457,7 +408,6 @@ set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)
 
 # Collect all python script in tests folder and run them.
 file(GLOB PY_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.py" )
-
 
 # Run python tests.
 foreach( _test_script ${PY_TEST_SCRIPTS} )
