@@ -17,11 +17,11 @@ packages:
       - python
       - python-matplotlib
       - python-numpy
-    ubuntu18.04:
-      builddeps:
-        - g++
-        - cmake
-        - libgsl-dev
-        - python-numpy
-        - python-matplotlib
-        - python-dev
+  ubuntu18.04:
+    builddeps:
+      - g++
+      - cmake
+      - libgsl-dev
+      - python-numpy
+      - python-matplotlib
+      - python-dev
