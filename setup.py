@@ -34,6 +34,11 @@ import pathlib
 sdir_ = pathlib.Path().absolute()
 builddir_ = sdir_ / '_build'
 builddir_.mkdir(parents=True, exist_ok=True)
+cmakeCacheFile_ = builddir_ / 'CMakeCache.txt'
+if cmakeCacheFile_.exists():
+    cmakeCacheFile_.unlink()
+
+
 numCores_ = os.cpu_count() - 1
 
 version_ = '3.1.2'
