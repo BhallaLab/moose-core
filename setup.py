@@ -6,42 +6,48 @@ __email__      = "dilawars@ncbs.res.in"
 import os
 import sys
 import subprocess
+import datetime
+
+## try:
+##     import wheel
+## except ImportError:
+##     print("[INFO ] Please install wheel:\n"
+##             "  $ python3 -m pip install wheel --user \n"
+##             "")
+##     quit(1)
+
 
 #### TEST IF REQUIRED TOOLS EXISTS.
 if sys.version_info[0] < 3:
-    print("[ERROR] You must use python3.5 or higher. " 
-        "You used %s" % sys.version + " which is not supported.")
+    print("[ERROR] You must use python3.5 or higher.\n" 
+        "You used '%s'" % sys.version + " which is not supported.")
     quit(-1)
 
 try:
     cmakeVersion = subprocess.check_output(["cmake", "--version"])
     print("[INFO ] CMake found: %s" % cmakeVersion.decode('utf8'))
-    
 except Exception as e:
-    print(f"[ERROR] cmake is not found. Please install cmake.", file=sys.stderr)
+    print("[ERROR] cmake is not found. Please install cmake.")
     quit(-1)
 
 
 # See https://docs.python.org/3/library/distutils.html
 # setuptools is preferred over distutils. And we are supporting python3 only.
 from setuptools import setup, Extension, Command
-from setuptools.command.build_ext import build_ext 
+from setuptools.command.build_ext import build_ext  as _build_ext
 import subprocess
-import pathlib
+from pathlib import Path
 
 # Global variables.
 
-sdir_ = pathlib.Path().absolute()
-builddir_ = sdir_ / '_build'
+sdir_ = Path(__file__).parent.absolute()
+stamp = datetime.datetime.now().strftime('%Y%m%d')
+builddir_ = sdir_ / ('_build_%s' % stamp)
 builddir_.mkdir(parents=True, exist_ok=True)
-cmakeCacheFile_ = builddir_ / 'CMakeCache.txt'
-if cmakeCacheFile_.exists():
-    cmakeCacheFile_.unlink()
-
 
 numCores_ = os.cpu_count() - 1
 
-version_ = '3.1.2'
+version_ = '3.2.dev%s' % stamp
 
 # importlib is available only for python3. Since we build wheels, prefer .so
 # extension. This way a wheel built by any python3.x will work with any python3.
@@ -51,8 +57,37 @@ class CMakeExtension(Extension):
         # don't invoke the original build_ext for this special extension
         super().__init__(name, sources=[])
 
-class build_ext_cmake(build_ext):
+class build_ext(_build_ext):
+    user_options = [('with-boost', None, 'Use Boost Libraries (OFF)')
+            , ('with-gsl', None, 'Use Gnu Scienfific Library (ON)')
+            , ('debug', None, 'Build moose in debugging mode (OFF)')
+            , ('no-build', None, 'DO NOT BUILD. (for debugging/development)')
+            ] + _build_ext.user_options
+
+    def initialize_options(self):
+        # Initialize options.
+        self.with_boost = 0
+        self.with_gsl = 1
+        self.debug = 0
+        self.no_build = 0
+        self.cmake_options = {}
+        super().initialize_options()
+
+    def finalize_options(self):
+        # Finalize options.
+        super().finalize_options()
+        self.cmake_options['PYTHON_EXECUTABLE'] = Path(sys.executable).resolve()
+        if self.with_boost:
+            self.cmake_options['WITH_BOOST'] = 'ON'
+            self.cmake_options['WITH_GSL'] = 'OFF'
+        if self.debug:
+            self.cmake_options['CMAKE_BUILD_TYPE'] = 'Debug'
+        else:
+            self.cmake_options['CMAKE_BUILD_TYPE'] = 'Release'
+
     def run(self):
+        if self.no_build:
+            return
         for ext in self.extensions:
             self.build_cmake(ext)
         super().run()
@@ -62,22 +97,16 @@ class build_ext_cmake(build_ext):
         global sdir_
         print("\n==========================================================\n")
         print("[INFO ] Building pymoose in %s ..." % builddir_)
-
-        # example of cmake args
-        config = 'Debug' if self.debug else 'Release'
-        cmake_args = [
-            '-DPYTHON_EXECUTABLE=%s' % sys.executable,
-            '-DVERSION_MOOSE=%s' % version_,
-            '-DCMAKE_BUILD_TYPE=%s' % config
-        ]
-        build_args = ['--config', config, '--', '-j%d' % numCores_]
+        cmake_args = []
+        for k, v in self.cmake_options.items():
+            cmake_args.append('-D%s=%s' % (k,v))
         os.chdir(str(builddir_))
         self.spawn(['cmake', str(sdir_)] + cmake_args)
         if not self.dry_run: 
-            self.spawn(['cmake', '--build', '.'] + build_args)
+            self.spawn(['make', '-j%d'%numCores_]) 
         os.chdir(str(sdir_))
 
-with open("README.md") as f:
+with open(Path(__file__).parent / "README.md") as f:
     readme = f.read()
 
 
@@ -99,8 +128,8 @@ setup(
     # python2 specific version here as well.
     install_requires=['numpy'],
     package_dir={
-        'moose': os.path.join('python', 'moose'),
-        'rdesigneur': os.path.join('python', 'rdesigneur')
+        'moose': sdir_ / 'python' / 'moose',
+        'rdesigneur': sdir_ / 'python' / 'rdesigneur'
     },
     package_data={
         'moose': [
@@ -108,6 +137,6 @@ setup(
             'chemUtil/rainbow2.pkl'
         ]
     },
-    ext_modules=[CMakeExtension('.')],
-    cmdclass={'build_ext': build_ext_cmake},
+    ext_modules=[CMakeExtension('pymoose')],
+    cmdclass={'build_ext': build_ext,},
 )
