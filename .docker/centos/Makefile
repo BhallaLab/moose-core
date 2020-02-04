@@ -14,5 +14,5 @@ upload :
 	docker push $(NAME):latest
 
 run :
-	docker run -ti $(NAME):$(VERSION) bash
+	docker run $(NAME):$(VERSION) /bin/bash -c "python3 -c 'import moose; moose.test()'"
 

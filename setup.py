@@ -57,6 +57,21 @@ class CMakeExtension(Extension):
         # don't invoke the original build_ext for this special extension
         super().__init__(name, sources=[])
 
+
+class TestCommand(Command):
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        print("[INFO ] Running tests... ")
+        return subprocess.run(["ctest", "--output-on-failure", '-j2']
+                , cwd=builddir_)
+
 class build_ext(_build_ext):
     user_options = [('with-boost', None, 'Use Boost Libraries (OFF)')
             , ('with-gsl', None, 'Use Gnu Scienfific Library (ON)')
@@ -138,5 +153,5 @@ setup(
         ]
     },
     ext_modules=[CMakeExtension('pymoose')],
-    cmdclass={'build_ext': build_ext,},
+    cmdclass={'build_ext': build_ext, 'test': TestCommand},
 )
