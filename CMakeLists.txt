@@ -299,7 +299,7 @@ endif(APPLE)
 
 add_dependencies(moose.bin libmoose)
 target_link_libraries(moose.bin moose ${CMAKE_DL_LIBS})
-target_link_directories(moose.bin PUBLIC ${CMAKE_BINARY_DIR})
+set_target_properties(moose.bin PROPERTIES LINK_DIRECTORIES ${CMAKE_BINARY_DIR})
 
 if( WITH_BOOST )
     target_link_libraries( moose.bin ${Boost_LIBRARIES} )
