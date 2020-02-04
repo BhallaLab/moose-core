@@ -92,6 +92,7 @@ endif()
 
 ################################### TARGETS ####################################
 
+link_directories(${CMAKE_BINARY_DIR})
 add_library(libmoose SHARED basecode/main.cpp)
 add_executable(moose.bin basecode/main.cpp)
 
@@ -299,7 +300,6 @@ endif(APPLE)
 
 add_dependencies(moose.bin libmoose)
 target_link_libraries(moose.bin moose ${CMAKE_DL_LIBS})
-set_target_properties(moose.bin PROPERTIES LINK_DIRECTORIES ${CMAKE_BINARY_DIR})
 
 if( WITH_BOOST )
     target_link_libraries( moose.bin ${Boost_LIBRARIES} )
