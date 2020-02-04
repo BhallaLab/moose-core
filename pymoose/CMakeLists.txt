@@ -18,17 +18,7 @@ add_definitions(-std=c++11)
 add_definitions(-DUSE_NUMPY)
 add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
 
-# set module extensiton. default is .so. Also check ../python/setup.cmake.py
-execute_process(COMMAND
-    ${PYTHON_EXECUTABLE} -c
-"import importlib.machinery
-print(importlib.machinery.EXTENSION_SUFFIXES[-1])"
-    OUTPUT_VARIABLE PYTHON_SO_EXTENSION
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-if(NOT PYTHON_SO_EXTENSION)
-    message(STATUS "Python so ext could not be determined. Using default .so")
-    set(PYTHON_SO_EXTENSION ".so")
-endif()
+set(PYTHON_SO_EXTENSION ".so")
 message(STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
 
 # TARGET
@@ -124,6 +114,7 @@ set(_platform "CMAKE")
 set(PYMOOSE_BDIST_FILE ${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.${_platform}.tar.gz)
 set(PYMOOSE_INSTALL_DIR ${CMAKE_BINARY_DIR}/_pymoose_temp_install)
 file(MAKE_DIRECTORY ${PYMOOSE_INSTALL_DIR})
+
 add_custom_command(TARGET _moose POST_BUILD
   COMMAND ${PYTHON_EXECUTABLE} setup.py build_py  
   COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_dumb --skip-build 
@@ -131,6 +122,14 @@ add_custom_command(TARGET _moose POST_BUILD
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   COMMENT "python's binary distribution is saved to ${CMAKE_BINARY_DIR}"
   VERBATIM)
+
+# Copy python tree to BUILD directory. User can set PYTHONPATH to
+# ${CMAKE_BINARY_DIR}/python.
+add_custom_target(copy_python_tree ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_directory 
+    ${CMAKE_SOURCE_DIR}/python ${CMAKE_BINARY_DIR}/python
+  DEPENDS _moose)
+
 
 install(CODE "execute_process(
   COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_INSTALL_PREFIX} tar xf ${PYMOOSE_BDIST_FILE}

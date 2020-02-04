@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
-project(PyMOOSE DESCRIPTION "MOOSE Python Module")
+# Project to build MOOSE's python module.
+project(PyMOOSE)
 
 # cmake related macros.
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
