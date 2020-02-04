@@ -128,7 +128,9 @@ add_custom_command(TARGET _moose POST_BUILD
 add_custom_target(copy_python_tree ALL
   COMMAND ${CMAKE_COMMAND} -E copy_directory 
     ${CMAKE_SOURCE_DIR}/python ${CMAKE_BINARY_DIR}/python
-  DEPENDS _moose)
+    COMMENT "Copying python source tree: ${CMAKE_SOURCE_DIR} -> ${CMAKE_BINARY_DIR}"
+  DEPENDS _moose 
+  VERBATIM)
 
 
 install(CODE "execute_process(
