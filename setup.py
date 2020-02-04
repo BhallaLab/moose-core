@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+# This script can also be called directly to build and install the pymoose
+# module.
+# Alternatively, you can use cmake build system which provides finer control
+# over the build. This script is called by cmake to install the python module. 
+
 __author__     = "Dilawar Singh"
 __copyright__  = "Copyright 2019-, Dilawar Singh"
 __maintainer__ = "Dilawar Singh"
@@ -8,24 +14,14 @@ import sys
 import subprocess
 import datetime
 
-## try:
-##     import wheel
-## except ImportError:
-##     print("[INFO ] Please install wheel:\n"
-##             "  $ python3 -m pip install wheel --user \n"
-##             "")
-##     quit(1)
-
-
-#### TEST IF REQUIRED TOOLS EXISTS.
 if sys.version_info[0] < 3:
     print("[ERROR] You must use python3.5 or higher.\n" 
         "You used '%s'" % sys.version + " which is not supported.")
     quit(-1)
 
+## TEST IF REQUIRED TOOLS EXISTS.
 try:
     cmakeVersion = subprocess.check_output(["cmake", "--version"])
-    print("[INFO ] CMake found: %s" % cmakeVersion.decode('utf8'))
 except Exception as e:
     print("[ERROR] cmake is not found. Please install cmake.")
     quit(-1)
