@@ -7,15 +7,15 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
+#include "../basecode/header.h"
 #include "OneToOneDataIndexMsg.h"
 
 // Initializing static variables
 Id OneToOneDataIndexMsg::managerId_;
 vector< OneToOneDataIndexMsg* > OneToOneDataIndexMsg::msg_;
 
-OneToOneDataIndexMsg::OneToOneDataIndexMsg( 
-				const Eref& e1, const Eref& e2, 
+OneToOneDataIndexMsg::OneToOneDataIndexMsg(
+				const Eref& e1, const Eref& e2,
 				unsigned int msgIndex )
 	: Msg( ObjId( managerId_, (msgIndex != 0) ? msgIndex: msg_.size() ),
 					e1.element(), e2.element() )
@@ -42,7 +42,7 @@ OneToOneDataIndexMsg::~OneToOneDataIndexMsg()
  * At this point, the effect of trying to go between regular
  * data entries and field entries is undefined.
  */
-Eref OneToOneDataIndexMsg::firstTgt( const Eref& src ) const 
+Eref OneToOneDataIndexMsg::firstTgt( const Eref& src ) const
 {
 	if ( src.element() == e1_ ) {
 		return Eref( e2_, src.dataIndex(), 0 );
@@ -87,7 +87,7 @@ ObjId OneToOneDataIndexMsg::findOtherEnd( ObjId f ) const
 		return ObjId( e2()->id(), f.dataIndex );
 	else if ( f.element() == e2() )
 		return ObjId( e1()->id(), f.dataIndex );
-	
+
 	return ObjId( 0, BADINDEX );
 }
 

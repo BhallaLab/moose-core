@@ -1,24 +1,25 @@
-# hdfutil.py --- 
-# 
+# -*- coding: utf-8 -*-
+# hdfutil.py ---
+#
 # Filename: hdfutil.py
-# Description: 
-# Author: 
-# Maintainer: 
+# Description:
+# Author:
+# Maintainer:
 # Created: Thu Aug 23 17:34:55 2012 (+0530)
-# Version: 
+# Version:
 # Last-Updated: Mon Sep  3 17:55:03 2012 (+0530)
 #           By: subha
 #     Update #: 618
-# URL: 
-# Keywords: 
-# Compatibility: 
-# 
-# 
+# URL:
+# Keywords:
+# Compatibility:
+#
+#
 
-# Commentary: 
-# 
+# Commentary:
+#
 # Utility function to save data in hdf5 format.
-# 
+#
 # In this utility we are trying to address a serialization
 # problem. The ultimate goal is to be able to save a snapshot of
 # complete simulator state in a portable format so that it can be
@@ -34,7 +35,7 @@
 #
 # TODO: How do we translate MOOSE tree to HDF5? MOOSE has vec and
 # elements. vec is a container and each element belongs to an
-# vec. 
+# vec.
 #
 #                    em-0
 #              el-00 el-01 el-02
@@ -61,34 +62,34 @@
 
 
 # Change log:
-# 
-# 
-# 
-# 
+#
+#
+#
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
 # published by the Free Software Foundation; either version 3, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 # Floor, Boston, MA 02110-1301, USA.
-# 
-# 
+#
+#
 
 # Code:
-from __future__ import print_function
+from __future__ import print_function, division, absolute_import
 try:
     from future_builtins import zip
 except ImportError:
     pass
-from . import moose as moose__
+import moose
 import numpy as np
 import h5py as h5
 import time
@@ -118,12 +119,12 @@ em_dtype = np.dtype([('path', 'S1024'), ('class', 'S64'), ('dims', 'i4', (3,))])
 def get_rec_dtype(em):
     bad_fields = []
     # Check if already have data type information for this class.
-    # Create it otherwise.    
+    # Create it otherwise.
     if em.className in dtype_table:
         dtype = dtype_table[em.className]
     else:
-        print('Creating entries for class:', obj.className)
-        fielddict = moose__.getFieldDict(obj.className, 'valueFinfo')
+        print('Creating entries for class:', em.className)
+        fielddict = moose.getFieldDict(em.className, 'valueFinfo')
         print(fielddict)
 
         # If we do not have the type of this field in cpp-np data
@@ -136,9 +137,9 @@ def get_rec_dtype(em):
         fields = [(fieldname, cpptonp[ftype]) # [('path', 'S1024')]
                   for fieldname, ftype in sorted(fielddict.items())
                   if ftype in cpptonp]
-        dtype_table[obj.className] = np.dtype(fields)
-        return dtype_table[obj.className]
-            
+        dtype_table[em.className] = np.dtype(fields)
+        return dtype_table[em.className]
+
 def save_dataset(classname, rec, dtype, hdfnode):
     """Saves the data from rec into dataset"""
     # Check if there is a dataset for this class. Create it
@@ -151,13 +152,13 @@ def save_dataset(classname, rec, dtype, hdfnode):
         newlen = oldlen + len(rec)
         ds.resize(newlen)
     else:
-        ds = hdfnode.create_dataset(classname, 
+        ds = hdfnode.create_dataset(classname,
                                     shape=(len(rec),),
-                                    dtype=dtype, 
-                                    compression='gzip', 
+                                    dtype=dtype,
+                                    compression='gzip',
                                     compression_opts=6)
     ds[oldlen:newlen] = np.rec.array(rec, dtype=dtype)
-    
+
 def savetree(moosenode, hdfnode):
     """Dump the MOOSE element tree rooted at moosenode as datasets
     under hdfnode."""
@@ -169,10 +170,10 @@ def savetree(moosenode, hdfnode):
     em_rec = []
     hdfnode.attr['path'] = moosenode.path
     elements = hdfnode.create_group('elements')
-    for em in moose.wildcardFind(moosenode.path+'/##'):        
+    for em in moose.wildcardFind(moosenode.path+'/##'):
         em_rec.append((em.path, em.className, em.shape))
         dtype = get_rec_dtype(em)
-        for obj in em:            
+        for obj in em:
             fields = []
             for fname in dtype.names:
                 f = obj.getField(fname)
@@ -192,8 +193,8 @@ def savetree(moosenode, hdfnode):
     vec[:] = em_rec
 
 def loadtree(hdfnode, moosenode):
-    """Load the element tree saved under the group `hdfnode` into `moosenode`"""    
-    pathclass = {}    
+    """Load the element tree saved under the group `hdfnode` into `moosenode`"""
+    pathclass = {}
     basepath = hdfnode.attr['path']
     if basepath != '/':
         basepath = basepath + '/'
@@ -210,28 +211,28 @@ def loadtree(hdfnode, moosenode):
         shape = dims[path]
         em = moose.vec(rpath, shape, classname)
     wfields = {}
-    for cinfo in moose__.element('/classes').children:
+    for cinfo in moose.element('/classes').children:
         cname = cinfo[0].name
-        wfields[cname] = [f[len('set_'):] for f in moose__.getFieldNames(cname, 'destFinfo') 
+        wfields[cname] = [f[len('set_'):] for f in moose.getFieldNames(cname, 'destFinfo')
                           if f.startswith('set_') and f not in ['set_this', 'set_name', 'set_lastDimension', 'set_runTime'] and not f.startswith('set_num_')]
         for key in hdfnode['/elements']:
             dset = hdfnode['/elements/'][key][:]
             fieldnames = dset.dtype.names
             for ii in range(len(dset)):
-                obj = moose__.element(dset['path'][ii][len(basepath):])
+                obj = moose.element(dset['path'][ii][len(basepath):])
                 for f in wfields[obj.className]:
                     obj.setField(f, dset[f][ii])
-        
-        
-    
+
+
+
 def savestate(filename=None):
     """Dump the state of MOOSE in an hdf5 file.
-    
+
     The file will have a data set for each class.
     Each such dataset will be a column of field values.
 
     This function needs more work on moose serialization.
-    """    
+    """
     if filename is None:
         filename = 'moose_session_' + time.strftime('%Y%m%d_%H%M%S') + '.hdf5'
     with h5.File(filename, 'w') as fd:
@@ -243,7 +244,7 @@ def savestate(filename=None):
         class_count_dict = {}
         class_array_dict = {}
         objcount = 0
-        for obj in moose__.wildcardFind("/##"):
+        for obj in moose.wildcardFind("/##"):
             if obj.path.startswith('/Msg') or obj.path.startswith('/class') or obj.className == 'Table' or obj.className == 'TableEntry':
                 continue
             print('Processing:', obj.path, obj.className)
@@ -256,7 +257,7 @@ def savestate(filename=None):
             # If we do not yet have dataset for this class, create one and keep it in dict
             if obj.className not in class_dataset_dict:
                 print('Creating entries for class:', obj.className)
-                fielddict = moose__.getFieldDict(obj.className, 'valueFinfo')
+                fielddict = moose.getFieldDict(obj.className, 'valueFinfo')
                 print(fielddict)
                 keys = sorted(fielddict)
                 fields = [] # [('path', 'S1024')]
@@ -279,7 +280,7 @@ def savestate(filename=None):
                 for f in ds.dtype.names:
                     print('getting field:', f)
                     entry.getField(f)
-                fields = [f.path if isinstance(f, moose__.vec) or isinstance(f, moose__.element) else f for f in fields]
+                fields = [f.path if isinstance(f, moose.vec) or isinstance(f, moose.element) else f for f in fields]
                 class_array_dict[obj.className].append(fields)
                 # print 'fields:'
                 # print fields
@@ -302,11 +303,11 @@ def savestate(filename=None):
             typeinfo_dataset.resize((objcount,))
             typeinfo_dataset[objcount-len(typeinfo): objcount] = np.rec.array(typeinfo, dtype=typeinfo_dataset.dtype)
 
-def restorestate(filename):    
+def restorestate(filename):
     wfields = {}
-    for cinfo in moose__.element('/classes').children:
+    for cinfo in moose.element('/classes').children:
         cname = cinfo[0].name
-        wfields[cname] = [f[len('set_'):] for f in moose__.getFieldNames(cname, 'destFinfo') 
+        wfields[cname] = [f[len('set_'):] for f in moose.getFieldNames(cname, 'destFinfo')
                           if f.startswith('set_') and f not in ['set_this', 'set_name', 'set_lastDimension', 'set_runTime'] and not f.startswith('set_num_')]
     with h5.File(filename, 'r') as fd:
         typeinfo = fd['/metadata/typeinfo'][:]
@@ -317,14 +318,14 @@ def restorestate(filename):
         sorted_paths = sorted(typeinfo['path'], key=lambda x: x.count('/'))
         for path in sorted_paths:
             name = path.rpartition('/')[-1].partition('[')[0]
-            moose__.vec(parentdict[path] + '/' + name, eval(dimsdict[path]), classdict[path])
+            moose.vec(parentdict[path] + '/' + name, eval(dimsdict[path]), classdict[path])
         for key in fd['/elements']:
             dset = fd['/elements/'][key][:]
             fieldnames = dset.dtype.names
             for ii in range(len(dset)):
-                obj = moose__.element(dset['path'][ii])
+                obj = moose.element(dset['path'][ii])
                 for f in wfields[obj.className]:
                     obj.setField(f, dset[f][ii])
 
-# 
+#
 # hdfutil.py ends here

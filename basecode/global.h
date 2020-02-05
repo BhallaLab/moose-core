@@ -15,15 +15,9 @@
 #include <ctime>
 #include <map>
 #include <sstream>
+#include <valarray>
 
-
-#ifdef  USE_BOOST
-//#ifdef BOOST_FILESYSTEM_EXISTS
-#include <boost/filesystem.hpp>
-//#endif                                          /* BOOST_FILESYSTEM_EXISTS */
-#endif
-
-#include "randnum/RNG.h"                        /* Use inbuilt rng */
+#include "../randnum/RNG.h"                        /* Use inbuilt rng */
 #include "../utility/print_function.hpp"
 
 using namespace std;
@@ -46,11 +40,8 @@ extern unsigned int totalTests;
 
 #define TEST_BEGIN cout << endl << "Test(" << totalTests << "): " << SIMPLE_CURRENT_FUNCTION;
 #define TEST_END totalTests++; \
-    cout << std::right <<  setw(20) << "test of " << SIMPLE_CURRENT_FUNCTION << " finished."; 
+    cout << std::right <<  setw(20) << "test of " << SIMPLE_CURRENT_FUNCTION << " finished.";
 
-/*-----------------------------------------------------------------------------
- *  Global functions in namespace moose
- *-----------------------------------------------------------------------------*/
 #define MISSING_BRACKET_AT_END                  -1
 #define EMPTY_PATH                              -2
 #define SPACES_AT_THE_BEGINING                  -3
@@ -59,10 +50,15 @@ extern unsigned int totalTests;
 #define BAD_CHARACTER_IN_PATH                   -6
 
 
+/*-----------------------------------------------------------------------------
+ *  Global functions in namespace moose
+ *-----------------------------------------------------------------------------*/
 namespace moose
 {
 
-    extern moose::RNG<double> rng;
+    extern moose::RNG rng;
+
+    extern map<string, valarray<double>> solverProfMap;
 
     /**
      * @brief A global seed for all RNGs in moose. When moose.seed( x ) is called,
@@ -70,7 +66,7 @@ namespace moose
      * initialize them. By default it is initialized by random_device (see
      * global.cpp).
      */
-    extern int __rng_seed__;
+    extern unsigned long __rng_seed__;
 
     /**
      * @brief Fix a path. For testing purpose.
@@ -82,7 +78,7 @@ namespace moose
     string fixPath(string path);
 
     /**
-     * @brief Checks if given path is correct. 
+     * @brief Checks if given path is correct.
      * If not, return false and error-code as well.
      *
      * @param path Path name.
@@ -91,13 +87,13 @@ namespace moose
      */
     int checkPath( const string& path );
 
-    /** @brief Append pathB to pathA and return the result. 
+    /** @brief Append pathB to pathA and return the result.
      *
      * If pathA does not have [indexs] at the end, append "[0]" to pathA and
      * then add pathB to it.  This version does not care if the result has '[0]'
      * at its end.
      *
-     * @param pathA First path.  
+     * @param pathA First path.
      * @param pathB Second path.
      *
      * @return A string representing moose-path.
@@ -118,6 +114,18 @@ namespace moose
      */
     double mtrand( void );
 
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Overloaded function. Random number between a and b
+     *
+     * @Param a lower limit.
+     * @Param b Upper limit.
+     *
+     * @Returns   
+     */
+    /* ----------------------------------------------------------------------------*/
+    double mtrand( double a, double b );
+
     /**
      * @brief Create a POSIX compatible path from a given string.
      * Remove/replace bad characters.
@@ -125,7 +133,7 @@ namespace moose
      * @param path Reutrn path is given path if creation was successful, else
      * directory is renamed to a filename.
      */
-    string createPosixPath( const string& path );
+    string createMOOSEPath( const string& path );
 
     /**
      * @brief Convert a given value to string.
@@ -147,7 +155,7 @@ namespace moose
      * which can be created in current directory without any need to create
      * parent directory.
      *
-     * @param path string 
+     * @param path string
      *
      * @return  filename without directory separator.
      */
@@ -179,9 +187,40 @@ namespace moose
      *
      * @param path Removed '[0]' from path and return.
      *
-     * @return 
+     * @return
      */
     string moosePathToUserPath( string path );
+
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Get the global seed set by call of moose.seed( X )
+     *
+     * @Returns  seed (int).
+     */
+    /* ----------------------------------------------------------------------------*/
+    int getGlobalSeed( );
+
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Set the seed for all random generator. When seed of a RNG is
+     * not set, this seed it used. It is set to -1 by default.
+     *
+     * @Param seed
+     */
+    /* ----------------------------------------------------------------------------*/
+    void setGlobalSeed( int seed );
+
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Add solver performance into the global map.
+     *
+     * @Param name Name of the solver.
+     * @Param time Time taken by the solver.
+     * @Param steps Steps.
+     */
+    /* ----------------------------------------------------------------------------*/
+    void addSolverProf( const string& name, double time, size_t steps = 1);
+    void printSolverProfMap( );
 }
 
 #endif   /* ----- #ifndef __MOOSE_GLOBAL_INC_  ----- */

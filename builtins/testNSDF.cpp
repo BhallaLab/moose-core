@@ -1,47 +1,47 @@
-// testNSDF.cpp --- 
-// 
+// testNSDF.cpp ---
+//
 // Filename: testNSDF.cpp
-// Description: 
+// Description:
 // Author: subha
-// Maintainer: 
+// Maintainer:
 // Created: Tue Aug 25 22:36:07 2015 (-0400)
-// Version: 
+// Version:
 // Last-Updated: Sat Aug 29 12:34:08 2015 (-0400)
 //           By: subha
 //     Update #: 43
-// URL: 
-// Keywords: 
-// Compatibility: 
-// 
-// 
+// URL:
+// Keywords:
+// Compatibility:
+//
+//
 
-// Commentary: 
-// 
-// 
-// 
-// 
+// Commentary:
+//
+//
+//
+//
 
 // Change log:
-// 
-// 
-// 
-// 
+//
+//
+//
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
 // published by the Free Software Foundation; either version 3, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; see the file COPYING.  If not, write to
 // the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 // Floor, Boston, MA 02110-1301, USA.
-// 
-// 
+//
+//
 
 // Code:
 
@@ -52,8 +52,9 @@
 
 #include <ctime>
 #include <deque>
+#include <cstdio>
 
-#include "header.h"
+#include "../basecode/header.h"
 #include "../utility/utility.h"
 
 #include "HDF5WriterBase.h"
@@ -72,7 +73,7 @@ void testCreateStringDataset()
     hsize_t size = STR_DSET_LEN;
     herr_t status;
     HDF5WriterBase writer;
-    string h5Filename = std::tmpnam( NULL );
+    string h5Filename = moose::random_string( 10 );
     file = H5Fcreate(h5Filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     dset = writer.createStringDataset(file, STR_DSET_NAME, size, size);
     assert(dset >= 0);
@@ -98,5 +99,5 @@ void testNSDF()
     testCreateStringDataset();
 }
 
-// 
+//
 // testNSDF.cpp ends here

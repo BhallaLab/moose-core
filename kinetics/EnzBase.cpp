@@ -7,24 +7,24 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
-#include "ElementValueFinfo.h"
+#include "../basecode/header.h"
+#include "../basecode/ElementValueFinfo.h"
 #include "lookupVolumeFromMesh.h"
 #include "EnzBase.h"
 
 #define EPSILON 1e-15
 
 static SrcFinfo2< double, double > *subOut() {
-	static SrcFinfo2< double, double > subOut( 
-			"subOut", 
+	static SrcFinfo2< double, double > subOut(
+			"subOut",
 			"Sends out increment of molecules on product each timestep"
 			);
 	return &subOut;
 }
 
 static SrcFinfo2< double, double > *prdOut() {
-	static SrcFinfo2< double, double > prdOut( 
-			"prdOut", 
+	static SrcFinfo2< double, double > prdOut(
+			"prdOut",
 			"Sends out increment of molecules on product each timestep"
 			);
 	return &prdOut;
@@ -61,6 +61,12 @@ const Cinfo* EnzBase::initCinfo()
 			"Number of substrates in this MM reaction. Usually 1."
 			"Does not include the enzyme itself",
 			&EnzBase::getNumSub
+		);
+
+		static ReadOnlyElementValueFinfo< EnzBase, unsigned int > numPrd(
+			"numProducts",
+			"Number of products in this MM reaction. Usually 1.",
+			&EnzBase::getNumPrd
 		);
 
 
@@ -125,6 +131,7 @@ const Cinfo* EnzBase::initCinfo()
 		&numKm,	// ElementValue
 		&kcat,	// Value
 		&numSub,	// ReadOnlyElementValue
+		&numPrd,	// ReadOnlyElementValue
 		&enzDest,			// DestFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
@@ -132,7 +139,7 @@ const Cinfo* EnzBase::initCinfo()
 		&remesh,			// Destfinfo
 	};
 
-	static string doc[] = 
+	static string doc[] =
 	{
 		"Name", "EnzBase",
 		"Author", "Upi Bhalla",
@@ -253,8 +260,16 @@ double EnzBase::getKcat( const Eref& e ) const
 
 unsigned int EnzBase::getNumSub( const Eref& e ) const
 {
-	const vector< MsgFuncBinding >* mfb = 
+	const vector< MsgFuncBinding >* mfb =
 		e.element()->getMsgAndFunc( subOut()->getBindIndex() );
+	assert( mfb );
+	return ( mfb->size() );
+}
+
+unsigned int EnzBase::getNumPrd( const Eref& e ) const
+{
+	const vector< MsgFuncBinding >* mfb =
+		e.element()->getMsgAndFunc( prdOut()->getBindIndex() );
 	assert( mfb );
 	return ( mfb->size() );
 }
@@ -285,7 +300,7 @@ void EnzBase::zombify( Element* orig, const Cinfo* zClass, Id solver )
 	vector< double > kcat( num, 0.0 );
 	for ( unsigned int i = 0; i < num; ++i ) {
 		Eref er( orig, i + start );
-		const EnzBase* eb = 
+		const EnzBase* eb =
 			reinterpret_cast< const EnzBase* >( er.data() );
 		kcat[ i ] = eb->getKcat( er );
 		Km[ i ] = eb->getKm( er );
@@ -305,4 +320,3 @@ void EnzBase::setSolver( Id solver, Id orig )
 {
 	;
 }
-

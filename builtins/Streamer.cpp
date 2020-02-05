@@ -1,26 +1,20 @@
 /***
- *       Filename:  Streamer.cpp
- *
  *    Description:  Stream table data.
- *
- *        Version:  0.0.1
- *        Created:  2016-04-26
-
- *       Revision:  none
  *
  *         Author:  Dilawar Singh <dilawars@ncbs.res.in>
  *   Organization:  NCBS Bangalore
- *
- *        License:  GNU GPL2
  */
 
 #include <algorithm>
 #include <sstream>
 
-#include "global.h"
-#include "header.h"
+#include "../basecode/global.h"
+#include "../basecode/header.h"
 #include "Streamer.h"
-#include "Clock.h"
+#include "../scheduling/Clock.h"
+#include "../utility/utility.h"
+#include "../shell/Shell.h"
+
 
 const Cinfo* Streamer::initCinfo()
 {
@@ -42,10 +36,16 @@ const Cinfo* Streamer::initCinfo()
         , &Streamer::getFormat
     );
 
-    static ReadOnlyValueFinfo< Streamer, size_t > numTables (
+    static ReadOnlyValueFinfo<Streamer, size_t> numTables (
         "numTables"
         , "Number of Tables handled by Streamer "
         , &Streamer::getNumTables
+    );
+
+    static ReadOnlyValueFinfo<Streamer, size_t> numWriteEvents(
+        "numWriteEvents"
+        , "Number of time streamer was called to write. (For debugging/performance reason only)"
+        , &Streamer::getNumWriteEvents
     );
 
     /*-----------------------------------------------------------------------------
@@ -93,7 +93,7 @@ const Cinfo* Streamer::initCinfo()
      *-----------------------------------------------------------------------------*/
     static Finfo* procShared[] =
     {
-        &process , &reinit , &addTable, &addTables, &removeTable, &removeTables
+        &process, &reinit, &addTable, &addTables, &removeTable, &removeTables
     };
 
     static SharedFinfo proc(
@@ -104,7 +104,7 @@ const Cinfo* Streamer::initCinfo()
 
     static Finfo * tableStreamFinfos[] =
     {
-        &outfile, &format, &proc, &numTables
+        &outfile, &format, &proc, &numTables, &numWriteEvents
     };
 
     static string doc[] =
@@ -133,15 +133,17 @@ static const Cinfo* tableStreamCinfo = Streamer::initCinfo();
 
 // Class function definitions
 
-Streamer::Streamer() 
+Streamer::Streamer()
 {
     // Not all compilers allow initialization during the declaration of class
     // methods.
-    format_ = "npy";
-    columns_.push_back( "time" );               /* First column is time. */
+    format_ = "csv";
+    numWriteEvents_ = 0;
+    columns_.push_back("time");               /* First column is time. */
     tables_.resize(0);
     tableIds_.resize(0);
-    columns_.resize(0);
+    tableTick_.resize(0);
+    tableDt_.resize(0);
     data_.resize(0);
 }
 
@@ -153,14 +155,6 @@ Streamer& Streamer::operator=( const Streamer& st )
 
 Streamer::~Streamer()
 {
-    cleanUp();
-}
-
-void Streamer::cleanUp( void )
-{
-    /*  Write the left-overs. */
-    zipWithTime( data_, currTime_ );
-    StreamerBase::writeToOutFile( outfilePath_, format_, "a", data_, columns_ );
 }
 
 /**
@@ -171,20 +165,90 @@ void Streamer::cleanUp( void )
  */
 void Streamer::reinit(const Eref& e, ProcPtr p)
 {
+
+    if( tables_.size() == 0 )
+    {
+        moose::showWarn( "Zero tables in streamer. Disabling Streamer" );
+        e.element()->setTick( -2 );             /* Disable process */
+        return;
+    }
+
+    Clock* clk = reinterpret_cast<Clock*>( Id(1).eref().data() );
+    for (size_t i = 0; i < tableIds_.size(); i++)
+    {
+        int tickNum = tableIds_[i].element()->getTick();
+        double tick = clk->getTickDt( tickNum );
+        tableDt_.push_back( tick );
+        // Make sure that all tables have the same tick.
+        if( i > 0 )
+        {
+            if( tick != tableDt_[0] )
+            {
+                moose::showWarn( "Table " + tableIds_[i].path() + " has "
+                        " different clock dt. "
+                        " Make sure all tables added to Streamer have the same "
+                        " dt value."
+                        );
+            }
+        }
+    }
+
+
     // Push each table dt_ into vector of dt
     for( size_t i = 0; i < tables_.size(); i++)
-        tableDt_.push_back( tables_[i]->getDt() );
+    {
+        Id tId = tableIds_[i];
+        int tickNum = tId.element()->getTick();
+        tableDt_.push_back( clk->getTickDt(tickNum) );
+    }
+
+    // Make sure all tables have same dt_ else disable the streamer.
+    vector<unsigned int> invalidTables;
+    for (size_t i = 1; i < tableTick_.size(); i++)
+    {
+        if( tableTick_[i] != tableTick_[0] )
+        {
+            LOG( moose::warning
+                    , "Table " << tableIds_[i].path()
+                    << " has tick (dt) which is different than the first table."
+                    << endl
+                    << " Got " << tableTick_[i] << " expected " << tableTick_[0]
+                    << endl << " Disabling this table."
+                    );
+            invalidTables.push_back( i );
+        }
+    }
+
+    for (size_t i = 0; i < invalidTables.size(); i++)
+    {
+        tables_.erase( tables_.begin() + i );
+        tableDt_.erase( tableDt_.begin() + i );
+        tableIds_.erase( tableIds_.begin() + i );
+    }
 
     if( ! isOutfilePathSet_ )
     {
         string defaultPath = "_tables/" + moose::moosePathToUserPath( e.id().path() );
         setOutFilepath( defaultPath );
     }
+
+    // Prepare data. Add columns names and write whatever values are available
+    // write now.
     currTime_ = 0.0;
-    // Prepare data.
-    zipWithTime( data_, currTime_ );
-    StreamerBase::writeToOutFile( outfilePath_, format_, "w", data_, columns_);
-    data_.clear();
+    zipWithTime( );
+    StreamerBase::writeToOutFile(outfilePath_, format_, "w", data_, columns_);
+    data_.clear( );
+}
+
+/**
+ * @brief This function is called from Shell when simulation is called to write
+ * the left-over data to streamer file.
+ */
+void Streamer::cleanUp( )
+{
+    zipWithTime( );
+    StreamerBase::writeToOutFile( outfilePath_, format_, "a", data_, columns_ );
+    data_.clear( );
 }
 
 /**
@@ -195,13 +259,11 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
  */
 void Streamer::process(const Eref& e, ProcPtr p)
 {
-    // Prepare data.
-    zipWithTime( data_, currTime_ );
+    // LOG( moose::debug, "Writing Streamer data to file." );
+    zipWithTime( );
     StreamerBase::writeToOutFile( outfilePath_, format_, "a", data_, columns_ );
-    // clean the arrays
     data_.clear();
-    for(size_t i = 0; i < tables_.size(); i++ )
-        tables_[i]->clearVec();
+    numWriteEvents_ += 1;
 }
 
 
@@ -218,13 +280,16 @@ void Streamer::addTable( Id table )
             return;                             /* Already added. */
 
     Table* t = reinterpret_cast<Table*>(table.eref().data());
-
     tableIds_.push_back( table );
     tables_.push_back( t );
+    tableTick_.push_back( table.element()->getTick() );
 
-    // We don't want name of table here as column names since they may not be
-    // unique. However, paths of tables are guarenteed to be unique.
-    columns_.push_back( moose::moosePathToUserPath( table.path() ) );
+    // NOTE: If user can make sure that names are unique in table, using name is
+    // better than using the full path.
+    if( t->getColumnName().size() > 0 )
+        columns_.push_back( t->getColumnName( ) );
+    else
+        columns_.push_back( moose::moosePathToUserPath( table.path() ) );
 }
 
 /**
@@ -234,6 +299,8 @@ void Streamer::addTable( Id table )
  */
 void Streamer::addTables( vector<Id> tables )
 {
+    if( tables.size() == 0 )
+        return;
     for( vector<Id>::const_iterator it = tables.begin(); it != tables.end(); it++)
         addTable( *it );
 }
@@ -247,7 +314,7 @@ void Streamer::addTables( vector<Id> tables )
 void Streamer::removeTable( Id table )
 {
     int matchIndex = -1;
-    for (size_t i = 0; i < tableIds_.size(); i++) 
+    for (size_t i = 0; i < tableIds_.size(); i++)
         if( table.path() == tableIds_[i].path() )
         {
             matchIndex = i;
@@ -283,6 +350,19 @@ size_t Streamer::getNumTables( void ) const
     return tables_.size();
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Get number of write events in streamer. Useful for debugging and
+ * performance measuerments.
+ *
+ * @Returns   
+ */
+/* ----------------------------------------------------------------------------*/
+size_t Streamer::getNumWriteEvents( void ) const
+{
+    return numWriteEvents_;
+}
+
 
 string Streamer::getOutFilepath( void ) const
 {
@@ -310,20 +390,52 @@ void Streamer::setFormat( string fmt )
 }
 
 /*  Get the format of all tables. */
-string Streamer::getFormat( void ) const 
+string Streamer::getFormat( void ) const
 {
     return format_;
 }
 
-void Streamer::zipWithTime( vector<double>& data, double currTime)
+/**
+ * @brief This function prepares data to be written to a file.
+ */
+void Streamer::zipWithTime( )
 {
-    size_t N = tables_[0]->getVecSize();
-    for (size_t i = 0; i < N; i++) 
+    size_t numEntriesInEachTable = tables_[0]->getVecSize( );
+
+    //LOG( moose::debug, "Entries in each table " << numEntriesInEachTable );
+
+    // Collect data from all table. If some table does not have enough data,
+    // fill it with nan
+    vector< vector< double > > collectedData;
+    for( size_t i = 0; i < tables_.size( ); i++ )
     {
-        /* Each entry we write, currTime_ increases by dt.  */
-        data.push_back( currTime_ );
-        currTime_ += tableDt_[0];               
-        for( size_t i = 0; i < tables_.size(); i++)
-            data.push_back( tables_[i]->getVec()[i] );
+        vector<double> tVec( tables_[i]->getVec( ) );
+        if( tVec.size( ) <= numEntriesInEachTable )
+        {
+#if 0
+            LOG( moose::debug
+                    , "Table " << tables_[i]->getName( ) << " is not functional. Filling with zero "
+                    );
+#endif
+            tVec.resize( numEntriesInEachTable, 0 );
+        }
+        collectedData.push_back( tVec );
     }
+
+    // Turn it into a table format. Its like taking a transpose of vector<
+    // vector >.
+    double allTableDt = tableDt_[ 0 ];
+    for( size_t i = 0; i < collectedData[0].size( ); i++ )
+    {
+        data_.push_back( currTime_ );
+        currTime_ += allTableDt;
+        for( size_t ii = 0; ii < collectedData.size(); ii++ )
+            data_.push_back( collectedData[ ii ][ i ] );
+    }
+
+    // After collection data from table, clear tables.
+    for(size_t i = 0; i < tables_.size(); i++ )
+        tables_[i]->clearVec( );
+
+    return;
 }

@@ -7,12 +7,10 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include <cctype>
-#include "header.h"
-#include "SparseMatrix.h"
+#include "../basecode/header.h"
+#include "../basecode/SparseMatrix.h"
+#include "../basecode/ElementValueFinfo.h"
 #include "../utility/Vec.h"
-
-#include "ElementValueFinfo.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
 #include "ChemCompt.h"
@@ -27,7 +25,7 @@
 #include "../utility/numutil.h"
 
 /*
-static SrcFinfo3< Id, vector< double >, vector< unsigned int > >* 
+static SrcFinfo3< Id, vector< double >, vector< unsigned int > >*
 	psdListOut()
 {
 	static SrcFinfo3< Id, vector< double >, vector< unsigned int > >
@@ -51,7 +49,7 @@ const Cinfo* SpineMesh::initCinfo()
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
 		static ReadOnlyValueFinfo< SpineMesh, vector< unsigned int > >
-			parentVoxel 
+			parentVoxel
 		(
 		 	"parentVoxel",
 			"Vector of indices of proximal voxels within this mesh."
@@ -61,7 +59,7 @@ const Cinfo* SpineMesh::initCinfo()
 		);
 
 		static ReadOnlyValueFinfo< SpineMesh, vector< unsigned int > >
-			neuronVoxel 
+			neuronVoxel
 		(
 		 	"neuronVoxel",
 			"Vector of indices of voxels on parent NeuroMesh, from which "
@@ -161,7 +159,7 @@ SpineMesh::SpineMesh()
 {;}
 
 SpineMesh::SpineMesh( const SpineMesh& other )
-	: 
+	:
 		spines_( other.spines_ ),
 		surfaceGranularity_( other.surfaceGranularity_ )
 {;}
@@ -185,7 +183,7 @@ SpineMesh::~SpineMesh()
 vector< unsigned int > SpineMesh::getParentVoxel() const
 {
 	vector< unsigned int > ret( spines_.size(), -1U );
-	// for ( unsigned int i = 0; i < spines_.size(); ++i ) 
+	// for ( unsigned int i = 0; i < spines_.size(); ++i )
 	// 	ret[i] = spines_[i].parent(); // Wrong, returns voxel on NeuroMesh
 	return ret;
 }
@@ -196,7 +194,7 @@ vector< unsigned int > SpineMesh::getParentVoxel() const
 vector< unsigned int > SpineMesh::getNeuronVoxel() const
 {
 	vector< unsigned int > ret( spines_.size(), -1U );
-	for ( unsigned int i = 0; i < spines_.size(); ++i ) 
+	for ( unsigned int i = 0; i < spines_.size(); ++i )
 		ret[i] = spines_[i].parent();
 	return ret;
 }
@@ -204,7 +202,7 @@ vector< unsigned int > SpineMesh::getNeuronVoxel() const
 vector< Id > SpineMesh::getElecComptMap() const
 {
 	vector< Id > ret( spines_.size() );
-	for ( unsigned int i = 0; i < spines_.size(); ++i ) 
+	for ( unsigned int i = 0; i < spines_.size(); ++i )
 		ret[i] = spines_[i].headId();
 	return ret;
 }
@@ -212,7 +210,7 @@ vector< Id > SpineMesh::getElecComptMap() const
 vector< unsigned int > SpineMesh::getStartVoxelInCompt() const
 {
 	vector< unsigned int > ret( spines_.size() );
-	for ( unsigned int i = 0; i < ret.size(); ++i ) 
+	for ( unsigned int i = 0; i < ret.size(); ++i )
 		ret[i] = i;
 	return ret;
 }
@@ -220,7 +218,7 @@ vector< unsigned int > SpineMesh::getStartVoxelInCompt() const
 vector< unsigned int > SpineMesh::getEndVoxelInCompt() const
 {
 	vector< unsigned int > ret( spines_.size() );
-	for ( unsigned int i = 0; i < ret.size(); ++i ) 
+	for ( unsigned int i = 0; i < ret.size(); ++i )
 		ret[i] = i+1;
 	return ret;
 }
@@ -243,8 +241,8 @@ unsigned int SpineMesh::innerGetDimensions() const
 }
 
 // Here we set up the spines. We don't permit heads without shafts.
-void SpineMesh::handleSpineList( 
-		const Eref& e, vector< Id > shaft, vector< Id > head, 
+void SpineMesh::handleSpineList(
+		const Eref& e, vector< Id > shaft, vector< Id > head,
 		vector< unsigned int > parentVoxel )
 {
 		double oldVol = getMeshEntryVolume( 0 );
@@ -260,6 +258,7 @@ void SpineMesh::handleSpineList(
 		vector< unsigned int > index( head.size(), 0 );
 		for ( unsigned int i = 0; i < head.size(); ++i ) {
 			spines_[i] = SpineEntry( shaft[i], head[i], parentVoxel[i] );
+			// cout << i << "	" << head[i] << ", pa = " << parentVoxel[i] << endl;
 			// ret = spines_[i].psdCoords();
 			// assert( ret.size() == 8 );
 			// psdCoords.insert( psdCoords.end(), ret.begin(), ret.end() );
@@ -271,7 +270,7 @@ void SpineMesh::handleSpineList(
 
 		updateCoords();
 		Id meshEntry( e.id().value() + 1 );
-		
+
 		vector< unsigned int > localIndices( head.size() );
 		vector< double > vols( head.size() );
 		for ( unsigned int i = 0; i < head.size(); ++i ) {
@@ -311,7 +310,7 @@ double SpineMesh::getMeshEntryVolume( unsigned int fid ) const
 	return spines_[ fid % spines_.size() ].volume();
 }
 /// Virtual function to assign volume of mesh Entry.
-void SpineMesh::setMeshEntryVolume( unsigned int fid, double volume ) 
+void SpineMesh::setMeshEntryVolume( unsigned int fid, double volume )
 {
 	if ( spines_.size() == 0 )
 		return;
@@ -391,10 +390,10 @@ const vector< double >& SpineMesh::vGetVoxelMidpoint() const
 	static vector< double > midpoint;
 	midpoint.resize( spines_.size() * 3 );
 	for ( unsigned int i = 0; i < spines_.size(); ++i ) {
-		spines_[i].mid( midpoint[i], 
-						midpoint[i + spines_.size() ], 
-						midpoint[i + 2 * spines_.size() ] 
-		); 
+		spines_[i].mid( midpoint[i],
+						midpoint[i + spines_.size() ],
+						midpoint[i + 2 * spines_.size() ]
+		);
 	}
 	return midpoint;
 }
@@ -412,7 +411,7 @@ const vector< double >& SpineMesh::getVoxelLength() const
 double SpineMesh::vGetEntireVolume() const
 {
 	double ret = 0.0;
-	for ( vector< double >::const_iterator i = 
+	for ( vector< double >::const_iterator i =
 					vs_.begin(); i != vs_.end(); ++i )
 		ret += *i;
 	return ret;
@@ -505,14 +504,14 @@ void SpineMesh::matchMeshEntries( const ChemCompt* other,
 }
 
 void SpineMesh::indexToSpace( unsigned int index,
-			double& x, double& y, double& z ) const 
+			double& x, double& y, double& z ) const
 {
 	if ( index >= innerGetNumEntries() )
 		return;
 	spines_[ index ].mid( x, y, z );
 }
 
-double SpineMesh::nearest( double x, double y, double z, 
+double SpineMesh::nearest( double x, double y, double z,
 				unsigned int& index ) const
 {
 	double best = 1e12;
@@ -548,7 +547,7 @@ void SpineMesh::matchNeuroMeshEntries( const ChemCompt* other,
 		double xda = spines_[i].rootArea() / spines_[i].diffusionLength();
 		ret.push_back( VoxelJunction( i, spines_[i].parent(), xda ) );
 		ret.back().firstVol = spines_[i].volume();
-		ret.back().secondVol = 
+		ret.back().secondVol =
 				nm->getMeshEntryVolume( spines_[i].parent() );
 	}
 }

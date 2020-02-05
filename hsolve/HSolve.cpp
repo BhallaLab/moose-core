@@ -7,8 +7,9 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
-#include "ElementValueFinfo.h"
+#include "../basecode/header.h"
+#include "../basecode/global.h"
+#include "../basecode/ElementValueFinfo.h"
 #include "HSolveStruct.h"
 #include "HinesMatrix.h"
 #include "HSolvePassive.h"
@@ -23,8 +24,15 @@
 #include "../biophysics/ChanBase.h"
 #include "../biophysics/ChanCommon.h"
 #include "../biophysics/HHChannel.h"
+#include "../biophysics/CaConc.h"
 #include "ZombieHHChannel.h"
 #include "../shell/Shell.h"
+
+#include <chrono>
+using namespace std::chrono;
+
+// defined in global.h 
+extern map<string, double> solverProfMap;
 
 const Cinfo* HSolve::initCinfo()
 {
@@ -189,7 +197,20 @@ static const Cinfo* hsolveCinfo = HSolve::initCinfo();
 HSolve::HSolve()
     : dt_( 50e-6 )
 {
-    ;
+}
+
+HSolve::~HSolve()
+{
+    unzombify();
+#if 0
+    char* p = getenv( "MOOSE_SHOW_SOLVER_PERF" );
+    if( p != NULL )
+    {
+        cout << "Info: HSolve took " << totalTime_ << " seconds and took " << numSteps_
+             << " steps." << endl;
+
+    }
+#endif
 }
 
 
@@ -199,7 +220,10 @@ HSolve::HSolve()
 
 void HSolve::process( const Eref& hsolve, ProcPtr p )
 {
+    t0_ = high_resolution_clock::now();
     this->HSolveActive::step( p );
+    t1_ = high_resolution_clock::now();
+    addSolverProf( "HSolve", duration_cast<duration<double>>(t1_ - t0_).count(), 1 );
 }
 
 void HSolve::reinit( const Eref& hsolve, ProcPtr p )
@@ -215,23 +239,48 @@ void HSolve::zombify( Eref hsolve ) const
 
     for ( i = compartmentId_.begin(); i != compartmentId_.end(); ++i )
 		temp.push_back( ObjId( *i, 0 ) );
-    for ( i = compartmentId_.begin(); i != compartmentId_.end(); ++i )
+    for ( i = compartmentId_.begin(); i != compartmentId_.end(); ++i ) {
         CompartmentBase::zombify( i->eref().element(),
 					   ZombieCompartment::initCinfo(), hsolve.id() );
+	}
 
 	temp.clear();
     for ( i = caConcId_.begin(); i != caConcId_.end(); ++i )
 		temp.push_back( ObjId( *i, 0 ) );
 	// Shell::dropClockMsgs( temp, "process" );
-    for ( i = caConcId_.begin(); i != caConcId_.end(); ++i )
+    for ( i = caConcId_.begin(); i != caConcId_.end(); ++i ) {
         CaConcBase::zombify( i->eref().element(), ZombieCaConc::initCinfo(), hsolve.id() );
+	}
 
 	temp.clear();
     for ( i = channelId_.begin(); i != channelId_.end(); ++i )
 		temp.push_back( ObjId( *i, 0 ) );
-    for ( i = channelId_.begin(); i != channelId_.end(); ++i )
+    for ( i = channelId_.begin(); i != channelId_.end(); ++i ) {
         HHChannelBase::zombify( i->eref().element(),
 						ZombieHHChannel::initCinfo(), hsolve.id() );
+	}
+}
+
+void HSolve::unzombify() const
+{
+    vector< Id >::const_iterator i;
+
+    for ( i = compartmentId_.begin(); i != compartmentId_.end(); ++i )
+		if ( i->element() ) {
+        	CompartmentBase::zombify( i->eref().element(),
+					   Compartment::initCinfo(), Id() );
+		}
+
+    for ( i = caConcId_.begin(); i != caConcId_.end(); ++i )
+		if ( i->element() ) {
+        	CaConcBase::zombify( i->eref().element(), CaConc::initCinfo(), Id() );
+		}
+
+    for ( i = channelId_.begin(); i != channelId_.end(); ++i )
+		if ( i->element() ) {
+        	HHChannelBase::zombify( i->eref().element(),
+						HHChannel::initCinfo(), Id() );
+		}
 }
 
 void HSolve::setup( Eref hsolve )
@@ -255,7 +304,6 @@ void HSolve::setSeed( Id seed )
              << "' is not derived from type 'Compartment'." << endl;
         return;
     }
-
     seed_ = seed;
 }
 
@@ -533,4 +581,3 @@ void testHSolvePassiveSingleComp()
 
 
 #endif // if 0
-

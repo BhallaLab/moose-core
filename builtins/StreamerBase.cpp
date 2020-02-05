@@ -15,8 +15,8 @@
  */
 
 
-#include "global.h"
-#include "header.h"
+#include "../basecode/global.h"
+#include "../basecode/header.h"
 #include "StreamerBase.h"
 
 #include "../scheduling/Clock.h"
@@ -27,7 +27,7 @@
 #include <memory>
 
 // Class function definitions
-StreamerBase::StreamerBase() 
+StreamerBase::StreamerBase()
 {
 }
 
@@ -42,7 +42,7 @@ StreamerBase::~StreamerBase()
 {
 
 }
- 
+
 
 string StreamerBase::getOutFilepath( void ) const
 {
@@ -55,32 +55,28 @@ void StreamerBase::setOutFilepath( string filepath )
 }
 
 
-void StreamerBase::writeToOutFile( const string& filepath 
-        , const string& outputFormat 
-        , const string& openmode 
-        , const vector<double>& data 
+void StreamerBase::writeToOutFile( const string& filepath
+        , const string& outputFormat
+        , const string& openmode
+        , const vector<double>& data
         , const vector<string>& columns
         )
 {
-    //cout << "Format " << outputFormat << " size is " << data.size() << endl;
-
     if( data.size() == 0 )
         return;
 
-    if( "csv" == outputFormat )
-        writeToCSVFile( filepath, openmode, data, columns );
-    else if( "npy" == outputFormat )
+    if( "npy" == outputFormat )
         writeToNPYFile( filepath, openmode, data, columns );
+    else if( "csv" == outputFormat or "dat" == outputFormat )
+        writeToCSVFile( filepath, openmode, data, columns );
     else
     {
-        LOG( moose::warning, "Unsupported format " << outputFormat 
+        LOG( moose::warning, "Unsupported format " << outputFormat
                 << ". Use npy or csv. Falling back to default csv"
            );
         writeToCSVFile( filepath, openmode, data, columns );
     }
-
 }
-
 
 /*  Write to a csv file.  */
 void StreamerBase::writeToCSVFile( const string& filepath, const string& openmode
@@ -95,14 +91,14 @@ void StreamerBase::writeToCSVFile( const string& filepath, const string& openmod
     }
 
     // If writing in "w" mode, write the header first.
-    if( openmode == "w" )
+    if(openmode == "w")
     {
         string headerText = "";
-        for( vector<string>::const_iterator it = columns.begin(); 
+        for( vector<string>::const_iterator it = columns.begin();
             it != columns.end(); it++ )
-            headerText += "\"" + *it + "\"" + delimiter_;
+            headerText += ( *it + delimiter_ );
         headerText += eol;
-        fprintf( fp, "%s", headerText.c_str() ); 
+        fprintf(fp, "%s", headerText.c_str());
     }
 
     string text = "";
@@ -115,15 +111,21 @@ void StreamerBase::writeToCSVFile( const string& filepath, const string& openmod
         // At the end of each row, we remove the delimiter_ and append newline_.
         *(text.end()-1) = eol;
     }
-    fprintf( fp, "%s", text.c_str() );
-    fclose( fp );
+    fprintf(fp, "%s", text.c_str() );
+    fclose(fp);
 }
 
 /*  write data to a numpy file */
 void StreamerBase::writeToNPYFile( const string& filepath, const string& openmode
         , const vector<double>& data, const vector<string>& columns )
 {
-    string format = moose::getExtension( filepath, true );
     cnpy2::save_numpy<double>( filepath, data, columns, openmode );
 }
 
+string StreamerBase::vectorToCSV( const vector<double>& ys, const string& fmt )
+{
+    stringstream ss;
+    for( auto v : ys )
+        ss << v << ",";
+    return ss.str();
+}

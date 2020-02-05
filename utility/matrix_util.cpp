@@ -17,7 +17,7 @@
  * =====================================================================================
  */
 
-#ifdef  USE_BOOST
+#ifdef  USE_BOOST_ODE
 
 #include "matrix_util.h"
 
@@ -38,14 +38,14 @@
 void swapRows( ublas::matrix< value_type >& mat, unsigned int r1, unsigned int r2)
 {
     ublas::vector<value_type> temp( mat.size2() );
-    for (size_t i = 0; i < mat.size2(); i++) 
+    for (size_t i = 0; i < mat.size2(); i++)
     {
         temp[i] = mat(r1, i );
         mat(r1, i ) = mat(r2, i );
     }
 
-    for (size_t i = 0; i < mat.size2(); i++) 
-        mat(r2, i) = temp[i]; 
+    for (size_t i = 0; i < mat.size2(); i++)
+        mat(r2, i) = temp[i];
 }
 
 
@@ -119,4 +119,4 @@ unsigned int rankUsingBoost( ublas::matrix<value_type>& U )
     return i + 1;
 }
 
-#endif     /* -----  not USE_BOOST  ----- */
+#endif     /* -----  not USE_BOOST_ODE  ----- */

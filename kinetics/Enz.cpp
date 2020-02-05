@@ -7,8 +7,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
-#include "ElementValueFinfo.h"
+#include "../basecode/header.h"
+#include "../basecode/ElementValueFinfo.h"
 #include "lookupVolumeFromMesh.h"
 #include "EnzBase.h"
 #include "CplxEnzBase.h"
@@ -23,15 +23,27 @@ const Cinfo* Enz::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
+		static DestFinfo setKmK1Dest( "setKmK1",
+			"Low-level function used when you wish to explicitly set "
+			"Km and k1, without doing any of the volume calculations."
+			"Needed by ReadKkit and other situations where the numbers "
+			"must be set before all the messaging is in place."
+			"Not relevant for zombie enzymes.",
+			new OpFunc2< Enz, double, double >( &Enz::setKmK1 )
+		);
 		//////////////////////////////////////////////////////////////
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
 	static Dinfo< Enz > dinfo;
+	static Finfo* enzFinfos[] = {
+		&setKmK1Dest,	// DestFinfo
+	};
+
 	static Cinfo enzCinfo (
 		"Enz",
 		CplxEnzBase::initCinfo(),
-		0,
-		0,
+		enzFinfos,
+		sizeof( enzFinfos ) / sizeof ( Finfo* ),
 		&dinfo
 	);
 
@@ -61,7 +73,7 @@ static const SrcFinfo2< double, double >* cplxOut =
 // Enz internal functions
 //////////////////////////////////////////////////////////////
 Enz::Enz( )
-	: k1_( 0.1 ), k2_( 0.4 ), k3_( 0.1 )
+	: Km_(5.0e-3), k1_( 0.1 ), k2_( 0.4 ), k3_( 0.1 )
 {
 	;
 }
@@ -72,6 +84,12 @@ Enz::~Enz()
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
+
+void Enz::setKmK1( double Km, double k1 )
+{
+	r1_ = k1_ = k1;
+	Km_ = Km;
+}
 
 void Enz::vSub( double n )
 {
@@ -97,7 +115,7 @@ void Enz::vProcess( const Eref& e, ProcPtr p )
 	cplxOut->send( e, r1_, r3_ + r2_ );
 
 	// cout << "	proc: " << r1_ << ", " << r2_ << ", " << r3_ << endl;
-	
+
 	r1_ = k1_;
 }
 
@@ -118,13 +136,14 @@ void Enz::vRemesh( const Eref& e )
 void Enz::vSetK1( const Eref& e, double v )
 {
 	r1_ = k1_ = v;
-	double volScale = 
-		convertConcToNumRateUsingMesh( e, subOut, 1 );
+	double volScale = convertConcToNumRateUsingMesh( e, enzOut, 1 );
 	Km_ = ( k2_ + k3_ ) / ( k1_ * volScale );
 }
 
 double Enz::vGetK1( const Eref& e ) const
 {
+	Enz* temp = const_cast< Enz* >( this );
+	temp->vSetKm( e, Km_ );
 	return k1_;
 }
 
@@ -141,7 +160,11 @@ double Enz::vGetK2( const Eref& e ) const
 
 void Enz::vSetKcat( const Eref& e, double v )
 {
-	double ratio = k2_ / k3_;
+	double ratio = 4.0;
+	if ( v < EPSILON )
+			v = EPSILON;
+	if (k3_ > EPSILON)
+		ratio = k2_ / k3_;
 	k3_ = v;
 	k2_ = v * ratio;
 	vSetKm( e, Km_ ); // Update k1_ here as well.
@@ -162,8 +185,8 @@ double Enz::vGetKcat( const Eref& e ) const
 void Enz::vSetKm( const Eref& e, double v )
 {
 	Km_ = v;
-	double volScale = 
-		convertConcToNumRateUsingMesh( e, subOut, 1 );
+	double volScale =
+		convertConcToNumRateUsingMesh( e, enzOut, 1 );
 	k1_ = ( k2_ + k3_ ) / ( v * volScale );
 }
 
@@ -174,22 +197,22 @@ double Enz::vGetKm( const Eref& e ) const
 
 void Enz::vSetNumKm( const Eref& e, double v )
 {
-	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
+	double volScale = convertConcToNumRateUsingMesh( e, enzOut, 1 );
 	k1_ = ( k2_ + k3_ ) / v;
 	Km_ = v / volScale;
 }
 
 double Enz::vGetNumKm( const Eref& e ) const
 {
-	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
+	double volScale = convertConcToNumRateUsingMesh( e, enzOut, 1 );
 	return Km_ * volScale;
 }
 
 void Enz::vSetRatio( const Eref& e, double v )
 {
 	k2_ = v * k3_;
-	double volScale = 
-		convertConcToNumRateUsingMesh( e, subOut, 1 );
+	double volScale =
+		convertConcToNumRateUsingMesh( e, enzOut, 1 );
 
 	k1_ = ( k2_ + k3_ ) / ( Km_ * volScale );
 }
@@ -205,7 +228,7 @@ void Enz::vSetConcK1( const Eref& e, double v )
 		cout << "Enz::vSetConcK1: Warning: value " << v << " too small\n";
 		return;
 	}
-	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
+	double volScale = convertConcToNumRateUsingMesh( e, enzOut, 1 );
 	r1_ = k1_ = v * volScale;
 	Km_ = ( k2_ + k3_ ) / ( v );
 }
@@ -218,4 +241,3 @@ double Enz::vGetConcK1( const Eref& e ) const
 	}
 	return ( k2_ + k3_ ) / Km_;
 }
-

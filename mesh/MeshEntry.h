@@ -15,11 +15,11 @@
  * the system
  */
 enum MeshType {
-	BAD, 
-	CUBOID, 
+	BAD,
+	CUBOID,
 	CYL, CYL_SHELL, CYL_SHELL_SEG,
 	SPHERE, SPHERE_SHELL, SPHERE_SHELL_SEG,
-	TETRAHEDRON, DISK
+	TETRAHEDRON, DISK, ENDO
 };
 
 class ChemCompt;
@@ -32,7 +32,7 @@ class ChemCompt;
  */
 class MeshEntry
 {
-	public: 
+	public:
 		MeshEntry();
 		MeshEntry( const ChemCompt* parent );
 		//////////////////////////////////////////////////////////////////
@@ -40,7 +40,7 @@ class MeshEntry
 		//////////////////////////////////////////////////////////////////
 
 		// volume of this MeshEntry
-		double getVolume( const Eref& e ) const; 
+		double getVolume( const Eref& e ) const;
 
 		/**
 		 * returns number of dimension
@@ -58,11 +58,12 @@ class MeshEntry
 		 * 6: spherical shell
 		 * 7: spherical shell segment
 		 * 8: Tetrahedral
+		 * 9: EndoMesh
 		 */
 		unsigned int getMeshType( const Eref& e ) const;
 
 		/**
-		 * Coords that define current MeshEntry. Usually generated on 
+		 * Coords that define current MeshEntry. Usually generated on
 		 * the fly by passing the current Field Index to the parent
 		 * ChemCompt subclass, which will figure it out.
 		 */
@@ -84,11 +85,11 @@ class MeshEntry
 		vector< double > getDiffusionScaling( const Eref& e) const;
 
 		/*
-		/// Coords that define current MeshEntry. Usually generated on 
+		/// Coords that define current MeshEntry. Usually generated on
 		/// the fly.
 		vector< double > coordinates() const;
 
-		/// Indices of other Entries that this one connects to, for 
+		/// Indices of other Entries that this one connects to, for
 		/// diffusion
 		vector< unsigned int > connected() const;
 
@@ -112,7 +113,7 @@ class MeshEntry
 		//////////////////////////////////////////////////////////////////
 		void triggerRemesh( const Eref& e,
 			double oldvol,
-			unsigned int startEntry, 
+			unsigned int startEntry,
 			const vector< unsigned int >& localIndices,
 			const vector< double >& vols );
 

@@ -116,11 +116,12 @@ int moose_Field_init(_Field * self, PyObject * args, PyObject * kwargs)
     }
     self->owner = ((_ObjId*)owner);
     Py_INCREF(self->owner);
-    ObjId tmp = ((_ObjId*)owner)->oid_;
-    size_t size = strlen(fieldName);
-    char * name = (char*)calloc(size+1, sizeof(char));
-    strncpy(name, fieldName, size);
-    self->name = name;
+    self->name = strdup(fieldName);
+    if (!self->name) {
+        PyErr_NoMemory();
+        return -1;
+    }
+
     // In earlier version I tried to deallocate the existing
     // self->name if it is not NULL. But it turns out that it
     // causes a SIGABRT. In any case it should not be an issue as
@@ -163,7 +164,6 @@ PyObject * moose_Field_repr(_Field * self)
     return PyString_FromString(fieldPath.str().c_str());
 }
 
-
 PyDoc_STRVAR(moose_Field_documentation,
              "Base class for MOOSE fields.\n"
              "\n"
@@ -175,8 +175,6 @@ PyDoc_STRVAR(moose_Field_documentation,
              "are putting fields as dictionary keys, you should do that after names\n"
              "of all elements have been finalized.\n"
              "\n");
-
-
 static PyTypeObject moose_Field =
 {
     PyVarObject_HEAD_INIT(NULL, 0)
@@ -319,7 +317,7 @@ PyObject * moose_DestField_call(PyObject * self, PyObject * args,
         PyObject * arg = PyTuple_GetItem(args, ii);
         Py_INCREF(arg);
         PyTuple_SetItem(newargs, ii+1, arg);
-        Py_DECREF(arg);
+        //Py_DECREF(arg);
     }
     // Call ObjId._setDestField with the new arguments
     PyObject * ret = moose_ObjId_setDestField(((_Field*)self)->owner, newargs);

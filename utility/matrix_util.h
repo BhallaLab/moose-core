@@ -19,7 +19,7 @@
 #ifndef  matrix_util_INC
 #define  matrix_util_INC
 
-#ifdef USE_BOOST
+#ifdef USE_BOOST_ODE
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include "boost/numeric/bindings/lapack/lapack.hpp"
@@ -38,5 +38,5 @@ void eliminateRowsBelow( ublas::matrix< value_type >& U, int start, int leftCol 
 
 unsigned int rankUsingBoost( ublas::matrix<value_type>& U );
 
-#endif 
+#endif
 #endif   /* ----- #ifndef matrix_util_INC  ----- */

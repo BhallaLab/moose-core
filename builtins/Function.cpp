@@ -1,81 +1,39 @@
-// Function.cpp --- 
-// 
-// Filename: Function.cpp
 // Description: Implementation of a wrapper around muParser.
 // Author: Subhasis Ray
 // Maintainer: Subhasis Ray
-// Created: Sat May 25 16:35:17 2013 (+0530)
-// Version: 
-// Last-Updated: Tue Jun 11 16:49:01 2013 (+0530)
-//           By: subha
-//     Update #: 619
-// URL: 
-// Keywords: 
-// Compatibility: 
-// 
-// 
 
-// Commentary: 
-// 
-// 
-// 
-// 
-
-// Change log:
-// 
-// 
-// 
-// 
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License as
-// published by the Free Software Foundation; either version 3, or
-// (at your option) any later version.
-// 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// General Public License for more details.
-// 
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program; see the file COPYING.  If not, write to
-// the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-// Floor, Boston, MA 02110-1301, USA.
-// 
-// 
-
-// Code:
-
-#include "header.h"
+#include "../basecode/header.h"
 #include "../utility/utility.h"
 #include "../utility/numutil.h"
+#include "../utility/print_function.hpp"
+#include "../builtins/MooseParser.h"
+
 #include "Variable.h"
-
 #include "Function.h"
-#include "ElementValueFinfo.h"
 
-#define PARSER_MAXVARS 100
-
+#include "../basecode/ElementValueFinfo.h"
 
 static const double TriggerThreshold = 0.0;
 
 static SrcFinfo1<double> *valueOut()
 {
     static SrcFinfo1<double> valueOut("valueOut",
-                                      "Evaluated value of the function for the current variable values.");
+            "Evaluated value of the function for the current variable values."
+            );
     return &valueOut;
 }
 
 static SrcFinfo1< double > *derivativeOut()
 {
     static SrcFinfo1< double > derivativeOut("derivativeOut",
-                                             "Value of derivative of the function for the current variable values");
+            "Value of derivative of the function for the current variable values");
     return &derivativeOut;
 }
 
 static SrcFinfo1< double > *rateOut()
 {
     static SrcFinfo1< double > rateOut("rateOut",
-                                             "Value of time-derivative of the function for the current variable values");
+            "Value of time-derivative of the function for the current variable values");
     return &rateOut;
 }
 
@@ -91,7 +49,7 @@ static SrcFinfo1< vector < double > *> *requestOut()
 const Cinfo * Function::initCinfo()
 {
     ////////////////////////////////////////////////////////////
-    // Value fields    
+    // Value fields
     ////////////////////////////////////////////////////////////
     static  ReadOnlyValueFinfo< Function, double > value(
         "value",
@@ -123,11 +81,21 @@ const Cinfo * Function::initCinfo()
     static ValueFinfo< Function, bool > useTrigger(
         "useTrigger",
         "When *false*, disables event-driven calculation and turns on "
-		"Process-driven calculations. \n"
+        "Process-driven calculations. \n"
         "When *true*, enables event-driven calculation and turns off "
-		"Process-driven calculations. \n",
+        "Process-driven calculations. \n"
+        "Defaults to *false*. \n",
         &Function::setUseTrigger,
         &Function::getUseTrigger);
+    static ValueFinfo< Function, bool > doEvalAtReinit(
+        "doEvalAtReinit",
+        "When *false*, disables function evaluation at reinit, and "
+        "just emits a value of zero to any message targets. \n"
+        "When *true*, does a function evaluation at reinit and sends "
+        "the computed value to any message targets. \n"
+        "Defaults to *false*. \n",
+        &Function::setDoEvalAtReinit,
+        &Function::getDoEvalAtReinit);
     static ElementValueFinfo< Function, string > expr(
         "expr",
         "Mathematical expression defining the function. The underlying parser\n"
@@ -150,7 +118,7 @@ const Cinfo * Function::initCinfo()
         "log2        1       logarithm to the base 2\n"
         "log10       1       logarithm to the base 10\n"
         "log         1       logarithm to the base 10\n"
-        "ln  1       logarithm to base e (2.71828...)\n"
+        "ln  	     1       logarithm to base e (2.71828...)\n"
         "exp         1       e raised to the power of x\n"
         "sqrt        1       square root of a value\n"
         "sign        1       sign function -1 if x<0; 1 if x>0\n"
@@ -160,46 +128,50 @@ const Cinfo * Function::initCinfo()
         "max         var.    max of all arguments\n"
         "sum         var.    sum of all arguments\n"
         "avg         var.    mean value of all arguments\n"
+        "rnd         0       rand(), random float between 0 and 1, honors global moose.seed.\n"
         "rand        1       rand(seed), random float between 0 and 1, \n"
-        "                    if seed = -1, then a 'random' seed is created.\n"
+        "                    if seed = -1, then a 'random' seed is used.\n"
         "rand2       3       rand(a, b, seed), random float between a and b, \n"
         "                    if seed = -1, a 'random' seed is created using either\n"
         "                    by random_device or by reading system clock\n"
         "\nOperators\n"
-        "Op  meaning         priority\n"
-        "=   assignment     -1\n"
-        "&&  logical and     1\n"
-        "||  logical or      2\n"
-        "<=  less or equal   4\n"
-        ">=  greater or equal        4\n"
-        "!=  not equal       4\n"
-        "==  equal   4\n"
-        ">   greater than    4\n"
-        "<   less than       4\n"
-        "+   addition        5\n"
-        "-   subtraction     5\n"
-        "*   multiplication  6\n"
-        "/   division        6\n"
-        "^   raise x to the power of y       7\n"
-        "%   floating point modulo         7\n"
+        "Op  meaning         		priority\n"
+        "=   assignment     		-1\n"
+        "&&  logical and     		1\n"
+        "||  logical or      		2\n"
+        "<=  less or equal   		4\n"
+        ">=  greater or equal  		4\n"
+        "!=  not equal         		4\n"
+        "==  equal   			4\n"
+        ">   greater than    		4\n"
+        "<   less than       		4\n"
+        "+   addition        		5\n"
+        "-   subtraction     		5\n"
+        "*   multiplication  		6\n"
+        "/   division        		6\n"
+        "^   raise x to the power of y  7\n"
+        "%   floating point modulo      7\n"
         "\n"
-        "?:  if then else operator   C++ style syntax\n",
+        "?:  if then else operator   	C++ style syntax\n",
         &Function::setExpr,
-        &Function::getExpr);
+        &Function::getExpr
+    );
 
     static ValueFinfo< Function, unsigned int > numVars(
         "numVars",
         "Number of variables used by Function.",
         &Function::setNumVar,
-        &Function::getNumVar);
-    
+        &Function::getNumVar
+    );
+
     static FieldElementFinfo< Function, Variable > inputs(
         "x",
         "Input variables to the function. These can be passed via messages.",
         Variable::initCinfo(),
         &Function::getVar,
         &Function::setNumVar,
-        &Function::getNumVar);
+        &Function::getNumVar
+    );
 
     static LookupValueFinfo < Function, string, double > constants(
         "c",
@@ -207,7 +179,7 @@ const Cinfo * Function::initCinfo()
         " specifying the function expression.",
         &Function::setConst,
         &Function::getConst);
-    
+
     static ReadOnlyValueFinfo< Function, vector < double > > y(
         "y",
         "Variable values received from target fields by requestOut",
@@ -229,11 +201,8 @@ const Cinfo * Function::initCinfo()
     static DestFinfo reinit( "reinit",
                              "Handles reinit call.",
                              new ProcOpFunc< Function >( &Function::reinit ) );
-    static Finfo* processShared[] =
-            {
-		&process, &reinit
-            };
-    
+    static Finfo* processShared[] = { &process, &reinit };
+
     static SharedFinfo proc( "proc",
                              "This is a shared message to receive Process messages "
                              "from the scheduler objects."
@@ -243,63 +212,65 @@ const Cinfo * Function::initCinfo()
                              "time, thread, dt and so on. The second entry is a MsgDest "
                              "for the Reinit operation. It also uses ProcInfo. ",
                              processShared, sizeof( processShared ) / sizeof( Finfo* )
-                             );
-	/*
-    static DestFinfo trigger( "trigger",
-		"Handles trigger input. Argument is timestamp of event. This is "
-		"compatible with spike events as well as chemical ones. ",
-        new OpFunc1< Function, double >( &Function::trigger ) );
-		*/
+                           );
+    /*
+       static DestFinfo trigger( "trigger",
+       "Handles trigger input. Argument is timestamp of event. This is "
+       "compatible with spike events as well as chemical ones. ",
+       new OpFunc1< Function, double >( &Function::trigger ) );
+       */
 
     static Finfo *functionFinfos[] =
-            {
-                &value,
-                &rate,
-                &derivative,
-                &mode,
-                &expr,
-                &numVars,
-                &inputs,
-                &constants,
-                &independent,
-                &proc,
-                requestOut(),
-                valueOut(),
-                rateOut(),
-                derivativeOut(),
-            };
-    
-    static string doc[] =
-            {
-                "Name", "Function",
-                "Author", "Subhasis Ray",
-                "Description",
-                "General purpose function calculator using real numbers.\n"
-                "It can parse mathematical expression defining a function and evaluate"
-                " it and/or its derivative for specified variable values."
-                "You can assign expressions of the form::\n"
-                "\n"
-                "f(c0, c1, ..., cM, x0, x1, ..., xN, y0,..., yP ) \n"
-                "\n"
-                " where `ci`'s are constants and `xi`'s and `yi`'s are variables."
+    {
+        &value,
+        &rate,
+        &derivative,
+        &mode,
+        &useTrigger,
+        &doEvalAtReinit,
+        &expr,
+        &numVars,
+        &inputs,
+        &constants,
+        &independent,
+        &proc,
+        requestOut(),
+        valueOut(),
+        rateOut(),
+        derivativeOut(),
+    };
 
-                "The constants must be defined before setting the expression and"
-                " variables are connected via messages. The constants can have any"
-                " name, but the variable names must be of the form x{i} or y{i}"
-                "  where i is increasing integer starting from 0.\n"
-                " The variables can be input from other moose objects."
-                " Such variables must be named `x{i}` in the expression and the source"
-                " field is connected to Function.x[i]'s `input` destination field.\n"
-                " In case the input variable is not available as a source field, but is"
-                " a value field, then the value can be requested by connecting the"
-                " `requestOut` message to the `get{Field}` destination on the target"
-                " object. Such variables must be specified in the expression as y{i}"
-                " and connecting the messages should happen in the same order as the"
-                " y indices.\n"
-                " This class handles only real numbers (C-double). Predefined constants"
-                " are: pi=3.141592..., e=2.718281..."
-            };
-    
+    static string doc[] =
+    {
+        "Name", "Function",
+        "Author", "Subhasis Ray",
+        "Description",
+        "General purpose function calculator using real numbers.\n"
+        "It can parse mathematical expression defining a function and evaluate"
+        " it and/or its derivative for specified variable values."
+        "You can assign expressions of the form::\n"
+        "\n"
+        "f(c0, c1, ..., cM, x0, x1, ..., xN, y0,..., yP ) \n"
+        "\n"
+        " where `ci`'s are constants and `xi`'s and `yi`'s are variables."
+
+        "The constants must be defined before setting the expression and"
+        " variables are connected via messages. The constants can have any"
+        " name, but the variable names must be of the form x{i} or y{i}"
+        "  where i is increasing integer starting from 0.\n"
+        " The variables can be input from other moose objects."
+        " Such variables must be named `x{i}` in the expression and the source"
+        " field is connected to Function.x[i]'s `input` destination field.\n"
+        " In case the input variable is not available as a source field, but is"
+        " a value field, then the value can be requested by connecting the"
+        " `requestOut` message to the `get{Field}` destination on the target"
+        " object. Such variables must be specified in the expression as y{i}"
+        " and connecting the messages should happen in the same order as the"
+        " y indices.\n"
+        " This class handles only real numbers (C-double). Predefined constants"
+        " are: pi=3.141592..., e=2.718281..."
+    };
+
     static Dinfo< Function > dinfo;
     static Cinfo functionCinfo("Function",
                                Neutral::initCinfo(),
@@ -309,23 +280,26 @@ const Cinfo * Function::initCinfo()
                                doc,
                                sizeof(doc)/sizeof(string));
     return &functionCinfo;
-                                                    
+
 }
 
 static const Cinfo * functionCinfo = Function::initCinfo();
 
 Function::Function(): _t(0.0), _valid(false), _numVar(0), _lastValue(0.0),
-    _value(0.0), _rate(0.0), _mode(1), 
-    _useTrigger( false ), _stoich(0)
+    _value(0.0), _rate(0.0), _mode(1),
+    _useTrigger( false ), _doEvalAtReinit( false ), _stoich(0)
 {
     _parser.SetVarFactory(_functionAddVar, this);
     _independent = "x0";
     //extendMuParser( );
 
     // Adding this default expression by default to avoid complains from GUI
-    try{
+    try
+    {
         _parser.SetExpr("0");
-    } catch (mu::Parser::exception_type &e) {
+    }
+    catch (moose::Parser::exception_type &e)
+    {
         _showError(e);
         _clearBuffer();
         return;
@@ -333,24 +307,13 @@ Function::Function(): _t(0.0), _valid(false), _numVar(0), _lastValue(0.0),
     _valid = true;
 }
 
-#if 0
-void Function::extendMuParser( void )
-{
-    // Adding pi and e, the defaults are `_pi` and `_e`
-    _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
-    _parser.DefineConst(_T("e"), (mu::value_type)M_E);
-    // Add support 
-    _parser.DefineVar( _T("t"),  &this->_t );
-    _parser.DefineOprt( _T("%"), &Function::muCallbackFMod, 7, mu::EOprtAssociativity::oaRIGHT, 0);
-}
-#endif
-
-Function::Function(const Function& rhs): _numVar(rhs._numVar),
+Function::Function(const Function& rhs):
+    _numVar(rhs._numVar),
     _lastValue(rhs._lastValue),
     _value(rhs._value), _rate(rhs._rate),
     _mode(rhs._mode),
     _useTrigger( rhs._useTrigger),
-    _stoich(0)
+    _stoich(nullptr)
 {
     static Eref er;
     _independent = rhs._independent;
@@ -359,10 +322,12 @@ Function::Function(const Function& rhs): _numVar(rhs._numVar),
     //extendMuParser( );
 
     // Copy the constants
-    mu::valmap_type cmap = rhs._parser.GetConst();
-    if (cmap.size()){
-        mu::valmap_type::const_iterator item = cmap.begin();
-        for (; item!=cmap.end(); ++item){
+    moose::Parser::valmap_type cmap = rhs._parser.GetConst();
+    if (cmap.size())
+    {
+        moose::Parser::valmap_type::const_iterator item = cmap.begin();
+        for (; item!=cmap.end(); ++item)
+        {
             _parser.DefineConst(item->first, item->second);
         }
     }
@@ -371,18 +336,20 @@ Function::Function(const Function& rhs): _numVar(rhs._numVar),
     setExpr(er, rhs.getExpr( er ));
     // Copy the values from the var pointers in rhs
     assert(_varbuf.size() == rhs._varbuf.size());
-    for (unsigned int ii = 0; ii < rhs._varbuf.size(); ++ii){
+    for (unsigned int ii = 0; ii < rhs._varbuf.size(); ++ii)
+    {
         _varbuf[ii]->value = rhs._varbuf[ii]->value;
     }
     assert(_pullbuf.size() == rhs._pullbuf.size());
-    for (unsigned int ii = 0; ii < rhs._pullbuf.size(); ++ii){
+    for (unsigned int ii = 0; ii < rhs._pullbuf.size(); ++ii)
+    {
         *_pullbuf[ii] = *(rhs._pullbuf[ii]);
     }
 }
 
 Function& Function::operator=(const Function rhs)
 {
-	static Eref er;
+    static Eref er;
     _clearBuffer();
     _mode = rhs._mode;
     _lastValue = rhs._lastValue;
@@ -390,24 +357,28 @@ Function& Function::operator=(const Function rhs)
     _rate = rhs._rate;
     _independent = rhs._independent;
     // Adding pi and e, the defaults are `_pi` and `_e`
-    _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
-    _parser.DefineConst(_T("e"), (mu::value_type)M_E);
+    _parser.DefineConst(_T("pi"), (moose::Parser::value_type)M_PI);
+    _parser.DefineConst(_T("e"), (moose::Parser::value_type)M_E);
     // Copy the constants
-    mu::valmap_type cmap = rhs._parser.GetConst();
-    if (cmap.size()){
-        mu::valmap_type::const_iterator item = cmap.begin();
-        for (; item!=cmap.end(); ++item){
+    moose::Parser::valmap_type cmap = rhs._parser.GetConst();
+    if (cmap.size())
+    {
+        moose::Parser::valmap_type::const_iterator item = cmap.begin();
+        for (; item!=cmap.end(); ++item)
+        {
             _parser.DefineConst(item->first, item->second);
         }
     }
     // Copy the values from the var pointers in rhs
     setExpr(er, rhs.getExpr( er ));
     assert(_varbuf.size() == rhs._varbuf.size());
-    for (unsigned int ii = 0; ii < rhs._varbuf.size(); ++ii){
+    for (unsigned int ii = 0; ii < rhs._varbuf.size(); ++ii)
+    {
         _varbuf[ii]->value = rhs._varbuf[ii]->value;
     }
     assert(_pullbuf.size() == rhs._pullbuf.size());
-    for (unsigned int ii = 0; ii < rhs._pullbuf.size(); ++ii){
+    for (unsigned int ii = 0; ii < rhs._pullbuf.size(); ++ii)
+    {
         *_pullbuf[ii] = *(rhs._pullbuf[ii]);
     }
     return *this;
@@ -415,8 +386,8 @@ Function& Function::operator=(const Function rhs)
 
 Function::~Function()
 {
-        _clearBuffer();
- }
+    _clearBuffer();
+}
 
 // do not know what to do about Variables that have already been
 // connected by message.
@@ -424,28 +395,28 @@ void Function::_clearBuffer()
 {
     _numVar = 0;
     _parser.ClearVar();
-    for (unsigned int ii = 0; ii < _varbuf.size(); ++ii){
-        if ( _varbuf[ii] ){
+    for (unsigned int ii = 0; ii < _varbuf.size(); ++ii)
+    {
+        if ( _varbuf[ii] )
+        {
             delete _varbuf[ii];
         }
     }
     _varbuf.clear();
-    for (unsigned int ii = 0; ii < _pullbuf.size(); ++ii){
-        if ( _pullbuf[ii] ){
+    for (unsigned int ii = 0; ii < _pullbuf.size(); ++ii)
+    {
+        if ( _pullbuf[ii] )
+        {
             delete _pullbuf[ii];
         }
     }
     _pullbuf.clear();
 }
 
-void Function::_showError(mu::Parser::exception_type &e) const
+void Function::_showError(moose::Parser::exception_type &e) const
 {
-    cout << "Error occurred in parser.\n" 
-         << "Message:  " << e.GetMsg() << "\n"
-         << "Formula:  " << e.GetExpr() << "\n"
-         << "Token:    " << e.GetToken() << "\n"
-         << "Position: " << e.GetPos() << "\n"
-         << "Error code:     " << e.GetCode() << endl;
+    cerr << "Error occurred in parser.\n"
+         << "Message:  " << e.GetMsg() << endl;
 }
 
 /**
@@ -472,39 +443,53 @@ double * _functionAddVar(const char *name, void *data)
     Function* function = reinterpret_cast< Function * >(data);
     double * ret = NULL;
     string strname(name);
+
     // Names starting with x are variables, everything else is constant.
-    if (strname[0] == 'x'){
+    if (name[0] == 'x')
+    {
         int index = atoi(strname.substr(1).c_str());
-        if ((unsigned)index >= function->_varbuf.size()){
+        if ((unsigned)index >= function->_varbuf.size())
+        {
             function->_varbuf.resize(index+1, 0);
-            for (int ii = 0; ii <= index; ++ii){
-                if (function->_varbuf[ii] == 0){
+            for (int ii = 0; ii <= index; ++ii)
+            {
+                if (function->_varbuf[ii] == 0)
+                {
                     function->_varbuf[ii] = new Variable();
                 }
             }
             function->_numVar = function->_varbuf.size();
         }
-        ret = &(function->_varbuf[index]->value);        
-    } else if (strname[0] == 'y'){
+        ret = &(function->_varbuf[index]->value);
+    }
+    else if (name[0] == 'y')
+    {
         int index = atoi(strname.substr(1).c_str());
-        if ((unsigned)index >= function->_pullbuf.size()){
+        if ((unsigned)index >= function->_pullbuf.size())
+        {
             function->_pullbuf.resize(index+1, 0 );
-            for (int ii = 0; ii <= index; ++ii){
-                if (function->_pullbuf[ii] == 0){
+            for (int ii = 0; ii <= index; ++ii)
+            {
+                if (function->_pullbuf[ii] == 0)
+                {
                     function->_pullbuf[ii] = new double();
                 }
             }
         }
-        ret = function->_pullbuf[index];        
-    } else if (strname == "t"){
+        ret = function->_pullbuf[index];
+    }
+    else if (strname == "t")
+    {
         ret = &function->_t;
-    } else {
-        cerr << "Got an undefined symbol: " << name << endl
-             << "Variables must be named xi, yi, where i is integer index."
-	     << " You must define the constants beforehand using LookupField c: c[name]"
-                " = value"
-             << endl;
-        throw mu::ParserError("Undefined constant.");
+    }
+    else
+    {
+        MOOSE_WARN( "Got an undefined symbol: " << strname << ".\n"
+                    << "Variables must be named xi, yi, where i is integer index."
+                    << " You must define the constants beforehand using LookupField c: c[name]"
+                    " = value"
+                  );
+        throw moose::Parser::exception_type("Undefined constant.");
     }
 
     return ret;
@@ -526,24 +511,12 @@ double * _functionAddVar(const char *name, void *data)
  */
 unsigned int Function::addVar()
 {
-//     unsigned int newVarIndex = _numVar;
-//     ++_numVar;
-//     stringstream name;
-//     name << "x" << newVarIndex;
-//     _functionAddVar(name.str().c_str(), this);
-    //     return newVarIndex;
     return 0;
 }
 
-// void Function::dropVar(unsigned int msgLookup)
-// {
-//     // Don't know what this can possibly mean in the context of
-//     // evaluating a set expression.
-// }
-
 void Function::setExpr(const Eref& eref, string expr)
 {
-	this->innerSetExpr( eref, expr ); // Refer to the virtual function here.
+    this->innerSetExpr( eref, expr ); // Refer to the virtual function here.
 }
 
 // Virtual function, this does the work.
@@ -553,10 +526,13 @@ void Function::innerSetExpr(const Eref& eref, string expr)
     _clearBuffer();
     _varbuf.resize(_numVar);
     // _pullbuf.resize(_num
-    mu::varmap_type vars;
-    try{
+    moose::Parser::varmap_type vars;
+    try
+    {
         _parser.SetExpr(expr);
-    } catch (mu::Parser::exception_type &e) {
+    }
+    catch (moose::Parser::exception_type &e)
+    {
         cerr << "Error setting expression on: " << eref.objId().path() << endl;
         _showError(e);
         _clearBuffer();
@@ -564,17 +540,21 @@ void Function::innerSetExpr(const Eref& eref, string expr)
     }
     // Force variable creation right away. Otherwise numVar does not
     // get set properly
-    try{
+    try
+    {
         _parser.Eval();
         _valid = true;
-    } catch (mu::Parser::exception_type &e){
+    }
+    catch (moose::Parser::exception_type &e)
+    {
         _showError(e);
     }
 }
 
 string Function::getExpr( const Eref& e ) const
 {
-    if (!_valid){
+    if (!_valid)
+    {
         cout << "Error: " << e.objId().path() << "::getExpr() - invalid parser state" << endl;
         return "";
     }
@@ -601,16 +581,30 @@ bool Function::getUseTrigger() const
     return _useTrigger;
 }
 
+void Function::setDoEvalAtReinit(bool doEvalAtReinit )
+{
+    _doEvalAtReinit = doEvalAtReinit;
+}
+
+bool Function::getDoEvalAtReinit() const
+{
+    return _doEvalAtReinit;
+}
+
 double Function::getValue() const
 {
     double value = 0.0;
-    if (!_valid){
-        cout << "Error: Function::getValue() - invalid state" << endl;        
+    if (!_valid)
+    {
+        cout << "Error: Function::getValue() - invalid state" << endl;
         return value;
     }
-    try{
+    try
+    {
         value = _parser.Eval();
-    } catch (mu::Parser::exception_type &e){
+    }
+    catch (moose::Parser::exception_type &e)
+    {
         _showError(e);
     }
     return value;
@@ -618,8 +612,9 @@ double Function::getValue() const
 
 double Function::getRate() const
 {
-    if (!_valid){
-        cout << "Error: Function::getValue() - invalid state" << endl;        
+    if (!_valid)
+    {
+        cout << "Error: Function::getValue() - invalid state" << endl;
     }
     return _rate;
 }
@@ -637,7 +632,8 @@ string Function::getIndependent() const
 vector< double > Function::getY() const
 {
     vector < double > ret(_pullbuf.size());
-    for (unsigned int ii = 0; ii < ret.size(); ++ii){
+    for (unsigned int ii = 0; ii < ret.size(); ++ii)
+    {
         ret[ii] = *_pullbuf[ii];
     }
     return ret;
@@ -645,17 +641,22 @@ vector< double > Function::getY() const
 
 double Function::getDerivative() const
 {
-    double value = 0.0;    
-    if (!_valid){
-        cout << "Error: Function::getDerivative() - invalid state" << endl;        
+    double value = 0.0;
+    if (!_valid)
+    {
+        cout << "Error: Function::getDerivative() - invalid state" << endl;
         return value;
     }
-    mu::varmap_type variables = _parser.GetVar();
-    mu::varmap_type::const_iterator item = variables.find(_independent);
-    if (item != variables.end()){
-        try{
+    moose::Parser::varmap_type variables = _parser.GetVar();
+    moose::Parser::varmap_type::const_iterator item = variables.find(_independent);
+    if (item != variables.end())
+    {
+        try
+        {
             value = _parser.Diff(item->second, *(item->second));
-        } catch (mu::Parser::exception_type &e){
+        }
+        catch (moose::Parser::exception_type &e)
+        {
             _showError(e);
         }
     }
@@ -665,11 +666,8 @@ double Function::getDerivative() const
 void Function::setNumVar(const unsigned int num)
 {
     _clearBuffer();
-    for (unsigned int ii = 0; ii < num; ++ii){
-        stringstream name;
-        name << "x" << ii;
-        _functionAddVar(name.str().c_str(), this);
-    }
+    for (unsigned int ii = 0; ii < num; ++ii)
+        _functionAddVar( ("x"+std::to_string(ii)).c_str(), this);
 }
 
 unsigned int Function::getNumVar() const
@@ -679,10 +677,13 @@ unsigned int Function::getNumVar() const
 
 void Function::setVar(unsigned int index, double value)
 {
-	cout << "varbuf[" << index << "]->setValue(" << value << ")\n";
-    if (index < _varbuf.size()){    
+    cout << "varbuf[" << index << "]->setValue(" << value << ")\n";
+    if (index < _varbuf.size())
+    {
         _varbuf[index]->setValue(value);
-    } else {
+    }
+    else
+    {
         cerr << "Function: index " << index << " out of bounds." << endl;
     }
 }
@@ -690,7 +691,8 @@ void Function::setVar(unsigned int index, double value)
 Variable * Function::getVar(unsigned int ii)
 {
     static Variable dummy;
-    if ( ii < _varbuf.size()){
+    if ( ii < _varbuf.size())
+    {
         return _varbuf[ii];
     }
     cout << "Warning: Function::getVar: index: "
@@ -706,102 +708,114 @@ void Function::setConst(string name, double value)
 
 double Function::getConst(string name) const
 {
-    mu::valmap_type cmap = _parser.GetConst();
-    if (cmap.size()){
-        mu::valmap_type::const_iterator it = cmap.find(name);
-        if (it != cmap.end()){
+    auto cmap = _parser.GetConst();
+    if (cmap.size())
+    {
+        auto it = cmap.find(name);
+        if (it != cmap.end())
             return it->second;
-        }
     }
     return 0;
 }
 
 void Function::process(const Eref &e, ProcPtr p)
 {
-    if (!_valid){
+    if (!_valid)
+    {
         return;
     }
     vector < double > databuf;
     requestOut()->send(e, &databuf);
     for (unsigned int ii = 0;
-         (ii < databuf.size()) && (ii < _pullbuf.size());
-         ++ii){
-        *_pullbuf[ii] = databuf[ii];        
+            (ii < databuf.size()) && (ii < _pullbuf.size());
+            ++ii)
+    {
+        *_pullbuf[ii] = databuf[ii];
     }
     _t = p->currTime;
     _value = getValue();
     _rate = (_value - _lastValue) / p->dt;
-	if ( _useTrigger && _value < TriggerThreshold ) {
-    	_lastValue = _value;
-		return;
-	}
-    switch (_mode){
-        case 1: {
-            valueOut()->send(e, _value);
-            break;
-        }
-        case 2: {
-            derivativeOut()->send(e, getDerivative());
-            break;
-        }
-        case 3: {
-            rateOut()->send(e, _rate);
-            break;
-        }
-        default: {
-            valueOut()->send(e, _value);
-            derivativeOut()->send(e, getDerivative());
-            rateOut()->send(e, _rate);
-            break;
-        }
+    if ( _useTrigger && _value < TriggerThreshold )
+    {
+        _lastValue = _value;
+        return;
+    }
+    switch (_mode)
+    {
+    case 1:
+    {
+        valueOut()->send(e, _value);
+        return;
+    }
+    case 2:
+    {
+        derivativeOut()->send(e, getDerivative());
+        return;
+    }
+    case 3:
+    {
+        rateOut()->send(e, _rate);
+        return;
+    }
+    default:
+    {
+        valueOut()->send(e, _value);
+        derivativeOut()->send(e, getDerivative());
+        rateOut()->send(e, _rate);
+        return;
+    }
     }
     _lastValue = _value;
 }
 
 void Function::reinit(const Eref &e, ProcPtr p)
 {
-    if (!_valid){
+    if (!_valid)
+    {
         cout << "Error: Function::reinit() - invalid parser state. Will do nothing." << endl;
         return;
     }
-    if (moose::trim(_parser.GetExpr(), " \t\n\r").length() == 0){
+    if (moose::trim(_parser.GetExpr(), " \t\n\r").length() == 0)
+    {
         cout << "Error: no expression set. Will do nothing." << endl;
         setExpr(e, "0.0");
         _valid = false;
     }
     _t = p->currTime;
-    _value = 0.0;
-    _lastValue = 0.0;
+    if (_doEvalAtReinit)
+    {
+        _lastValue = _value = getValue();
+    }
+    else
+    {
+        _lastValue = _value = 0.0;
+    }
     _rate = 0.0;
-    switch (_mode){
-        case 1: {
-            valueOut()->send(e, _value);
-            break;
-        }
-        case 2: {
-            derivativeOut()->send(e, 0.0);
-            break;
-        }
-        case 3: {
-            rateOut()->send(e, _rate);
-            break;
-        }
-        default: {
-            valueOut()->send(e, _value);
-            derivativeOut()->send(e, 0.0);
-            rateOut()->send(e, _rate);
-            break;
-        }
+    switch (_mode)
+    {
+    case 1:
+    {
+        valueOut()->send(e, _value);
+        break;
+    }
+    case 2:
+    {
+        derivativeOut()->send(e, 0.0);
+        break;
+    }
+    case 3:
+    {
+        rateOut()->send(e, _rate);
+        break;
+    }
+    default:
+    {
+        valueOut()->send(e, _value);
+        derivativeOut()->send(e, 0.0);
+        rateOut()->send(e, _rate);
+        break;
+    }
     }
 }
 
-#if 0
-mu::value_type Function::muCallbackFMod( mu::value_type a, mu::value_type b)
-{
-    cerr << "Callback: " << a << " " << b << endl;
-    return fmod(a, b);
-}
-#endif
-
-// 
 // Function.cpp ends here

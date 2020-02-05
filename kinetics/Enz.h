@@ -12,7 +12,7 @@
 
 class Enz: public CplxEnzBase
 {
-	public: 
+	public:
 		Enz();
 		~Enz();
 
@@ -37,6 +37,11 @@ class Enz: public CplxEnzBase
 		double vGetRatio( const Eref& e ) const;
 		void vSetConcK1( const Eref& e, double v );
 		double vGetConcK1( const Eref& e ) const;
+
+		//////////////////////////////////////////////////////////////////
+		// Dest funcs, not virtual
+		//////////////////////////////////////////////////////////////////
+		void setKmK1( double Km, double k1 );
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs, all virtual

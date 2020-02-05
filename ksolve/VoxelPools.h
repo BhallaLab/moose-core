@@ -1,6 +1,5 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
-#include <boost/numeric/odeint.hpp>
 ** Messaging Object Oriented Simulation Environment.
 **           Copyright (C) 2003-2014 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
@@ -14,7 +13,7 @@
 #include "OdeSystem.h"
 #include "VoxelPoolsBase.h"
 
-#ifdef USE_BOOST
+#ifdef USE_BOOST_ODE
 #include "BoostSys.h"
 #endif
 
@@ -52,15 +51,11 @@ public:
     /// Set initial timestep to use by the solver.
     void setInitDt( double dt );
 
-#ifdef USE_GSL      /* -----  not USE_BOOST  ----- */
+#ifdef USE_GSL      /* -----  not USE_BOOST_ODE  ----- */
     static int gslFunc( double t, const double* y, double *dydt, void* params);
-#elif  USE_BOOST
-    static void evalRates( const vector_type_& y 
-                ,  vector_type_& dydt
-                ,  const double t 
-                , VoxelPools* vp
-                );
-#endif     /* -----  not USE_BOOST  ----- */
+#elif  USE_BOOST_ODE
+    static void evalRates( VoxelPools* vp, const vector_type_& y, vector_type_& dydt );
+#endif     /* -----  not USE_BOOST_ODE  ----- */
 
     //////////////////////////////////////////////////////////////////
     // Rate manipulation and calculation functions
@@ -95,11 +90,6 @@ public:
     void updateReacVelocities(
         const double* s, vector< double >& v ) const;
 
-    /**
-     * Changes cross rate terms to zero if there is no junction
-    void filterCrossRateTerms( const vector< pair< Id, Id > >& vec );
-     */
-
     /// Used for debugging.
     void print() const;
 private:
@@ -107,9 +97,11 @@ private:
 #ifdef USE_GSL
     gsl_odeiv2_driver* driver_;
     gsl_odeiv2_system sys_;
-#elif USE_BOOST
-    BoostSys sys_;
 #endif
+
+    double epsAbs_;
+    double epsRel_;
+    string method_;
 
 };
 

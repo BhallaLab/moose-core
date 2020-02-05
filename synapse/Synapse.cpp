@@ -7,7 +7,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
+#include "../basecode/header.h"
+#include "../basecode/ElementValueFinfo.h"
 #include "SynHandlerBase.h"
 #include "Synapse.h"
 
@@ -26,6 +27,13 @@ const Cinfo* Synapse::initCinfo()
 			&Synapse::setDelay,
 			&Synapse::getDelay
 		);
+		static ElementValueFinfo< Synapse, double > spikeTime(
+			"spikeTime",
+			"Value field interface to add spike (by assignment) and to "
+			"read the value of the spike on top of the queue.",
+			&Synapse::addSpike,
+			&Synapse::getTopSpike
+		);
 
 		static DestFinfo addSpike( "addSpike",
 			"Handles arriving spike messages, inserts into event queue.",
@@ -34,10 +42,11 @@ const Cinfo* Synapse::initCinfo()
 	static Finfo* synapseFinfos[] = {
 		&weight,		// Field
 		&delay,			// Field
+		&spikeTime,		// ElementField
 		&addSpike,		// DestFinfo
 	};
 
-	static string doc[] = 
+	static string doc[] =
 	{
 		"Name", "Synapse",
 		"Author", "Upi Bhalla",
@@ -103,6 +112,11 @@ void Synapse::addSpike( const Eref& e, double time )
 	handler_->addSpike( e.fieldIndex(), time + delay_, weight_ );
 }
 
+double Synapse::getTopSpike( const Eref& e ) const
+{
+	return handler_->getTopSpike( e.fieldIndex() );
+}
+
 /////////////////////////////////////////////////////////////
 // Callbacks for message add/drop
 /////////////////////////////////////////////////////////////
@@ -110,15 +124,15 @@ void Synapse::addSpike( const Eref& e, double time )
 // static function, executed by the Synapse Element when a message is
 // added to the Element. Expands the parent synapse array to fit.
 void Synapse::addMsgCallback(
-				const Eref& e, const string& finfoName, 
+				const Eref& e, const string& finfoName,
 			    ObjId msg, unsigned int msgLookup )
 {
 	if ( finfoName == "addSpike" ) {
 		ObjId pa = Neutral::parent( e );
-		SynHandlerBase* sh = 
+		SynHandlerBase* sh =
 				reinterpret_cast< SynHandlerBase* >( pa.data() );
 		unsigned int synapseNumber = sh->addSynapse();
-		SetGet2< unsigned int, unsigned int >::set( 
+		SetGet2< unsigned int, unsigned int >::set(
 						msg, "fieldIndex", msgLookup, synapseNumber );
 	}
 }
@@ -129,12 +143,12 @@ void Synapse::addMsgCallback(
 // unused entry. Could even reuse if a synapse is added later, but all
 // this policy is independent of the Synapse class.
 void Synapse::dropMsgCallback(
-				const Eref& e, const string& finfoName, 
+				const Eref& e, const string& finfoName,
 			    ObjId msg, unsigned int msgLookup )
 {
 	if ( finfoName == "addSpike" ) {
 		ObjId pa = Neutral::parent( e );
-		SynHandlerBase* sh = 
+		SynHandlerBase* sh =
 				reinterpret_cast< SynHandlerBase* >( pa.data() );
 		sh->dropSynapse( msgLookup );
 	}

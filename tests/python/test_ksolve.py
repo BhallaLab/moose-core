@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 import numpy as np
 import time
@@ -31,7 +32,8 @@ ksolve = moose.Ksolve( '/compt/ksolve' )
 stoich = moose.Stoich( '/compt/stoich' )
 stoich.compartment = compt
 stoich.ksolve = ksolve
-stoich.path = '/compt/##' 
+ksolve.numThreads = 2
+stoich.path = '/compt/##'
 moose.reinit()
 print( '[INFO] Using method = %s' % ksolve.method )
 t1 = time.time()
@@ -42,7 +44,7 @@ expected = [ 7.77859 , 2.77858 , 2.27541 , 6.12141 , 7.77858 , 2.77858
         , 2.77858 , 2.27541 , 6.12141 , 7.77858 , 2.77858 , 2.27541 , 6.12141
         , 7.77858 , 2.77858 , 2.27541 , 6.12141 , 7.77858 , 2.77858 , 2.27541
         , 6.12141 , 7.77858 , 2.77858 , 2.27541 , 6.12141 , 7.77858 , 2.77858
-        , 2.27541 , 6.12141 , 7.77858 , 2.77858 , 2.27541 , 6.12141 
+        , 2.27541 , 6.12141 , 7.77858 , 2.77858 , 2.27541 , 6.12141
         ]
 concs = [ p.conc for p in pools ]
 if(not np.isclose( concs, expected ).all() ):

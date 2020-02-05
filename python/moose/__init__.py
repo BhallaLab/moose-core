@@ -1,29 +1,18 @@
-"""
-How to use the documentation
-----------------------------
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function
 
-MOOSE documentation is split into Python documentation and builtin
-documentation. The functions and classes that are only part of the
-Python interface can be viewed via Python's builtin ``help``
-function::
+# Use this format in all logger inside logger. Define it before any moose
+# related module is imported.
+LOGGING_FORMAT = '%(asctime)s %(message)s'
 
->>> help(moose.connect)
+# Bring everything from c++ module to global namespace. Not everything is
+# imported by the pervios import statement.
+from moose._moose import *
 
-The documentation built into main C++ code of MOOSE can be accessed
-via the module function ``doc``::
+# Bring everything from moose.py to global namespace. 
+# IMP: It will overwrite any c++ function with the same name. 
+from moose.moose import *
+from moose.server import *
 
->>> moose.doc('Neutral')
-
-To get documentation about a particular field::
-
->>> moose.doc('Neutral.childMsg')
-
-Builtin functions and classes in moose module (Python only)
------------------------------------------------------------
-
-"""
-from .moose import *
-
-# Wrapper to get moose version information.
-__version__ = moose._moose.__version__
-VERSION = moose._moose.VERSION
+# create a shorthand for version() call here.
+__version__ = version()

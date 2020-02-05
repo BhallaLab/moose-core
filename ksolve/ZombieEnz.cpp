@@ -6,12 +6,11 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#include "header.h"
-
-#include "lookupVolumeFromMesh.h"
+#include "../basecode/header.h"
+#include "../kinetics/lookupVolumeFromMesh.h"
 #include "RateTerm.h"
 #include "FuncTerm.h"
-#include "SparseMatrix.h"
+#include "../basecode/SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
@@ -19,9 +18,11 @@
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
 
-#include "EnzBase.h"
-#include "CplxEnzBase.h"
+#include "../kinetics/EnzBase.h"
+#include "../kinetics/CplxEnzBase.h"
 #include "ZombieEnz.h"
+
+#define EPSILON 1e-15
 
 const Cinfo* ZombieEnz::initCinfo()
 {
@@ -59,7 +60,7 @@ static const SrcFinfo2< double, double >* subOut =
 //////////////////////////////////////////////////////////////
 
 ZombieEnz::ZombieEnz( )
-		: 
+		:
 				stoich_( 0 ),
 				concK1_( 1.0 )
 { ; }
@@ -73,9 +74,9 @@ ZombieEnz::~ZombieEnz( )
 
 /*
 void ZombieEnz::vRemesh( const Eref& e )
-{   
+{
 	stoich_->setEnzK1( e, concK1_ );
-}   
+}
 */
 
 
@@ -86,7 +87,7 @@ void ZombieEnz::vRemesh( const Eref& e )
 // v is in number units.
 void ZombieEnz::vSetK1( const Eref& e, double v )
 {
-	double volScale = 
+	double volScale =
 		convertConcToNumRateUsingMesh( e, subOut, true );
 
 	concK1_ = v * volScale;
@@ -97,7 +98,7 @@ void ZombieEnz::vSetK1( const Eref& e, double v )
 double ZombieEnz::vGetK1( const Eref& e ) const
 {
 	// return stoich_->getEnzNumK1( e );
-	double volScale = 
+	double volScale =
 		convertConcToNumRateUsingMesh( e, subOut, true );
 
 	return concK1_ / volScale;
@@ -115,7 +116,20 @@ double ZombieEnz::vGetK2( const Eref& e ) const
 
 void ZombieEnz::vSetKcat( const Eref& e, double v )
 {
+	double k2 = getK2( e );
+	double k3 = getKcat( e );
+	double ratio = 4.0;
+	if ( v < EPSILON )
+		v = EPSILON;
+	if ( k3 > EPSILON ) {
+		ratio = k2/k3;
+	}
+	double Km = (k2 + k3) / concK1_;
+	concK1_ = v * (1.0 + ratio) / Km;
+
+	stoich_->setEnzK1( e, concK1_ );
 	stoich_->setEnzK3( e, v );
+	stoich_->setEnzK2( e, v * ratio );
 }
 
 double ZombieEnz::vGetKcat( const Eref& e ) const
@@ -144,7 +158,7 @@ void ZombieEnz::vSetNumKm( const Eref& e, double v )
 {
 	double k2 = getK2( e );
 	double k3 = getKcat( e );
-	double volScale = 
+	double volScale =
 		convertConcToNumRateUsingMesh( e, subOut, 1 );
 	concK1_ = ( k2 + k3 ) / ( v * volScale );
 
@@ -155,7 +169,7 @@ double ZombieEnz::vGetNumKm( const Eref& e ) const
 {
 	double k2 = vGetK2( e );
 	double k3 = vGetKcat( e );
-	double volScale = 
+	double volScale =
 		convertConcToNumRateUsingMesh( e, subOut, 1 );
 
 	return volScale * ( k2 + k3 ) / concK1_;
@@ -213,23 +227,29 @@ void ZombieEnz::setSolver( Id stoich, Id enz )
 	vector< Id > cplxMols;
 	bool isOK = true;
 	unsigned int numReactants;
-	numReactants = enz.element()->getNeighbors( enzMols, enzFinfo ); 
-	isOK &= ( numReactants == 1 );
+	numReactants = enz.element()->getNeighbors( enzMols, enzFinfo );
+	bool hasEnz = ( numReactants == 1 );
 	vector< Id > subs;
-	numReactants = enz.element()->getNeighbors( subs, subFinfo ); 
-	isOK &= ( numReactants > 0 );
-	numReactants = enz.element()->getNeighbors( cplxMols, cplxFinfo ); 
-	isOK &= ( numReactants == 1 );
+	numReactants = enz.element()->getNeighbors( subs, subFinfo );
+	bool hasSubs = ( numReactants > 0 );
+	numReactants = enz.element()->getNeighbors( cplxMols, cplxFinfo );
+	bool hasCplx = ( numReactants == 1 );
 	vector< Id > prds;
-	numReactants = enz.element()->getNeighbors( prds, prdFinfo ); 
-	isOK &= ( numReactants > 0 );
+	numReactants = enz.element()->getNeighbors( prds, prdFinfo );
+	bool hasPrds = ( numReactants > 0 );
 	assert( stoich.element()->cinfo()->isA( "Stoich" ) );
 	stoich_ = reinterpret_cast< Stoich* >( stoich.eref().data() );
 
-	if ( isOK ) {
+	if ( hasEnz && hasSubs && hasCplx && hasPrds ) {
 		stoich_->installEnzyme( enz, enzMols[0], cplxMols[0], subs, prds );
 	} else {
 		stoich_->installDummyEnzyme( enz, Id() );
-		cout << "Warning: ZombieEnz:setSolver: Dangling Enz, missing a substrate or product\n"; 
+		string msg = "";
+		if ( !hasEnz ) msg = msg + " enzyme";
+		if ( !hasCplx ) msg = msg + " enzyme-substrate complex";
+		if ( !hasSubs ) msg = msg + " substrates";
+		if ( !hasPrds ) msg = msg + " products";
+		cout << "Warning: ZombieEnz:setSolver: Dangling Enz '" <<
+			enz.path() << "':\nMissing " << msg << endl;
 	}
 }

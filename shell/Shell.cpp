@@ -8,28 +8,28 @@
 **********************************************************************/
 
 #include <string>
-using namespace std;
+#include <algorithm>
+#include <chrono>
 
+#include "../basecode/header.h"
+#include "../basecode/global.h"
+#include "../basecode/Dinfo.h"
+#include "../basecode/SparseMatrix.h"
 
-#include "header.h"
-#include "global.h"
-#include "SingleMsg.h"
-#include "DiagonalMsg.h"
-#include "OneToOneMsg.h"
-#include "OneToAllMsg.h"
-#include "SparseMatrix.h"
-#include "SparseMsg.h"
+#include "../msg/SingleMsg.h"
+#include "../msg/DiagonalMsg.h"
+#include "../msg/OneToOneMsg.h"
+#include "../msg/OneToAllMsg.h"
+#include "../msg/SparseMsg.h"
+#include "../builtins/SocketStreamer.h"
+#include "../builtins/Streamer.h"
+
 #include "Shell.h"
-#include "Dinfo.h"
 #include "Wildcard.h"
+
 
 // Want to separate out this search path into the Makefile options
 #include "../scheduling/Clock.h"
-
-#ifdef USE_SBML
-#include "../sbml/MooseSbmlWriter.h"
-#include "../sbml/MooseSbmlReader.h"
-#endif
 
 const unsigned int Shell::OkStatus = ~0;
 const unsigned int Shell::ErrorStatus = ~1;
@@ -46,12 +46,9 @@ bool Shell::doReinit_( 0 );
 bool Shell::isParserIdle_( 0 );
 double Shell::runtime_( 0.0 );
 
+
 const Cinfo* Shell::initCinfo()
 {
-
-#ifdef ENABLE_LOGGER
-    clock_t t = clock();
-#endif
 
 ////////////////////////////////////////////////////////////////
 // Value Finfos
@@ -67,65 +64,68 @@ const Cinfo* Shell::initCinfo()
         &Shell::setCwe,
         &Shell::getCwe );
 
-////////////////////////////////////////////////////////////////
-// Dest Finfos: Functions handled by Shell
-////////////////////////////////////////////////////////////////
-    static DestFinfo handleUseClock( "useClock",
-                                     "Deals with assignment of path to a given clock."
-                                     " Arguments: path, field, tick number. ",
-                                     new EpFunc4< Shell, string, string, unsigned int, unsigned int >(
-                                         &Shell::handleUseClock )
-                                   );
-    static DestFinfo handleCreate( "create",
-                                   "create( class, parent, newElm, name, numData, isGlobal )",
-                                   new EpFunc6< Shell, string, ObjId, Id, string, NodeBalance, unsigned int >( &Shell::handleCreate ) );
 
-    static DestFinfo handleDelete( "delete",
-                                   "When applied to a regular object, this function operates "
-                                   "on the Id (element) specified by the ObjId argument. "
-                                   "The function deletes the entire object "
-                                   "array on this Id, including all dataEntries on it,"
-                                   "all its messages, and all its children. The DataIndex here "
-                                   "is ignored, and all dataEntries are destroyed. \n"
-                                   "When applied to a message: Destroys only that one specific "
-                                   "message identified by the full ObjId. \n"
-                                   "Args: ObjId\n",
-                                   new EpFunc1< Shell, ObjId >( & Shell::destroy ) );
+    // Dest Finfos: Functions handled by Shell
+    static DestFinfo handleUseClock( "useClock"
+            , "Deals with assignment of path to a given clock."
+            " Arguments: path, field, tick number. "
+            , new EpFunc4< Shell, string, string, unsigned int, unsigned int >(&Shell::handleUseClock )
+            );
 
-    static DestFinfo handleAddMsg( "addMsg",
-                                   "Makes a msg. Arguments are:"
-                                   " msgtype, src object, src field, dest object, dest field",
-                                   new EpFunc6< Shell, string, ObjId, string, ObjId, string, unsigned int >
-                                   ( & Shell::handleAddMsg ) );
-    static DestFinfo handleQuit( "quit",
-                                 "Stops simulation running and quits the simulator",
-                                 new OpFunc0< Shell >( & Shell::handleQuit ) );
-    static DestFinfo handleMove( "move",
-                                 "handleMove( Id orig, Id newParent ): "
-                                 "moves an Element to a new parent",
-                                 new EpFunc2< Shell, Id, ObjId >( & Shell::handleMove ) );
-    static DestFinfo handleCopy( "copy",
-                                 "handleCopy( vector< Id > args, string newName, unsigned int nCopies, bool toGlobal, bool copyExtMsgs ): "
-                                 " The vector< Id > has Id orig, Id newParent, Id newElm. "
-                                 "This function copies an Element and all its children to a new parent."
-                                 " May also expand out the original into nCopies copies."
-                                 " Normally all messages within the copy tree are also copied. "
-                                 " If the flag copyExtMsgs is true, then all msgs going out are also copied.",
-                                 new EpFunc5< Shell, vector< ObjId >, string, unsigned int, bool, bool >(
-                                     & Shell::handleCopy ) );
+    static DestFinfo handleCreate( "create"
+            , "create( class, parent, newElm, name, numData, isGlobal )"
+            , new EpFunc6<Shell, string, ObjId, Id, string, NodeBalance, unsigned int>(&Shell::handleCreate)
+            );
 
-    static DestFinfo setclock( "setclock",
-                               "Assigns clock ticks. Args: tick#, dt",
-                               new OpFunc2< Shell, unsigned int, double >( & Shell::doSetClock ) );
+    static DestFinfo handleDelete( "delete"
+            , "When applied to a regular object, this function operates "
+            "on the Id (element) specified by the ObjId argument. "
+            "The function deletes the entire object "
+            "array on this Id, including all dataEntries on it,"
+            "all its messages, and all its children. The DataIndex here "
+            "is ignored, and all dataEntries are destroyed. \n"
+            "When applied to a message: Destroys only that one specific "
+            "message identified by the full ObjId. \n"
+            "Args: ObjId\n"
+            , new EpFunc1< Shell, ObjId >( & Shell::destroy )
+            );
+
+    static DestFinfo handleAddMsg( "addMsg"
+            , "Makes a msg. Arguments are:"
+            " msgtype, src object, src field, dest object, dest field"
+            , new EpFunc6< Shell, string, ObjId, string, ObjId, string, unsigned int >(&Shell::handleAddMsg)
+            );
+
+    static DestFinfo handleQuit( "quit"
+            , "Stops simulation running and quits the simulator"
+            , new OpFunc0< Shell >( & Shell::handleQuit )
+            );
+
+    static DestFinfo handleMove( "move"
+            , "handleMove( Id orig, Id newParent ): "
+            "moves an Element to a new parent"
+            , new EpFunc2<Shell, Id, ObjId>( & Shell::handleMove )
+            );
+
+    static DestFinfo handleCopy( "copy"
+            , "handleCopy( vector< Id > args, string newName, unsigned int nCopies, bool toGlobal, bool copyExtMsgs ): "
+            " The vector< Id > has Id orig, Id newParent, Id newElm. "
+            "This function copies an Element and all its children to a new parent."
+            " May also expand out the original into nCopies copies."
+            " Normally all messages within the copy tree are also copied. "
+            " If the flag copyExtMsgs is true, then all msgs going out are also copied."
+            , new EpFunc5< Shell, vector< ObjId >, string, unsigned int, bool, bool >(
+                & Shell::handleCopy )
+            );
+
+    static DestFinfo setclock( "setclock"
+            , "Assigns clock ticks. Args: tick#, dt"
+            , new OpFunc2< Shell, unsigned int, double >( & Shell::doSetClock )
+            );
 
     static Finfo* shellFinfos[] =
     {
         &setclock,
-////////////////////////////////////////////////////////////////
-//  Shared msg
-////////////////////////////////////////////////////////////////
-        // &master,
-        // &worker,
         &handleCreate,
         &handleDelete,
         &handleCopy,
@@ -170,39 +170,6 @@ Shell::~Shell()
     ;
 }
 
-#ifdef  CYMOOSE
-
-/*-----------------------------------------------------------------------------
- *  This function must create a fully functional Shell. Used in cython
- *  interface.
- *-----------------------------------------------------------------------------*/
-Shell* Shell::initShell()
-{
-    Eref sheller = Id().eref();
-    Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
-    return shell;
-}
-
-Id Shell::create(string type, string name, unsigned int numData
-                 , NodePolicy nodePolicy, unsigned int preferredNode
-                )
-{
-    if(name.size() == 0)
-        return doCreate(type, Id(), name, numData, nodePolicy, preferredNode);
-
-    string::size_type pos = name.find_last_of('/');
-    string parentPath = name.substr(0, pos);
-    ObjId parentObj = ObjId(parentPath);
-    //cerr << "info: Creating Obj with parent : " << parentObj << endl;
-    Id id = doCreate(type, parentObj, name.substr(pos+1)
-                     , numData, nodePolicy, preferredNode
-                    );
-    //cerr << "    ++ with id " << id << endl;
-    return id;
-}
-
-#endif     /* -----  CYMOOSE  ----- */
-
 void Shell::setShellElement( Element* shelle )
 {
     shelle_ = shelle;
@@ -219,9 +186,8 @@ void Shell::setShellElement( Element* shelle )
  *
  */
 Id Shell::doCreate( string type, ObjId parent, string name,
-                    unsigned int numData,
-                    NodePolicy nodePolicy,
-                    unsigned int preferredNode )
+    unsigned int numData, NodePolicy nodePolicy, unsigned int preferredNode
+    )
 {
 
     const Cinfo* c = Cinfo::find( type );
@@ -252,12 +218,17 @@ Id Shell::doCreate( string type, ObjId parent, string name,
             warning( ss.str() );
             return Id();
         }
+
+        // TODO: This should be an error in future.
+        // This logic of handling already existing path is now handled in
+        // melements.cpp . Calling this section should become an error in
+        // future.
         if ( Neutral::child( parent.eref(), name ) != Id() )
         {
             stringstream ss;
-            ss << "Shell::doCreate: Object with same name already present: '"
-               << parent.path() << "/" << name << "'. No Element created";
-            warning( ss.str() );
+            ss << "Object with same path already present : " << parent.path()
+               << "/" << name;
+            moose::showWarn( ss.str() );
             return Id();
         }
         // Get the new Id ahead of time and pass to all nodes.
@@ -276,6 +247,7 @@ Id Shell::doCreate( string type, ObjId parent, string name,
             nb,			// Node balance configuration
             parentMsgIndex	// Message index of child-parent msg.
         );
+
         // innerCreate( type, parent, ret, name, numData, isGlobal );
 
         return ret;
@@ -367,31 +339,40 @@ void Shell::doStart( double runtime, bool notify )
 {
     Id clockId( 1 );
     SetGet2< double, bool >::set( clockId, "start", runtime, notify );
+
+    /*-----------------------------------------------------------------------------
+     *  Now that simulation is over, call cleanUp function of Streamer class
+     *  objects. The purpose of this is to write whatever is left in tables to
+     *  the output file.
+     *-----------------------------------------------------------------------------*/
+    vector< ObjId > streamers;
+    wildcardFind( "/##[TYPE=Streamer]", streamers );
+    // LOG( moose::debug,  "total streamers " << streamers.size( ) );
+    for( vector<ObjId>::const_iterator itr = streamers.begin()
+            ; itr != streamers.end(); itr++ )
+    {
+        Streamer* pStreamer = reinterpret_cast<Streamer*>( itr->data( ) );
+        pStreamer->cleanUp( );
+    }
+
+    // Print the stats collected by profiling map.
+    char* p = getenv( "MOOSE_SHOW_SOLVER_PERF" );
+    if( p != NULL )
+        moose::printSolverProfMap( );
 }
 
 bool isDoingReinit()
 {
     static Id clockId( 1 );
     assert( clockId.element() != 0 );
-
-    return ( reinterpret_cast< const Clock* >(
-                 clockId.eref().data() ) )->isDoingReinit();
+    return (reinterpret_cast<const Clock*>(clockId.eref().data()))->isDoingReinit();
 }
+
 
 void Shell::doReinit( )
 {
-
-#ifdef ENABLE_LOGGER
-    clock_t t = clock();
-    cout << logger.dumpStats(0);
-#endif
     Id clockId( 1 );
     SetGet0::set( clockId, "reinit" );
-
-#ifdef ENABLE_LOGGER
-    float time = (float(clock() - t)/CLOCKS_PER_SEC);
-    logger.initializationTime.push_back(time);
-#endif
 }
 
 void Shell::doStop( )
@@ -413,39 +394,6 @@ void Shell::doUseClock( string path, string field, unsigned int tick )
             "useClock", path, field, tick, msgIndex );
     // innerUseClock( path, field, tick);
 }
-
-/**
- * Write given model to SBML file. Returns success value.
- */
-int Shell::doWriteSBML( const string& fname, const string& modelpath )
-{
-#ifdef USE_SBML
-    moose::SbmlWriter sw;
-    int ret = sw.write( fname, modelpath );
-    return ret;
-#else
-
-    cerr << "Shell::WriteSBML: This copy of MOOSE has not been compiled with SBML writing support.\n";
-    return -2;
-#endif
-}
-/**
- * read given SBML model to moose. Returns success value.
- */
-
-Id Shell::doReadSBML( const string& fname, const string& modelpath, const string& solverclass )
-{
-#ifdef USE_SBML
-    moose::SbmlReader sr;
-    return sr.read( fname, modelpath,solverclass);
-#else
-    cerr << "Shell::ReadSBML: This copy of MOOSE has not been compiled with SBML reading support.\n";
-    return Id();
-#endif
-}
-
-
-////////////////////////////////////////////////////////////////////////
 
 void Shell::doMove( Id orig, ObjId newParent )
 {
@@ -606,36 +554,6 @@ bool Shell::chopPath( const string& path, vector< string >& ret,
     return isAbsolute;
 }
 
-/*
-/// non-static func. Fallback which treats index brackets as part of
-/// name string, and does not try to extract integer indices.
-ObjId Shell::doFindWithoutIndexing( const string& path ) const
-{
-	Id curr = Id();
-	vector< string > names;
-	vector< vector< unsigned int > > indices;
-	bool isAbsolute = chopString( path, names, '/' );
-
-	if ( !isAbsolute )
-		curr = cwe_;
-
-	for ( vector< string >::iterator i = names.begin();
-		i != names.end(); ++i ) {
-		if ( *i == "." ) {
-		} else if ( *i == ".." ) {
-			curr = Neutral::parent( curr.eref() ).id;
-		} else {
-			curr = Neutral::child( curr.eref(), *i );
-		}
-	}
-
-	assert( curr.element() );
-	assert( curr.element()->dataHandler() );
-	return ObjId( curr, 0 );
-}
-*/
-
-/// non-static func. Returns the Id found by traversing the specified path.
 ObjId Shell::doFind( const string& path ) const
 {
     if ( path == "/" || path == "/root" )
@@ -694,7 +612,8 @@ ObjId Shell::doFind( const string& path ) const
 
 string Shell::doVersion()
 {
-    return MOOSE_VERSION;
+    string v = MOOSE_VERSION;
+    return v;
 }
 
 void Shell::setCwe( ObjId val )
@@ -726,8 +645,8 @@ bool Shell::isRunning() const
  * This gets a bit complicated if the Element is a multidim array.
  */
 void Shell::handleCreate( const Eref& e,
-                          string type, ObjId parent, Id newElm, string name,
-                          NodeBalance nb, unsigned int parentMsgIndex )
+        string type, ObjId parent, Id newElm, string name,
+        NodeBalance nb, unsigned int parentMsgIndex )
 {
     innerCreate( type, parent, newElm, name, nb, parentMsgIndex );
 }
@@ -778,8 +697,7 @@ bool Shell::adopt( Id parent, Id child, unsigned int msgIndex )
  * Assumes we've already done all the argument checking.
  */
 void Shell::innerCreate( string type, ObjId parent, Id newElm, string name,
-                         const NodeBalance& nb, unsigned int msgIndex )
-// unsigned int numData, bool isGlobal
+        const NodeBalance& nb, unsigned int msgIndex )
 {
     const Cinfo* c = Cinfo::find( type );
     if ( c )
@@ -796,7 +714,6 @@ void Shell::innerCreate( string type, ObjId parent, Id newElm, string name,
         case MooseSingleNode:
             cout << "Error: Shell::innerCreate: Yet to implement SingleNodeDataElement. Making BlockBalance.\n";
             ret = new LocalDataElement( newElm, c, name, nb.numData );
-            // ret = new SingleNodeDataElement( newElm, c, name, numData, nb.preferredNode );
             break;
         };
         assert( ret );
@@ -804,9 +721,7 @@ void Shell::innerCreate( string type, ObjId parent, Id newElm, string name,
         ret->setTick( Clock::lookupDefaultTick( c->name() ) );
     }
     else
-    {
         assert( 0 );
-    }
 }
 
 void Shell::destroy( const Eref& e, ObjId oid)
@@ -1074,6 +989,9 @@ void Shell::handleUseClock( const Eref& e,
     		*/
 }
 
+/**
+ * @brief This function is NOT called when simulation ends normally.
+ */
 void Shell::handleQuit()
 {
     Shell::keepLooping_ = 0;
@@ -1087,20 +1005,13 @@ bool Shell::keepLooping()
 
 void Shell::warning( const string& text )
 {
-    LOG( moose::warning, text  );
+    moose::showWarn( text  );
 }
 
 void Shell::error( const string& text )
 {
     cout << "Error: Shell:: " << text << endl;
 }
-
-/*
-void Shell::wildcard( const string& path, vector< ObjId >& list )
-{
-	wildcardFind( path, list );
-}
-*/
 
 /**
  * @brief Clean-up MOOSE before shutting down. This function is called whenever
@@ -1114,10 +1025,10 @@ void Shell::cleanSimulation()
     Neutral::children( sheller, kids );
     for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
     {
-        if ( i->value() > 4 )
+        if ( i->value() > 4 )                   /* These are created by users */
         {
             LOG( moose::debug
-                    , "Shell::cleanSimulation: deleted cruft at " <<
+                 , "Shell::cleanSimulation: deleted cruft at " <<
                  i->value() << ": " << i->path());
             s->doDelete( *i );
         }

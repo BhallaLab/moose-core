@@ -1,30 +1,31 @@
-/* 
-                 __________                                      
-    _____   __ __\______   \_____  _______  ______  ____ _______ 
+/*
+                 __________
+    _____   __ __\______   \_____  _______  ______  ____ _______
    /     \ |  |  \|     ___/\__  \ \_  __ \/  ___/_/ __ \\_  __ \
   |  Y Y  \|  |  /|    |     / __ \_|  | \/\___ \ \  ___/ |  | \/
-  |__|_|  /|____/ |____|    (____  /|__|  /____  > \___  >|__|   
-        \/                       \/            \/      \/        
+  |__|_|  /|____/ |____|    (____  /|__|  /____  > \___  >|__|
+        \/                       \/            \/      \/
 
   Copyright (C) 2013 Ingo Berg
 
-  Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this
   software and associated documentation files (the "Software"), to deal in the Software
-  without restriction, including without limitation the rights to use, copy, modify, 
-  merge, publish, distribute, sublicense, and/or sell copies of the Software, and to 
+  without restriction, including without limitation the rights to use, copy, modify,
+  merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
   permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-  The above copyright notice and this permission notice shall be included in all copies or 
+  The above copyright notice and this permission notice shall be included in all copies or
   substantial portions of the Software.
 
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
-  NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
-  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
-  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+  NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#include "muParser.h"
-#include "muParserTemplateMagic.h"
+#include "../include/muParser.h"
+#include "../include/muParserTemplateMagic.h"
+#include "../../../basecode/global.h"
 
 //--- Standard includes ------------------------------------------------------------------------
 #include <cmath>
@@ -51,7 +52,7 @@ namespace mu
 {
 
     // Initialize the RNG with random time.
-    moose::RNG<double> rng;
+    moose::RNG rng;
 
   //---------------------------------------------------------------------------
   // Trigonometric function
@@ -73,48 +74,63 @@ namespace mu
   // Logarithm functions
 
   // Logarithm base 2
-  value_type Parser::Log2(value_type v)  
-  { 
+  value_type Parser::Log2(value_type v)
+  {
     #ifdef MUP_MATH_EXCEPTIONS
         if (v<=0)
           throw ParserError(ecDOMAIN_ERROR, _T("Log2"));
     #endif
 
-    return MathImpl<value_type>::Log2(v);  
-  }  
+    return MathImpl<value_type>::Log2(v);
+  }
 
   // Logarithm base 10
-  value_type Parser::Log10(value_type v) 
-  { 
+  value_type Parser::Log10(value_type v)
+  {
     #ifdef MUP_MATH_EXCEPTIONS
         if (v<=0)
           throw ParserError(ecDOMAIN_ERROR, _T("Log10"));
     #endif
 
-    return MathImpl<value_type>::Log10(v); 
-  } 
+    return MathImpl<value_type>::Log10(v);
+  }
 
 // Logarithm base e (natural logarithm)
-  value_type Parser::Ln(value_type v)    
-  { 
+  value_type Parser::Ln(value_type v)
+  {
     #ifdef MUP_MATH_EXCEPTIONS
         if (v<=0)
           throw ParserError(ecDOMAIN_ERROR, _T("Ln"));
     #endif
 
-    return MathImpl<value_type>::Log(v);   
-  } 
+    return MathImpl<value_type>::Log(v);
+  }
 
   //---------------------------------------------------------------------------
   //  misc
   value_type Parser::Exp(value_type v)  { return MathImpl<value_type>::Exp(v);  }
   value_type Parser::Abs(value_type v)  { return MathImpl<value_type>::Abs(v);  }
   value_type Parser::Fmod(value_type v1, value_type v2) { return fmod(v1, v2); }
+  value_type Parser::Quot(value_type v1, value_type v2) { return (int)(v1 / v2); }
 
-  // If no seed is given, 
-  value_type Parser::Rand( value_type seed ) 
+  value_type Parser::Rand( value_type seed = -1 )
   {
       static bool isSeedSet_ = false;
+
+      if( ! isSeedSet_ )
+      {
+          mu::rng.setSeed( seed );
+          isSeedSet_ = true;
+      }
+      return rng.uniform( );                    /* Between 0 and 1 */
+  }
+
+  // If no seed is given,
+  value_type Parser::Rnd( )
+  {
+      static bool isSeedSet_ = false;
+      // check if global seed is set
+      size_t seed = moose::getGlobalSeed();
       if( ! isSeedSet_ )
       {
           mu::rng.setSeed( seed );
@@ -132,14 +148,14 @@ namespace mu
       return mu::rng.uniform( v1, v2 );           /* Between a and b */
   }
 
-  value_type Parser::Sqrt(value_type v) 
-  { 
+  value_type Parser::Sqrt(value_type v)
+  {
     #ifdef MUP_MATH_EXCEPTIONS
         if (v<0)
           throw ParserError(ecDOMAIN_ERROR, _T("sqrt"));
     #endif
 
-    return MathImpl<value_type>::Sqrt(v); 
+    return MathImpl<value_type>::Sqrt(v);
   }
   value_type Parser::Rint(value_type v) { return MathImpl<value_type>::Rint(v); }
   value_type Parser::Sign(value_type v) { return MathImpl<value_type>::Sign(v); }
@@ -149,9 +165,9 @@ namespace mu
       \param v The value to negate
       \return -v
   */
-  value_type Parser::UnaryMinus(value_type v) 
-  { 
-    return -v; 
+  value_type Parser::UnaryMinus(value_type v)
+  {
+    return -v;
   }
 
   //---------------------------------------------------------------------------
@@ -159,19 +175,19 @@ namespace mu
       \param v The value to negate
       \return -v
   */
-  value_type Parser::UnaryPlus(value_type v) 
-  { 
-    return v; 
+  value_type Parser::UnaryPlus(value_type v)
+  {
+    return v;
   }
 
   //---------------------------------------------------------------------------
-  /** \brief Callback for adding multiple values. 
+  /** \brief Callback for adding multiple values.
       \param [in] a_afArg Vector with the function arguments
       \param [in] a_iArgc The size of a_afArg
   */
   value_type Parser::Sum(const value_type *a_afArg, int a_iArgc)
-  { 
-    if (!a_iArgc)	
+  {
+    if (!a_iArgc)
       throw exception_type(_T("too few arguments for function sum."));
 
     value_type fRes=0;
@@ -180,13 +196,13 @@ namespace mu
   }
 
   //---------------------------------------------------------------------------
-  /** \brief Callback for averaging multiple values. 
+  /** \brief Callback for averaging multiple values.
       \param [in] a_afArg Vector with the function arguments
       \param [in] a_iArgc The size of a_afArg
   */
   value_type Parser::Avg(const value_type *a_afArg, int a_iArgc)
-  { 
-    if (!a_iArgc)	
+  {
+    if (!a_iArgc)
       throw exception_type(_T("too few arguments for function sum."));
 
     value_type fRes=0;
@@ -196,17 +212,17 @@ namespace mu
 
 
   //---------------------------------------------------------------------------
-  /** \brief Callback for determining the minimum value out of a vector. 
+  /** \brief Callback for determining the minimum value out of a vector.
       \param [in] a_afArg Vector with the function arguments
       \param [in] a_iArgc The size of a_afArg
   */
   value_type Parser::Min(const value_type *a_afArg, int a_iArgc)
-  { 
-    if (!a_iArgc)	
+  {
+    if (!a_iArgc)
       throw exception_type(_T("too few arguments for function min."));
 
     value_type fRes=a_afArg[0];
-    for (int i=0; i<a_iArgc; ++i) 
+    for (int i=0; i<a_iArgc; ++i)
       fRes = std::min(fRes, a_afArg[i]);
 
     return fRes;
@@ -214,13 +230,13 @@ namespace mu
 
 
   //---------------------------------------------------------------------------
-  /** \brief Callback for determining the maximum value out of a vector. 
+  /** \brief Callback for determining the maximum value out of a vector.
       \param [in] a_afArg Vector with the function arguments
       \param [in] a_iArgc The size of a_afArg
   */
   value_type Parser::Max(const value_type *a_afArg, int a_iArgc)
-  { 
-    if (!a_iArgc)	
+  {
+    if (!a_iArgc)
       throw exception_type(_T("too few arguments for function min."));
 
     value_type fRes=a_afArg[0];
@@ -231,7 +247,7 @@ namespace mu
 
 
   //---------------------------------------------------------------------------
-  /** \brief Default value recognition callback. 
+  /** \brief Default value recognition callback.
       \param [in] a_szExpr Pointer to the expression
       \param [in, out] a_iPos Pointer to an index storing the current position within the expression
       \param [out] a_fVal Pointer where the value should be stored in case one is found.
@@ -257,7 +273,7 @@ namespace mu
 
 
   //---------------------------------------------------------------------------
-  /** \brief Constructor. 
+  /** \brief Constructor.
 
     Call ParserBase class constructor and trigger Function, Operator and Constant initialization.
   */
@@ -273,9 +289,9 @@ namespace mu
   }
 
   //---------------------------------------------------------------------------
-  /** \brief Define the character sets. 
+  /** \brief Define the character sets.
       \sa DefineNameChars, DefineOprtChars, DefineInfixOprtChars
-    
+
     This function is used for initializing the default character sets that define
     the characters to be useable in function and variable names and operators.
   */
@@ -329,6 +345,7 @@ namespace mu
       DefineFun(_T("rint"), Rint);
       DefineFun(_T("abs"), Abs);
       DefineFun(_T("fmod"), Fmod);
+      DefineFun(_T("rnd"), Rnd);
       DefineFun(_T("rand"), Rand);
       DefineFun(_T("rand2"), Rand2);
       // Functions with variable number of arguments
@@ -336,12 +353,13 @@ namespace mu
       DefineFun(_T("avg"), Avg);
       DefineFun(_T("min"), Min);
       DefineFun(_T("max"), Max);
+      DefineFun(_T("quot"), Quot);
     }
   }
 
   //---------------------------------------------------------------------------
   /** \brief Initialize constants.
-  
+
     By default the parser recognizes two constants. Pi ("pi") and the Eulerian
     number ("_e").
   */
@@ -352,8 +370,8 @@ namespace mu
   }
 
   //---------------------------------------------------------------------------
-  /** \brief Initialize operators. 
-  
+  /** \brief Initialize operators.
+
     By default only the unary minus operator is added.
   */
   void Parser::InitOprt()
@@ -372,7 +390,7 @@ namespace mu
 
     string sVar(pExpr->begin()+nStart, pExpr->begin()+nEnd);
     string sRepl = std::string("_") + sVar + "_";
-  
+
     int nOrigVarEnd = nEnd;
     cout << "variable detected!\n";
     cout << "  Expr: " << *pExpr << "\n";
@@ -388,23 +406,23 @@ namespace mu
   }
 
   //---------------------------------------------------------------------------
-  /** \brief Numerically differentiate with regard to a variable. 
+  /** \brief Numerically differentiate with regard to a variable.
       \param [in] a_Var Pointer to the differentiation variable.
       \param [in] a_fPos Position at which the differentiation should take place.
       \param [in] a_fEpsilon Epsilon used for the numerical differentiation.
 
-    Numerical differentiation uses a 5 point operator yielding a 4th order 
+    Numerical differentiation uses a 5 point operator yielding a 4th order
     formula. The default value for epsilon is 0.00074 which is
     numeric_limits<double>::epsilon() ^ (1/5) as suggested in the muparser
     forum:
 
     http://sourceforge.net/forum/forum.php?thread_id=1994611&forum_id=462843
   */
-  value_type Parser::Diff(value_type *a_Var, 
-                          value_type  a_fPos, 
+  value_type Parser::Diff(value_type *a_Var,
+                          value_type  a_fPos,
                           value_type  a_fEpsilon) const
   {
-    value_type fRes(0), 
+    value_type fRes(0),
                fBuf(*a_Var),
                f[4] = {0,0,0,0},
                fEpsilon(a_fEpsilon);

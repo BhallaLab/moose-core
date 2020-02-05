@@ -1,9 +1,10 @@
-"""test_table_streaming_support.py: 
+# -*- coding: utf-8 -*-
+"""test_table_streaming_support.py:
 
 Test the streaming support in moose.Table.
 
 """
-    
+
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2016, Dilawar Singh"
 __credits__          = ["NCBS Bangalore"]
@@ -21,9 +22,9 @@ print( '[INFO] Using moose form %s' % moose.__file__ )
 
 def print_table( table ):
     msg = ""
-    msg += " outfile : %s" % table.outfile 
-    msg += " useStreamer: %s" % table.useStreamer 
-    msg += ' Path: %s' % table.path 
+    msg += " outfile : %s" % table.outfile
+    msg += " useStreamer: %s" % table.useStreamer
+    msg += ' Path: %s' % table.path
     print( msg )
 
 def test( ):
@@ -58,20 +59,15 @@ def test( ):
     moose.reinit( )
     [ print_table( x) for x in [tabA, tabB, tabC] ]
     runtime = 1000
-    print( 'Starting moose for %s' % runtime )
+    print( 'Starting moose for %d secs' % runtime )
     moose.start( runtime, 1 )
     print( ' MOOSE is done' )
 
     # Now read the numpy and csv and check the results.
-    a = np.load( '_tables/compt/a/tabA.npy' )
+    a = np.loadtxt( '_tables/compt/a/tabA.csv', skiprows=1 )
     b = np.load( 'table2.npy' )
     c = np.loadtxt( 'tablec.csv', skiprows=1 )
-    print( a )
-    print( b )
-    print( c )
-    print(a['time'])
-    print(b['time'])
-    assert len(a['time']) == len(a['/compt/a/tabA'])
+    assert (len(a) == len(b) == len(c))
 
 def main( ):
     test( )

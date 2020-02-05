@@ -1,70 +1,111 @@
-# hhfit.py --- 
-# 
+# -*- coding: utf-8 -*-
+# hhfit.py ---
+#
 # Filename: hhfit.py
-# Description: 
-# Author: 
-# Maintainer: 
+# Description:
+# Author:
+# Maintainer:
 # Created: Tue May 21 16:31:56 2013 (+0530)
-# Version: 
+# Version:
 # Last-Updated: Tue Jun 11 16:57:30 2013 (+0530)
 #           By: subha
 #     Update #: 34
-# URL: 
-# Keywords: 
-# Compatibility: 
-# 
-# 
+# URL:
+# Keywords:
+# Compatibility:
+#
+#
 
-# Commentary: 
-# 
+# Commentary:
+#
 # Functions for fitting common equations for Hodgkin-Huxley type gate
 # equations.
-# 
-# 
+#
+#
 
 # Change log:
-# 
+#
 # Tue May 21 16:33:59 IST 2013 - Subha refactored the code from
 # converter.py to hhfit.py.
-# 
+#
 
 
-# 
-# 
+#
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public License as
 # published by the Free Software Foundation; either version 3, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 # Floor, Boston, MA 02110-1301, USA.
-# 
-# 
+#
+#
 
 # Code:
 
 import traceback
 import warnings
-from collections import deque
+import moose.utils as mu
 import numpy as np
-from scipy.optimize import curve_fit
-from matplotlib import pyplot as plt
+
+try:
+    from scipy.optimize import curve_fit
+except ImportError as e:
+    mu.error( "To use this feature/module, please install python-scipy" )
+    raise e
+
+def exponential2(x, a, scale, x0, y0=0):
+    res = a * np.exp((x - x0)/scale) + y0
+    #print('============   Calculating exponential2 for %s, a=%s, scale=%s, x0=%s, y0=%s; = %s'%(x, a, scale, x0, y0, res))
+    return res
 
 def exponential(x, a, k, x0, y0=0):
-    return a * np.exp(k * (x - x0)) + y0
+    res = a * np.exp(k * (x - x0)) + y0
+    #print('============   Calculating exponential for %s, a=%s, k=%s, x0=%s, y0=%s; = %s'%(x, a, k, x0, y0, res))
+    return res
+
+def sigmoid2(x, a, scale, x0, y0=0):
+    res = a / (np.exp(-1*(x - x0)/scale) + 1.0) + y0
+    #print('============   Calculating sigmoid for %s, a=%s, scale=%s, x0=%s, y0=%s; = %s'%(x, a, scale, x0, y0, res))
+    return res
 
 def sigmoid(x, a, k, x0, y0=0):
-    return a / (np.exp(k * (x - x0)) + 1.0) + y0
+    res = a / (np.exp(k * (x - x0)) + 1.0) + y0
+    #print('============   Calculating sigmoid for %s, a=%s, k=%s, x0=%s, y0=%s; = %s'%(x, a, k, x0, y0, res))
+    return res
+
+def linoid2(x, a, scale, x0, y0=0):
+    """The so called linoid function. Called explinear in neuroml."""
+    
+    denominator = 1 - np.exp(-1 * (x - x0)/scale)
+    # Linoid often includes a zero denominator - we need to fill those
+    # points with interpolated values (interpolation is simpler than
+    # finding limits).
+    ret = (a/scale) *  (x - x0) / denominator
+    infidx = np.flatnonzero((ret == np.inf) | (ret == -np.inf))
+    if len(infidx) > 0:
+        for ii in infidx:
+            if ii == 0:
+                ret[ii] = ret[ii+1] - (ret[ii+2] - ret[ii+1])
+            elif ii == len(ret):
+                ret[ii] = ret[ii-1] + (ret[ii-1] - ret[ii-2])
+            else:
+                ret[ii] = (ret[ii+1] + ret[ii+2]) * 0.5
+    res = ret + y0
+    #print('============   Calculating linoid2 for %s, a=%s, scale=%s, x0=%s, y0=%s; res=%s'%(x, a, scale, x0, y0,res))
+    return res
 
 def linoid(x, a, k, x0, y0=0):
-    """The so called linoid function. Called explinear in neurml.""" 
+    """The so called linoid function. Called explinear in neuroml."""
+    
     denominator = np.exp(k * (x - x0)) - 1.0
     # Linoid often includes a zero denominator - we need to fill those
     # points with interpolated values (interpolation is simpler than
@@ -79,7 +120,9 @@ def linoid(x, a, k, x0, y0=0):
                 ret[ii] = ret[ii-1] + (ret[ii-1] - ret[ii-2])
             else:
                 ret[ii] = (ret[ii+1] + ret[ii+2]) * 0.5
-    return ret + y0
+    res = ret + y0
+    #print('============   Calculating linoid for %s, a=%s, k=%s, x0=%s, y0=%s; res=%s'%(x, a, k, x0, y0,res))
+    return res
 
 def double_exp(x, a, k1, x1, k2, x2, y0=0):
     """For functions of the form:
@@ -90,7 +133,7 @@ def double_exp(x, a, k1, x1, k2, x2, y0=0):
     ret = np.zeros(len(x))
     try:
         ret = a / (np.exp(k1 * (x - x1)) + np.exp(k2 * (x - x2))) + y0
-    except RuntimeWaring as e:
+    except RuntimeWarning as e:
         traceback.print_exc()
     return ret
 
@@ -99,7 +142,7 @@ fn_rate_map = {
     exponential: 'HHExpRate',
     sigmoid: 'HHSigmoidRate',
     linoid: 'HHExpLinearRate',
-    double_exp: None,    
+    double_exp: None,
 }
 
 # These are default starting parameter values
@@ -198,8 +241,8 @@ def find_ratefn(x, y, **kwargs):
 
     y: 1D array
     function values.
-    
-    **kwargs: keyword arguments 
+
+    **kwargs: keyword arguments
     passed to randomized_curve_fit.
 
     Returns
@@ -219,7 +262,7 @@ def find_ratefn(x, y, **kwargs):
         if p is None:
             continue
         popt = p[0]
-        pcov = p[1]        
+        pcov = p[1]
         error = y - fn(x, *popt)
         erms = np.sqrt(np.mean(error**2))
         # Ideally I want a fuzzy selection criterion here - a
@@ -241,5 +284,5 @@ def find_ratefn(x, y, **kwargs):
 
 
 
-# 
+#
 # hhfit.py ends here

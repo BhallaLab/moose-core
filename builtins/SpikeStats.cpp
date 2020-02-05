@@ -7,7 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
+#include "../basecode/header.h"
 #include "Stats.h"
 #include "SpikeStats.h"
 
@@ -46,7 +46,7 @@ const Cinfo* SpikeStats::initCinfo()
 		&Vm,	// DestFinfo
 	};
 
-	static string doc[] = 
+	static string doc[] =
 	{
 		"Name", "SpikeStats",
 		"Author", "Upi Bhalla Aug 2014",

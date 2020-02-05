@@ -8,15 +8,15 @@
 **********************************************************************/
 
 #include <queue>
-#include "header.h"
+#include "../basecode/header.h"
 #include "Group.h"
 
 //////////////////////////////////////////////////////////////
 // MsgSrc Definitions
 //////////////////////////////////////////////////////////////
 static SrcFinfo0 *group() {
-	static SrcFinfo0 group( 
-			"group", 
+	static SrcFinfo0 group(
+			"group",
 			"Handle for grouping Elements"
 			);
 	return &group;

@@ -41,30 +41,30 @@ public:
     void setOutFilepath( string stream );
     string getOutFilepath() const;
 
-    /** @brief Write to a output file in given format.  
+    /** @brief Write to a output file in given format.
      *
      * @param filepath, path of
      * output file. If parent directories do not exist, they will be created. If
      * creation fails for some reason, data will be saved in current working
      * directory. The name of the file will be computed from the given directory
-     * name by replacing '/' or '\' by '_'.  
+     * name by replacing '/' or '\' by '_'.
      *
-     * @param format 
+     * @param format
      *
      *  npy : numpy binary format (version 1 and 2), version 1 is default.
-     *  csv : comma separated value (delimiter ',' )
+     *  csv or dat: comma separated value (delimiter ' ' )
      *
      * @param  openmode (write or append)
-     * 
+     *
      * @param  data, vector of values
      *
      * @param ncols (number of columns). Incoming data will be formatted into a
      * matrix with ncols.
      */
-    static void writeToOutFile( 
+    static void writeToOutFile(
             const string& filepath, const string& format
             , const string& openmode
-            , const vector<double>& data 
+            , const vector<double>& data
             , const vector<string>& columns
             );
 
@@ -82,9 +82,20 @@ public:
      */
     static void writeToNPYFile( const string& filepath, const string& openmode
             , const vector<double>& data
-            , const vector<string>& columns 
+            , const vector<string>& columns
             );
 
+
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Return a csv representation of a vector.
+     *
+     * @Param ys vector of double.
+     *
+     * @Returns CSV string.
+     */
+    /* ----------------------------------------------------------------------------*/
+    string vectorToCSV( const vector<double>& ys, const string& fmt  );
 
 private:
 

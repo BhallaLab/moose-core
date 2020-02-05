@@ -18,12 +18,13 @@
 
 #include "cnpy.hpp"
 #include <cstring>
+#include "print_function.hpp"
 
 using namespace std;
 
 namespace cnpy2 {
 
-// Check the endian-ness of machine at run-time. This is from library 
+// Check the endian-ness of machine at run-time. This is from library
 // https://github.com/rogersce/cnpy
 char BigEndianTest() {
     unsigned char x[] = {1,0};
@@ -35,8 +36,8 @@ char BigEndianTest() {
 char map_type(const std::type_info& t)
 {
     if(t == typeid(float) ) return 'f';
-    if(t == typeid(double) ) return 'f';
-    if(t == typeid(long double) ) return 'f';
+    if(t == typeid(double) ) return 'd';
+    if(t == typeid(long double) ) return 'd';
 
     if(t == typeid(int) ) return 'i';
     if(t == typeid(char) ) return 'i';
@@ -59,7 +60,7 @@ char map_type(const std::type_info& t)
     else return '?';
 }
 
-void split(vector<string>& strs, string& input, const string& pat) 
+void split(vector<string>& strs, string& input, const string& pat)
 {
     char* pch;
     pch = strtok( &input[0], pat.c_str() );
@@ -74,23 +75,21 @@ void split(vector<string>& strs, string& input, const string& pat)
 /**
  * @brief Check if a numpy file is sane or not.
  *
- * Read first 8 bytes and compare with standard header. 
+ * Read first 8 bytes and compare with standard header.
  *
  * @param npy_file Path to file.
  *
  * @return  true if file is sane, else false.
  */
-bool is_valid_numpy_file( const string& npy_file )
+bool is_valid_numpy_file( FILE* fp )
 {
+    assert( fp );
     char buffer[__pre__size__];
-    FILE* fp = NULL;
-    fp = fopen( npy_file.c_str(), "r" );
-    if(!fp)
-    {
-        LOG( moose::warning, "Can't open " << npy_file );
+    size_t nr = fread( buffer, sizeof(char), __pre__size__, fp );
+
+    if( 0 == nr )
         return false;
-    }
-    fread( buffer, sizeof(char), __pre__size__, fp );
+
     bool equal = true;
     // Check for equality
     for(size_t i = 0; i < __pre__size__; i++ )
@@ -124,23 +123,31 @@ void parse_header( FILE* fp, string& header )
 /**
  * @brief Change shape in numpy header.
  *
- * @param 
+ * @param
  * @param data_len
- * @param 
+ * @param
  */
 void change_shape_in_header( const string& filename
-        , const size_t data_len, const size_t numcols 
+        , const size_t data_len, const size_t numcols
         )
 {
     string header;
 
     // Always open file in r+b mode. a+b mode always append at the end.
     FILE* fp = fopen( filename.c_str(), "r+b" );
+    if( ! fp )
+    {
+        moose::showWarn( "Failed to open " + filename );
+        return;
+    }
+
     parse_header( fp, header );
 
     size_t shapePos = header.find( "'shape':" );
     size_t lbrac = header.find( '(', shapePos );
     size_t rbrac = header.find( ')', lbrac );
+    assert( lbrac > shapePos );
+    assert( rbrac > lbrac );
 
     string prefixHeader = header.substr( 0, lbrac + 1 );
     string postfixHeader = header.substr( rbrac );
@@ -151,10 +158,10 @@ void change_shape_in_header( const string& filename
     split( tokens, shapeStr, "," );
 
     string newShape = "";
-    for (size_t i = 0; i < tokens.size(); i++) 
+    for (size_t i = 0; i < tokens.size(); i++)
         newShape += moose::toString( atoi( tokens[i].c_str() ) + data_len/numcols ) + ",";
 
-    string newHeader = prefixHeader + newShape + postfixHeader;
+    string newHeader = prefixHeader + newShape + postfixHeader + "\n";
     if( newHeader.size() < header.size() )
     {
         cout << "Warn: Modified header can not be smaller than old header" << endl;

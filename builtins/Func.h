@@ -1,41 +1,41 @@
-/* Func.h --- 
- * 
+/* Func.h ---
+ *
  * Filename: Func.h
- * Description: A simple function parser and evaluator class for MOOSE. 
+ * Description: A simple function parser and evaluator class for MOOSE.
  * Author: Subhasis Ray
- * Maintainer: 
+ * Maintainer:
  * Created: Sat May 25 16:14:13 2013 (+0530)
- * Version: 
+ * Version:
  * Last-Updated: Sat Jun  1 19:04:31 2013 (+0530)
  *           By: subha
  *     Update #: 117
- * URL: 
- * Keywords: 
- * Compatibility: 
- * 
+ * URL:
+ * Keywords:
+ * Compatibility:
+ *
  */
 
-/* Commentary: 
- * 
- * 
- * 
+/* Commentary:
+ *
+ *
+ *
  */
 
 /* Change log:
- * 
- * 
+ *
+ *
  */
 
 /* This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 3, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street, Fifth
@@ -47,7 +47,7 @@
 #ifndef _FUNC_H
 #define _FUNC_H
 
-#include "muParser.h"
+#include "../external/muparser/include/muParser.h"
 /**
    Simple function parser and evaluator for MOOSE. This can take a mathematical
    expression in standard C form and a list of variables values and
@@ -64,14 +64,14 @@ class Func
     ~Func();
     void setExpr(string expr);
     string getExpr() const;
-    
-    
+
+
     // get a list of variable identifiers.
     // this is created by the parser
     vector<string> getVars() const;
     void setVarValues(vector< string > vars, vector < double > vals);
 
-    
+
     // get/set the value of variable `name`
     void setVar(string name, double value);
     double getVar(string name) const;

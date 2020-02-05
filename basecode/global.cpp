@@ -10,7 +10,7 @@
  *       Revision:  0.1
  *       Compiler:  gcc/g++
  *
- *         Author:  Dilawar Singh 
+ *         Author:  Dilawar Singh
  *   Organization:  Bhalla's lab, NCBS Bangalore
  *
  * ==============================================================================
@@ -40,12 +40,16 @@ extern string joinPath( string pathA, string pathB);
 extern string fixPath( string path);
 extern string dumpStats( int  );
 
-
 namespace moose {
 
-    int __rng_seed__ = 0;
+    unsigned long __rng_seed__ = 0;
 
-    moose::RNG<double> rng;
+    map<string, valarray<double>> solverProfMap = { 
+        { "Ksolve", {0.0, 0} }, 
+        { "HSolve", {0.0, 0} }
+    };
+
+    moose::RNG rng;
 
     /* Check if path is OK */
     int checkPath( const string& path  )
@@ -85,10 +89,11 @@ namespace moose {
     /**
      * @brief Set the global seed or all rngs.
      *
-     * @param x 
+     * @param x
      */
     void mtseed( unsigned int x )
     {
+        moose::__rng_seed__ = x;
         moose::rng.setSeed( x );
         isRNGInitialized = true;
     }
@@ -99,22 +104,27 @@ namespace moose {
         return moose::rng.uniform( );
     }
 
-    // Fix the given path.
-    string createPosixPath( const string& path )
+    double mtrand( double a, double b )
+    {
+        return (b-a) * mtrand() + a; 
+    }
+
+    // MOOSE suffixes [0] to all elements to path. Remove [0] with null
+    // character whenever possible. For n > 0, [n] should not be touched. Its
+    // the user job to take the pain and write the correct path.
+    string createMOOSEPath( const string& path )
     {
         string s = path;                        /* Local copy */
-        string undesired = ":?\"<>|[]";
-
-        for (size_t i = 0; i < s.size() ; ++i)
-        {
-            bool found = undesired.find(s[i]) != string::npos;
-            if(found) s[i] = '_';
-        }
+        // Remove [0] from paths. They will be annoying for normal users.
+        std::string::size_type n = 0;
+        string zeroIndex("[0]");
+        while( (n = s.find( zeroIndex, n )) != std::string::npos )
+            s.erase( n, zeroIndex.size() );
         return s;
     }
 
     /**
-     * @brief Create directories recursively needed to open the given file p. 
+     * @brief Create directories recursively needed to open the given file p.
      *
      * @param path When successfully created, returns created path, else
      * convert path to a filename by replacing '/' by '_'.
@@ -130,35 +140,20 @@ namespace moose {
             p = p.substr( 0, pos );
         else                                    /* no parent directory to create */
             return true;
+
         if( p.size() == 0 )
             return true;
 
-#ifdef  USE_BOOST
-        try 
-        {
-            boost::filesystem::path pdirs( p );
-            boost::filesystem::create_directories( pdirs );
-            LOG( moose::info, "Created directory " << p );
-            return true;
-        }
-        catch(const boost::filesystem::filesystem_error& e)
-        {
-            LOG( moose::warning, "create_directories(" << p << ") failed with "
-                    << e.code().message()
-               );
-            return false;
-        }
-#else      /* -----  not USE_BOOST  ----- */
         string command( "mkdir -p ");
         command += p;
-        system( command.c_str() );
+        int ret = system( command.c_str() );
         struct stat info;
         if( stat( p.c_str(), &info ) != 0 )
         {
             LOG( moose::warning, "cannot access " << p );
             return false;
         }
-        else if( info.st_mode & S_IFDIR )  
+        else if( info.st_mode & S_IFDIR )
         {
             LOG( moose::info, "Created directory " <<  p );
             return true;
@@ -168,7 +163,6 @@ namespace moose {
             LOG( moose::warning, p << " is no directory" );
             return false;
         }
-#endif     /* -----  not USE_BOOST  ----- */
         return true;
     }
 
@@ -204,17 +198,12 @@ namespace moose {
     /*  /a[0]/b[1]/c[0] -> /a/b/c  */
     string moosePathToUserPath( string path )
     {
-        size_t p1 = path.find( '[', 0 );
-        while( p1 != std::string::npos )
-        {
-            size_t p2 = path.find( ']', p1 );
-            path.erase( p1, p2-p1+1 );
-            p1 = path.find( '[', p2 );
-        }
-        return path;
+        // Just write the moose path. Things becomes messy when indexing is
+        // used.
+        return createMOOSEPath( path );
     }
 
-    /*  Return formatted string 
+    /*  Return formatted string
      *  Precision is upto 17 decimal points.
      */
     string toString( double x )
@@ -223,4 +212,26 @@ namespace moose {
         sprintf(buffer, "%.17g", x );
         return string( buffer );
     }
+
+    int getGlobalSeed( )
+    {
+        return __rng_seed__;
+    }
+
+    void setGlobalSeed( int seed )
+    {
+        __rng_seed__ = seed;
+    }
+
+    void addSolverProf( const string& name, double time, size_t steps)
+    {
+        solverProfMap[ name ] = solverProfMap[name] + valarray<double>({ time, (double)steps });
+    }
+
+    void printSolverProfMap( )
+    {
+        for( auto &v : solverProfMap )
+            cout <<  '\t' << v.first << ": " << v.second[0] << " sec (" << v.second[1] << ")" << endl;
+    }
+
 }

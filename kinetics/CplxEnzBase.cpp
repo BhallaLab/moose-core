@@ -7,23 +7,23 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
-#include "ElementValueFinfo.h"
+#include "../basecode/header.h"
+#include "../basecode/ElementValueFinfo.h"
 #include "lookupVolumeFromMesh.h"
 #include "EnzBase.h"
 #include "CplxEnzBase.h"
 
 static SrcFinfo2< double, double > *enzOut() {
-	static SrcFinfo2< double, double > enzOut( 
-			"enzOut", 
+	static SrcFinfo2< double, double > enzOut(
+			"enzOut",
 			"Sends out increment of molecules on product each timestep"
 			);
 	return &enzOut;
 }
 
 static SrcFinfo2< double, double > *cplxOut() {
-	static SrcFinfo2< double, double > cplxOut( 
-			"cplxOut", 
+	static SrcFinfo2< double, double > cplxOut(
+			"cplxOut",
 			"Sends out increment of molecules on product each timestep"
 			);
 	return &cplxOut;
@@ -40,8 +40,8 @@ DestFinfo* enzDest()
 }
 
 /*
-static DestFinfo* enzDest = 
-	dynamic_cast< DestFinfo* >( 
+static DestFinfo* enzDest =
+	dynamic_cast< DestFinfo* >(
 			const_cast< Finfo* >(
 			EnzBase::initCinfo()->findFinfo( "enzDest" ) ) );
 			*/
@@ -142,11 +142,11 @@ const Cinfo* CplxEnzBase::initCinfo()
 		&cplx,				// SharedFinfo
 	};
 
-	static string doc[] = 
+	static string doc[] =
 	{
 			"Name", "CplxEnzBase",
 			"Author", "Upi Bhalla",
-			"Description:", 
+			"Description:",
 			"Base class for mass-action enzymes in which there is an "
 			" explicit pool for the enzyme-substrate complex. "
  			"It models the reaction: "
@@ -264,7 +264,7 @@ void CplxEnzBase::zombify( Element* orig, const Cinfo* zClass, Id solver )
 	vector< double > kcat( num, 0.0 );
 	for ( unsigned int i = 0; i < num; ++i ) {
 		Eref er( orig, i + start );
-		const CplxEnzBase* ceb = 
+		const CplxEnzBase* ceb =
 			reinterpret_cast< const CplxEnzBase* >( er.data() );
 		concK1[ i ] = ceb->getConcK1( er );
 		k2[ i ] = ceb->getK2( er );

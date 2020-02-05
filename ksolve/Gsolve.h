@@ -10,142 +10,166 @@
 #ifndef _GSOLVE_H
 #define _GSOLVE_H
 
+#include "../randnum/RNG.h"
+
 class Stoich;
+
 class Gsolve: public ZombiePoolInterface
 {
-	public: 
-		Gsolve();
-		~Gsolve();
+public:
+    Gsolve();
+    ~Gsolve();
 
-		//////////////////////////////////////////////////////////////////
-		// Field assignment stuff
-		//////////////////////////////////////////////////////////////////
-		Id getStoich() const;
-		void setStoich( Id stoich ); /// Inherited from ZombiePoolInterface.
-		Id getCompartment() const;
-		void setCompartment( Id compt );
+    // Assignment operator required for c++11
+    Gsolve& operator=(const Gsolve& );
 
-		unsigned int getNumLocalVoxels() const;
-		unsigned int getNumAllVoxels() const;
-		/**
-		 * Assigns the number of voxels used in the entire reac-diff 
-		 * system. Note that fewer than this may be used on any given node.
-		 */
-		void setNumAllVoxels( unsigned int num );
+    //////////////////////////////////////////////////////////////////
+    // Field assignment stuff
+    //////////////////////////////////////////////////////////////////
+    Id getStoich() const;
+    void setStoich( Id stoich ); /// Inherited from ZombiePoolInterface.
+    Id getCompartment() const;
+    void setCompartment( Id compt );
 
-		/**
-		 * Assigns number of different pools (chemical species) present in
-		 * each voxel.
-		 */
-		void setNumPools( unsigned int num ); /// Inherited.
-		unsigned int getNumPools() const; /// Inherited.
-		VoxelPoolsBase* pools( unsigned int i ); /// Inherited.
-		double volume( unsigned int i ) const;
+    unsigned int getNumLocalVoxels() const;
+    unsigned int getNumAllVoxels() const;
 
-		/// Returns the vector of pool Num at the specified voxel.
-		vector< double > getNvec( unsigned int voxel) const;
-		void setNvec( unsigned int voxel, vector< double > vec );
-		//////////////////////////////////////////////////////////////////
-		// Dest Finfos
-		//////////////////////////////////////////////////////////////////
-		void process( const Eref& e, ProcPtr p );
-		void reinit( const Eref& e, ProcPtr p );
-		void initProc( const Eref& e, ProcPtr p );
-		void initReinit( const Eref& e, ProcPtr p );
+    /**
+     * Assigns the number of voxels used in the entire reac-diff
+     * system. Note that fewer than this may be used on any given node.
+     */
+    void setNumAllVoxels( unsigned int num );
 
-		/**
-		 * Handles request to change volumes of voxels in this Ksolve, and
-		 * all cascading effects of this. At this point it won't handle
-		 * change in size of voxel array.
-		 */
-		void updateVoxelVol( vector< double > vols );
+    /**
+     * Assigns number of different pools (chemical species) present in
+     * each voxel.
+     */
+    void setNumPools( unsigned int num ); /// Inherited.
+    unsigned int getNumPools() const; /// Inherited.
+    void setNumVarTotPools( unsigned int var, unsigned int tot );//Inherited
+    VoxelPoolsBase* pools( unsigned int i ); /// Inherited.
+    double volume( unsigned int i ) const;
 
-		//////////////////////////////////////////////////////////////////
-		// Solver setup functions
-		//////////////////////////////////////////////////////////////////
-		void rebuildGssaSystem();
-		void fillMmEnzDep();
-		void fillPoolFuncDep();
-		void fillIncrementFuncDep();
-		void insertMathDepReacs( unsigned int mathDepIndex,
-			unsigned int firedReac );
-		void makeReacDepsUnique();
+    /// Returns the vector of pool Num at the specified voxel.
+    vector< double > getNvec( unsigned int voxel) const;
+    void setNvec( unsigned int voxel, vector< double > vec );
+    //////////////////////////////////////////////////////////////////
+    // Dest Finfos
+    //////////////////////////////////////////////////////////////////
+    void process( const Eref& e, ProcPtr p );
+    void reinit( const Eref& e, ProcPtr p );
+    void initProc( const Eref& e, ProcPtr p );
+    void initReinit( const Eref& e, ProcPtr p );
 
-		//////////////////////////////////////////////////////////////////
-		// Solver interface functions
-		//////////////////////////////////////////////////////////////////
-		unsigned int getPoolIndex( const Eref& e ) const;
-		unsigned int getVoxelIndex( const Eref& e ) const;
+    /**
+     * Handles request to change volumes of voxels in this Ksolve, and
+     * all cascading effects of this. At this point it won't handle
+     * change in size of voxel array.
+     */
+    void updateVoxelVol( vector< double > vols );
 
-		/**
-		 * Inherited. Needed for reac-diff calculations so the Gsolve can
-		 * orchestrate the data transfer between the itself and the 
-		 * diffusion solver.
-		 */
-		void setDsolve( Id dsolve );
-		
-		//////////////////////////////////////////////////////////////////
-		// ZombiePoolInterface inherited functions
-		//////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////
+    // Solver setup functions
+    //////////////////////////////////////////////////////////////////
+    void rebuildGssaSystem();
+    void fillMmEnzDep();
+    void fillPoolFuncDep();
+    void fillIncrementFuncDep();
+    void insertMathDepReacs(unsigned int mathDepIndex, unsigned int firedReac);
+    void makeReacDepsUnique();
 
-		void setN( const Eref& e, double v );
-		double getN( const Eref& e ) const;
-		void setNinit( const Eref& e, double v );
-		double getNinit( const Eref& e ) const;
-		void setDiffConst( const Eref& e, double v );
-		double getDiffConst( const Eref& e ) const;
+    //////////////////////////////////////////////////////////////////
+    // Solver interface functions
+    //////////////////////////////////////////////////////////////////
+    unsigned int getPoolIndex( const Eref& e ) const;
+    unsigned int getVoxelIndex( const Eref& e ) const;
+    vector< unsigned int > getNumFire( unsigned int voxel) const;
 
-		void getBlock( vector< double >& values ) const;
-		void setBlock( const vector< double >& values );
+    /**
+     * Inherited. Needed for reac-diff calculations so the Gsolve can
+     * orchestrate the data transfer between the itself and the
+     * diffusion solver.
+     */
+    void setDsolve( Id dsolve );
 
-		/**
-		 * Rescale specified voxel rate term following rate constant change 
-		 * or volume change. If index == ~0U then does all terms.
-		 */
-		void updateRateTerms( unsigned int index );
+    //////////////////////////////////////////////////////////////////
+    // ZombiePoolInterface inherited functions
+    //////////////////////////////////////////////////////////////////
 
+    void setN( const Eref& e, double v );
+    double getN( const Eref& e ) const;
+    void setNinit( const Eref& e, double v );
+    double getNinit( const Eref& e ) const;
+    void setDiffConst( const Eref& e, double v );
+    double getDiffConst( const Eref& e ) const;
 
-		//////////////////////////////////////////////////////////////////
-		/// Flag: returns true if randomized round to integers is done.
-		bool getRandInit() const;
-		/// Flag: set true if randomized round to integers is to be done.
-		void setRandInit( bool val );
+    void getBlock( vector< double >& values ) const;
+    void setBlock( const vector< double >& values );
 
-		/// Flag: returns true if randomized round to integers is done.
-		bool getClockedUpdate() const;
-		/// Flag: set true if randomized round to integers is to be done.
-		void setClockedUpdate( bool val );
+    /**
+     * Rescale specified voxel rate term following rate constant change
+     * or volume change. If index == ~0U then does all terms.
+     */
+    void updateRateTerms( unsigned int index );
 
-		//////////////////////////////////////////////////////////////////
-		static SrcFinfo2< Id, vector< double > >* xComptOut();
-		static const Cinfo* initCinfo();
-	private:
-		GssaSystem sys_;
-		/**
-		 * Each VoxelPools entry handles all the pools in a single voxel.
-		 * Each entry knows how to update itself in order to complete 
-		 * the kinetic calculations for that voxel. The ksolver does
-		 * multinode management by indexing only the subset of entries
-		 * present on this node.
-		 */
-		vector< GssaVoxelPools > pools_;
+    // Function for multithreading.
+    size_t advance_chunk( const size_t begin, const size_t end, ProcPtr p );
+    size_t recalcTimeChunk( const size_t begin, const size_t end, ProcPtr p);
 
-		/// First voxel indexed on the current node.
-		unsigned int startVoxel_;
+    //////////////////////////////////////////////////////////////////
+    /// Flag: returns true if randomized round to integers is done.
+    bool getRandInit() const;
+    /// Flag: set true if randomized round to integers is to be done.
+    void setRandInit( bool val );
 
-		/// Utility ptr used to help Pool Id lookups by the Ksolve.
-		Stoich* stoichPtr_;
+    /// Flag: returns true if randomized round to integers is done.
+    bool getClockedUpdate() const;
+    /// Flag: set true if randomized round to integers is to be done.
+    void setClockedUpdate( bool val );
 
-		/**
-		 * Id of diffusion solver, needed for coordinating numerics.
-		 */
-		Id dsolve_;
+    unsigned int getNumThreads( ) const;
+    void setNumThreads( unsigned int x );
 
-		/// Pointer to diffusion solver
-		ZombiePoolInterface* dsolvePtr_;
-		
-		/// Flag: True if atot should be updated every clock tick
-		bool useClockedUpdate_;
+    //////////////////////////////////////////////////////////////////
+    static const Cinfo* initCinfo();
+private:
+
+    /**
+     * @brief Number of threads to use when parallel version of Gsolve is
+     * used.
+     */
+    size_t numThreads_;
+    size_t grainSize_;
+
+    GssaSystem sys_;
+
+    moose::RNG rng_;
+
+    /**
+     * Each VoxelPools entry handles all the pools in a single voxel.
+     * Each entry knows how to update itself in order to complete
+     * the kinetic calculations for that voxel. The ksolver does
+     * multinode management by indexing only the subset of entries
+     * present on this node.
+     */
+    vector< GssaVoxelPools > pools_;
+
+    /// First voxel indexed on the current node.
+    unsigned int startVoxel_;
+
+    /// Utility ptr used to help Pool Id lookups by the Ksolve.
+    Stoich* stoichPtr_;
+
+    /**
+     * Id of diffusion solver, needed for coordinating numerics.
+     */
+    Id dsolve_;
+
+    /// Pointer to diffusion solver
+    ZombiePoolInterface* dsolvePtr_;
+
+    /// Flag: True if atot should be updated every clock tick
+    bool useClockedUpdate_;
 };
 
 #endif	// _GSOLVE_H

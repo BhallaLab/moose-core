@@ -21,7 +21,7 @@
 //
 // mooseinspect:naassert_macro
 //
-// Log: 
+// Log:
 // Thursday 01 May 2014 01:18:02 PM IST
 //
 // This files is a modified version of boost/assert.hpp file. The names of
@@ -62,16 +62,12 @@ namespace moose
 //                                   SIMPLE_ASSERT_MSG                                   //
 //--------------------------------------------------------------------------------------//
 
-# undef SIMPLE_ASSERT_MSG
+#undef SIMPLE_ASSERT_MSG
 
 #if defined(SIMPLE_DISABLE_ASSERTS) || defined(NDEBUG)
-
   #define SIMPLE_ASSERT_MSG(expr, msg) ((void)0)
-
 #elif defined(SIMPLE_ENABLE_ASSERT_HANDLER)
-
   #include "current_function.hpp"
-
   namespace moose
   {
     void assertion_failed_msg(char const * expr, char const * msg,
@@ -96,9 +92,9 @@ namespace moose
     #endif
 
     namespace moose
-    { 
-      namespace assertion 
-      { 
+    {
+      namespace assertion
+      {
         namespace detail
         {
           inline void assertion_failed_msg(char const * expr, char const * msg, char const * function,

@@ -10,10 +10,6 @@
 #ifndef _TABLE_H
 #define _TABLE_H
 
-
-#if  USE_BOOST
-#include <boost/filesystem.hpp>
-#endif     /* -----  USE_BOOST  ----- */
 #include <fstream>
 
 /**
@@ -25,42 +21,52 @@ public:
     Table();
     ~Table();
 
-    Table& operator=( const Table& tab );
+    Table& operator= ( const Table& tab );
 
     //////////////////////////////////////////////////////////////////
     // Field assignment stuff
     //////////////////////////////////////////////////////////////////
 
-    void setThreshold( double v );
+    void setThreshold ( double v );
     double getThreshold() const;
 
-    void setFormat( string format );
+    void setFormat ( const string format );
     string getFormat( ) const;
 
-    void setUseStreamer( bool status );
-    bool getUseStreamer( void ) const;
+    void setColumnName( const string colname );
+    string getColumnName( ) const;
 
-    void setOutfile( string outfilepath );
-    string getOutfile( void ) const;
+    void setUseStreamer ( bool status );
+    bool getUseStreamer ( void ) const;
+
+    void setUseSpikeMode ( bool status );
+    bool getUseSpikeMode ( void ) const;
+
+    void setOutfile ( string outfilepath );
+    string getOutfile ( void ) const;
 
     // Access the dt_ of table.
-    double getDt( void ) const;
+    double getDt ( void ) const;
 
-    void zipWithTime( 
-            const vector<double>& yvec
-            , vector<double>& tvec
-            , const double& lasttime 
-            );
+    // merge time value among values. e.g. t1, v1, t2, v2, etc.
+    void mergeWithTime( vector<double>& data );
+
+    string toJSON(bool withTime=true, bool clear = false);
+
+    void collectData(vector<double>& data, bool withTime=true, bool clear = false);
+
+
+    void clearAllVecs();
 
     //////////////////////////////////////////////////////////////////
     // Dest funcs
     //////////////////////////////////////////////////////////////////
 
-    void process( const Eref& e, ProcPtr p );
-    void reinit( const Eref& e, ProcPtr p );
+    void process ( const Eref& e, ProcPtr p );
+    void reinit ( const Eref& e, ProcPtr p );
 
-    void input( double v );
-    void spike( double v );
+    void input ( double v );
+    void spike ( double v );
 
     //////////////////////////////////////////////////////////////////
     // Lookup funcs for table
@@ -69,26 +75,34 @@ public:
     static const Cinfo* initCinfo();
 
 private:
+
     double threshold_;
     double lastTime_;
     double input_;
+    bool fired_;
+    bool useSpikeMode_;
 
-    /**
-     * @brief Keep the data, each entry is preceeded by time value. 
-     * t0, v0, t1, v1, t2, v2 etc.
-     */
     vector<double> data_;
+    vector<double> tvec_;                       /* time data */
     vector<string> columns_;                    /* Store the name of tables */
 
+    // Upto which indices we have read the data. This variable is used when
+    // SocketStreamer is used.
+    size_t lastN_ = 0;
+
     string tablePath_;
-    string tableName_;
+
+    /**
+     * @brief Column name of this table. Use it when writing data to a datafile.
+     */
+    string tableColumnName_;
 
     /**
      * @brief If stream is set to true, then stream to outfile_. Default value
      * of outfile_ is table path starting from `pwd`/_tables_ . On table, set
      * streamToFile to true.
      */
-    bool useStreamer_;
+    bool useFileStreamer_;
 
     /**
      * @brief Table directory into which dump the stream data.
@@ -102,10 +116,10 @@ private:
     /**
      * @brief Wheather or not outfile path is set by user
      */
-    bool outfileIsSet_;                         
+    bool outfileIsSet_;
 
     /**
-     * @brief format of data. Currently fixed to csv.
+     * @brief format of data. Default to csv.
      */
     string format_;
 

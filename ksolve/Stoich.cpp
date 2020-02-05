@@ -7,16 +7,16 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
-#include "ElementValueFinfo.h"
-#include "PoolBase.h"
-#include "ReacBase.h"
-#include "EnzBase.h"
-#include "CplxEnzBase.h"
+#include "../basecode/header.h"
+#include "../basecode/ElementValueFinfo.h"
+#include "../kinetics/PoolBase.h"
+#include "../kinetics/ReacBase.h"
+#include "../kinetics/EnzBase.h"
+#include "../kinetics/CplxEnzBase.h"
 #include "FuncTerm.h"
 #include "RateTerm.h"
 #include "FuncRateTerm.h"
-#include "SparseMatrix.h"
+#include "../basecode/SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
@@ -26,7 +26,7 @@
 #include "../builtins/Function.h"
 #include "ZombieFunction.h"
 #include "Stoich.h"
-#include "lookupVolumeFromMesh.h"
+#include "../kinetics/lookupVolumeFromMesh.h"
 #include "../scheduling/Clock.h"
 #include "../shell/Shell.h"
 #include "../shell/Wildcard.h"
@@ -73,6 +73,19 @@ const Cinfo* Stoich::initCinfo()
         " used it must be assigned before the path is set.",
         &Stoich::setCompartment,
         &Stoich::getCompartment
+    );
+
+    static ValueFinfo< Stoich, bool > allowNegative(
+        "allowNegative",
+        "Flag: allow negative values if true. Default is false."
+        " This is used to protect the chemical system from going unstable"
+        " in cases where the numerical integration gives a negative value."
+        " Typically it is a small negative value but is obviously"
+        " physically impossible. In some cases we want to use the "
+        " solvers to handle general systems of equations (not purely "
+        " chemical ones), so we have this flag to allow it.",
+        &Stoich::setAllowNegative,
+        &Stoich::getAllowNegative
     );
 
     static ReadOnlyValueFinfo< Stoich, unsigned int > numVarPools(
@@ -128,7 +141,7 @@ const Cinfo* Stoich::initCinfo()
         "matrixEntry",
         "The non-zero matrix entries in the sparse matrix. Their"
         "column indices are in a separate vector and the row"
-        "informatino in a third",
+        "information in a third",
         &Stoich::getMatrixEntry
     );
     // Stuff here for getting Stoichiometry matrix to manipulate in
@@ -182,22 +195,6 @@ const Cinfo* Stoich::initCinfo()
                                 "Restore all zombies to their native state",
                                 new OpFunc0< Stoich >( &Stoich::unZombifyModel )
                               );
-    static DestFinfo buildXreacs( "buildXreacs",
-                                  "Build cross-reaction terms between current stoich and "
-                                  "argument. This function scans the voxels at which there are "
-                                  "junctions between different compartments, and orchestrates "
-                                  "set up of interfaces between the Ksolves that implement "
-                                  "the X reacs at those junctions. ",
-                                  new EpFunc1< Stoich, Id >( &Stoich::buildXreacs )
-                                );
-
-    static DestFinfo filterXreacs( "filterXreacs",
-                                   "Filter cross-reaction terms on current stoich"
-                                   "This function clears out absent rate terms that would "
-                                   "otherwise try to compute cross reactions where the "
-                                   "junctions are not present. ",
-                                   new OpFunc0< Stoich >( &Stoich::filterXreacs )
-                                 );
     static DestFinfo scaleBufsAndRates( "scaleBufsAndRates",
                                         "Args: voxel#, volRatio\n"
                                         "Handles requests for runtime volume changes in the specified "
@@ -220,6 +217,7 @@ const Cinfo* Stoich::initCinfo()
         &ksolve,			// Value
         &dsolve,			// Value
         &compartment,		// Value
+        &allowNegative,		// Value
         &numVarPools,		// ReadOnlyValue
         &numBufPools,		// ReadOnlyValue
         &numAllPools,		// ReadOnlyValue
@@ -232,8 +230,6 @@ const Cinfo* Stoich::initCinfo()
         &proxyPools,		// ReadOnlyLookupValue
         &status,			// ReadOnlyLookupValue
         &unzombify,			// DestFinfo
-        &buildXreacs,		// DestFinfo
-        &filterXreacs,		// DestFinfo
         &scaleBufsAndRates,	// DestFinfo
     };
 
@@ -258,13 +254,14 @@ static const Cinfo* stoichCinfo = Stoich::initCinfo();
 
 Stoich::Stoich()
     :
-    useOneWay_( 0 ),
+    useOneWay_( false ),
+    allowNegative_( false ),
     path_( "" ),
     ksolve_(), // Must be reassigned to build stoich system.
     dsolve_(), // Must be assigned if diffusion is planned.
     compartment_(), // Must be assigned if diffusion is planned.
-    kinterface_( 0 ),
-    dinterface_( 0 ),
+    kinterface_( nullptr ),
+    dinterface_( nullptr ),
     rates_( 0 ), 	// No RateTerms yet.
     // uniqueVols_( 1, 1.0 ),
     numVoxels_( 1 ),
@@ -308,6 +305,16 @@ void Stoich::setOneWay( bool v )
 bool Stoich::getOneWay() const
 {
     return useOneWay_;
+}
+
+void Stoich::setAllowNegative( bool v )
+{
+    allowNegative_ = v;
+}
+
+bool Stoich::getAllowNegative() const
+{
+    return allowNegative_;
 }
 
 void Stoich::setPath( const Eref& e, string v )
@@ -380,7 +387,6 @@ void Stoich::setElist( const Eref& e, const vector< ObjId >& elist )
         status_ = 16;
         return;
     }
-    locateOffSolverReacs( compartment_, temp );
 
     // allocateObjMap( temp );
     allocateModel( temp );
@@ -389,8 +395,7 @@ void Stoich::setElist( const Eref& e, const vector< ObjId >& elist )
         // kinterface_->setNumPools( n );
         kinterface_->setStoich( e.id() );
         Shell* shell =  reinterpret_cast< Shell* >( Id().eref().data() );
-        shell->doAddMsg( "Single",
-                         compartment_, "voxelVolOut", ksolve_, "voxelVol" );
+        shell->doAddMsg( "Single", compartment_, "voxelVolOut", ksolve_, "voxelVol" );
     }
     if ( dinterface_ )
     {
@@ -401,54 +406,9 @@ void Stoich::setElist( const Eref& e, const vector< ObjId >& elist )
     if ( kinterface_ )
     {
         kinterface_->setDsolve( dsolve_ );
-        // kinterface_->setupCrossSolverReacs( offSolverPoolVec_ );
-        kinterface_->setupCrossSolverReacVols( subComptVec_, prdComptVec_);
         kinterface_->updateRateTerms();
     }
 }
-
-void Stoich::setupCrossSolverReacVols() const
-{
-    kinterface_->setupCrossSolverReacVols( subComptVec_, prdComptVec_);
-}
-
-/*
-// Utility function for getting inputs to a single Function object.
-static vector< ObjId > inputsToFunc( Id func )
-{
-	static const Finfo* inputFinfo =
-			Cinfo::find( "Variable" )->findFinfo("input");
-	static const DestFinfo* df = dynamic_cast< const DestFinfo* >( inputFinfo );
-	assert( df );
-	static FuncId fid = df->funcId();
-	assert( func.element()->cinfo()->isA( "Function" );
-	unsigned int numInputs = Field< unsigned int >::get( func, "numVars" );
-	Id varId( func.value() );
-	vector< ObjId > caller;
-	varId.element()->getInputMsgs( caller, fid );
-	cout << "NUM Inputs = " << numInputs << ", numObjId = " << caller.size() << endl;
-	return caller;
-}
-
-// routine to get all inputs (pool Ids) to Pool Functions
-void Stoich::inputsToPoolFuncs(
-		vector< pair< Id, vector< unsigned int> >& ret ) const
-{
-	ret.clear();
-	vector< Id >::iterator i;
-	vector< ObjId >::iterator j;
-	for ( i = poolFuncVec_.begin(); i != poolFuncVec_.end(); ++i )
-		vector< ObjId > ovec = inputsToFunc( *i );
-		vector< unsigned int > poolIndex;
-		poolIndex.reserve( ovec.size() );
-		for ( j = ovec.begin(); j != ovec.end(); ++j ) {
-			unsigned int poolIndex =
-			poolIndex.push_back( convertIdToPoolIndex( j->id ) );
-		}
-		ret.push_back( pair( *i, poolIndex) );
-	return ret;
-}
-*/
 
 //////////////////////////////////////////////////////////////////////
 
@@ -460,20 +420,16 @@ string Stoich::getPath( const Eref& e ) const
 void Stoich::setKsolve( Id ksolve )
 {
     ksolve_ = Id();
-    kinterface_ = 0;
-    if ( ! (
-                ksolve.element()->cinfo()->isA( "Ksolve" )  ||
-                ksolve.element()->cinfo()->isA( "Gsolve" )
-            )
-       )
+    kinterface_ = nullptr;
+    if ( ! ( ksolve.element()->cinfo()->isA( "Ksolve" )  || ksolve.element()->cinfo()->isA( "Gsolve" )))
     {
         cout << "Error: Stoich::setKsolve: invalid class assigned,"
              " should be either Ksolve or Gsolve\n";
         return;
     }
+
     ksolve_ = ksolve;
-    kinterface_ = reinterpret_cast< ZombiePoolInterface* >(
-                      ksolve.eref().data() );
+    kinterface_ = reinterpret_cast< ZombiePoolInterface* >(ksolve.eref().data());
 
     if ( ksolve.element()->cinfo()->isA( "Gsolve" ) )
         setOneWay( true );
@@ -491,18 +447,14 @@ void Stoich::setDsolve( Id dsolve )
 {
     dsolve_ = Id();
     dinterface_ = 0;
-    if ( ! (
-                dsolve.element()->cinfo()->isA( "Dsolve" )
-            )
-       )
+    if (not (dsolve.element()->cinfo()->isA("Dsolve") ))
     {
         cout << "Error: Stoich::setDsolve: invalid class assigned,"
              " should be Dsolve\n";
         return;
     }
     dsolve_ = dsolve;
-    dinterface_ = reinterpret_cast< ZombiePoolInterface* >(
-                      dsolve.eref().data() );
+    dinterface_ = reinterpret_cast<ZombiePoolInterface*>(dsolve.eref().data());
 }
 
 Id Stoich::getDsolve() const
@@ -512,12 +464,9 @@ Id Stoich::getDsolve() const
 
 void Stoich::setCompartment( Id compartment )
 {
-    if ( ! (
-                compartment.element()->cinfo()->isA( "ChemCompt" )
-            )
-       )
+    if (! (compartment.element()->cinfo()->isA( "ChemCompt" )))
     {
-        cout << "Error: Stoich::setCompartment: invalid class assigned,"
+        cerr << "Error: Stoich::setCompartment: invalid class assigned,"
              " should be ChemCompt or derived class\n";
         return;
     }
@@ -532,8 +481,7 @@ void Stoich::setCompartment( Id compartment )
         double bigVol = vols.back();
         assert( bigVol > 0.0 );
         temp.push_back( vols[0] / bigVol );
-        for ( vector< double >::iterator
-                i = vols.begin(); i != vols.end(); ++i )
+        for ( auto i = vols.begin(); i != vols.end(); ++i )
         {
             if ( !doubleEq( temp.back(), *i / bigVol ) )
                 temp.push_back( *i / bigVol );
@@ -574,8 +522,8 @@ vector< unsigned int > Stoich::getPoolIdMap() const
     unsigned int minId = 1000000;
     unsigned int maxId = 0;
     unsigned int maxIndex = 0;
-    map< Id, unsigned int >::const_iterator i;
-    for ( i = poolLookup_.begin(); i != poolLookup_.end(); ++i )
+
+    for (auto i = poolLookup_.cbegin(); i != poolLookup_.end(); ++i )
     {
         unsigned int j = i->first.value();
         if ( j < minId ) minId = j;
@@ -583,7 +531,7 @@ vector< unsigned int > Stoich::getPoolIdMap() const
         if ( maxIndex < i->second ) maxIndex = i->second;
     }
     vector< unsigned int > ret( maxId - minId + 2, ~0U );
-    for ( i = poolLookup_.begin(); i != poolLookup_.end(); ++i )
+    for (auto i = poolLookup_.cbegin(); i != poolLookup_.end(); ++i )
     {
         unsigned int j = i->first.value() - minId;
         ret[j] = i->second;
@@ -591,6 +539,17 @@ vector< unsigned int > Stoich::getPoolIdMap() const
     ret[ ret.size() -1 ] = minId;
 
     return ret;
+}
+
+Id Stoich::getPoolByIndex( unsigned int index ) const
+{
+    map< Id, unsigned int >::const_iterator i;
+    for ( i = poolLookup_.begin(); i != poolLookup_.end(); ++i )
+    {
+        if( i->second == index )
+            return i->first;
+    }
+    return Id();
 }
 
 unsigned int Stoich::getNumRates() const
@@ -629,6 +588,12 @@ const FuncTerm* Stoich::funcs( unsigned int i ) const
     assert( i < funcs_.size() );
     assert( funcs_[i]);
     return funcs_[i];
+}
+
+bool Stoich::isFuncTarget( unsigned int poolIndex ) const
+{
+    assert( poolIndex < funcTarget_.size() );
+    return ( funcTarget_[poolIndex] != ~0U );
 }
 
 vector< int > Stoich::getMatrixEntry() const
@@ -968,6 +933,10 @@ void Stoich::resizeArrays()
 
     species_.resize( totNumPools, 0 );
 
+    funcTarget_.clear();
+    // Only the pools controlled by a func (targets) have positive indices.
+    funcTarget_.resize( totNumPools, ~0 );
+
     unsigned int totNumRates =
         ( reacVec_.size() + offSolverReacVec_.size() ) * (1+useOneWay_) +
         ( enzVec_.size() + offSolverEnzVec_.size() ) * (2 + useOneWay_ ) +
@@ -978,8 +947,8 @@ void Stoich::resizeArrays()
     N_.setSize( totNumPools, totNumRates );
     if ( kinterface_ )
         kinterface_->setNumPools( totNumPools );
-    if ( dinterface_ ) // Only set up var pools managed locally.
-        dinterface_->setNumPools( varPoolVec_.size() );
+    if ( dinterface_ ) // Need to set both the numVar and numTot
+        dinterface_->setNumVarTotPools( varPoolVec_.size(), totNumPools );
 }
 
 /// Calculate sizes of all arrays, and allocate them.
@@ -1118,10 +1087,13 @@ void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
     string expr = Field< string >::get( func, "expr" );
     ft->setExpr( expr );
     // Tie the output of the FuncTerm to the pool it controls.
-    ft->setTarget( convertIdToPoolIndex( pool ) );
+    unsigned int targetIndex = convertIdToPoolIndex( pool );
+    ft->setTarget( targetIndex );
     ft->setVolScale( volScale );
     unsigned int funcIndex = convertIdToFuncIndex( func );
     assert( funcIndex != ~0U );
+    // funcTarget_ vector tracks which pools are controlled by which func.
+    funcTarget_[targetIndex] = funcIndex;
     funcs_[ funcIndex ] = ft;
 }
 
@@ -1238,45 +1210,6 @@ const KinSparseMatrix& Stoich::getStoichiometryMatrix() const
     return N_;
 }
 
-void Stoich::buildXreacs( const Eref& e, Id otherStoich )
-{
-    kinterface_->setupCrossSolverReacs( offSolverPoolMap_, otherStoich );
-}
-
-void Stoich::filterXreacs()
-{
-    kinterface_->filterCrossRateTerms( offSolverReacVec_, offSolverReacCompts_ );
-    kinterface_->filterCrossRateTerms( offSolverEnzVec_, offSolverEnzCompts_ );
-    kinterface_->filterCrossRateTerms( offSolverMMenzVec_, offSolverMMenzCompts_ );
-}
-
-/*
-void Stoich::comptsOnCrossReacTerms( vector< pair< Id, Id > >& xr ) const
-{
-	xr.clear();
-	assert( offSolverReacVec_.size() == offSolverReacCompts_.size() );
-	assert( offSolverEnzVec_.size() == offSolverEnzCompts_.size() );
-	assert( offSolverMMenzVec_.size() == offSolverMMenzCompts_.size() );
-	unsigned int numOffSolverRates = getNumRates() - getNumCoreRates();
-	if ( numOffSolverRates == 0 )
-		return;
-	unsigned int k = getNumCoreRates();
-	unsigned int j = 0;
-
-	for ( unsigned int i = 0; i < offSolverReacs_.size() ; ++i ) {
-		if ( i+1 < offSolverReacs_.size() )
-			j = convertIdToReacIndex( offSolverReacs_[i+1] );
-		else
-			j = rates_.size();
-		while ( k < j ) {
-			xr.push_back( offSolverReacCompts_[i] );
-			k++;
-		}
-	}
-	assert( xr.size() == numXrates );
-}
-*/
-
 //////////////////////////////////////////////////////////////
 // Model zombification functions
 //////////////////////////////////////////////////////////////
@@ -1293,31 +1226,6 @@ static Id findFuncMsgSrc( Id pa, const string& msg )
             return ret[0];
     }
     return Id(); // failure
-
-
-    /*
-    cout << "fundFuncMsgSrc:: convert to DestFinfo\n";
-    const DestFinfo *df = dynamic_cast< const DestFinfo* >( finfo );
-    if ( !df ) return Id();
-    FuncId fid = df->getFid();
-
-    cout << "fundFuncMsgSrc:: findCaller\n";
-    ObjId caller = pa.element()->findCaller( fid );
-    if ( caller.bad() )
-    	return Id();
-    cout << "Found Func for " << pa.path() << " on " << msg << endl;
-    cout << "Func was " << caller.path() << endl;
-    return caller.id;
-    */
-
-    /*
-    	vector< Id > kids = Neutral::getChildren( pa.eref() );
-    	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
-    		if ( i->element()->cinfo()->isA( "Function" ) )
-    			return( *i );
-    	return Id();
-    */
-
 }
 
 Id Stoich::zombifyPoolFuncWithScaling( Id pool )
@@ -1491,32 +1399,40 @@ void Stoich::unZombifyModel()
 
     unZombifyPools();
 
-    for ( vector< Id >::iterator i = reacVec_.begin();
-            i != reacVec_.end(); ++i )
+    vector< Id > temp = reacVec_;
+    temp.insert( temp.end(),
+                 offSolverReacVec_.begin(), offSolverReacVec_.end() );
+    for ( vector< Id >::iterator i = temp.begin(); i != temp.end(); ++i )
     {
         Element* e = i->element();
         if ( e != 0 &&  e->cinfo() == zombieReacCinfo )
             ReacBase::zombify( e, reacCinfo, Id() );
     }
 
-    for ( vector< Id >::iterator i = mmEnzVec_.begin();
-            i != mmEnzVec_.end(); ++i )
+    temp = mmEnzVec_;
+    temp.insert( temp.end(),
+                 offSolverMMenzVec_.begin(), offSolverMMenzVec_.end() );
+    for ( vector< Id >::iterator i = temp.begin(); i != temp.end(); ++i )
     {
         Element* e = i->element();
         if ( e != 0 &&  e->cinfo() == zombieMMenzCinfo )
             EnzBase::zombify( e, mmEnzCinfo, Id() );
     }
 
-    for ( vector< Id >::iterator i = enzVec_.begin();
-            i != enzVec_.end(); ++i )
+    temp = enzVec_;
+    temp.insert( temp.end(),
+                 offSolverEnzVec_.begin(), offSolverEnzVec_.end() );
+    for ( vector< Id >::iterator i = temp.begin(); i != temp.end(); ++i )
     {
         Element* e = i->element();
         if ( e != 0 &&  e->cinfo() == zombieEnzCinfo )
             CplxEnzBase::zombify( e, enzCinfo, Id() );
     }
 
-    for ( vector< Id >::iterator i = poolFuncVec_.begin();
-            i != poolFuncVec_.end(); ++i )
+    temp = poolFuncVec_;
+    temp.insert( temp.end(),
+                 incrementFuncVec_.begin(), incrementFuncVec_.end() );
+    for ( vector< Id >::iterator i = temp.begin(); i != temp.end(); ++i )
     {
         Element* e = i->element();
         if ( e != 0 && e->cinfo() == zombieFunctionCinfo )
@@ -1546,9 +1462,7 @@ unsigned int Stoich::convertIdToReacIndex( Id id ) const
 {
     map< Id, unsigned int >::const_iterator i = rateTermLookup_.find( id );
     if ( i != rateTermLookup_.end() )
-    {
         return i->second;
-    }
     return ~0U;
 }
 
@@ -1749,8 +1663,7 @@ void Stoich::installMMenz( Id enzId, const vector< Id >& enzMols,
         return;
     vector< Id > subCompt;
     vector< Id > dummy;
-    for ( vector< Id >::const_iterator
-            i = subs.begin(); i != subs.end(); ++i )
+    for( auto i = subs.cbegin(); i != subs.end(); ++i )
         subCompt.push_back( getCompt( *i ).id );
     subComptVec_.push_back( subCompt );
     prdComptVec_.push_back( dummy );
@@ -2188,15 +2101,9 @@ const vector< Id >& Stoich::offSolverPoolMap( Id compt ) const
 // s is the array of pools, S_[meshIndex][0]
 void Stoich::updateFuncs( double* s, double t ) const
 {
-    for ( vector< FuncTerm* >::const_iterator i = funcs_.begin();
-            i != funcs_.end(); ++i )
-    {
+    for ( auto i = funcs_.cbegin(); i != funcs_.end(); ++i )
         if ( *i )
-        {
             (*i)->evalPool( s, t );
-            // s holds arguments and also result location
-        }
-    }
 }
 
 /**
@@ -2282,7 +2189,7 @@ unsigned int Stoich::indexOfMatchingVolume( double vol ) const
 
 void Stoich::scaleBufsAndRates( unsigned int index, double volScale )
 {
-    if ( !kinterface_ )
+    if ( !kinterface_ || status_ != 0 )
         return;
     kinterface_->pools( index )->scaleVolsBufsRates( volScale, this );
 }

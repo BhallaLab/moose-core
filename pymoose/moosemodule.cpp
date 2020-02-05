@@ -1,38 +1,10 @@
 // moosemodule.cpp ---
-//
-// Filename: moosemodule.cpp
-// Description:
-// Author: Subhasis Ray
-// Maintainer:
-// Copyright (C) 2010 Subhasis Ray, all rights reserved.
-// Created: Thu Mar 10 11:26:00 2011 (+0530)
-// Version:
-// Last-Updated: Mon 25 Apr 2016 11:17:24 AM IST
-//           By: Dilawar Singh
-//
-
-// Change log:
-//
-// 2011-03-10 Initial version. Starting coding directly with Python
-//            API.  Trying out direct access to Python API instead of
-//            going via SWIG. SWIG has this issue of creating huge
-//            files and the resulting binaries are also very
-//            large. Since we are not going to use any language but
-//            Python in the foreseeable future, we can avoid the bloat
-//            by coding directly with Python API.
-//
-// 2012-01-05 Much polished version. Handling destFinfos as methods in
-//            Python class.
-//
-// 2012-04-13 Finished reimplementing the meta class system using
-//            Python/C API.
-//            Decided not to expose any lower level moose API.
-//
-// 2012-04-20 Finalized the C interface
+// For detailed log, see the git-log .
+// Author : Subhasis Ray
+// Maintainer : Dilawar Singh, Subhasis Ray
 
 #include <Python.h>
-
-#include <structmember.h> // This defines the type id macros like T_STRING
+#include <structmember.h>
 
 #ifdef USE_NUMPY
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
@@ -44,11 +16,13 @@
 #include <cstring>
 #include <map>
 #include <ctime>
+#include <cstring>
 #include <csignal>
+#include <chrono>
+#include <thread>
 #include <exception>
 
-
-#if USE_BOOST
+#if USE_BOOST_ODE
 #include <boost/format.hpp>
 #endif
 
@@ -64,9 +38,9 @@
 #include "../utility/utility.h"
 #include "../shell/Shell.h"
 #include "../shell/Wildcard.h"
+#include "../basecode/global.h"
 
 #include "moosemodule.h"
-#include "global.h"
 
 using namespace std;
 
@@ -75,10 +49,10 @@ using namespace std;
 extern void testSync();
 extern void testAsync();
 
-extern void testSyncArray( 
+extern void testSyncArray(
         unsigned int size,
         unsigned int numThreads,
-        unsigned int method 
+        unsigned int method
         );
 
 extern void testShell();
@@ -104,18 +78,17 @@ extern void test_moosemodule();
 
 extern Id init(
         int argc, char ** argv, bool& doUnitTests
-        , bool& doRegressionTests, unsigned int& benchmark 
+        , bool& doRegressionTests, unsigned int& benchmark
         );
 
 extern void initMsgManagers();
 extern void destroyMsgManagers();
 
 extern void speedTestMultiNodeIntFireNetwork(
-        unsigned int size, unsigned int runsteps 
+        unsigned int size, unsigned int runsteps
         );
 
 extern void mooseBenchmarks( unsigned int option );
-
 
 /*-----------------------------------------------------------------------------
  *  Random number generator for this module.
@@ -125,7 +98,7 @@ extern void mooseBenchmarks( unsigned int option );
  *  themselves. If seed is not set by user, it uses std::random_device to
  *  initialize itself.
  *-----------------------------------------------------------------------------*/
-void pymoose_mtseed_( unsigned int seed )
+void pymoose_mtseed_( long int seed )
 {
     moose::mtseed( seed );
 }
@@ -133,6 +106,31 @@ void pymoose_mtseed_( unsigned int seed )
 double pymoose_mtrand_( void )
 {
     return moose::mtrand( );
+}
+
+bool setupSocketStreamer(const string addr )
+{
+    LOG(moose::debug, "Setting streamer with addr " << addr );
+    // Find all tables.
+    vector< ObjId > tables;
+    wildcardFind( "/##[TYPE=Table2]", tables );
+    wildcardFind( "/##[TYPE=Table]", tables, false );
+
+    if( tables.size() < 1 )
+    {
+        LOG( moose::warning, "No table found. MOOSE will not create a streamer." );
+        return false;
+    }
+
+    // Craete a SocketStreamer and add all tables.
+    Id stBase = SHELLPTR->doCreate("Neutral", Id(), "socket", 1);
+    Id st = SHELLPTR->doCreate("SocketStreamer", stBase, "streamer", 1);
+    Field<string>::set(st, "address", addr);
+
+    LOG(moose::debug, "Found " << tables.size() << " tables.");
+    for( auto &t : tables )
+        SetGet1<ObjId>::set(st, "addTable", t );
+    return true;
 }
 
 /**
@@ -192,8 +190,8 @@ int verbosity = 1;
 // static int isSingleThreaded = 0;
 static int isInfinite = 0;
 static unsigned int numNodes = 1;
-static unsigned int numCores = 1;
-static unsigned int myNode = 0;
+// static unsigned int numCores = 1;
+// static unsigned int myNode = 0;
 // static unsigned int numProcessThreads = 0;
 static int doUnitTests = 0;
 static int doRegressionTests = 0;
@@ -907,7 +905,7 @@ const map<string, string>& get_field_alias()
 */
 vector <string> setup_runtime_env()
 {
-    const map<string, string>& argmap = getArgMap();
+    const map<string, string>& argmap = moose::getArgMap();
     vector<string> args;
     args.push_back("moose");
     map<string, string>::const_iterator it;
@@ -927,6 +925,7 @@ vector <string> setup_runtime_env()
             args.push_back("-i");
         }
     }
+#if 0
     it = argmap.find("NUMNODES");
     if (it != argmap.end())
     {
@@ -945,6 +944,7 @@ vector <string> setup_runtime_env()
     //     args.push_back("-t");
     //     args.push_back(it->second);
     // }
+#endif
     it = argmap.find("QUIT");
     if (it != argmap.end())
     {
@@ -1073,12 +1073,15 @@ void finalize()
     //     free(classObject->tp_name); // skipping this as not sure whether this is useful - all gets deallocated at exit anyways.
     // }
     // get_moose_classes().clear();
+
     SHELLPTR->doQuit();
     Msg::clearAllMsgs();
     Id::clearAllElements();
+
 #ifdef USE_MPI
     MPI_Finalize();
 #endif
+
 } //! finalize()
 
 
@@ -1350,8 +1353,12 @@ PyDoc_STRVAR(moose_getFieldNames_documentation,
              "className : string\n"
              "    Name of the class to look up.\n"
              "finfoType : string\n"
-             "    The kind of field (`valueFinfo`, `srcFinfo`, `destFinfo`,\n"
-             "    `lookupFinfo`, `fieldElementFinfo`.).\n"
+             "    The kind of field "
+             "        `valueFinfo` - "
+             "        `srcFinfo`   -  "
+             "        `destFinfo`  - "
+             "        `lookupFinfo`- "
+             "        `fieldElementFinfo` - \n"
              "\n"
              "Returns\n"
              "-------\n"
@@ -1383,31 +1390,32 @@ PyObject * moose_getFieldNames(PyObject * dummy, PyObject * args)
 }
 
 PyDoc_STRVAR(moose_copy_documentation,
-             "copy(src, dest, name, n, toGlobal, copyExtMsg) -> bool\n"
-             "\n"
-             "Make copies of a moose object.\n"
-             "\n"
-             "Parameters\n"
-             "----------\n"
-             "src : vec, element or str\n"
-             "    source object.\n"
-             "dest : vec, element or str\n"
-             "    Destination object to copy into.\n"
-             "name : str\n"
-             "    Name of the new object. If omitted, name of the original will be used.\n"
-             "n : int\n"
-             "    Number of copies to make.\n"
-             "toGlobal : int\n"
-             "    Relevant for parallel environments only. If false, the copies will\n"
-             "    reside on local node, otherwise all nodes get the copies.\n"
-             "copyExtMsg : int\n"
-             "    If true, messages to/from external objects are also copied.\n"
-             "\n"
-             "Returns\n"
-             "-------\n"
-             "vec\n"
-             "    newly copied vec\n"
+        "copy(src, dest, name, n, toGlobal, copyExtMsg) -> bool\n"
+        "\n"
+        "Make copies of a moose object.\n"
+        "\n"
+        "Parameters\n"
+        "----------\n"
+        "src : vec, element or str\n"
+        "    source object.\n"
+        "dest : vec, element or str\n"
+        "    Destination object to copy into.\n"
+        "name : str\n"
+        "    Name of the new object. If omitted, name of the original will be used.\n"
+        "n : int\n"
+        "    Number of copies to make.\n"
+        "toGlobal : int\n"
+        "    Relevant for parallel environments only. If false, the copies will\n"
+        "    reside on local node, otherwise all nodes get the copies.\n"
+        "copyExtMsg : int\n"
+        "    If true, messages to/from external objects are also copied.\n"
+        "\n"
+        "Returns\n"
+        "-------\n"
+        "vec\n"
+        "    newly copied vec\n"
             );
+
 PyObject * moose_copy(PyObject * dummy, PyObject * args, PyObject * kwargs)
 {
     PyObject * src = NULL, * dest = NULL;
@@ -1548,7 +1556,7 @@ PyObject * moose_move(PyObject * dummy, PyObject * args)
 PyDoc_STRVAR(moose_delete_documentation,
              "delete(obj)->None\n"
              "\n"
-             "Delete the underlying moose object. This does not delete any of the\n"
+             "Delete the underlying moose object(s). This does not delete any of the\n"
              "Python objects referring to this vec but does invalidate them. Any\n"
              "attempt to access them will raise a ValueError.\n"
              "\n"
@@ -1570,10 +1578,7 @@ PyObject * moose_delete(PyObject * dummy, PyObject * args)
     {
         return NULL;
     }
-    // if (!PyObject_IsInstance(obj, (PyObject*)&IdType)){
-    //     PyErr_SetString(PyExc_TypeError, "vec instance expected");
-    //     return NULL;
-    // }
+
     ObjId oid_;
     if (PyObject_IsInstance(obj, (PyObject*)&IdType))
     {
@@ -1591,13 +1596,14 @@ PyObject * moose_delete(PyObject * dummy, PyObject * args)
     }
     else
     {
-        PyErr_SetString(PyExc_ValueError, "cannot delete moose shell.");
-        return NULL;
+        PyErr_WarnEx(PyExc_RuntimeWarning, "Cannot delete moose shell.", 1);
+        Py_RETURN_NONE;;
     }
+
     if (oid_ == ObjId())
     {
-        PyErr_SetString(PyExc_ValueError, "cannot delete moose shell.");
-        return NULL;
+        PyErr_WarnEx(PyExc_RuntimeWarning, "Cannot delete moose shell.", 1);
+        Py_RETURN_NONE;
     }
     if ( oid_.bad() )
     {
@@ -1643,8 +1649,8 @@ PyDoc_STRVAR(moose_useClock_documentation,
              "Examples\n"
              "--------\n"
              "In multi-compartmental neuron model a compartment's membrane potential (Vm) is dependent on its neighbours' membrane potential. Thus it must get the neighbour's present Vm before computing its own Vm in next time step. This ordering is achieved by scheduling the `init` function, which communicates membrane potential, on tick 0 and `process` function on tick 1.\n\n"
-             "    >>> moose.useClock(0, '/model/compartment_1', 'init')\n"
-             "    >>> moose.useClock(1, '/model/compartment_1', 'process')\n");
+             "        >>> moose.useClock(0, '/model/compartment_1', 'init')\n"
+             "        >>> moose.useClock(1, '/model/compartment_1', 'process')\n");
 
 PyObject * moose_useClock(PyObject * dummy, PyObject * args)
 {
@@ -1739,18 +1745,8 @@ PyObject * moose_start(PyObject * dummy, PyObject * args )
     sigemptyset(&sigHandler.sa_mask);
     sigHandler.sa_flags = 0;
     sigaction(SIGINT, &sigHandler, NULL);
-
-#if 0
-    // NOTE: (dilawar) Does not know if Py_BEGIN_ALLOW_THREADS is
-    // neccessary.
-    // Py_BEGIN_ALLOW_THREADS
-    SHELLPTR->doStart(runtime);
-    // Py_END_ALLOW_THREADS
-    Py_RETURN_NONE;
-#endif
     SHELLPTR->doStart( runtime, notify );
     Py_RETURN_NONE;
-
 }
 
 PyDoc_STRVAR(moose_reinit_documentation,
@@ -1768,9 +1764,19 @@ PyDoc_STRVAR(moose_reinit_documentation,
              "\n");
 PyObject * moose_reinit(PyObject * dummy, PyObject * args)
 {
+    // If environment variable MOOSE_TCP_STREAMER_ADDRESS is set then setup the
+    // streamer.
+    string envSocketServer = moose::getEnv( "MOOSE_STREAMER_ADDRESS" );
+    if(! envSocketServer.empty())
+    {
+        LOG( moose::debug, "Environment variable MOOSE_STREAMER_ADDRESS: " << envSocketServer );
+        if( envSocketServer.size() > 0 )
+            setupSocketStreamer(envSocketServer);
+    }
     SHELLPTR->doReinit();
     Py_RETURN_NONE;
 }
+
 PyObject * moose_stop(PyObject * dummy, PyObject * args)
 {
     SHELLPTR->doStop();
@@ -1791,52 +1797,12 @@ PyObject * moose_exists(PyObject * dummy, PyObject * args)
     return Py_BuildValue("i", Id(path) != Id() || string(path) == "/" || string(path) == "/root");
 }
 
-//Harsha : For writing genesis file to sbml
-PyObject * moose_writeSBML(PyObject * dummy, PyObject * args)
-{
-    char * fname = NULL, * modelpath = NULL;
-    if(!PyArg_ParseTuple(args, "ss:moose_writeSBML", &modelpath, &fname))
-    {
-        return NULL;
-    }
-    int ret = SHELLPTR->doWriteSBML(string(modelpath),string(fname));
-    return Py_BuildValue("i", ret);
-}
-
-PyObject * moose_readSBML(PyObject * dummy, PyObject * args)
-{
-    char * fname = NULL, * modelpath = NULL, * solverclass = NULL;
-    if(!PyArg_ParseTuple(args, "ss|s:moose_readSBML", &fname, &modelpath, &solverclass))
-    {
-        return NULL;
-    }
-    //Id ret = SHELLPTR->doReadSBML(string(fname), string(modelpath));
-    //return Py_BuildValue("i", ret);
-    _Id * model = (_Id*)PyObject_New(_Id, &IdType);
-    //model->id_ = SHELLPTR->doReadSBML(string(fname), string(modelpath), string(solverclass));
-    if (!solverclass)
-    {
-        model->id_ = SHELLPTR->doReadSBML(string(fname), string(modelpath));
-    }
-    else
-    {
-        model->id_ = SHELLPTR->doReadSBML(string(fname), string(modelpath), string(solverclass));
-    }
-
-    if (model->id_ == Id())
-    {
-        Py_XDECREF(model);
-        PyErr_SetString(PyExc_IOError, "could not load model");
-        return NULL;
-    }
-    PyObject * ret = reinterpret_cast<PyObject*>(model);
-    return ret;
-}
-
-PyDoc_STRVAR(moose_loadModel_documentation,
-             "loadModel(filename, modelpath, solverclass) -> vec\n"
+PyDoc_STRVAR(moose_loadModelInternal_documentation,
+             "loadModelInternal(filename, modelpath, solverclass) -> vec\n"
              "\n"
              "Load model from a file to a specified path.\n"
+             "Note: This function should not be used by users. It is meants for developers. \n"
+             "Please see `moose.loadModel` function.\n"
              "\n"
              "Parameters\n"
              "----------\n"
@@ -1853,11 +1819,11 @@ PyDoc_STRVAR(moose_loadModel_documentation,
              "    loaded model container vec.\n"
             );
 
-PyObject * moose_loadModel(PyObject * dummy, PyObject * args)
+PyObject * moose_loadModelInternal(PyObject * dummy, PyObject * args)
 {
     char * fname = NULL, * modelpath = NULL, * solverclass = NULL;
 
-    if(!PyArg_ParseTuple(args, "ss|s:moose_loadModel", &fname, &modelpath, &solverclass))
+    if(!PyArg_ParseTuple(args, "ss|s:moose_loadModelInternal", &fname, &modelpath, &solverclass))
     {
         cout << "here in moose load";
         return NULL;
@@ -1881,6 +1847,7 @@ PyObject * moose_loadModel(PyObject * dummy, PyObject * args)
     return ret;
 }
 
+#if 0
 PyDoc_STRVAR(moose_saveModel_documentation,
              "saveModel(source, filename) -> None\n"
              "\n"
@@ -1937,6 +1904,7 @@ PyObject * moose_saveModel(PyObject * dummy, PyObject * args)
     SHELLPTR->doSaveModel(model, filename);
     Py_RETURN_NONE;
 }
+#endif
 
 PyObject * moose_setCwe(PyObject * dummy, PyObject * args)
 {
@@ -1994,42 +1962,52 @@ PyObject * moose_getCwe(PyObject * dummy, PyObject * args)
 }
 
 PyDoc_STRVAR(moose_connect_documentation,
-             "connect(src, src_field, dest, dest_field, message_type) -> bool\n"
-             "\n"
-             "Create a message between `src_field` on `src` object to `dest_field`\n"
-             "on `dest` object.\n"
-             "\n"
-             "Parameters\n"
-             "----------\n"
-             "src : element/vec/string\n"
-             "    the source object (or its path)\n"
-             "src_field : str\n"
-             "    the source field name. Fields listed under `srcFinfo` and\n"
-             "    `sharedFinfo` qualify for this.\n"
-             "dest : element/vec/string\n"
-             "    the destination object.\n"
-             "dest_field : str\n"
-             "    the destination field name. Fields listed under `destFinfo`\n"
-             "    and `sharedFinfo` qualify for this.\n"
-             "message_type : str (optional)\n"
-             "    Type of the message. Can be `Single`, `OneToOne`, `OneToAll`.\n"
-             "    If not specified, it defaults to `Single`.\n"
-             "\n"
-             "Returns\n"
-             "-------\n"
-             "msgmanager: melement\n"
-             "    message-manager for the newly created message.\n"
-             "\n"
-             "Examples\n"
-             "--------\n"
-             "Connect the output of a pulse generator to the input of a spike\n"
-             "generator::\n"
-             "\n"
-             ">>> pulsegen = moose.PulseGen('pulsegen')\n"
-             ">>> spikegen = moose.SpikeGen('spikegen')\n"
-             ">>> moose.connect(pulsegen, 'output', spikegen, 'Vm')\n"
-             "\n"
-            );
+          "connect(src, srcfield, destobj, destfield[,msgtype]) -> bool\n"
+          "\n"
+          "Create a message between `src_field` on `src` object to `dest_field` on `dest` object.\n"
+          "This function is used mainly, to say, connect two entities, and to denote what kind of give-and-take relationship they share."
+          "It enables the 'destfield' (of the 'destobj') to acquire the data, from 'srcfield'(of the 'src')."
+          "\n"
+          "Parameters\n"
+          "----------\n"
+          "src : element/vec/string\n"
+          "    the source object (or its path) \n"
+          "    (the one that provides information)\n"
+          "srcfield : str\n"
+          "    source field on self.(type of the information)\n"
+          "destobj : element\n"
+          "    Destination object to connect to.\n"
+          "    (The one that need to get information)\n"
+          "destfield : str\n"
+          "    field to connect to on `destobj`.\n"
+          "msgtype : str\n"
+          "    type of the message. Can be \n"
+          "    `Single` - \n"
+          "    `OneToAll` - \n"
+          "    `AllToOne` - \n"
+          "    `OneToOne` - \n"
+          "    `Reduce` - \n"
+          "    `Sparse` - \n"
+          "    Default: `Single`.\n"
+          "\n"
+          "Returns\n"
+          "-------\n"
+          "msgmanager: melement\n"
+          "    message-manager for the newly created message.\n"
+          "\n"
+          "Examples\n"
+          "--------\n"
+          "Connect the output of a pulse generator to the input of a spike\n"
+          "generator::\n"
+          "\n"
+          "    >>> pulsegen = moose.PulseGen('pulsegen')\n"
+          "    >>> spikegen = moose.SpikeGen('spikegen')\n"
+          "    >>> pulsegen.connect('output', spikegen, 'Vm')\n"
+          "\n"
+          "See also\n"
+          "--------\n"
+          "moose.connect\n"
+          );
 
 PyObject * moose_connect(PyObject * dummy, PyObject * args)
 {
@@ -2127,7 +2105,7 @@ PyDoc_STRVAR(moose_getFieldDict_documentation,
              "List all the source fields on class Neutral::\n"
              "\n"
              ">>> moose.getFieldDict('Neutral', 'srcFinfo')\n"
-             "{'childMsg': 'int'}\n"
+             "    {'childMsg': 'int'}\n"
              "\n"
              "\n");
 PyObject * moose_getFieldDict(PyObject * dummy, PyObject * args)
@@ -2541,15 +2519,53 @@ int defineAllClasses(PyObject * module_dict)
   have to recursively call this function using the base class
   string.
 */
+
 PyDoc_STRVAR(moose_Class_documentation,
              "*-----------------------------------------------------------------*\n"
              "* This is Python generated documentation.                         *\n"
              "* Use moose.doc('classname') to display builtin documentation for *\n"
              "* class `classname`.                                              *\n"
              "* Use moose.doc('classname.fieldname') to display builtin         *\n"
-             "* documentationfor `field` in class `classname`.                  *\n"
+             "* documentation for `field` in class `classname`.                 *\n"
              "*-----------------------------------------------------------------*\n"
             );
+
+int defineLookupFinfos(const Cinfo * cinfo)
+{
+    const string & className = cinfo->name();
+#ifndef NDEBUG
+    if (verbosity > 1)
+    {
+        cout << "\tDefining lookupFields for " << className << endl;
+    }
+#endif
+    unsigned int num = cinfo->getNumLookupFinfo();
+    unsigned int currIndex = get_getsetdefs()[className].size();
+    for (unsigned int ii = 0; ii < num; ++ii)
+    {
+        const string& name = const_cast<Cinfo*>(cinfo)->getLookupFinfo(ii)->name();
+        PyGetSetDef getset;
+        get_getsetdefs()[className].push_back(getset);
+        get_getsetdefs()[className][currIndex].name = (char*)calloc(name.size() + 1, sizeof(char));
+        strncpy(const_cast<char*>(get_getsetdefs()[className][currIndex].name)
+                , const_cast<char*>(name.c_str()), name.size());
+        get_getsetdefs()[className][currIndex].doc = (char*) "Lookup field";
+        get_getsetdefs()[className][currIndex].get = (getter)moose_ObjId_get_lookupField_attr;
+        PyObject * args = PyTuple_New(1);
+        PyTuple_SetItem(args, 0, PyString_FromString(name.c_str()));
+        get_getsetdefs()[className][currIndex].closure = (void*)args;
+#ifndef NDEBUG
+        if (verbosity > 1)
+        {
+            cout << "\tDefined lookupField " << get_getsetdefs()[className][currIndex].name << endl;
+        }
+#endif
+
+        ++currIndex;
+    }
+    return 1;
+}
+
 
 int defineClass(PyObject * module_dict, const Cinfo * cinfo)
 {
@@ -2619,7 +2635,7 @@ int defineClass(PyObject * module_dict, const Cinfo * cinfo)
     new_class->tp_name = strdup(str.c_str());
     new_class->tp_doc = moose_Class_documentation;
 
-    // strncpy(new_class->tp_doc, moose_Class_documentation, strlen(moose_Class_documentation));
+    //strncpy(new_class->tp_doc, moose_Class_documentation, strlen(moose_Class_documentation));
     map<string, PyTypeObject *>::iterator base_iter =
         get_moose_classes().find(cinfo->getBaseClass());
     if (base_iter == get_moose_classes().end())
@@ -2759,20 +2775,26 @@ int defineDestFinfos(const Cinfo * cinfo)
         // if (name.find("get") == 0 || name.find("set") == 0){
         //     continue;
         // }
-        PyGetSetDef destFieldGetSet;
+        PyGetSetDef destFieldGetSet = {.name = (char*) name.c_str()
+	  , .get=nullptr, .set=nullptr
+          , .doc= (char*) "Destination field"
+	  , .closure=nullptr};
         vec.push_back(destFieldGetSet);
 
-        vec[currIndex].name = (char*)calloc(name.size() + 1, sizeof(char));
-        strncpy(vec[currIndex].name,
-                const_cast<char*>(name.c_str()),
-                name.size());
+        // Dilawar:
+        // strncpy can not write to const char* especially with clang++.
+        // Ref: https://docs.python.org/3/c-api/structures.html#c.PyGetSetDef
+        //vec[currIndex].name = (char*)calloc(name.size() + 1, sizeof(char));
+        //strncpy(vec[currIndex].name,
+        //        const_cast<char*>(name.c_str()),
+        //        name.size());
+        // vec[currIndex].doc = (char*) "Destination field";
 
-        vec[currIndex].doc = (char*) "Destination field";
         vec[currIndex].get = (getter)moose_ObjId_get_destField_attr;
-        PyObject * args = PyTuple_New(1);
-        if (args == NULL)
+        PyObject *args = PyTuple_New(1);
+        if (!args || !vec[currIndex].name)
         {
-            cerr << "moosemodule.cpp: defineDestFinfos: Failed to allocate tuple" << endl;
+            cerr << "moosemodule.cpp: defineDestFinfos: allocation failed\n";
             return 0;
         }
         PyTuple_SetItem(args, 0, PyString_FromString(name.c_str()));
@@ -2838,42 +2860,6 @@ PyObject * moose_ObjId_get_lookupField_attr(PyObject * self,
     return (PyObject*)ret;
 }
 
-int defineLookupFinfos(const Cinfo * cinfo)
-{
-    const string & className = cinfo->name();
-#ifndef NDEBUG
-    if (verbosity > 1)
-    {
-        cout << "\tDefining lookupFields for " << className << endl;
-    }
-#endif
-    unsigned int num = cinfo->getNumLookupFinfo();
-    unsigned int currIndex = get_getsetdefs()[className].size();
-    for (unsigned int ii = 0; ii < num; ++ii)
-    {
-        const string& name = const_cast<Cinfo*>(cinfo)->getLookupFinfo(ii)->name();
-        PyGetSetDef getset;
-        get_getsetdefs()[className].push_back(getset);
-        get_getsetdefs()[className][currIndex].name = (char*)calloc(name.size() + 1, sizeof(char));
-        strncpy(const_cast<char*>(get_getsetdefs()[className][currIndex].name)
-                , const_cast<char*>(name.c_str()), name.size());
-        get_getsetdefs()[className][currIndex].doc = (char*) "Lookup field";
-        get_getsetdefs()[className][currIndex].get = (getter)moose_ObjId_get_lookupField_attr;
-        PyObject * args = PyTuple_New(1);
-        PyTuple_SetItem(args, 0, PyString_FromString(name.c_str()));
-        get_getsetdefs()[className][currIndex].closure = (void*)args;
-#ifndef NDEBUG
-        if (verbosity > 1)
-        {
-            cout << "\tDefined lookupField " << get_getsetdefs()[className][currIndex].name << endl;
-        }
-#endif
-
-        ++currIndex;
-    }
-    return 1;
-}
-
 PyObject * moose_ObjId_get_elementField_attr(PyObject * self,
         void * closure)
 {
@@ -2903,6 +2889,7 @@ PyObject * moose_ObjId_get_elementField_attr(PyObject * self,
     Py_INCREF(self); // compensate for stolen ref
     PyTuple_SetItem(args, 1, PyString_FromString(name));
     _Field * ret = PyObject_New(_Field, &moose_ElementField);
+
     // 2. Now use this arg to actually create the element field.
     if (moose_ElementField.tp_init((PyObject*)ret, args, NULL) != 0)
     {
@@ -2990,17 +2977,17 @@ PyObject * moose_element(PyObject* dummy, PyObject * args)
     unsigned nid = 0, did = 0, fidx = 0;
     Id id;
     unsigned int numData = 0;
-    if (PyArg_ParseTuple(args, "s", &path))
+
+    // Parse into str or bytes-like object. Using 's' parses into const char*
+    // which is portable with bytes often returned when working with python3.
+    if (PyArg_ParseTuple(args, "s*", &path))
     {
         oid = ObjId(path);
-        //            cout << "Original Path " << path << ", Element Path: " << oid.path() << endl;
         if ( oid.bad() )
         {
-            PyErr_SetString(PyExc_ValueError, ( std::string("moose_element: '")
-                                                + std::string(path)
-                                                + std::string("' does not exist!")
-                                              ).c_str()
-                           );
+            PyErr_SetString(PyExc_ValueError
+                    , (std::string("moose_element: '") + std::string(path) + std::string("' does not exist!")).c_str()
+                    );
             return NULL;
         }
         PyObject * new_obj = oid_to_element(oid);
@@ -3073,15 +3060,11 @@ static PyMethodDef MooseMethods[] =
     {"stop", (PyCFunction)moose_stop, METH_VARARGS, "Stop simulation"},
     {"isRunning", (PyCFunction)moose_isRunning, METH_VARARGS, "True if the simulation is currently running."},
     {"exists", (PyCFunction)moose_exists, METH_VARARGS, "True if there is an object with specified path."},
-    {"writeSBML", (PyCFunction)moose_writeSBML, METH_VARARGS, "Export biochemical model to an SBML file."},
-    {"readSBML",  (PyCFunction)moose_readSBML,  METH_VARARGS, "Import SBML model to Moose."},
-    {"loadModel", (PyCFunction)moose_loadModel, METH_VARARGS, moose_loadModel_documentation},
-    {"saveModel", (PyCFunction)moose_saveModel, METH_VARARGS, moose_saveModel_documentation},
+    {"loadModelInternal", (PyCFunction)moose_loadModelInternal, METH_VARARGS, moose_loadModelInternal_documentation},
+    //{"saveModel", (PyCFunction)moose_saveModel, METH_VARARGS, moose_saveModel_documentation},
     {"connect", (PyCFunction)moose_connect, METH_VARARGS, moose_connect_documentation},
     {"getCwe", (PyCFunction)moose_getCwe, METH_VARARGS, "Get the current working element. 'pwe' is an alias of this function."},
-    // {"pwe", (PyCFunction)moose_getCwe, METH_VARARGS, "Get the current working element. 'getCwe' is an alias of this function."},
     {"setCwe", (PyCFunction)moose_setCwe, METH_VARARGS, "Set the current working element. 'ce' is an alias of this function"},
-    // {"ce", (PyCFunction)moose_setCwe, METH_VARARGS, "Set the current working element. setCwe is an alias of this function."},
     {"getFieldDict", (PyCFunction)moose_getFieldDict, METH_VARARGS, moose_getFieldDict_documentation},
     {
         "getField", (PyCFunction)moose_getField, METH_VARARGS,
@@ -3153,8 +3136,10 @@ static struct PyModuleDef MooseModuleDef =
 PyMODINIT_FUNC MODINIT(_moose)
 {
     clock_t modinit_start = clock();
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure();
+
+    //PyGILState_STATE gstate;
+    //gstate = PyGILState_Ensure();
+
     // First of all create the Shell.  We convert the environment
     // variables into c-like argv array
     vector<string> args = setup_runtime_env();
@@ -3165,6 +3150,7 @@ PyMODINIT_FUNC MODINIT(_moose)
         argv[ii] = (char*)(calloc(args[ii].length()+1, sizeof(char)));
         strncpy(argv[ii], args[ii].c_str(), args[ii].length()+1);
     }
+
     // Should not call. No pthreads now. PyEval_InitThreads();
     Id shellId = getShell(argc, argv);
     for (int ii = 1; ii < argc; ++ii)
@@ -3254,10 +3240,10 @@ PyMODINIT_FUNC MODINIT(_moose)
     PyModule_AddObject(moose_module, "DestField", (PyObject*)&moose_DestField);
 
     // PyModule_AddIntConstant(moose_module, "SINGLETHREADED", isSingleThreaded);
-    PyModule_AddIntConstant(moose_module, "NUMCORES", numCores);
-    PyModule_AddIntConstant(moose_module, "NUMNODES", numNodes);
+    // PyModule_AddIntConstant(moose_module, "NUMCORES", numCores);
+    // PyModule_AddIntConstant(moose_module, "NUMNODES", numNodes);
     // PyModule_AddIntConstant(moose_module, "NUMPTHREADS", numProcessThreads);
-    PyModule_AddIntConstant(moose_module, "MYNODE", myNode);
+    // PyModule_AddIntConstant(moose_module, "MYNODE", myNode);
     PyModule_AddIntConstant(moose_module, "INFINITE", isInfinite);
     PyModule_AddStringConstant(moose_module, "__version__", SHELLPTR->doVersion().c_str());
     PyModule_AddStringConstant(moose_module, "VERSION", SHELLPTR->doVersion().c_str());
@@ -3276,52 +3262,20 @@ PyMODINIT_FUNC MODINIT(_moose)
 
     clock_t defclasses_end = clock();
 
-    LOG( moose::info, "`Time to define moose classes:" 
+    LOG( moose::debug, "`Time to define moose classes:"
             << (defclasses_end - defclasses_start) * 1.0 /CLOCKS_PER_SEC
        );
 
-    PyGILState_Release(gstate);
+    //PyGILState_Release(gstate);
     clock_t modinit_end = clock();
 
-    LOG( moose::info, "`Time to initialize module:" 
-            << (modinit_end - modinit_start) * 1.0 /CLOCKS_PER_SEC 
+    LOG( moose::debug, "`Time to initialize module:"
+            << (modinit_end - modinit_start) * 1.0 /CLOCKS_PER_SEC
        );
 
     if (doUnitTests)
-    {
         test_moosemodule();
-    }
 #ifdef PY3K
     return moose_module;
 #endif
-} //! init_moose
-
-
-//////////////////////////////////////////////
-// Main function
-//////////////////////////////////////////////
-
-// int main(int argc, char* argv[])
-// {
-// #ifdef PY3K
-//     size_t len = strlen(argv[0]);
-//     wchar_t * warg = (wchar_t*)calloc(sizeof(wchar_t), len);
-//     mbstowcs(warg, argv[0], len);
-// #else
-//     char * warg = argv[0];
-// #endif
-//     for (int ii = 0; ii < argc; ++ii){
-//     cout << "ARGV: " << argv[ii];
-// }
-//     cout << endl;
-//     Py_SetProgramName(warg);
-//     Py_Initialize();
-//     MODINIT(_moose);
-// #ifdef PY3K
-//     free(warg);
-// #endif
-//     return 0;
-// }
-
-//
-// moosemodule.cpp ends here
+}

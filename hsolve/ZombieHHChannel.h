@@ -29,8 +29,8 @@
  * respectively.
  */
 
-#include "header.h"
-#include "ElementValueFinfo.h"
+#include "../basecode/header.h"
+#include "../basecode/ElementValueFinfo.h"
 #include "HinesMatrix.h"
 #include "HSolveStruct.h"
 #include "HSolvePassive.h"
@@ -80,7 +80,7 @@ public:
      */
     void vSetUseConcentration( const Eref& e, int value );
     // implemented in baseclass: int getUseConcentration() const;
-	
+
     void vSetModulation( const Eref& e, double value );
 
     /////////////////////////////////////////////////////////////
@@ -91,7 +91,7 @@ public:
     void vReinit( const Eref& e, ProcPtr p );
     void vHandleConc( const Eref& e, double value);
     void vCreateGate(const Eref& e , string name);
-    
+
     /////////////////////////////////////////////////////////////
 	// Dummy function, not needed in Zombie.
 	void vHandleVm( double Vm );

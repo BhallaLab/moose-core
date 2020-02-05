@@ -32,6 +32,7 @@
 #include <iomanip>
 #include <ctime>
 #include <algorithm>
+#include <cstring>
 
 #define T_RESET       "\033[0m"
 #define T_BLACK       "\033[30m"      /* Black */
@@ -53,25 +54,40 @@
 
 using namespace std;
 
-namespace moose {
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Macros
+ */
+/* ----------------------------------------------------------------------------*/
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+#ifndef NDEBUG
+#define MOOSE_DEBUG( a ) { \
+    stringstream ss; ss << a; \
+    cout << "DEBUG: " << __FILENAME__ << ":" << __LINE__ << " " << ss.str() << std::endl; \
+    }
+#else
+#define MOOSE_DEBUG( a ) {}
+#endif
 
+#define MOOSE_WARN( a ) { \
+    stringstream ss; ss << a; \
+    moose::showWarn( ss.str() ); \
+    }
+
+namespace moose {
 
     /**
      * @brief Enumerate type for debug and log.
      */
-    enum serverity_level_ { 
-        trace, debug, info
-            , warning, fixme
-            , error, fatal, failed 
+    enum serverity_level_ {
+        trace, debug, info , warning, fixme , error, fatal, failed
     };
 
-    static string levels_[9] = { 
-        "TRACE", "DEBUG", "INFO", "LOG"
-            , "WARNING", "FIXME"
-            , "ERROR", "FATAL", "FAILED" 
+    static string levels_[9] = {
+        "TRACE", "DEBUG", "INFO", "WARNING", "FIXME" , "ERROR", "FATAL", "FAILED"
     };
 
-    /* 
+    /*
      * ===  FUNCTION  ==============================================================
      *         Name:  mapToString
      *  Description:  GIven a map, return a string representation of it.
@@ -85,7 +101,6 @@ namespace moose {
         string mapToString(const map<A, B>& m, bool value=true)
         {
             unsigned int width = 81;
-            unsigned int mapSize = m.size();
             unsigned int size = 0;
 
             vector<string> row;
@@ -138,14 +153,15 @@ namespace moose {
         return ss.str();
     }
 
+    // Not print it when built for release.
     inline string debugPrint(string msg, string prefix = "DEBUG"
             , string color=T_RESET, unsigned debugLevel = 0
-            ) 
+            )
     {
         stringstream ss; ss.str("");
         if(debugLevel <= DEBUG_LEVEL)
         {
-            ss << setw(debugLevel/2) << "[" << prefix << "] " 
+            ss << setw(debugLevel/2) << "[" << prefix << "] "
                 << color << msg << T_RESET;
         }
         return ss.str();
@@ -153,7 +169,7 @@ namespace moose {
 
     /*-----------------------------------------------------------------------------
      *  This function __dump__ a message onto console. Fills appropriate colors as
-     *  needed. 
+     *  needed.
      *-----------------------------------------------------------------------------*/
 
     inline void __dump__(string msg, serverity_level_ type = debug, bool autoFormat = true)
@@ -176,7 +192,7 @@ namespace moose {
         {
             if('`' == msg[i])
             {
-                if(!set and reset) 
+                if(!set and reset)
                 {
                     set = true;
                     reset = false;
@@ -199,6 +215,33 @@ namespace moose {
         if(!reset)
             ss << T_RESET;
         cout << ss.str() << endl;
+        cout.flush( );
+    }
+
+    /*
+     * Wrapper function around __dump__
+     */
+    inline void showInfo( string msg )
+    {
+        moose::__dump__( msg, moose::info );
+    }
+
+    inline void showWarn( string msg )
+    {
+        moose::__dump__(msg, moose::warning );
+    }
+
+    inline void showDebug( const string msg )
+    {
+#ifdef DISABLE_DEBUG
+#else
+        moose::__dump__(msg, moose::debug );
+#endif
+    }
+
+    inline void showError( string msg )
+    {
+        moose::__dump__( msg, moose::error );
     }
 
     /**
@@ -210,9 +253,11 @@ namespace moose {
      */
 
 #ifdef  NDEBUG
-#define LOG(a, t ) ((void)0);
+#define LOG(t, a ) ((void)0);
 #else      /* -----  not NDEBUG  ----- */
-#define LOG(t, a) { stringstream __ss__;  __ss__ << a; moose::__dump__(__ss__.str(), t ); } 
+#define LOG(t, a) { stringstream __ss__; \
+    __ss__ << __func__ << ": " << a; moose::__dump__(__ss__.str(), t); \
+}
 #endif     /* -----  not NDEBUG  ----- */
 
     /*-----------------------------------------------------------------------------
@@ -236,12 +281,12 @@ namespace moose {
      *
      * @param msg String, message to be written.
      * @param type Type of the message.
-     * @param redirectToConsole 
+     * @param redirectToConsole
      * @param removeTicks
      */
     inline void log(string msg, serverity_level_ type = debug
             , bool redirectToConsole = true
-            , bool removeTicks = true 
+            , bool removeTicks = true
             )
     {
 
