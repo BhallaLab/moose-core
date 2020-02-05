@@ -1,4 +1,4 @@
-name: Build PyMOOSE using setup.py
+name: C/C++ CI
 
 on: [push]
 
@@ -12,13 +12,10 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install libgsl-dev g++ cmake python3-pip python3-numpy python3-matplotlib
-        sudo apt install python-dev python-numpy python-matplotlib python-pip
-    - name: build
-      run: |
-        python setup.py install test
-        python3 setup.py install test
-    - name: Post Install
-      run: |
-        python3 -c "import moose;moose.test()" || echo "Failed python3 test"
-        python2 -c "import moose;moose.test()" || echo "Failed python2 tests"
+        sudo apt install libgsl-dev g++ cmake python3-dev python3-numpy
+    - name: configure
+      run: mkdir -p build && cd build && cmake ..
+    - name: make
+      run: cd build && make
+    - name: ctest --output-on-failure
+      run: cd build && make check
