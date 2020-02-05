@@ -1,36 +1,23 @@
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(MOOSE)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules")
+# Project to build MOOSE's python module.
+project(PyMOOSE)
+
+# cmake related macros.
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
+include(FindPythonModule)
 
-# getgit revision number
-find_program( GIT_EXEC git )
-if(GIT_EXEC)
-    execute_process(
-        COMMAND ${GIT_EXEC} rev-parse --short HEAD
-        OUTPUT_VARIABLE GIT_HEAD
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-else(GIT_EXEC)
-    set(GIT_HEAD 'HEAD')
-    message(STATUS "Couldn't fetch version from git repo" )
-endif()
 
-# If from command line, version info is not passed, use the git to generate a
-# version file. If GIT fails, use the previous known version.
+# If moose version is not given, then create a default version.
+string(TIMESTAMP STAMP "%Y%m%d")
 if(NOT VERSION_MOOSE)
-    set(VERSION_MOOSE "3.2.0-${GIT_HEAD}")
+  set(VERSION_MOOSE "3.2.dev${STAMP}")
 endif()
 
-add_definitions( -DMOOSE_VERSION="${VERSION_MOOSE}")
-message( STATUS "MOOSE Version ${VERSION_MOOSE}" )
-
-# Write VERSION to a file VERSION so that setup.cmake.py can use it.
-set(VERSION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/python/VERSION)
-file(WRITE ${VERSION_FILE} ${VERSION_MOOSE} )
-message(STATUS "| Writing ${VERSION_MOOSE} to ${VERSION_FILE}" )
+add_definitions(-DMOOSE_VERSION="${VERSION_MOOSE}")
+message(STATUS "MOOSE Version ${VERSION_MOOSE}")
 
 # This snippet is from LLVM project.
 # Sanity check our source directory to make sure that we are not trying to
@@ -49,21 +36,6 @@ if( CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
         "===================================================================== \n"
         )
 endif()
-
-# uninstall target
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-    IMMEDIATE @ONLY
-    )
-
-add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -P
-    ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
-    )
-
-# This is for testing purpose.
-link_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 ################################ CMAKE OPTIONS ##################################
 option(WITH_NSDF            "Enable NSDF support. Requires hdf5" OFF )
@@ -120,6 +92,7 @@ endif()
 
 ################################### TARGETS ####################################
 
+link_directories(${CMAKE_BINARY_DIR})
 add_library(libmoose SHARED basecode/main.cpp)
 add_executable(moose.bin basecode/main.cpp)
 
@@ -327,6 +300,7 @@ endif(APPLE)
 
 add_dependencies(moose.bin libmoose)
 target_link_libraries(moose.bin moose ${CMAKE_DL_LIBS})
+
 if( WITH_BOOST )
     target_link_libraries( moose.bin ${Boost_LIBRARIES} )
 endif( WITH_BOOST )
@@ -341,11 +315,13 @@ endif( WITH_BOOST )
 # See the cmake doc.
 # Till then, stay with the old macro.
 set(Python_ADDITIONAL_VERSIONS 2.7)
-find_package(PythonInterp 3.4)
+find_package(PythonInterp 3.5)
+if(NOT PYTHONINTERP_FOUND)
+  find_package(PythonInterp 2.7)
+endif()
 
 # This target is built by pymoose/CMakeLists.txt file.
 add_subdirectory(pymoose)
-
 
 # always override debian default installation directory. It will be installed in
 # site-packages instead of dist-packages.
@@ -363,69 +339,19 @@ set(EXTRA_ARGS "--prefix ${CMAKE_INSTALL_PREFIX} ${DISTUTILS_EXTRA_ARGS}")
 # suitable for DEBIAN systems.
 if(${_platform_desc} MATCHES ".*(Ubuntu|debian).*")
     list(APPEND EXTRA_ARGS "--install-layout=deb")
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/python/setup.cfg
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/setup.cfg
          "[install]\nprefix=/usr\ninstall-layout=deb"
        )
 endif()
 
-# Set PYMOOSE binary distribution build and install directories.
-# Target for creating bdist. This is handy for creating bdist for packaging.
-# Save the binary distribution (tar.gz) to PYMOOSE_BDIST_DIR.
-find_package(PythonInterp REQUIRED)
-if(NOT PYMOOSE_BDIST_DIR)
-    set(PYMOOSE_BDIST_DIR ${CMAKE_BINARY_DIR}/bdist)
-endif( )
-
-# If no one hsa set the PYMOOSE bdist installation directory, use default.
-if(NOT PYMOOSE_BDIST_INSTALL_DIR)
-    set(PYMOOSE_BDIST_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/pymoose_bdist_install)
-endif()
-file(MAKE_DIRECTORY ${PYMOOSE_BDIST_INSTALL_DIR})
-
-# We need a custom name for bdist; same on all platform.
-set(_platform "CMAKE" )
-set(PYMOOSE_BDIST_FILE ${PYMOOSE_BDIST_DIR}/pymoose-${VERSION_MOOSE}.${_platform}.tar.gz)
-message(STATUS "binary distribution file ${PYMOOSE_BDIST_FILE}")
-add_custom_target(bdist ALL DEPENDS  ${PYMOOSE_BDIST_FILE} )
-
-# Any command using setup.cmake.py must run in the same directory. Use option
-# `--relative` to prefix is aways fixed.
-add_custom_command( OUTPUT ${PYMOOSE_BDIST_FILE}
-    COMMAND ${PYTHON_EXECUTABLE} setup.cmake.py bdist_dumb -p ${_platform}
-        -d ${PYMOOSE_BDIST_DIR} --relative
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/python
-    COMMENT "bdist is saved to ${PYMOOSE_BDIST_DIR}"
-    VERBATIM
-    )
-add_custom_command(TARGET bdist POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E chdir ${PYMOOSE_BDIST_INSTALL_DIR} tar xf ${PYMOOSE_BDIST_FILE}
-    COMMENT "Unarchiving bdist file ${PYMOOSE_BDIST_FILE} to ${PYMOOSE_BDIST_INSTALL_DIR}"
-    VERBATIM
-    )
-
-# Copy python files from source to current binary directory. Make sure to call
-# this before building bdist.
-file(GLOB_RECURSE PYTHON_SRCS "${CMAKE_SOURCE_DIR}/python/*")
-add_custom_target(copy_pymoose DEPENDS ${PYTHON_SRCS}
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/python ${CMAKE_CURRENT_BINARY_DIR}/python
-    COMMENT "Copying required python files and other files to build directory"
-    VERBATIM
-    )
-
-add_dependencies( bdist copy_pymoose )
-add_dependencies( copy_pymoose _moose )
 
 ######################### INSTALL ##############################################
 
 install(TARGETS moose.bin DESTINATION bin CONFIGURATIONS Debug)
 install(TARGETS libmoose DESTINATION lib CONFIGURATIONS Debug)
 
-# install pymoose bdist.
-install(DIRECTORY ${PYMOOSE_BDIST_INSTALL_DIR}/
-    DESTINATION ${CMAKE_INSTALL_PREFIX}
-    CONFIGURATIONS Release Debug
-    )
+# NOTE: Install macro for _moose (pymoose) has been moved to
+# pymoose/CMakeLists.txt file.
 
 # Print message to start build process
 if(${CMAKE_BUILD_TOOL} MATCHES "make")
