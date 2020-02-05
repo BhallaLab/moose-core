@@ -1,47 +1,53 @@
 # -*- coding: utf-8 -*-
 # This script can also be called directly to build and install the pymoose
 # module.
+#
 # Alternatively, you can use cmake build system which provides finer control
 # over the build. This script is called by cmake to install the python module. 
+# 
+# This script is compatible with python2.7 and python3+. Therefore use of
+# super() is commented out.
+#
+# NOTES:
+#  * Python2
+#   - Update setuptools using `python2 -m pip install setuptools --upgrade --user'.
 
 __author__     = "Dilawar Singh"
 __copyright__  = "Copyright 2019-, Dilawar Singh"
 __maintainer__ = "Dilawar Singh"
-__email__      = "dilawars@ncbs.res.in"
+__email__      = "dilawar.s.rajput@gmail.com"
 
 import os
 import sys
 import subprocess
 import datetime
 
-if sys.version_info[0] < 3:
-    print("[ERROR] You must use python3.5 or higher.\n" 
-        "You used '%s'" % sys.version + " which is not supported.")
-    quit(-1)
-
-## TEST IF REQUIRED TOOLS EXISTS.
 try:
     cmakeVersion = subprocess.check_output(["cmake", "--version"])
 except Exception as e:
     print("[ERROR] cmake is not found. Please install cmake.")
     quit(-1)
 
-
 # See https://docs.python.org/3/library/distutils.html
 # setuptools is preferred over distutils. And we are supporting python3 only.
 from setuptools import setup, Extension, Command
 from setuptools.command.build_ext import build_ext  as _build_ext
 import subprocess
-from pathlib import Path
 
 # Global variables.
-
-sdir_ = Path(__file__).parent.absolute()
+sdir_ = os.path.dirname(os.path.realpath(__file__))
 stamp = datetime.datetime.now().strftime('%Y%m%d')
-builddir_ = sdir_ / ('_build_%s' % stamp)
-builddir_.mkdir(parents=True, exist_ok=True)
+builddir_ = os.path.join(sdir_, '%s_build_%s' % (sys.version_info[0], stamp))
 
-numCores_ = os.cpu_count() - 1
+if not os.path.exists(builddir_):
+    os.makedirs(builddir_)
+
+numCores_ = 4
+try:
+    # Python3 only.
+    numCores_ = os.cpu_count() - 1
+except Exception:
+    pass
 
 version_ = '3.2.dev%s' % stamp
 
@@ -51,8 +57,7 @@ version_ = '3.2.dev%s' % stamp
 class CMakeExtension(Extension):
     def __init__(self, name):
         # don't invoke the original build_ext for this special extension
-        super().__init__(name, sources=[])
-
+        Extension.__init__(self, name, sources=[])
 
 class TestCommand(Command):
     user_options = []
@@ -65,8 +70,9 @@ class TestCommand(Command):
 
     def run(self):
         print("[INFO ] Running tests... ")
-        return subprocess.run(["ctest", "--output-on-failure", '-j2']
-                , cwd=builddir_)
+        os.chdir(builddir_)
+        self.spawn(["ctest", "--output-on-failure", '-j2'])
+        os.chdir(sdir_)
 
 class build_ext(_build_ext):
     user_options = [('with-boost', None, 'Use Boost Libraries (OFF)')
@@ -82,12 +88,14 @@ class build_ext(_build_ext):
         self.debug = 0
         self.no_build = 0
         self.cmake_options = {}
-        super().initialize_options()
+        #  super().initialize_options()
+        _build_ext.initialize_options(self)
 
     def finalize_options(self):
         # Finalize options.
-        super().finalize_options()
-        self.cmake_options['PYTHON_EXECUTABLE'] = Path(sys.executable).resolve()
+        #  super().finalize_options()
+        _build_ext.finalize_options(self)
+        self.cmake_options['PYTHON_EXECUTABLE'] = os.path.realpath(sys.executable)
         if self.with_boost:
             self.cmake_options['WITH_BOOST'] = 'ON'
             self.cmake_options['WITH_GSL'] = 'OFF'
@@ -101,7 +109,8 @@ class build_ext(_build_ext):
             return
         for ext in self.extensions:
             self.build_cmake(ext)
-        super().run()
+        #  super().run()
+        _build_ext.run(self)
 
     def build_cmake(self, ext):
         global numCores_
@@ -117,9 +126,8 @@ class build_ext(_build_ext):
             self.spawn(['make', '-j%d'%numCores_]) 
         os.chdir(str(sdir_))
 
-with open(Path(__file__).parent / "README.md") as f:
+with open(os.path.join(sdir_,  "README.md")) as f:
     readme = f.read()
-
 
 setup(
     name="pymoose",
@@ -139,13 +147,14 @@ setup(
     # python2 specific version here as well.
     install_requires=['numpy'],
     package_dir={
-        'moose': sdir_ / 'python' / 'moose',
-        'rdesigneur': sdir_ / 'python' / 'rdesigneur'
+        'moose': os.path.join(sdir_, 'python', 'moose'),
+        'rdesigneur': os.path.join(sdir_, 'python', 'rdesigneur')
     },
     package_data={
         'moose': [
-            '_moose.so', 'neuroml2/schema/NeuroMLCoreDimensions.xml',
-            'chemUtil/rainbow2.pkl'
+            '_moose.so'
+            , os.path.join('neuroml2','schema','NeuroMLCoreDimensions.xml')
+            , os.path.join('chemUtil', 'rainbow2.pkl')
         ]
     },
     ext_modules=[CMakeExtension('pymoose')],
