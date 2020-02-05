@@ -315,6 +315,7 @@ endif( WITH_BOOST )
 # See the cmake doc.
 # Till then, stay with the old macro.
 set(Python_ADDITIONAL_VERSIONS 2.7)
+<<<<<<< HEAD
 find_package(PythonInterp 3.5)
 if(NOT PYTHONINTERP_FOUND)
   find_package(PythonInterp 2.7)
@@ -322,6 +323,13 @@ endif()
 
 # This target is built by pymoose/CMakeLists.txt file.
 add_subdirectory(pymoose)
+=======
+find_package(PythonInterp 3.4)
+
+# This target is built by pymoose/CMakeLists.txt file.
+add_subdirectory(pymoose)
+
+>>>>>>> bhallalab/master
 
 # always override debian default installation directory. It will be installed in
 # site-packages instead of dist-packages.
