@@ -20,8 +20,7 @@ jobs:
       run: |
         export DEBIAN_FRONTEND=noninteractive
         sudo -E apt install -y cmake libgsl-dev g++ gcc git 
-        sudo -E apt install -y python-numpy python3-numpy
-        sudo -E apt install -y python-matplotlib python3-matplotlib
+        python -m pip install numpy matplotlib --user
     - name: Build
       run: |
         python setup.py install test
