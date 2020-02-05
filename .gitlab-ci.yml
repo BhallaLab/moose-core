@@ -15,6 +15,7 @@ build:
   script:
     - python3 setup.py install
     - python2 setup.py install 
+    - python3 setup.py sdist
   artifacts:
     paths:
       - mybinary
