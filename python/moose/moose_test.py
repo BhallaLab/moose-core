@@ -7,12 +7,7 @@ from __future__ import print_function, division
 
 __author__ = "Dilawar Singh"
 __copyright__ = "Copyright 2016, Dilawar Singh"
-__credits__ = ["NCBS Bangalore"]
-__license__ = "GNU GPL"
-__version__ = "1.0.0"
-__maintainer__ = "Dilawar Singh"
 __email__ = "dilawars@ncbs.res.in"
-__status__ = "Development"
 
 import sys
 import os
@@ -22,12 +17,20 @@ import subprocess
 import threading
 import signal
 import logging
+import tempfile
 from collections import defaultdict
 import time
 
+test_dir_ = os.path.join(tempfile.gettempdir(), 'moose-examples')
 test_data_url_ = 'https://github.com/BhallaLab/moose-examples/archive/master.zip'
 test_repo_url_ = 'https://github.com/BhallaLab/moose-examples'
-test_dir_ = os.path.join(tempfile.gettempdir(), 'moose-examples')
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+    datefmt='%m-%d %H:%M',
+    filename=os.path.join(test_dir_, '_moose_test.log'),
+    filemode='a')
 
 ignored_dict_ = defaultdict(list)
 test_status_ = defaultdict(list)
@@ -38,13 +41,16 @@ backend : agg
 interactive : True
 '''
 
+
 # Handle CTRL+C
 def signal_handler(signal, frame):
     print('You pressed Ctrl+C!')
     print_test_stat()
     quit(-1)
 
+
 signal.signal(signal.SIGINT, signal_handler)
+
 
 # Credit: https://stackoverflow.com/a/4825933/1805129
 class Command(object):
@@ -57,40 +63,32 @@ class Command(object):
         return ' '.join(self.cmd)
 
     def run(self, timeout, **kwargs):
-        def target():
-            logging.info("Running %s" % self)
-            self.process = subprocess.Popen(self.cmd,
-                                            shell=False,
-                                            stdout=self.fnull,
-                                            stderr=subprocess.STDOUT)
-            self.process.communicate()
-
-        thread = threading.Thread(target=target)
-        thread.start()
-        thread.join(timeout)
-        if thread.is_alive():
-            self.process.terminate()
-            thread.join()
-
-        if self.process.stderr is not None:
-            logging.warn('%s' % self.process.stderr.read())
-
+        self.process = subprocess.Popen(self.cmd, stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+        timer = threading.Timer(timeout, self.process.kill)
+        try:
+            timer.start()
+            output, errors = self.process.communicate()
+            logging.warn('%s %s' % (output, errors))
+        finally:
+            timer.cancel()
         return self.process.returncode
 
 
 def init_test_dir():
     global test_dir_
     global test_url_
-    if (not os.path.exists(test_dir_)):
+    if not os.path.exists(test_dir_):
         os.makedirs(test_dir_)
         logging.info("Donwloading test repository")
-        subprocess.call(
+        subprocess.check_output(
             ['git', 'clone', '--depth=10', test_repo_url_, test_dir_])
     os.chdir(test_dir_)
+    subprocess.check_output(['git', 'pull'])
 
 
 def suitable_for_testing(script):
-    with open(script, 'r', encoding='utf8') as f:
+    with open(script, 'r') as f:
         txt = f.read()
         if not re.search(r'main\(\s*\)', txt):
             logging.debug('Script %s does not contain main( )' % script)
@@ -177,7 +175,6 @@ def test_all(timeout, **kwargs):
 
 def test(timeout=60, **kwargs):
     """Download and run tests.
-
     """
     print('[INFO] Running test with timeout %d sec' % timeout)
     try:
