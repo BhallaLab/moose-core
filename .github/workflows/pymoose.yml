@@ -18,8 +18,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        sudo apt install -y cmake libgsl-dev g++ git
-        python -m pip install --upgrade pip --user
+        sudo apt install -y cmake libgsl-dev g++ gcc git
     - name: Build
       run: |
         python setup.py install test
