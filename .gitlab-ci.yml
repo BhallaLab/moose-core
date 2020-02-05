@@ -9,11 +9,22 @@ build:
   # instead of calling g++ directly you can also use some build toolkit like make
   # install the necessary build tools when needed
   before_script:
-     - apt update && apt -y install cmake libgsl-devel python-devel python-numpy
+    - apt update && apt -y install cmake git libgsl-dev
+    - apt -y install python3-numpy python3-matplotlib
+    - apt -y install python-numpy python-matplotlib
   script:
-    - mkdir build && cd build && make -j5 && ctest --output-on-failure
- 
-  # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
-  # cache:
-  #   paths:
-  #     - "*.o"
+    - python3 setup.py install
+    - python2 setup.py install 
+  artifacts:
+    paths:
+      - mybinary
+      # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
+      # cache:
+      #   paths:
+      #     - "*.o"
+
+# run tests using the binary built before
+test:
+  stage: test
+  script:
+    - python3 setup.py test
