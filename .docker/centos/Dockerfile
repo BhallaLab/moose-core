@@ -15,10 +15,11 @@ RUN yum install -y python3-matplotlib python3-networkx graphviz python3-scipy  \
 RUN yum install -y python-matplotlib python-networkx python-scipy python-numpy \
       && yum -y clean all --enablerepo='*'
 RUN ln -s /usr/bin/cmake3 /usr/bin/cmake 
+RUN ln -s /usr/bin/ctest3 /usr/bin/ctest 
 WORKDIR /home/root
 # RUN git clone  https://github.com/dilawar/moose-core -b devel
 # Run docker build from outside 
 COPY . moose-core
-RUN cd moose-core && python3 setup.py build test install 
-RUN cd moose-core && python2 setup.py build test install 
+RUN cd moose-core && python3 setup.py build test install
+RUN cd moose-core && python2 setup.py build test install
 CMD ["/usr/bin/python3", "-c", "'import moose;moose.test()'"]
