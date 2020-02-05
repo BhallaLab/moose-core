@@ -10,11 +10,13 @@ build:
   # install the necessary build tools when needed
   before_script:
     - apt update && apt -y install cmake git libgsl-dev
-    - apt -y install python3-numpy python3-matplotlib
-    - apt -y install python-numpy python-matplotlib
+    - apt -y install python3-numpy python3-matplotlib python3-setuptools
+    - apt -y install python-numpy python-matplotlib python-setuptools
   script:
     - python3 setup.py install
+    - python3 -m pip install setuptools --user
     - python2 setup.py install 
+    - python2 -m pip install setuptools --user
     - python3 setup.py sdist
   artifacts:
     paths:
