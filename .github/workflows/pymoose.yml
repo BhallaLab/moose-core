@@ -19,7 +19,9 @@ jobs:
     - name: Install dependencies
       run: |
         export DEBIAN_FRONTEND=noninteractive
-        sudo -E apt install -y cmake libgsl-dev g++ gcc git
+        sudo -E apt install -y cmake libgsl-dev g++ gcc git 
+        sudo -E apt install -y python-numpy python3-numpy
+        sudo -E apt install -y python-matplotlib python3-matplotlib
     - name: Build
       run: |
         python setup.py install test
