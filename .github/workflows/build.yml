@@ -14,8 +14,7 @@ jobs:
         sudo apt update
         sudo apt install libgsl-dev g++ cmake python3-pip python3-numpy python3-matplotlib
         sudo apt install python-dev python-numpy python-matplotlib python-pip
-    - name: configure
-    - name: make
+    - name: build
       run: |
         python setup.py install test
         python3 setup.py install test
