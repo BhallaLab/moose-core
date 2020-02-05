@@ -42,10 +42,10 @@ builddir_ = os.path.join(sdir_, '%s_build_%s' % (sys.version_info[0], stamp))
 if not os.path.exists(builddir_):
     os.makedirs(builddir_)
 
-numCores_ = 4
+numCores_ = 2
 try:
     # Python3 only.
-    numCores_ = os.cpu_count() - 1
+    numCores_ = os.cpu_count()
 except Exception:
     pass
 
