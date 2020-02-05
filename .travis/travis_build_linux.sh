@@ -73,3 +73,4 @@ if type $PYTHON3 > /dev/null; then
 else
     echo "Python3 is not found. Build disabled"
 fi
+python3 setup.py sdist
