@@ -18,17 +18,7 @@ add_definitions(-std=c++11)
 add_definitions(-DUSE_NUMPY)
 add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
 
-# set module extensiton. default is .so. Also check ../python/setup.cmake.py
-execute_process(COMMAND
-    ${PYTHON_EXECUTABLE} -c
-"import importlib.machinery
-print(importlib.machinery.EXTENSION_SUFFIXES[-1])"
-    OUTPUT_VARIABLE PYTHON_SO_EXTENSION
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-if(NOT PYTHON_SO_EXTENSION)
-    message(STATUS "Python so ext could not be determined. Using default .so")
-    set(PYTHON_SO_EXTENSION ".so")
-endif()
+set(PYTHON_SO_EXTENSION ".so")
 message(STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
 
 # TARGET
@@ -49,8 +39,9 @@ set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../python/moose")
 message(STATUS "Python module will be saved to ${PYMOOSE_OUTPUT_DIRECTORY}" )
 
 # make sure the Python.h is found.
-# Use python executable to find include paths. For building wheel, we are
-# stuck with cmake-2.8 with which PythonLibs module might fail.
+# Use python executable to find include paths. 
+# FIXME: cmake > 3.12 has great support for python but it is not available
+# everywhere YET. When it is available on centos, we can use FindPython.
 message(STATUS "Using ${PYTHON_EXECUTABLE}-config to find Python.h" )
 execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --includes
   OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
@@ -110,11 +101,39 @@ else(APPLE)
     ${SYSTEM_SHARED_LIBS})
 endif()
 
-add_custom_command(TARGET _moose POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan
-        "MOOSE python extention is successfully built. Now "
-        " Run 'sudo make install' to install it. "
-        " "
-        "NOTE: Run 'pip uninstall moose' to uninstall moose."
-    VERBATIM)
+# PYMOOSE DISTRIBUTION.
+#find_python_module(wheel REQUIRED)
+#if(NOT PY_WHEEL)
+#  message(STATUS "Python module wheel is not found. Please wait while I install it..")
+#  execute_process(COMMAND ${PYTHON_EXECUTABLE} -m pip install wheel --user)
+#endif(NOT PY_WHEEL)
+  
+# Create a binary distribution inside a directory. Installation is copying that
+# directory to ${CMAKE_INSTALL_PREFIX}
+set(_platform "CMAKE")
+set(PYMOOSE_BDIST_FILE ${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.${_platform}.tar.gz)
+set(PYMOOSE_INSTALL_DIR ${CMAKE_BINARY_DIR}/_pymoose_temp_install)
+file(MAKE_DIRECTORY ${PYMOOSE_INSTALL_DIR})
 
+add_custom_command(TARGET _moose POST_BUILD
+  COMMAND ${PYTHON_EXECUTABLE} setup.py build_py  
+  COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_dumb --skip-build 
+    -p "${_platform}" -d ${CMAKE_BINARY_DIR} --relative
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  COMMENT "python's binary distribution is saved to ${CMAKE_BINARY_DIR}"
+  VERBATIM)
+
+# Copy python tree to BUILD directory. User can set PYTHONPATH to
+# ${CMAKE_BINARY_DIR}/python.
+add_custom_target(copy_python_tree ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_directory 
+    ${CMAKE_SOURCE_DIR}/python ${CMAKE_BINARY_DIR}/python
+    COMMENT "Copying python source tree: ${CMAKE_SOURCE_DIR} -> ${CMAKE_BINARY_DIR}"
+  DEPENDS _moose 
+  VERBATIM)
+
+
+install(CODE "execute_process(
+  COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_INSTALL_PREFIX} tar xf ${PYMOOSE_BDIST_FILE}
+  )" 
+  CONFIGURATION Release Debug)
