@@ -1,10 +1,12 @@
-name: C/C++ CI
+name: Build PyMOOSE using setup.py
 
 on: [push]
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
+    
     steps:
     - uses: actions/checkout@v2
     - name: Install dependencies
@@ -19,5 +21,5 @@ jobs:
         python3 setup.py install test
     - name: Post Install
       run: |
-        python3 -c "import moose;moose.test()" || echo "Failed python3 tests"
+        python3 -c "import moose;moose.test()" || echo "Failed python3 test"
         python2 -c "import moose;moose.test()" || echo "Failed python2 tests"
