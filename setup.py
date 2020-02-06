@@ -57,7 +57,7 @@ version_ = '3.2.dev%s' % stamp
 class CMakeExtension(Extension):
     def __init__(self, name):
         # don't invoke the original build_ext for this special extension
-        Extension.__init__(self, name, sources=[])
+        Extension.__init__(self, name, sources=[], optional=True)
 
 class TestCommand(Command):
     user_options = []
@@ -77,6 +77,7 @@ class TestCommand(Command):
 class build_ext(_build_ext):
     user_options = [('with-boost', None, 'Use Boost Libraries (OFF)')
             , ('with-gsl', None, 'Use Gnu Scienfific Library (ON)')
+            , ('with-gsl-static', None, 'Use GNU Scientific Library (static library) (OFF)') 
             , ('debug', None, 'Build moose in debugging mode (OFF)')
             , ('no-build', None, 'DO NOT BUILD. (for debugging/development)')
             ] + _build_ext.user_options
@@ -85,6 +86,7 @@ class build_ext(_build_ext):
         # Initialize options.
         self.with_boost = 0
         self.with_gsl = 1
+        self.with_gsl_static = 0
         self.debug = 0
         self.no_build = 0
         self.cmake_options = {}
@@ -99,6 +101,9 @@ class build_ext(_build_ext):
         if self.with_boost:
             self.cmake_options['WITH_BOOST'] = 'ON'
             self.cmake_options['WITH_GSL'] = 'OFF'
+        else:
+            if self.with_gsl_static:
+                self.cmake_options['GSL_USE_STATIC_LIBRARIES'] = 'ON'
         if self.debug:
             self.cmake_options['CMAKE_BUILD_TYPE'] = 'Debug'
         else:
@@ -157,6 +162,6 @@ setup(
             , os.path.join('chemUtil', 'rainbow2.pkl')
         ]
     },
-    ext_modules=[CMakeExtension('pymoose')],
+    ext_modules=[CMakeExtension('')],
     cmdclass={'build_ext': build_ext, 'test': TestCommand},
 )
