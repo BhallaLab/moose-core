@@ -55,13 +55,13 @@ IF(WIN32)
 
 ELSE(WIN32)
     # UNIX
-    IF(GSL_USE_STATIC_LIBRARIES)
+    if(GSL_USE_STATIC_LIBRARIES OR $ENV{GSL_USE_STATIC_LIBRARIES})
         SET(GSL_LIB_NAMES libgsl.a)
         SET(GSL_CBLAS_LIB_NAMES libgslcblas.a)
-    ELSE(GSL_USE_STATIC_LIBRARIES)
+    else()
         SET(GSL_LIB_NAMES gsl)
         SET(GSL_CBLAS_LIB_NAMES gslcblas)
-    ENDIF( )
+    endif( )
 
     if(GSL_ROOT_DIR)
         FIND_LIBRARY(GSL_LIB 

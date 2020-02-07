@@ -23,8 +23,9 @@ import subprocess
 import datetime
 
 try:
-    cmakeVersion = subprocess.check_output(["cmake", "--version"])
+    cmakeVersion = subprocess.call(["cmake", "--version"])
 except Exception as e:
+    print(e)
     print("[ERROR] cmake is not found. Please install cmake.")
     quit(-1)
 
@@ -55,9 +56,17 @@ version_ = '3.2.dev%s' % stamp
 # extension. This way a wheel built by any python3.x will work with any python3.
 
 class CMakeExtension(Extension):
-    def __init__(self, name):
+    def __init__(self, name, **kwargs):
         # don't invoke the original build_ext for this special extension
-        Extension.__init__(self, name, sources=[], optional=True)
+        import tempfile
+        # Create a temp file to create a dummy target. This build raises an
+        # exception because sources are empty. With python3 we can fix it by
+        # passing `optional=True` to the argument. With python2 there is no
+        # getaway from it.
+        f = tempfile.NamedTemporaryFile(suffix='.cpp', delete=False)
+        f.write(b'int main() { return 1; }')
+        Extension.__init__(self, name, sources=[f.name], **kwargs)
+        f.close()
 
 class TestCommand(Command):
     user_options = []
@@ -162,6 +171,6 @@ setup(
             , os.path.join('chemUtil', 'rainbow2.pkl')
         ]
     },
-    ext_modules=[CMakeExtension('')],
+    ext_modules=[CMakeExtension('dummy', optional=True)],
     cmdclass={'build_ext': build_ext, 'test': TestCommand},
 )
