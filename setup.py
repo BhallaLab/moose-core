@@ -38,7 +38,7 @@ import subprocess
 # Global variables.
 sdir_ = os.path.dirname(os.path.realpath(__file__))
 stamp = datetime.datetime.now().strftime('%Y%m%d')
-builddir_ = os.path.join(sdir_, '%s_build_%s' % (sys.version_info[0], stamp))
+builddir_ = os.path.join(sdir_, '_temp__build')
 
 if not os.path.exists(builddir_):
     os.makedirs(builddir_)
