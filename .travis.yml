@@ -1,11 +1,13 @@
 language: cpp
 sudo: required
+
 matrix:
   include:
   - os: linux
-    dist: xenial
+    dist: bionic
   - os: osx
     osx_image: xcode11.3
+
 notifications:
   email:
     recipients:
@@ -14,21 +16,16 @@ notifications:
     - hrani@ncbs.res.in
     on_success: change
     on_failure: always
+
 addons:
   apt:
     update: true
-    username: __token__
-    password: 
+
 before_script:
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then nvm get head || true; fi
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./.ci/travis_prepare_osx.sh; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ./.ci/travis_prepare_linux.sh;
-  fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then nvm get head || true; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./.ci/travis_prepare_osx.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ./.ci/travis_prepare_linux.sh; fi
+
 script:
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./.ci/travis_build_osx.sh; fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./.ci/travis_build_linux.sh; fi
-deploy:
-  provider: pypi
-  user: bhallalab
-  password:
-    secure: tyHOpsHgjNcj+74QVWd9dwq+Tg8YOrFHIRpxTroXDg5kSsj0AZF241GurpefZa22s2ltt3JhelNR0CgJGI+OQvHteD06MhYtOqu2eDXAJAXzn9yzt+XCv9Ya/ryh+Qt2+IHBnAgsn+dQ83+rwKy1Qx3aVutd24riL4lcYuqXaJHiznED12hrCHrfeY9eyJyQ59n9X8XYTwN/R05AEurGlek8lABf+Ww2WTnhEuOaQ0HPKdxlzSxXMoLmXKsrb+QqyCOpZk/edFwzLziZUwWyecVVtWbILvRcGyfY3BEdgkEeIiah57VVQveUORzdcbXJKkKQBqtBfiyRgSbWwhPsX4tWoy16iKdLrekk6jsp5X27trWSGevqsrobELtD1PWV3McjNiHC66Zi2yJHiucg7QYaoDVt/+9Fu6UMSMSCRycIjL9ZyjUq/B44luMWcaOsx9MBvL0OU0YpPUyOi7iMkyReRkguQhpeEYUBiPLtraOS0lUwMt3F1XhfvVCy+biS3DaqSzc+nfo2aqjl/UKZuRCXcw3pEgS51QMGdBfJJp0JhgKk2J1HNAhHTPKA43a6NFX0x35guVOu0anbv0B+gVXXYvW3nPynPiU8WGQTT8dTN39QfRD1qSKEgy+2XsLYyZsckkJM+T2lifSu6FFpNcE3fizU+xeioc0psuSwxWA=
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./.ci/travis_build_osx.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./.ci/travis_build_linux.sh; fi

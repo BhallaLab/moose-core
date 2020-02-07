@@ -117,8 +117,9 @@ file(MAKE_DIRECTORY ${PYMOOSE_INSTALL_DIR})
 
 add_custom_command(TARGET _moose POST_BUILD
   COMMAND ${PYTHON_EXECUTABLE} setup.py build_py  
-  COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_dumb --skip-build 
-    -p "${_platform}" -d ${CMAKE_BINARY_DIR} --relative
+  COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_dumb 
+    --skip-build -p "${_platform}" -d ${CMAKE_BINARY_DIR} 
+  COMMAND ${CMAKE_COMMAND} -E chdir ${PYMOOSE_INSTALL_DIR} tar xf ${PYMOOSE_BDIST_FILE}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   COMMENT "python's binary distribution is saved to ${CMAKE_BINARY_DIR}"
   VERBATIM)
@@ -128,12 +129,10 @@ add_custom_command(TARGET _moose POST_BUILD
 add_custom_target(copy_python_tree ALL
   COMMAND ${CMAKE_COMMAND} -E copy_directory 
     ${CMAKE_SOURCE_DIR}/python ${CMAKE_BINARY_DIR}/python
-    COMMENT "Copying python source tree: ${CMAKE_SOURCE_DIR} -> ${CMAKE_BINARY_DIR}"
-  DEPENDS _moose 
-  VERBATIM)
+    COMMENT "Copying python source tree: ${CMAKE_SOURCE_DIR}/python -> ${CMAKE_BINARY_DIR}/python"
+  DEPENDS _moose VERBATIM)
 
+install(DIRECTORY ${PYMOOSE_INSTALL_DIR}/usr/local/
+  DESTINATION ${CMAKE_INSTALL_PREFIX}
+  CONFIGURATIONS Debug Release)
 
-install(CODE "execute_process(
-  COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_INSTALL_PREFIX} tar xf ${PYMOOSE_BDIST_FILE}
-  )" 
-  CONFIGURATION Release Debug)

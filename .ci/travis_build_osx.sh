@@ -21,7 +21,7 @@ set -o nounset                              # Treat unset variables as an error
 set -e
 
 # NOTE: On travis, don't enable -j`nproc` option. It may not compile properly.
-
+NPROC=$(nproc)
 (
     # Make sure not to pick up python from /opt.
     PATH=/usr/local/bin:/usr/bin:$PATH
@@ -37,18 +37,14 @@ set -e
         && cmake -DDEBUG=ON \
         -DPYTHON_EXECUTABLE=$PYTHON3 \
         ..
-    make pylint -j3
-    make && ctest --output-on-failure 
+    make pylint -j$NPROC
+    make -j$NPROC && ctest --output-on-failure -$NPROC
 
     cd .. # Now with boost.
     mkdir -p _BOOST_BUILD && cd _BOOST_BUILD \
         && cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON \
         -DPYTHON_EXECUTABLE=`which python3` ..
 
-    make -j4 && ctest --output-on-failure 
-    cd ..
-    set +e
-
+    make -j$NPROC && ctest -j$NPROC --output-on-failure 
 )
 set +e
-
