@@ -23,7 +23,8 @@ import subprocess
 import datetime
 
 try:
-    cmakeVersion = subprocess.call(["cmake", "--version"])
+    cmakeVersion = subprocess.call(["cmake", "--version"],
+            stdout=subprocess.PIPE)
 except Exception as e:
     print(e)
     print("[ERROR] cmake is not found. Please install cmake.")
@@ -37,6 +38,7 @@ import subprocess
 
 # Global variables.
 sdir_ = os.path.dirname(os.path.realpath(__file__))
+
 stamp = datetime.datetime.now().strftime('%Y%m%d')
 builddir_ = os.path.join(sdir_, '_temp__build')
 
@@ -50,7 +52,8 @@ try:
 except Exception:
     pass
 
-version_ = '3.2.dev%s' % stamp
+
+version_ = '3.2.%s.rc1' % stamp
 
 # importlib is available only for python3. Since we build wheels, prefer .so
 # extension. This way a wheel built by any python3.x will work with any python3.
@@ -83,8 +86,10 @@ class TestCommand(Command):
         self.spawn(["ctest", "--output-on-failure", '-j2'])
         os.chdir(sdir_)
 
+
 class build_ext(_build_ext):
-    user_options = [('with-boost', None, 'Use Boost Libraries (OFF)')
+    user_options = [
+            ('with-boost', None, 'Use Boost Libraries (OFF)')
             , ('with-gsl', None, 'Use Gnu Scienfific Library (ON)')
             , ('with-gsl-static', None, 'Use GNU Scientific Library (static library) (OFF)') 
             , ('debug', None, 'Build moose in debugging mode (OFF)')
@@ -107,6 +112,7 @@ class build_ext(_build_ext):
         #  super().finalize_options()
         _build_ext.finalize_options(self)
         self.cmake_options['PYTHON_EXECUTABLE'] = os.path.realpath(sys.executable)
+        self.cmake_options['MOOSE_VERSION'] = version_
         if self.with_boost:
             self.cmake_options['WITH_BOOST'] = 'ON'
             self.cmake_options['WITH_GSL'] = 'OFF'
@@ -158,11 +164,9 @@ setup(
         'rdesigneur', 'moose', 'moose.SBML', 'moose.genesis', 'moose.neuroml',
         'moose.neuroml2', 'moose.chemUtil', 'moose.chemMerge'
     ],
-    # python2 specific version here as well.
-    install_requires=['numpy'],
     package_dir={
-        'moose': os.path.join(sdir_, 'python', 'moose'),
-        'rdesigneur': os.path.join(sdir_, 'python', 'rdesigneur')
+        'rdesigneur': os.path.join(sdir_, 'python', 'rdesigneur'),
+        'moose': os.path.join(sdir_, 'python', 'moose')
     },
     package_data={
         'moose': [
@@ -171,6 +175,8 @@ setup(
             , os.path.join('chemUtil', 'rainbow2.pkl')
         ]
     },
+    # python2 specific version here as well.
+    install_requires=['numpy'],
     ext_modules=[CMakeExtension('dummy', optional=True)],
     cmdclass={'build_ext': build_ext, 'test': TestCommand},
 )

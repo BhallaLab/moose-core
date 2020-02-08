@@ -25,3 +25,6 @@ apt-get install -qq libboost-all-dev
 apt-get install -qq python-scipy python3-scipy
 apt-get install -qq python-lxml python3-lxml
 apt-get install -qq python-setuptools python3-setuptools
+
+# Install twine
+python3 -m pip install twine

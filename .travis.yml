@@ -29,3 +29,8 @@ before_script:
 script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./.ci/travis_build_osx.sh; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./.ci/travis_build_linux.sh; fi
+
+after_success:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then\
+      mkdir _sdist && cd _sdist && cmake .. && make sdist && make upload_test;\
+    fi

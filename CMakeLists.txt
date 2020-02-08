@@ -9,11 +9,24 @@ include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 include(FindPythonModule)
 
+# We find python executable here. Though mainly used inside pymoose. 
+# FIXME: When cmake 3.12 is widely available use the following:
+#   find_package(Python3 COMPONENTS Interpreter Numpy)
+#   set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
+set(Python_ADDITIONAL_VERSIONS 2.7)
+find_package(PythonInterp 3.5)
+if(NOT PYTHONINTERP_FOUND)
+  find_package(PythonInterp 2.7)
+endif()
 
-# If moose version is not given, then create a default version.
-string(TIMESTAMP STAMP "%Y%m%d")
+
+# NOTE: version should be changed in setup.py file.
+# If moose version is not given, use setup.py file to get the default version.
 if(NOT VERSION_MOOSE)
-  set(VERSION_MOOSE "3.2.dev${STAMP}")
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} setup.py --version
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE VERSION_MOOSE
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()
 
 add_definitions(-DMOOSE_VERSION="${VERSION_MOOSE}")
@@ -308,17 +321,6 @@ endif( WITH_BOOST )
 
 ######################### BUILD PYMOOSE ########################################
 
-# We find python executable here. Though mainly used inside pymoose. 
-# FIXME: When cmake 3.12 is widely available use the following:
-#   find_package(Python3 COMPONENTS Interpreter Numpy)
-#   set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
-# See the cmake doc.
-# Till then, stay with the old macro.
-set(Python_ADDITIONAL_VERSIONS 2.7)
-find_package(PythonInterp 3.5)
-if(NOT PYTHONINTERP_FOUND)
-  find_package(PythonInterp 2.7)
-endif()
 
 # This target is built by pymoose/CMakeLists.txt file.
 add_subdirectory(pymoose)
@@ -452,3 +454,27 @@ endforeach( )
 ############################ CPACK ######################################
 # This is not maintained anymore since packaging is done using OpenBuildService 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_cpack.cmake)
+
+
+########################### RELEASE #########################################
+set(PYMOOSE_SDIST_FILE ${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.tar.gz)
+add_custom_target(sdist
+    COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --formats=gztar 
+        -d ${CMAKE_BINARY_DIR}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Creating sdist ${PYMOOSE_SDIST_FILE}" 
+    VERBATIM)
+add_custom_target(upload_test DEPENDS sdist
+    COMMAND ${PYTHON_EXECUTABLE} -m twine upload 
+        --user $ENV{PYMOOSE_PYPI_USER} --password $ENV{PYMOOSE_PYPI_PASSWORD}
+        --repository-url https://test.pypi.org/legacy/
+        ${PYMOOSE_SDIST_FILE}
+    COMMENT "Uploading source distribution to test.pypi.org"
+    VERBATIM)
+
+add_custom_target(upload DEPENDS sdist
+    COMMAND ${PYTHON_EXECUTABLE} -m twine upload 
+        --user $ENV{PYMOOSE_PYPI_USER} --password $ENV{PYMOOSE_PYPI_PASSWORD}
+        ${PYMOOSE_SDIST_FILE}
+    COMMENT "Uploading source distribution to PyPI"
+    VERBATIM)
