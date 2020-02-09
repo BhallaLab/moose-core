@@ -79,7 +79,6 @@ def main( nthreads = 1 ):
     moose.reinit()
     updateDt = 50
     runtime = updateDt * 4
-    #  plt = pylab.plot( x, c.vec.n, label='t = 0 ')
     yvec = c.vec.n
     u1, m1 = np.mean( yvec ), np.std( yvec )
     print( u1, m1 )
@@ -87,7 +86,6 @@ def main( nthreads = 1 ):
     t1 = time.time()
     for i, t in enumerate(range( 0, runtime-1, updateDt)):
         moose.start( updateDt )
-        #  plt = pylab.plot( x, c.vec.n, label='t = '+str(t + updateDt) )
         yvec = c.vec.n
         u1, m1 = np.mean( yvec ), np.std( yvec )
         print( u1, m1 )

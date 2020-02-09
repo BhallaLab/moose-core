@@ -29,11 +29,11 @@ try:
     import moose.neuroml2 as _neuroml2
 except Exception as e:
     nml2Import_ = False
-    nml2ImportError_ = ' '.join( [ 
+    nml2ImportError_ = ' '.join( [
         "NML2 support is disabled because `libneuroml` and "
         , "`pyneuroml` modules are not found.\n"
         , "     $ pip install pyneuroml libneuroml \n"
-        , " should fix it." 
+        , " should fix it."
         , " Actual error: %s " % e ]
         )
 
@@ -58,6 +58,15 @@ except Exception as e:
     mergechemImport_ = False
     mergechemError_ = '%s' % e
 
+def about():
+    """info: Return some 'about me' information.
+    """
+    return '\n'.join([
+        'Path    : ' + os.path.dirname(__file__)
+       , 'Version: ' + _moose.VERSION
+       , 'Docs   : ' + 'https://moose.readthedocs.io/en/latest/'
+        ])
+
 def loadModel(filename, modelpath, solverclass="gsl"):
     """loadModel: Load model from a file to a specified path.
 
@@ -67,7 +76,7 @@ def loadModel(filename, modelpath, solverclass="gsl"):
         model description file.
     modelpath: str
         moose path for the top level element of the model to be created.
-    method: str 
+    method: str
         solver type to be used for simulating the model.
         TODO: Link to detailed description of solvers?
 
@@ -106,7 +115,7 @@ def loadModel(filename, modelpath, solverclass="gsl"):
         mu.error( "Unknown model extenstion '%s'" % extension)
         return None
 
-        
+
 # Version
 def version( ):
     # Show user version.
@@ -146,12 +155,12 @@ def mooseReadSBML(filepath, loadpath, solver='ee',validate="on"):
     --------
     filepath: str
         filepath to be loaded.
-    loadpath : str 
+    loadpath : str
         Root path for this model e.g. /model/mymodel
     solver : str
         Solver to use (default 'ee').
         Available options are "ee", "gsl", "stochastic", "gillespie"
-            "rk", "deterministic" 
+            "rk", "deterministic"
             For full list see ??
     """
     global sbmlImport_
@@ -177,20 +186,20 @@ def mooseReadSBML(filepath, loadpath, solver='ee',validate="on"):
 
 def mooseWriteSBML(modelpath, filepath, sceneitems={}):
     """mooseWriteSBML: Writes loaded model under modelpath to a file in SBML format.
-    
+
     Parameters
     ----------
-    modelpath : str 
+    modelpath : str
         model path in moose e.g /model/mymodel \n
     filepath : str
         Path of output file. \n
-    sceneitems : dict 
-        UserWarning: user need not worry about this layout position is saved in 
+    sceneitems : dict
+        UserWarning: user need not worry about this layout position is saved in
         Annotation field of all the moose Object (pool,Reaction,enzyme).
-        If this function is called from 
-        * GUI - the layout position of moose object is passed 
+        If this function is called from
+        * GUI - the layout position of moose object is passed
         * command line - NA
-        * if genesis/kkit model is loaded then layout position is taken from the file 
+        * if genesis/kkit model is loaded then layout position is taken from the file
         * otherwise auto-coordinates is used for layout position.
     """
     if sbmlImport_:
@@ -205,9 +214,9 @@ def mooseWriteKkit(modelpath, filepath, sceneitems={}):
 
     Parameters
     ----------
-    modelpath : str 
+    modelpath : str
         Model path in moose.
-    filepath : str 
+    filepath : str
         Path of output file.
     """
     global kkitImport_, kkitImport_err_
@@ -225,7 +234,7 @@ def mooseDeleteChemSolver(modelpath):
     Notes
     -----
     This is neccesary while created a new moose object on a pre-existing modelpath,
-    this should be followed by mooseAddChemSolver for add solvers on to compartment 
+    this should be followed by mooseAddChemSolver for add solvers on to compartment
     to simulate else default is Exponential Euler (ee)
     """
     if chemImport_:
@@ -244,7 +253,7 @@ def mooseAddChemSolver(modelpath, solver):
 
     modelpath : str
         Model path that is loaded into moose.
-    solver : str 
+    solver : str
         Exponential Euler "ee" is default. Other options are Gillespie ("gssa"),
         Runge Kutta ("gsl") etc. Link to documentation?
     """

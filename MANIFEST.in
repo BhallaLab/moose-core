@@ -1,0 +1,36 @@
+AUTHORS
+CMakeLists.txt
+CONTRIBUTING.md
+CheckCXXCompiler.cmake
+INSTALL.md
+LICENSE
+MANIFEST.in
+README.md
+cmake_moose_cpack.cmake
+cmake_uninstall.cmake.in
+recursive-include basecode *
+recursive-include benchmarks *
+recursive-include biophysics *
+recursive-include builtins *
+recursive-include cmake *
+recursive-include device *
+recursive-include diffusion *
+recursive-include dist *
+recursive-include examples *
+recursive-include external *
+recursive-include hsolve *
+recursive-include intfire *
+recursive-include kinetics *
+recursive-include ksolve *
+recursive-include mesh *
+recursive-include mpi *
+recursive-include msg *
+recursive-include pymoose *
+recursive-include python *
+recursive-include randnum *
+recursive-include scheduling *
+recursive-include shell *
+recursive-include signeur *
+recursive-include synapse *
+recursive-include tests *
+recursive-include utility *

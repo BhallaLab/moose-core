@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
 """test_snippets.py:
-
 This script tests all the snippets.
-
 """
 from __future__ import print_function
 
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2015, Dilawar Singh and NCBS Bangalore"
 __credits__          = ["NCBS Bangalore"]
-__license__          = "GNU GPL"
-__version__          = "1.0.0"
 __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
-__status__           = "Development"
 
 import sys
 import os
@@ -44,7 +39,7 @@ def executeCode(filepath):
 def main():
     snippetPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../Demos/snippets')
     print("Testing snippets in %s" % snippetPath)
-    print("[INFO] Disabling all pylab/matplotlib show() functions")
+    print("[INFO] Disabling all matplotlib show() functions")
     files = []
     for d, subd, fs in os.walk(snippetPath):
         for f in fs:

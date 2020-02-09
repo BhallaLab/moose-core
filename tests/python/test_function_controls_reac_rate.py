@@ -19,7 +19,6 @@
 
 import numpy as np
 import moose
-import pylab
 import rdesigneur as rd
 
 plot_ = False

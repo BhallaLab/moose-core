@@ -83,7 +83,7 @@ def readtable(table, filename, separator=None):
     for line in in_file:
         line_no = line_no + 1
         tokens = line.split(separator)
-        if len(tokens) is 0:
+        if not tokens:
             continue
         elif len(tokens) == 1:
             table[ii] = float(tokens[0])
