@@ -13,6 +13,7 @@
 #   - Update setuptools using `python2 -m pip install setuptools --upgrade --user'.
 
 __author__     = "Dilawar Singh"
+
 __copyright__  = "Copyright 2019-, Dilawar Singh"
 __maintainer__ = "Dilawar Singh"
 __email__      = "dilawar.s.rajput@gmail.com"
@@ -53,7 +54,7 @@ except Exception:
     pass
 
 
-version_ = '3.2.%s.rc1' % stamp
+version_ = '3.2.1.dev%s' % stamp
 
 # importlib is available only for python3. Since we build wheels, prefer .so
 # extension. This way a wheel built by any python3.x will work with any python3.
@@ -112,7 +113,7 @@ class build_ext(_build_ext):
         #  super().finalize_options()
         _build_ext.finalize_options(self)
         self.cmake_options['PYTHON_EXECUTABLE'] = os.path.realpath(sys.executable)
-        self.cmake_options['MOOSE_VERSION'] = version_
+        self.cmake_options['VERSION_MOOSE'] = version_
         if self.with_boost:
             self.cmake_options['WITH_BOOST'] = 'ON'
             self.cmake_options['WITH_GSL'] = 'OFF'
