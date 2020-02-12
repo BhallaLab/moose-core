@@ -3,7 +3,11 @@
 import numpy as np
 import sys
 import moose
+
 simtime = 1.0
+plot_ = False
+if plot_:
+    import matplotlib.pyplot as plt
 
 def example():
     """Function objects can be used to evaluate expressions with arbitrary
@@ -67,7 +71,7 @@ def example():
     # mode 3 - evaluate rate
     function.mode = 0
     function.independent = 'y0'
-    nsteps = 1000
+    nsteps = 10000
     xarr = np.linspace(0.0, 1.0, nsteps)
     # Stimulus tables allow you to store sequences of numbers which
     # are delivered via the 'output' message at each time step. This
@@ -106,16 +110,51 @@ def example():
     moose.reinit()
     moose.start(simtime)
 
+    # Uncomment the following lines and the import matplotlib.pyplot as plt on top
+    # of this file to display the plot.
+    if plot_:
+        plt.plot(x_rec.vector, result.vector, 'r-', label='z = {}'.format(function.expr))
+        plt.subplot(4,1,1)
     z = function.c['c0'] * np.exp(function.c['c1'] * xarr) * np.cos(yarr) + np.sin(np.arange(len(xarr)) * dt)
     zz = result.vector[1:]
     err = z[1:] - zz[1:]
-    assert (np.abs(err) <= 0.05).all(), err[err > 0.05]
+    assert (np.abs(err) <= 0.05).all(), err
     assert (np.mean(err) <= 0.001), np.mean(err)
 
+    if plot_:
+        plt.plot(xarr, z, 'b--', label='numpy computed')
+        plt.xlabel('x')
+        plt.ylabel('z')
+        plt.legend()
+
+    if plot_:
+        plt.subplot(4,1,2)
+        plt.plot(y_rec.vector, derivative.vector, 'r-', label='dz/dy0')
+        # derivatives computed by putting x values in the analytical formula
     dzdy = function.c['c0'] * np.exp(function.c['c1'] * xarr) * (- np.sin(yarr))
     err = np.abs(dzdy - derivative.vector[1:])
-    assert (err < 0.05).all(), (err[err>1e-2])
-    assert (np.mean(err) < 1e-2), np.mean(err)
+    assert (err < 1e-2).all(), err
+    assert (np.mean(err) < 1e-3), np.mean(err)
+
+    if plot_:
+        plt.plot(yarr, dzdy, 'b--', label='numpy computed')
+        plt.xlabel('y')
+        plt.ylabel('dz/dy')
+        plt.legend()
+
+    if plot_:
+        plt.subplot(4,1,3)
+        # *** BEWARE *** The first two entries are spurious. Entry 0 is
+        # *** from reinit sending out the defaults. Entry 2 is because
+        # *** there is no lastValue for computing real forward difference.
+        plt.plot(np.arange(2, len(rate.vector), 1) * dt, rate.vector[2:], 'r-', label='dz/dt')
+        dzdt = np.diff(z)/dt
+        plt.plot(np.arange(0, len(dzdt), 1.0) * dt, dzdt, 'b--', label='numpy computed')
+        plt.xlabel('t')
+        plt.ylabel('dz/dt')
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
 
 if __name__ == '__main__':
     example()

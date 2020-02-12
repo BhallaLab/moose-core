@@ -277,16 +277,17 @@ void VoxelPools::updateRates( const double* s, double* yprime ) const
     const KinSparseMatrix& N = stoichPtr_->getStoichiometryMatrix();
     vector< double > v( N.nColumns(), 0.0 );
     vector< double >::iterator j = v.begin();
+
     // totVar should include proxyPools only if this voxel uses them
-    unsigned int totVar = stoichPtr_->getNumVarPools() +
-                          stoichPtr_->getNumProxyPools();
+    unsigned int totVar = stoichPtr_->getNumVarPools() + stoichPtr_->getNumProxyPools();
+
     // totVar should include proxyPools if this voxel does not use them
     unsigned int totInvar = stoichPtr_->getNumBufPools();
+
     assert( N.nColumns() == 0 || N.nRows() == stoichPtr_->getNumAllPools() );
     assert( N.nColumns() == rates_.size() );
 
-    for ( vector< RateTerm* >::const_iterator
-            i = rates_.begin(); i != rates_.end(); i++)
+    for ( auto i = rates_.cbegin(); i != rates_.end(); i++)
     {
         *j++ = (**i)( s );
         assert( !std::isnan( *( j-1 ) ) );

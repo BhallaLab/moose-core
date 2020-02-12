@@ -47,13 +47,13 @@
 #ifndef _FUNC_H
 #define _FUNC_H
 
-#include "../external/muparser/include/muParser.h"
+#include "../builtins/MooseParser.h"
 /**
    Simple function parser and evaluator for MOOSE. This can take a mathematical
    expression in standard C form and a list of variables values and
    evaluate the results.
  */
-static double *_addVar(const char *name, void *data);
+static double _addVar(const char *name, void *data);
 
 class Func
 {
@@ -69,7 +69,7 @@ class Func
     // get a list of variable identifiers.
     // this is created by the parser
     vector<string> getVars() const;
-    void setVarValues(vector< string > vars, vector < double > vals);
+    void setVarValues(vector<string> vars, vector<double> vals);
 
 
     // get/set the value of variable `name`
@@ -105,14 +105,14 @@ class Func
     static const Cinfo * initCinfo();
 
 protected:
-    friend double * _addVar(const char * name, void *data);
-    vector< double *> _varbuf;
-    mu::Parser _parser;
-    double *_x, *_y, *_z;
+    friend double _addVar(const char * name, void *data);
+    vector< double > _varbuf;
+    moose::MooseParser _parser;
+    double _x, _y, _z;
     unsigned int _mode;
     mutable bool _valid;
     void _clearBuffer();
-    void _showError(mu::Parser::exception_type &e) const;
+    void _showError(moose::Parser::exception_type &e) const;
 };
 #endif
 

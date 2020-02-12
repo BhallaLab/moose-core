@@ -11,6 +11,7 @@
 
 #ifndef _UTILITY_H
 
+#include <memory>
 #include "strutil.h"
 
 // See types.cpp file for definitions.
@@ -38,7 +39,6 @@ namespace moose
     {
         return path.substr( path.find_last_of('/') + 1 );
     }
-
 }
 
 

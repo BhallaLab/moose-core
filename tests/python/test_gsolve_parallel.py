@@ -44,10 +44,7 @@ def main( nT ):
 
     #Set up solvers
     ksolve = moose.Gsolve( '/cylinder/Gsolve' )
-    try:
-        ksolve.numThreads = nT
-    except Exception as e:
-        print( 'OLD MOOSE. Does not support multithreading' )
+    ksolve.numThreads = nT
 
     dsolve = moose.Dsolve( '/cylinder/dsolve' )
     stoich = moose.Stoich( '/cylinder/stoich' )

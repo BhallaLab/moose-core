@@ -44,7 +44,7 @@ message(STATUS "Python module will be saved to ${PYMOOSE_OUTPUT_DIRECTORY}" )
 # everywhere YET. When it is available on centos, we can use FindPython.
 message(STATUS "Using ${PYTHON_EXECUTABLE}-config to find Python.h" )
 execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --includes
-  OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
+         OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 if("${PYTHON_INCLUDE_FLAGS}" STREQUAL "")
@@ -54,13 +54,13 @@ else()
 endif()
 
 execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --libs
-  OUTPUT_VARIABLE PYTHON_LIBRARIES
+         OUTPUT_VARIABLE PYTHON_LIBRARIES
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 set_target_properties(_moose PROPERTIES
-  COMPILE_DEFINITIONS "PYMOOSE"
+    COMPILE_DEFINITIONS "PYMOOSE"
   COMPILE_FLAGS "${COMPILE_FLAGS} ${PYTHON_INCLUDE_FLAGS}"
-  )
+    )
 
 # Remove prefix lib from python module.
 if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))
@@ -84,20 +84,20 @@ if(APPLE)
 endif(APPLE)
 
 if(APPLE)
-  target_link_libraries( _moose
-    "-Wl,-all_load"
-    ${MOOSE_LIBRARIES}
-    ${STATIC_LIBRARIES}
-    )
-  target_link_libraries(_moose
-    ${SYSTEM_SHARED_LIBS}
-    )
+    target_link_libraries( _moose
+        "-Wl,-all_load"
+        ${MOOSE_LIBRARIES}
+        ${STATIC_LIBRARIES}
+        )
+    target_link_libraries(_moose
+        ${SYSTEM_SHARED_LIBS}
+        )
 else(APPLE)
-  target_link_libraries(_moose
-    "-Wl,--whole-archive"
-    ${MOOSE_LIBRARIES}
-    ${STATIC_LIBRARIES}
-    "-Wl,--no-whole-archive"
+    target_link_libraries(_moose
+        "-Wl,--whole-archive"
+        ${MOOSE_LIBRARIES}
+        ${STATIC_LIBRARIES}
+        "-Wl,--no-whole-archive"
     ${SYSTEM_SHARED_LIBS})
 endif()
 

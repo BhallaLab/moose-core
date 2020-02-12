@@ -6,6 +6,7 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+
 #include "../basecode/header.h"
 #include "../basecode/global.h"
 #ifdef USE_GSL
@@ -21,7 +22,6 @@
 #include "ZombiePoolInterface.h"
 
 #include "RateTerm.h"
-#include "FuncTerm.h"
 #include "../basecode/SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "Stoich.h"
@@ -49,6 +49,13 @@
 using namespace std::chrono;
 
 const unsigned int OFFNODE = ~0;
+
+// TODO: Profiling
+#define USE_ASYNC 1
+
+#if USE_ASYNC
+#define THREAD_LAUNCH_POLICY std::launch::async
+#endif
 
 const Cinfo* Ksolve::initCinfo()
 {
@@ -524,17 +531,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         setBlock( dvalues );
     }
 
-    size_t nvPools = pools_.size( );
-
-    // Third, do the numerical integration for all reactions.
-    size_t grainSize = max( (size_t)1, min( nvPools, nvPools / numThreads_));
-    size_t nWorkers = std::max(1, (int)(nvPools/grainSize) );
-
-    // Just to be sure. Its not very costly computation.
-    while( nWorkers * grainSize < nvPools )
-        grainSize += 1;
-
-    if( 1 == nWorkers || 1 == nvPools )
+    if( 1 == numThreads_ || 1 == pools_.size() )
     {
         if( numThreads_ > 1 )
         {
@@ -542,27 +539,46 @@ void Ksolve::process( const Eref& e, ProcPtr p )
             numThreads_ = 1;
         }
 
-        for ( unsigned int i = 0; i < nvPools; i++ )
+        for ( unsigned int i = 0; i < pools_.size(); i++ )
             pools_[i].advance( p );
     }
     else
     {
+
+#if USE_ASYNC
+        std::vector<std::future<size_t>> vecFutures;
+        // lambdas are faster than std::bind
+        for (size_t i = 0; i < numThreads_; i++)
+        {
+            vecFutures.push_back( 
+                    std::async( THREAD_LAUNCH_POLICY
+                        , &Ksolve::advance_chunk, this, i*grainSize_, (i+1)*grainSize_, p 
+                        )
+                    );
+        }
+
+        size_t tot = 0;
+        for (auto &v : vecFutures )
+            tot += v.get();
+        assert( tot >= pools_.size() );
+
+#else
         /*-----------------------------------------------------------------------------
          *  Somewhat complicated computation to compute the number of threads. 1
          *  thread per (at least) voxel pool is ideal situation.
          *-----------------------------------------------------------------------------*/
         vector<std::thread> vecThreads;
-        // cout << nWorkers << " grain size " << grainSize << endl;
 
         // lambdas are faster than std::bind
-        for (size_t i = 0; i < nWorkers; i++)
+        for (size_t i = 0; i < numThreads_; i++)
         {
-            std::thread t( &Ksolve::advance_chunk, this, i*grainSize, (i+1)*grainSize, p );
+            std::thread t( &Ksolve::advance_chunk, this, i*grainSize_, (i+1)*grainSize_, p );
             vecThreads.push_back( std::move(t) );
         }
 
         for (auto &v : vecThreads )
             v.join();
+#endif 
     }
 
     // Assemble and send the integrated values off for the Dsolve.
@@ -580,6 +596,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         // for diffusion, channels, and xreacs
         dsolvePtr_->updateJunctions( p->dt ); 
     }
+
     t1_ = high_resolution_clock::now();
     moose::addSolverProf( "Ksolve", duration_cast<duration<double>> (t1_ - t0_ ).count(), 1 );
 }
@@ -589,10 +606,15 @@ void Ksolve::advance_pool( const size_t i, ProcPtr p )
     pools_[i].advance(p);
 }
 
-void Ksolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )
+size_t Ksolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )
 {
+    size_t tot = 0;
     for (size_t i = begin; i < std::min(end, pools_.size() ); i++)
+    {
+        tot += 1;
         pools_[i].advance( p );
+    }
+    return tot;
 }
 
 
@@ -612,8 +634,11 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
         return;
     }
 
-    if( 1 < getNumThreads( ) )
-        cout << "Info: Setting up ksolve with " << numThreads_ << " threads" << endl;
+    grainSize_ = (size_t) std::ceil( (double)pools_.size() / (double)numThreads_);
+    assert(grainSize_ * numThreads_ >= pools_.size());
+    numThreads_ = (size_t) std::ceil( (double)pools_.size() / (double) grainSize_ );
+    if(numThreads_ > 1)
+        MOOSE_DEBUG( "Multi-threaded Ksolve: " << numThreads_ << " threads." );
 
 }
 

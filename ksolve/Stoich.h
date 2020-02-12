@@ -46,6 +46,8 @@
  * - Reinit.
  */
 
+class FuncTerm;
+
 class Stoich
 {
 public:

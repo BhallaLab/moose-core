@@ -71,7 +71,8 @@ const Cinfo * Func::initCinfo()
     ////////////////////////////////////////////////////////////
     static  ReadOnlyValueFinfo< Func, double > value("value",
             "Result of the function evaluation with current variable values.",
-            &Func::getValue);
+            &Func::getValue
+            );
     static ReadOnlyValueFinfo< Func, double > derivative("derivative",
             "Derivative of the function at given variable values.",
             &Func::getDerivative);
@@ -137,7 +138,8 @@ const Cinfo * Func::initCinfo()
                                            "\n"
                                            "?:  if then else operator   C++ style syntax\n",
                                            &Func::setExpr,
-                                           &Func::getExpr);
+                                           &Func::getExpr
+                                        );
     static LookupValueFinfo < Func, string, double > var("var",
             "Lookup table for variable values.",
             &Func::setVar,
@@ -285,22 +287,22 @@ static const Cinfo * funcCinfo = Func::initCinfo();
 
 const int Func::VARMAX = 10;
 
-Func::Func():_x(NULL), _y(NULL), _z(NULL), _mode(1), _valid(false)
+Func::Func():_x(0), _y(0), _z(0), _mode(1), _valid(false)
 {
     _varbuf.reserve(VARMAX);
-    _parser.SetVarFactory(_addVar, this);
+    // _parser.SetVarFactory(_addVar, this);
     // Adding pi and e, the defaults are `_pi` and `_e`
-    _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
-    _parser.DefineConst(_T("e"), (mu::value_type)M_E);
+    _parser.DefineConst("pi", (moose::Parser::value_type)M_PI);
+    _parser.DefineConst("e", (moose::Parser::value_type)M_E);
 }
 
 Func::Func(const Func& rhs): _mode(rhs._mode)
 {
     _varbuf.reserve(VARMAX);
-    _parser.SetVarFactory(_addVar, this);
+    // _parser.SetVarFactory(_addVar, this);
     // Adding pi and e, the defaults are `_pi` and `_e`
-    _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
-    _parser.DefineConst(_T("e"), (mu::value_type)M_E);
+    _parser.DefineConst("pi", (moose::Parser::value_type)M_PI);
+    _parser.DefineConst("e", (moose::Parser::value_type)M_E);
     setExpr(rhs.getExpr());
     vector <string> vars = rhs.getVars();
     for (unsigned int ii = 0; ii < vars.size(); ++ii)
@@ -314,8 +316,8 @@ Func& Func::operator=(const Func rhs)
     _clearBuffer();
     _mode = rhs._mode;
     // Adding pi and e, the defaults are `_pi` and `_e`
-    _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
-    _parser.DefineConst(_T("e"), (mu::value_type)M_E);
+    _parser.DefineConst("pi", (moose::Parser::value_type)M_PI);
+    _parser.DefineConst("e", (moose::Parser::value_type)M_E);
     setExpr(rhs.getExpr());
     vector <string> vars = rhs.getVars();
     for (unsigned int ii = 0; ii < vars.size(); ++ii)
@@ -334,53 +336,48 @@ Func::~Func()
 void Func::_clearBuffer()
 {
     _parser.ClearVar();
-    for (unsigned int ii = 0; ii < _varbuf.size(); ++ii)
-    {
-        delete _varbuf[ii];
-    }
     _varbuf.clear();
 }
 
-void Func::_showError(mu::Parser::exception_type &e) const
+void Func::_showError(moose::Parser::exception_type &e) const
 {
     cout << "Error occurred in parser.\n"
          << "Message:  " << e.GetMsg() << "\n"
-         << "Formula:  " << e.GetExpr() << "\n"
-         << "Token:    " << e.GetToken() << "\n"
-         << "Position: " << e.GetPos() << "\n"
-         << "Error code:     " << e.GetCode() << endl;
+         // << "Formula:  " << e.GetExpr() << "\n"
+         // << "Token:    " << e.GetToken() << "\n"
+         // << "Position: " << e.GetPos() << "\n"
+         // << "Error code:     " << e.GetCode() << endl;
+         << endl;
 }
 /**
    Call-back to add variables to parser automatically.
  */
-static double * _addVar(const char *name, void *data)
+static double _addVar(const char *name, void *data)
 {
-    Func* func = reinterpret_cast< Func * >(data);
-    double *ret = new double;
-    *ret = 0.0;
+    Func* func = reinterpret_cast<Func*>(data);
+    double ret = 0.0;
     func->_varbuf.push_back(ret);
     return ret;
 }
 
-void Func::setExpr(string expr)
+void Func::setExpr( const string expr)
 {
     _valid = false;
-    _x = NULL;
-    _y = NULL;
-    _z = NULL;
-    mu::varmap_type vars;
+    moose::Parser::varmap_type vars;
     try
     {
         _parser.SetExpr(expr);
         vars = _parser.GetUsedVar();
     }
-    catch (mu::Parser::exception_type &e)
+    catch (moose::Parser::exception_type &e)
     {
         _showError(e);
         _clearBuffer();
         return;
     }
-    mu::varmap_type::iterator v = vars.find("x");
+
+
+    moose::Parser::varmap_type::iterator v = vars.find("x");
     if (v != vars.end())
     {
         _x = v->second;
@@ -390,6 +387,7 @@ void Func::setExpr(string expr)
         v = vars.begin();
         _x = v->second;
     }
+
     v = vars.find("y");
     if (v != vars.end())
     {
@@ -401,6 +399,7 @@ void Func::setExpr(string expr)
         ++v;
         _y = v->second;
     }
+
     v = vars.find("z");
     if (v != vars.end())
     {
@@ -414,6 +413,12 @@ void Func::setExpr(string expr)
         _z = v->second;
     }
     _valid = true;
+
+    // cout << MOOSE_DEBUG( "Setting expression " << expr);
+    // for (auto& i : vars)
+        // cout << i->first << '=' << i->second << ", ";
+    // cout << endl;
+
 }
 
 string Func::getExpr() const
@@ -436,21 +441,21 @@ void Func::setVar(string name, double value)
         cout << "Error: Func::setVar() - invalid parser state" << endl;
         return;
     }
-    mu::varmap_type vars;
+    moose::Parser::varmap_type vars;
     try
     {
         vars = _parser.GetVar();
     }
-    catch (mu::Parser::exception_type &e)
+    catch (moose::Parser::exception_type &e)
     {
         _valid = false;
         _showError(e);
         return;
     }
-    mu::varmap_type::iterator v = vars.find(name);
+    moose::Parser::varmap_type::iterator v = vars.find(name);
     if (v != vars.end())
     {
-        *v->second = value;
+        v->second = value;
     }
     else
     {
@@ -470,11 +475,11 @@ double Func::getVar(string name) const
     }
     try
     {
-        const mu::varmap_type &vars = _parser.GetVar();
-        mu::varmap_type::const_iterator v = vars.find(name);
+        const moose::Parser::varmap_type &vars = _parser.GetVar();
+        moose::Parser::varmap_type::const_iterator v = vars.find(name);
         if (v != vars.end())
         {
-            return *v->second;
+            return v->second;
         }
         else
         {
@@ -482,7 +487,7 @@ double Func::getVar(string name) const
             return 0.0;
         }
     }
-    catch (mu::Parser::exception_type &e)
+    catch (moose::Parser::exception_type &e)
     {
         _showError(e);
         return 0.0;
@@ -491,80 +496,42 @@ double Func::getVar(string name) const
 
 void Func::setX(double x)
 {
-    if (_x != NULL)
-    {
-        *_x = x;
-    }
+    _x = x;
 }
 
 double Func::getX() const
 {
-    if (_x != NULL)
-    {
-        return *_x;
-    }
-    return 0.0;
+    return _x;
 }
 
 void Func::setY(double y)
 {
-    if (_y != NULL)
-    {
-        *_y = y;
-    }
+    _y =  y;
 }
 
 double Func::getY() const
 {
-    if (_y != NULL)
-    {
-        return *_y;
-    }
-    return 0.0;
+    return _y;
 }
 void Func::setZ(double z)
 {
-    if (_z != NULL)
-    {
-        *_z = z;
-    }
+    _z = z;
 }
 
 double Func::getZ() const
 {
-    if (_z != NULL)
-    {
-        return *_z;
-    }
-    return 0.0;
+    return _z;
 }
 
 void Func::setXY(double x, double y)
 {
-    if (_x != NULL)
-    {
-        *_x = x;
-    }
-    if (_y != NULL)
-    {
-        *_y = y;
-    }
+    _x = x;
+    _y = y;
 }
 
 void Func::setXYZ(double x, double y, double z)
 {
-    if (_x != NULL)
-    {
-        *_x = x;
-    }
-    if (_y != NULL)
-    {
-        *_y = y;
-    }
-    if (_z != NULL)
-    {
-        *_z = z;
-    }
+    _x = x; _y = y; _z = z;
 }
 
 void Func::setMode(unsigned int mode)
@@ -589,7 +556,7 @@ double Func::getValue() const
     {
         value = _parser.Eval();
     }
-    catch (mu::Parser::exception_type &e)
+    catch (moose::Parser::exception_type &e)
     {
         _showError(e);
     }
@@ -604,16 +571,14 @@ double Func::getDerivative() const
         cout << "Error: Func::getDerivative() - invalid state" << endl;
         return value;
     }
-    if (_x != NULL)
+
+    try
     {
-        try
-        {
-            value = _parser.Diff(_x, *_x);
-        }
-        catch (mu::Parser::exception_type &e)
-        {
-            _showError(e);
-        }
+        value = _parser.Diff(_x, _x);
+    }
+    catch (moose::Parser::exception_type &e)
+    {
+        _showError(e);
     }
     return value;
 }
@@ -627,17 +592,17 @@ vector<string> Func::getVars() const
         cout << "Error: Func::getVars() - invalid parser state" << endl;
         return ret;
     }
-    mu::varmap_type vars;
+    moose::Parser::varmap_type vars;
     try
     {
         vars = _parser.GetVar();
-        for (mu::varmap_type::iterator ii = vars.begin();
+        for (moose::Parser::varmap_type::iterator ii = vars.begin();
                 ii != vars.end(); ++ii)
         {
             ret.push_back(ii->first);
         }
     }
-    catch (mu::Parser::exception_type &e)
+    catch (moose::Parser::exception_type &e)
     {
         _showError(e);
     }
@@ -651,13 +616,13 @@ void Func::setVarValues(vector<string> vars, vector<double> vals)
     {
         return;
     }
-    mu::varmap_type varmap = _parser.GetVar();
+    moose::Parser::varmap_type varmap = _parser.GetVar();
     for (unsigned int ii = 0; ii < vars.size(); ++ii)
     {
-        mu::varmap_type::iterator v = varmap.find(vars[ii]);
+        moose::Parser::varmap_type::iterator v = varmap.find(vars[ii]);
         if ( v != varmap.end())
         {
-            *v->second = vals[ii];
+            v->second = vals[ii];
         }
     }
 }

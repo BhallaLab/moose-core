@@ -98,20 +98,21 @@ def test_rand( ):
     f, t = create_func( 'random', 'rnd()')
     moose.reinit()
     moose.start(1)
-    expected = [0.49458993, 0.44301495, 0.58332174, 0.70920801, 0.26360285,
-            0.68381843, 0.33607158, 0.19812181, 0.87761494, 0.54088093,
-            0.41366738]
-    assert np.isclose(t.vector, expected ).all(), t.vector
+    expected = [0.29876116, 0.49458993, 0.83191136, 0.02517173, 0.26556613,
+            0.15037787, 0.81660184, 0.89081653, 0.03061665, 0.72743551, 0.13145815]
+    assert np.isclose(t.vector, expected ).all(), "Expected %s, got %s" % (
+            expected, t.vector)
     print( 'Passed test random' )
 
 def test_fmod( ):
     f, t = create_func( 'fmod', 'fmod(t, 2)' )
     moose.reinit()
-    moose.start( 20 )
+    moose.start(20)
     y = t.vector
+    print(y)
     assert (np.fmod(y, 2) == y).all()
-    assert(np.isclose(np.max(y), 1.9)), np.max(y)
-    assert(np.isclose(np.min(y), 0.0)), np.min(y)
+    assert(np.isclose(np.max(y), 1.9)), "Expected 1.9 got %s" % np.max(y)
+    assert(np.isclose(np.min(y), 0.0)), "Expected 0.0 got %s" % np.min(y)
     print('Passed fmod(t,2)')
 
 

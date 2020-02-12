@@ -6,10 +6,9 @@
 #include <Python.h>
 #include <structmember.h>
 
-#ifdef USE_NUMPY
+// Numpy is now default.
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
-#endif
 
 #include <iostream>
 #include <typeinfo>
@@ -2987,7 +2986,7 @@ PyObject * moose_element(PyObject* dummy, PyObject * args)
         {
             PyErr_SetString(PyExc_ValueError
                     , (std::string("moose_element: '") + std::string(path) + std::string("' does not exist!")).c_str()
-                    );
+                           );
             return NULL;
         }
         PyObject * new_obj = oid_to_element(oid);
