@@ -28,6 +28,7 @@ namespace moose
 MooseParser::MooseParser() : symbol_tables_registered_(false)
 {
     // And add user defined functions.
+    symbol_table_.add_function( "ln", MooseParser::Ln );
     symbol_table_.add_function( "rand", MooseParser::Rand ); // between 0 and 1
     symbol_table_.add_function( "rnd", MooseParser::Rand );  // between 0 and 1
 
@@ -38,35 +39,32 @@ MooseParser::MooseParser() : symbol_tables_registered_(false)
     expression_.register_symbol_table(symbol_table_);
 }
 
-MooseParser& MooseParser::operator=(const moose::MooseParser& other)
-{
-    // In Function assginemnt, make sure to reinit this parser.
-    expression_ = other.expression_;
-    var_map_ = other.var_map_;
-    const_map_ = other.const_map_;
-    refs_ = other.refs_;
-
-    // Copy the references and symbols.
-    for(auto i = var_map_.begin(); i != var_map_.end(); i++)
-        symbol_table_.add_variable(i->first, *(refs_[i->first]));
-
-    expression_.release();
-    expression_.register_symbol_table(symbol_table_);
-    expr_ = other.expr_;
-    CompileExpr();
-
-    return *this;
-}
-
 MooseParser::~MooseParser()
 {
     symbol_table_.clear();
     expression_.release();
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Copy data from other parser.
+ *
+ * @Param parser
+ */
+/* ----------------------------------------------------------------------------*/
+void MooseParser::CopyData(const moose::MooseParser& other)
+{
+
+}
+
 /*-----------------------------------------------------------------------------
  *  User defined function here.
  *-----------------------------------------------------------------------------*/
+double MooseParser::Ln( double v )
+{
+    return std::log(v);
+}
+
 double MooseParser::Rand( )
 {
     return moose::mtrand();

@@ -344,12 +344,7 @@ Function& Function::operator=(const Function& rhs)
     t_ = rhs.t_;
     rate_ = rhs.rate_;
     independent_ = rhs.independent_;
-    stoich_ = rhs.stoich_;
-
-    parser_ = rhs.parser_;
-
-
-
+    parser_.CopyData(rhs.parser_);
     return *this;
 }
 

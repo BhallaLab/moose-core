@@ -9,6 +9,9 @@ include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 include(FindPythonModule)
 
+# Precompiled headers support. Till cmake 3.16 becomes available use cotire.
+include(cotire)
+
 # We find python executable here. Though mainly used inside pymoose. 
 # FIXME: When cmake 3.12 is widely available use the following:
 #   find_package(Python3 COMPONENTS Interpreter Numpy)
@@ -106,7 +109,9 @@ endif()
 
 link_directories(${CMAKE_BINARY_DIR})
 add_library(libmoose SHARED basecode/main.cpp)
+cotire(libmoose)
 add_executable(moose.bin basecode/main.cpp)
+
 
 ################################### SETUP BUILD ################################
 

@@ -1,12 +1,10 @@
 /***
- *       Filename:  Parser.h
- *
  *    Description:  Parser class. Similar API as muParser.
  *
  *         Author:  Dilawar Singh <dilawars@ncbs.res.in>
  *   Organization:  NCBS Bangalore
  *
- *        License:  GNU GPL3
+ *        License:  See the LICENSE.md file.
  */
 
 #ifndef PARSER_H
@@ -18,6 +16,9 @@
 #include <map>
 #include <iostream>
 
+#define exprtk_enabled_debugging 0
+#define exprtk_disable_comments 1
+#define exprtk_disable_rtl_io_file 1
 #include "../external/exprtk/exprtk.hpp"
 
 using namespace std;
@@ -55,10 +56,14 @@ public:
     MooseParser();
     ~MooseParser();
 
-    MooseParser& operator=(const moose::MooseParser&);
+    // No copying allowed. Can't get Zombies to work with copy constructor.
+    MooseParser& operator=(const moose::MooseParser&) = delete;
+
+    void CopyData(const moose::MooseParser& other);
 
     // Other functions.
     void Reinit();
+
 
     /*-----------------------------------------------------------------------------
      *  Set/Get
@@ -108,6 +113,7 @@ public:
     /*-----------------------------------------------------------------------------
      *  User defined function of parser.
      *-----------------------------------------------------------------------------*/
+    static double Ln(double v);
     static double Rand( );
     static double SRand( double seed );
     static double Rand2( double a, double b );

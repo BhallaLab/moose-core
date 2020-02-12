@@ -47,10 +47,8 @@ void FuncTerm::setReactantIndex( const vector< unsigned int >& mol )
 
     args_ = unique_ptr<double[]>(new double[mol.size()+1]);
     for ( unsigned int i = 0; i < mol.size(); ++i ) {
-        stringstream ss;
         args_[i] = 0.0;
-        ss << "x" << i;
-        parser_.DefineVar( ss.str(), &args_[i] );
+        parser_.DefineVar( 'x'+to_string(i), &args_[i] );
     }
     // Define a 't' variable even if we don't always use it.
     args_[mol.size()] = 0.0;
@@ -112,8 +110,8 @@ const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
     args_ = nullptr;
     // NOTE: Don't copy the parser. Just create a new one else we'll get
     // headache when objects are Zombiefied later.
-    // parser_ = other.parser_;
-    parser_ = moose::MooseParser();
+    parser_.CopyData(other.parser_);
+    // parser_ = moose::MooseParser();
     expr_ = other.expr_;
     volScale_ = other.volScale_;
     target_ = other.target_;
