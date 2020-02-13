@@ -115,7 +115,11 @@ set(PYMOOSE_BDIST_FILE ${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.${_platform}
 set(PYMOOSE_INSTALL_DIR ${CMAKE_BINARY_DIR}/_pymoose_temp_install)
 file(MAKE_DIRECTORY ${PYMOOSE_INSTALL_DIR})
 
-add_custom_command(TARGET _moose POST_BUILD
+add_custom_target(pymoose_sdist ALL
+    DEPENDS ${PYMOOSE_BDIST_FILE} _moose
+    COMMENT "Building pymoose sdist")
+
+add_custom_command(OUTPUT ${PYMOOSE_BDIST_FILE}
   COMMAND ${PYTHON_EXECUTABLE} setup.py build_py  
   COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_dumb 
     --skip-build -p "${_platform}" -d ${CMAKE_BINARY_DIR} 

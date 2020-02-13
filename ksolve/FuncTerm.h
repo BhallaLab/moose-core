@@ -47,6 +47,7 @@ private:
     // Look up reactants in the S vec.
     vector< unsigned int > reactantIndex_;
     moose::MooseParser parser_;
+
     string expr_;
     /**
      * Scale factor to account for pool volume if we are assigning conc

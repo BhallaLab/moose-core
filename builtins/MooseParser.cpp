@@ -45,6 +45,11 @@ MooseParser::~MooseParser()
     expression_.release();
 }
 
+MooseParser& MooseParser::operator=(const moose::MooseParser& other) 
+{
+    return *this;
+}
+
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis  Copy data from other parser.
@@ -54,7 +59,9 @@ MooseParser::~MooseParser()
 /* ----------------------------------------------------------------------------*/
 void MooseParser::CopyData(const moose::MooseParser& other)
 {
-
+    for(auto v: other.refs_)
+        DefineVar(v.first, v.second);
+    SetExpr(other.expr_);
 }
 
 /*-----------------------------------------------------------------------------
@@ -115,9 +122,6 @@ bool MooseParser::DefineVar( const string varName, double* const val)
 {
     // Use in copy assignment.
     refs_[varName] = val;
-
-    // Does not add duplicate variables.
-    var_map_[varName] = *val; 
     return symbol_table_.add_variable(varName, *val, false);
 }
 
@@ -161,6 +165,7 @@ void MooseParser::findAllVars( const string& expr, set<string>& vars, const stri
         vars.insert(sm.str());
         temp = sm.suffix();
     }
+    cerr << "DEBUG: Found " << vars.size() << " expr: " << expr << endl;
 }
 
 string MooseParser::Reformat( const string user_expr )
@@ -188,9 +193,9 @@ void MooseParser::findXsYs( const string& expr, set<string>& xs, set<string>& ys
 bool MooseParser::SetExpr( const string& user_expr )
 {
     expr_ = moose::trim(user_expr);
-    expr_ = Reformat(expr_);
     if(expr_.empty())
         return false;
+    expr_ = Reformat(expr_);
     return CompileExpr();
 }
 
@@ -210,8 +215,8 @@ bool MooseParser::CompileExpr()
         {
             Parser::error_t error = parser.get_error(i);
             ss << "Error[" << i << "] Position: " << error.token.position
-                 << " Type: [" << exprtk::parser_error::to_str(error.mode)
-                 << "] Msg: " << error.diagnostic << endl;
+               << " Type: [" << exprtk::parser_error::to_str(error.mode)
+               << "] Msg: " << error.diagnostic << endl;
 
             // map is
             auto symbTable = GetSymbolTable();
@@ -248,11 +253,6 @@ double MooseParser::Eval( ) const
     return expression_();
 }
 
-Parser::varmap_type MooseParser::GetVar() const
-{
-    return var_map_;
-}
-
 
 double MooseParser::Diff( const double a, const double b ) const
 {
@@ -264,22 +264,16 @@ Parser::varmap_type MooseParser::GetConst( ) const
     return const_map_;
 }
 
-
-Parser::varmap_type MooseParser::GetUsedVar( )
-{
-    return used_vars_;
-}
-
 void MooseParser::ClearVariables( )
 {
     // Do not invalidate the reference.
+    refs_.clear();
     symbol_table_.clear_variables(true);
 }
 
 void MooseParser::ClearAll( )
 {
     const_map_.clear();
-    var_map_.clear();
     ClearVariables();
 }
 

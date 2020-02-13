@@ -1059,9 +1059,11 @@ void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
     Id ei( func.value() + 1 );
 
     unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
+    string _expr = Field<string>::get( func, "expr" );
+
     vector< pair< Id, unsigned int> > srcPools;
     unsigned int n = ei.element()->getInputsWithTgtIndex( srcPools, df );
-    ASSERT_EQ( numSrc, n, "NumMsgVsYs" );
+    ASSERT_EQ( numSrc, n, "NumMsgVsYs: " + _expr );
     vector< unsigned int > poolIndex( numSrc, 0 );
     for ( unsigned int i = 0; i < numSrc; ++i )
     {
@@ -2089,7 +2091,7 @@ const vector< Id >& Stoich::offSolverPoolMap( Id compt ) const
 void Stoich::updateFuncs( double* s, double t ) const
 {
     for ( auto i = funcs_.cbegin(); i != funcs_.end(); ++i )
-        if ( *i ) 
+        if ( *i )
             (*i)->evalPool( s, t );
 }
 

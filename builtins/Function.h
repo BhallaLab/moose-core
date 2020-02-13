@@ -34,8 +34,8 @@ public:
 
     static const Cinfo * initCinfo();
 
-    void setExpr( const Eref& e, string expr);
-    string getExpr( const Eref& e ) const;
+    void setExpr(const Eref& e, string expr);
+    string getExpr(const Eref& e) const;
 
     // get a list of variable identifiers.
     // this is created by the parser

@@ -405,10 +405,7 @@ void Function::addVariable(const string& name)
 
         // This must be true.
         if(  xs_[index] )
-        {
-            // vars_[name] = &xs_[index]->value;
             parser_.DefineVar(name, &xs_[index]->value);
-        }
         else
             throw runtime_error( "Empty Variable." );
         numVar_ = xs_.size();
@@ -426,16 +423,10 @@ void Function::addVariable(const string& name)
         }
 
         if (ys_[index])
-        {
-            // vars_[name] = ys_[index].get();
             parser_.DefineVar(name, ys_[index].get());
-        }
     }
     else if (name == "t")
-    {
-        // vars_["t"] = &t_;
         parser_.DefineVar("t", &t_);
-    }
     else
     {
         MOOSE_WARN( "Got an undefined symbol: " << name << endl
@@ -580,6 +571,7 @@ double Function::getDerivative() const
 
 void Function::setNumVar(const unsigned int num)
 {
+    numVar_ = num;
     cerr << "Deprecated: numVar has no effect. MOOSE can infer number of variables "
         " from the expression. " << endl;
 }

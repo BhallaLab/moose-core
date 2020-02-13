@@ -45,7 +45,7 @@ void FuncTerm::setReactantIndex( const vector< unsigned int >& mol )
         parser_.ClearAll();
     }
 
-    args_ = unique_ptr<double[]>(new double[mol.size()+1]);
+    args_.reset(new double[mol.size()+1]);
     for ( unsigned int i = 0; i < mol.size(); ++i ) {
         args_[i] = 0.0;
         parser_.DefineVar( 'x'+to_string(i), &args_[i] );
@@ -70,13 +70,21 @@ void showError(moose::Parser::exception_type &e)
 
 void FuncTerm::setExpr( const string& expr )
 {
+    if(expr.empty()) {
+        expr_ = expr;
+        return;
+    }
+
     try {
         if(! parser_.SetExpr( expr ))
-            MOOSE_WARN("Failed to set expression..." << expr);
+            MOOSE_WARN("Failed to set expression: '" << expr << "'");
         expr_ = expr;
-    } catch(moose::Parser::exception_type &e) {
+    } 
+    catch(moose::Parser::exception_type &e) 
+    {
         showError(e);
-        throw(e);
+        return;
+        // throw(e);
     }
 }
 
@@ -108,10 +116,7 @@ double FuncTerm::getVolScale() const
 const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
 {
     args_ = nullptr;
-    // NOTE: Don't copy the parser. Just create a new one else we'll get
-    // headache when objects are Zombiefied later.
-    parser_.CopyData(other.parser_);
-    // parser_ = moose::MooseParser();
+    parser_ = other.parser_;
     expr_ = other.expr_;
     volScale_ = other.volScale_;
     target_ = other.target_;

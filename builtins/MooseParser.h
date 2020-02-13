@@ -57,7 +57,7 @@ public:
     ~MooseParser();
 
     // No copying allowed. Can't get Zombies to work with copy constructor.
-    MooseParser& operator=(const moose::MooseParser&) = delete;
+    MooseParser& operator=(const moose::MooseParser&);
 
     void CopyData(const moose::MooseParser& other);
 
@@ -99,9 +99,7 @@ public:
 
     double Diff( const double a, const double b) const;
 
-    Parser::varmap_type GetVar() const;
     Parser::varmap_type GetConst( ) const;
-    Parser::varmap_type GetUsedVar( );
     double GetVarValue(const string& name) const;
 
 
@@ -125,9 +123,8 @@ public:
     /* data */
     string expr_;
     double value=0.0;
-    Parser::varmap_type var_map_;
+
     Parser::varmap_type const_map_;
-    Parser::varmap_type used_vars_;
 
     /* Map to variable names and pointer to their values. */
     map<string, double*> refs_;
