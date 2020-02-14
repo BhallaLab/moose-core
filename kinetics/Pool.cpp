@@ -9,6 +9,7 @@
 
 #include "../basecode/header.h"
 #include "../basecode/ElementValueFinfo.h"
+#include "../utility/print_function.hpp"
 #include "lookupVolumeFromMesh.h"
 #include "PoolBase.h"
 #include "Pool.h"
@@ -201,7 +202,10 @@ void Pool::vSetConcInit( const Eref& e, double c )
 
 void Pool::vSetDiffConst( const Eref& e, double v )
 {
-    diffConst_ = v;
+    if(! isnan(v))
+        diffConst_ = v;
+    else
+        moose::showWarn("Trying to assign non-numeric value:"  + to_string(v) + ".  Ignored!");
 }
 
 double Pool::vGetDiffConst( const Eref& e ) const

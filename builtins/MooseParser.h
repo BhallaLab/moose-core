@@ -57,8 +57,9 @@ public:
     ~MooseParser();
 
     // No copying allowed. Can't get Zombies to work with copy constructor.
-    MooseParser& operator=(const moose::MooseParser&);
+    // MooseParser& operator=(const moose::MooseParser&);
 
+    // fixme: The copy constructor should be used instead of this function. 
     void CopyData(const moose::MooseParser& other);
 
     // Other functions.

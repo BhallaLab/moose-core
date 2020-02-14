@@ -34,7 +34,9 @@ public:
 
     static const Cinfo * initCinfo();
 
-    void setExpr(const Eref& e, string expr);
+    void setExpr(const Eref& e, const string expr);
+    bool innerSetExpr(const Eref& e, const string expr);
+
     string getExpr(const Eref& e) const;
 
     // get a list of variable identifiers.
@@ -116,7 +118,6 @@ protected:
     void* stoich_;
 
     // parser. It is often copied.
-    // shared_ptr<moose::MooseParser> parser_;
     moose::MooseParser parser_;
 
 };

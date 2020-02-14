@@ -39,14 +39,15 @@ FuncTerm::~FuncTerm()
 void FuncTerm::setReactantIndex( const vector< unsigned int >& mol )
 {
     reactantIndex_ = mol;
-    if ( args_ ) 
+    if ( args_ )
     {
         args_.reset();
         parser_.ClearAll();
     }
 
     args_.reset(new double[mol.size()+1]);
-    for ( unsigned int i = 0; i < mol.size(); ++i ) {
+    for ( unsigned int i = 0; i < mol.size(); ++i )
+    {
         args_[i] = 0.0;
         parser_.DefineVar( 'x'+to_string(i), &args_[i] );
     }
@@ -64,27 +65,34 @@ const vector< unsigned int >& FuncTerm::getReactantIndex() const
 
 void showError(moose::Parser::exception_type &e)
 {
-    cout << "Error occurred in parser.\n"
+    cerr << "Error occurred in parser.\n"
          << "Message:  " << e.GetMsg() << endl;
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Set expression on FuncTerm. Before calling this function, user
+ * should make sure that symbol_table has been linked to pointers to the variables.
+ *
+ * @Param expr
+ */
+/* ----------------------------------------------------------------------------*/
 void FuncTerm::setExpr( const string& expr )
 {
-    if(expr.empty()) {
-        expr_ = expr;
+    // Empty expression are not allowed.
+    if(expr.empty())
         return;
-    }
 
-    try {
-        if(! parser_.SetExpr( expr ))
+    try
+    {
+        if(! parser_.SetExpr(expr))
             MOOSE_WARN("Failed to set expression: '" << expr << "'");
         expr_ = expr;
-    } 
-    catch(moose::Parser::exception_type &e) 
+    }
+    catch(moose::Parser::exception_type &e)
     {
         showError(e);
         return;
-        // throw(e);
     }
 }
 
@@ -116,7 +124,8 @@ double FuncTerm::getVolScale() const
 const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
 {
     args_ = nullptr;
-    parser_ = other.parser_;
+    // NOTE: Don't copy the parser.
+    // parser_ = other.parser_;
     expr_ = other.expr_;
     volScale_ = other.volScale_;
     target_ = other.target_;

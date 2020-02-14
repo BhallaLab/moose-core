@@ -9,6 +9,8 @@
 
 #include "../basecode/header.h"
 #include "../basecode/global.h"
+#include "../utility/utility.h"
+
 #ifdef USE_GSL
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
@@ -205,18 +207,18 @@ const Cinfo* Ksolve::initCinfo()
     {
         &method,                         // Value
         &epsAbs,                         // Value
-        &epsRel ,                         // Value
-        &numThreads,                            // Value
-        &compartment,                           // Value
+        &epsRel ,                        // Value
+        &numThreads,                     // Value
+        &compartment,                    // Value
         &numLocalVoxels,                 // ReadOnlyValue
-        &nVec,                                 // LookupValue
-        &numAllVoxels,                         // ReadOnlyValue
-        &numPools,                         // Value
-        &estimatedDt,                         // ReadOnlyValue
+        &nVec,                           // LookupValue
+        &numAllVoxels,                   // ReadOnlyValue
+        &numPools,                       // Value
+        &estimatedDt,                    // ReadOnlyValue
         &stoich,                         // ReadOnlyValue
-        &voxelVol,                         // DestFinfo
-        &proc,                                 // SharedFinfo
-        &init,                                 // SharedFinfo
+        &voxelVol,                       // DestFinfo
+        &proc,                           // SharedFinfo
+        &init,                           // SharedFinfo
     };
 
     static Dinfo< Ksolve > dinfo;
@@ -248,7 +250,7 @@ Ksolve::Ksolve()
     dsolve_(),
     dsolvePtr_( nullptr )
 {
-    ;
+    numThreads_ = moose::getEnvInt("MOOSE_NUM_THREADS", 1);
 }
 
 Ksolve::~Ksolve()
@@ -637,8 +639,10 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
     grainSize_ = (size_t) std::ceil( (double)pools_.size() / (double)numThreads_);
     assert(grainSize_ * numThreads_ >= pools_.size());
     numThreads_ = (size_t) std::ceil( (double)pools_.size() / (double) grainSize_ );
+
     if(numThreads_ > 1)
-        MOOSE_DEBUG( "Multi-threaded Ksolve: " << numThreads_ << " threads." );
+        cout << "Info: Multi-threaded Ksolve. Using " 
+            << numThreads_ << " threads." << endl;
 
 }
 
@@ -827,7 +831,6 @@ void Ksolve::setBlock( const vector< double >& values )
     }
 }
 
-//////////////////////////////////////////////////////////////////////////
 void Ksolve::updateVoxelVol( vector< double > vols )
 {
     // For now we assume identical numbers of voxels. Also assume
@@ -843,14 +846,8 @@ void Ksolve::updateVoxelVol( vector< double > vols )
     }
 }
 
-//////////////////////////////////////////////////////////////////////////
 // cross-compartment reaction stuff.
-//////////////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////////////
 // Functions for setup of cross-compartment transfer.
-/////////////////////////////////////////////////////////////////////
-
 void Ksolve::print() const
 {
     cout << "path = " << stoichPtr_->getKsolve().path() <<

@@ -114,14 +114,14 @@ static ostringstream assertStream;
         moose::__dump__(assertStream.str(), moose::failed); \
     }
 
-#define ASSERT_TRUE( condition, msg) \
+#define ASSERT_TRUE(condition, msg) \
     if( !(condition) ) {\
         assertStream.str(""); \
         assertStream << msg << endl;  \
         throw std::runtime_error( assertStream.str() );\
     }
 
-#define ASSERT_FALSE( condition, msg) \
+#define ASSERT_FALSE(condition, msg) \
     if( (condition) ) {\
         assertStream.str(""); \
         assertStream.precision( 9 ); \

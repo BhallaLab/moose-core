@@ -18,8 +18,6 @@
 #include "../basecode/global.h"
 #include "MooseParser.h"
 
-#define DEBUG_HERE
-
 using namespace std;
 
 namespace moose
@@ -45,10 +43,14 @@ MooseParser::~MooseParser()
     expression_.release();
 }
 
-MooseParser& MooseParser::operator=(const moose::MooseParser& other) 
-{
-    return *this;
-}
+// MooseParser& MooseParser::operator=(const moose::MooseParser& other)
+// {
+//     expr_ = other.expr_;
+//     symbol_table_ = other.symbol_table_;
+//     expression_ = other.expression_;
+//     refs_ = other.refs_;
+//     return *this;
+// }
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -165,7 +167,6 @@ void MooseParser::findAllVars( const string& expr, set<string>& vars, const stri
         vars.insert(sm.str());
         temp = sm.suffix();
     }
-    cerr << "DEBUG: Found " << vars.size() << " expr: " << expr << endl;
 }
 
 string MooseParser::Reformat( const string user_expr )
@@ -184,33 +185,58 @@ string MooseParser::Reformat( const string user_expr )
     return expr;
 }
 
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Find all x\d+ and y\d+ in the experssion.
+ *
+ * @Param expr
+ * @Param vars
+ */
+/* ----------------------------------------------------------------------------*/
 void MooseParser::findXsYs( const string& expr, set<string>& xs, set<string>& ys )
 {
     findAllVars( expr, xs, "x\\d+");
     findAllVars( expr, ys, "y\\d+" );
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Set expression on parser.
+ *
+ * @Param user_expr
+ *
+ * @Returns   
+ */
+/* ----------------------------------------------------------------------------*/
 bool MooseParser::SetExpr( const string& user_expr )
 {
-    expr_ = moose::trim(user_expr);
-    if(expr_.empty())
-        return false;
-    expr_ = Reformat(expr_);
+    ASSERT_FALSE( user_expr.empty(), "Empty expression" );
+    expr_ = Reformat(user_expr);
     return CompileExpr();
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Compile a given expression.
+ *
+ * @Returns Return true if successful, throws exception if compilation fails.
+ * Exception includes a detailed diagnostic.
+ */
+/* ----------------------------------------------------------------------------*/
 bool MooseParser::CompileExpr()
 {
     // User should make sure that symbol table has been setup. Do not raise
     // exception here. User can set expression again.
     // GCC specific
-    if(expr_.empty())
-        return false;
+    ASSERT_FALSE(expr_.empty(), __func__ << ": Empty expression not allowed here");
 
-    Parser::parser_t       parser;          /* parser */
-    if(! parser.compile(expr_, expression_))
+    Parser::parser_t  parser;
+    auto res = parser.compile(expr_, expression_);
+    if(! res)
     {
-        stringstream ss;
+        std::stringstream ss;
+        ss << "Failed to parse '" << expr_ << "' :" << endl;
         for (std::size_t i = 0; i < parser.error_count(); ++i)
         {
             Parser::error_t error = parser.get_error(i);
@@ -227,10 +253,10 @@ bool MooseParser::CompileExpr()
                 ss << "\t" << i.first << "=" << i.second << " " << &symbol_table_.get_variable(i.first)->ref();
             ss << endl;
         }
-        cerr <<  ss.str() << endl;
-        throw runtime_error(ss.str());
+        // Throw the error, this is handled in callee.
+        throw moose::Parser::exception_type(ss.str());
     }
-    return true;
+    return res;
 }
 
 #if 0

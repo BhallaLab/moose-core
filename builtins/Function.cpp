@@ -1,6 +1,6 @@
 /***
  *    Description:  Wrapper around MooseParser.
- *         Author:  Subhasis Ray
+ *         Author:  Dilawar Singh <diawar.s.rajput@gmail.com>, Subhasis Ray
  *     Maintainer:  Dilawar Singh <dilawars@ncbs.res.in>
  */
 
@@ -22,8 +22,8 @@ static const double TriggerThreshold = 0.0;
 static SrcFinfo1<double> *valueOut()
 {
     static SrcFinfo1<double> valueOut("valueOut",
-            "Evaluated value of the function for the current variable values."
-            );
+                                      "Evaluated value of the function for the current variable values."
+                                     );
     return &valueOut;
 }
 
@@ -31,15 +31,15 @@ static SrcFinfo1< double > *derivativeOut()
 {
     static SrcFinfo1< double > derivativeOut("derivativeOut",
             "Value of derivative of the function for the current variable values"
-            );
+                                            );
     return &derivativeOut;
 }
 
 static SrcFinfo1< double > *rateOut()
 {
     static SrcFinfo1< double > rateOut("rateOut",
-            "Value of time-derivative of the function for the current variable values"
-            );
+                                       "Value of time-derivative of the function for the current variable values"
+                                      );
     return &rateOut;
 }
 
@@ -215,27 +215,27 @@ const Cinfo * Function::initCinfo()
     // Shared messages
     ///////////////////////////////////////////////////////////////////
     static DestFinfo process( "process",
-            "Handles process call, updates internal time stamp.",
-            new ProcOpFunc< Function >( &Function::process )
-            );
+                              "Handles process call, updates internal time stamp.",
+                              new ProcOpFunc< Function >( &Function::process )
+                            );
 
     static DestFinfo reinit( "reinit",
-            "Handles reinit call.",
-            new ProcOpFunc< Function >( &Function::reinit )
-            );
+                             "Handles reinit call.",
+                             new ProcOpFunc< Function >( &Function::reinit )
+                           );
 
     static Finfo* processShared[] = { &process, &reinit };
 
     static SharedFinfo proc( "proc",
-            "This is a shared message to receive Process messages "
-            "from the scheduler objects."
-            "The first entry in the shared msg is a MsgDest "
-            "for the Process operation. It has a single argument, "
-            "ProcInfo, which holds lots of information about current "
-            "time, thread, dt and so on. The second entry is a MsgDest "
-            "for the Reinit operation. It also uses ProcInfo. ",
-            processShared, sizeof( processShared ) / sizeof( Finfo* )
-            );
+                             "This is a shared message to receive Process messages "
+                             "from the scheduler objects."
+                             "The first entry in the shared msg is a MsgDest "
+                             "for the Process operation. It has a single argument, "
+                             "ProcInfo, which holds lots of information about current "
+                             "time, thread, dt and so on. The second entry is a MsgDest "
+                             "for the Reinit operation. It also uses ProcInfo. ",
+                             processShared, sizeof( processShared ) / sizeof( Finfo* )
+                           );
 
 
     static Finfo *functionFinfos[] =
@@ -291,12 +291,12 @@ const Cinfo * Function::initCinfo()
 
     static Dinfo< Function > dinfo;
     static Cinfo functionCinfo("Function",
-            Neutral::initCinfo(),
-            functionFinfos,
-            sizeof(functionFinfos) / sizeof(Finfo*),
-            &dinfo,
-            doc,
-            sizeof(doc)/sizeof(string));
+                               Neutral::initCinfo(),
+                               functionFinfos,
+                               sizeof(functionFinfos) / sizeof(Finfo*),
+                               &dinfo,
+                               doc,
+                               sizeof(doc)/sizeof(string));
     return &functionCinfo;
 
 }
@@ -344,7 +344,7 @@ Function& Function::operator=(const Function& rhs)
     t_ = rhs.t_;
     rate_ = rhs.rate_;
     independent_ = rhs.independent_;
-    parser_.CopyData(rhs.parser_);
+    parser_ = rhs.parser_;
     return *this;
 }
 
@@ -430,31 +430,55 @@ void Function::addVariable(const string& name)
     else
     {
         MOOSE_WARN( "Got an undefined symbol: " << name << endl
-             << "Variables must be named xi, yi, where i is integer index."
-             << " You must define the constants beforehand using LookupField c: c[name]"
-             " = value");
+                    << "Variables must be named xi or yi where i is integer index,"
+                    << " e.g., x0, x12, y9, y23 etc."
+                    << " Also you must define the constants beforehand using LookupField c: c[name]"
+                    " = value");
         throw moose::Parser::ParserException("Undefined constant.");
     }
 }
 
+
 /* --------------------------------------------------------------------------*/
 /**
- * @Synopsis  Find all x\d+ and y\d+ in the experssion.
+ * @Synopsis  Assign an expression to the parser. Calls innerSetExpr to do the
+ * task.
  *
- * @Param expr
- * @Param vars
+ * @Param eref
+ * @Param expression
  */
 /* ----------------------------------------------------------------------------*/
-
-void Function::setExpr(const Eref& eref, string expr)
+void Function::setExpr(const Eref& eref, const string expression)
 {
-    if(expr == parser_.GetExpr())
+    string expr = moose::trim(expression);
+    if(expr.empty())
+    {
+        MOOSE_WARN("Empy expression.");
+        return;
+    }
+
+    if(valid_ && expr == parser_.GetExpr())
     {
         MOOSE_WARN( "No change in expression.");
         return;
     }
 
-    valid_ = false;
+    try
+    {
+        valid_ = innerSetExpr(eref, expr);
+    }
+    catch(std::exception& e)
+    {
+        valid_ = false;
+        cerr << "Error setting expression on: " << eref.objId().path() << endl;
+        cerr << "\tExpression: '" << expr << "'" << endl;
+        cerr << e.what() << endl;
+        clearBuffer();
+    }
+}
+
+bool Function::innerSetExpr(const Eref& eref, const string expr)
+{
 
     // Find all variables x\d+ or y\d+ etc, and add them to variable buffer.
     set<string> xs;
@@ -468,19 +492,9 @@ void Function::setExpr(const Eref& eref, string expr)
     for(auto &y : ys) addVariable(y.c_str());
     addVariable("t");
 
-    try
-    {
-        // Set parser expression. Note that the symbol table is popultated by
-        // addVariable function above.
-        valid_ = parser_.SetExpr( expr );
-    }
-    catch (moose::Parser::exception_type &e)
-    {
-        cerr << "Error setting expression on: " << eref.objId().path() << endl;
-        valid_ = false;
-        showError(e);
-        clearBuffer();
-    }
+    // Set parser expression. Note that the symbol table is popultated by
+    // addVariable function above.
+    return parser_.SetExpr( expr );
 }
 
 string Function::getExpr( const Eref& e ) const
@@ -488,6 +502,7 @@ string Function::getExpr( const Eref& e ) const
     if (!valid_)
     {
         cout << "Error: " << e.objId().path() << "::getExpr() - invalid parser state" << endl;
+        cout << "\tExpression was : " << parser_.GetExpr() << endl;
         return "";
     }
     return parser_.GetExpr();
@@ -573,7 +588,7 @@ void Function::setNumVar(const unsigned int num)
 {
     numVar_ = num;
     cerr << "Deprecated: numVar has no effect. MOOSE can infer number of variables "
-        " from the expression. " << endl;
+         " from the expression. " << endl;
 }
 
 unsigned int Function::getNumVar() const
@@ -674,12 +689,12 @@ void Function::process(const Eref &e, ProcPtr p)
 
 void Function::reinit(const Eref &e, ProcPtr p)
 {
-    if (!valid_)
+    if (! (valid_ || parser_.GetExpr().empty()))
     {
-        cout << "Error: Function::reinit() - invalid parser state. Will do nothing." << endl;
+        cout << "Error: " << e.objId().path() << "::reinit() - invalid parser state" << endl;
+        cout << " Expr: '" << parser_.GetExpr() << "'" << endl;
         return;
     }
-
 
     t_ = p->currTime;
 

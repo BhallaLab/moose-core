@@ -24,7 +24,9 @@ namespace moose
 
     // In setuptevn.cpp 
     const map<std::string, std::string>& getArgMap();
-    string getEnv( const string& env);
+
+    string getEnv(const string& env);
+    int getEnvInt(const string& env, const int defaultVal=1);
 
     // In fileutils.cpp
     bool filepath_exists( const string& path );
