@@ -11,6 +11,7 @@
 
 #include "../mesh/VoxelJunction.h"
 #include "../utility/print_function.hpp"
+#include "../utility/utility.h"
 
 #include "VoxelPoolsBase.h"
 #include "XferInfo.h"
@@ -236,6 +237,7 @@ Gsolve::Gsolve() :
 {
     // Initialize with global seed.
     rng_.setSeed(moose::getGlobalSeed());
+    numThreads_ = moose::getEnvInt("MOOSE_NUM_THREADS", 1);
 }
 
 Gsolve& Gsolve::operator=(const Gsolve& )

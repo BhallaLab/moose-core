@@ -4,7 +4,7 @@ endif()
 
 ########################### COMPILER MACROS #####################################
 include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++17" COMPILER_SUPPORTS_CXX17 )
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11 )
 CHECK_CXX_COMPILER_FLAG("-Wno-strict-aliasing" COMPILER_WARNS_STRICT_ALIASING )
 
 # Turn warning to error: Not all of the options may be supported on all
@@ -38,15 +38,15 @@ if(COMPILER_SUPPORT_UNUSED_BUT_SET_VARIABLE_NO_WARN)
     add_definitions( "-Wno-unused-but-set-variable" )
 endif(COMPILER_SUPPORT_UNUSED_BUT_SET_VARIABLE_NO_WARN)
 
-if(COMPILER_SUPPORTS_CXX17)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+if(COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     if(APPLE)
         add_definitions( -mllvm -inline-threshold=1000 )
     endif(APPLE)
-else(COMPILER_SUPPORTS_CXX17)
+else(COMPILER_SUPPORTS_CXX11)
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} is too old. \n"
       "Please use a compiler which has c++11 support."
       )
-endif(COMPILER_SUPPORTS_CXX17)
+endif(COMPILER_SUPPORTS_CXX11)
 
 set(COMPILER_IS_TESTED ON)

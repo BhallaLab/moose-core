@@ -648,7 +648,11 @@ void Function::process(const Eref &e, ProcPtr p)
     t_ = p->currTime;
     value_ = getValue();
     rate_ = (value_ - lastValue_) / p->dt;
-    // cout << "t= " << t_  << " init: " << getValue() << " ";
+
+#ifdef DEBUG_THIS_FILE
+    cout << "t= " << t_  << " value: " << getValue() << ", expr: " 
+        << parser_.GetExpr() << endl;
+#endif
 
     for (size_t ii = 0; (ii < databuf.size()) && (ii < ys_.size()); ++ii)
         *ys_[ii] = databuf[ii];
