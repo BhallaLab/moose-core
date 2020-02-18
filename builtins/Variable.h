@@ -8,8 +8,11 @@
 #ifndef _VARIABLE_H
 #define _VARIABLE_H
 
-#include "../utility/print_function.hpp"
 class ObjId;
+class Eref;
+class Cinfo;
+
+using namespace std;
 
 /** This class is used as FieldElement in Function. It is used as named
    variable of type double.
@@ -19,37 +22,53 @@ class Variable
 
 public:
 
-    Variable():value(0.0)
+    Variable(): name_(""), value_(0.0)
     {
     };
 
-    Variable(const Variable& rhs): value(rhs.value)
+    Variable(const string& name): name_(name), value_(0.0)
+    {
+    };
+
+    Variable(const Variable& rhs): name_(rhs.name_), value_(rhs.value_)
     {
         ;
     }
 
-    virtual ~Variable(){};
+    virtual ~Variable() {};
 
     void setValue(double v)
     {
-        value = v;
+        value_ = v;
     }
 
     virtual void epSetValue(const Eref & e, double v)
     {
-        value = v;
+        value_ = v;
     }
 
     double getValue() const
     {
-        return value;
+        return value_;
+    }
+
+    double* ref() 
+    {
+        return &value_;
+    }
+
+    std::string getName() const
+    {
+        return name_;
     }
 
     void addMsgCallback(const Eref& e, const string& finfoName, ObjId msg, unsigned int msgLookup);
 
     static const Cinfo * initCinfo();
 
-    double value;
+private:
+    std::string name_;
+    double value_;
 };
 
 #endif

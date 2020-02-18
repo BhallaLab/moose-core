@@ -43,27 +43,30 @@ const Cinfo* ZombieFunction::initCinfo()
     //////////////////////////////////////////////////////////////
     // SharedMsg Definitions: Override Function
     //////////////////////////////////////////////////////////////
+    
     static DestFinfo process( "process",
-                              "Handles process call, updates internal time stamp.",
-                              new ProcOpFunc< ZombieFunction >( &ZombieFunction::process) );
+            "Handles process call, updates internal time stamp.",
+            new ProcOpFunc< ZombieFunction >( &ZombieFunction::process) );
+
     static DestFinfo reinit( "reinit",
-                             "Handles reinit call.",
-                             new ProcOpFunc< ZombieFunction >( &ZombieFunction::reinit ) );
+            "Handles reinit call.",
+            new ProcOpFunc< ZombieFunction >( &ZombieFunction::reinit ) );
+
     static Finfo* processShared[] =
     {
         &process, &reinit
     };
 
     static SharedFinfo proc( "proc",
-                             "This is a shared message to receive Process messages "
-                             "from the scheduler objects."
-                             "The first entry in the shared msg is a MsgDest "
-                             "for the Process operation. It has a single argument, "
-                             "ProcInfo, which holds lots of information about current "
-                             "time, thread, dt and so on. The second entry is a MsgDest "
-                             "for the Reinit operation. It also uses ProcInfo. ",
-                             processShared, sizeof( processShared ) / sizeof( Finfo* )
-                           );
+            "This is a shared message to receive Process messages "
+            "from the scheduler objects."
+            "The first entry in the shared msg is a MsgDest "
+            "for the Process operation. It has a single argument, "
+            "ProcInfo, which holds lots of information about current "
+            "time, thread, dt and so on. The second entry is a MsgDest "
+            "for the Reinit operation. It also uses ProcInfo. ",
+            processShared, sizeof( processShared ) / sizeof( Finfo* )
+            );
 
     // Note that here the isOneZombie_ flag on the Dinfo constructor is
     // true. This means that the duplicate and copy operations only make

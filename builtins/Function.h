@@ -93,7 +93,7 @@ public:
 
 
 protected:
-    // friend double * functionAddVar_(const char * name, void *data);
+
     bool valid_;
     unsigned int numVar_;
     double lastValue_;
@@ -108,17 +108,19 @@ protected:
 
     // this stores variables received via incoming messages, identifiers of
     // the form x{i} are included in this
-    vector<shared_ptr<Variable>> xs_;
+    vector<Variable*> xs_;
 
     // this stores variable values pulled by sending request. identifiers of
     // the form y{i} are included in this
-    vector<shared_ptr<double>> ys_;
+    vector<double> ys_;
 
     // Used by kinetic solvers when this is zombified.
     void* stoich_;
 
-    // parser. It is often copied.
-    moose::MooseParser parser_;
+    // Parser which should never be copied. Multithreaded programs may behave
+    // strangely if copy-constructor or operator()= is implemented.
+    // moose::MooseParser parser_;
+    moose::MooseParser* parser_;
 
 };
 

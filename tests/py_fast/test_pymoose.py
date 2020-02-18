@@ -192,36 +192,6 @@ class TestWildcardFind(unittest.TestCase):
         yless = moose.wildcardFind('/x[]/##[FIELD(Vm)<0]')
         self.assertEqual(set(yless), set(self.y.vec[:5]))
 
-
-# class TestPyMooseGlobals(unittest.TestCase):
-#     def setUp(self):
-#         path1 = 'neutral%d' % (uuid.uuid4().int)
-#         path2 = 'neutral%d' % (uuid.uuid4().int)
-#         self.src1 = moose.Id(path1, 1, 'Neutral')
-#         self.dest1 = moose.Id(path2, 1, 'Neutral')
-
-#     def testCopy(self):
-#         print 'Testing copy ...',
-#         newname = 'neutral%d' % (uuid.uuid4().int)
-#         new_id = moose.copy(self.src1, self.dest1, newname, 3, toGlobal=False)
-#         self.assertEqual(len(new_id), 3)
-#         self.assertEqual(new_obj.path, self.dest1.path + "/" + newname + '[0]')
-#         print 'OK'
-
-#     def testElement(self):
-#         print 'Testing element() ...'
-#         x = moose.element(self.src1.path)
-#         self.assertTrue(isinstance(x, moose.Neutral))
-#         self.assertEqual(x.path, self.src1.path)
-#         x = moose.element(self.src1.vec)
-#         self.assertTrue(isinstance(x, moose.Neutral))
-#         self.assertEqual(x.path, self.src1.path)
-#         x = moose.element(self.src1[0].oid_)
-#         self.assertTrue(isinstance(x, moose.Neutral))
-#         self.assertEqual(x.path, self.src1.path)
-#         self.assertRaises(NameError, moose.element, 'abracadabra')
-
-
 class TestMessages(unittest.TestCase):
     def setUp(self):
         path1 = '/comp%d' % (uuid.uuid4().int)
@@ -254,29 +224,6 @@ class TestMessages(unittest.TestCase):
             p = msg.path
         p = msg2.path # this should not raise any error
 
-    # def test_getInMessageDict(self):
-    #     print 'Testing getInMessageDict ...',
-    #     indict = self.src1.getInMessageDict()
-    #     self.assertTrue('parentMsg' in indict)
-
-
-# class TestNeighbors(unittest.TestCase):
-#     def setUp(self):
-#         self.pulsegen = moose.PulseGen('pulsegen')
-#         self.compartment = moose.Compartment('compartment')
-#         self.table = moose.Table('table')
-#         moose.connect(self.table, 'requestData', self.compartment, 'get_Im')
-#         moose.connect(self.pulsegen, 'output', self.compartment, 'injectMsg')
-
-#     def testNeighborDict(self):
-#         print 'Testing neighbour dict ...'
-#         neighbors = self.compartment.neighborDict
-#         self.assertTrue(self.pulsegen.oid_ in [ n.oid_ for n in neighbors['injectMsg']])
-#         self.assertTrue(self.table.oid_ in [n.oid_ for n in neighbors['get_Im']])
-#         self.assertTrue(self.compartment.oid_ in [n.oid_ for n in self.pulsegen.neighborDict['output']])
-#         self.assertTrue(self.compartment.oid_ in [n.oid_ for n in self.table.neighborDict['requestData']])
-#         print 'OK'
-
 class TestDelete(unittest.TestCase):
     def setUp(self):
         self.oid = moose.Neutral('testDelete')
@@ -293,25 +240,6 @@ class TestDelete(unittest.TestCase):
 class TestFieldAccess(unittest.TestCase):
     def testSetGet(self):
         pass
-        # a = moose.IntFire('TestFieldAccess_IntFire', g=0)
-        # print 'a:', a
-        # sys.stdout.flush()
-        # print 'Vm=',
-        # print a.Vm
-        # a.Vm = 2.0
-        # self.assertAlmostEqual(a.Vm, 2.0)
-
-# class TestValueFieldTypes(unittest.TestCase):
-#     def setUp(self):
-#         self.id_ = uuid.uuid4().int
-#         self.container = moose.Neutral('/test%d' % (self.id_))
-#         cwe = moose.getCwe()
-#         self.model = moose.loadModel('../Demos/Genesis_files/Kholodenko.g', '%s/kholodenko' % (self.container.path))
-#         moose.setCwe(cwe)
-
-#     def testVecUnsigned(self):
-#         x = moose.element('%s/kinetics' % (self.model.path))
-#         self.assertTrue(len(x.meshToSpace) > 0)
 
 if __name__ == '__main__':
     print('PyMOOSE Regression Tests:')

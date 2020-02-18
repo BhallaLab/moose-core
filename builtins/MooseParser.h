@@ -18,10 +18,11 @@
 
 #define exprtk_enabled_debugging 0
 #define exprtk_disable_comments 1
-#define exprtk_disable_rtl_io_file 1
 #include "../external/exprtk/exprtk.hpp"
 
 using namespace std;
+
+class Variable;
 
 namespace moose
 {
@@ -56,16 +57,6 @@ public:
     MooseParser();
     ~MooseParser();
 
-    // No copying allowed. Can't get Zombies to work with copy constructor.
-    // MooseParser& operator=(const moose::MooseParser&);
-
-    // fixme: The copy constructor should be used instead of this function. 
-    void CopyData(const moose::MooseParser& other);
-
-    // Other functions.
-    void Reinit();
-
-
     /*-----------------------------------------------------------------------------
      *  Set/Get
      *-----------------------------------------------------------------------------*/
@@ -90,10 +81,10 @@ public:
     // Reformat the expression to meet TkExpr.
     string Reformat( const string user_expr );
 
-    // void SetVariableMap( const map<string, double*> map );
-
     static void findAllVars( const string& expr, set<string>& vars, const string& start );
     static void findXsYs(const string& expr, set<string>& xs, set<string>& ys);
+
+    void LinkVariables(vector<Variable*>& xs_, vector<double>& ys_, double* t);
 
     double Eval( ) const;
     double Derivative(const string& name) const;
@@ -119,7 +110,6 @@ public:
     static double SRand2( double a, double b, double seed );
     static double Fmod( double a, double b );
 
-
 public:
     /* data */
     string expr_;
@@ -132,7 +122,7 @@ public:
 
     /* Parser related */
     Parser::symbol_table_t symbol_table_;
-    Parser::expression_t   expression_;     /* expression type */
+    Parser::expression_t expression_;     /* expression type */
     size_t num_user_defined_funcs_ = 0;
 
     bool symbol_tables_registered_;

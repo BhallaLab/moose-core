@@ -11,7 +11,8 @@ import numpy as np
 import sys
 import os
 
-scriptDir = os.path.dirname( os.path.realpath( __file__ ) )
+scriptDir = os.path.dirname(os.path.realpath(__file__))
+
 
 def main():
     """
@@ -24,48 +25,49 @@ def main():
     """
 
     solver = "gsl"  # Pick any of gsl, gssa, ee..
-    mfile = os.path.join( scriptDir, './genesis/acc11.g' )
+    mfile = os.path.join(scriptDir, '..', 'data', 'acc11.g')
     runtime = 1000.0
-    if ( len( sys.argv ) >= 3 ):
+    if (len(sys.argv) >= 3):
         if sys.argv[1][0] == '/':
             mfile = sys.argv[1]
         else:
             mfile = sys.argv[1]
-            runtime = float( sys.argv[2] )
-    if ( len( sys.argv ) == 4 ):
-            solver = sys.argv[3]
+            runtime = float(sys.argv[2])
+    if (len(sys.argv) == 4):
+        solver = sys.argv[3]
 
-    modelId = moose.loadModel( mfile, 'model')
-    moose.mooseAddChemSolver('model',solver)
-    moose.element( '/model/kinetics/neuroNOS/nNOS.arg' ).concInit = 0.1
+    modelId = moose.loadModel(mfile, 'model')
+    moose.mooseAddChemSolver('model', solver)
+    moose.element('/model/kinetics/neuroNOS/nNOS.arg').concInit = 0.1
     moose.reinit()
-    moose.start( runtime )
+    moose.start(runtime)
 
     # Display all plots.
-    for x in moose.wildcardFind( '/model/#graphs/conc#/#' ):
-        t = np.arange( 0, x.vector.size, 1 ) * x.dt
-        print( x.vector )
+    for x in moose.wildcardFind('/model/#graphs/conc#/#'):
+        t = np.arange(0, x.vector.size, 1) * x.dt
+        print(x.vector)
         if x.vector.size > 0:
-            assert min( x.vector ) >= 0.0, min(x.vector)
+            assert min(x.vector) >= 0.0, min(x.vector)
         assert x.vector.size in [0, 10001], x.vector.size
 
     ########################################################
     # Run it again with negative values allowed
-    moose.element( '/model/kinetics/stoich' ).allowNegative = True
+    moose.element('/model/kinetics/stoich').allowNegative = True
     moose.reinit()
-    moose.start( runtime )
+    moose.start(runtime)
     oneValIsBelowZero = False
-    allVals = [ ]
-    for x in moose.wildcardFind( '/model/#graphs/conc#/#' ):
-        t = np.arange( 0, x.vector.size, 1 ) * x.dt
+    allVals = []
+    for x in moose.wildcardFind('/model/#graphs/conc#/#'):
+        t = np.arange(0, x.vector.size, 1) * x.dt
         if x.vector.size > 0:
-            allVals.append( min( x.vector ) )
-            if min( x.vector ) <= 0.0:
+            allVals.append(min(x.vector))
+            if min(x.vector) <= 0.0:
                 oneValIsBelowZero = True
 
         if allVals:
-            assert oneValIsBelowZero, "No value is negative: %s" % allVals 
+            assert oneValIsBelowZero, "No value is negative: %s" % allVals
         assert x.vector.size in [0, 10001], x.vector.size
+
 
 if __name__ == '__main__':
     main()

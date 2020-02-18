@@ -16,6 +16,7 @@
 #include "../utility/print_function.hpp"
 #include "../utility/strutil.h"
 #include "../basecode/global.h"
+#include "../builtins/Variable.h"
 #include "MooseParser.h"
 
 using namespace std;
@@ -39,31 +40,10 @@ MooseParser::MooseParser() : symbol_tables_registered_(false)
 
 MooseParser::~MooseParser()
 {
-    symbol_table_.clear();
-    expression_.release();
-}
-
-// MooseParser& MooseParser::operator=(const moose::MooseParser& other)
-// {
-//     expr_ = other.expr_;
-//     symbol_table_ = other.symbol_table_;
-//     expression_ = other.expression_;
-//     refs_ = other.refs_;
-//     return *this;
-// }
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis  Copy data from other parser.
- *
- * @Param parser
- */
-/* ----------------------------------------------------------------------------*/
-void MooseParser::CopyData(const moose::MooseParser& other)
-{
-    for(auto v: other.refs_)
-        DefineVar(v.first, v.second);
-    SetExpr(other.expr_);
+    // Nothing to do here.
+    // Do not clean symbol table or expression here at all. ExprTK takes care
+    // of them in its destructor. 
+    // Other variables are cleaned up by Function.
 }
 
 /*-----------------------------------------------------------------------------
@@ -132,17 +112,6 @@ double MooseParser::GetVarValue(const string& name) const
     return symbol_table_.get_variable(name)->value();
 }
 
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis  Reinit the parser. Reassign symbol table, recompile the
- * expression.
- */
-/* ----------------------------------------------------------------------------*/
-void MooseParser::Reinit( )
-{
-    ClearVariables();
-}
-
 void MooseParser::DefineConst( const string& constName, const double value )
 {
     const_map_[constName] = value;
@@ -169,15 +138,26 @@ void MooseParser::findAllVars( const string& expr, set<string>& vars, const stri
     }
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  EXPRTK does not have && and || but have 'and' and 'or' symbol.
+ * Replace && with 'and' and '||' with 'or'.
+ *
+ * @Param user_expr
+ *
+ * @Returns   
+ */
+/* ----------------------------------------------------------------------------*/
 string MooseParser::Reformat( const string user_expr )
 {
     string expr( user_expr );
 
-    // Replate || with or
+    // Replate || with 'or'
     moose::str_replace_all( expr, "||", " or " );
+    // Replace && with 'and'
     moose::str_replace_all( expr, "&&", " and " );
 
-    // replace ! with not but do not change !=
+    // Trickt business: Replace ! with not but do not change !=
     moose::str_replace_all( expr, "!=", "@@@" ); // placeholder
     moose::str_replace_all( expr, "!", " not " );
     moose::str_replace_all( expr, "@@@", "!=" ); // change back @@@ to !=
@@ -259,14 +239,6 @@ bool MooseParser::CompileExpr()
     return res;
 }
 
-#if 0
-void MooseParser::SetVariableMap( const map<string, double*> m )
-{
-    for( auto &v : m )
-        symbol_table_.add_variable( v.first, *v.second );
-}
-#endif
-
 double MooseParser::Derivative(const string& name) const
 {
     return exprtk::derivative(expression_, name);
@@ -293,7 +265,6 @@ Parser::varmap_type MooseParser::GetConst( ) const
 void MooseParser::ClearVariables( )
 {
     // Do not invalidate the reference.
-    refs_.clear();
     symbol_table_.clear_variables(true);
 }
 
@@ -306,6 +277,17 @@ void MooseParser::ClearAll( )
 const string MooseParser::GetExpr( ) const
 {
     return expr_;
+}
+
+void MooseParser::LinkVariables(vector<Variable*>& xs, vector<double>& ys, double* t)
+{
+    for(auto x : xs)
+        DefineVar( x->getName(), x->ref());
+
+    for (size_t i = 0; i < ys.size(); i++) 
+        DefineVar('y'+to_string(i), &ys[i]);
+
+    DefineVar("t", t);
 }
 
 

@@ -51,6 +51,7 @@ void FuncTerm::setReactantIndex( const vector< unsigned int >& mol )
         args_[i] = 0.0;
         parser_.DefineVar( 'x'+to_string(i), &args_[i] );
     }
+
     // Define a 't' variable even if we don't always use it.
     args_[mol.size()] = 0.0;
     parser_.DefineVar( "t", &args_[mol.size()] );
@@ -124,8 +125,6 @@ double FuncTerm::getVolScale() const
 const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
 {
     args_ = nullptr;
-    // NOTE: Don't copy the parser.
-    // parser_ = other.parser_;
     expr_ = other.expr_;
     volScale_ = other.volScale_;
     target_ = other.target_;
@@ -174,7 +173,6 @@ void FuncTerm::evalPool( double* S, double t ) const
     catch ( moose::Parser::exception_type & e )
     {
         showError( e );
-        //throw e;
         return;
     }
 }

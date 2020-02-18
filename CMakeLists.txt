@@ -379,24 +379,35 @@ if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     add_test(NAME moose.bin-raw-run COMMAND moose.bin -u -q)
 endif()
 
-## PyMOOSE tests.
-set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)
+# PyMOOSE tests. These tests complete in reasonable time and should run by
+# default.
+set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/py_fast)
 
 # Collect all python script in tests folder and run them.
 file(GLOB PY_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.py" )
 
-
-# Run python tests.
-foreach( _test_script ${PY_TEST_SCRIPTS} )
-    get_filename_component( _test_name ${_test_script} NAME_WE)
-    add_test( NAME ${_test_name}
+# Run python tests. These are fast tests.
+foreach(_test_script ${PY_TEST_SCRIPTS} )
+    get_filename_component(_test_name ${_test_script} NAME_WE)
+    add_test(NAME ${_test_name}
         COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
         WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
         )
-     set_tests_properties( ${_test_name}
+     set_tests_properties(${_test_name}
          PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python"
         )
 endforeach( )
+
+# CUSTOM TESTS. These tests may require some extra settings.
+# Run python tests. These are fast tests.
+set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/py_custom)
+add_test(NAME test_long_sbml_multi
+    COMMAND ${PYTHON_EXECUTABLE} ${PYMOOSE_TEST_DIRECTORY}/test_long_sbml+exp+parser+multithreaded.py
+    WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+    CONFIGURATIONS Release # In debug mode, this will take a lot of time.
+    )
+set_tests_properties(test_long_sbml_multi PROPERTIES 
+    ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python;MOOSE_NUM_THREADS=4")
 
 # Alpha tests. These should not run by default.
 set(MOOSE_ALPHA_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/alpha)
@@ -414,25 +425,25 @@ foreach( _test_script ${PY_ALPHA_TEST_SCRIPTS} )
 endforeach( )
 
 # Regression and github issues. These should not run by default.
-set(PYMOOSE_ISSUES_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/issues)
+set(PYMOOSE_ISSUES_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/devel/issues)
 file(GLOB PY_ISSUES_SCRIPTS "${PYMOOSE_ISSUES_DIRECTORY}/*.py" )
-foreach( _test_script ${PY_ISSUES_SCRIPTS} )
+foreach(_test_script ${PY_ISSUES_SCRIPTS})
     get_filename_component( _test_name ${_test_script} NAME_WE)
-    add_test( NAME ${_test_name}
+    add_test(NAME ${_test_name}
         COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
 	CONFIGURATIONS Devel
 	WORKING_DIRECTORY ${PYMOOSE_ISSUES_DIRECTORY}
         )
-     set_tests_properties( ${_test_name}
+     set_tests_properties(${_test_name}
          PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python"
         )
-endforeach( )
+endforeach()
 
 # add pylint target.
 set(PYSCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python )
 file(GLOB_RECURSE PY_SCRIPTS  "python/*.py")
-add_custom_target( pylint )
-foreach( _py_script ${PY_SCRIPTS} )
+add_custom_target(pylint)
+foreach(_py_script ${PY_SCRIPTS})
     get_filename_component( _py_name ${_py_script} NAME_WE)
     file( READ ${_py_script} pytext)
     string(MD5 _md5 "${pytext}")
@@ -463,6 +474,7 @@ add_custom_target(sdist
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Creating sdist ${PYMOOSE_SDIST_FILE}" 
     VERBATIM)
+
 add_custom_target(upload_test DEPENDS sdist
     COMMAND ${PYTHON_EXECUTABLE} -m twine upload 
         --user $ENV{PYMOOSE_PYPI_USER} --password $ENV{PYMOOSE_PYPI_PASSWORD}

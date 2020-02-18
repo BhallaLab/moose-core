@@ -22,10 +22,10 @@ print( 'Using moose form %s' % moose.__file__ )
 print( '\t Moose version %s' % moose.version( ) )
 
 # the model lives in the same directory as the test script
-modeldir = os.path.dirname( os.path.realpath( __file__ ) )
+sdir_ = os.path.dirname( os.path.realpath( __file__ ) )
 
 def main():
-    modelname = os.path.join(modeldir, './chem_models/00001-sbml-l3v1.xml' )
+    modelname = os.path.join(sdir_, '..', 'data', '00001-sbml-l3v1.xml')
     model = moose.mooseReadSBML( modelname, '/sbml' )
     c = moose.element('/clock')
     moose.reinit()

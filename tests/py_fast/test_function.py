@@ -39,21 +39,25 @@ def test_var_order():
     x0.startTime = 0.0
     x0.stopTime = simtime
     x0.stepPosition = 0.0
+    print('x0', x0.vector)
     inputs /= 10
     x1 = moose.StimulusTable('/x1')
     x1.vector = inputs
     x1.startTime = 0.0
     x1.stopTime = simtime
     x1.stepPosition = 0.0
+    print('x1', x1.vector)
     inputs /= 10
     y0 = moose.StimulusTable('/y0')
     y0.vector = inputs
     y0.startTime = 0.0
     y0.stopTime = simtime
     y0.stepPosition = 0.0
+    print('y0', y0.vector)
     inputs /= 10
     y1 = moose.StimulusTable('/y1')
     y1.vector = inputs
+    print('y1', y1.vector)
     y1.startTime = 0.0
     y1.startTime = 0.0
     y1.stopTime = simtime
@@ -70,7 +74,8 @@ def test_var_order():
         moose.setClock(ii, dt)
     moose.reinit()
     moose.start(simtime)
-    expected = [0, 1.1, 2.211, 3.322, 4.433, 5.544]
+    expected = [0, 1.1, 2.201, 3.302, 4.403, 5.504]
+    print('sum: ', x0.vector + x1.vector + y0.vector  + y1.vector)
     assert np.allclose(z1.vector, expected), "Excepted %s, got %s" % (expected, z1.vector )
     print( 'Passed order vars' )
 

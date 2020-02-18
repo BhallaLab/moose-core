@@ -37,7 +37,9 @@ public:
                          Id ksolve, Id dsolve );
 
     static const Cinfo* initCinfo();
+
 private:
+
 };
 
 #endif	// ZOMBIE_FUNCTION_H_

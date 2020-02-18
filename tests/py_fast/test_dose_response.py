@@ -71,15 +71,15 @@ def main():
 
     # Load Model and set up the steady state solver.
     # model = sys.argv[1] # To load model from a file.
-    model = os.path.join( sdir_, 'chem_models/19085.cspace' )
+    model = os.path.join(sdir_, '..', 'data', '19085.cspace')
     modelPath, modelName, modelType = parseModelName(model)
     outputDir = modelPath
     
     modelId = moose.loadModel(model, 'model', 'ee')
     dosePath = '/model/kinetics/b/DabX' # The dose entity
 
-    ksolve, state = setupSteadyState( simdt, plotDt)
-    vol = moose.element( '/model/kinetics' ).volume
+    ksolve, state = setupSteadyState(simdt, plotDt)
+    vol = moose.element('/model/kinetics' ).volume
     iterInit = 100
     solutionVector = []
     factorArr = []
