@@ -87,8 +87,6 @@ public:
 
     void addVariable(const string& name);
 
-
-    void clearBuffer();
     void showError(moose::Parser::exception_type &e) const;
 
 
@@ -119,8 +117,7 @@ protected:
 
     // Parser which should never be copied. Multithreaded programs may behave
     // strangely if copy-constructor or operator()= is implemented.
-    // moose::MooseParser parser_;
-    moose::MooseParser* parser_;
+    moose::MooseParser parser_;
 
 };
 

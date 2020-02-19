@@ -24,18 +24,25 @@ using namespace std;
 namespace moose
 {
 
-MooseParser::MooseParser() : symbol_tables_registered_(false)
+MooseParser::MooseParser() : 
+    expression_(new  moose::Parser::expression_t())
+    , symbol_tables_registered_(false)
 {
-    // And add user defined functions.
-    symbol_table_.add_function( "ln", MooseParser::Ln );
-    symbol_table_.add_function( "rand", MooseParser::Rand ); // between 0 and 1
-    symbol_table_.add_function( "rnd", MooseParser::Rand );  // between 0 and 1
+    /* Parser related */
+    Parser::symbol_table_t symbol_table;
 
-    symbol_table_.add_function( "srand", MooseParser::SRand );
-    symbol_table_.add_function( "rand2", MooseParser::Rand2 );
-    symbol_table_.add_function( "srand2", MooseParser::SRand2 );
-    symbol_table_.add_function( "fmod", MooseParser::Fmod );
-    expression_.register_symbol_table(symbol_table_);
+    // And add user defined functions.
+    symbol_table.add_function( "ln", MooseParser::Ln );
+    symbol_table.add_function( "rand", MooseParser::Rand ); // between 0 and 1
+    symbol_table.add_function( "rnd", MooseParser::Rand );  // between 0 and 1
+
+    symbol_table.add_function( "srand", MooseParser::SRand );
+    symbol_table.add_function( "rand2", MooseParser::Rand2 );
+    symbol_table.add_function( "srand2", MooseParser::SRand2 );
+    symbol_table.add_function( "fmod", MooseParser::Fmod );
+
+    expression_->register_symbol_table(symbol_table);
+
 }
 
 MooseParser::~MooseParser()
@@ -44,6 +51,8 @@ MooseParser::~MooseParser()
     // Do not clean symbol table or expression here at all. ExprTK takes care
     // of them in its destructor. 
     // Other variables are cleaned up by Function.
+    if(expression_)
+        delete expression_;
 }
 
 /*-----------------------------------------------------------------------------
@@ -87,15 +96,11 @@ double MooseParser::Fmod( double a, double b )
 /*-----------------------------------------------------------------------------
  *  Get/Set
  *-----------------------------------------------------------------------------*/
-Parser::symbol_table_t MooseParser::GetSymbolTable( ) const
+Parser::symbol_table_t& MooseParser::GetSymbolTable( ) const
 {
-    return expression_.get_symbol_table();
+    return expression_->get_symbol_table();
 }
 
-Parser::expression_t MooseParser::GetExpression( ) const
-{
-    return expression_;
-}
 
 /*-----------------------------------------------------------------------------
  *  Other function.
@@ -103,19 +108,20 @@ Parser::expression_t MooseParser::GetExpression( ) const
 bool MooseParser::DefineVar( const string varName, double* const val)
 {
     // Use in copy assignment.
-    refs_[varName] = val;
-    return symbol_table_.add_variable(varName, *val, false);
+    if( GetSymbolTable().is_variable(varName))
+        GetSymbolTable().remove_variable(varName, false);
+    return GetSymbolTable().add_variable(varName, *val, false);
 }
 
 double MooseParser::GetVarValue(const string& name) const
 {
-    return symbol_table_.get_variable(name)->value();
+    return GetSymbolTable().get_variable(name)->value();
 }
 
 void MooseParser::DefineConst( const string& constName, const double value )
 {
     const_map_[constName] = value;
-    symbol_table_.add_constant(constName, value);
+    GetSymbolTable().add_constant(constName, value);
 }
 
 void MooseParser::DefineFun1( const string& funcName, double (&func)(double) )
@@ -123,7 +129,7 @@ void MooseParser::DefineFun1( const string& funcName, double (&func)(double) )
     // Add a function. This function currently handles only one argument
     // function.
     num_user_defined_funcs_ += 1;
-    symbol_table_.add_function( funcName, func );
+    GetSymbolTable().add_function( funcName, func );
 }
 
 void MooseParser::findAllVars( const string& expr, set<string>& vars, const string& pattern)
@@ -212,7 +218,7 @@ bool MooseParser::CompileExpr()
     ASSERT_FALSE(expr_.empty(), __func__ << ": Empty expression not allowed here");
 
     Parser::parser_t  parser;
-    auto res = parser.compile(expr_, expression_);
+    auto res = parser.compile(expr_, *expression_);
     if(! res)
     {
         std::stringstream ss;
@@ -230,7 +236,7 @@ bool MooseParser::CompileExpr()
             auto n = symbTable.get_variable_list(vars);
             ss << "More Information:\nTotal variables " << n << ".";
             for (auto i : vars)
-                ss << "\t" << i.first << "=" << i.second << " " << &symbol_table_.get_variable(i.first)->ref();
+                ss << "\t" << i.first << "=" << i.second << " " << symbTable.get_variable(i.first)->ref();
             ss << endl;
         }
         // Throw the error, this is handled in callee.
@@ -241,14 +247,14 @@ bool MooseParser::CompileExpr()
 
 double MooseParser::Derivative(const string& name) const
 {
-    return exprtk::derivative(expression_, name);
+    return exprtk::derivative(*expression_, name);
 }
 
 double MooseParser::Eval( ) const
 {
     if( expr_.empty())
         return 0.0;
-    return expression_();
+    return expression_->value();
 }
 
 
@@ -264,13 +270,11 @@ Parser::varmap_type MooseParser::GetConst( ) const
 
 void MooseParser::ClearVariables( )
 {
-    // Do not invalidate the reference.
-    symbol_table_.clear_variables(true);
+    GetSymbolTable().clear_variables(false);
 }
 
 void MooseParser::ClearAll( )
 {
-    const_map_.clear();
     ClearVariables();
 }
 
@@ -281,8 +285,8 @@ const string MooseParser::GetExpr( ) const
 
 void MooseParser::LinkVariables(vector<Variable*>& xs, vector<double*>& ys, double* t)
 {
-    for(auto x : xs)
-        DefineVar( x->getName(), x->ref());
+    for(size_t i = 0; i < xs.size(); i++)
+        DefineVar('x'+to_string(i), xs[i]->ref());
 
     for (size_t i = 0; i < ys.size(); i++) 
         DefineVar('y'+to_string(i), ys[i]);

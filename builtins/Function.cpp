@@ -304,13 +304,17 @@ const Cinfo * Function::initCinfo()
 static const Cinfo * functionCinfo = Function::initCinfo();
 
 Function::Function():
-    valid_(false), numVar_(0), lastValue_(0.0)
-    , value_(0.0), rate_(0.0), mode_(1)
-    , useTrigger_(false), doEvalAtReinit_(false)
+    valid_(false)
+    , numVar_(0)
+    , lastValue_(0.0)
+    , value_(0.0)
+    , rate_(0.0)
+    , mode_(1)
+    , useTrigger_(false)
+    , doEvalAtReinit_(false)
     , t_(0.0)
     , independent_("x0")
     , stoich_(nullptr)
-    , parser_(new moose::MooseParser())
 {
 }
 
@@ -328,8 +332,7 @@ Function::Function(const Function& f) :
     ys_(f.ys_),
     stoich_(f.stoich_)
 {
-    parser_ = new moose::MooseParser();
-    parser_->LinkVariables(xs_, ys_, &t_);
+    parser_.LinkVariables(xs_, ys_, &t_);
 }
 
 // Careful: This is a critical function.
@@ -338,7 +341,6 @@ Function& Function::operator=(const Function& rhs)
     // protect from self-assignment.
     if( this == &rhs)
         return *this;
-
 
     valid_ = rhs.valid_;
     numVar_ = rhs.numVar_;
@@ -349,28 +351,16 @@ Function& Function::operator=(const Function& rhs)
     t_ = rhs.t_;
     rate_ = rhs.rate_;
     independent_ = rhs.independent_;
-
-    // Make sure that we copy the parser 
     xs_ = rhs.xs_;
     ys_ = rhs.ys_;
-    parser_ = new moose::MooseParser();
-    parser_->LinkVariables(xs_, ys_, &t_);
-
+    parser_.LinkVariables(xs_, ys_, &t_);
     return *this;
 }
 
 Function::~Function()
 {
-    clearBuffer();
 }
 
-// do not know what to do about Variables that have already been
-// connected by message.
-void Function::clearBuffer()
-{
-    numVar_ = 0;
-    parser_->ClearVariables();
-}
 
 void Function::showError(moose::Parser::exception_type &e) const
 {
@@ -411,12 +401,12 @@ void Function::addVariable(const string& name)
         {
             // Equality with index because we cound from 0.
             for (size_t i = xs_.size(); i <= (size_t) index; i++)
-                xs_.push_back( new Variable() );
+                xs_.push_back(new Variable());
         }
 
         // This must be true.
         if(  xs_[index] )
-            parser_->DefineVar(name, xs_[index]->ref());
+            parser_.DefineVar(name, xs_[index]->ref());
         else
             throw runtime_error( "Empty Variable." );
         numVar_ = xs_.size();
@@ -430,12 +420,12 @@ void Function::addVariable(const string& name)
         {
             // Equality with index because we cound from 0.
             for (size_t i = ys_.size(); i <= (size_t) index; i++)
-                ys_.push_back( new double(0.0));
+                ys_.push_back(new double(0.0));
         }
-        parser_->DefineVar(name, ys_[index]);
+        parser_.DefineVar(name, ys_[index]);
     }
     else if (name == "t")
-        parser_->DefineVar("t", &t_);
+        parser_.DefineVar("t", &t_);
     else
     {
         MOOSE_WARN( "Got an undefined symbol: " << name << endl
@@ -466,7 +456,7 @@ void Function::setExpr(const Eref& eref, const string expression)
         return;
     }
 
-    if(valid_ && expr == parser_->GetExpr())
+    if(valid_ && expr == parser_.GetExpr())
     {
         MOOSE_WARN( "No change in expression.");
         return;
@@ -482,7 +472,6 @@ void Function::setExpr(const Eref& eref, const string expression)
         cerr << "Error setting expression on: " << eref.objId().path() << endl;
         cerr << "\tExpression: '" << expr << "'" << endl;
         cerr << e.GetMsg() << endl;
-        clearBuffer();
     }
 }
 
@@ -497,13 +486,13 @@ bool Function::innerSetExpr(const Eref& eref, const string expr)
     // Now create a map which maps the variable name to location of values. This
     // is critical to make sure that pointers remain valid when multi-threaded
     // encironment is used.
-    for(auto &x : xs) addVariable(x.c_str());
-    for(auto &y : ys) addVariable(y.c_str());
+    for(auto &x : xs) addVariable(x);
+    for(auto &y : ys) addVariable(y);
     addVariable("t");
 
     // Set parser expression. Note that the symbol table is popultated by
     // addVariable function above.
-    return parser_->SetExpr( expr );
+    return parser_.SetExpr( expr );
 }
 
 string Function::getExpr( const Eref& e ) const
@@ -511,10 +500,10 @@ string Function::getExpr( const Eref& e ) const
     if (!valid_)
     {
         cout << "Error: " << e.objId().path() << "::getExpr() - invalid parser state" << endl;
-        cout << "\tExpression was : " << parser_->GetExpr() << endl;
+        cout << "\tExpression was : " << parser_.GetExpr() << endl;
         return "";
     }
-    return parser_->GetExpr();
+    return parser_.GetExpr();
 }
 
 void Function::setMode(unsigned int mode)
@@ -549,7 +538,7 @@ bool Function::getDoEvalAtReinit() const
 
 double Function::getValue() const
 {
-    return parser_->Eval( );
+    return parser_.Eval( );
 }
 
 
@@ -590,7 +579,7 @@ double Function::getDerivative() const
         cout << "Error: Function::getDerivative() - invalid state" << endl;
         return value;
     }
-    return parser_->Derivative(independent_);
+    return parser_.Derivative(independent_);
 }
 
 void Function::setNumVar(const unsigned int num)
@@ -628,12 +617,12 @@ Variable * Function::getVar(unsigned int ii)
 
 void Function::setConst(string name, double value)
 {
-    parser_->DefineConst(name.c_str(), value);
+    parser_.DefineConst(name.c_str(), value);
 }
 
 double Function::getConst(string name) const
 {
-    moose::Parser::varmap_type cmap = parser_->GetConst();
+    moose::Parser::varmap_type cmap = parser_.GetConst();
     if (! cmap.empty() )
     {
         moose::Parser::varmap_type::const_iterator it = cmap.find(name);
@@ -660,7 +649,7 @@ void Function::process(const Eref &e, ProcPtr p)
 
 #ifdef DEBUG_THIS_FILE
     cout << "t= " << t_  << " value: " << getValue() << ", expr: " 
-        << parser_->GetExpr() << endl;
+        << parser_.GetExpr() << endl;
 #endif
 
     for (size_t ii = 0; (ii < databuf.size()) && (ii < ys_.size()); ++ii)
@@ -702,10 +691,10 @@ void Function::process(const Eref &e, ProcPtr p)
 
 void Function::reinit(const Eref &e, ProcPtr p)
 {
-    if (! (valid_ || parser_->GetExpr().empty()))
+    if (! (valid_ || parser_.GetExpr().empty()))
     {
         cout << "Error: " << e.objId().path() << "::reinit() - invalid parser state" << endl;
-        cout << " Expr: '" << parser_->GetExpr() << "'" << endl;
+        cout << " Expr: '" << parser_.GetExpr() << "'" << endl;
         return;
     }
 

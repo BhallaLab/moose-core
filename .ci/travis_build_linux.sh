@@ -13,10 +13,10 @@ PYTHON2="/usr/bin/python2"
 PYTHON3="/usr/bin/python3"
 
 $PYTHON2 -m pip install pip --upgrade --user
-$PYTHON2 -m pip install libNeuroML pyNeuroML --upgrade --user
+$PYTHON2 -m pip install libNeuroML pyNeuroML python-libsbml --upgrade --user
 
 $PYTHON3 -m pip install pip --upgrade --user
-$PYTHON3 -m pip install libNeuroML pyNeuroML --upgrade --user
+$PYTHON3 -m pip install libNeuroML pyNeuroML python-libsbml --upgrade --user
 
 NPROC=$(nproc)
 MAKE="make -j$NPROC"

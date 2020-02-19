@@ -20,7 +20,7 @@ const Cinfo * Variable::initCinfo()
     static DestFinfo input(
         "input",
         "Handles incoming variable value.",
-        new EpFunc1< Variable, double >( &Variable::epSetValue )
+        new EpFunc1< Variable, double >( &Variable::setValue )
         );
 
     static Finfo * variableFinfos[] =
@@ -51,10 +51,3 @@ const Cinfo * Variable::initCinfo()
 }
 
 static const Cinfo * variableCinfo = Variable::initCinfo();
-
-// This imitates Synapse::addMsgCallback
-// but does not seem to be used anywhere
-// - Subha, Tue Sep  9 19:37:11 IST 2014
-void Variable::addMsgCallback(const Eref& e, const string& finfoName, ObjId msg, unsigned int msgLookup)
-{
-}

@@ -60,8 +60,7 @@ public:
     /*-----------------------------------------------------------------------------
      *  Set/Get
      *-----------------------------------------------------------------------------*/
-    Parser::symbol_table_t  GetSymbolTable( ) const;
-    Parser::expression_t    GetExpression( ) const;
+    Parser::symbol_table_t& GetSymbolTable( ) const;
 
     void SetSymbolTable( Parser::symbol_table_t tab );
 
@@ -118,11 +117,9 @@ public:
     Parser::varmap_type const_map_;
 
     /* Map to variable names and pointer to their values. */
-    map<string, double*> refs_;
+    // map<string, double*> refs_;
 
-    /* Parser related */
-    Parser::symbol_table_t symbol_table_;
-    Parser::expression_t expression_;     /* expression type */
+    Parser::expression_t* expression_;     /* expression type */
     size_t num_user_defined_funcs_ = 0;
 
     bool symbol_tables_registered_;

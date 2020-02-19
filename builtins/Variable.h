@@ -22,27 +22,23 @@ class Variable
 
 public:
 
-    Variable(): name_(""), value_(0.0)
+    Variable(): value_(0.0)
     {
     };
 
-    Variable(const string& name): name_(name), value_(0.0)
-    {
-    };
-
-    Variable(const Variable& rhs): name_(rhs.name_), value_(rhs.value_)
+    Variable(const Variable& rhs): value_(rhs.value_)
     {
         ;
     }
 
-    virtual ~Variable() {};
+    ~Variable() {};
 
     void setValue(double v)
     {
         value_ = v;
     }
 
-    virtual void epSetValue(const Eref & e, double v)
+    void setValue(const Eref & e, double v)
     {
         value_ = v;
     }
@@ -57,17 +53,9 @@ public:
         return &value_;
     }
 
-    std::string getName() const
-    {
-        return name_;
-    }
-
-    void addMsgCallback(const Eref& e, const string& finfoName, ObjId msg, unsigned int msgLookup);
-
     static const Cinfo * initCinfo();
 
 private:
-    std::string name_;
     double value_;
 };
 

@@ -486,7 +486,7 @@ pref_curv=0.055
 radmax=max(radv)
 if count%100==0:
   print("Sum of IRSp53s", end=': ')
-  print(sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_dimer').n)+sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_a').n)+sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_m').n)+sum(moose.vec('/model/chem/dend/IRSpGr/curv_IRSp53').n),sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_m').n),sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_a').n),sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_dimer').n),sum(moose.vec('/model/chem/dend/IRSpGr/curv_IRSp53').n), end=', ')
+  print(sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_dimer').n)+sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_a').n)+sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_m').n)+sum(moose.vec('/model/chem/dend/IRSpGr/curv_IRSp53').n),sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_m').n),sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_a').n),sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_dimer').n),sum(moose.vec('/model/chem/dend/IRSpGr/curv_IRSp53').n))
   sys.stdout.flush()
 """
     outputTab = moose.Table('/model/output')

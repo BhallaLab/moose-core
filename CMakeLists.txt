@@ -396,6 +396,7 @@ foreach(_test_script ${PY_TEST_SCRIPTS} )
     get_filename_component(_test_name ${_test_script} NAME_WE)
     add_test(NAME ${_test_name}
         COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
+        CONFIGURATIONS Debug Release
         WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
         )
      set_tests_properties(${_test_name}
