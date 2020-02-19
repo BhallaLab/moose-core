@@ -84,7 +84,7 @@ public:
     static void findAllVars( const string& expr, set<string>& vars, const string& start );
     static void findXsYs(const string& expr, set<string>& xs, set<string>& ys);
 
-    void LinkVariables(vector<Variable*>& xs_, vector<double>& ys_, double* t);
+    void LinkVariables(vector<Variable*>& xs_, vector<double*>& ys_, double* t);
 
     double Eval( ) const;
     double Derivative(const string& name) const;

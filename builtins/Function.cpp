@@ -114,9 +114,9 @@ const Cinfo * Function::initCinfo()
     static ElementValueFinfo< Function, string > expr(
         "expr",
         "Mathematical expression defining the function. The underlying parser\n"
-        "is muParser. In addition to the available functions and operators  from\n"
-        "muParser, some more functions are added.\n"
-        "\nFunctions\n"
+        "is exprtk (https://archive.codeplex.com/?p=exprtk) . In addition to the\n"
+        "available functions and operators  from exprtk, a few functions are added.\n"
+        "\nMajor Functions\n"
         "Name        args    explanation\n"
         "sin         1       sine function\n"
         "cos         1       cosine function\n"
@@ -133,11 +133,10 @@ const Cinfo * Function::initCinfo()
         "log2        1       logarithm to the base 2\n"
         "log10       1       logarithm to the base 10\n"
         "log         1       logarithm to the base 10\n"
-        "ln  	     1       logarithm to base e (2.71828...)\n"
+        "ln          1       logarithm to base e (2.71828...)\n"
         "exp         1       e raised to the power of x\n"
         "sqrt        1       square root of a value\n"
         "sign        1       sign function -1 if x<0; 1 if x>0\n"
-        "rint        1       round to nearest integer\n"
         "abs         1       absolute value\n"
         "min         var.    min of all arguments\n"
         "max         var.    max of all arguments\n"
@@ -150,24 +149,26 @@ const Cinfo * Function::initCinfo()
         "                    if seed = -1, a 'random' seed is created using either\n"
         "                    by random_device or by reading system clock\n"
         "\nOperators\n"
-        "Op  meaning         		priority\n"
-        "=   assignment     		-1\n"
-        "&&  logical and     		1\n"
-        "||  logical or      		2\n"
-        "<=  less or equal   		4\n"
-        ">=  greater or equal  		4\n"
-        "!=  not equal         		4\n"
-        "==  equal   			4\n"
-        ">   greater than    		4\n"
-        "<   less than       		4\n"
-        "+   addition        		5\n"
-        "-   subtraction     		5\n"
-        "*   multiplication  		6\n"
-        "/   division        		6\n"
-        "^   raise x to the power of y  7\n"
-        "%   floating point modulo      7\n"
+        "Op  meaning                      priority\n"
+        "=   assignment                     -1\n"
+        "&&,and  logical and                1\n"
+        "||,or  logical or                  2\n"
+        "<=  less or equal                  4\n"
+        ">=  greater or equal               4\n"
+        "!=,not  not equal                  4\n"
+        "==  equal                          4\n"
+        ">   greater than                   4\n"
+        "<   less than                      4\n"
+        "+   addition                       5\n"
+        "-   subtraction                    5\n"
+        "*   multiplication                 6\n"
+        "/   division                       6\n"
+        "^   raise x to the power of y      7\n"
+        "%   floating point modulo          7\n"
         "\n"
-        "?:  if then else operator   	C++ style syntax\n",
+        "?:  if then else operator          C++ style syntax\n"
+        "\n\n"
+        "For more information see https://archive.codeplex.com/?p=exprtk \n",
         &Function::setExpr,
         &Function::getExpr
     );
@@ -429,9 +430,9 @@ void Function::addVariable(const string& name)
         {
             // Equality with index because we cound from 0.
             for (size_t i = ys_.size(); i <= (size_t) index; i++)
-                ys_.push_back(0.0);
+                ys_.push_back( new double(0.0));
         }
-        parser_->DefineVar(name, &(ys_[index]));
+        parser_->DefineVar(name, ys_[index]);
     }
     else if (name == "t")
         parser_->DefineVar("t", &t_);
@@ -576,7 +577,7 @@ vector< double > Function::getY() const
     vector < double > ret(ys_.size());
     for (unsigned int ii = 0; ii < ret.size(); ++ii)
     {
-        ret[ii] = ys_[ii];
+        ret[ii] = *ys_[ii];
     }
     return ret;
 }
@@ -663,7 +664,7 @@ void Function::process(const Eref &e, ProcPtr p)
 #endif
 
     for (size_t ii = 0; (ii < databuf.size()) && (ii < ys_.size()); ++ii)
-        ys_[ii] = databuf[ii];
+        *ys_[ii] = databuf[ii];
 
     if ( useTrigger_ && value_ < TriggerThreshold )
     {

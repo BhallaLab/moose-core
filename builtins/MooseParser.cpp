@@ -279,13 +279,13 @@ const string MooseParser::GetExpr( ) const
     return expr_;
 }
 
-void MooseParser::LinkVariables(vector<Variable*>& xs, vector<double>& ys, double* t)
+void MooseParser::LinkVariables(vector<Variable*>& xs, vector<double*>& ys, double* t)
 {
     for(auto x : xs)
         DefineVar( x->getName(), x->ref());
 
     for (size_t i = 0; i < ys.size(); i++) 
-        DefineVar('y'+to_string(i), &ys[i]);
+        DefineVar('y'+to_string(i), ys[i]);
 
     DefineVar("t", t);
 }

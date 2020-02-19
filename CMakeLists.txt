@@ -22,6 +22,11 @@ if(NOT PYTHONINTERP_FOUND)
   find_package(PythonInterp 2.7)
 endif()
 
+# Disable rpath on OSX.
+if(APPLE)
+  set(CMAKE_MACOSX_RPATH OFF)
+endif()
+
 
 # NOTE: version should be changed in setup.py file.
 # If moose version is not given, use setup.py file to get the default version.

@@ -74,8 +74,9 @@ def test_var_order():
         moose.setClock(ii, dt)
     moose.reinit()
     moose.start(simtime)
-    expected = [0, 1.1, 2.201, 3.302, 4.403, 5.504]
+    expected = [0, 1.1, 2.211, 3.322, 4.433, 5.544]
     print('sum: ', x0.vector + x1.vector + y0.vector  + y1.vector)
+    print('got', z1.vector)
     assert np.allclose(z1.vector, expected), "Excepted %s, got %s" % (expected, z1.vector )
     print( 'Passed order vars' )
 
