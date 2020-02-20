@@ -85,7 +85,8 @@ public:
 
     void LinkVariables(vector<Variable*>& xs_, vector<double*>& ys_, double* t);
 
-    double Eval( ) const;
+    double Eval(bool check=false)
+        const;
     double Derivative(const string& name) const;
 
     double Diff( const double a, const double b) const;

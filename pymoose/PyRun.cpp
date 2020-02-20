@@ -271,7 +271,7 @@ void PyRun::run(const Eref&e, string statement)
 void PyRun::process(const Eref & e, ProcPtr p)
 {
     // Make sure the get the GIL. Ksolve/Gsolve can be multithreaded.
-    // PyGILState_STATE gstate = PyGILState_Ensure();
+    PyGILState_STATE gstate = PyGILState_Ensure();
 
     // PyRun_String(runstr_.c_str(), 0, globals_, locals_);
     // PyRun_SimpleString(runstr_.c_str());
@@ -300,7 +300,7 @@ void PyRun::process(const Eref & e, ProcPtr p)
             outputOut()->send(e, output);
     }
 
-    // PyGILState_Release( gstate );
+    PyGILState_Release( gstate );
 }
 
 /**

@@ -17,6 +17,7 @@ class FuncTerm
 public:
     FuncTerm();
     ~FuncTerm();
+
     /**
      * This computes the value. The time t is an argument needed by
      * some functions.
@@ -41,14 +42,9 @@ public:
     double getVolScale() const;
 
 private:
-
-    unique_ptr<double[]> args_;
-
     // Look up reactants in the S vec.
     vector< unsigned int > reactantIndex_;
-    moose::MooseParser parser_;
 
-    string expr_;
     /**
      * Scale factor to account for pool volume if we are assigning conc
      * rather than N. Note that this conc will not be further updated
@@ -56,6 +52,11 @@ private:
      */
     double volScale_;
     unsigned int target_; /// Index of the entity to be updated by Func
+
+    unique_ptr<double[]> args_;
+
+    string expr_;
+    unique_ptr<moose::MooseParser> parser_;
 };
 
 #endif // _FUNC_TERM_H

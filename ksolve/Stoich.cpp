@@ -2090,9 +2090,8 @@ const vector< Id >& Stoich::offSolverPoolMap( Id compt ) const
 // s is the array of pools, S_[meshIndex][0]
 void Stoich::updateFuncs( double* s, double t ) const
 {
-    for ( auto i = funcs_.cbegin(); i != funcs_.end(); ++i )
-        if ( *i )
-            (*i)->evalPool( s, t );
+    for (auto i = funcs_.cbegin(); i != funcs_.end(); ++i)
+        if(*i) (*i)->evalPool( s, t );
 }
 
 /**

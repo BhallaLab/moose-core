@@ -48,7 +48,6 @@
 
 #include <Python.h>
 #include <structmember.h> // This defines the type id macros like T_STRING
-#include "../utility/simple_logger.hpp"
 
 #include <iostream>
 #include <typeinfo>
@@ -510,13 +509,9 @@ long moose_Id_hash(_Id * self)
 }
 
 
-// 2011-03-23 15:14:11 (+0530)
-// 2011-03-26 17:02:19 (+0530)
-//
-// 2011-03-26 19:14:34 (+0530) - This IS UGLY! Destroying one
+// This IS UGLY! Destroying one
 // ObjId will destroy the containing element and invalidate all
 // the other ObjId with the same Id.
-// 2011-03-28 13:44:49 (+0530)
 PyObject * deleteObjId(ObjId oid)
 {
 #ifndef NDEBUG

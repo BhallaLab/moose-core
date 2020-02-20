@@ -370,8 +370,6 @@ void Function::showError(moose::Parser::exception_type &e) const
 }
 
 /**
-   Call-back to add variables to parser automatically.
-
    We use different storage for constants and variables. Variables are
    stored in a vector of Variable object pointers. They must have the
    name x{index} where index is any non-negative integer. Note that
@@ -383,10 +381,6 @@ void Function::showError(moose::Parser::exception_type &e) const
    If the name starts with anything other than `x` or `y`, then it is taken
    to be a named constant, which must be set before any expression or
    variables and error is thrown.
-
-   NOTE: this is called not on setting expression but on first attempt
-   at evaluation of the same, i.e. when you access `value` of the
-   Function object.
  */
 void Function::addVariable(const string& name)
 {

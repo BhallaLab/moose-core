@@ -609,8 +609,7 @@ void Dsolve::setStoich( Id id )
             // assert( poolIndex < pools_.size() );
             Id pid( i + poolMapStart_ );
             assert( pid.element()->cinfo()->isA( "PoolBase" ) );
-            PoolBase* pb =
-                reinterpret_cast< PoolBase* >( pid.eref().data());
+            PoolBase* pb = reinterpret_cast< PoolBase* >( pid.eref().data());
             double diffConst = pb->getDiffConst( pid.eref() );
             double motorConst = pb->getMotorConst( pid.eref() );
             pools_[ poolIndex ].setId( pid.value() );

@@ -516,7 +516,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     if ( isBuilt_ == false )
         return;
 
-    t0_ = high_resolution_clock::now();
+    //t0_ = high_resolution_clock::now();
 
     // First, handle incoming diffusion values, update S with those.
     if ( dsolvePtr_ )
@@ -537,7 +537,8 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     {
         if( numThreads_ > 1 )
         {
-            cerr << "Warn: Not enough voxels or threads. Reverting to serial mode. " << endl;
+            cerr << "Warn: Not enough voxels for multithreading. " 
+                << "Reverting to serial mode. " << endl;
             numThreads_ = 1;
         }
 
@@ -562,7 +563,7 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         size_t tot = 0;
         for (auto &v : vecFutures )
             tot += v.get();
-        assert( tot >= pools_.size() );
+        assert( tot == pools_.size() );
 
 #else
         /*-----------------------------------------------------------------------------
@@ -599,8 +600,8 @@ void Ksolve::process( const Eref& e, ProcPtr p )
         dsolvePtr_->updateJunctions( p->dt ); 
     }
 
-    t1_ = high_resolution_clock::now();
-    moose::addSolverProf( "Ksolve", duration_cast<duration<double>> (t1_ - t0_ ).count(), 1 );
+    //t1_ = high_resolution_clock::now();
+    //moose::addSolverProf( "Ksolve", duration_cast<duration<double>> (t1_ - t0_ ).count(), 1 );
 }
 
 void Ksolve::advance_pool( const size_t i, ProcPtr p )
@@ -613,8 +614,8 @@ size_t Ksolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )
     size_t tot = 0;
     for (size_t i = begin; i < std::min(end, pools_.size() ); i++)
     {
-        tot += 1;
         pools_[i].advance( p );
+        tot += 1;
     }
     return tot;
 }
@@ -668,10 +669,8 @@ void Ksolve::updateRateTerms( unsigned int index )
 {
     if ( index == ~0U )
     {
-        // unsigned int numCrossRates = stoichPtr_->getNumRates() - stoichPtr_->getNumCoreRates();
         for ( unsigned int i = 0 ; i < pools_.size(); ++i )
         {
-            // pools_[i].resetXreacScale( numCrossRates );
             pools_[i].updateAllRateTerms( stoichPtr_->getRateTerms(),
                                           stoichPtr_->getNumCoreRates() );
         }

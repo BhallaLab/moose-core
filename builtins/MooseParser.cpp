@@ -1,11 +1,10 @@
 /***
- *    Description:  Moose Parser class.
+ *    Description:  Moose Parser class, wraps exprtk.
  *
  *        Created:  2018-08-25
 
  *         Author:  Dilawar Singh <dilawars@ncbs.res.in>
  *   Organization:  NCBS Bangalore
- *        License:  MIT License
  */
 
 #include <vector>
@@ -28,7 +27,6 @@ MooseParser::MooseParser() :
     expression_(new  moose::Parser::expression_t())
     , symbol_tables_registered_(false)
 {
-    /* Parser related */
     Parser::symbol_table_t symbol_table;
 
     // And add user defined functions.
@@ -47,12 +45,6 @@ MooseParser::MooseParser() :
 
 MooseParser::~MooseParser()
 {
-    // Nothing to do here.
-    // Do not clean symbol table or expression here at all. ExprTK takes care
-    // of them in its destructor. 
-    // Other variables are cleaned up by Function.
-    if(expression_)
-        delete expression_;
 }
 
 /*-----------------------------------------------------------------------------
@@ -101,6 +93,22 @@ Parser::symbol_table_t& MooseParser::GetSymbolTable( ) const
     return expression_->get_symbol_table();
 }
 
+double MooseParser::GetVarValue(const string& name) const
+{
+    return GetSymbolTable().get_variable(name)->value();
+}
+
+void MooseParser::findAllVars( const string& expr, set<string>& vars, const string& pattern)
+{
+    const regex xpat(pattern);
+    smatch sm;
+    string temp(expr);
+    while(regex_search(temp, sm, xpat))
+    {
+        vars.insert(sm.str());
+        temp = sm.suffix();
+    }
+}
 
 /*-----------------------------------------------------------------------------
  *  Other function.
@@ -111,11 +119,6 @@ bool MooseParser::DefineVar( const string varName, double* const val)
     if( GetSymbolTable().is_variable(varName))
         GetSymbolTable().remove_variable(varName, false);
     return GetSymbolTable().add_variable(varName, *val, false);
-}
-
-double MooseParser::GetVarValue(const string& name) const
-{
-    return GetSymbolTable().get_variable(name)->value();
 }
 
 void MooseParser::DefineConst( const string& constName, const double value )
@@ -132,17 +135,6 @@ void MooseParser::DefineFun1( const string& funcName, double (&func)(double) )
     GetSymbolTable().add_function( funcName, func );
 }
 
-void MooseParser::findAllVars( const string& expr, set<string>& vars, const string& pattern)
-{
-    const regex xpat(pattern);
-    smatch sm;
-    string temp(expr);
-    while(regex_search(temp, sm, xpat))
-    {
-        vars.insert(sm.str());
-        temp = sm.suffix();
-    }
-}
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -250,11 +242,27 @@ double MooseParser::Derivative(const string& name) const
     return exprtk::derivative(*expression_, name);
 }
 
-double MooseParser::Eval( ) const
+double MooseParser::Eval(bool check) const
 {
     if( expr_.empty())
         return 0.0;
-    return expression_->value();
+    double v = expression_->value();
+    if(check)
+    {
+        if(! std::isfinite(v)) 
+        {
+            stringstream ss;
+            auto symbTable = GetSymbolTable();
+            vector<std::pair<string, double>> vars;
+            auto n = symbTable.get_variable_list(vars);
+            ss << "| Vars (" << n << ") ";
+            for (auto i : vars)
+                ss << i.first << "=" << i.second << ", ";
+            cerr << "Warn: Expr: " << expr_ << "-> " << v 
+                << endl << ss.str() << endl;
+        }
+    }
+    return v;
 }
 
 

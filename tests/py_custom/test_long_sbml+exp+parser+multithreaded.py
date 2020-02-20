@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
+from __future__ import print_function, division
 
 ################################################################
 # This program is part of 'MOOSE', the
@@ -17,7 +17,7 @@ from __future__ import print_function
 # Tension modification
 # Modification logs:
 #     Model is developed by Vinu Verghese.
-#     Modified by Dilawar Singh <dilawar.s.rajput@gmail.com> for testting.
+#     Modified by Dilawar Singh <dilawar.s.rajput@gmail.com> for testing.
 
 import os
 import numpy as np
@@ -72,7 +72,7 @@ def computeTP(t, distS, SourceC):
     conv = moose.element('/model/chem/dend/conv')
     w = len(conv.vec.n)
     h = w
-    v2d = [[0 for x in range(w)] for y in range(h)]
+    v2d = [[0.0 for x in range(w)] for y in range(h)]
     mm = moose.vec('/model/chem/dend/mesh')
     diffL = moose.element('/model/chem/dend').diffLength
     print(conv.name, conv.vec[0].nInit, 'diff lenght %s' % diffL)
@@ -82,10 +82,10 @@ def computeTP(t, distS, SourceC):
     for j in listL:
         for i in range(len(conv.vec.n)):
             for k in range(len(conv.vec.conc)):
-                v2d[i][k] = diffL**2 * (
+                v2d[i][k] = diffL**2.0 * (
                     SourceC /
-                    (4 * np.pi * j[1] * np.sqrt(extraDiff * extraDiff))
-                ) * np.exp(-(mm[i].Coordinates[0]**2) /
+                    (4.0 * np.pi * j[1] * np.sqrt(extraDiff * extraDiff))
+                ) * np.exp(-(mm[i].Coordinates[0]**2.0) /
                            (4 * extraDiff * j[1]) - (mm[k].Coordinates[0]**2) /
                            (4 * extraDiff * j[1]))
     tempRec = []
@@ -488,7 +488,7 @@ temp_sort=moose.vec('/model/chem/dend/IRSpGr/sort_func').n
 pref_curv=0.055
 radmax=max(radv)
 if count%100==0:
-  print("Sum of IRSp53s", end=': ')
+  print("Sum of IRSp53s")
   print(sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_dimer').n)+sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_a').n)+sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_m').n)+sum(moose.vec('/model/chem/dend/IRSpGr/curv_IRSp53').n),sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_m').n),sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_a').n),sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_dimer').n),sum(moose.vec('/model/chem/dend/IRSpGr/curv_IRSp53').n))
   sys.stdout.flush()
 """

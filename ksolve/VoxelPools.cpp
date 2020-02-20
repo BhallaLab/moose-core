@@ -133,9 +133,6 @@ void VoxelPools::advance( const ProcInfo* p )
 
     /**
      * @brief Default step size for fixed size iterator.
-     * FIXME/TODO: I am not sure if this is a right value to pick by default. May be
-     * user should provide the stepping size when using fixed dt. This feature
-     * can be incredibly useful on large system.
      */
 
     // Variout stepper times are listed here:
@@ -239,10 +236,12 @@ void VoxelPools::updateAllRateTerms( const vector< RateTerm* >& rates,
     for ( unsigned int i = 0; i < rates_.size(); ++i )
         delete( rates_[i] );
 
-    rates_.resize( rates.size() );
+    rates_.resize(rates.size());
 
     for ( unsigned int i = 0; i < numCoreRates; ++i )
+    {
         rates_[i] = rates[i]->copyWithVolScaling( getVolume(), 1, 1 );
+    }
 
     for ( unsigned int i = numCoreRates; i < rates.size(); ++i )
     {
@@ -288,15 +287,16 @@ void VoxelPools::updateRates( const double* s, double* yprime ) const
     assert( N.nColumns() == rates_.size() );
 
     for ( auto i = rates_.cbegin(); i != rates_.end(); i++)
-    {
         *j++ = (**i)( s );
-        assert( !std::isnan( *( j-1 ) ) );
-    }
-
     for (unsigned int i = 0; i < totVar; ++i)
-        *yprime++ = N.computeRowRate( i, v );
+    {
+        auto rate = N.computeRowRate( i, v );
+        assert(std::isfinite(rate));
+        *yprime++ = rate;
+    }
     for (unsigned int i = 0; i < totInvar ; ++i)
         *yprime++ = 0.0;
+
 }
 
 /**
@@ -304,21 +304,21 @@ void VoxelPools::updateRates( const double* s, double* yprime ) const
  * This is a utility function for programs like SteadyState that need
  * to analyze velocity.
  */
-void VoxelPools::updateReacVelocities(
-    const double* s, vector< double >& v ) const
+void VoxelPools::updateReacVelocities(const double* s, vector<double>& v) const
 {
     const KinSparseMatrix& N = stoichPtr_->getStoichiometryMatrix();
     assert( N.nColumns() == rates_.size() );
 
-    vector< RateTerm* >::const_iterator i;
     v.clear();
     v.resize( rates_.size(), 0.0 );
+
+    vector< RateTerm* >::const_iterator i;
     vector< double >::iterator j = v.begin();
 
     for ( i = rates_.begin(); i != rates_.end(); i++)
     {
         *j++ = (**i)( s );
-        assert( !std::isnan( *( j-1 ) ) );
+        assert(std::isfinite(*(j-1)));
     }
 }
 

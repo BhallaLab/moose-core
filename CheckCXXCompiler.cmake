@@ -1,3 +1,6 @@
+# Compiler check.
+# Must support c++11
+# If python2 is supported then we can not use c++17. 
 if(COMPILER_IS_TESTED)
     return()
 endif()
