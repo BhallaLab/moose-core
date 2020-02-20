@@ -36,8 +36,10 @@ except Exception as e:
     quit(0)
 
 sdir_ = os.path.dirname(os.path.realpath(__file__))
-args_ = ['', 1e-6, 0.018, 1, 20e-12, 1e-12, 100, 102, 105, 4, 20, 10, 1.0
-            , 0.5, 0.05, 0.0, 0.0055, 0.1e-14] 
+args_ = [
+    '', 1e-6, 0.018, 1, 20e-12, 1e-12, 100, 102, 105, 4, 20, 10, 1.0, 0.5,
+    0.05, 0.0, 0.0055, 0.1e-14
+]
 
 PI = 3.141592653
 scaling_ = 10.0
@@ -62,6 +64,7 @@ spineSizeDistrib = 0.5
 spineAngle = np.pi / 2.0
 spineAngleDistrib = 0.0
 numDendSegments = 200
+
 
 def computeTP(t, distS, SourceC):
     print("[INFO ] Calling computeTP", end=' ....')
@@ -190,7 +193,8 @@ def makeDendProto(name):
 def makeChemProto(name='hydra'):
     moose.Neutral('/library/')
     meshName = '/library/' + name
-    moose.SBML.mooseReadSBML(os.path.join(sdir_, '..', 'data', 'c_m.xml'), meshName)
+    moose.SBML.mooseReadSBML(os.path.join(sdir_, '..', 'data', 'c_m.xml'),
+                             meshName)
     Rad = moose.element('/library/hydra/dend/IRSpGr/Rad')
 
     I_C = moose.element(meshName + '/dend/IRSpGr/IRSp53')
@@ -265,8 +269,8 @@ def makeChemProto(name='hydra'):
         args_[14]) + "/(x0*1e9))-(1/(2.0*(x0*1e9)*(x0*1e9))))))"
 
     Radfun.expr = "sqrt(((45+12)*4*1e-18)/(2*(x2-0.08*(ln((((1.0*x0+1.0*x1)/(2*3.14*(0.45*0.05)))*1e-6*54))))))*((3*" + str(
-        float(args_[2])) + "*x3*(x0+1.0*x1)^2)/(1.+3*" + str(
-            float(args_[2])) + "*x3*(x0+1.0*x1)^2))"
+        float(args_[2])) + "*x3*(x0+1.0*x1)^2)/(1.+3*" + str(float(
+            args_[2])) + "*x3*(x0+1.0*x1)^2))"
 
     mod_sort.Kf = 0.
     mod_sort.Kb = 0.
@@ -391,9 +395,8 @@ def makeModel():
         stimList=[
             [
                 'dend#', '1.', 'NMDA', 'periodicsyn',
-                str(args_[13]) + '*(t>0 && t<60)+' + str(args_[13]) +
-                '*(t>' + str(args_[15]) + ' && t<(' + str(args_[15]) +
-                '+60))'
+                str(args_[13]) + '*(t>0 && t<60)+' + str(args_[13]) + '*(t>' +
+                str(args_[15]) + ' && t<(' + str(args_[15]) + '+60))'
             ],
         ],
         adaptorList=[['Ca_conc', 'Ca', 'dend/conv', 'conc', 0.00008, 20]],
@@ -424,7 +427,7 @@ def main():
     """
     t0 = time.time()
     makeModel()
-    print("[INFO ] Took %f sec." % (time.time()-t0))
+    print("[INFO ] Took %f sec." % (time.time() - t0))
     sys.stdout.flush()
     for i in range(11, 18):
         moose.setClock(i, 0.0025)
@@ -538,7 +541,7 @@ if count%100==0:
     allres = []
     t0 = time.time()
     for i in range(3):
-        print("[INFO ] Simulation step %d/3" % (1+i))
+        print("[INFO ] Simulation step %d/3" % (1 + i))
         moose.start(0.5)
         res = sum(moose.vec('/model/chem/dend/IRSpGr/IRSp53_dimer').n) + sum(
             moose.vec('/model/chem/dend/IRSpGr/IRSp53_a').n
@@ -550,19 +553,43 @@ if count%100==0:
                     moose.vec('/model/chem/dend/IRSpGr/curv_IRSp53').n)
         allres.append(res)
 
-    print("[INFO ] Time talke %f s" % (time.time() - t0))
+    print("== Time taken %g s" % (time.time() - t0))
 
-    expected = [
-            (28520.566609113474, 7.148023126603051e-10
-                , 1.572239573672028e-08, 28520.566609097037, 0.0)
-            , (28520.56660909553, 1.1642403685206266e-07
-                , 1.1977428714415305e-06, 28520.566607781366, 0.0)
-            , (28520.56660907723, 0.8696260035955732
-                , 7.770359837334404 , 28511.9266232363, 0.0)
-            ] 
-    print('EXPECTED', expected)
-    print('RES', allres)
-    assert np.isclose(expected, allres).all()
+    # These values are created by GSL based solver. Boost solvers generates
+    # slightly different values.
+    gslExpected = [(28520.566609113474, 7.148023126603051e-10,
+                    1.572239573672028e-08, 28520.566609097037, 0.0),
+                   (28520.56660909553, 1.1642403685206266e-07,
+                    1.1977428714415305e-06, 28520.566607781366, 0.0),
+                   (28520.56660907723, 0.8696260035955732, 7.770359837334404,
+                    28511.9266232363, 0.0)]
+    boostExpected = [(28520.566609114358, 6.767220971967792e-10,
+                      1.4836490693639741e-08, 28520.566609098845, 0.0),
+                     (28520.566609095247, 1.1011852351643147e-07,
+                      1.135790489305351e-06, 28520.566607849338, 0.0),
+                     (28520.566609076508, 0.8503592534168581,
+                      7.628999192709499, 28512.087250630382, 0.0)]
+
+    gslExpected = np.array(gslExpected)
+    boostExpected = np.array(boostExpected)
+    allres = np.array(allres)
+
+    print('BOOST  :', boostExpected)
+    print('Result :', allres)
+    # Compare the last value. When using Boost based solvers these numbers can
+    # differ a bit but not more than 1%.
+    if not np.allclose(gslExpected, allres, rtol=1e-3, atol=1e-3):
+        print("[INFO ]  results did not match GSL.")
+        print('GSL    :', gslExpected)
+        print('Result :', allres)
+        print('ERROR  :', np.array(allres) - np.array(gslExpected))
+        if not np.allclose(boostExpected, allres, rtol=1e-3, atol=1e-3):
+            print("[INFO ]  results did not match BOOST.")
+            print('BOOST  :', boostExpected)
+            print('Result :', allres)
+            print('ERROR  :', np.array(allres) - np.array(boostExpected))
+            raise AssertionError("The results does not match with either GSL "
+                    " or Boost solvers.")
 
 if __name__ == '__main__':
     main()

@@ -20,7 +20,6 @@
 set -o nounset                              # Treat unset variables as an error
 set -e
 
-# NOTE: On travis, don't enable -j`nproc` option. It may not compile properly.
 NPROC=$(nproc)
 (
     # Make sure not to pick up python from /opt.
@@ -34,17 +33,16 @@ NPROC=$(nproc)
     $PYTHON3 -m pip install pyneuroml --user
 
     mkdir -p _GSL_BUILD && cd _GSL_BUILD \
-        && cmake -DDEBUG=ON \
-        -DPYTHON_EXECUTABLE=$PYTHON3 \
+        && cmake -DPYTHON_EXECUTABLE=$PYTHON3 \
         ..
     make pylint -j$NPROC
-    make -j$NPROC && ctest --output-on-failure -$NPROC
+    make -j$NPROC && MOOSE_NUM_THREAD=$NPROC ctest --output-on-failure -j$NPROC
 
     cd .. # Now with boost.
     mkdir -p _BOOST_BUILD && cd _BOOST_BUILD \
-        && cmake -DWITH_BOOST_ODE=ON -DDEBUG=ON \
+        && cmake -DWITH_BOOST_ODE=ON \
         -DPYTHON_EXECUTABLE=`which python3` ..
 
-    make -j$NPROC && ctest -j$NPROC --output-on-failure 
+    make -j$NPROC && MOOSE_NUM_THREAD=$NPROC ctest -j$NPROC --output-on-failure 
 )
 set +e

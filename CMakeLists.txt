@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(PyMOOSE)
 
 # cmake related macros.
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 include(FindPythonModule)
@@ -32,7 +32,7 @@ endif()
 # If moose version is not given, use setup.py file to get the default version.
 if(NOT VERSION_MOOSE)
     execute_process(COMMAND ${PYTHON_EXECUTABLE} setup.py --version
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         OUTPUT_VARIABLE VERSION_MOOSE
         OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()
@@ -386,7 +386,7 @@ endif()
 
 # PyMOOSE tests. These tests complete in reasonable time and should run by
 # default.
-set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/py_fast)
+set(PYMOOSE_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/py_regular)
 
 # Collect all python script in tests folder and run them.
 file(GLOB PY_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.py" )
@@ -396,7 +396,6 @@ foreach(_test_script ${PY_TEST_SCRIPTS} )
     get_filename_component(_test_name ${_test_script} NAME_WE)
     add_test(NAME ${_test_name}
         COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
-        CONFIGURATIONS Debug Release
         WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
         )
      set_tests_properties(${_test_name}
@@ -406,11 +405,10 @@ endforeach( )
 
 # CUSTOM TESTS. These tests may require some extra settings.
 # Run python tests. These are fast tests.
-set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/py_custom)
+set(PYMOOSE_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/py_custom)
 add_test(NAME test_long_sbml_multi
     COMMAND ${PYTHON_EXECUTABLE} ${PYMOOSE_TEST_DIRECTORY}/test_long_sbml+exp+parser+multithreaded.py
     WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
-    CONFIGURATIONS Release # In debug mode, this will take a lot of time.
     )
 set_tests_properties(test_long_sbml_multi PROPERTIES 
     ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python;MOOSE_NUM_THREADS=4")
@@ -422,7 +420,7 @@ foreach( _test_script ${PY_ALPHA_TEST_SCRIPTS} )
     get_filename_component( _test_name ${_test_script} NAME_WE)
     add_test( NAME ${_test_name}
         COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
-	CONFIGURATIONS Devel
+        CONFIGURATIONS alpha
 	WORKING_DIRECTORY ${PYMOOSE_ALPHA_TEST_DIRECTORY}
         )
      set_tests_properties( ${_test_name}
@@ -477,7 +475,7 @@ set(PYMOOSE_SDIST_FILE ${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.tar.gz)
 add_custom_target(sdist
     COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --formats=gztar 
         -d ${CMAKE_BINARY_DIR}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Creating sdist ${PYMOOSE_SDIST_FILE}" 
     VERBATIM)
 
