@@ -7,10 +7,6 @@ project(PyMOOSE)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
-include(FindPythonModule)
-
-# Precompiled headers support. Till cmake 3.16 becomes available use cotire.
-include(cotire)
 
 # We find python executable here. Though mainly used inside pymoose. 
 # FIXME: When cmake 3.12 is widely available use the following:
@@ -114,7 +110,6 @@ endif()
 
 link_directories(${CMAKE_BINARY_DIR})
 add_library(libmoose SHARED basecode/main.cpp)
-cotire(libmoose)
 add_executable(moose.bin basecode/main.cpp)
 
 
@@ -387,11 +382,7 @@ endif()
 # PyMOOSE tests. These tests complete in reasonable time and should run by
 # default.
 set(PYMOOSE_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/py_regular)
-
-# Collect all python script in tests folder and run them.
 file(GLOB PY_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.py" )
-
-# Run python tests. These are fast tests.
 foreach(_test_script ${PY_TEST_SCRIPTS} )
     get_filename_component(_test_name ${_test_script} NAME_WE)
     add_test(NAME ${_test_name}
@@ -402,6 +393,21 @@ foreach(_test_script ${PY_TEST_SCRIPTS} )
          PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python"
         )
 endforeach( )
+
+# PYDOC tests. These tests require matplotlib.
+set(PYMOOSE_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/py_doctest) 
+file(GLOB PYDOC_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.py" )
+foreach(_test_script ${PYDOC_TEST_SCRIPTS})
+    get_filename_component(_test_name ${_test_script} NAME_WE)
+    add_test(NAME ${_test_name}
+        COMMAND ${PYTHON_EXECUTABLE} -m doctest ${_test_script}
+        WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+        )
+    set_tests_properties(${_test_name} PROPERTIES 
+        ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python;MOOSE_NUM_THREADS=4"
+        )
+endforeach()
+
 
 # CUSTOM TESTS. These tests may require some extra settings.
 # Run python tests. These are fast tests.

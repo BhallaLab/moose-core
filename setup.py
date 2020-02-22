@@ -177,7 +177,7 @@ setup(
         ]
     },
     # python2 specific version here as well.
-    install_requires=['numpy'],
+    install_requires=['numpy', 'matplotlib'],
     ext_modules=[CMakeExtension('dummy', optional=True)],
     cmdclass={'build_ext': build_ext, 'test': TestCommand},
 )

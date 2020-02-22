@@ -16,7 +16,7 @@
 ## latter in the former, including mapping entities like calcium and
 ## channel conductances, between them.
 ##########################################################################
-from __future__ import print_function, absolute_import 
+from __future__ import print_function, absolute_import, division
 
 import imp
 import os
@@ -189,7 +189,7 @@ class rdesigneur:
     def _printModelStats( self ):
         if not self.verbose:
             return
-        print("\nRdesigneur: Elec model has",
+        print("Rdesigneur: Elec model has",
             self.elecid.numCompartments, "compartments and",
             self.elecid.numSpines, "spines on",
             len( self.cellPortionElist ), "compartments.")
@@ -789,9 +789,9 @@ rdesigneur.rmoogli.updateMoogliViewer()
         moose.reinit()
         moose.start( runtime )
         if block:
-            self.display( len( self.moogNames ) + 1 )
+            self.display( len( self.moogNames ) + 1)
 
-    def display( self, startIndex = 0 ):
+    def display( self, startIndex = 0, block=True ):
         for i in self.plotNames:
             plt.figure( i[2] + startIndex )
             plt.title( i[1] )
@@ -817,7 +817,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
         if len( self.wavePlotNames ) > 0:
             for i in range( 3 ):
                 self.displayWavePlots()
-        plt.show( block=True )
+        plt.show( block=block )
         self._save()                                            
         
 
@@ -829,7 +829,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             if len( vtab ) < 2:
                 print( "Warning: Waveplot {} abandoned, only {} points".format( i[1], len( vtab ) ) )
                 continue
-            dFrame = len( vtab[0].vector ) / self.numWaveFrames
+            dFrame = len( vtab[0].vector ) // self.numWaveFrames
             if dFrame < 1:
                 dFrame = 1
             vpts = np.array( [ [k.vector[j] for j in range( 0, len( k.vector ), dFrame ) ] for k in vtab] ).T * i[3]
