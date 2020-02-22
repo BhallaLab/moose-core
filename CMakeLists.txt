@@ -409,15 +409,15 @@ foreach(_test_script ${PYDOC_TEST_SCRIPTS})
 endforeach()
 
 
-# CUSTOM TESTS. These tests may require some extra settings.
-# Run python tests. These are fast tests.
-set(PYMOOSE_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/py_custom)
-add_test(NAME test_long_sbml_multi
-    COMMAND ${PYTHON_EXECUTABLE} ${PYMOOSE_TEST_DIRECTORY}/test_long_sbml+exp+parser+multithreaded.py
-    WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
-    )
-set_tests_properties(test_long_sbml_multi PROPERTIES 
-    ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python;MOOSE_NUM_THREADS=4")
+## # CUSTOM TESTS. These tests may require some extra settings.
+## # Run python tests. These are fast tests.
+## set(PYMOOSE_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/py_custom)
+## add_test(NAME test_long_sbml_multi
+##     COMMAND ${PYTHON_EXECUTABLE} ${PYMOOSE_TEST_DIRECTORY}/test_long_sbml+exp+parser+multithreaded.py
+##     WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+##     )
+## set_tests_properties(test_long_sbml_multi PROPERTIES 
+##     ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python;MOOSE_NUM_THREADS=4")
 
 # Alpha tests. These should not run by default.
 set(MOOSE_ALPHA_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/alpha)
@@ -449,28 +449,6 @@ foreach(_test_script ${PY_ISSUES_SCRIPTS})
         )
 endforeach()
 
-# add pylint target.
-set(PYSCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python )
-file(GLOB_RECURSE PY_SCRIPTS  "python/*.py")
-add_custom_target(pylint)
-foreach(_py_script ${PY_SCRIPTS})
-    get_filename_component( _py_name ${_py_script} NAME_WE)
-    file( READ ${_py_script} pytext)
-    string(MD5 _md5 "${pytext}")
-    set(TGT_NAME "${_py_name}-${_md5}" )
-    set(PYLINT_OPTIONS --disable=no-member --disable=no-name-in-module
-            --disable=invalid-unary-operand-type
-            --disable=import-error
-            --disable=no-method-argument
-        )
-    add_custom_target( ${TGT_NAME}
-        COMMAND ${PYTHON_EXECUTABLE} -m pylint -E ${PYLINT_OPTIONS} ${_py_script}
-        COMMENT "Running pylint on ${_py_script}"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        )
-    add_dependencies(pylint ${TGT_NAME} )
-endforeach( )
-
 ############################ CPACK ######################################
 # This is not maintained anymore since packaging is done using OpenBuildService 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_cpack.cmake)
@@ -498,4 +476,36 @@ add_custom_target(upload DEPENDS sdist
         --user $ENV{PYMOOSE_PYPI_USER} --password $ENV{PYMOOSE_PYPI_PASSWORD}
         ${PYMOOSE_SDIST_FILE}
     COMMENT "Uploading source distribution to PyPI"
+    VERBATIM)
+
+####################### DEVELOPMENT ########################################
+
+# PYLINT target.
+set(PYSCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python)
+file(GLOB_RECURSE PY_SCRIPTS  "python/*.py")
+add_custom_target(pylint)
+foreach(_py_script ${PY_SCRIPTS})
+    get_filename_component( _py_name ${_py_script} NAME_WE)
+    file( READ ${_py_script} pytext)
+    string(MD5 _md5 "${pytext}")
+    set(TGT_NAME "${_py_name}-${_md5}" )
+    set(PYLINT_OPTIONS --disable=no-member --disable=no-name-in-module
+            --disable=invalid-unary-operand-type
+            --disable=import-error
+            --disable=no-method-argument
+        )
+    add_custom_target( ${TGT_NAME}
+        COMMAND ${PYTHON_EXECUTABLE} -m pylint -E ${PYLINT_OPTIONS} ${_py_script}
+        COMMENT "Running pylint on ${_py_script}"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        )
+    add_dependencies(pylint ${TGT_NAME} )
+endforeach( )
+
+# Replicate Travis-CI building using docker
+add_custom_target(travis
+    COMMAND docker build -t bhallalab/travis:latest
+        -f ${CMAKE_CURRENT_SOURCE_DIR}/devel/docker/travis/Dockerfile .
+    COMMENT "Replicating Travis-CI building using Docker."
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     VERBATIM)

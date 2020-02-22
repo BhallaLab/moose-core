@@ -225,8 +225,7 @@ const Cinfo* PoolBase::initCinfo()
 static const Cinfo* poolCinfo = PoolBase::initCinfo();
 
 //////////////////////////////////////////////////////////////
-PoolBase::PoolBase()
-    : concInit_( 0.0 )
+PoolBase::PoolBase() : concInit_( 0.0 )
 {;}
 
 PoolBase::~PoolBase()

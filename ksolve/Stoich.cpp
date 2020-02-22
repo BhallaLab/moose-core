@@ -193,16 +193,17 @@ const Cinfo* Stoich::initCinfo()
     // MsgDest Definitions
     //////////////////////////////////////////////////////////////
     static DestFinfo unzombify( "unzombify",
-                                "Restore all zombies to their native state",
-                                new OpFunc0< Stoich >( &Stoich::unZombifyModel )
-                              );
+            "Restore all zombies to their native state",
+            new OpFunc0< Stoich >( &Stoich::unZombifyModel )
+            );
+
     static DestFinfo scaleBufsAndRates( "scaleBufsAndRates",
-                                        "Args: voxel#, volRatio\n"
-                                        "Handles requests for runtime volume changes in the specified "
-                                        "voxel#, Used in adaptors changing spine vols.",
-                                        new OpFunc2< Stoich, unsigned int, double >(
-                                            &Stoich::scaleBufsAndRates )
-                                      );
+            "Args: voxel#, volRatio\n"
+            "Handles requests for runtime volume changes in the specified "
+            "voxel#, Used in adaptors changing spine vols.",
+            new OpFunc2< Stoich, unsigned int, double >(
+                &Stoich::scaleBufsAndRates )
+            );
 
     //////////////////////////////////////////////////////////////
     // SrcFinfo Definitions
@@ -274,6 +275,7 @@ Stoich::Stoich()
 Stoich::~Stoich()
 {
     unZombifyModel();
+
     // Note that we cannot do the unZombify here, because it is too
     // prone to problems with the ordering of the delete operations
     // relative to the zombies.

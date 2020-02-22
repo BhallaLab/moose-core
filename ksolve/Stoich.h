@@ -483,6 +483,7 @@ public:
     //////////////////////////////////////////////////////////////////
     static const unsigned int PoolIsNotOnSolver;
     static const Cinfo* initCinfo();
+
 private:
     /**
      * True if the stoich matrix is set up to handle only one-way

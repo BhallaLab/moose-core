@@ -1,20 +1,18 @@
-FROM ubuntu:xenial
+FROM ubuntu:bionic
 MAINTAINER Dilawar Singh <dilawars@ncbs.res.in>
 
 # Install dependencies.
-RUN apt update && apt install -y git cmake gcc g++ make vim-athena \
-        libboost-all-dev libgsl-dev \
+RUN apt update && apt install -y cmake gcc g++ make \
+        libboost-all-dev libgsl-dev libblas-dev \
+        python3-pip python-pip \
+        python3-numpy python-numpy python3-matplotlib python-matplotlib \
+        python-tk python3-tk \
+        python-setuptools python3-setuptools \
+        python-dev python3-dev \
         && rm -rf /var/lib/apt/lists/*
 
-RUN apt update && apt install -y python3-pip python-pip \
-        python3-numpy python-numpy \
-        python3-matplotlib python-matplotlib \
-        && rm -rf /var/lib/apt/lists/*
-
-RUN git config --global user.name "Dilawar Singh" \
-  && git config --global user.email "dilawars@ncbs.res.in"
-RUN git clone https://github.com/dilawar/vim ~/.vim -b minimal --depth 1
 WORKDIR /root
+RUN ls -ltrah
 COPY . moose-core/
-RUN ls -lta
+RUN ls -ltarh
 CMD cd moose-core && ./.ci/travis_build_linux.sh
