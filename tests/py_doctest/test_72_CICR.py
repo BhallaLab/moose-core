@@ -6,13 +6,28 @@
 # 
 # Copyright (C) Upinder S. Bhalla NCBS 2018
 # Released under the terms of the GNU Public License V3.
-# Converted to a doctest by Dilawar Singh
+# Converted to a doctest by Dilawar Singh, 2020 
 
+import os
 import moose
+print("[INFO ] Using moose from %s (%s)" % (moose.__file__, moose.version()))
+
 import numpy as np
 import rdesigneur as rd
 
 np.set_printoptions(precision=3)
+
+sdir_ = os.path.dirname(os.path.realpath(__file__))
+
+expected = (np.array([    0,     0,     0,     0,   972,   954,   981,   984,   984,
+             984,   984,   984,   984,   984,   972,   954,   981,   984,
+             984,   984,   984,   984,   984,   984, 95384, 95687, 95503,
+           95511, 95512, 95512, 95512, 95512, 95512, 95512,     2,     1,
+               1,     1,     1,     1,     1,     1,     1,     1]), 
+    np.array([   0,    0,    0,    0, 2852, 2731, 2770, 2770, 2770, 2770, 2770,
+           2770, 2770, 2770, 2852, 2731, 2770, 2770, 2770, 2770, 2770, 2770,
+           2770, 2770, 2998, 2742, 2820, 2839, 2840, 2840, 2840, 2840, 2840,
+           2840,    4,    3,    3,    3,    3,    3,    3,    3,    3,    3]))
 
 def test():
     """Test CICR
@@ -22,14 +37,7 @@ def test():
         Chem part of model has the following compartments: 
         | In dend, 10 voxels X 15 pools
         | In dend_endo, 10 voxels X 2 pools
-    array([1.569e-06, 5.800e-13, 1.991e-08, 4.094e-01, 5.288e-04, 5.188e-04,
-           5.242e-04, 5.275e-04, 5.276e-04, 5.276e-04, 5.276e-04, 5.276e-04,
-           5.276e-04, 5.276e-04, 5.288e-04, 5.188e-04, 5.242e-04, 5.275e-04,
-           5.276e-04, 5.276e-04, 5.276e-04, 5.276e-04, 5.276e-04, 5.276e-04,
-           4.032e-01, 4.045e-01, 4.038e-01, 4.038e-01, 4.038e-01, 4.038e-01,
-           4.038e-01, 4.038e-01, 4.038e-01, 4.038e-01, 1.109e-06, 1.017e-06,
-           1.079e-06, 1.085e-06, 1.085e-06, 1.085e-06, 1.085e-06, 1.085e-06,
-           1.085e-06, 1.085e-06])
+    True
     """
     rdes = rd.rdesigneur(
         turnOffElec = True,
@@ -42,13 +50,13 @@ def test():
         addEndoChemCompt = True,
         # cellProto syntax: ['somaProto', 'name', dia, length]
         cellProto = [['somaProto', 'soma', 2e-6, 10e-6]],
-        chemProto = [['./chem/CICRwithConcChan.g', 'chem']],
+        chemProto = [[os.path.join(sdir_, 'chem', 'CICRwithConcChan.g'), 'chem']],
         chemDistrib = [['chem', 'soma', 'install', '1' ]],
         plotList = [
-            ['soma', '1', 'dend/CaCyt', 'conc', 'Dendritic Ca'],
-            ['soma', '1', 'dend/CaCyt', 'conc', 'Dendritic Ca', 'wave'],
-            ['soma', '1', 'dend_endo/CaER', 'conc', 'ER Ca'],
-            ['soma', '1', 'dend/ActIP3R', 'conc', 'active IP3R'],
+            ['soma', '1', 'dend/CaCyt', 'n', 'Dendritic Ca'],
+            ['soma', '1', 'dend/CaCyt', 'n', 'Dendritic Ca', 'wave'],
+            ['soma', '1', 'dend_endo/CaER', 'n', 'ER Ca'],
+            ['soma', '1', 'dend/ActIP3R', 'n', 'active IP3R'],
         ],
     )
     rdes.buildModel()
@@ -56,9 +64,16 @@ def test():
     IP3.vec.concInit = 0.004
     IP3.vec[0].concInit = 0.02
     moose.reinit()
+    k = moose.wildcardFind('/##[TYPE=Ksolve]')[0]
+
     moose.start(20)
-    return np.mean([t.vector[::20] for t in
-        moose.wildcardFind('/##[TYPE=Table2]')], axis=1)
+    data = [t.vector for t in moose.wildcardFind('/##[TYPE=Table2]')]
+    m, s = np.mean(data, axis=1).astype(int), np.std(data, axis=1).astype(int)
+    # In multithreaded mode, the numers are not exactly the same as in
+    # expected.
+    assert abs((expected[0] - m).mean()) < 0.5, (m - expected[0])
+    assert abs((expected[1] - s).mean()) < 1, (s - expected[1])
+    return True
 
 if __name__ == '__main__':
     test()

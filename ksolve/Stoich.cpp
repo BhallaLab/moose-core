@@ -274,11 +274,11 @@ Stoich::Stoich()
 
 Stoich::~Stoich()
 {
-    unZombifyModel();
-
+    // unZombifyModel();
     // Note that we cannot do the unZombify here, because it is too
     // prone to problems with the ordering of the delete operations
     // relative to the zombies.
+
     for ( vector< RateTerm* >::iterator j = rates_.begin();
             j != rates_.end(); ++j )
         delete *j;

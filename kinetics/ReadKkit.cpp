@@ -12,7 +12,6 @@
 #include <iomanip>
 #include <fstream>
 #include "../basecode/header.h"
-#include "../utility/utility.h"
 #include "PoolBase.h"
 #include "Pool.h"
 #include "BufPool.h"
@@ -22,6 +21,8 @@
 
 #include "../shell/Shell.h"
 #include "../shell/Wildcard.h"
+
+#include "../utility/strutil.h"
 
 #include "ReadKkit.h"
 

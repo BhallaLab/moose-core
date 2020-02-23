@@ -34,10 +34,12 @@
 #include "../basecode/global.h"
 #include "../basecode/Id.h"
 #include "../basecode/ObjId.h"
-#include "../utility/utility.h"
 #include "../shell/Shell.h"
 #include "../shell/Wildcard.h"
 #include "../basecode/global.h"
+
+#include "../utility/utility.h"
+#include "../utility/strutil.h"
 
 #include "moosemodule.h"
 

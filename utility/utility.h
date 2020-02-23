@@ -12,7 +12,12 @@
 #ifndef _UTILITY_H
 
 #include <memory>
-#include "strutil.h"
+#include <vector>
+#include <map>
+#include <utility>
+#include <cassert>
+
+using namespace std;
 
 // See types.cpp file for definitions.
 namespace moose 
@@ -41,6 +46,18 @@ namespace moose
     {
         return path.substr( path.find_last_of('/') + 1 );
     }
+
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Split a interval (0, max) in n parts which are almost equal
+     * to each other.
+     *
+     * @Param max
+     * @Param n
+     * @Param result. A vector of interval [start, end) (as std::pair).
+     */
+    /* ----------------------------------------------------------------------------*/
+    void splitIntervalInNParts(size_t max, size_t n, std::vector<std::pair<size_t, size_t>>& result);
 }
 
 

@@ -37,12 +37,6 @@
 #include <chrono>
 #include <algorithm>
 
-#ifdef USE_BOOST_ASYNC
-#define BOOST_THREAD_PROVIDES_FUTURE
-#include <boost/thread.hpp>
-#include <boost/thread/future.hpp>
-#endif
-
 #include <future>
 #include <functional>
 #include <atomic>
@@ -51,13 +45,6 @@
 using namespace std::chrono;
 
 const unsigned int OFFNODE = ~0;
-
-// TODO: Profiling
-#define USE_ASYNC 1
-
-#if USE_ASYNC
-#define THREAD_LAUNCH_POLICY std::launch::async
-#endif
 
 const Cinfo* Ksolve::initCinfo()
 {
@@ -547,41 +534,24 @@ void Ksolve::process( const Eref& e, ProcPtr p )
     }
     else
     {
-
-#if USE_ASYNC
         std::vector<std::future<size_t>> vecFutures;
-        // lambdas are faster than std::bind
-        for (size_t i = 0; i < numThreads_; i++)
+
+        // lambdas is faster than std::bind
+        for (auto interval : intervals_)
         {
             vecFutures.push_back( 
-                    std::async( THREAD_LAUNCH_POLICY
-                        , &Ksolve::advance_chunk, this, i*grainSize_, (i+1)*grainSize_, p 
+                    std::async( std::launch::async
+                        , &Ksolve::advance_chunk
+                        , this
+                        , interval.first
+                        , interval.second, p 
                         )
                     );
         }
-
         size_t tot = 0;
         for (auto &v : vecFutures )
             tot += v.get();
-        assert( tot == pools_.size() );
-
-#else
-        /*-----------------------------------------------------------------------------
-         *  Somewhat complicated computation to compute the number of threads. 1
-         *  thread per (at least) voxel pool is ideal situation.
-         *-----------------------------------------------------------------------------*/
-        vector<std::thread> vecThreads;
-
-        // lambdas are faster than std::bind
-        for (size_t i = 0; i < numThreads_; i++)
-        {
-            std::thread t( &Ksolve::advance_chunk, this, i*grainSize_, (i+1)*grainSize_, p );
-            vecThreads.push_back( std::move(t) );
-        }
-
-        for (auto &v : vecThreads )
-            v.join();
-#endif 
+        assert(tot == pools_.size());
     }
 
     // Assemble and send the integrated values off for the Dsolve.
@@ -612,7 +582,7 @@ void Ksolve::advance_pool( const size_t i, ProcPtr p )
 size_t Ksolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )
 {
     size_t tot = 0;
-    for (size_t i = begin; i < std::min(end, pools_.size() ); i++)
+    for (size_t i = begin; i < std::min(end, pools_.size()); i++)
     {
         pools_[i].advance( p );
         tot += 1;
@@ -637,14 +607,16 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
         return;
     }
 
-    grainSize_ = (size_t) std::ceil( (double)pools_.size() / (double)numThreads_);
-    assert(grainSize_ * numThreads_ >= pools_.size());
-    numThreads_ = (size_t) std::ceil( (double)pools_.size() / (double) grainSize_ );
+    if(numThreads_ > pools_.size())
+        numThreads_ = pools_.size();
 
     if(numThreads_ > 1)
-        cout << "Info: Multi-threaded Ksolve. Using " 
-            << numThreads_ << " threads." << endl;
+        cout << "Info: Multi-threaded Ksolve (" << numThreads_ << " threads)."
+            << endl;
 
+    // Recompute the partition of interval.
+    intervals_.clear();
+    moose::splitIntervalInNParts(pools_.size(), numThreads_, intervals_);
 }
 
 //////////////////////////////////////////////////////////////

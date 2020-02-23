@@ -6,7 +6,7 @@
 
 #include "../basecode/header.h"
 #include "../basecode/global.h"
-#include "../utility/utility.h"
+#include "../utility/strutil.h"
 #include "../utility/numutil.h"
 #include "../utility/print_function.hpp"
 #include "../builtins/MooseParser.h"
