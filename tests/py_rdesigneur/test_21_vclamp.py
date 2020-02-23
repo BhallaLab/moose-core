@@ -1,15 +1,9 @@
-# doctest: NORMALIZE_WHITESPACE
 import moose
+import numpy as np
 import rdesigneur as rd
 
 def test_21_vclamp():
     """Test vclamp.
-
-    >>> test_21_vclamp()
-    Rdesigneur: Elec model has 1 compartments and 0 spines on 0 compartments.
-    [array([-0.065     , -0.06496867, -0.06503101, ..., -0.065     ,
-           -0.065     , -0.065     ]), array([ 0.00000000e+00, -4.46215298e-08, -2.12672343e-08, ...,
-           -2.49756618e-08, -2.49756618e-08, -2.49756618e-08])]
     """
     rdes = rd.rdesigneur(
         stimList = [['soma', '1', '.', 'vclamp', '-0.065 + (t>0.1 && t<0.2) * 0.02' ]],
@@ -25,6 +19,10 @@ def test_21_vclamp():
     data = []
     for t in moose.wildcardFind('/##[TYPE=Table]'):
         data.append(t.vector)
+    mean = np.mean(data, axis=1)
+    std = np.std(data, axis=1)
+    assert np.allclose([-5.83422152e-02, -9.28563233e-09], mean), mean
+    assert np.allclose([9.41512562e-03, 2.79081939e-08], std), std
     return data
 
 if __name__ == '__main__':

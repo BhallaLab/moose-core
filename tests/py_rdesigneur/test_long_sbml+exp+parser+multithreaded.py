@@ -63,7 +63,7 @@ spineSize = 1.0
 spineSizeDistrib = 0.5
 spineAngle = np.pi / 2.0
 spineAngleDistrib = 0.0
-numDendSegments = 200
+numDendSegments = 100
 
 
 def computeTP(t, distS, SourceC):
@@ -499,6 +499,9 @@ if count%100==0:
     moose.setClock(15, 0.0025)
     moose.setClock(16, 0.0025)
     mypyrun.mode = 1
+
+    k = moose.wildcardFind('/##[TYPE=Ksolve]')[0]
+    k.numThreads = 4
     print('   .... done making plots.')
     print("[INFO ] Doing moose.reinit ...")
     sys.stdout.flush()
@@ -557,39 +560,16 @@ if count%100==0:
 
     # These values are created by GSL based solver. Boost solvers generates
     # slightly different values.
-    gslExpected = [(28520.566609113474, 7.148023126603051e-10,
-                    1.572239573672028e-08, 28520.566609097037, 0.0),
-                   (28520.56660909553, 1.1642403685206266e-07,
-                    1.1977428714415305e-06, 28520.566607781366, 0.0),
-                   (28520.56660907723, 0.8696260035955732, 7.770359837334404,
-                    28511.9266232363, 0.0)]
-    boostExpected = [(28520.566609114358, 6.767220971967792e-10,
-                      1.4836490693639741e-08, 28520.566609098845, 0.0),
-                     (28520.566609095247, 1.1011852351643147e-07,
-                      1.135790489305351e-06, 28520.566607849338, 0.0),
-                     (28520.566609076508, 0.8503592534168581,
-                      7.628999192709499, 28512.087250630382, 0.0)]
-
+    gslExpected = [[1.43312300e+04, 3.59179272e-10, 7.90030831e-09, 1.43312300e+04, 0.00000000e+00],
+        [1.43312300e+04, 5.85016305e-08, 6.01850896e-07, 1.43312300e+04, 0.00000000e+00],
+        [1.43312300e+04, 1.88782106e-01, 1.78215231e+00, 1.43292591e+04, 0.00000000e+00]]
     gslExpected = np.array(gslExpected)
-    boostExpected = np.array(boostExpected)
-    allres = np.array(allres)
 
-    print('BOOST  :', boostExpected)
-    print('Result :', allres)
+    allres = np.array(allres)
     # Compare the last value. When using Boost based solvers these numbers can
-    # differ a bit but not more than 1%.
-    if not np.allclose(gslExpected, allres, rtol=1e-3, atol=1e-3):
-        print("[INFO ]  results did not match GSL.")
-        print('GSL    :', gslExpected)
-        print('Result :', allres)
-        print('ERROR  :', np.array(allres) - np.array(gslExpected))
-        if not np.allclose(boostExpected, allres, rtol=1e-3, atol=1e-3):
-            print("[INFO ]  results did not match BOOST.")
-            print('BOOST  :', boostExpected)
-            print('Result :', allres)
-            print('ERROR  :', np.array(allres) - np.array(boostExpected))
-            raise AssertionError("The results does not match with either GSL "
-                    " or Boost solvers.")
+    # differ a bit but not more than 1%ii.
+    assert np.allclose(gslExpected, allres, rtol=1e-2, atol=1e-3), (allres, gslExpected)
+    print('done')
 
 if __name__ == '__main__':
     main()

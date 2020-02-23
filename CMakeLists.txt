@@ -381,10 +381,11 @@ endif()
 
 # PyMOOSE tests. These tests complete in reasonable time and should run by
 # default.
-set(PYMOOSE_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/py_regular)
+set(PYMOOSE_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/py_moose)
 file(GLOB PY_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.py" )
 foreach(_test_script ${PY_TEST_SCRIPTS} )
-    get_filename_component(_test_name ${_test_script} NAME_WE)
+    get_filename_component(_name_we ${_test_script} NAME_WE)
+    set(_test_name "pymoose_${_name_we}")
     add_test(NAME ${_test_name}
         COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
         WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
@@ -394,36 +395,27 @@ foreach(_test_script ${PY_TEST_SCRIPTS} )
         )
 endforeach( )
 
-# PYDOC tests. These tests require matplotlib.
-set(PYMOOSE_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/py_doctest) 
-file(GLOB PYDOC_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.py" )
-foreach(_test_script ${PYDOC_TEST_SCRIPTS})
-    get_filename_component(_test_name ${_test_script} NAME_WE)
+# rdesigneur tests. These tests require matplotlib.
+set(RDES_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/py_rdesigneur) 
+file(GLOB RDES_TEST_SCRIPTS "${RDES_TEST_DIRECTORY}/test_*.py" )
+foreach(_test_script ${RDES_TEST_SCRIPTS})
+    get_filename_component(_name_we ${_test_script} NAME_WE)
+    set(_test_name "rdes_${_name_we}")
     add_test(NAME ${_test_name}
-        COMMAND ${PYTHON_EXECUTABLE} -m doctest ${_test_script}
-        WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
+        COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
+        WORKING_DIRECTORY ${RDES_TEST_DIRECTORY}
         )
     set_tests_properties(${_test_name} PROPERTIES 
         ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python;MOOSE_NUM_THREADS=4"
         )
 endforeach()
 
-
-## # CUSTOM TESTS. These tests may require some extra settings.
-## # Run python tests. These are fast tests.
-## set(PYMOOSE_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/py_custom)
-## add_test(NAME test_long_sbml_multi
-##     COMMAND ${PYTHON_EXECUTABLE} ${PYMOOSE_TEST_DIRECTORY}/test_long_sbml+exp+parser+multithreaded.py
-##     WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
-##     )
-## set_tests_properties(test_long_sbml_multi PROPERTIES 
-##     ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python;MOOSE_NUM_THREADS=4")
-
-# Alpha tests. These should not run by default.
-set(MOOSE_ALPHA_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/alpha)
-file(GLOB PY_ALPHA_TEST_SCRIPTS "${PYMOOSE_ALPHA_TEST_DIRECTORY}/*.py" )
-foreach( _test_script ${PY_ALPHA_TEST_SCRIPTS} )
-    get_filename_component( _test_name ${_test_script} NAME_WE)
+# FIXME TESTS. These should not run by default. We need to fix them.
+set(PYMOOSE_FIXME_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/fixme)
+file(GLOB PY_FIXME_TEST_SCRIPTS "${PYMOOSE_FIXME_TEST_DIRECTORY}/*.py" )
+foreach( _test_script ${PY_FIXME_TEST_SCRIPTS} )
+    get_filename_component( _name_we ${_test_script} NAME_WE)
+    set(_test_name "alpha_${_name_we}")
     add_test( NAME ${_test_name}
         COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
         CONFIGURATIONS alpha

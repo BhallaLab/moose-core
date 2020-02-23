@@ -1,6 +1,8 @@
 FROM ubuntu:bionic
 MAINTAINER Dilawar Singh <dilawars@ncbs.res.in>
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install dependencies.
 RUN apt update && apt install -y cmake gcc g++ make \
         libboost-all-dev libgsl-dev libblas-dev \
@@ -15,4 +17,4 @@ WORKDIR /root
 RUN ls -ltrah
 COPY . moose-core/
 RUN ls -ltarh
-CMD cd moose-core && ./.ci/travis_build_linux.sh
+RUN cd moose-core && rm -rf .git && ./.ci/travis_build_linux.sh

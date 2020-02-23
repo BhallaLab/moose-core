@@ -4,28 +4,25 @@
 # Copyright (C) Upinder S. Bhalla NCBS 2018
 # Released under the terms of the GNU Public License V3.
 #
-# Turned to a doctest by Dilawar Singh
+# Turned to a test by Dilawar Singh
 
+import matplotlib
+matplotlib.use('Agg')
 import moose
 import numpy as np
 import rdesigneur as rd
 
-np.set_printoptions(precision=3)
+expected =  np.array([-0.065, -0.068, -0.07 , -0.071, -0.072, -0.072, -0.072, -0.072,
+    -0.072, -0.072, -0.072, -0.048,  0.03 , -0.019, -0.054, -0.07 ,
+    -0.07 , -0.067, -0.065, -0.062, -0.06 , -0.056, -0.048, -0.005,
+    -0.024, -0.055, -0.069, -0.069, -0.067, -0.064, -0.062, -0.059,
+    -0.055, -0.046, -0.005, -0.028, -0.057, -0.069, -0.068, -0.066,
+    -0.064, -0.061, -0.058, -0.054, -0.044, -0.004, -0.031, -0.059,
+    -0.069, -0.068, -0.066, -0.075, -0.076, -0.075, -0.075, -0.075,
+    -0.075, -0.074, -0.074, -0.073, -0.073])
 
 def test():
     """Test 41 Ball and Stick model.
-
-    >>> test()
-    min = -80.0, max = 40.0
-    Rdesigneur: Elec model has 11 compartments and 0 spines on 0 compartments.
-    array([-0.065, -0.068, -0.07 , -0.071, -0.072, -0.072, -0.072, -0.072,
-           -0.072, -0.072, -0.072, -0.048,  0.03 , -0.019, -0.054, -0.07 ,
-           -0.07 , -0.067, -0.065, -0.062, -0.06 , -0.056, -0.048, -0.005,
-           -0.024, -0.055, -0.069, -0.069, -0.067, -0.064, -0.062, -0.059,
-           -0.055, -0.046, -0.005, -0.028, -0.057, -0.069, -0.068, -0.066,
-           -0.064, -0.061, -0.058, -0.054, -0.044, -0.004, -0.031, -0.059,
-           -0.069, -0.068, -0.066, -0.075, -0.076, -0.075, -0.075, -0.075,
-           -0.075, -0.074, -0.074, -0.073, -0.073])
     """
     rdes = rd.rdesigneur(
         cellProto = [['ballAndStick', 'soma', 20e-6, 20e-6, 4e-6, 500e-6, 10]],
@@ -43,10 +40,13 @@ def test():
     rdes.buildModel()
     soma = moose.element( '/model/elec/soma' )
     moose.reinit()
-    #rdes.displayMoogli( 0.0005, 0.06, 0.0 )
     moose.start(0.06)
-    t = moose.wildcardFind('/##[TYPE=Table]')[-1].vector[::10]
-    return t
+    t = [x.vector for x in moose.wildcardFind('/##[TYPE=Table]')]
+    m, u = np.mean(t), np.std(t)
+    assert np.allclose([m, u], [-0.05820780543933818, 0.02098328548146809]), \
+            (m, u)
+    print('done')
+    return True
 
 if __name__ == '__main__':
     test()

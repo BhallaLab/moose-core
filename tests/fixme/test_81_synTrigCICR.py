@@ -88,7 +88,8 @@ def test():
     for t in moose.wildcardFind('/##[TYPE=Table2]'):
         data.append(t.vector[::20])
     res = np.mean(data, axis=1)
-    assert np.allclose(res, expected, rtol=1e-3), res - expected
+    assert np.allclose(res, expected, rtol=1e-4, atol=1e-4), \
+            "Total error %s" % np.sum(res - expected)
     return True
 
 if __name__ == '__main__':

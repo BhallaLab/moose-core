@@ -1,4 +1,6 @@
-# doctest: NORMALIZE_WHITESPACE
+import matplotlib as mpl
+mpl.use('Agg')
+import numpy as np
 import moose
 import rdesigneur as rd
 
@@ -20,7 +22,11 @@ def test():
     moose.reinit()
     moose.start(0.3)
     rdes.display(block=False)
-    return [x.vector for x in moose.wildcardFind('/##[TYPE=Table]')]
+    data =  moose.wildcardFind('/##[TYPE=Table]')[0].vector
+    m, u = data.mean(), data.std()
+    np.allclose([-0.06507780556166297, 0.012544993918549656], [m, u])
+    print("[INFO ] Done")
+    return True
 
 if __name__ == '__main__':
     test()

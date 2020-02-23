@@ -45,7 +45,11 @@ def test():
     rdes.buildModel()
     moose.reinit()
     moose.start( 0.3 )
-    t = moose.wildcardFind('/##[TYPE=Table]')[0].vector[::20]
+    t = moose.wildcardFind('/##[TYPE=Table]')[0].vector
+    expected = [-0.04995514162861773, 0.004795008283676097]
+    assert np.allclose(expected, [t.mean(), t.std()]), \
+            (t.mean(), t.std())
+
     return t
 
 if __name__ == '__main__':

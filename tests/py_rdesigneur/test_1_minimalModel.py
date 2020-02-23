@@ -42,4 +42,5 @@ def test():
     moose.showfields(rdes.soma)
 
 if __name__ == '__main__':
-    test()
+    import doctest
+    doctest.testmod()
