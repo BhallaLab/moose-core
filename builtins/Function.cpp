@@ -578,9 +578,9 @@ double Function::getDerivative() const
 
 void Function::setNumVar(const unsigned int num)
 {
+    //cerr << "Deprecated: numVar has no effect. MOOSE can infer number of variables "
+    //     " from the expression. " << endl;
     numVar_ = num;
-    cerr << "Deprecated: numVar has no effect. MOOSE can infer number of variables "
-         " from the expression. " << endl;
 }
 
 unsigned int Function::getNumVar() const
