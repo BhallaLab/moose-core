@@ -278,7 +278,7 @@ Parser::varmap_type MooseParser::GetConst( ) const
 
 void MooseParser::ClearVariables( )
 {
-    GetSymbolTable().clear_variables(false);
+    GetSymbolTable().clear_variables();
 }
 
 void MooseParser::ClearAll( )
