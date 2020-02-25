@@ -495,7 +495,7 @@ foreach(_py_script ${PY_SCRIPTS})
 endforeach( )
 
 # Replicate Travis-CI building using docker
-add_custom_target(travis
+add_custom_target(docker
     COMMAND docker build -t bhallalab/travis:latest
         -f ${CMAKE_CURRENT_SOURCE_DIR}/devel/docker/travis/Dockerfile .
     COMMENT "Replicating Travis-CI building using Docker."

@@ -16,6 +16,7 @@
 #include <map>
 #include <utility>
 #include <cassert>
+#include <string>
 
 using namespace std;
 
@@ -42,7 +43,7 @@ namespace moose
      *
      * @return
      */
-    inline string basename( const string& path )
+    inline std::string basename( const std::string& path )
     {
         return path.substr( path.find_last_of('/') + 1 );
     }

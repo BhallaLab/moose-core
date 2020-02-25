@@ -28,6 +28,11 @@ import rdesigneur as rd
 import time
 import xml.etree.ElementTree as ET
 
+
+if sys.version_info.major == 2:
+    print("[INFO ] this test works with python3 only.")
+    quit(0)
+
 try:
     import moose.SBML
 except Exception as e:
