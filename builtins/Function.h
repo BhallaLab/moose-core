@@ -24,7 +24,6 @@ class Function
 public:
     static const int VARMAX;
     Function();
-    Function(const Function& f);
 
     // Destructor.
     ~Function();
@@ -115,8 +114,6 @@ protected:
     // Used by kinetic solvers when this is zombified.
     void* stoich_;
 
-    // Parser which should never be copied. Multithreaded programs may behave
-    // strangely if copy-constructor or operator()= is implemented.
     moose::MooseParser parser_;
 
 };

@@ -97,6 +97,7 @@ for t in moose.wildcardFind('/##[TYPE=Table2]'):
 m = np.mean(A, axis=1)
 u = np.std(A, axis=1)
 
-assert np.allclose(m, E[0])
-assert np.allclose(u, E[1])
+# multithreaded version given different results.
+assert np.allclose(m, E[0], rtol=1e-3), (m-E[0])
+assert np.allclose(u, E[1], rtol=1e-3), (u-E[1])
 print('all done')

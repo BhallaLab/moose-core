@@ -35,8 +35,12 @@ $PYTHON3 -m compileall -q .
     mkdir -p _GSL_BUILD_PY3 && cd _GSL_BUILD_PY3 && \
         cmake -DPYTHON_EXECUTABLE=$PYTHON3 \
         -DCMAKE_INSTALL_PREFIX=/usr -DDEBUG=ON ..
-    # Don't run test_long prefix. They take very long time in DEBUG mode.
-    $MAKE && MOOSE_NUM_THREADS=$NPROC ctest -j$NPROC --output-on-failure -E ".*test_long*"
+    $MAKE
+    # Run with valgrind to log any memory leak.
+    valgrind --leak-check=full ./moose.bin -q -u 
+
+    # Run all tests in debug mode.
+    MOOSE_NUM_THREADS=$NPROC ctest -j$NPROC --output-on-failure 
     make install || sudo make install 
     cd /tmp
     $PYTHON3 -c 'import moose;print(moose.__file__);print(moose.version())'

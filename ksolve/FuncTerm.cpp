@@ -33,6 +33,8 @@ FuncTerm::FuncTerm():
 
 FuncTerm::~FuncTerm()
 {
+    if(args_)
+        delete[] args_;
 }
 
 void FuncTerm::setReactantIndex( const vector< unsigned int >& mol )
@@ -40,11 +42,11 @@ void FuncTerm::setReactantIndex( const vector< unsigned int >& mol )
     reactantIndex_ = mol;
     if ( args_ )
     {
-        parser_.Reset();
-        // parser_.ClearAll();
+        delete[] args_;
+        parser_.ClearAll();
     }
 
-    args_.reset(new double[mol.size()+1]);
+    args_ = new double[mol.size()+1];
     for ( unsigned int i = 0; i < mol.size(); ++i )
     {
         args_[i] = 0.0;
@@ -123,7 +125,7 @@ double FuncTerm::getVolScale() const
 
 const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
 {
-    args_ = nullptr;
+    args_ = nullptr;  // other is still using it.
     expr_ = other.expr_;
     volScale_ = other.volScale_;
     target_ = other.target_;
@@ -139,7 +141,7 @@ const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
  */
 double FuncTerm::operator() ( const double* S, double t ) const
 {
-    if ( ! args_.get() )
+    if ( ! args_ )
         return 0.0;
 
     unsigned int i = 0;
@@ -160,7 +162,7 @@ double FuncTerm::operator() ( const double* S, double t ) const
 
 void FuncTerm::evalPool( double* S, double t ) const
 {
-    if ( !args_.get() || target_ == ~0U )
+    if ( !args_ || target_ == ~0U )
         return;
 
     unsigned int i;

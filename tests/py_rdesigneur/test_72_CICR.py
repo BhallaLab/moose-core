@@ -85,8 +85,8 @@ def test():
     # print(np.array_repr(s))
     # In multithreaded mode, the numers are not exactly the same as in
     # expected.
-    assert np.allclose(m, E[0], rtol=1e-2), (m - E[0])
-    assert np.allclose(s, E[1], rtol=1e-2), (s - E[1])
+    assert np.allclose(m, E[0], rtol=1e-2, atol=1e-4), (m - E[0])
+    assert np.allclose(s, E[1], rtol=1e-2, atol=1e-4), (s - E[1])
     print('done')
 
 

@@ -53,7 +53,7 @@ private:
     double volScale_;
     unsigned int target_; /// Index of the entity to be updated by Func
 
-    unique_ptr<double[]> args_;
+    double* args_;
 
     string expr_;
     moose::MooseParser parser_;

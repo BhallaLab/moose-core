@@ -318,23 +318,6 @@ Function::Function():
 {
 }
 
-Function::Function(const Function& f) :
-    valid_(f.valid_),
-    numVar_(f.numVar_),
-    lastValue_(f.lastValue_),
-    rate_(f.rate_),
-    mode_(f.mode_),
-    useTrigger_(f.useTrigger_),
-    doEvalAtReinit_(f.doEvalAtReinit_),
-    t_(f.t_),
-    independent_(f.independent_),
-    xs_(f.xs_),
-    ys_(f.ys_),
-    stoich_(f.stoich_),
-    parser_(f.parser_)
-{
-}
-
 // Careful: This is a critical function. Also since during zombiefication, deep
 // copy is expected. Merely copying the parser won't work.
 Function& Function::operator=(const Function& rhs)
@@ -353,9 +336,12 @@ Function& Function::operator=(const Function& rhs)
     rate_ = rhs.rate_;
     independent_ = rhs.independent_;
 
-    // Deep copy.
+    // Deep copy; create new Variable and constant to link with new parser.
+    // Zombification requires it. DO NOT just copy the object/pointer of
+    // MooseParser.
     xs_.clear();
     ys_.clear();
+    parser_.ClearAll();
     if(rhs.parser_.GetExpr().size() > 0)
     {
         for(auto x: rhs.xs_)
