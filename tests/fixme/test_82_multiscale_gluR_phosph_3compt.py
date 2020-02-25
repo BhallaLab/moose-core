@@ -11,9 +11,12 @@
 # Released under the terms of the GNU Public License V3.
 # Convered to doctest by Dilawar Singh
 
+import os
 import moose
 import numpy as np
 import rdesigneur as rd
+
+sdir_ = os.path.dirname(os.path.realpath(__file__))
 
 A = np.array([3.522e-05, 3.298e-04, 1.752e-05, 1.879e-02, 1.629e-02, 1.533e-04,
        1.538e-04, 1.546e-04, 1.559e-04, 1.576e-04, 1.597e-04, 1.623e-04,
@@ -51,7 +54,8 @@ def test():
         useGssa = False,
         # cellProto syntax: ['ballAndStick', 'name', somaDia, somaLength, dendDia, dendLength, numDendSegments ]
         cellProto = [['ballAndStick', 'soma', 12e-6, 12e-6, 4e-6, 100e-6, 2 ]],
-        chemProto = [['./chem/chanPhosph3compt.g', 'chem']],
+        chemProto = [[os.path.join(sdir_,
+            '../py_rdesigneur/chem/chanPhosph3compt.g'), 'chem']],
         spineProto = [['makeActiveSpine()', 'spine']],
         chanProto = [
             ['make_Na()', 'Na'], 

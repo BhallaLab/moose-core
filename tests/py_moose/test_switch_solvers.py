@@ -10,9 +10,7 @@
 import os
 import moose
 print("[INFO ] using moose from %s" % moose.__file__)
-import numpy
-import matplotlib.pyplot as plt
-import sys
+import numpy as np 
 
 sdir_ = os.path.dirname(os.path.realpath(__file__))
 
@@ -107,30 +105,39 @@ def main():
     #########################################################
 
     # Display all plots.
-    fig = plt.figure( figsize = (12, 10) )
-    orig = fig.add_subplot( 511 )
-    gsl = fig.add_subplot( 512 )
-    ee = fig.add_subplot( 513 )
-    gsl2 = fig.add_subplot( 514 )
-    gssa = fig.add_subplot( 515 )
     plotdt = moose.element( '/clock' ).tickDt[18]
+    conc = []
     for x in moose.wildcardFind( '/model/#graphs/conc#/#' ):
-        t = numpy.arange( 0, x.vector.size, 1 ) * plotdt
-        orig.plot( t, x.vector, label=x.name )
+        conc.append(x.vector)
+    conc = np.array(conc)
+    assert conc.mean() > 0.0
+
+    data = []
     for x in moose.wildcardFind( '/model/graphs/gsl/#' ):
-        t = numpy.arange( 0, x.vector.size, 1 ) * plotdt
-        gsl.plot( t, x.vector, label=x.name )
+        data.append(x.vector)
+    gsl = np.array(data)
+    assert abs(conc - gsl).sum() < 0.25
+
+    data=[]
     for x in moose.wildcardFind( '/model/graphs/ee/#' ):
-        t = numpy.arange( 0, x.vector.size, 1 ) * plotdt
-        ee.plot( t, x.vector, label=x.name )
+        data.append(x.vector)
+    ee = np.array(data)
+    assert abs(conc-ee).sum() < 0.2
+
+    data=[]
     for x in moose.wildcardFind( '/model/graphs/gsl2/#' ):
-        t = numpy.arange( 0, x.vector.size, 1 ) * plotdt
-        gsl2.plot( t, x.vector, label=x.name )
+        data.append(x.vector)
+    gsl2 = np.array(data)
+    assert abs(conc-gsl2).sum() == 0.0   # these are the same.
+
+    data=[]
     for x in moose.wildcardFind( '/model/graphs/gssa/#' ):
-        t = numpy.arange( 0, x.vector.size, 1 ) * plotdt
-        gssa.plot( t, x.vector, label=x.name )
-    plt.legend()
-    plt.show()
+        data.append(x.vector)
+    gssa = np.array(data)
+    assert abs(conc - gssa).sum() < 0.05 
+    assert gssa.shape == conc.shape == gsl.shape == ee.shape 
+
+    print('all done')
 
 if __name__ == '__main__':
     main()
