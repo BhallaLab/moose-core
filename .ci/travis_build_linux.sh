@@ -9,6 +9,9 @@
 set -e
 set -x
 
+BUILDDIR=_build_travis
+mkdir -p $BUILDDIR
+
 PYTHON2="/usr/bin/python2"
 PYTHON3="/usr/bin/python3"
 
@@ -32,7 +35,7 @@ $PYTHON3 -m compileall -q .
 
 # Python3 with GSL in debug more.
 (
-    mkdir -p _GSL_BUILD_PY3 && cd _GSL_BUILD_PY3 && \
+    mkdir -p $BUILDDIR && cd $BUILDDIR && \
         cmake -DPYTHON_EXECUTABLE=$PYTHON3 \
         -DCMAKE_INSTALL_PREFIX=/usr -DDEBUG=ON ..
     $MAKE
@@ -46,22 +49,22 @@ $PYTHON3 -m compileall -q .
     $PYTHON3 -c 'import moose;print(moose.__file__);print(moose.version())'
 )
 
-# BOOST and python3
-(
-    mkdir -p _BOOST_BUILD_PY3 && cd _BOOST_BUILD_PY3 && \
-        cmake -DWITH_BOOST_ODE=ON -DPYTHON_EXECUTABLE="$PYTHON3" \
-        -DCMAKE_INSTALL_PREFIX=/usr ..
-    $MAKE && MOOSE_NUM_THREADS=$NPROC ctest -j$NPROC --output-on-failure 
-)
-
 # GSL and python2, failure is allowed
 set +e
 (
-    BUILDDIR=_GSL_PY2
     mkdir -p $BUILDDIR && cd $BUILDDIR && \
         cmake -DPYTHON_EXECUTABLE=$PYTHON2 -DCMAKE_INSTALL_PREFIX=/usr ..
     $MAKE && MOOSE_NUM_THREADS=$NPROC ctest -j$NPROC --output-on-failure
 )
 set -e
+
+
+# BOOST and python3
+(
+    mkdir -p $BUILDDIR && cd $BUILDDIR && \
+        cmake -DWITH_BOOST_ODE=ON -DPYTHON_EXECUTABLE="$PYTHON3" \
+        -DCMAKE_INSTALL_PREFIX=/usr ..
+    $MAKE && MOOSE_NUM_THREADS=$NPROC ctest -j$NPROC --output-on-failure 
+)
 
 echo "All done"
