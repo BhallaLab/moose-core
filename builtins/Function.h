@@ -106,11 +106,11 @@ protected:
 
     // this stores variables received via incoming messages, identifiers of
     // the form x{i} are included in this
-    vector<Variable*> xs_;
+    vector<shared_ptr<Variable>> xs_;
 
     // this stores variable values pulled by sending request. identifiers of
     // the form y{i} are included in this
-    vector<double*> ys_;
+    vector<shared_ptr<double>> ys_;
 
     // Used by kinetic solvers when this is zombified.
     void* stoich_;

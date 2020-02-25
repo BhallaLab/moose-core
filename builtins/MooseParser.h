@@ -84,9 +84,10 @@ public:
     static void findXsYs(const string& expr, set<string>& xs, set<string>& ys);
 
     void LinkVariables(vector<Variable*>& xs_, vector<double*>& ys_, double* t);
+    void LinkVariables(vector<shared_ptr<Variable>>& xs_, vector<shared_ptr<double>>& ys_, double* t);
 
-    double Eval(bool check=false)
-        const;
+    double Eval(bool check=false) const;
+
     double Derivative(const string& name) const;
 
     double Diff( const double a, const double b) const;

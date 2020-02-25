@@ -330,12 +330,13 @@ Function::Function(const Function& f) :
     independent_(f.independent_),
     xs_(f.xs_),
     ys_(f.ys_),
-    stoich_(f.stoich_)
+    stoich_(f.stoich_),
+    parser_(f.parser_)
 {
-    parser_.LinkVariables(xs_, ys_, &t_);
 }
 
-// Careful: This is a critical function.
+// Careful: This is a critical function. Also since during zombiefication, deep
+// copy is expected. Merely copying the parser won't work.
 Function& Function::operator=(const Function& rhs)
 {
     // protect from self-assignment.
@@ -351,9 +352,20 @@ Function& Function::operator=(const Function& rhs)
     t_ = rhs.t_;
     rate_ = rhs.rate_;
     independent_ = rhs.independent_;
-    xs_ = rhs.xs_;
-    ys_ = rhs.ys_;
-    parser_.LinkVariables(xs_, ys_, &t_);
+
+    // Deep copy.
+    xs_.clear();
+    ys_.clear();
+    if(rhs.parser_.GetExpr().size() > 0)
+    {
+        for(auto x: rhs.xs_)
+            xs_.push_back(shared_ptr<Variable>(new Variable()));
+        for(auto y: rhs.ys_)
+            ys_.push_back(shared_ptr<double>(new double(0.0)));
+
+        parser_.LinkVariables(xs_, ys_, &t_);
+        parser_.SetExpr(rhs.parser_.GetExpr());
+    }
     return *this;
 }
 
@@ -395,7 +407,7 @@ void Function::addVariable(const string& name)
         {
             // Equality with index because we cound from 0.
             for (size_t i = xs_.size(); i <= (size_t) index; i++)
-                xs_.push_back(new Variable());
+                xs_.push_back(shared_ptr<Variable>(new Variable()));
         }
 
         // This must be true.
@@ -414,9 +426,9 @@ void Function::addVariable(const string& name)
         {
             // Equality with index because we cound from 0.
             for (size_t i = ys_.size(); i <= (size_t) index; i++)
-                ys_.push_back(new double(0.0));
+                ys_.push_back(shared_ptr<double>(new double(0.0)));
         }
-        parser_.DefineVar(name, ys_[index]);
+        parser_.DefineVar(name, ys_[index].get());
     }
     else if (name == "t")
         parser_.DefineVar("t", &t_);
@@ -601,7 +613,7 @@ Variable * Function::getVar(unsigned int ii)
 {
     static Variable dummy;
     if ( ii < xs_.size())
-        return xs_[ii];
+        return xs_[ii].get();
 
     MOOSE_WARN( "Warning: Function::getVar: index: "
                 << ii << " is out of range: "

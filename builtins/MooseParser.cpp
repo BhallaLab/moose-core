@@ -302,5 +302,17 @@ void MooseParser::LinkVariables(vector<Variable*>& xs, vector<double*>& ys, doub
     DefineVar("t", t);
 }
 
+void MooseParser::LinkVariables(vector<shared_ptr<Variable>>& xs, vector<shared_ptr<double>>& ys, double* t)
+{
+    for(size_t i = 0; i < xs.size(); i++)
+        DefineVar('x'+to_string(i), xs[i]->ref());
+
+    for (size_t i = 0; i < ys.size(); i++) 
+        DefineVar('y'+to_string(i), ys[i].get());
+
+    DefineVar("t", t);
+}
+
+
 
 } // namespace moose.
