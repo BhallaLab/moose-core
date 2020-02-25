@@ -56,7 +56,7 @@ private:
     unique_ptr<double[]> args_;
 
     string expr_;
-    unique_ptr<moose::MooseParser> parser_;
+    moose::MooseParser parser_;
 };
 
 #endif // _FUNC_TERM_H

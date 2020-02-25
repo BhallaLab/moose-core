@@ -98,6 +98,7 @@ public:
 
     void ClearVariables( );
     void ClearAll( );
+    void Reset( );
 
     const string GetExpr( ) const;
 

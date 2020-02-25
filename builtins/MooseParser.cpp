@@ -45,6 +45,7 @@ MooseParser::MooseParser() :
 
 MooseParser::~MooseParser()
 {
+    expression_->release();
 }
 
 /*-----------------------------------------------------------------------------
@@ -284,6 +285,11 @@ void MooseParser::ClearVariables( )
 void MooseParser::ClearAll( )
 {
     ClearVariables();
+}
+
+void MooseParser::Reset( )
+{
+    expression_->release();
 }
 
 const string MooseParser::GetExpr( ) const

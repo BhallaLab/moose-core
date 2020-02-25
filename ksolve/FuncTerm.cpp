@@ -28,7 +28,6 @@ using namespace std;
 
 FuncTerm::FuncTerm():
     reactantIndex_(1, 0) , volScale_(1.0) , target_(~0U) , args_(nullptr)
-    , parser_(unique_ptr<moose::MooseParser>(new moose::MooseParser()))
 {
 }
 
@@ -40,18 +39,21 @@ void FuncTerm::setReactantIndex( const vector< unsigned int >& mol )
 {
     reactantIndex_ = mol;
     if ( args_ )
-        parser_->ClearAll();
+    {
+        parser_.Reset();
+        // parser_.ClearAll();
+    }
 
     args_.reset(new double[mol.size()+1]);
     for ( unsigned int i = 0; i < mol.size(); ++i )
     {
         args_[i] = 0.0;
-        parser_->DefineVar( 'x'+to_string(i), &args_[i] );
+        parser_.DefineVar( 'x'+to_string(i), &args_[i] );
     }
 
     // Define a 't' variable even if we don't always use it.
     args_[mol.size()] = 0.0;
-    parser_->DefineVar( "t", &args_[mol.size()] );
+    parser_.DefineVar( "t", &args_[mol.size()] );
     setExpr(expr_);
 }
 
@@ -83,7 +85,7 @@ void FuncTerm::setExpr( const string& expr )
 
     try
     {
-        if(! parser_->SetExpr(expr))
+        if(! parser_.SetExpr(expr))
             MOOSE_WARN("Failed to set expression: '" << expr << "'");
         expr_ = expr;
     }
@@ -126,6 +128,7 @@ const FuncTerm& FuncTerm::operator=( const FuncTerm& other )
     volScale_ = other.volScale_;
     target_ = other.target_;
     reactantIndex_ = other.reactantIndex_;
+    parser_ = other.parser_;
     setReactantIndex(reactantIndex_);
     return *this;
 }
@@ -146,7 +149,7 @@ double FuncTerm::operator() ( const double* S, double t ) const
 
     try
     {
-        return parser_->Eval() * volScale_;
+        return parser_.Eval() * volScale_;
     }
     catch (moose::Parser::exception_type &e )
     {
@@ -167,7 +170,7 @@ void FuncTerm::evalPool( double* S, double t ) const
 
     try
     {
-        S[ target_] = parser_->Eval() * volScale_;
+        S[ target_] = parser_.Eval() * volScale_;
         //assert(! std::isnan(S[target_]));
     }
     catch ( moose::Parser::exception_type & e )
