@@ -30,6 +30,7 @@
 #include "../scheduling/Clock.h"
 #include "../shell/Shell.h"
 #include "../shell/Wildcard.h"
+#include "../utility/testing_macros.hpp"
 
 const Cinfo* Stoich::initCinfo()
 {
@@ -192,16 +193,17 @@ const Cinfo* Stoich::initCinfo()
     // MsgDest Definitions
     //////////////////////////////////////////////////////////////
     static DestFinfo unzombify( "unzombify",
-                                "Restore all zombies to their native state",
-                                new OpFunc0< Stoich >( &Stoich::unZombifyModel )
-                              );
+            "Restore all zombies to their native state",
+            new OpFunc0< Stoich >( &Stoich::unZombifyModel )
+            );
+
     static DestFinfo scaleBufsAndRates( "scaleBufsAndRates",
-                                        "Args: voxel#, volRatio\n"
-                                        "Handles requests for runtime volume changes in the specified "
-                                        "voxel#, Used in adaptors changing spine vols.",
-                                        new OpFunc2< Stoich, unsigned int, double >(
-                                            &Stoich::scaleBufsAndRates )
-                                      );
+            "Args: voxel#, volRatio\n"
+            "Handles requests for runtime volume changes in the specified "
+            "voxel#, Used in adaptors changing spine vols.",
+            new OpFunc2< Stoich, unsigned int, double >(
+                &Stoich::scaleBufsAndRates )
+            );
 
     //////////////////////////////////////////////////////////////
     // SrcFinfo Definitions
@@ -272,10 +274,11 @@ Stoich::Stoich()
 
 Stoich::~Stoich()
 {
-    unZombifyModel();
+    // unZombifyModel();
     // Note that we cannot do the unZombify here, because it is too
     // prone to problems with the ordering of the delete operations
     // relative to the zombies.
+
     for ( vector< RateTerm* >::iterator j = rates_.begin();
             j != rates_.end(); ++j )
         delete *j;
@@ -283,14 +286,6 @@ Stoich::~Stoich()
     for ( vector< FuncTerm* >::iterator j = funcs_.begin();
             j != funcs_.end(); ++j )
         delete *j;
-
-    /*
-     * Do NOT delete FuncTerms, they are just pointers stolen from
-     * the non-zombified objects.
-    for ( vector< FuncTerm* >::iterator i = funcs_.begin();
-    	i != funcs_.end(); ++i )
-    	delete *i;
-    	*/
 }
 
 //////////////////////////////////////////////////////////////
@@ -1066,12 +1061,11 @@ void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
     Id ei( func.value() + 1 );
 
     unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
+    string _expr = Field<string>::get( func, "expr" );
+
     vector< pair< Id, unsigned int> > srcPools;
-#ifndef NDEBUG
-    unsigned int n =
-#endif
-        ei.element()->getInputsWithTgtIndex( srcPools, df );
-    assert( numSrc == n );
+    unsigned int n = ei.element()->getInputsWithTgtIndex( srcPools, df );
+    ASSERT_EQ( numSrc, n, "NumMsgVsYs: " + _expr );
     vector< unsigned int > poolIndex( numSrc, 0 );
     for ( unsigned int i = 0; i < numSrc; ++i )
     {
@@ -1121,11 +1115,8 @@ void Stoich::installAndUnschedFuncRate( Id func, Id pool )
 
     unsigned int numSrc = Field< unsigned int >::get( func, "numVars" );
     vector< pair< Id, unsigned int > > srcPools;
-#ifndef NDEBUG
-    unsigned int n =
-#endif
-        ei.element()->getInputsWithTgtIndex( srcPools, df );
-    assert( numSrc == n );
+    unsigned int n = ei.element()->getInputsWithTgtIndex( srcPools, df );
+    ASSERT_EQ( numSrc, n, "NumMsgXS" );
     vector< unsigned int > poolIndex( numSrc, 0 );
     for ( unsigned int i = 0; i < numSrc; ++i )
     {
@@ -2101,9 +2092,8 @@ const vector< Id >& Stoich::offSolverPoolMap( Id compt ) const
 // s is the array of pools, S_[meshIndex][0]
 void Stoich::updateFuncs( double* s, double t ) const
 {
-    for ( auto i = funcs_.cbegin(); i != funcs_.end(); ++i )
-        if ( *i )
-            (*i)->evalPool( s, t );
+    for (auto i = funcs_.cbegin(); i != funcs_.end(); ++i)
+        if(*i) (*i)->evalPool( s, t );
 }
 
 /**

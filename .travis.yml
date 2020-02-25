@@ -5,6 +5,8 @@ matrix:
   include:
   - os: linux
     dist: bionic
+    services:
+        - xvfb
   - os: osx
     osx_image: xcode11.3
 
@@ -20,6 +22,7 @@ notifications:
 addons:
   apt:
     update: true
+
 
 before_script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then nvm get head || true; fi

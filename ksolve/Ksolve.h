@@ -61,7 +61,7 @@ public:
     unsigned int getNumThreads( ) const;
     void setNumThreads( unsigned int x );
 
-    void advance_chunk( const size_t begin, const size_t end, ProcPtr p );
+    size_t advance_chunk( const size_t begin, const size_t end, ProcPtr p );
 
     void advance_pool( const size_t i, ProcPtr p );
 
@@ -140,7 +140,8 @@ private:
     /**
      * @brief Number of threads to use. Only applicable for deterministic case.
      */
-    unsigned int numThreads_;
+    size_t numThreads_;
+    size_t grainSize_;
 
     /**
      * Each VoxelPools entry handles all the pools in a single voxel.
@@ -171,7 +172,9 @@ private:
     // Time taken in all process function in us.
     double totalTime_ = 0.0;
 
-    high_resolution_clock::time_point t0_, t1_;
+    vector<std::pair<size_t, size_t>> intervals_;
+
+    //high_resolution_clock::time_point t0_, t1_;
 
 };
 

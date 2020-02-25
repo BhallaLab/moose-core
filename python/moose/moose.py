@@ -379,21 +379,23 @@ def showfield(el, field='*', showtype=False):
 
     Returns
     -------
-    None
+    string
 
     """
     if isinstance(el, str):
         if not _moose.exists(el):
-            raise ValueError('no such element')
+            raise ValueError('no such element: %s' % el)
         el = _moose.element(el)
+    result = []
     if field == '*':
         value_field_dict = _moose.getFieldDict(el.className, 'valueFinfo')
         max_type_len = max(len(dtype) for dtype in value_field_dict.values())
         max_field_len = max(len(dtype) for dtype in value_field_dict.keys())
-        print('\n[', el.path, ']')
+        result.append('\n[' + el.path + ']\n')
         for key, dtype in sorted(value_field_dict.items()):
-            if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith(
-                    'vector') or 'ObjId' in dtype:
+            if dtype == 'bad' or key == 'this' or key == 'dummy' \
+                or key == 'me' or dtype.startswith('vector') \
+                or 'ObjId' in dtype:
                 continue
             value = el.getField(key)
             if showtype:
@@ -401,22 +403,25 @@ def showfield(el, field='*', showtype=False):
                 # The following hack is for handling both Python 2 and
                 # 3. Directly putting the print command in the if/else
                 # clause causes syntax error in both systems.
-                print(typestr, end=' ')
-            print(key.ljust(max_field_len + 4), '=', value)
+                result.append(typestr+' ')
+            result.append(key.ljust(max_field_len + 4) + '=' + str(value)+'\n')
     else:
         try:
-            print(field, '=', el.getField(field))
+            result.append(field + '=' + el.getField(field))
         except AttributeError:
             pass  # Genesis silently ignores non existent fields
+    print(''.join(result))
+    return ''.join(result)
 
 
 def showfields(el, showtype=False):
-    """Convenience function. Should be deprecated if nobody uses it.
+    """
+    Print all fields on a a given element.
     """
     warnings.warn(
         'Deprecated. Use showfield(element, field="*", showtype=True) instead.',
         DeprecationWarning)
-    showfield(el, field='*', showtype=showtype)
+    return showfield(el, field='*', showtype=showtype)
 
 # Predefined field types and their human readable names
 finfotypes = [('valueFinfo', 'value field'),

@@ -4,10 +4,9 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(PyMOOSE)
 
 # cmake related macros.
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
-include(FindPythonModule)
 
 # We find python executable here. Though mainly used inside pymoose. 
 # FIXME: When cmake 3.12 is widely available use the following:
@@ -19,12 +18,17 @@ if(NOT PYTHONINTERP_FOUND)
   find_package(PythonInterp 2.7)
 endif()
 
+# Disable rpath on OSX.
+if(APPLE)
+  set(CMAKE_MACOSX_RPATH OFF)
+endif()
+
 
 # NOTE: version should be changed in setup.py file.
 # If moose version is not given, use setup.py file to get the default version.
 if(NOT VERSION_MOOSE)
     execute_process(COMMAND ${PYTHON_EXECUTABLE} setup.py --version
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         OUTPUT_VARIABLE VERSION_MOOSE
         OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()
@@ -69,7 +73,6 @@ option(WITH_ASAN            "Use AddressSanitizer in DEBUG mode." OFF)
 
 # Default definitions.
 add_definitions(-DUSE_GENESIS_PARSER)
-
 if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     message(STATUS "Building for Debug/Unit testing")
     add_definitions(-DDO_UNIT_TESTS -O)
@@ -108,6 +111,7 @@ endif()
 link_directories(${CMAKE_BINARY_DIR})
 add_library(libmoose SHARED basecode/main.cpp)
 add_executable(moose.bin basecode/main.cpp)
+
 
 ################################### SETUP BUILD ################################
 
@@ -224,10 +228,6 @@ if(WITH_MPI)
         list(APPEND SYSTEM_SHARED_LIBS ${MPI_CXX_LIBRARIES})
     endif()
 endif(WITH_MPI)
-
-# Always use private version of muparser. We have some custom edits.
-add_subdirectory(external/muparser)
-list(APPEND MOOSE_LIBRARIES muparser)
 
 # Add subdirectroeis
 add_subdirectory(basecode)
@@ -368,9 +368,8 @@ endif()
 
 ############################ CTEST ######################################
 include( CTest )
-# If CTEST_OUTPUT_ON_FAILURE environment variable is set, the output is printed
-# onto the console if a test fails.
-set(ENV{CTEST_OUTPUT_ON_FAILURE} ON)
+set(CTEST_NIGHTLY_START_TIME "05:30:00 UTC")
+set(CTEST_SUBMIT_URL "http://my.cdash.org/submit.php?project=moose")
 
 if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     # Run this test in debug mode. In Release mode, this does not do anything.
@@ -380,33 +379,46 @@ if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     add_test(NAME moose.bin-raw-run COMMAND moose.bin -u -q)
 endif()
 
-## PyMOOSE tests.
-set(PYMOOSE_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/python)
-
-# Collect all python script in tests folder and run them.
+# PyMOOSE tests. These tests complete in reasonable time and should run by
+# default.
+set(PYMOOSE_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/py_moose)
 file(GLOB PY_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.py" )
-
-
-# Run python tests.
-foreach( _test_script ${PY_TEST_SCRIPTS} )
-    get_filename_component( _test_name ${_test_script} NAME_WE)
-    add_test( NAME ${_test_name}
+foreach(_test_script ${PY_TEST_SCRIPTS} )
+    get_filename_component(_name_we ${_test_script} NAME_WE)
+    set(_test_name "pymoose_${_name_we}")
+    add_test(NAME ${_test_name}
         COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
         WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY}
         )
-     set_tests_properties( ${_test_name}
+     set_tests_properties(${_test_name}
          PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python"
         )
 endforeach( )
 
-# Alpha tests. These should not run by default.
-set(MOOSE_ALPHA_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/alpha)
-file(GLOB PY_ALPHA_TEST_SCRIPTS "${PYMOOSE_ALPHA_TEST_DIRECTORY}/*.py" )
-foreach( _test_script ${PY_ALPHA_TEST_SCRIPTS} )
-    get_filename_component( _test_name ${_test_script} NAME_WE)
+# rdesigneur tests. These tests require matplotlib.
+set(RDES_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/py_rdesigneur) 
+file(GLOB RDES_TEST_SCRIPTS "${RDES_TEST_DIRECTORY}/test_*.py" )
+foreach(_test_script ${RDES_TEST_SCRIPTS})
+    get_filename_component(_name_we ${_test_script} NAME_WE)
+    set(_test_name "rdes_${_name_we}")
+    add_test(NAME ${_test_name}
+        COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
+        WORKING_DIRECTORY ${RDES_TEST_DIRECTORY}
+        )
+    set_tests_properties(${_test_name} PROPERTIES 
+        ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python;MOOSE_NUM_THREADS=4"
+        )
+endforeach()
+
+# FIXME TESTS. These should not run by default. We need to fix them.
+set(PYMOOSE_FIXME_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/fixme)
+file(GLOB PY_FIXME_TEST_SCRIPTS "${PYMOOSE_FIXME_TEST_DIRECTORY}/*.py" )
+foreach( _test_script ${PY_FIXME_TEST_SCRIPTS} )
+    get_filename_component( _name_we ${_test_script} NAME_WE)
+    set(_test_name "alpha_${_name_we}")
     add_test( NAME ${_test_name}
         COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
-	CONFIGURATIONS Devel
+        CONFIGURATIONS alpha
 	WORKING_DIRECTORY ${PYMOOSE_ALPHA_TEST_DIRECTORY}
         )
      set_tests_properties( ${_test_name}
@@ -415,25 +427,56 @@ foreach( _test_script ${PY_ALPHA_TEST_SCRIPTS} )
 endforeach( )
 
 # Regression and github issues. These should not run by default.
-set(PYMOOSE_ISSUES_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/issues)
+set(PYMOOSE_ISSUES_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/devel/issues)
 file(GLOB PY_ISSUES_SCRIPTS "${PYMOOSE_ISSUES_DIRECTORY}/*.py" )
-foreach( _test_script ${PY_ISSUES_SCRIPTS} )
+foreach(_test_script ${PY_ISSUES_SCRIPTS})
     get_filename_component( _test_name ${_test_script} NAME_WE)
-    add_test( NAME ${_test_name}
+    add_test(NAME ${_test_name}
         COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
 	CONFIGURATIONS Devel
 	WORKING_DIRECTORY ${PYMOOSE_ISSUES_DIRECTORY}
         )
-     set_tests_properties( ${_test_name}
+     set_tests_properties(${_test_name}
          PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python"
         )
-endforeach( )
+endforeach()
 
-# add pylint target.
-set(PYSCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python )
+############################ CPACK ######################################
+# This is not maintained anymore since packaging is done using OpenBuildService 
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_cpack.cmake)
+
+
+########################### RELEASE #########################################
+set(PYMOOSE_SDIST_FILE ${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.tar.gz)
+add_custom_target(sdist
+    COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --formats=gztar 
+        -d ${CMAKE_BINARY_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Creating sdist ${PYMOOSE_SDIST_FILE}" 
+    VERBATIM)
+
+add_custom_target(upload_test DEPENDS sdist
+    COMMAND ${PYTHON_EXECUTABLE} -m twine upload 
+        --user $ENV{PYMOOSE_PYPI_USER} --password $ENV{PYMOOSE_PYPI_PASSWORD}
+        --repository-url https://test.pypi.org/legacy/
+        ${PYMOOSE_SDIST_FILE}
+    COMMENT "Uploading source distribution to test.pypi.org"
+    VERBATIM)
+
+add_custom_target(upload DEPENDS sdist
+    COMMAND ${PYTHON_EXECUTABLE} -m twine upload 
+        --user $ENV{PYMOOSE_PYPI_USER} --password $ENV{PYMOOSE_PYPI_PASSWORD}
+        ${PYMOOSE_SDIST_FILE}
+    COMMENT "Uploading source distribution to PyPI"
+    VERBATIM)
+
+####################### DEVELOPMENT ########################################
+
+# PYLINT target.
+set(PYSCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/python)
 file(GLOB_RECURSE PY_SCRIPTS  "python/*.py")
-add_custom_target( pylint )
-foreach( _py_script ${PY_SCRIPTS} )
+add_custom_target(pylint)
+foreach(_py_script ${PY_SCRIPTS})
     get_filename_component( _py_name ${_py_script} NAME_WE)
     file( READ ${_py_script} pytext)
     string(MD5 _md5 "${pytext}")
@@ -451,30 +494,10 @@ foreach( _py_script ${PY_SCRIPTS} )
     add_dependencies(pylint ${TGT_NAME} )
 endforeach( )
 
-############################ CPACK ######################################
-# This is not maintained anymore since packaging is done using OpenBuildService 
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake_moose_cpack.cmake)
-
-
-########################### RELEASE #########################################
-set(PYMOOSE_SDIST_FILE ${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.tar.gz)
-add_custom_target(sdist
-    COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --formats=gztar 
-        -d ${CMAKE_BINARY_DIR}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Creating sdist ${PYMOOSE_SDIST_FILE}" 
-    VERBATIM)
-add_custom_target(upload_test DEPENDS sdist
-    COMMAND ${PYTHON_EXECUTABLE} -m twine upload 
-        --user $ENV{PYMOOSE_PYPI_USER} --password $ENV{PYMOOSE_PYPI_PASSWORD}
-        --repository-url https://test.pypi.org/legacy/
-        ${PYMOOSE_SDIST_FILE}
-    COMMENT "Uploading source distribution to test.pypi.org"
-    VERBATIM)
-
-add_custom_target(upload DEPENDS sdist
-    COMMAND ${PYTHON_EXECUTABLE} -m twine upload 
-        --user $ENV{PYMOOSE_PYPI_USER} --password $ENV{PYMOOSE_PYPI_PASSWORD}
-        ${PYMOOSE_SDIST_FILE}
-    COMMENT "Uploading source distribution to PyPI"
+# Replicate Travis-CI building using docker
+add_custom_target(docker
+    COMMAND docker build -t bhallalab/travis:latest
+        -f ${CMAKE_CURRENT_SOURCE_DIR}/devel/docker/travis/Dockerfile .
+    COMMENT "Replicating Travis-CI building using Docker."
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     VERBATIM)

@@ -14,11 +14,13 @@
 #include "KinSparseMatrix.h"
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
+#include "../builtins/MooseParser.h"
 #include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
 
-#include "../external/muparser/include/muParser.h"
+#include "../builtins/MooseParser.h"
+#include "../utility/testing_macros.hpp"
 
 /**
  * Tab controlled by table
@@ -102,16 +104,15 @@ Id makeReacTest()
     Field< double >::set( e2, "kcat", 1 );
     vector< double > stim( 100, 0.0 );
     double vol = Field< double >::get( kin, "volume" );
-    for ( unsigned int i = 0; i< 100; ++i )
-    {
-        stim[i] = vol * NA * (1.0 + sin( i * 2.0 * PI / 100.0 ) );
-    }
+
+    for(unsigned int i = 0; i < 100; ++i)
+        stim[i] = vol*NA*(1.0+sin(i*2.0*PI/100.0));
+
     Field< vector< double > >::set( tab, "vector", stim );
     Field< double >::set( tab, "stepSize", 0.0 );
     Field< double >::set( tab, "stopTime", 10.0 );
     Field< double >::set( tab, "loopTime", 10.0 );
     Field< bool >::set( tab, "doLoop", true );
-
 
     // Connect outputs
     for ( unsigned int i = 0; i < 7; ++i )
@@ -310,24 +311,24 @@ void testRunGsolve()
 void testFuncTerm()
 {
     FuncTerm ft;
-    ft.setExpr( "x0 + x1 * t" );
-    double args[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    double args[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
     // First check that it doesn't die even if we forget to set up anything.
-    double ans = ft( args, 2.0 );
-
-    vector< unsigned int > mol( 2, 0 );
+    double ans = ft(args, 2.0);
+    vector< unsigned int > mol(2, 0);
     mol[0] = 2;
     mol[1] = 0;
-    ft.setReactantIndex( mol );
+    ft.setReactantIndex(mol);
+    
+    ft.setExpr("x0+x1*t");
+    ans = ft(args, 10.0);
+    assert(doubleEq(ans, 13.0));
 
-    ans = ft( args, 10.0 );
-    assert( doubleEq( ans, 13.0 ) );
     mol[0] = 0;
     mol[1] = 9;
-    ft.setReactantIndex( mol );
-    ans = ft( args, 2.0 );
-    assert( doubleEq( ans, 21.0 ) );
+    ft.setReactantIndex(mol);
+    ans = ft(args, 2.0);
+    ASSERT_EQ(21.0, ans, "testFuncTerm");
     cout << "." << flush;
 }
 

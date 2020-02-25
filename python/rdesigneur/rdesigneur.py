@@ -16,7 +16,7 @@
 ## latter in the former, including mapping entities like calcium and
 ## channel conductances, between them.
 ##########################################################################
-from __future__ import print_function, absolute_import 
+from __future__ import print_function, absolute_import, division
 
 import imp
 import os
@@ -44,6 +44,19 @@ except ImportError:
 import csv
 
 #EREST_ACT = -70e-3
+
+def _profile(func):
+    """
+    Can be used to profile a function. Useful in debugging and profiling.
+    Author: Dilawar Singh
+    """
+    def wrap(self=None, *args, **kwargs):
+        t0 = time.time()
+        result = func(self, *args, **kwargs)
+        print("[INFO ] Took %s sec" % (time.time()-t0))
+        return result
+    return wrap
+        
 
 class BuildError(Exception):
     def __init__(self, value):
@@ -116,7 +129,9 @@ class rdesigneur:
         self.addEndoChemCompt = addEndoChemCompt
         self.diffusionLength= diffusionLength
         if meshLambda > 0.0:
-            print("Warning: meshLambda argument is deprecated. Please use 'diffusionLength' instead.\nFor now rdesigneur will accept this argument.")
+            print("Warning: meshLambda argument is deprecated. Please use "
+                    "'diffusionLength' instead.\nFor now rdesigneur will "
+                    "accept this argument.")
             self.diffusionLength = meshLambda
         self.temperature = temperature
         self.chemDt= chemDt
@@ -148,7 +163,6 @@ class rdesigneur:
             print("Error: rdesigneur: " + msg)
             quit()
 
-        #self.saveList = plotList                    #ADDED BY Sarthak
         self.saveAs = []
         self.plotNames = []
         self.wavePlotNames = []
@@ -175,16 +189,16 @@ class rdesigneur:
     def _printModelStats( self ):
         if not self.verbose:
             return
-        print("\nRdesigneur: Elec model has",
+        print("Rdesigneur: Elec model has",
             self.elecid.numCompartments, "compartments and",
             self.elecid.numSpines, "spines on",
             len( self.cellPortionElist ), "compartments.")
         if hasattr( self , 'chemid') and len( self.chemDistrib ) > 0:
-            dmstoich = moose.element( self.dendCompt.path + '/stoich' )
-            print("\tChem part of model has the following compartments: ")
+            #  dmstoich = moose.element( self.dendCompt.path + '/stoich' )
+            print("    Chem part of model has the following compartments: ")
             for j in moose.wildcardFind( '/model/chem/##[ISA=ChemCompt]'):
                 s = moose.element( j.path + '/stoich' )
-                print( "\t | In {}, {} voxels X {} pools".format( j.name, j.mesh.num, s.numAllPools ) )
+                print( "    | In {}, {} voxels X {} pools".format( j.name, j.mesh.num, s.numAllPools ) )
 
     def buildModel( self, modelPath = '/model' ):
         if moose.exists( modelPath ):
@@ -193,28 +207,28 @@ class rdesigneur:
             return
         self.model = moose.Neutral( modelPath )
         self.modelPath = modelPath
-        funcs = [ self.installCellFromProtos, self.buildPassiveDistrib
+        funcs = [self.installCellFromProtos, self.buildPassiveDistrib
             , self.buildChanDistrib, self.buildSpineDistrib, self.buildChemDistrib
             , self._configureSolvers, self.buildAdaptors, self._buildStims
             , self._buildPlots, self._buildMoogli, self._configureHSolve
-            , self._configureClocks, self._printModelStats 
-            ]
-        for i, _func in enumerate( funcs ):
+            , self._configureClocks, self._printModelStats]
+
+        for i, _func in enumerate(funcs):
             if self.benchmark:
-                print( " + (%d/%d) executing %25s"%(i, len(funcs), _func.__name__), end=' ' )
+                print("- (%02d/%d) Executing %25s"%(i+1, len(funcs), _func.__name__), end=' ' )
             t0 = time.time()
             try:
-                _func( )
+                _func()
             except BuildError as msg:
                 print("Error: rdesigneur: model build failed:", msg)
-                moose.delete( self.model )
+                moose.delete(self.model)
                 return
             t = time.time() - t0
             if self.benchmark:
                 msg = r'    ... DONE'
-                if t > 1:
+                if t > 0.1:
                     msg += ' %.3f sec' % t
-                print( msg )
+                print(msg)
             sys.stdout.flush()
 
     def installCellFromProtos( self ):
@@ -775,9 +789,9 @@ rdesigneur.rmoogli.updateMoogliViewer()
         moose.reinit()
         moose.start( runtime )
         if block:
-            self.display( len( self.moogNames ) + 1 )
+            self.display( len( self.moogNames ) + 1)
 
-    def display( self, startIndex = 0 ):
+    def display( self, startIndex = 0, block=True ):
         for i in self.plotNames:
             plt.figure( i[2] + startIndex )
             plt.title( i[1] )
@@ -803,7 +817,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
         if len( self.wavePlotNames ) > 0:
             for i in range( 3 ):
                 self.displayWavePlots()
-        plt.show( block=True )
+        plt.show( block=block )
         self._save()                                            
         
 
@@ -815,7 +829,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             if len( vtab ) < 2:
                 print( "Warning: Waveplot {} abandoned, only {} points".format( i[1], len( vtab ) ) )
                 continue
-            dFrame = len( vtab[0].vector ) / self.numWaveFrames
+            dFrame = len( vtab[0].vector ) // self.numWaveFrames
             if dFrame < 1:
                 dFrame = 1
             vpts = np.array( [ [k.vector[j] for j in range( 0, len( k.vector ), dFrame ) ] for k in vtab] ).T * i[3]
@@ -1568,7 +1582,6 @@ class rmoog( baseplot ):
         else:
             raise BuildError( "rmoog initialization failed" )
 
-        # Stimlist = [path, geomExpr, relPath, field, expr_string]
 class rstim( baseplot ):
     def __init__( self,
             elecpath = 'soma', geom_expr = '1', relpath = '.', field = 'inject', expr = '0'):

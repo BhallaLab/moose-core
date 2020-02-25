@@ -78,6 +78,7 @@ import collections
 import moose
 from moose.chemUtil.chemConnectUtil import *
 from moose.SBML.validation import validateModel
+import moose.print_utils as pu
 import re
 import os
 
@@ -93,17 +94,15 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
     """
     global foundLibSBML_
     if not foundLibSBML_:
-        print('No python-libsbml found.'
-            '\nThis module can be installed by following command in terminal:'
-            '\n\t easy_install python-libsbml'
-            '\n\t apt-get install python-libsbml'
+        print('[WARN] No python-libsbml found.'
+            '\nThis module can be installed by using `pip` in terminal:'
+            '\n\t $ pip install python-libsbml --user'
             )
         return moose.element('/')
 
     if not os.path.isfile(filepath):
-        print('%s is not found ' % filepath)
+        pu.warn('%s is not found ' % filepath)
         return moose.element('/')
-
 
     with open(filepath, "r") as filep:
         loadpath  = loadpath[loadpath.find('/')+1:]
@@ -120,11 +119,11 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
         if tobecontinue:
             level = document.getLevel()
             version = document.getVersion()
-            print(("\n" + "File: " + filepath + " (Level " +
-                   str(level) + ", version " + str(version) + ")"))
+            pu.info("File: " + filepath + " (Level " +
+                   str(level) + ", version " + str(version) + ")")
             model = document.getModel()
-            if (model is None):
-                print("No model present.")
+            if model is None:
+                pu.error("No model present.")
                 return moose.element('/')
             else:
                 
@@ -183,45 +182,45 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
                         # as while reading in GUI the model will show up untill
                         # built which is not correct print "Deleted rest of the
                         # model"
-                        print((" model: " + str(model)))
-                        print(("functionDefinitions: " +
-                            str(model.getNumFunctionDefinitions())))
-                        print(("    unitDefinitions: " +
-                            str(model.getNumUnitDefinitions())))
-                        print(("   compartmentTypes: " +
-                               str(model.getNumCompartmentTypes())))
-                        print(("        specieTypes: " +
-                               str(model.getNumSpeciesTypes())))
-                        print(("       compartments: " +
-                               str(model.getNumCompartments())))
-                        print(("            species: " +
-                               str(model.getNumSpecies())))
-                        print(("         parameters: " +
-                               str(model.getNumParameters())))
-                        print((" initialAssignments: " +
-                               str(model.getNumInitialAssignments())))
-                        print(("              rules: " +
-                               str(model.getNumRules())))
-                        print(("        constraints: " +
-                               str(model.getNumConstraints())))
-                        print(("          reactions: " +
-                               str(model.getNumReactions())))
-                        print(("             events: " +
-                               str(model.getNumEvents())))
+                        print(" model: " + str(model))
+                        print("functionDefinitions: " +
+                            str(model.getNumFunctionDefinitions()))
+                        print("    unitDefinitions: " +
+                            str(model.getNumUnitDefinitions()))
+                        print("   compartmentTypes: " +
+                               str(model.getNumCompartmentTypes()))
+                        print("        specieTypes: " +
+                               str(model.getNumSpeciesTypes()))
+                        print("       compartments: " +
+                               str(model.getNumCompartments()))
+                        print("            species: " +
+                               str(model.getNumSpecies()))
+                        print("         parameters: " +
+                               str(model.getNumParameters()))
+                        print(" initialAssignments: " +
+                               str(model.getNumInitialAssignments()))
+                        print("              rules: " +
+                               str(model.getNumRules()))
+                        print("        constraints: " +
+                               str(model.getNumConstraints()))
+                        print("          reactions: " +
+                               str(model.getNumReactions()))
+                        print("             events: " +
+                               str(model.getNumEvents()))
                         print("\n")
                         moose.delete(basePath)
                         loadpath = moose.Shell('/')
-            #return basePath, ""
+
             loaderror = msgCmpt+str(msgRule)+msgReac+noRE
             if loaderror != "":
                 loaderror = loaderror
             return moose.element(loadpath), loaderror
         else:
-            print("Validation failed while reading the model."+"\n"+errorFlag)
+            print("Validation failed while reading the model.\n"+errorFlag)
             if errorFlag != "":
-                return moose.element('/'),errorFlag
+                return moose.element('/'), errorFlag
             else:
-                return moose.element('/'), "This document is not valid SBML"
+                return moose.element('/'), "This document is not a valid SBML"
 
 def checkFuncDef(model):
     funcDef = {}

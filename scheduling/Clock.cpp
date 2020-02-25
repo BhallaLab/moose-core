@@ -734,7 +734,9 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
         unsigned long endStep = currentStep_ + stride_;
         currentTime_ = info_.currTime = dt_ * endStep;
 
-#if PARALLELIZE_CLOCK_USING_CPP11_ASYNC
+#if 0
+
+//#if PARALLELIZE_CLOCK_USING_CPP11_ASYNC
 
         // NOTE: It does not produce very promising results. The challenge here
         // is doing load-balancing.
@@ -748,8 +750,7 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
 
         for( unsigned int i = 0; i < numThreads_; ++i  )
         {
-            std::async( std::launch::async
-                        , [this,blockSize,i,nTasks,endStep,e]
+            std::async( std::launch::async, [this,blockSize,i,nTasks,endStep,e]
             {
                 unsigned int mapI = i * blockSize;
                 // Get the block we want to run in paralle.
@@ -764,7 +765,7 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
                     mapI++;
                 }
             }
-                      );
+          );
         }
 #else
         vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
