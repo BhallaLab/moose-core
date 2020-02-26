@@ -357,6 +357,10 @@ Function& Function::operator=(const Function& rhs)
 
 Function::~Function()
 {
+    for(auto y: ys_) 
+    {
+        if(y) delete y;
+    }
 }
 
 
