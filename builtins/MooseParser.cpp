@@ -42,6 +42,7 @@ MooseParser::MooseParser()
 
 MooseParser::~MooseParser()
 {
+    expression_->release();
 }
 
 /*-----------------------------------------------------------------------------
