@@ -134,7 +134,7 @@ def main():
     for x in moose.wildcardFind( '/model/graphs/gssa/#' ):
         data.append(x.vector)
     gssa = np.array(data)
-    assert abs(conc - gssa).sum() < 0.1, conc - gssa
+    assert abs(conc - gssa).sum() < 0.15, (conc - gssa).sum()
     assert gssa.shape == conc.shape == gsl.shape == ee.shape 
 
     print('all done')
