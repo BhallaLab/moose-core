@@ -88,9 +88,8 @@ def test():
     assert np.allclose(m, E[0], rtol=1e-2, atol=1e-4), (m - E[0])
     # standard deviation could be very low in some cases.
     print(np.sum(abs(s-E[1])) )
-    assert np.sum(abs(s-E[1])) < 1e-3
+    assert np.sum(abs(s-E[1])) < 1e-2, "Got %s" % np.sum(abs(s-E[1]))
     print('done')
-
 
 if __name__ == '__main__':
     test()
