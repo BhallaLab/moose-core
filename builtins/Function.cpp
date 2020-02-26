@@ -349,15 +349,14 @@ Function& Function::operator=(const Function& rhs)
         for(auto y: rhs.ys_)
             ys_.push_back(shared_ptr<double>(new double(0.0)));
 
-        parser_->LinkVariables(xs_, ys_, &t_);
-        parser_->SetExpr(rhs.parser_->GetExpr());
+        parser_.LinkVariables(xs_, ys_, &t_);
+        parser_.SetExpr(rhs.parser_.GetExpr());
     }
     return *this;
 }
 
 Function::~Function()
 {
-    parser_->Reset();
 }
 
 
@@ -399,7 +398,7 @@ void Function::addVariable(const string& name)
 
         // This must be true.
         if(  xs_[index] )
-            parser_->DefineVar(name, xs_[index]->ref());
+            parser_.DefineVar(name, xs_[index]->ref());
         else
             throw runtime_error( "Empty Variable." );
         numVar_ = xs_.size();
@@ -415,10 +414,10 @@ void Function::addVariable(const string& name)
             for (size_t i = ys_.size(); i <= (size_t) index; i++)
                 ys_.push_back(shared_ptr<double>(new double(0.0)));
         }
-        parser_->DefineVar(name, ys_[index].get());
+        parser_.DefineVar(name, ys_[index].get());
     }
     else if (name == "t")
-        parser_->DefineVar("t", &t_);
+        parser_.DefineVar("t", &t_);
     else
     {
         MOOSE_WARN( "Got an undefined symbol: " << name << endl
@@ -449,7 +448,7 @@ void Function::setExpr(const Eref& eref, const string expression)
         return;
     }
 
-    if(valid_ && expr == parser_->GetExpr())
+    if(valid_ && expr == parser_.GetExpr())
     {
         MOOSE_WARN( "No change in expression.");
         return;
@@ -485,7 +484,7 @@ bool Function::innerSetExpr(const Eref& eref, const string expr)
 
     // Set parser expression. Note that the symbol table is popultated by
     // addVariable function above.
-    return parser_->SetExpr( expr );
+    return parser_.SetExpr( expr );
 }
 
 string Function::getExpr( const Eref& e ) const
@@ -493,10 +492,10 @@ string Function::getExpr( const Eref& e ) const
     if (!valid_)
     {
         cout << "Error: " << e.objId().path() << "::getExpr() - invalid parser state" << endl;
-        cout << "\tExpression was : " << parser_->GetExpr() << endl;
+        cout << "\tExpression was : " << parser_.GetExpr() << endl;
         return "";
     }
-    return parser_->GetExpr();
+    return parser_.GetExpr();
 }
 
 void Function::setMode(unsigned int mode)
@@ -531,7 +530,7 @@ bool Function::getDoEvalAtReinit() const
 
 double Function::getValue() const
 {
-    return parser_->Eval( );
+    return parser_.Eval( );
 }
 
 
@@ -572,7 +571,7 @@ double Function::getDerivative() const
         cout << "Error: Function::getDerivative() - invalid state" << endl;
         return value;
     }
-    return parser_->Derivative(independent_);
+    return parser_.Derivative(independent_);
 }
 
 void Function::setNumVar(const unsigned int num)
@@ -610,12 +609,12 @@ Variable * Function::getVar(unsigned int ii)
 
 void Function::setConst(string name, double value)
 {
-    parser_->DefineConst(name.c_str(), value);
+    parser_.DefineConst(name.c_str(), value);
 }
 
 double Function::getConst(string name) const
 {
-    moose::Parser::varmap_type cmap = parser_->GetConst();
+    moose::Parser::varmap_type cmap = parser_.GetConst();
     if (! cmap.empty() )
     {
         moose::Parser::varmap_type::const_iterator it = cmap.find(name);
@@ -642,7 +641,7 @@ void Function::process(const Eref &e, ProcPtr p)
 
 #ifdef DEBUG_THIS_FILE
     cout << "t= " << t_  << " value: " << getValue() << ", expr: " 
-        << parser_->GetExpr() << endl;
+        << parser_.GetExpr() << endl;
 #endif
 
     for (size_t ii = 0; (ii < databuf.size()) && (ii < ys_.size()); ++ii)
@@ -684,10 +683,10 @@ void Function::process(const Eref &e, ProcPtr p)
 
 void Function::reinit(const Eref &e, ProcPtr p)
 {
-    if (! (valid_ || parser_->GetExpr().empty()))
+    if (! (valid_ || parser_.GetExpr().empty()))
     {
         cout << "Error: " << e.objId().path() << "::reinit() - invalid parser state" << endl;
-        cout << " Expr: '" << parser_->GetExpr() << "'" << endl;
+        cout << " Expr: '" << parser_.GetExpr() << "'" << endl;
         return;
     }
 

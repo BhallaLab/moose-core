@@ -42,7 +42,6 @@ MooseParser::MooseParser()
 
 MooseParser::~MooseParser()
 {
-    expression_->release();
 }
 
 /*-----------------------------------------------------------------------------
@@ -95,7 +94,6 @@ const Parser::symbol_table_t& MooseParser::GetSymbolTable() const
 {
     return expression_.get_symbol_table();
 }
-
 
 double MooseParser::GetVarValue(const string& name) const
 {
