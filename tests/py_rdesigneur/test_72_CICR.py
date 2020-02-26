@@ -86,6 +86,9 @@ def test():
     # In multithreaded mode, the numers are not exactly the same as in
     # expected.
     assert np.allclose(m, E[0], rtol=1e-2, atol=1e-4), (m - E[0])
+    # standard deviation could be very low in some cases.
+    s[s < 1e-10] = 0
+    E[1][E[1] < 1e-10] = 0
     assert np.allclose(s, E[1], rtol=1e-2, atol=1e-4), (s - E[1])
     print('done')
 
