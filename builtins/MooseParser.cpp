@@ -23,9 +23,7 @@ using namespace std;
 namespace moose
 {
 
-MooseParser::MooseParser() : 
-    expression_(new  moose::Parser::expression_t())
-    , symbol_tables_registered_(false)
+MooseParser::MooseParser()
 {
     Parser::symbol_table_t symbol_table;
 
@@ -39,8 +37,7 @@ MooseParser::MooseParser() :
     symbol_table.add_function( "srand2", MooseParser::SRand2 );
     symbol_table.add_function( "fmod", MooseParser::Fmod );
 
-    expression_->register_symbol_table(symbol_table);
-
+    expression_.register_symbol_table(symbol_table);
 }
 
 MooseParser::~MooseParser()
@@ -88,9 +85,14 @@ double MooseParser::Fmod( double a, double b )
 /*-----------------------------------------------------------------------------
  *  Get/Set
  *-----------------------------------------------------------------------------*/
-Parser::symbol_table_t& MooseParser::GetSymbolTable( ) const
+Parser::symbol_table_t& MooseParser::GetSymbolTable()
 {
-    return expression_->get_symbol_table();
+    return expression_.get_symbol_table();
+}
+
+const Parser::symbol_table_t& MooseParser::GetSymbolTable() const
+{
+    return expression_.get_symbol_table();
 }
 
 double MooseParser::GetVarValue(const string& name) const
@@ -210,7 +212,7 @@ bool MooseParser::CompileExpr()
     ASSERT_FALSE(expr_.empty(), __func__ << ": Empty expression not allowed here");
 
     Parser::parser_t  parser;
-    auto res = parser.compile(expr_, *expression_);
+    auto res = parser.compile(expr_, expression_);
     if(! res)
     {
         std::stringstream ss;
@@ -239,14 +241,14 @@ bool MooseParser::CompileExpr()
 
 double MooseParser::Derivative(const string& name) const
 {
-    return exprtk::derivative(*expression_, name);
+    return exprtk::derivative(expression_, name);
 }
 
 double MooseParser::Eval(bool check) const
 {
     if( expr_.empty())
         return 0.0;
-    double v = expression_->value();
+    double v = expression_.value();
     if(check)
     {
         if(! std::isfinite(v)) 
@@ -278,12 +280,17 @@ Parser::varmap_type MooseParser::GetConst( ) const
 
 void MooseParser::ClearVariables( )
 {
-    GetSymbolTable().clear_variables(false);
+    GetSymbolTable().clear_variables();
 }
 
 void MooseParser::ClearAll( )
 {
     ClearVariables();
+}
+
+void MooseParser::Reset( )
+{
+    expression_.release();
 }
 
 const string MooseParser::GetExpr( ) const
@@ -301,6 +308,18 @@ void MooseParser::LinkVariables(vector<Variable*>& xs, vector<double*>& ys, doub
 
     DefineVar("t", t);
 }
+
+void MooseParser::LinkVariables(vector<shared_ptr<Variable>>& xs, vector<shared_ptr<double>>& ys, double* t)
+{
+    for(size_t i = 0; i < xs.size(); i++)
+        DefineVar('x'+to_string(i), xs[i]->ref());
+
+    for (size_t i = 0; i < ys.size(); i++) 
+        DefineVar('y'+to_string(i), ys[i].get());
+
+    DefineVar("t", t);
+}
+
 
 
 } // namespace moose.

@@ -84,11 +84,7 @@ elseif(ENABLE_UNIT_TESTS)
 else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
-		add_definitions(-UDO_UNIT_TESTS -O3 -DDISABLE_DEBUG)
-
-    # DO NOT Treat all warnings as errors. With some compilers and newer versions
-    # this often causes headache.
-    # add_definitions(-Werror)
+    add_definitions(-UDO_UNIT_TESTS -O3 -DDISABLE_DEBUG)
 endif()
 
 if(GPROF AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
@@ -160,20 +156,11 @@ if(WITH_GSL)
             "====================================================================\n"
             )
     endif(NOT GSL_FOUND)
-    add_definitions(-DUSE_GSL)
-    # GSL is also used in RNG (whenever applicable), therefore include paths are
-    # top level.
-    include_directories( ${GSL_INCLUDE_DIRS} )
 elseif(WITH_BOOST_ODE)
     find_package(Boost 1.53 REQUIRED)
     find_package(LAPACK REQUIRED)
 endif()
 
-# if boost ode is being used, don't use GSL.
-if(WITH_BOOST_ODE)
-    add_definitions(-DUSE_BOOST_ODE -UUSE_GSL)
-    include_directories(${Boost_INCLUDE_DIRS})
-endif()
 
 # Openmpi
 if(WITH_MPI)

@@ -9,6 +9,9 @@
 set -e
 set -x
 
+BUILDDIR=_build_travis
+mkdir -p $BUILDDIR
+
 PYTHON2="/usr/bin/python2"
 PYTHON3="/usr/bin/python3"
 
@@ -32,32 +35,36 @@ $PYTHON3 -m compileall -q .
 
 # Python3 with GSL in debug more.
 (
-    mkdir -p _GSL_BUILD_PY3 && cd _GSL_BUILD_PY3 && \
+    mkdir -p $BUILDDIR && cd $BUILDDIR && \
         cmake -DPYTHON_EXECUTABLE=$PYTHON3 \
         -DCMAKE_INSTALL_PREFIX=/usr -DDEBUG=ON ..
-    # Don't run test_long prefix. They take very long time in DEBUG mode.
-    $MAKE && MOOSE_NUM_THREADS=$NPROC ctest -j$NPROC --output-on-failure -E ".*test_long*"
+    $MAKE
+    # Run with valgrind to log any memory leak.
+    valgrind --leak-check=full ./moose.bin -q -u 
+
+    # Run all tests in debug mode.
+    MOOSE_NUM_THREADS=$NPROC ctest -j$NPROC --output-on-failure 
     make install || sudo make install 
     cd /tmp
     $PYTHON3 -c 'import moose;print(moose.__file__);print(moose.version())'
 )
 
-# BOOST and python3
-(
-    mkdir -p _BOOST_BUILD_PY3 && cd _BOOST_BUILD_PY3 && \
-        cmake -DWITH_BOOST_ODE=ON -DPYTHON_EXECUTABLE="$PYTHON3" \
-        -DCMAKE_INSTALL_PREFIX=/usr ..
-    $MAKE && MOOSE_NUM_THREADS=$NPROC ctest -j$NPROC --output-on-failure 
-)
-
 # GSL and python2, failure is allowed
 set +e
 (
-    BUILDDIR=_GSL_PY2
     mkdir -p $BUILDDIR && cd $BUILDDIR && \
         cmake -DPYTHON_EXECUTABLE=$PYTHON2 -DCMAKE_INSTALL_PREFIX=/usr ..
     $MAKE && MOOSE_NUM_THREADS=$NPROC ctest -j$NPROC --output-on-failure
 )
 set -e
+
+
+# BOOST and python3
+(
+    mkdir -p $BUILDDIR && cd $BUILDDIR && \
+        cmake -DWITH_BOOST_ODE=ON -DPYTHON_EXECUTABLE="$PYTHON3" \
+        -DCMAKE_INSTALL_PREFIX=/usr ..
+    $MAKE && MOOSE_NUM_THREADS=$NPROC ctest -j$NPROC --output-on-failure 
+)
 
 echo "All done"

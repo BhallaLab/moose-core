@@ -96,7 +96,7 @@ def main( nthreads = 1 ):
 if __name__ == '__main__':
     import multiprocessing
     import sys
-    nT = int(multiprocessing.cpu_count()/2)
+    nT = max(1, int(multiprocessing.cpu_count()))
     if len(sys.argv) > 1:
         nT = int(sys.argv[1])
     t2 = main( nT )

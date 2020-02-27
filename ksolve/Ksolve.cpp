@@ -238,6 +238,7 @@ Ksolve::Ksolve()
     dsolvePtr_( nullptr )
 {
     numThreads_ = moose::getEnvInt("MOOSE_NUM_THREADS", 1);
+
 }
 
 Ksolve::~Ksolve()

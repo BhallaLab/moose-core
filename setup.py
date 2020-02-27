@@ -20,6 +20,7 @@ __email__      = "dilawar.s.rajput@gmail.com"
 
 import os
 import sys
+import multiprocessing
 import subprocess
 import datetime
 
@@ -46,12 +47,7 @@ builddir_ = os.path.join(sdir_, '_temp__build')
 if not os.path.exists(builddir_):
     os.makedirs(builddir_)
 
-numCores_ = 2
-try:
-    # Python3 only.
-    numCores_ = os.cpu_count()
-except Exception:
-    pass
+numCores_ = multiprocessing.cpu_count()
 
 
 version_ = '3.2.1.dev%s' % stamp
@@ -84,7 +80,7 @@ class TestCommand(Command):
     def run(self):
         print("[INFO ] Running tests... ")
         os.chdir(builddir_)
-        self.spawn(["ctest", "--output-on-failure", '-j2'])
+        self.spawn(["ctest", "--output-on-failure", '-j%d'%numCores_])
         os.chdir(sdir_)
 
 

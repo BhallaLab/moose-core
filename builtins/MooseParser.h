@@ -60,7 +60,8 @@ public:
     /*-----------------------------------------------------------------------------
      *  Set/Get
      *-----------------------------------------------------------------------------*/
-    Parser::symbol_table_t& GetSymbolTable( ) const;
+    Parser::symbol_table_t& GetSymbolTable();
+    const Parser::symbol_table_t& GetSymbolTable() const;
 
     void SetSymbolTable( Parser::symbol_table_t tab );
 
@@ -84,9 +85,10 @@ public:
     static void findXsYs(const string& expr, set<string>& xs, set<string>& ys);
 
     void LinkVariables(vector<Variable*>& xs_, vector<double*>& ys_, double* t);
+    void LinkVariables(vector<shared_ptr<Variable>>& xs_, vector<shared_ptr<double>>& ys_, double* t);
 
-    double Eval(bool check=false)
-        const;
+    double Eval(bool check=false) const;
+
     double Derivative(const string& name) const;
 
     double Diff( const double a, const double b) const;
@@ -97,6 +99,7 @@ public:
 
     void ClearVariables( );
     void ClearAll( );
+    void Reset( );
 
     const string GetExpr( ) const;
 
@@ -120,9 +123,8 @@ public:
     /* Map to variable names and pointer to their values. */
     // map<string, double*> refs_;
 
-    Parser::expression_t* expression_;     /* expression type */
+    Parser::expression_t expression_;     /* expression type */
     size_t num_user_defined_funcs_ = 0;
-
     bool symbol_tables_registered_;
 };
 

@@ -13,21 +13,8 @@ build:
     - apt -y install python3-numpy python3-matplotlib python3-pip python3-dev
     - apt -y install python-numpy python-matplotlib python-pip python-dev
   script:
-    - python3 setup.py install
     - python3 -m pip install setuptools pip --user --upgrade
-    - python2 setup.py install 
-    - python2 -m pip install setuptools pip --user --upgrade
-    - python3 setup.py sdist
-  artifacts:
-    paths:
-      - mybinary
-      # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
-      # cache:
-      #   paths:
-      #     - "*.o"
-
-# run tests using the binary built before
-test:
-  stage: test
-  script:
-    - python3 setup.py test
+    - python3 -m pip install pyneuroml --user --upgrade
+    - python3 setup.py build test 
+    - python3 setup.py install --user
+    - python3 -c "import moose; moose.test()"

@@ -70,7 +70,7 @@ using namespace std;
 #endif
 
 #define MOOSE_WARN( a ) { \
-    stringstream ss; ss << a; \
+    stringstream ss; ss << __func__ << ": " << a; \
     moose::showWarn( ss.str() ); \
     }
 
