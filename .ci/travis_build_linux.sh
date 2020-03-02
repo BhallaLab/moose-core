@@ -21,6 +21,9 @@ $PYTHON2 -m pip install libNeuroML pyNeuroML python-libsbml --upgrade --user
 $PYTHON3 -m pip install pip --upgrade --user
 $PYTHON3 -m pip install libNeuroML pyNeuroML python-libsbml --upgrade --user
 
+# sympy is only needed for pretty-priting for one test.
+$PYTHON3 -m pip install sympy --upgrade --user   
+
 NPROC=$(nproc)
 MAKE="make -j$NPROC"
 
