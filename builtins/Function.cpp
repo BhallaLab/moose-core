@@ -115,6 +115,15 @@ const Cinfo * Function::initCinfo()
         &Function::getDoEvalAtReinit
     );
 
+    static ValueFinfo< Function, bool > allowUnknownVariable(
+        "allowUnknownVariable",
+        "When *false*, expression can only have ci, xi, yi and t."
+        "When set to *true*, expression can have arbitrary names."
+        "Defaults to *true*. \n",
+        &Function::setAllowUnknownVariable,
+        &Function::getAllowUnknowVariable
+    );
+
     static ElementValueFinfo< Function, string > expr(
         "expr",
         "Mathematical expression defining the function. The underlying parser\n"
@@ -258,6 +267,7 @@ const Cinfo * Function::initCinfo()
         &mode,
         &useTrigger,
         &doEvalAtReinit,
+        &allowUnknownVariable,
         &expr,
         &numVars,
         &inputs,
@@ -324,8 +334,9 @@ Function::Function():
     , mode_(1)
     , useTrigger_(false)
     , doEvalAtReinit_(false)
+    , allowUnknownVar_(true)
     , t_(0.0)
-    , independent_("x0")
+    , independent_("t")
     , stoich_(nullptr)
     , parser_(shared_ptr<moose::MooseParser>(new moose::MooseParser()))
 {
@@ -345,6 +356,8 @@ Function& Function::operator=(const Function& rhs)
     value_ = rhs.value_;
     mode_ = rhs.mode_;
     useTrigger_ = rhs.useTrigger_;
+    doEvalAtReinit_ = rhs.doEvalAtReinit_;
+    allowUnknownVar_ = rhs.allowUnknownVar_;
     t_ = rhs.t_;
     rate_ = rhs.rate_;
 
@@ -357,16 +370,18 @@ Function& Function::operator=(const Function& rhs)
     parser_->ClearAll();
     if(rhs.parser_->GetExpr().size() > 0)
     {
+        // These are alreay indexed. So its OK to add them by name.
         for(auto x: rhs.xs_)
-            addXByName(x->getName());
+        {
+            xs_.push_back(shared_ptr<Variable>(new Variable(x->getName())));
+            varIndex_[x->getName()] = xs_.size()-1;
+        }
+        // Add all the Ys now.
         for(size_t i=0; i < rhs.ys_.size(); i++)
-            addY(i);
-        parser_->DefineVar("t", &t_);
+            ys_.push_back(shared_ptr<double>(new double(0.0)));
+        parser_->LinkVariables(xs_, ys_, &t_);
         parser_->SetExpr(rhs.parser_->GetExpr());
     }
-
-    numVar_ = rhs.numVar_;
-
     return *this;
 }
 
@@ -388,6 +403,9 @@ void Function::addXByIndex(const unsigned int index)
 {
     // We have only xi's in xs_.
     string name = 'x'+to_string(index);
+    if(symbolExists(name))
+        return;
+
     if(index >= xs_.size())
     {
         for(size_t i = xs_.size(); i <= index; i++) 
@@ -403,18 +421,12 @@ void Function::addXByIndex(const unsigned int index)
 
 void Function::addXByName(const string& name)
 {
+    if(symbolExists(name))
+        return;
     xs_.push_back(shared_ptr<Variable>(new Variable(name)));
     parser_->DefineVar(name, xs_.back()->ref());
     varIndex_[name] = xs_.size()-1;
     numVar_ = varIndex_.size();
-}
-
-void Function::addCustomVariable(const string& name)
-{
-    if(name == "t")
-        parser_->DefineVar("t", &t_);
-    else
-        addXByName(name);
 }
 
 void Function::addY(const unsigned int index)
@@ -446,20 +458,18 @@ void Function::addVariable(const string& name)
 
     if(XVAR_INDEX == vtype)
     {
-        addXByName(name);
+        addXByIndex(stoul(name.substr(1)));
         return;
     }
-
     if(XVAR_NAMED == vtype)
     {
-        addCustomVariable(name);
+        addXByName(name);
         return;
     }
 
     if(YVAR == vtype)
     {
-        size_t index = (size_t)stoull(name.substr(1).c_str());
-        addY(index);
+        addY(stoul(name.substr(1)));
         return;
     }
 
@@ -471,7 +481,8 @@ void Function::addVariable(const string& name)
 
     if(CONSTVAR == vtype)
     {
-        // These are constants. Don't add them.
+        // These are constants. Don't add them. We don't know there value just
+        // yet. 
         return;
     }
 
@@ -533,7 +544,7 @@ void Function::setExpr(const Eref& eref, const string expression)
 
     try
     {
-        valid_ = innerSetExpr(eref, expr, true);
+        valid_ = innerSetExpr(eref, expr);
     }
     catch(moose::Parser::ParserException& e)
     {
@@ -547,7 +558,7 @@ void Function::setExpr(const Eref& eref, const string expression)
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis  Set expression in the parser. This function support two mode:
- * with dynamic lookup and without it. When `dynamicLookup` is set to true,
+ * with dynamic lookup and without it. When `dynamicLookup_` is set to true,
  * unknown variables are created at the compile time. Otherwise, an error is
  * raised.
  *
@@ -559,9 +570,17 @@ void Function::setExpr(const Eref& eref, const string expression)
  * @Returns  True if compilation was successful. 
  */
 /* ----------------------------------------------------------------------------*/
-bool Function::innerSetExpr(const Eref& eref, const string expr, bool dynamicLookup)
+bool Function::innerSetExpr(const Eref& eref, const string expr)
 {
     ASSERT_FALSE(expr.empty(), "Empty expression not allowed here.");
+
+    // NOTE: Don't clear the expression here. Sometime the user extend the
+    // expression by calling this function agian. For example:
+    //
+    // >>> f.expr = 'x0+x2'
+    // >>> # connect x0 and x2
+    // >>> f.expr += '+ 100+y0' 
+    // >>> # connect more etc.
 
     // First, set the xi, yi and t to the symbol table.
     set<string> xs;
@@ -571,7 +590,7 @@ bool Function::innerSetExpr(const Eref& eref, const string expr, bool dynamicLoo
     for(auto &y : ys) addY(std::stoul(y.substr(1)));
     addVariable("t");
     
-    if(dynamicLookup)
+    if(allowUnknownVar_)
        return parser_->SetExprWithUnknown(expr, this);
 
     // If we are here that mean we have only xi, yi and t in the expression.
@@ -619,6 +638,17 @@ bool Function::getDoEvalAtReinit() const
 {
     return doEvalAtReinit_;
 }
+
+void Function::setAllowUnknownVariable(bool value )
+{
+    allowUnknownVar_ = value;
+}
+
+bool Function::getAllowUnknowVariable() const
+{
+    return allowUnknownVar_;
+}
+
 
 double Function::getValue() const
 {
@@ -728,6 +758,11 @@ unsigned int Function::getVarIndex(string name) const
     return varIndex_.at(name);
 }
 
+bool Function::symbolExists(const string& name) const
+{
+    return varIndex_.find(name) != varIndex_.end();
+}
+
 void Function::process(const Eref &e, ProcPtr p)
 {
     if(! valid_)
@@ -821,4 +856,12 @@ void Function::reinit(const Eref &e, ProcPtr p)
         rateOut()->send(e, rate_);
         return;
     }
+}
+
+
+void Function::clearAll()
+{
+    xs_.clear();
+    ys_.clear();
+    varIndex_.clear();
 }

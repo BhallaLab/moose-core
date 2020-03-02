@@ -35,7 +35,7 @@ public:
     static const Cinfo * initCinfo();
 
     void setExpr(const Eref& e, const string expr);
-    bool innerSetExpr(const Eref& e, const string expr, bool dynamicLookup=true);
+    bool innerSetExpr(const Eref& e, const string expr);
 
     string getExpr(const Eref& e) const;
 
@@ -63,6 +63,9 @@ public:
     // set/get flag to do function evaluation at reinit
     void setDoEvalAtReinit(bool doEvalAtReinit);
     bool getDoEvalAtReinit() const;
+
+    void setAllowUnknownVariable(bool value);
+    bool getAllowUnknowVariable() const;
 
     void setNumVar(unsigned int num);
     unsigned int getNumVar() const;
@@ -94,14 +97,16 @@ public:
     // Add unknown variable.
     void callbackAddSymbol(const string& name);
 
+    bool symbolExists(const string& name) const;
+
     void addXByIndex(const unsigned int index);
     void addXByName(const string& name);
 
     void addY(const unsigned int index);
 
-    void addCustomVariable(const string& name);
-
     VarType getVarType(const string& name) const;
+
+    void clearAll();
 
 protected:
 
@@ -113,6 +118,7 @@ protected:
     unsigned int mode_;
     bool useTrigger_;
     bool doEvalAtReinit_;
+    bool allowUnknownVar_;
 
     double t_;                             // local storage for current time
     string independent_;                   // To take derivative.
