@@ -300,6 +300,7 @@ void * to_cpp(PyObject * object, char typecode)
     }
     case 's':
     {
+        assert(object);
         char* tmp = PyString_AsString(object);
         if (tmp == NULL)
         {

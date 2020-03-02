@@ -8,6 +8,8 @@
 #ifndef _VARIABLE_H
 #define _VARIABLE_H
 
+#include <string>
+
 class ObjId;
 class Eref;
 class Cinfo;
@@ -22,11 +24,10 @@ class Variable
 
 public:
 
-    Variable(): value_(0.0)
-    {
-    };
+    Variable(string name=""): name_(name), value_(0.0)
+    {};
 
-    Variable(const Variable& rhs): value_(rhs.value_)
+    Variable(const Variable& rhs): name_(rhs.name_), value_(rhs.value_)
     {
         ;
     }
@@ -48,7 +49,12 @@ public:
         return value_;
     }
 
-    double* ref() 
+    string getName() const
+    {
+        return name_;
+    }
+
+    double* ref()
     {
         return &value_;
     }
@@ -56,12 +62,9 @@ public:
     static const Cinfo * initCinfo();
 
 private:
-    double value_;
+    string name_{"NONAME"};
+    double value_{0.0};
 };
 
-#endif
+#endif // include guard.
 
-
-
-//
-// Variable.h ends here

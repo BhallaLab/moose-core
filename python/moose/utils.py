@@ -16,8 +16,12 @@ from datetime import datetime
 from collections import defaultdict
 import re
 
+import logging
+logger = logging.getLogger('moose')
+
 from moose.moose_constants import *
 from moose.print_utils import *
+
 # Print and Plot utilities.
 try:
     from moose.plot_utils import *
@@ -519,15 +523,12 @@ def assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='hsolve'):
             if len(tab.neighbors['input']) == 0:
                 moose.useClock(9, tab.path, 'process')
 
-def stepRun(simtime, steptime, verbose=True, logger=None):
+def stepRun(simtime, steptime, verbose=True):
     """Run the simulation in steps of `steptime` for `simtime`."""
     clock = moose.element('/clock')
     if verbose:
         msg = 'Starting simulation for %g' % (simtime)
-        if logger is None:
-            print(msg)
-        else:
-            logger.info(msg)
+        logger.info(msg)
     ts = datetime.now()
     while clock.currentTime < simtime - steptime:
         ts1 = datetime.now()
@@ -536,29 +537,20 @@ def stepRun(simtime, steptime, verbose=True, logger=None):
         td = te - ts1
         if verbose:
             msg = 'Simulated till %g. Left: %g. %g of simulation took: %g s' % (clock.currentTime, simtime - clock.currentTime, steptime, td.days * 86400 + td.seconds + 1e-6 * td.microseconds)
-            if logger is None:
-                print(msg)
-            else:
-                logger.info(msg)
+            logger.info(msg)
 
     remaining = simtime - clock.currentTime
     if remaining > 0:
         if verbose:
             msg = 'Running the remaining %g.' % (remaining)
-            if logger is None:
-                print(msg)
-            else:
-                logger.info(msg)
+            logger.info(msg)
         moose.start(remaining)
     te = datetime.now()
     td = te - ts
     dt = min([t for t in moose.element('/clock').dts if t > 0.0])
     if verbose:
         msg = 'Finished simulation of %g with minimum dt=%g in %g s' % (simtime, dt, td.days * 86400 + td.seconds + 1e-6 * td.microseconds)
-        if logger is None:
-            print(msg)
-        else:
-            logger.info(msg)
+        logger.info(msg)
 
 
 

@@ -197,4 +197,11 @@ void str_replace_all( string& str, const string& a, const string& b)
     }
 }
 
+bool isPrefix(const string& a, const string& b)
+{
+    if(a.size() < b.size())
+        return false;
+    return (b.find(a, 0) == 0);
+}
+
 }

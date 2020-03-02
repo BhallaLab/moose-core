@@ -23,10 +23,8 @@ import numpy as np
 import moose
 import logging
 
-logging.basicConfig( format=moose.LOGGING_FORMAT )
-logger_ = logging.getLogger(__name__)
+logger_ = logging.getLogger('moose.nml2')
 
-import moose
 import neuroml         as nml
 import pyneuroml.pynml as pynml
 from moose.neuroml2.units import SI

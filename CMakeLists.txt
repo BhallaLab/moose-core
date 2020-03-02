@@ -110,7 +110,6 @@ add_executable(moose.bin basecode/main.cpp)
 
 
 ################################### SETUP BUILD ################################
-
 # default include paths.
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
