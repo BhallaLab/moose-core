@@ -17,7 +17,7 @@ from collections import defaultdict
 import re
 
 import logging
-logger = logging.getLogger('moose')
+logger_ = logging.getLogger('moose')
 
 from moose.moose_constants import *
 from moose.print_utils import *
@@ -523,8 +523,11 @@ def assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='hsolve'):
             if len(tab.neighbors['input']) == 0:
                 moose.useClock(9, tab.path, 'process')
 
-def stepRun(simtime, steptime, verbose=True):
+def stepRun(simtime, steptime, verbose=True, logger=None):
     """Run the simulation in steps of `steptime` for `simtime`."""
+    global logger_
+    if logger is None:
+        logger = logger_
     clock = moose.element('/clock')
     if verbose:
         msg = 'Starting simulation for %g' % (simtime)
