@@ -598,16 +598,6 @@ private:
      */
     static double runtime_;
 
-    /*
-     * Show progress of simulation?
-     */
-    static bool notify_;
-
-    /**
-     * How long shell was active during simulation.
-     */
-    static double clock_time_;
-
     static bool isParserIdle_;
 
     /// Current working Element

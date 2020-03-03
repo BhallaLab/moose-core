@@ -60,28 +60,12 @@ def mooseAddChemSolver(modelRoot, solver):
     """
     Add the solvers only if all are Chemical compartment
     """
-    compt = moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]')
-    # at least one comparment is found.
-    if len(compt) > 0:
-        comptinfo = moose.Annotator(moose.element(compt[0]).path + '/info')
-        previousSolver = comptinfo.solver
-        currentSolver = previousSolver
-        if solver in [ "Gillespie", "gssa"]:
-            currentSolver = "gssa"
-        elif solver in [ "Runge Kutta", "gsl" ]:
-            currentSolver = "gsl"
-        elif solver in [ "LSODA", "lsoda" ]:
-            solver = "lsoda"
-        elif solver in  ["Exponential Euler", "ee"]:
-            currentSolver = "ee"
-
-        if previousSolver != currentSolver:
-            comptinfo.solver = currentSolver
-            if (moose.exists(compt[0].path + '/stoich')):
-                # "A: and stoich exists then delete the stoich add solver"
-                mooseDeleteChemSolver(modelRoot)
-            setCompartmentSolver(modelRoot, currentSolver)
-            return True
+    compts = moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]')
+    if all(isinstance(x, (moose.CubeMesh,moose.CylMesh)) for x in compts):
+        if not compts:
+            return ("Atleast one compartment is required ")
+        elif ( len(compts) > 3 ):
+            return ("Warning: setSolverOnCompt Cannot handle " ,  len(compts) , " chemical compartments\n")
 
         else:
             comptinfo = moose.Annotator(moose.element(compts[0]).path + '/info')
@@ -122,36 +106,35 @@ def setCompartmentSolver(modelRoot, solver):
         if (len(compts) >1 ):
             positionCompt(compts)
             fixXreacs( modelRoot )
-            
-    vollist = sorted(comptlist.keys())
-    compts = [comptlist[key] for key in vollist]
+                
+        vollist = sorted(comptlist.keys())
+        compts = [comptlist[key] for key in vollist]
+        #compts = [key for key, value in sorted(comptlist.items(), key=lambda (k,v): (v,k))] 
 
-    for compt in compts:
-        ksolve, dsolve = None, None
-        if solver != 'ee':
-            if solver in [ 'gsl', 'Runge Kutta', 'lsoda' ]:
-                ksolve = moose.Ksolve(compt.path + '/ksolve')
-            elif solver in ['gssa', 'Gillespie']:
-                ksolve = moose.Gsolve(compt.path + '/gsolve')
+        for compt in compts:
+            if solver != 'ee':
+                if solver.lower() in [ 'gsl', 'runge kutta', 'lsoda' ]:
+                    ksolve = moose.Ksolve(compt.path + '/ksolve')
+                elif solver.lower() in ['gssa', 'gillespie']:
+                    ksolve = moose.Gsolve(compt.path + '/gsolve')
 
-            if (len(compts) > 1):
-                dsolve = moose.Dsolve(compt.path+'/dsolve')
+                if (len(compts) > 1):
+                    dsolve = moose.Dsolve(compt.path+'/dsolve')
 
-            stoich = moose.Stoich(compt.path + '/stoich')
-            stoich.ksolve = ksolve
-            if dsolve is not None:
-                stoich.dsolve = dsolve
+                stoich = moose.Stoich(compt.path + '/stoich')
+                stoich.ksolve = ksolve
+                if (len(compts) > 1):
+                    stoich.dsolve = dsolve
 
-            stoich.compartment = compt
-            stoich.path = compt.path + "/##"
+                stoich.compartment = compt
+                stoich.path = compt.path + "/##"
 
-    ksolveList = moose.wildcardFind(modelRoot+'/##[ISA=Ksolve]')
-    dsolveList = moose.wildcardFind(modelRoot+'/##[ISA=Dsolve]')
-    stoichList = moose.wildcardFind(modelRoot+'/##[ISA=Stoich]')
 
-    i = 0
-    while(i < len(dsolveList)-1):
-        dsolveList[i+1].buildMeshJunctions(dsolveList[i])
-        i += 1
-
-    print("[INFO] Solver %s is added to model path %s" % (solver, modelRoot))
+        dsolveList = moose.wildcardFind(modelRoot+'/##[ISA=Dsolve]')
+        i = 0
+        while(i < len(dsolveList)-1):
+            dsolveList[i+1].buildMeshJunctions(dsolveList[i])
+            i += 1
+    if not modelRoot[:1].startswith('/'):
+        modelRoot ='/'+modelRoot
+    print( " Solver is added to model path `%s` with `%s` solver" % (modelRoot,solver) )

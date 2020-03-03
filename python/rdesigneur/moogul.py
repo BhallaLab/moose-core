@@ -7,11 +7,10 @@
 # This program is licensed under the GNU Public License version 3.
 #
 
-import numpy as np 
+import moose
+import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
-
-import moose
 
 class MoogulError( Exception ):
     def __init__( self, value ):

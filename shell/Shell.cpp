@@ -50,7 +50,9 @@ double Shell::runtime_( 0.0 );
 const Cinfo* Shell::initCinfo()
 {
 
-    // Value Finfos
+////////////////////////////////////////////////////////////////
+// Value Finfos
+////////////////////////////////////////////////////////////////
     static ReadOnlyValueFinfo< Shell, bool > isRunning(
         "isRunning",
         "Flag: Checks if simulation is in progress",
@@ -165,12 +167,7 @@ Shell::Shell()
 
 Shell::~Shell()
 {
-    string notifyEnvVar = "";
-    if( std::getenv( "MOOSE_NOTIFY" ) )
-        notifyEnvVar = string( std::getenv( "MOOSE_NOTIFY" ) );
-
-    if( notify_ || notifyEnvVar.size() > 0 )
-        cout << "Info: Clock time " << clock_time_ << " sec." << endl;
+    ;
 }
 
 void Shell::setShellElement( Element* shelle )
@@ -337,17 +334,13 @@ void Shell::doQuit()
 
 void Shell::doStart( double runtime, bool notify )
 {
-    Shell::notify_ = notify;
-
-    auto t0 = std::chrono::high_resolution_clock::now();
-
     Id clockId( 1 );
     SetGet2< double, bool >::set( clockId, "start", runtime, notify );
 
     /*-----------------------------------------------------------------------------
-     *  Now that simulation is over, call cleanUp function
-     of Streamer class *  objects. The purpose of this is to
-     write whatever is left in tables to *  the output file.
+     *  Now that simulation is over, call cleanUp function of Streamer class
+     *  objects. The purpose of this is to write whatever is left in tables to
+     *  the output file.
      *-----------------------------------------------------------------------------*/
     vector< ObjId > streamers;
     wildcardFind( "/##[TYPE=Streamer]", streamers );

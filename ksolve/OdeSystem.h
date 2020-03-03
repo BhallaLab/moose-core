@@ -16,14 +16,13 @@
 #include <gsl/gsl_odeiv2.h>
 #endif     /* -----  not USE_BOOST_ODE  ----- */
 
-class OdeSystem
-{
-public:
-    OdeSystem()
-        : method( "rk5" ),
-          initStepSize( 0.001 ),
-          epsAbs( 1e-6 ),
-          epsRel( 1e-6 )
+class OdeSystem {
+    public:
+        OdeSystem()
+            : method( "rk5" ),
+            initStepSize( 0.001 ),
+            epsAbs( 1e-6 ),
+            epsRel( 1e-6 )
     {;}
 
         std::string method;

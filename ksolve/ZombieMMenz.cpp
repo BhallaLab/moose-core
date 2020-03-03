@@ -13,14 +13,13 @@
 #include "../basecode/SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "VoxelPoolsBase.h"
+#include "../mesh/VoxelJunction.h"
 #include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
 
 #include "../kinetics/EnzBase.h"
 #include "ZombieMMenz.h"
-
-#include "../mesh/VoxelJunction.h"
 
 #define EPSILON 1e-15
 
@@ -156,12 +155,8 @@ void ZombieMMenz::setSolver( Id solver, Id enzId )
 	vector< Id > enzvec;
 	vector< Id > subvec;
 	vector< Id > prdvec;
-
-        // The return value of following calls are used nowhere so we are not
-        // storing them.
-        enzId.element()->getNeighbors( enzvec, enzFinfo );
-        enzId.element()->getNeighbors( subvec, subFinfo );
-        enzId.element()->getNeighbors( prdvec, prdFinfo );
-
+	unsigned int num = enzId.element()->getNeighbors( enzvec, enzFinfo );
+	num = enzId.element()->getNeighbors( subvec, subFinfo );
+	num = enzId.element()->getNeighbors( prdvec, prdFinfo );
 	stoich_->installMMenz( enzId, enzvec, subvec, prdvec );
 }

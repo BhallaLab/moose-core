@@ -562,18 +562,6 @@ size_t Gsolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )
     return tot;
 }
 
-void Gsolve::recalcTimeChunk( const size_t begin, const size_t end, ProcPtr p)
-{
-    for (size_t i = begin; i < std::min(pools_.size(), end); i++) 
-        pools_[i].recalcTime( &sys_, p->currTime );
-}
-
-void Gsolve::advance_chunk( const size_t begin, const size_t end, ProcPtr p )
-{
-    for (size_t i = begin; i < std::min(end, pools_.size() ); i++)
-        pools_[i].advance( p, &sys_ );
-}
-
 void Gsolve::reinit( const Eref& e, ProcPtr p )
 {
     if ( !stoichPtr_ )
@@ -903,8 +891,7 @@ void Gsolve::makeReacDepsUnique()
         vector< unsigned int >& dep = sys_.dependency[ i ];
         // Here we want to remove self-entries as well as duplicates.
         sort( dep.begin(), dep.end() );
-
-        // vector< unsigned int >::iterator k = dep.begin();
+        vector< unsigned int >::iterator k = dep.begin();
 
         /// STL stuff follows, with the usual weirdness.
         vector<unsigned int>::iterator pos = unique( dep.begin(), dep.end() );

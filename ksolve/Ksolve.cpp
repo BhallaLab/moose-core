@@ -17,23 +17,21 @@
 #include <gsl/gsl_odeiv2.h>
 #endif
 
+#include "OdeSystem.h"
+#include "VoxelPoolsBase.h"
+#include "VoxelPools.h"
+#include "../mesh/VoxelJunction.h"
+#include "ZombiePoolInterface.h"
+
+#include "RateTerm.h"
+#include "../basecode/SparseMatrix.h"
+#include "KinSparseMatrix.h"
+#include "Stoich.h"
 #include "../shell/Shell.h"
 
 #include "../mesh/MeshEntry.h"
 #include "../mesh/Boundary.h"
 #include "../mesh/ChemCompt.h"
-#include "../mesh/VoxelJunction.h"
-
-#include "../utility/print_function.hpp"
-
-#include "OdeSystem.h"
-#include "VoxelPoolsBase.h"
-#include "VoxelPools.h"
-#include "ZombiePoolInterface.h"
-#include "RateTerm.h"
-#include "../basecode/SparseMatrix.h"
-#include "KinSparseMatrix.h"
-#include "Stoich.h"
 #include "Ksolve.h"
 
 #include <chrono>
@@ -246,15 +244,7 @@ Ksolve::Ksolve()
 
 Ksolve::~Ksolve()
 {
-#if 0
-    char* p = getenv( "MOOSE_SHOW_SOLVER_PERF" );
-    if( p != NULL )
-    {
-        cout << "Info: Ksolve (+Dsolve) took " << totalTime_ << " seconds and took " << numSteps_
-             << " steps." << endl;
-
-    }
-#endif
+    ;
 }
 
 //////////////////////////////////////////////////////////////
@@ -269,7 +259,6 @@ string Ksolve::getMethod() const
 void Ksolve::setMethod( string method )
 {
     std::transform(method.begin(), method.end(), method.begin(), ::tolower);
-
     // If user is trying to set ksolve method after ksolve has been initialized,
     // show a warning.
     if( isBuilt_ )
@@ -288,42 +277,25 @@ void Ksolve::setMethod( string method )
         method_ = "rk5";
     }
     else if ( method == "rk4"  || method == "rk2" ||
-              method == "rk8" || method == "rkck" || method == "lsoda"
-            )
+              method == "rk8" || method == "rkck" || method == "lsoda" )
     {
         method_ = method;
     }
     else
     {
         cout << "Warning: Ksolve::setMethod: '" << method <<
-             "' not known, using default rk5\n";
+             "' is not known, using default rk5\n";
         method_ = "rk5";
     }
 #elif USE_BOOST_ODE
     // TODO: Check for boost related methods.
     method_ = method;
 #endif
-
 }
 
 double Ksolve::getEpsAbs() const
 {
     return epsAbs_;
-}
-
-double Ksolve::getEpsRel() const
-{
-    return epsRel_;
-}
-
-double Ksolve::getRelativeAccuracy( ) const
-{
-    return getEpsRel();
-}
-
-double Ksolve::getAbsoluteAccuracy( ) const
-{
-    return getEpsAbs();
 }
 
 void Ksolve::setEpsAbs( double epsAbs )
@@ -332,6 +304,12 @@ void Ksolve::setEpsAbs( double epsAbs )
         epsAbs_ = 1.0e-4;
     else
         epsAbs_ = epsAbs;
+}
+
+
+double Ksolve::getEpsRel() const
+{
+    return epsRel_;
 }
 
 void Ksolve::setEpsRel( double epsRel )
@@ -537,8 +515,6 @@ double Ksolve::getEstimatedDt() const
 //////////////////////////////////////////////////////////////
 void Ksolve::process( const Eref& e, ProcPtr p )
 {
-
-
     if ( isBuilt_ == false )
         return;
 

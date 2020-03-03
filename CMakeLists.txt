@@ -119,17 +119,15 @@ if(WITH_BOOST)
 endif(WITH_BOOST)
 
 # If using BOOST ODE2 library to solve ODE system, then don't use GSL.
-if(WITH_BOOST_ODE OR WITH_BOOST)
-    message(STATUS "Turning off GSL")
+if(WITH_BOOST_ODE)
     set(WITH_GSL OFF)
-endif()
+endif(WITH_BOOST_ODE)
 
 set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
 
 ## Variable to collect all static libraries.
 set(STATIC_LIBRARIES "" )
-
 # Collect all shared libraries here.
 set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
 
@@ -179,14 +177,12 @@ if(WITH_MPI)
     endif()
 endif(WITH_MPI)
 
-if(WITH_BOOST OR WITH_BOOST_ODE)
+if(WITH_BOOST_ODE)
     list(APPEND SYSTEM_SHARED_LIBS ${LAPACK_LIBRARIES})
     list(APPEND SYSTEM_SHARED_LIBS ${Boost_LIBRARIES})
 endif(WITH_BOOST_ODE)
 
 find_package( Threads )
-list(APPEND SYSTEM_SHARED_LIBS ${CMAKE_THREAD_LIBS_INIT})
-
 list(APPEND SYSTEM_SHARED_LIBS ${CMAKE_THREAD_LIBS_INIT})
 
 # These libraries could be static of dynamic. We need to discrimate between
@@ -240,10 +236,6 @@ add_subdirectory(kinetics)
 add_subdirectory(synapse)
 add_subdirectory(intfire)
 add_subdirectory(external/libsoda)
-add_subdirectory(external/muparser)
-
-list(APPEND MOOSE_LIBRARIES muparser)
-
 
 ###################################### LINKING #################################
 list(APPEND MOOSE_LIBRARIES
@@ -273,7 +265,7 @@ list(APPEND MOOSE_LIBRARIES
 list(REMOVE_DUPLICATES STATIC_LIBRARIES)
 if(SYSTEM_SHARED_LIBS)
     list(REMOVE_DUPLICATES SYSTEM_SHARED_LIBS)
-endif()
+endif( )
 
 # cmake --help-policy CMP0042. Also in pymoose/CMakeLists.txt
 # More details:
@@ -312,7 +304,7 @@ target_link_libraries(moose.bin moose ${CMAKE_DL_LIBS})
 
 if( WITH_BOOST )
     target_link_libraries( moose.bin ${Boost_LIBRARIES} )
-endif( )
+endif( WITH_BOOST )
 
 
 ######################### BUILD PYMOOSE ########################################

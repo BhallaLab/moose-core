@@ -65,8 +65,6 @@ namespace moose
 
     extern map<string, valarray<double>> solverProfMap;
 
-    extern map<string, valarray<double>> solverProfMap;
-
     /**
      * @brief A global seed for all RNGs in moose. When moose.seed( x ) is called,
      * this variable is set. Other's RNGs (except muparser) uses this seed to

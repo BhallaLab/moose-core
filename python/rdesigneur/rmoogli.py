@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+from __future__ import absolute_import, print_function, division
 # rmoogli.py: rdesigneur Moogli interface
 # This is a fallback version designed to work with moogul but using almost
 # the same interface as far as rdesigneur is concerned.
@@ -7,10 +7,7 @@
 # Copyright (C) Upinder S. Bhalla NCBS 2018
 # This program is licensed under the GNU Public License version 3.
 
-from __future__ import absolute_import, print_function
-
 import rdesigneur.moogul as moogul
-
 mooViews = []
 
 def makeMoogli( rd, mooObj, args, fieldInfo ):
