@@ -7,18 +7,14 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
-#include "global.h"
+#include "../basecode/header.h"
+#include "../basecode/global.h"
 #include <fstream>
 
 #include "TableBase.h"
 #include "Table.h"
-#include "Clock.h"
+#include "../scheduling/Clock.h"
 #include "StreamerBase.h"
-
-// Write to numpy arrays.
-#include "../utility/cnpy.hpp"
-
 
 static SrcFinfo1< vector< double >* > *requestOut()
 {
@@ -63,7 +59,7 @@ const Cinfo* Table::initCinfo()
         "useSpikeMode"
         , "When set to true, look for spikes in a time-series."
         " Normally used for monitoring Vm for action potentials."
-		" Could be used for any thresholded event. Default is False."
+        " Could be used for any thresholded event. Default is False."
         , &Table::setUseSpikeMode
         , &Table::getUseSpikeMode
     );
@@ -210,30 +206,30 @@ const Cinfo* Table::initCinfo()
 
 static const Cinfo* tableCinfo = Table::initCinfo();
 
-Table::Table() : 
-		threshold_( 0.0 ) , 
-		lastTime_( 0.0 ) , 
-		input_( 0.0 ), 
-		fired_(false), 
-		useSpikeMode_(false), 
-		dt_( 0.0 )
+Table::Table() :
+    threshold_( 0.0 ),
+    lastTime_( 0.0 ),
+    input_( 0.0 ),
+    fired_(false),
+    useSpikeMode_(false),
+    dt_( 0.0 )
 {
     // Initialize the directory to which each table should stream.
     rootdir_ = "_tables";
-    useStreamer_ = false;
+    useFileStreamer_ = false;
     format_ = "csv";
     outfileIsSet_ = false;
+    lastN_ = 0;
 }
 
 Table::~Table( )
 {
     // Make sure to write to rest of the entries to file before closing down.
-    if( useStreamer_ )
+    if( useFileStreamer_ )
     {
-        zipWithTime( vec(), data_, lastTime_ );
+        mergeWithTime( data_ );
         StreamerBase::writeToOutFile( outfile_, format_, "a", data_, columns_ );
-        clearVec();
-        data_.clear();
+        clearAllVecs();
     }
 }
 
@@ -250,32 +246,40 @@ Table& Table::operator=( const Table& tab )
 void Table::process( const Eref& e, ProcPtr p )
 {
     lastTime_ = p->currTime;
+    tvec_.push_back(lastTime_);
 
     // Copy incoming data to ret and insert into vector.
     vector< double > ret;
     requestOut()->send( e, &ret );
-	if (useSpikeMode_) {
-		for ( vector< double >::const_iterator
-					i = ret.begin(); i != ret.end(); ++i )
-		spike( *i );
-	} else {
-    	vec().insert( vec().end(), ret.begin(), ret.end() );
-	}
+
+    if (useSpikeMode_)
+    {
+        for ( auto i = ret.begin(); i != ret.end(); ++i )
+            spike( *i );
+    }
+    else
+        vec().insert( vec().end(), ret.begin(), ret.end() );
 
     /*  If we are streaming to a file, let's write to a file. And clean the
      *  vector.
      *  Write at every 5 seconds or whenever size of vector is more than 10k.
      */
-    if( useStreamer_ )
+    if( useFileStreamer_ )
     {
-        if( fmod(lastTime_, 5.0) == 0.0 or getVecSize() >= 10000 )
+        if( fmod(lastTime_, 5.0) == 0.0 || getVecSize() >= 10000 )
         {
-            zipWithTime( vec(), data_, lastTime_ );
-            StreamerBase::writeToOutFile( outfile_, format_ , "a", data_, columns_ );
-            data_.clear();
-            clearVec();
+            mergeWithTime( data_ );
+            StreamerBase::writeToOutFile( outfile_, format_, "a", data_, columns_ );
+            clearAllVecs();
+        }
         }
     }
+
+void Table::clearAllVecs()
+{
+    clearVec();
+    tvec_.clear();
+    data_.clear();
 }
 
 /**
@@ -289,11 +293,12 @@ void Table::reinit( const Eref& e, ProcPtr p )
     tablePath_ = e.id().path();
     unsigned int numTick = e.element()->getTick();
     Clock* clk = reinterpret_cast<Clock*>(Id(1).eref().data());
+
     dt_ = clk->getTickDt( numTick );
-	fired_ = false;
+    fired_ = false;
 
     /** Create the default filepath for this table.  */
-    if( useStreamer_ )
+    if( useFileStreamer_ )
     {
         // The first column is variable time.
         columns_.push_back( "time" );
@@ -304,8 +309,8 @@ void Table::reinit( const Eref& e, ProcPtr p )
         // with rootdit as path.
         if( ! outfileIsSet_ )
             setOutfile( rootdir_ +
-                    moose::moosePathToUserPath(tablePath_) + '.' + format_
-                    );
+                        moose::moosePathToUserPath(tablePath_) + '.' + format_
+                      );
     }
 
     input_ = 0.0;
@@ -313,21 +318,22 @@ void Table::reinit( const Eref& e, ProcPtr p )
     lastTime_ = 0;
     vector< double > ret;
     requestOut()->send( e, &ret );
-	if (useSpikeMode_) {
-		for ( vector< double >::const_iterator
-					i = ret.begin(); i != ret.end(); ++i )
-		spike( *i );
-	} else {
-    	vec().insert( vec().end(), ret.begin(), ret.end() );
-	}
 
-    if( useStreamer_ )
+    if (useSpikeMode_)
     {
-        zipWithTime( vec(), data_, lastTime_ );
+        for ( auto i = ret.begin(); i != ret.end(); ++i )
+            spike( *i );
+    }
+    else
+        vec().insert( vec().end(), ret.begin(), ret.end() );
+
+    tvec_.push_back(lastTime_);
+
+    if( useFileStreamer_ )
+    {
+        mergeWithTime( data_ );
         StreamerBase::writeToOutFile( outfile_, format_, "w", data_, columns_);
-        clearVec();
-        data_.clear();
-        clearVec();
+        clearAllVecs();
     }
 }
 
@@ -342,21 +348,24 @@ void Table::input( double v )
 
 void Table::spike( double v )
 {
-	if ( fired_ ) { // Wait for it to go below threshold
-		if ( v < threshold_ )
-			fired_ = false;
-	} else {
-		if ( v > threshold_ ) { // wait for it to go above threshold.
-			fired_ = true;
-        	vec().push_back( lastTime_ );
-		}
-	}
+    if ( fired_ )
+    { // Wait for it to go below threshold
+        if ( v < threshold_ )
+            fired_ = false;
+    }
+    else
+    {
+        if ( v > threshold_ )
+        {
+            // wait for it to go above threshold.
+            fired_ = true;
+            vec().push_back( lastTime_ );
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////
 // Field Definitions
-//////////////////////////////////////////////////////////////
-
 void Table::setThreshold( double v )
 {
     threshold_ = v;
@@ -370,12 +379,12 @@ double Table::getThreshold() const
 // Set the format of table to which its data should be written.
 void Table::setFormat( string format )
 {
-    if( format == "csv" or format == "npy" )
+    if( format == "csv" )
         format_ = format;
     else
         LOG( moose::warning
-                , "Unsupported format " << format
-                << " only npy and csv are supported"
+             , "Unsupported format " << format
+             << " only sv is supported"
            );
 }
 
@@ -399,12 +408,12 @@ void Table::setColumnName( const string colname )
 /* Enable/disable streamer support. */
 void Table::setUseStreamer( bool useStreamer )
 {
-    useStreamer_ = useStreamer;
+    useFileStreamer_ = useStreamer;
 }
 
 bool Table::getUseStreamer( void ) const
 {
-    return useStreamer_;
+    return useFileStreamer_;
 }
 
 /* Enable/disable spike mode. */
@@ -450,15 +459,74 @@ double Table::getDt( void ) const
  * @brief Take the vector from table and timestamp it. It must only be called
  * when packing the data for writing.
  */
-void Table::zipWithTime( const vector<double>& v
-        , vector<double>& tvec
-        , const double& currTime
-        )
+void Table::mergeWithTime( vector<double>& data )
 {
-    size_t N = v.size();
-    for (size_t i = 0; i < N; i++)
+    auto v = vec();
+    for (size_t i = 0; i < v.size(); i++)
     {
-        tvec.push_back( currTime - (N - i - 1 ) * dt_ );
-        tvec.push_back( v[i] );
+        data.push_back(tvec_[i]);
+        data.push_back(v[i]);
     }
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis.  Convert table data to JOSN.
+ *
+ * @Returns string.
+ */
+/* ----------------------------------------------------------------------------*/
+string Table::toJSON(bool withTime, bool clear)
+{
+    stringstream ss;
+    auto v = vec();
+    if( clear )
+        lastN_ = 0;
+
+    for (size_t i = lastN_; i < v.size(); i++)
+    {
+        if(withTime)
+            ss << '[' << tvec_[i] << ',' << v[i] << "],";
+        else
+            ss << v[i] << ',';
+    }
+
+    string res = ss.str();
+    if(',' == res.back())
+        res.pop_back();
+
+    if( clear )
+        clearAllVecs();
+    else
+        lastN_ += v.size();
+
+    return res;
+}
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Collect data in given vector. Its similar to toJSON function.
+ *
+ * @Param data
+ * @Param withTime
+ * @Param clear
+ */
+/* ----------------------------------------------------------------------------*/
+void Table::collectData(vector<double>& data, bool withTime, bool clear)
+{
+    auto v = vec();
+    if( clear )
+        lastN_ = 0;
+
+    for (size_t i = lastN_; i < v.size(); i++)
+    {
+        if(withTime)
+            data.push_back(tvec_[i]);
+        data.push_back(v[i]);
+    }
+
+    if( clear )
+        clearAllVecs();
+    else
+        lastN_ = v.size();
 }

@@ -7,18 +7,17 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 #include "../basecode/header.h"
-#include "../basecode/SparseMatrix.h"
-
 #include "../kinetics/lookupVolumeFromMesh.h"
-#include "../kinetics/EnzBase.h"
-
 #include "RateTerm.h"
 #include "FuncTerm.h"
+#include "../basecode/SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "VoxelPoolsBase.h"
 #include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
+
+#include "../kinetics/EnzBase.h"
 #include "ZombieMMenz.h"
 
 #include "../mesh/VoxelJunction.h"

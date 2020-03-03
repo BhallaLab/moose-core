@@ -26,17 +26,17 @@ public:
           epsRel( 1e-6 )
     {;}
 
-    std::string method;
-    // GSL stuff
+        std::string method;
+
+        double initStepSize;
+        double epsAbs; // Absolute error
+        double epsRel; // Relative error
 
 #ifdef USE_GSL
-    gsl_odeiv2_system gslSys;
-    const gsl_odeiv2_step_type* gslStep;
+        // GSL stuff
+        gsl_odeiv2_system gslSys;
+        const gsl_odeiv2_step_type* gslStep;
 #endif
-
-    double initStepSize;
-    double epsAbs; // Absolute error
-    double epsRel; // Relative error
 
 #if  USE_BOOST_ODE
         size_t dimension;

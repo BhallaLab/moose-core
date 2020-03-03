@@ -2,22 +2,20 @@
 from __future__ import absolute_import, division, print_function
 import sys
 
-# Bring moose.py functions into global namespace.
-# Try to set the backend. This must be called before any instance of matplotlib
-# is imported i.e. import 'moose' after this.
-if 'matplotlib' not in sys.modules:
-    import matplotlib
-    try:
-        matplotlib.use( 'TkAgg' )
-    except Exception as e:
-        try:
-            matplotlib.use( 'Qt5Agg')
-        except Exception as e:
-            try:
-                matplotlib.use( 'Qt4Agg')
-            except Exception as e:
-                pass
+# Bring everything from c++ module to global namespace. 
+from moose._moose import *
 
+# Bring everything from moose.py to global namespace. 
+# IMP: It will overwrite any c++ function with the same name.  We can override
+# some C++ here.
 from moose.moose import *
+from moose.server import *
 
-__version__ = version( )
+# SBML and NML2 support.
+from moose.model_utils import *
+
+# create a shorthand for version() call here.
+__version__ = version()
+
+# C++ core override
+from moose.wrapper import *

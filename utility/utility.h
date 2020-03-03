@@ -11,7 +11,14 @@
 
 #ifndef _UTILITY_H
 
-#include "strutil.h"
+#include <memory>
+#include <vector>
+#include <map>
+#include <utility>
+#include <cassert>
+#include <string>
+
+using namespace std;
 
 // See types.cpp file for definitions.
 namespace moose 
@@ -20,7 +27,15 @@ namespace moose
     char shortType(std::string type);
     char innerType(char typecode);
     char shortFinfo(std::string ftype);
+
+    // In setuptevn.cpp 
     const map<std::string, std::string>& getArgMap();
+
+    string getEnv(const string& env);
+    int getEnvInt(const string& env, const int defaultVal=1);
+
+    // In fileutils.cpp
+    bool filepath_exists( const string& path );
 
     /**
      * @brief Givem path of MOOSE element, return its name. It's behaviour is
@@ -28,11 +43,22 @@ namespace moose
      *
      * @return
      */
-    inline string basename( const string& path )
+    inline std::string basename( const std::string& path )
     {
         return path.substr( path.find_last_of('/') + 1 );
     }
 
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Split a interval (0, max) in n parts which are almost equal
+     * to each other.
+     *
+     * @Param max
+     * @Param n
+     * @Param result. A vector of interval [start, end) (as std::pair).
+     */
+    /* ----------------------------------------------------------------------------*/
+    void splitIntervalInNParts(size_t max, size_t n, std::vector<std::pair<size_t, size_t>>& result);
 }
 
 

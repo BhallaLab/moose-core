@@ -1,172 +1,179 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
+# This script can also be called directly to build and install the pymoose
+# module.
+#
+# Alternatively, you can use cmake build system which provides finer control
+# over the build. This script is called by cmake to install the python module. 
+# 
+# This script is compatible with python2.7 and python3+. Therefore use of
+# super() is commented out.
+#
+# NOTES:
+#  * Python2
+#   - Update setuptools using `python2 -m pip install setuptools --upgrade --user'.
 
-"""setup.py: This
-NOT COMPLETE.
-scripts prepare MOOSE for PyPI.
+__author__     = "Dilawar Singh"
 
-Last modified: Mon Jul 28, 2014  12:52AM
-
-"""
-
-__author__           = "Dilawar Singh"
-__copyright__        = "Copyright 2013, Dilawar Singh and NCBS Bangalore"
-__credits__          = ["NCBS Bangalore"]
-__license__          = "GNU GPL"
-__version__          = "1.0.0"
-__maintainer__       = "Dilawar Singh"
-__email__            = "dilawars@ncbs.res.in"
-__status__           = "Development"
+__copyright__  = "Copyright 2019-, Dilawar Singh"
+__maintainer__ = "Dilawar Singh"
+__email__      = "dilawar.s.rajput@gmail.com"
 
 import os
 import sys
-import shutil
+import multiprocessing
+import subprocess
+import datetime
 
-from setuptools import setup
-from distutils.core import Command, Extension
-from distutils.command.install import install as _install
-from distutils.command.build import build as _build
-from distutils.command.build_py import build_py as _build_py
+try:
+    cmakeVersion = subprocess.call(["cmake", "--version"],
+            stdout=subprocess.PIPE)
+except Exception as e:
+    print(e)
+    print("[ERROR] cmake is not found. Please install cmake.")
+    quit(-1)
+
+# See https://docs.python.org/3/library/distutils.html
+# setuptools is preferred over distutils. And we are supporting python3 only.
+from setuptools import setup, Extension, Command
+from setuptools.command.build_ext import build_ext  as _build_ext
+import subprocess
+
+# Global variables.
+sdir_ = os.path.dirname(os.path.realpath(__file__))
+
+stamp = datetime.datetime.now().strftime('%Y%m%d')
+builddir_ = os.path.join(sdir_, '_temp__build')
+
+if not os.path.exists(builddir_):
+    os.makedirs(builddir_)
+
+numCores_ = multiprocessing.cpu_count()
 
 
-import distutils.spawn as ds
+version_ = '3.2.1.dev%s' % stamp
 
-build_dir = 'buildMooseUsingCmake'
-if not os.path.isdir(build_dir):
-    os.makedirs(build_dir)
+# importlib is available only for python3. Since we build wheels, prefer .so
+# extension. This way a wheel built by any python3.x will work with any python3.
 
-class BuildCommand(_build):
-    """This command builds """
-    user_options = _build.user_options + []
+class CMakeExtension(Extension):
+    def __init__(self, name, **kwargs):
+        # don't invoke the original build_ext for this special extension
+        import tempfile
+        # Create a temp file to create a dummy target. This build raises an
+        # exception because sources are empty. With python3 we can fix it by
+        # passing `optional=True` to the argument. With python2 there is no
+        # getaway from it.
+        f = tempfile.NamedTemporaryFile(suffix='.cpp', delete=False)
+        f.write(b'int main() { return 1; }')
+        Extension.__init__(self, name, sources=[f.name], **kwargs)
+        f.close()
+
+class TestCommand(Command):
+    user_options = []
 
     def initialize_options(self):
-        self.cwd = os.getcwd()
-        self.build_base = '/tmp'
-        self.build_temp = '/tmp'
-        self.build_lib = '/tmp'
-        self.new_dir = os.path.join(os.path.split(__file__)[0], build_dir)
-
-    def finalize_options(self):
         pass
-
-    def get_source_files(self):
-        return []
-
-    def run(self):
-        print("++ Building MOOSE")
-        os.chdir(self.new_dir)
-        try:
-            ds.spawn(['cmake',  '..' ])
-            ds.spawn(['make', '_moose'])
-        except ds.DistutilsExecError as e:
-            print("Can't build MOOSE")
-            print(e)
-            os.chdir(self.cwd)
-            sys.exit(-1)
-        os.chdir(self.cwd)
-
-class InstallCommand(_install):
-    user_options = _install.user_options + [
-            ('single-version-externally-managed', None, '')
-            ]
-
-    def initialize_options(self):
-        _install.initialize_options(self)
-        self.cwd = os.getcwd()
-        self.single_version_externally_managed = False
-        self.record = None
-        self.build_lib = None
-
-    def finalize_options(self):
-        _install.finalize_options(self)
-
-    def run(self):
-        self.new_dir = os.path.join(os.path.split(__file__)[0], build_dir)
-        os.chdir(self.new_dir)
-        try:
-            ds.spawn(['cmake',  '..' ])
-            ds.spawn(['make', '_moose'])
-        except ds.DistutilsExecError as e:
-            print("Can't build MOOSE")
-            print(e)
-            os.chdir(self.cwd)
-            sys.exit(-1)
-        os.chdir(self.cwd)
-
-        print("++ Installing PyMOOSE")
-        self.new_dir = os.path.join(os.path.split(__file__)[0], 'python')
-        os.chdir(self.new_dir)
-        try:
-            ds.spawn(["python", "setup.cmake.py", "install"])
-        except ds.DistutilsExecError as e:
-            print("Can't install PyMOOSE")
-            print(e)
-            os.chdir(self.cwd)
-            sys.exit(-1)
-        os.chdir(self.cwd)
-
-class BuildPyCommand(_build_py):
-    """Build PyMoose for distribution"""
-    user_options =  _build_py.user_options + [
-            ( 'build_lib', None, 'Build library' )
-            ]
-
-    def initialize_options(self):
-        self.data_files = []
-        self.build_lib = '/tmp'
-        self.cwd = os.getcwd()
-        self.compiler = None
-        self.new_dir = os.path.join(os.path.split(__file__)[0], 'python')
 
     def finalize_options(self):
         pass
 
     def run(self):
-        pass
+        print("[INFO ] Running tests... ")
+        os.chdir(builddir_)
+        self.spawn(["ctest", "--output-on-failure", '-j%d'%numCores_])
+        os.chdir(sdir_)
 
-##
-# @brief FUnction to read a file.
-#
-# @param fname Name of the file.
-#
-# @return  A string content of the file.
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-name          = 'moose'
-version       = '3.0'
-description   = (
-        'MOOSE is the Multiscale Object-Oriented Simulation Environment. '
-        'It is the base and numerical core for large, detailed simulations '
-        'including Computational Neuroscience and Systems Biology.' )
-url           = 'http://moose.ncbs.res.in/'
+class build_ext(_build_ext):
+    user_options = [
+            ('with-boost', None, 'Use Boost Libraries (OFF)')
+            , ('with-gsl', None, 'Use Gnu Scienfific Library (ON)')
+            , ('with-gsl-static', None, 'Use GNU Scientific Library (static library) (OFF)') 
+            , ('debug', None, 'Build moose in debugging mode (OFF)')
+            , ('no-build', None, 'DO NOT BUILD. (for debugging/development)')
+            ] + _build_ext.user_options
 
+    def initialize_options(self):
+        # Initialize options.
+        self.with_boost = 0
+        self.with_gsl = 1
+        self.with_gsl_static = 0
+        self.debug = 0
+        self.no_build = 0
+        self.cmake_options = {}
+        #  super().initialize_options()
+        _build_ext.initialize_options(self)
+
+    def finalize_options(self):
+        # Finalize options.
+        #  super().finalize_options()
+        _build_ext.finalize_options(self)
+        self.cmake_options['PYTHON_EXECUTABLE'] = os.path.realpath(sys.executable)
+        self.cmake_options['VERSION_MOOSE'] = version_
+        if self.with_boost:
+            self.cmake_options['WITH_BOOST'] = 'ON'
+            self.cmake_options['WITH_GSL'] = 'OFF'
+        else:
+            if self.with_gsl_static:
+                self.cmake_options['GSL_USE_STATIC_LIBRARIES'] = 'ON'
+        if self.debug:
+            self.cmake_options['CMAKE_BUILD_TYPE'] = 'Debug'
+        else:
+            self.cmake_options['CMAKE_BUILD_TYPE'] = 'Release'
+
+    def run(self):
+        if self.no_build:
+            return
+        for ext in self.extensions:
+            self.build_cmake(ext)
+        #  super().run()
+        _build_ext.run(self)
+
+    def build_cmake(self, ext):
+        global numCores_
+        global sdir_
+        print("\n==========================================================\n")
+        print("[INFO ] Building pymoose in %s ..." % builddir_)
+        cmake_args = []
+        for k, v in self.cmake_options.items():
+            cmake_args.append('-D%s=%s' % (k,v))
+        os.chdir(str(builddir_))
+        self.spawn(['cmake', str(sdir_)] + cmake_args)
+        if not self.dry_run: 
+            self.spawn(['make', '-j%d'%numCores_]) 
+        os.chdir(str(sdir_))
+
+with open(os.path.join(sdir_,  "README.md")) as f:
+    readme = f.read()
 
 setup(
-        name = name
-        , version = version
-        , author = "Upinder Bhalla et. al."
-        , author_email = "bhalla@ncbs.res.in"
-        , maintainer = 'Dilawar Singh'
-        , maintainer_email = 'dilawars@ncbs.res.in'
-        , description = description
-        , license = "LGPL"
-        , url = url
-        , long_description = read('./README.md')
-        , ext_modules = [
-            Extension('_moose', [ '*' ])
-            ]
-        , cmdclass = {
-             'install' : InstallCommand
-            , 'build_py' : BuildPyCommand
-            , 'build_ext' : BuildCommand
-            }
-        , require = [ 'python-qt4' ]
-        , keywords = "neural simulation"
-        , classifiers=[
-            'Intended Audience :: Science/Research',
-            'Operating System :: Linux',
-            'Programming Language :: Python',
-            'Programming Language :: C++',
-            ]
-        )
+    name="pymoose",
+    version=version_,
+    description= 'Python scripting interface of MOOSE Simulator (https://moose.ncbs.res.in)',
+    long_description=readme,
+    long_description_content_type='text/markdown',
+    author='MOOSERes',
+    author_email='bhalla@ncbs.res.in',
+    maintainer='Dilawar Singh',
+    maintainer_email='dilawars@ncbs.res.in',
+    url='http://moose.ncbs.res.in',
+    packages=[
+        'rdesigneur', 'moose', 'moose.SBML', 'moose.genesis', 'moose.neuroml',
+        'moose.neuroml2', 'moose.chemUtil', 'moose.chemMerge'
+    ],
+    package_dir={
+        'rdesigneur': os.path.join(sdir_, 'python', 'rdesigneur'),
+        'moose': os.path.join(sdir_, 'python', 'moose')
+    },
+    package_data={
+        'moose': [
+            '_moose.so'
+            , os.path.join('neuroml2','schema','NeuroMLCoreDimensions.xml')
+            , os.path.join('chemUtil', 'rainbow2.pkl')
+        ]
+    },
+    # python2 specific version here as well.
+    install_requires=['numpy', 'matplotlib'],
+    ext_modules=[CMakeExtension('dummy', optional=True)],
+    cmdclass={'build_ext': build_ext, 'test': TestCommand},
+)

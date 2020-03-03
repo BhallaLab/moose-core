@@ -49,7 +49,6 @@ public:
     Id getDsolve() const;
     void setDsolve( Id dsolve ); /// Inherited from ZombiePoolInterface.
 
-
     unsigned int getNumLocalVoxels() const;
     unsigned int getNumAllVoxels() const;
     /**
@@ -66,7 +65,7 @@ public:
     unsigned int getNumThreads( ) const;
     void setNumThreads( unsigned int x );
 
-    void advance_chunk( const size_t begin, const size_t end, ProcPtr p );
+    size_t advance_chunk( const size_t begin, const size_t end, ProcPtr p );
 
     void advance_pool( const size_t i, ProcPtr p );
 
@@ -83,30 +82,25 @@ public:
     void reinit( const Eref& e, ProcPtr p );
     void initProc( const Eref& e, ProcPtr p );
     void initReinit( const Eref& e, ProcPtr p );
+
     /**
      * Handles request to change volumes of voxels in this Ksolve, and
      * all cascading effects of this. At this point it won't handle
      * change in size of voxel array.
      */
     void updateVoxelVol( vector< double > vols );
-    //////////////////////////////////////////////////////////////////
-    // Utility for SrcFinfo
-    //////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////////
     // Solver interface functions
-    //////////////////////////////////////////////////////////////////
     unsigned int getPoolIndex( const Eref& e ) const;
     unsigned int getVoxelIndex( const Eref& e ) const;
 
-    //////////////////////////////////////////////////////////////////
     // ZombiePoolInterface inherited functions
-    //////////////////////////////////////////////////////////////////
-
     void setN( const Eref& e, double v );
     double getN( const Eref& e ) const;
+
     void setNinit( const Eref& e, double v );
     double getNinit( const Eref& e ) const;
+
     void setDiffConst( const Eref& e, double v );
     double getDiffConst( const Eref& e ) const;
 
@@ -117,6 +111,7 @@ public:
      */
     void setNumPools( unsigned int num );
     unsigned int getNumPools() const;
+    void setNumVarTotPools( unsigned int var, unsigned int tot );
 
     VoxelPoolsBase* pools( unsigned int i );
     double volume( unsigned int i ) const;
@@ -149,7 +144,8 @@ private:
     /**
      * @brief Number of threads to use. Only applicable for deterministic case.
      */
-    unsigned int numThreads_;
+    size_t numThreads_;
+    size_t grainSize_;
 
     /**
      * Each VoxelPools entry handles all the pools in a single voxel.
@@ -180,7 +176,9 @@ private:
     // Time taken in all process function in us.
     double totalTime_ = 0.0;
 
-    high_resolution_clock::time_point t0_, t1_;
+    vector<std::pair<size_t, size_t>> intervals_;
+
+    //high_resolution_clock::time_point t0_, t1_;
 
 };
 

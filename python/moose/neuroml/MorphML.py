@@ -259,15 +259,18 @@ class MorphML():
                 if cableid in self.intFireCableIds:
                     mechanismname = self.intFireCableIds[cableid]
                 if mechanismname is not None: # this cableid is an intfire
-                    ## create LIF (subclass of Compartment) and set to default values
+                    # create LIF (subclass of Compartment) and set to default values
                     moosecomp = moose.LIF(moosecomppath)
-                    moosechannel = moose.Neutral('/library/'+mechanismname)
+                    mname = '/library/' + mechanismname
+                    moosechannel = moose.element(mname) if moose.exists(mname) else moose.Neutral(mname)
+                    # Mstring values are 'string'; make sure to convert them to
+                    # float else it will seg-fault with python3+
                     moosechannelval = moose.Mstring(moosechannel.path+'/vReset')
-                    moosecomp.vReset = moosechannelval.value
+                    moosecomp.vReset = float(moosechannelval.value)
                     moosechannelval = moose.Mstring(moosechannel.path+'/thresh')
-                    moosecomp.thresh = moosechannelval.value
+                    moosecomp.thresh = float( moosechannelval.value )
                     moosechannelval = moose.Mstring(moosechannel.path+'/refracT')
-                    moosecomp.refractoryPeriod = moosechannelval.value
+                    moosecomp.refractoryPeriod = eval(moosechannelval.value)
                     ## refracG is currently not supported by moose.LIF
                     ## when you implement it, check if refracG or g_refrac
                     ## is a conductance density or a conductance, I think the former
@@ -582,7 +585,7 @@ class MorphML():
             compartment.refractoryPeriod = value # compartment is a moose.LIF instance (intfire)
         elif name == 'g_refrac':
             _logger.info("SORRY, current moose.LIF doesn't support g_refrac.")
-        elif mechanismname is 'synapse': # synapse being added to the compartment
+        elif mechanismname == 'synapse': # synapse being added to the compartment
             ## these are potential locations, we do not actually make synapses,
             ## unless the user has explicitly asked for it
             if self.createPotentialSynapses:
@@ -592,7 +595,7 @@ class MorphML():
             ## I assume below that compartment name has _segid at its end
             segid = compartment.name.split('_')[-1] # get segment id from compartment name
             self.segDict[segid][5].append(value)
-        elif mechanismname is 'spikegen': # spikegen being added to the compartment
+        elif mechanismname == 'spikegen': # spikegen being added to the compartment
             ## these are potential locations, we do not actually make the spikegens.
             ## spikegens for different synapses can have different thresholds,
             ## hence include synapse_type in its name

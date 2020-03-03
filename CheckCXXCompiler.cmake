@@ -1,9 +1,14 @@
-########################### COMPILER MACROS #####################################
+# Compiler check.
+# Must support c++11
+# If python2 is supported then we can not use c++17. 
+if(COMPILER_IS_TESTED)
+    return()
+endif()
 
+########################### COMPILER MACROS #####################################
 include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG( "-std=c++11" COMPILER_SUPPORTS_CXX11 )
-CHECK_CXX_COMPILER_FLAG( "-std=c++0x" COMPILER_SUPPORTS_CXX0X )
-CHECK_CXX_COMPILER_FLAG( "-Wno-strict-aliasing" COMPILER_WARNS_STRICT_ALIASING )
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11 )
+CHECK_CXX_COMPILER_FLAG("-Wno-strict-aliasing" COMPILER_WARNS_STRICT_ALIASING )
 
 # Turn warning to error: Not all of the options may be supported on all
 # versions of compilers. be careful here.
@@ -15,8 +20,13 @@ add_definitions(-Wall
     )
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     add_definitions( -Wno-unused-local-typedefs )
+elseif(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
+    add_definitions( -Wno-unused-local-typedef )
 endif()
 
+if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" )
+    add_definitions( -Wno-unused-local-typedefs )
+endif()
 
 add_definitions(-fPIC)
 if(COMPILER_WARNS_STRICT_ALIASING)
@@ -32,20 +42,14 @@ if(COMPILER_SUPPORT_UNUSED_BUT_SET_VARIABLE_NO_WARN)
 endif(COMPILER_SUPPORT_UNUSED_BUT_SET_VARIABLE_NO_WARN)
 
 if(COMPILER_SUPPORTS_CXX11)
-    message(STATUS "Your compiler supports c++11 features. Enabling it")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    add_definitions( -DENABLE_CPP11 )
     if(APPLE)
-        #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
-        message(STATUS "NOTE: Making clang to inline more aggresively" )
         add_definitions( -mllvm -inline-threshold=1000 )
     endif(APPLE)
 else(COMPILER_SUPPORTS_CXX11)
-    add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS -DBOOST_NO_SCOPED_ENUMS )
-    message(FATAL_ERROR "\
-        The compiler ${CMAKE_CXX_COMPILER} is too old. \
-        Please use a compiler which has c++11 support.
-        ")
+    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} is too old. \n"
+      "Please use a compiler which has c++11 support."
+      )
 endif(COMPILER_SUPPORTS_CXX11)
 
-
+set(COMPILER_IS_TESTED ON)

@@ -61,7 +61,9 @@ extern unsigned int totalTests;
 namespace moose
 {
 
-    extern moose::RNG<double> rng;
+    extern moose::RNG rng;
+
+    extern map<string, valarray<double>> solverProfMap;
 
     extern map<string, valarray<double>> solverProfMap;
 
@@ -118,6 +120,18 @@ namespace moose
      * @return  A random number between 0 and 1.
      */
     double mtrand( void );
+
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Overloaded function. Random number between a and b
+     *
+     * @Param a lower limit.
+     * @Param b Upper limit.
+     *
+     * @Returns   
+     */
+    /* ----------------------------------------------------------------------------*/
+    double mtrand( double a, double b );
 
     /**
      * @brief Create a POSIX compatible path from a given string.
@@ -214,7 +228,6 @@ namespace moose
     /* ----------------------------------------------------------------------------*/
     void addSolverProf( const string& name, double time, size_t steps = 1);
     void printSolverProfMap( );
-
 }
 
 #endif   /* ----- #ifndef __MOOSE_GLOBAL_INC_  ----- */

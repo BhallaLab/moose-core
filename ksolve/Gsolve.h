@@ -10,7 +10,10 @@
 #ifndef _GSOLVE_H
 #define _GSOLVE_H
 
+#include "../randnum/RNG.h"
+
 class Stoich;
+
 class Gsolve: public ZombiePoolInterface
 {
 public:
@@ -30,6 +33,7 @@ public:
 
     unsigned int getNumLocalVoxels() const;
     unsigned int getNumAllVoxels() const;
+
     /**
      * Assigns the number of voxels used in the entire reac-diff
      * system. Note that fewer than this may be used on any given node.
@@ -42,6 +46,7 @@ public:
      */
     void setNumPools( unsigned int num ); /// Inherited.
     unsigned int getNumPools() const; /// Inherited.
+    void setNumVarTotPools( unsigned int var, unsigned int tot );//Inherited
     VoxelPoolsBase* pools( unsigned int i ); /// Inherited.
     double volume( unsigned int i ) const;
 
@@ -70,8 +75,7 @@ public:
     void fillMmEnzDep();
     void fillPoolFuncDep();
     void fillIncrementFuncDep();
-    void insertMathDepReacs( unsigned int mathDepIndex,
-                             unsigned int firedReac );
+    void insertMathDepReacs(unsigned int mathDepIndex, unsigned int firedReac);
     void makeReacDepsUnique();
 
     //////////////////////////////////////////////////////////////////
@@ -109,8 +113,8 @@ public:
     void updateRateTerms( unsigned int index );
 
     // Function for multithreading.
-    void advance_chunk( const size_t begin, const size_t end, ProcPtr p );
-    void recalcTimeChunk( const size_t begin, const size_t end, ProcPtr p);
+    size_t advance_chunk( const size_t begin, const size_t end, ProcPtr p );
+    size_t recalcTimeChunk( const size_t begin, const size_t end, ProcPtr p);
 
     //////////////////////////////////////////////////////////////////
     /// Flag: returns true if randomized round to integers is done.
@@ -134,9 +138,11 @@ private:
      * @brief Number of threads to use when parallel version of Gsolve is
      * used.
      */
-    unsigned int numThreads_;
+    size_t numThreads_;
+    size_t grainSize_;
 
     GssaSystem sys_;
+
     /**
      * Each VoxelPools entry handles all the pools in a single voxel.
      * Each entry knows how to update itself in order to complete
@@ -163,7 +169,8 @@ private:
     /// Flag: True if atot should be updated every clock tick
     bool useClockedUpdate_;
 
-    double t1_;
+    // private rng.
+    moose::RNG rng_;
 };
 
 #endif	// _GSOLVE_H

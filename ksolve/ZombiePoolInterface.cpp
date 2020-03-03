@@ -6,7 +6,7 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#include "header.h"
+#include "../basecode/header.h"
 #ifdef USE_GSL
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
@@ -21,7 +21,7 @@
 
 #include "RateTerm.h"
 #include "FuncTerm.h"
-#include "SparseMatrix.h"
+#include "../basecode/SparseMatrix.h"
 #include "KinSparseMatrix.h"
 #include "Stoich.h"
 #include "../shell/Shell.h"
@@ -30,12 +30,12 @@
 #include "../mesh/ChemCompt.h"
 
 ZombiePoolInterface::ZombiePoolInterface()
-    : stoich_(), compartment_(),
-      isBuilt_( false )
+    : stoich_(), compartment_(), isBuilt_(false)
 {;}
 
 void ZombiePoolInterface::updateJunctions( double dt )
 {;}
+
 void ZombiePoolInterface::setPrev()
 {;}
 
@@ -52,15 +52,13 @@ void ZombiePoolInterface::setCompartment( Id compt )
     if ( compt.element()->cinfo()->isA( "ChemCompt" ) )
     {
         compartment_ = compt;
-        vector< double > vols =
-            Field< vector < double > >::get( compt, "voxelVolume" );
-        if ( vols.size() > 0 )
+        vector<double> vols = Field<vector<double>>::get( compt, "voxelVolume" );
+
+        if (vols.size() > 0)
         {
             setNumAllVoxels( vols.size() );
             for ( unsigned int i = 0; i < vols.size(); ++i )
-            {
                 pools(i)->setVolume( vols[i] );
-            }
         }
     }
 }

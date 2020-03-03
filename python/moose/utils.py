@@ -16,8 +16,12 @@ from datetime import datetime
 from collections import defaultdict
 import re
 
+import logging
+logger = logging.getLogger('moose')
+
 from moose.moose_constants import *
 from moose.print_utils import *
+
 # Print and Plot utilities.
 try:
     from moose.plot_utils import *
@@ -82,15 +86,17 @@ def readtable(table, filename, separator=None):
     line_no = 0
     for line in in_file:
         line_no = line_no + 1
-        tokens = split(line, separator)
-        if len(token) is 0:
+        tokens = line.split(separator)
+        if not tokens:
             continue
-        elif len(token) == 1:
-            table[ii] = float(token[0])
-        elif len(token) == 2:
-            table[int(token[0])] = float(token[1])
+        elif len(tokens) == 1:
+            table[ii] = float(tokens[0])
+        elif len(tokens) == 2:
+            table[int(tokens[0])] = float(tokens[1])
         else:
-            print("pymoose.readTable(", table, ",", filename, ",", separator, ") - line#", line_no, " does not fit.")
+            print("pymoose.readTable(", table, ",", filename, ",", separator
+                    , ") - line#", line_no, " does not fit."
+                    )
 
 def getfields(moose_object):
     """Returns a dictionary of the fields and values in this object."""
@@ -310,8 +316,9 @@ def autoposition(root):
     compartments = moose.wildcardFind('%s/##[TYPE=Compartment]' % (root.path))
     stack = [compartment for compartment in map(moose.element, compartments)
               if len(compartment.neighbors['axial']) == 0]
-    if len(stack) != 1:
-        raise Exception('There must be one and only one top level compartment. Found %d' % (len(topcomp_list)))
+
+    assert len(stack) == 1, 'There must be one and only one top level\
+            compartment. Found %d' % len(stack)
     ret = stack[0]
     while len(stack) > 0:
         comp = stack.pop()
@@ -335,8 +342,10 @@ def autoposition(root):
 
 def loadModel(filename, target,method='ee'):
     moose.loadModel(filename,target)
-    moose.mooseaddChemSolver(target,method)
-	
+    moose.mooseAddChemSolver(target,method)
+    if moose.exists(target+'/kinetics/info'):
+        moose.element(target+'/kinetics/info').solver = method
+
 def readcell_scrambled(filename, target, method='ee'):
     """A special version for handling cases where a .p file has a line
     with specified parent yet to be defined.
@@ -514,15 +523,12 @@ def assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='hsolve'):
             if len(tab.neighbors['input']) == 0:
                 moose.useClock(9, tab.path, 'process')
 
-def stepRun(simtime, steptime, verbose=True, logger=None):
+def stepRun(simtime, steptime, verbose=True):
     """Run the simulation in steps of `steptime` for `simtime`."""
-    clock = moose.Clock('/clock')
+    clock = moose.element('/clock')
     if verbose:
         msg = 'Starting simulation for %g' % (simtime)
-        if logger is None:
-            print(msg)
-        else:
-            logger.info(msg)
+        logger.info(msg)
     ts = datetime.now()
     while clock.currentTime < simtime - steptime:
         ts1 = datetime.now()
@@ -531,29 +537,20 @@ def stepRun(simtime, steptime, verbose=True, logger=None):
         td = te - ts1
         if verbose:
             msg = 'Simulated till %g. Left: %g. %g of simulation took: %g s' % (clock.currentTime, simtime - clock.currentTime, steptime, td.days * 86400 + td.seconds + 1e-6 * td.microseconds)
-            if logger is None:
-                print(msg)
-            else:
-                logger.info(msg)
+            logger.info(msg)
 
     remaining = simtime - clock.currentTime
     if remaining > 0:
         if verbose:
             msg = 'Running the remaining %g.' % (remaining)
-            if logger is None:
-                print(msg)
-            else:
-                logger.info(msg)
+            logger.info(msg)
         moose.start(remaining)
     te = datetime.now()
     td = te - ts
     dt = min([t for t in moose.element('/clock').dts if t > 0.0])
     if verbose:
         msg = 'Finished simulation of %g with minimum dt=%g in %g s' % (simtime, dt, td.days * 86400 + td.seconds + 1e-6 * td.microseconds)
-        if logger is None:
-            print(msg)
-        else:
-            logger.info(msg)
+        logger.info(msg)
 
 
 

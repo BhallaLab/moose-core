@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-#
-# plot_utils.py: Some utility function for plotting data in moose.
-
 from __future__ import print_function, division, absolute_import
 
 __author__           = "Dilawar Singh"
@@ -18,10 +15,7 @@ import matplotlib.pyplot as plt
 import moose
 import moose.print_utils as pu
 import re
-
-# To support python 2.6. On Python3.6+, dictionaries are ordered by default.
-# This is here to fill this gap.
-from moose.OrderedDict import OrderedDict
+from collections import OrderedDict
 
 def plotAscii(yvec, xvec = None, file=None):
     """Plot two list-like object in terminal using gnuplot.
@@ -225,7 +219,7 @@ def saveRecords(records, xvec = None, **kwargs):
     for k in records:
         try:
             yvec = records[k].vector
-        except AtrributeError as e:
+        except AttributeError as e:
             yevc = records[k]
         yvecs.append(yvec)
     xvec = np.linspace(0, clock.currentTime, len(yvecs[0]))
@@ -242,10 +236,9 @@ def plotRecords(records, xvec = None, **kwargs):
     try:
         for k in sorted(records.keys(), key=str.lower):
             dataDict[k] = records[k]
-    except Exception as e:
+    except Exception:
         dataDict = records
 
-    legend = kwargs.get('legend', True)
     outfile = kwargs.get('outfile', None)
     subplot = kwargs.get('subplot', False)
     filters = [ x.lower() for x in kwargs.get('filter', [])]
@@ -287,7 +280,7 @@ def plotRecords(records, xvec = None, **kwargs):
     plt.close( )
 
 
-def plotTables( regex = '.*', **kwargs ):
+def plotTablesByRegex( regex = '.*', **kwargs ):
     """plotTables Plot all moose.Table/moose.Table2 matching given regex. By
     default plot all tables. Table names must be unique. Table name are used as
     legend.

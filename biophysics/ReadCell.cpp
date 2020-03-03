@@ -7,11 +7,10 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
+#include "../basecode/header.h"
 #include "../shell/Shell.h"
 #include "ReadCell.h"
-#include "../utility/utility.h"
-#include "../utility/numutil.h"
+#include "../utility/strutil.h"
 #include "CompartmentBase.h"
 #include "Compartment.h"
 #include "SymCompartment.h"

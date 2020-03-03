@@ -7,12 +7,10 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
-#include <stdio.h>
+#include "../basecode/header.h"
 #include "Neutral.h"
 #include "Shell.h"
 #include "Wildcard.h"
-// #define NOINDEX (UINT_MAX - 2)
 
 static int wildcardRelativeFind( ObjId start, const vector< string >& path,
                                  unsigned int depth, vector< ObjId >& ret );
@@ -153,9 +151,10 @@ static void myUnique(vector<ObjId>& ret)
         ret.resize(j);
 }
 
-int wildcardFind(const string& path, vector<ObjId>& ret)
+int wildcardFind(const string& path, vector<ObjId>& ret, bool clear)
 {
-    ret.resize( 0 );
+    if(clear)
+        ret.resize( 0 );
     simpleWildcardFind( path, ret );
     myUnique( ret );
     return ret.size();

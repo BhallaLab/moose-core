@@ -234,7 +234,7 @@ PyObject * moose_reinit(PyObject * dummy, PyObject * args);
 PyObject * moose_stop(PyObject * dummy, PyObject * args);
 PyObject * moose_isRunning(PyObject * dummy, PyObject * args);
 PyObject * moose_exists(PyObject * dummy, PyObject * args);
-PyObject * moose_loadModel(PyObject * dummy, PyObject * args);
+PyObject * moose_loadModelInternal(PyObject * dummy, PyObject * args);
 //PyObject * moose_saveModel(PyObject * dummy, PyObject * args);
 PyObject * moose_setCwe(PyObject * dummy, PyObject * args);
 PyObject * moose_getCwe(PyObject * dummy, PyObject * args);
@@ -486,6 +486,7 @@ template <class KeyType>
 int set_lookup_value(const ObjId& oid, string fname, char value_type_code, char key_type_code, PyObject * key, PyObject * value_obj)
 {
     bool success = false;
+    assert(key);
     KeyType *cpp_key = (KeyType*)to_cpp(key, key_type_code);
     if (cpp_key == NULL)
     {

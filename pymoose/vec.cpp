@@ -1,56 +1,11 @@
 // vec.cpp ---
-//
 // Filename: vec.cpp
 // Description:
-// Author:
-// Maintainer:
+// Author: Subhasis Ray
 // Created: Mon Jul 22 16:46:37 2013 (+0530)
-// Version:
-// Last-Updated: Fri Sep 25 23:00:48 2015 (-0400)
-//           By: subha
-//     Update #: 80
-// URL:
-// Keywords:
-// Compatibility:
-//
-//
-
-// Commentary:
-//
-//
-//
-//
-
-// Change log:
-//
-// Mon Jul 22 16:47:10 IST 2013 - Splitting contents of
-// moosemodule.cpp into speparate files.
-//
-//c
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as
-// published by the Free Software Foundation; either version 3, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; see the file COPYING.  If not, write to
-// the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-// Floor, Boston, MA 02110-1301, USA.
-//
-//
-
-// Code:
 
 #include <Python.h>
 #include <structmember.h> // This defines the type id macros like T_STRING
-// #include "numpy/arrayobject.h"
-
-#include "../utility/simple_logger.hpp"
 
 #include <iostream>
 #include <typeinfo>
@@ -66,9 +21,12 @@
 #include "../basecode/global.h"
 #include "../basecode/Id.h"
 #include "../basecode/ObjId.h"
-#include "../utility/utility.h"
+
 #include "../shell/Shell.h"
 #include "../shell/Wildcard.h"
+
+#include "../utility/utility.h"
+#include "../utility/strutil.h"
 
 #include "moosemodule.h"
 
@@ -512,13 +470,9 @@ long moose_Id_hash(_Id * self)
 }
 
 
-// 2011-03-23 15:14:11 (+0530)
-// 2011-03-26 17:02:19 (+0530)
-//
-// 2011-03-26 19:14:34 (+0530) - This IS UGLY! Destroying one
+// This IS UGLY! Destroying one
 // ObjId will destroy the containing element and invalidate all
 // the other ObjId with the same Id.
-// 2011-03-28 13:44:49 (+0530)
 PyObject * deleteObjId(ObjId oid)
 {
 #ifndef NDEBUG
@@ -1259,20 +1213,12 @@ int moose_Id_setattro(_Id * self, PyObject * attr, PyObject *value)
     default:
         break;
     }
+
     // MOOSE Field::set returns 1 for success 0 for
     // failure. Python treats return value 0 from setters as
     // success, anything else failure.
     if (ret && (PyErr_Occurred() == NULL))
-    {
         return 0;
-    }
     else
-    {
         return -1;
-    }
-
 }
-
-
-//
-// vec.cpp ends here

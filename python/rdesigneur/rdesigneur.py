@@ -16,7 +16,7 @@
 ## latter in the former, including mapping entities like calcium and
 ## channel conductances, between them.
 ##########################################################################
-from __future__ import print_function, absolute_import 
+from __future__ import print_function, absolute_import, division
 
 import imp
 import os
@@ -46,6 +46,19 @@ import csv
 
 #EREST_ACT = -70e-3
 
+def _profile(func):
+    """
+    Can be used to profile a function. Useful in debugging and profiling.
+    Author: Dilawar Singh
+    """
+    def wrap(self=None, *args, **kwargs):
+        t0 = time.time()
+        result = func(self, *args, **kwargs)
+        print("[INFO ] Took %s sec" % (time.time()-t0))
+        return result
+    return wrap
+        
+
 class BuildError(Exception):
     def __init__(self, value):
         self.value = value
@@ -74,6 +87,7 @@ class rdesigneur:
             combineSegments = True,
             stealCellFromLibrary = False,
             verbose = True,
+            benchmark = False,
             addSomaChemCompt = False,  # Put a soma chemCompt on neuroMesh
             addEndoChemCompt = False,  # Put an endo compartment, typically for ER, on each of the NeuroMesh compartments.
             diffusionLength= 2e-6,
@@ -113,11 +127,14 @@ class rdesigneur:
         self.combineSegments = combineSegments
         self.stealCellFromLibrary = stealCellFromLibrary
         self.verbose = verbose
+        self.benchmark = benchmark
         self.addSomaChemCompt = addSomaChemCompt
         self.addEndoChemCompt = addEndoChemCompt
         self.diffusionLength= diffusionLength
         if meshLambda > 0.0:
-            print("Warning: meshLambda argument is deprecated. Please use 'diffusionLength' instead.\nFor now rdesigneur will accept this argument.")
+            print("Warning: meshLambda argument is deprecated. Please use "
+                    "'diffusionLength' instead.\nFor now rdesigneur will "
+                    "accept this argument.")
             self.diffusionLength = meshLambda
         self.temperature = temperature
         self.chemDt= chemDt
@@ -141,9 +158,14 @@ class rdesigneur:
         self.params = params
 
         self.adaptorList = adaptorList
-        self.stimList = stimList
-        self.plotList = plotList
-        self.saveList = plotList                    #ADDED BY Sarthak
+        try:
+            self.stimList = [ rstim.convertArg(i) for i in stimList ]
+            self.plotList = [ rplot.convertArg(i) for i in plotList ]
+            self.moogList = [ rmoog.convertArg(i) for i in moogList ]
+        except BuildError as msg:
+            print("Error: rdesigneur: " + msg)
+            quit()
+
         self.saveAs = []
         self.moogList = moogList
         self.plotNames = []
@@ -169,16 +191,18 @@ class rdesigneur:
 
     ################################################################
     def _printModelStats( self ):
-        print("\n\tRdesigneur: Elec model has",
+        if not self.verbose:
+            return
+        print("Rdesigneur: Elec model has",
             self.elecid.numCompartments, "compartments and",
             self.elecid.numSpines, "spines on",
             len( self.cellPortionElist ), "compartments.")
-        if hasattr( self , 'chemid' ):
-            dmstoich = moose.element( self.dendCompt.path + '/stoich' )
-            print("\tChem part of model has the following compartments: ")
+        if hasattr( self , 'chemid') and len( self.chemDistrib ) > 0:
+            #  dmstoich = moose.element( self.dendCompt.path + '/stoich' )
+            print("    Chem part of model has the following compartments: ")
             for j in moose.wildcardFind( '/model/chem/##[ISA=ChemCompt]'):
                 s = moose.element( j.path + '/stoich' )
-                print( "\t | In {}, {} voxels X {} pools".format( j.name, j.mesh.num, s.numAllPools ) )
+                print( "    | In {}, {} voxels X {} pools".format( j.name, j.mesh.num, s.numAllPools ) )
 
     def buildModel( self, modelPath = '/model' ):
         if moose.exists( modelPath ):
@@ -187,30 +211,29 @@ class rdesigneur:
             return
         self.model = moose.Neutral( modelPath )
         self.modelPath = modelPath
-        print( "[INFO ] rdesigneur: Building model. " )
-        funcs = [ self.installCellFromProtos, self.buildPassiveDistrib
+        funcs = [self.installCellFromProtos, self.buildPassiveDistrib
             , self.buildChanDistrib, self.buildSpineDistrib, self.buildChemDistrib
             , self._configureSolvers, self.buildAdaptors, self._buildStims
             , self._buildPlots, self._buildMoogli, self._configureHSolve
-            , self._configureClocks, self._printModelStats, self._savePlots 
-            ]
-        for i, _func in enumerate( funcs ):
-            if self.verbose:
-                print( " + (%d/%d) executing %25s"%(i, len(funcs), _func.__name__), end=' ' )
-                sys.stdout.flush()
+            , self._configureClocks, self._printModelStats]
+
+        for i, _func in enumerate(funcs):
+            if self.benchmark:
+                print("- (%02d/%d) Executing %25s"%(i+1, len(funcs), _func.__name__), end=' ' )
             t0 = time.time()
             try:
-                _func( )
+                _func()
             except BuildError as msg:
                 print("Error: rdesigneur: model build failed:", msg)
-                moose.delete( self.model )
+                moose.delete(self.model)
                 return
             t = time.time() - t0
-            if self.verbose:
+            if self.benchmark:
                 msg = r'    ... DONE'
-                if t > 1:
+                if t > 0.1:
                     msg += ' %.3f sec' % t
-                print( msg )
+                print(msg)
+            sys.stdout.flush()
 
     def installCellFromProtos( self ):
         if self.stealCellFromLibrary:
@@ -306,7 +329,7 @@ class rdesigneur:
             protoName = protoVec[0][6:]
             if self.isKnownClassOrFile( protoName, knownClasses ):
                 try:
-                    getAttr( moose, protoName )( '/library/' + protoVec[1] )
+                    getattr( moose, protoName )( '/library/' + protoVec[1] )
                 except AttributeError:
                     raise BuildError( protoType + "Proto: Moose class '" \
                             + protoVec[0] + "' not found." )
@@ -394,7 +417,7 @@ class rdesigneur:
             period = name.rfind( '.' )
             slash = name.rfind( '/' )
             if ( slash >= period ):
-                raise BuildError( "chanProto: bad filename:" + i[0] )
+                raise BuildError( "chanProto: bad filename:" + name )
             if ( slash < 0 ):
                 return name[:period]
             else:
@@ -436,7 +459,7 @@ class rdesigneur:
         for i in range( len(args) ):
             parms[i] = args[i]
         if parms[6] <= 0:
-            return _self.buildElecSoma( parms[:4] )
+            return self.buildElecSoma( parms[:4] )
         cell = moose.Neuron( '/library/' + parms[1] )
         prev = buildCompt( cell, 'soma', dia = args[2], dx = args[3] )
         dx = parms[5]/parms[6]
@@ -455,6 +478,9 @@ class rdesigneur:
         stimObj = []
         for i in dendCompts + spineCompts:
             vclamp = make_vclamp( name = 'vclamp', parent = i.path )
+
+            # Assume SI units. Scale by Cm to get reasonable gain.
+            vclamp.gain = i.Cm * 1e4 
             moose.connect( i, 'VmOut', vclamp, 'sensedIn' )
             moose.connect( vclamp, 'currentOut', i, 'injectMsg' )
             stimObj.append( vclamp )
@@ -489,6 +515,12 @@ class rdesigneur:
 	# Expression can use p, g, L, len, dia, maxP, maxG, maxL.
         temp = []
         for i in self.passiveDistrib:
+            # Handle legacy format of ['.', path, field, expr [field expr]]
+            if (len( i ) < 3) or (i[0] != '.' and len(i) %2 != 1):
+                raise BuildError( "buildPassiveDistrib: Need 3 + N*2 arguments as (path field expr [field expr]...), have {}".format( len(i) ) )
+
+            if not(( len(i) % 2 ) != 1 and i[0] == '.' ):
+                temp.append( '.' )
             temp.extend( i )
             temp.extend( [""] )
         self.elecid.passiveDistribution = temp
@@ -618,11 +650,10 @@ class rdesigneur:
 
         kf = knownFields[field] # Find the field to decide type.
         if kf[0] in ['CaConcBase', 'ChanBase', 'NMDAChan', 'VClamp']:
-            objList = self._collapseElistToPathAndClass( comptList, plotSpec[2], kf[0] )
+            objList = self._collapseElistToPathAndClass( comptList, plotSpec.relpath, kf[0] )
             return objList, kf[1]
-
         elif field in [ 'n', 'conc', 'volume']:
-            path = plotSpec[2]
+            path = plotSpec.relpath
             pos = path.find( '/' )
             if pos == -1:   # Assume it is in the dend compartment.
                 path  = 'dend/' + path
@@ -689,26 +720,26 @@ class rdesigneur:
             assert( plotField == plotField2 )
             plotObj3 = plotObj + plotObj2
             numPlots = sum( q != dummy for q in plotObj3 )
-            if numPlots == 0:
-                return 
+            #print( "PlotList: {0}: numobj={1}, field ={2}, nd={3}, ns={4}".format( pair, numPlots, plotField, len( dendCompts ), len( spineCompts ) ) )
+            if numPlots > 0:
+                tabname = graphs.path + '/plot' + str(k)
+                scale = knownFields[i.field][2]
+                units = knownFields[i.field][3]
+                if i.mode == 'wave':
+                    self.wavePlotNames.append( [ tabname, i.title, k, scale, units, i ] )
+                else:
+                    self.plotNames.append( [ tabname, i.title, k, scale, units, i.field, i.ymin, i.ymax ] )
+                if len( i.saveFile ) > 4 and i.saveFile[-4] == '.xml' or i.saveFile:
+                    self.saveNames.append( [ tabname, len(self.saveNames), scale, units, i ] )
 
-            tabname = graphs.path + '/plot' + str(k)
-            scale = knownFields[i[3]][2]
-            units = knownFields[i[3]][3]
-            ymin = i[6] if len(i) > 7 else 0
-            ymax = i[7] if len(i) > 7 else 0
-            if len( i ) > 5 and i[5] == 'wave':
-                self.wavePlotNames.append( [ tabname, i[4], k, scale, units, i[3], ymin, ymax ] )
-            else:
-                self.plotNames.append( [ tabname, i[4], k, scale, units, i[3], ymin, ymax ] )
-            k += 1
-            if i[3] in [ 'n', 'conc', 'volume', 'Gbar' ]:
-                tabs = moose.Table2( tabname, numPlots )
-            else:
-                tabs = moose.Table( tabname, numPlots )
-                if i[3] == 'spikeTime':
-                    tabs.vec.threshold = -0.02 # Threshold for classifying Vm as a spike.
-                    tabs.vec.useSpikeMode = True # spike detect mode on
+                k += 1
+                if i.field == 'n' or i.field == 'conc' or i.field == 'volume' or i.field == 'Gbar':
+                    tabs = moose.Table2( tabname, numPlots )
+                else:
+                    tabs = moose.Table( tabname, numPlots )
+                    if i.field == 'spikeTime':
+                        tabs.vec.threshold = -0.02 # Threshold for classifying Vm as a spike.
+                        tabs.vec.useSpikeMode = True # spike detect mode on
 
             vtabs = moose.vec( tabs )
             q = 0
@@ -769,9 +800,9 @@ rdesigneur.rmoogli.updateMoogliViewer()
         moose.reinit()
         moose.start( runtime )
         if block:
-            self.display( len( self.moogNames ) + 1 )
+            self.display( len( self.moogNames ) + 1)
 
-    def display( self, startIndex = 0 ):
+    def display( self, startIndex = 0, block=True ):
         for i in self.plotNames:
             plt.figure( i[2] + startIndex )
             plt.title( i[1] )
@@ -797,7 +828,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
         if len( self.wavePlotNames ) > 0:
             for i in range( 3 ):
                 self.displayWavePlots()
-        plt.show( block=True )
+        plt.show( block=block )
         self._save()                                            
         
 
@@ -809,7 +840,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             if len( vtab ) < 2:
                 print( "Warning: Waveplot {} abandoned, only {} points".format( i[1], len( vtab ) ) )
                 continue
-            dFrame = len( vtab[0].vector ) / self.numWaveFrames
+            dFrame = len( vtab[0].vector ) // self.numWaveFrames
             if dFrame < 1:
                 dFrame = 1
             vpts = np.array( [ [k.vector[j] for j in range( 0, len( k.vector ), dFrame ) ] for k in vtab] ).T * i[3]
@@ -818,10 +849,15 @@ rdesigneur.rmoogli.updateMoogliViewer()
             plt.title( i[1] )
             plt.xlabel( "position (voxels)" )
             plt.ylabel( i[4] )
-            mn = np.min(vpts)
-            mx = np.max(vpts)
-            if mn/mx < 0.3:
-                mn = 0
+            plotinfo = i[5]
+            if plotinfo.ymin == plotinfo.ymax:
+                mn = np.min(vpts)
+                mx = np.max(vpts)
+                if mn/mx < 0.3:
+                    mn = 0
+            else:
+                mn = plotinfo.ymin
+                mx = plotinfo.ymax
             ax.set_ylim( mn, mx )
             line, = plt.plot( range( len( vtab ) ), vpts[0] )
             timeLabel = plt.text( len(vtab ) * 0.05, mn + 0.9*(mx-mn), 'time = 0' )
@@ -1081,7 +1117,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
         }
         stims = moose.Neutral( self.modelPath + '/stims' )
         k = 0
-        # Stimlist = [path, geomExpr, relPath, field, expr_string]
+        # rstim class has {elecpath, geom_expr, relpath, field, expr}
         for i in self.stimList:
             pair = i[0] + " " + i[1]
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
@@ -1144,8 +1180,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
     ################################################################
 
     def validateFromMemory( self, epath, cpath ):
-        ret = self.validateChem()
-        return ret
+        return self.validateChem()
 
     #################################################################
     # assumes ePath is the parent element of the electrical model,
@@ -1197,11 +1232,11 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
         self._buildNeuroMesh()
 
-
         self._configureSolvers()
         for i in self.adaptorList:
-            print(i)
-            self._buildAdaptor( i[0],i[1],i[2],i[3],i[4],i[5],i[6] )
+            #  print(i)
+            assert len(i) >= 8
+            self._buildAdaptor( i[0],i[1],i[2],i[3],i[4],i[5],i[6],i[7] )
 
     ################################################################
 
@@ -1331,6 +1366,8 @@ rdesigneur.rmoogli.updateMoogliViewer()
         if len( comptlist ) == 0:
             raise BuildError( "validateChem: no compartment on: " + cpath )
 
+        return True
+
         '''
         if len( comptlist ) == 1:
             return;
@@ -1381,7 +1418,6 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 comptList[0].name = 'dend'
             return comptList
         if not self._isModelFromKkit():
-            print( "Not isModelfromKkit" )
             return comptList
         sortedComptList = sorted( comptList, key=lambda x: -x.volume )
         if self.addSomaChemCompt:
@@ -1400,6 +1436,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             #print( "SortedClist= {}".format( sortedComptList[i] ))
             if sortedComptList[i].name != sortedNames[i]:
                 sortedComptList[i].name = sortedNames[i]
+            #print( "SortedClist= {}     {}".format( sortedNames[i], sortedComptList[i].volume ))
         return sortedComptList
 
 
@@ -1457,7 +1494,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
     #################################################################
     def _configureSolvers( self ) :
-        if not hasattr( self, 'chemid' ):
+        if not hasattr( self, 'chemid' ) or len( self.chemDistrib ) == 0:
             return
         if not hasattr( self, 'dendCompt' ):
             raise BuildError( "configureSolvers: no chem meshes defined." )
@@ -1528,7 +1565,11 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
     def _loadChem( self, fname, chemName ):
         chem = moose.Neutral( '/library/' + chemName )
-        modelId = moose.loadModel( fname, chem.path, 'ee' )
+        pre, ext = os.path.splitext( fname )
+        if ext == '.xml' or ext == '.sbml':
+            modelId = moose.mooseReadSBML( fname, chem.path )
+        else:
+            modelId = moose.loadModel( fname, chem.path, 'ee' )
         comptlist = moose.wildcardFind( chem.path + '/#[ISA=ChemCompt]' )
         if len( comptlist ) == 0:
             print("loadChem: No compartment found in file: ", fname)
@@ -1625,3 +1666,94 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 for j in range( i[1], i[2] ):
                     moose.connect( i[3], 'requestOut', chemVec[j], chemFieldSrc)
                 msg = moose.connect( i[3], 'output', elObj, elecFieldDest )
+
+
+#######################################################################
+# Some helper classes, used to define argument lists.
+#######################################################################
+
+class baseplot:
+    def __init__( self,
+            elecpath='soma', geom_expr='1', relpath='.', field='Vm' ):
+        self.elecpath = elecpath
+        self.geom_expr = geom_expr
+        self.relpath = relpath
+        self.field = field
+
+class rplot( baseplot ):
+    def __init__( self,
+        elecpath = 'soma', geom_expr = '1', relpath = '.', field = 'Vm', 
+        title = 'Membrane potential', 
+        mode = 'time', 
+        ymin = 0.0, ymax = 0.0, 
+        saveFile = "", saveResolution = 3, show = True ):
+        baseplot.__init__( self, elecpath, geom_expr, relpath, field )
+        self.title = title
+        self.mode = mode # Options: time, wave, wave_still, raster
+        self.ymin = ymin # If ymin == ymax, it autoscales.
+        self.ymax = ymax
+        if len( saveFile ) < 5:
+            self.saveFile = ""
+        else:
+            f = saveFile.split('.')
+            if len(f) < 2 or ( f[-1] != 'xml' and f[-1] != 'csv' ):
+                raise BuildError( "rplot: Filetype is '{}', must be of type .xml or .csv.".format( f[-1] ) )
+        self.saveFile = saveFile
+        self.show = show
+
+    def printme( self ):
+        print( "{}, {}, {}, {}, {}, {}, {}, {}, {}, {}".format( 
+            self.elecpath,
+            self.geom_expr, self.relpath, self.field, self.title,
+            self.mode, self.ymin, self.ymax, self.saveFile, self.show ) )
+
+    @staticmethod
+    def convertArg( arg ):
+        if isinstance( arg, rplot ):
+            return arg
+        elif isinstance( arg, list ):
+            return rplot( *arg )
+        else:
+            raise BuildError( "rplot initialization failed" )
+
+class rmoog( baseplot ):
+    def __init__( self,
+        elecpath = 'soma', geom_expr = '1', relpath = '.', field = 'Vm', 
+        title = 'Membrane potential', 
+        ymin = 0.0, ymax = 0.0, 
+        show = True ): # Could put in other display options.
+        baseplot.__init__( self, elecpath, geom_expr, relpath, field )
+        self.title = title
+        self.ymin = ymin # If ymin == ymax, it autoscales.
+        self.ymax = ymax
+        self.show = show
+
+    @staticmethod
+    def convertArg( arg ):
+        if isinstance( arg, rmoog ):
+            return arg
+        elif isinstance( arg, list ):
+            return rmoog( *arg )
+        else:
+            raise BuildError( "rmoog initialization failed" )
+
+class rstim( baseplot ):
+    def __init__( self,
+            elecpath = 'soma', geom_expr = '1', relpath = '.', field = 'inject', expr = '0'):
+        baseplot.__init__( self, elecpath, geom_expr, relpath, field )
+        self.expr = expr
+
+    def printme( self ):
+        print( "{0}, {1}, {2}, {3}, {4}".format( 
+            self.elecpath, self.geom_expr, self.relpath, self.field, self.expr
+            ) )
+
+    @staticmethod
+    def convertArg( arg ):
+        if isinstance( arg, rstim ):
+            return arg
+        elif isinstance( arg, list ):
+            return rstim( *arg )
+        else:
+            raise BuildError( "rstim initialization failed" )
+
