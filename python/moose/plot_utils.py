@@ -128,14 +128,23 @@ def plotTable(table, **kwargs):
         plt.legend(loc='best')
 
 def plotTables(tables, outfile=None, **kwargs):
-    """Plot a list of tables onto one figure only.
+    """Plot a dict of tables.
+
+    Each axis will be labeled with dict keys. The dict values must be
+    moose.Table/moose.Table2.
+
+    :param outfile: Default `None`. If given, plot will be saved to this filepath.
+    :param grid: A tuple with (cols, rows), default is (len(tables)//2+1, 2)
+    :param figsize: Size of figure (W, H) in inches. Default (10, 1.5*len(tables))
     """
     assert type(tables) == dict, "Expected a dict of moose.Table"
-    plt.figure(figsize=(10, 1.5*len(tables)))
+    plt.figure(figsize=kwargs.get('figsize', (10, 1.5*len(tables))))
     subplot = kwargs.get('subplot', True)
+    gridSize = kwargs.get('grid', (len(tables)//2+1, 2))
     for i, tname in enumerate(tables):
         if subplot:
-            plt.subplot(len(tables), 1, i+1)
+            assert gridSize[0] <= 9
+            plt.subplot(100*gridSize[0]+10*gridSize[1]+(i+1))
         yvec = tables[tname].vector
         xvec = np.linspace(0, moose.Clock('/clock').currentTime, len(yvec))
         plt.plot(xvec, yvec, label=tname)
@@ -152,9 +161,7 @@ def plotTables(tables, outfile=None, **kwargs):
         try:
             plt.savefig(outfile, transparent=True)
         except Exception as e:
-            pu.dump("WARN"
-                    , "Failed to save figure, plotting onto a window"
-                    )
+            pu.dump("WARN", "Failed to save figure. Errror %s"%e)
             plt.show()
     else:
         plt.show()

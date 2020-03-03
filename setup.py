@@ -87,7 +87,6 @@ class TestCommand(Command):
         self.spawn(["ctest", "--output-on-failure", '-j2'])
         os.chdir(sdir_)
 
-
 class build_ext(_build_ext):
     user_options = [
             ('with-boost', None, 'Use Boost Libraries (OFF)')

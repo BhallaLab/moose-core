@@ -1,39 +1,32 @@
 # -*- coding: utf-8 -*-
-"""graph_utils.py: Graph related utilties. It does not require networkx library.
-It writes files to be used with graphviz.
+"""graph_utils.py:
 
-Last modified: Sat Jan 18, 2014  05:01PM
-
+Some network analysis utilities.
 """
 
+from __future__ import print_function, division
+
 __author__           = "Dilawar Singh"
-__copyright__        = "Copyright 2013, NCBS Bangalore"
-__credits__          = ["NCBS Bangalore", "Bhalla Lab"]
-__license__          = "GPL"
-__version__          = "1.0.0"
+__copyright__        = "Copyright 2018-19, NCBS Bangalore"
 __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
-__status__           = "Development"
 
 import sys
+import hashlib
 from . import _moose
-import inspect
-from . import print_utils as debug
+from . import print_utils as pu
 import re
 
 pathPat = re.compile(r'.+?\[\d+\]$')
 
-def getMoosePaths(pat, isRoot=True):
-    ''' Return a list of paths for a given pattern. '''
-    if type(pat) != str:
-        pat = pat.path
-        assert type(pat) == str
-    moose_paths = [x.path for x in _moose.wildcardFind(pat)]
-    return moose_paths
-
 def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]'):
-    '''This is  a generic function. It takes the the pattern, search for paths
-    and write a graphviz file.
+    '''Write Electrical network to a dot graph.
+
+    Params:
+
+    :filename: Default None. Write graphviz file to this path. If None, write to
+        stdout.
+    :pat: Compartment path. By default, search for all moose.Compartment.
     '''
 
     def fix(path):
@@ -44,14 +37,9 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]'):
             path = path + '[0]'
         return path
 
-
-    pathList = getMoosePaths(pat)
     compList = _moose.wildcardFind(pat)
     if not compList:
-        debug.dump("WARN"
-                , "No compartment found"
-                , frame = inspect.currentframe()
-                )
+        pu.warn("No compartment found")
 
     dot = []
     dot.append("digraph G {")
@@ -83,3 +71,57 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]'):
             graphviz.write(dot)
     return True
 
+def writeCRN(compt, path=None):
+    """Write chemical reaction network to a graphviz file.
+
+    :param compt: Given compartment.
+    :param filepath: Save to this filepath. If None, write to stdout.
+    """
+    dot = _crn(compt)
+    if path is None:
+        print(dot, file=sys.stdout)
+        return
+    with open(path, 'w') as f:
+        f.write(dot)
+
+def _fixLabel(name):
+    name = name.replace('*', 'star')
+    name = name.replace('.', '_')
+    return "\"{}\"".format(name)
+
+def _addNode(n, nodes, dot):
+    node = hashlib.sha224(n.path.encode()).hexdigest()
+    nodeType = 'pool'
+    if isinstance(n, _moose.Reac) or isinstance(n, _moose.ZombieReac):
+        node = 'r'+node
+        nodeType = 'reac'
+    else:
+        node = 'p'+node
+    if node in nodes:
+        return node
+
+    nLabel = n.name
+    if nodeType == 'reac':
+        nLabel = "kf=%g kb=%g"%(n.Kf, n.Kb)
+        dot.append('\t%s [label="%s", kf=%g, kb=%g, shape=rect]' % (
+            node, nLabel, n.Kf, n.Kb))
+    else:
+        dot.append('\t%s [label="%s", concInit=%g]' % (
+            node, nLabel, n.concInit))
+    return node
+
+def _crn(compt):
+    nodes = {}
+    reacs = _moose.wildcardFind(compt.path+'/##[TYPE=Reac]')
+    reacs += _moose.wildcardFind(compt.path+'/##[TYPE=ZombieReac]')
+    dot = ['digraph %s {\n\t overlap=false' % compt.name ]
+    for r in reacs:
+        rNode = _addNode(r, nodes, dot)
+        for s in r.neighbors['sub']:
+            sNode = _addNode(s, nodes, dot)
+            dot.append('\t%s -> %s' % (sNode, rNode))
+        for p in r.neighbors['prd']:
+            pNode = _addNode(p, nodes, dot)
+            dot.append('\t%s -> %s' % (rNode, pNode))
+    dot.append('}')
+    return '\n'.join(dot)
