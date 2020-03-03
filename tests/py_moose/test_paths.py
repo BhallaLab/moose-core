@@ -42,10 +42,8 @@ if testFailed:
 
 a = moose.Neutral( '/k' )
 b = moose.Neutral( '/k' )
-h = moose.HSolve( '/h' )
-try:
-    h = moose.Neutral( '/h' )
-    print( 'This should have failed' )
-    quit(1)
-except Exception as e:
-    print( 'Success' )
+h1 = moose.HSolve( '/h' )
+h2 = moose.Neutral( '/h' )
+print(h1)
+print(h2)
+assert h1 == h2

@@ -11,6 +11,7 @@
 #define PARSER_H
 
 #include <string>
+#include <regex>
 #include <memory>
 #include <exception>
 #include <map>
@@ -23,6 +24,7 @@
 using namespace std;
 
 class Variable;
+class Function;
 
 namespace moose
 {
@@ -57,13 +59,13 @@ public:
     MooseParser();
     ~MooseParser();
 
+    void PrintSymbolTable() const;
+
     /*-----------------------------------------------------------------------------
      *  Set/Get
      *-----------------------------------------------------------------------------*/
-    Parser::symbol_table_t& GetSymbolTable();
-    const Parser::symbol_table_t& GetSymbolTable() const;
-
-    void SetSymbolTable( Parser::symbol_table_t tab );
+    Parser::symbol_table_t& GetSymbolTable(const size_t nth=0);
+    const Parser::symbol_table_t& GetSymbolTable(const size_t nth=0) const;
 
     /*-----------------------------------------------------------------------------
      *  User interface.
@@ -74,9 +76,11 @@ public:
 
     void DefineFun1( const string& funcName, double (&func)(double) );
 
-    bool SetExpr( const string& expr );
+    bool SetExpr( const string& expr);
+    bool SetExprWithUnknown( const string& expr, Function* func);
 
     bool CompileExpr();
+    bool CompileExprWithUnknown(Function* func);
 
     // Reformat the expression to meet TkExpr.
     string Reformat( const string user_expr );
@@ -89,7 +93,7 @@ public:
 
     double Eval(bool check=false) const;
 
-    double Derivative(const string& name) const;
+    double Derivative(const string& name, size_t nth=1) const;
 
     double Diff( const double a, const double b) const;
 
@@ -113,19 +117,20 @@ public:
     static double SRand2( double a, double b, double seed );
     static double Fmod( double a, double b );
 
-public:
+private:
+
     /* data */
     string expr_;
     double value=0.0;
 
     Parser::varmap_type const_map_;
 
-    /* Map to variable names and pointer to their values. */
-    // map<string, double*> refs_;
-
     Parser::expression_t expression_;     /* expression type */
+
     size_t num_user_defined_funcs_ = 0;
-    bool symbol_tables_registered_;
+
+    bool valid_;
+
 };
 
 } // namespace moose.
