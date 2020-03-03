@@ -57,7 +57,7 @@ def _prettifyExpr(expr):
 # Generic wrapper around moose.Neutral
 class Neutral(_moose.Neutral):
     def __init__(self, path, n=1, g=0, dtype='Neutral', **kwargs):
-        super(_moose.Neutral, self).__init__(path, n, g, dtype)
+        super(Neutral, self).__init__(path, n, g, dtype)
         for k in kwargs:
             try:
                 setattr(self, k, kwargs[k])
@@ -71,7 +71,7 @@ class Neutral(_moose.Neutral):
         if _moose.exists(path):
             #  logger.info("%s already exists. Returning old element."%path)
             return _moose.element(path)
-        return super(_moose.Neutral, cls).__new__(cls, pathOrObject, n, g,
+        return super(Neutral, cls).__new__(cls, pathOrObject, n, g,
                                                   dtype)
 
     def connect(self, srcField, dest, destField):
@@ -113,7 +113,7 @@ class Function(_moose.Function):
     __expr = ""
 
     def __init__(self, path, n=1, g=0, dtype='Function', **kwargs):
-        super(_moose.Function, self).__init__(path, n, g, dtype)
+        super(Function, self).__init__(path, n, g, dtype)
         for k in kwargs:
             try:
                 setattr(self, k, kwargs[k])
@@ -172,7 +172,7 @@ class StimulusTable(Neutral):
     """StimulusTable
     """
     def __init__(self, path, n=1, g=0, dtype='StimulusTable', **kwargs):
-        super(Neutral, self).__init__(path, n, g, dtype)
+        super(StimulusTable, self).__init__(path, n, g, dtype)
         for k in kwargs:
             try:
                 setattr(self, k, kwargs[k])

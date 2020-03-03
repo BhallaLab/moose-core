@@ -15,10 +15,7 @@ import matplotlib.pyplot as plt
 import moose
 import moose.print_utils as pu
 import re
-
-# To support python 2.6. On Python3.6+, dictionaries are ordered by default.
-# This is here to fill this gap.
-from moose.OrderedDict import OrderedDict
+from collections import OrderedDict
 
 def plotAscii(yvec, xvec = None, file=None):
     """Plot two list-like object in terminal using gnuplot.
@@ -239,10 +236,9 @@ def plotRecords(records, xvec = None, **kwargs):
     try:
         for k in sorted(records.keys(), key=str.lower):
             dataDict[k] = records[k]
-    except Exception as e:
+    except Exception:
         dataDict = records
 
-    legend = kwargs.get('legend', True)
     outfile = kwargs.get('outfile', None)
     subplot = kwargs.get('subplot', False)
     filters = [ x.lower() for x in kwargs.get('filter', [])]
