@@ -6,6 +6,8 @@
  *        License:  GNU GPL3
  */
 
+#include <memory>
+
 #include "../basecode/header.h"
 #include "../basecode/SparseMatrix.h"
 
@@ -32,7 +34,7 @@ using namespace boost::numeric;
 //////////////////////////////////////////////////////////////
 // Class definitions
 
-VoxelPools::VoxelPools()
+VoxelPools::VoxelPools() : pLSODA(nullptr)
 {
 #ifdef USE_GSL
     driver_ = 0;
@@ -66,10 +68,9 @@ void VoxelPools::reinit( double dt )
     // param (void*).
     if( getMethod() == "lsoda" )
     {
-        pLSODA = new LSODA();
+        pLSODA.reset(new LSODA());
         pLSODA->param = (void *) this;
     }
-
 }
 
 void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
@@ -90,8 +91,7 @@ void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
             gsl_odeiv2_driver_free( driver_ );
 
         driver_ = gsl_odeiv2_driver_alloc_y_new( &sys_, ode->gslStep
-                  , ode->initStepSize, ode->epsAbs, ode->epsRel
-                                               );
+                  , ode->initStepSize, ode->epsAbs, ode->epsRel);
     }
 #endif
     VoxelPoolsBase::reinit();
@@ -171,15 +171,15 @@ cleaner.
          *  If you are planning your own custom typdedef of stepper_type_ (see
          *  file BoostSystem.h), the you may run into troble. Have a look at this
          *  http://boostw.boost.org/doc/libs/1_56_0/boost/numeric/odeint/integrate/integrate.hpp
-         *-----------------------------------------------------------------------------
+         * 
+         * To make numerical results comparable with "gsl" solvers,
+         * by default, we pick adaptive step-size control. Use a suffix 'c' to
+         * force a constant step size. The numerical accuracy of constant step
+         * size solver is low.
+         * More details can be found here:
+         * https://www.boost.org/doc/libs/1_72_0/libs/numeric/odeint/doc/html/boost_numeric_odeint/odeint_in_detail/steppers.html
          */
 
-        /**
-         * @brief Default step size for fixed size iterator.
-         * FIXME/TODO: I am not sure if this is a right value to pick by default. May be
-         * user should provide the stepping size when using fixed dt. This feature
-         * can be incredibly useful on large system.
-         */
         const double fixedDt = 0.1;
 
         if( method_ == "rk2" )
@@ -190,7 +190,7 @@ cleaner.
                     , Svec()
                     , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
                     );
-        else if( method_ == "rk4" )
+        else if( method_ == "rk4c" )
             odeint::integrate_const( rk4_stepper_type_()
                     , [this](const vector_type_& dy, vector_type_& dydt, const double t) { 
                     VoxelPools::evalRates(this, dy, dydt );
@@ -198,7 +198,7 @@ cleaner.
                     , Svec()
                     , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
                     );
-        else if( method_ == "rk5")
+        else if( method_ == "rk5c")
             odeint::integrate_const( rk_karp_stepper_type_()
                     , [this](const vector_type_& dy, vector_type_& dydt, const double t) { 
                     VoxelPools::evalRates(this, dy, dydt );
@@ -206,7 +206,7 @@ cleaner.
                     , Svec()
                     , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
                     );
-        else if( method_ == "rk5a")
+        else if( method_ == "rk5ck" )
             odeint::integrate_adaptive(
                     odeint::make_controlled<rk_karp_stepper_type_>( epsAbs_, epsRel_ )
                     , [this](const vector_type_& dy, vector_type_& dydt, const double t) { 
@@ -216,16 +216,16 @@ cleaner.
                     , p->currTime - p->dt
                     , p->currTime
                     , p->dt
+                    );
+        else if ("rk54c" == method_ )
+            odeint::integrate_const( rk_karp_stepper_type_()
+                    , [this](const vector_type_& dy, vector_type_& dydt, const double t) { 
+                    VoxelPools::evalRates(this, dy, dydt );
+                    }
+                    , Svec()
+                    , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
                     );
         else if ("rk54" == method_ )
-            odeint::integrate_const( rk_karp_stepper_type_()
-                    , [this](const vector_type_& dy, vector_type_& dydt, const double t) { 
-                    VoxelPools::evalRates(this, dy, dydt );
-                    }
-                    , Svec()
-                    , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
-                    );
-        else if ("rk54a" == method_ )
             odeint::integrate_adaptive(
                     odeint::make_controlled<rk_karp_stepper_type_>( epsAbs_, epsRel_ )
                     , [this](const vector_type_& dy, vector_type_& dydt, const double t) { 
@@ -236,7 +236,7 @@ cleaner.
                     , p->currTime
                     , p->dt
                     );
-        else if ("rk5" == method_ )
+        else if ("rk5c" == method_ )
             odeint::integrate_const( rk_dopri_stepper_type_()
                     , [this](const vector_type_& dy, vector_type_& dydt, const double t) { 
                     VoxelPools::evalRates(this, dy, dydt );
@@ -246,7 +246,7 @@ cleaner.
                     , p->currTime
                     , std::min( p->dt, fixedDt )
                     );
-        else if ("rk5a" == method_ )
+        else if ("rk5" == method_  || "gsl" == method_)
             odeint::integrate_adaptive(
                     odeint::make_controlled<rk_dopri_stepper_type_>( epsAbs_, epsRel_ )
                     , [this](const vector_type_& dy, vector_type_& dydt, const double t) { 
@@ -257,7 +257,7 @@ cleaner.
                     , p->currTime
                     , p->dt
                     );
-        else if( method_ == "rk8" )
+        else if( method_ == "rk8c" )
             odeint::integrate_const( rk_felhberg_stepper_type_()
                     , [this](const vector_type_& dy, vector_type_& dydt, const double t) { 
                     VoxelPools::evalRates(this, dy, dydt );
@@ -265,7 +265,7 @@ cleaner.
                     , Svec()
                     , p->currTime - p->dt, p->currTime, std::min( p->dt, fixedDt )
                     );
-        else if( method_ == "rk8a" )
+        else if( method_ == "rk8" )
             odeint::integrate_adaptive(
                     odeint::make_controlled<rk_felhberg_stepper_type_>( epsAbs_, epsRel_ )
                     , [this](const vector_type_& dy, vector_type_& dydt, const double t) { 
@@ -276,7 +276,6 @@ cleaner.
                     , p->currTime
                     , p->dt
                     );
-
         else
             odeint::integrate_adaptive(
                     odeint::make_controlled<rk_karp_stepper_type_>( epsAbs_, epsRel_ )
@@ -409,7 +408,7 @@ void VoxelPools::updateRates( const double* s, double* yprime ) const
     for (unsigned int i = 0; i < totVar; ++i)
     {
         auto rate = N.computeRowRate( i, v );
-        assert(std::isfinite(rate));
+        assert(! std::isnan(rate));
         *yprime++ = rate;
     }
     for (unsigned int i = 0; i < totInvar ; ++i)
@@ -435,7 +434,7 @@ void VoxelPools::updateReacVelocities(const double* s, vector< double >& v) cons
     for ( i = rates_.begin(); i != rates_.end(); i++)
     {
         *j++ = (**i)( s );
-        assert(std::isfinite(*(j-1)));
+        assert(! std::isnan(*(j-1)));
     }
 }
 

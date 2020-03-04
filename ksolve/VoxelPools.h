@@ -99,7 +99,7 @@ public:
 
 private:
 
-    LSODA* pLSODA;
+    std::shared_ptr<LSODA> pLSODA;
     LSODA_ODE_SYSTEM_TYPE lsodaSystem;
     int lsodaState = 1;
 
