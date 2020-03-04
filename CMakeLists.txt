@@ -55,17 +55,19 @@ if( CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
 endif()
 
 ################################ CMAKE OPTIONS ##################################
+option(WITH_NSDF            "Enable NSDF support. Requires hdf5" OFF )
+
 option(DEBUG                "Build with debug support" OFF)
-option(ENABLE_UNIT_TESTS    "Enable unit tests (DEBUG should also be ON)" OFF)
-option(USE_PRIVATE_RNG      "Stochastic Objects use their private RNG" ON)
-option(WITH_GSL             "Use gsl library instead of BOOST for ODE solvers." OFF)
 option(GPROF                "Build for profiling using gprof" OFF)
+option(ENABLE_UNIT_TESTS    "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_MPI             "Enable Openmpi support" OFF)
+option(WITH_BOOST           "Enable boost. Prefer boost over stl" OFF)
+option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" OFF)
+option(WITH_GSL             "Use gsl-library. Alternative is WITH_BOOST" ON)
 option(PARALLELIZED_CLOCK   "High level parallelization of moose::Clock (alpha)" OFF )
 option(USE_PRIVATE_RNG      "Stochastic Objects use their private RNG" ON)
 option(WITH_ASAN            "Use AddressSanitizer in DEBUG mode." OFF)
 
-option(WITH_NSDF            "Enable NSDF support. Requires hdf5" OFF )
 
 ############################ BUILD CONFIGURATION #################################
 
@@ -100,6 +102,14 @@ if(WITH_ASAN AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address")
 endif()
 
+if(WITH_GSL)
+    set(WITH_BOOST OFF)
+    set(WITH_BOOST_ODE OFF)
+elseif(WITH_BOOST)
+    set(WITH_BOOST_ODE ON)
+    set(WITH_GSL OFF)
+endif()
+
 ################################### TARGETS ####################################
 
 link_directories(${CMAKE_BINARY_DIR})
@@ -110,15 +120,6 @@ add_executable(moose.bin basecode/main.cpp)
 ################################### SETUP BUILD ################################
 # default include paths.
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-
-# Boost and GSL solvers are mutually exclusive. Boost is default.
-set(WITH_BOOST_ODE ON)
-set(WITH_BOOST     ON)
-if(WITH_GSL)
-    set(WITH_BOOST_ODE OFF)
-    set(WITH_BOOST     OFF)
-endif(WITH_GSL)
-
 set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
 

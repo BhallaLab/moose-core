@@ -2,17 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 include(CheckIncludeFileCXX)
 include( ${CMAKE_CURRENT_SOURCE_DIR}/../CheckCXXCompiler.cmake)
 
-if(WITH_BOOST)
-    find_package(Boost 1.53 REQUIRED COMPONENTS thread)
-    add_definitions( -DUSE_BOOST_ASYNC )
-    set(WITH_BOOST_ODE ON)
-    include_directories( ${Boost_INCLUDE_DIRS} )
-    # This is still not part of official bindings.
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/boost-numeric-bindings)
-endif()
-
 # if boost ode is being used, don't use GSL.
 if(WITH_BOOST_ODE)
+    # This is still not part of official bindings.
+    set(WITH_GSL OFF)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/boost-numeric-bindings)
     add_definitions(-DUSE_BOOST_ODE -UUSE_GSL)
     include_directories(${Boost_INCLUDE_DIRS})
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/boost-numeric-bindings)

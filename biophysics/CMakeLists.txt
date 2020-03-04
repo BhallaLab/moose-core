@@ -51,8 +51,9 @@ set(BIOPHYSICS_SRCS
     MarkovSolver.cpp
     VClamp.cpp
     Spine.cpp
-    MarkovODESolver.cpp
+    MarkovOdeSolver.cpp
+    testBiophysics.cpp
     )
 
-add_library( biophysics ${BIOPHYSICS_SRCS} )
+add_library(biophysics ${BIOPHYSICS_SRCS})
 
