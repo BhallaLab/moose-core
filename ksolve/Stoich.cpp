@@ -274,7 +274,7 @@ Stoich::Stoich()
 
 Stoich::~Stoich()
 {
-    // unZombifyModel();
+    unZombifyModel();
     // Note that we cannot do the unZombify here, because it is too
     // prone to problems with the ordering of the delete operations
     // relative to the zombies.
@@ -1052,6 +1052,7 @@ void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
     static const Finfo* funcInputFinfo = varCinfo->findFinfo( "input" );
     static const DestFinfo* df = dynamic_cast< const DestFinfo* >( funcInputFinfo );
     assert( df );
+
     // Unsched Func
     func.element()->setTick( -2 ); // Disable with option to resurrect.
 
@@ -1065,7 +1066,7 @@ void Stoich::installAndUnschedFunc( Id func, Id pool, double volScale )
 
     vector< pair< Id, unsigned int> > srcPools;
     unsigned int n = ei.element()->getInputsWithTgtIndex( srcPools, df );
-    ASSERT_EQ( numSrc, n, "NumMsgVsYs: " + _expr );
+    ASSERT_EQ( numSrc, n, "NumMsgVsYs Expr=" + _expr );
     vector< unsigned int > poolIndex( numSrc, 0 );
     for ( unsigned int i = 0; i < numSrc; ++i )
     {

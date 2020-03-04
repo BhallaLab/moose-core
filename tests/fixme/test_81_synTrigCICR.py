@@ -61,7 +61,7 @@ def test():
         # cellProto syntax: ['ballAndStick', 'name', somaDia, somaLength, dendDia, dendLength, numDendSeg]
         cellProto = [['ballAndStick', 'soma', 10e-6, 10e-6, 2e-6, 40e-6, 4]],
         spineProto = [['makeActiveSpine()', 'spine']],
-        chemProto = [[os.path.join(sdir_,'./chem/CICRspineDend.g'), 'chem']],
+        chemProto = [[os.path.join(sdir_,'../py_rdesigneur/chem/CICRspineDend.g'), 'chem']],
         spineDistrib = [['spine', '#dend#', '10e-6', '0.1e-6']],
         chemDistrib = [['chem', 'dend#,spine#,head#', 'install', '1' ]],
         adaptorList = [

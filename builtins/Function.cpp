@@ -4,17 +4,22 @@
  *     Maintainer:  Dilawar Singh <dilawars@ncbs.res.in>
  */
 
+#include <regex>
+
 #include "../basecode/header.h"
 #include "../basecode/global.h"
+#include "../basecode/ElementValueFinfo.h"
+#include "../basecode/LookupElementValueFinfo.h"
+
 #include "../utility/strutil.h"
 #include "../utility/numutil.h"
-#include "../utility/print_function.hpp"
+#include "../utility/testing_macros.hpp"
+
 #include "../builtins/MooseParser.h"
 
 #include "Variable.h"
 #include "Function.h"
 
-#include "../basecode/ElementValueFinfo.h"
 
 static const double TriggerThreshold = 0.0;
 
@@ -29,8 +34,7 @@ static SrcFinfo1<double> *valueOut()
 static SrcFinfo1< double > *derivativeOut()
 {
     static SrcFinfo1< double > derivativeOut("derivativeOut",
-            "Value of derivative of the function for the current variable values"
-            );
+            "Value of derivative of the function for the current variable values");
     return &derivativeOut;
 }
 
@@ -111,6 +115,15 @@ const Cinfo * Function::initCinfo()
         &Function::getDoEvalAtReinit
     );
 
+    static ValueFinfo< Function, bool > allowUnknownVariable(
+        "allowUnknownVariable",
+        "When *false*, expression can only have ci, xi, yi and t."
+        "When set to *true*, expression can have arbitrary names."
+        "Defaults to *true*. \n",
+        &Function::setAllowUnknownVariable,
+        &Function::getAllowUnknowVariable
+    );
+
     static ElementValueFinfo< Function, string > expr(
         "expr",
         "Mathematical expression defining the function. The underlying parser\n"
@@ -182,12 +195,13 @@ const Cinfo * Function::initCinfo()
 
     static FieldElementFinfo< Function, Variable > inputs(
         "x",
-        "Input variables to the function. These can be passed via messages.",
+        "Input variables (indexed) to the function. These can be passed via messages.",
         Variable::initCinfo(),
         &Function::getVar,
         &Function::setNumVar,
         &Function::getNumVar
     );
+
 
     static LookupValueFinfo < Function, string, double > constants(
         "c",
@@ -195,6 +209,13 @@ const Cinfo * Function::initCinfo()
         " specifying the function expression.",
         &Function::setConst,
         &Function::getConst
+    );
+
+    static LookupValueFinfo< Function, string, unsigned int > xindex(
+        "xindex",
+        "Return the index of given variable. It can be used with field `x`",
+        &Function::setVarIndex,
+        &Function::getVarIndex
     );
 
     static ReadOnlyValueFinfo< Function, vector < double > > y(
@@ -246,9 +267,11 @@ const Cinfo * Function::initCinfo()
         &mode,
         &useTrigger,
         &doEvalAtReinit,
+        &allowUnknownVariable,
         &expr,
         &numVars,
         &inputs,
+        &xindex,
         &constants,
         &independent,
         &proc,
@@ -263,30 +286,29 @@ const Cinfo * Function::initCinfo()
         "Name", "Function",
         "Author", "Subhasis Ray/Dilawar Singh",
         "Description",
-        "General purpose function calculator using real numbers.\n"
-        "It can parse mathematical expression defining a function and evaluate"
-        " it and/or its derivative for specified variable values."
-        "You can assign expressions of the form::\n"
-        "\n"
-        "f(c0, c1, ..., cM, x0, x1, ..., xN, y0,..., yP ) \n"
-        "\n"
-        " where `ci`'s are constants and `xi`'s and `yi`'s are variables."
+        R""""(General purpose function calculator using real numbers.
 
-        "The constants must be defined before setting the expression and"
-        " variables are connected via messages. The constants can have any"
-        " name, but the variable names must be of the form x{i} or y{i}"
-        "  where i is increasing integer starting from 0.\n"
-        " The variables can be input from other moose objects."
-        " Such variables must be named `x{i}` in the expression and the source"
-        " field is connected to Function.x[i]'s `input` destination field.\n"
-        " In case the input variable is not available as a source field, but is"
-        " a value field, then the value can be requested by connecting the"
-        " `requestOut` message to the `get{Field}` destination on the target"
-        " object. Such variables must be specified in the expression as y{i}"
-        " and connecting the messages should happen in the same order as the"
-        " y indices.\n"
-        " This class handles only real numbers (C-double). Predefined constants"
-        " are: pi=3.141592..., e=2.718281..."
+It can parse mathematical expression defining a function and evaluate it and/or
+its derivative for specified variable values.  You can assign expressions of
+the form::
+
+ f(t, x, y, z, var, p, q, Ca, CaMKII) 
+
+NOTE: `t` represents time. You CAN NOT use to for any other purpose.
+
+The constants must be defined before setting the expression and variables are
+connected via messages. The variables can be input from other moose objects.
+Connected variables named `xyz` in the expression and the source field is
+connected to Function[xyz]'s `input` destination field.
+
+In case the input variable is not available as a source field, but is a value
+field, then the value can be requested by connecting the `requestOut` message
+to the `get{Field}` destination on the target object. Such variables must be
+specified in the expression as y{i} and connecting the messages should happen
+in the same order as the y indices.
+
+ This class handles only real numbers (C-double). Predefined constants
+ are: pi=3.141592..., e=2.718281...)""""
     };
 
     static Dinfo< Function > dinfo;
@@ -312,30 +334,16 @@ Function::Function():
     , mode_(1)
     , useTrigger_(false)
     , doEvalAtReinit_(false)
+    , allowUnknownVar_(true)
     , t_(0.0)
-    , independent_("x0")
+    , independent_("t")
     , stoich_(nullptr)
+    , parser_(shared_ptr<moose::MooseParser>(new moose::MooseParser()))
 {
 }
 
-Function::Function(const Function& f) :
-    valid_(f.valid_),
-    numVar_(f.numVar_),
-    lastValue_(f.lastValue_),
-    rate_(f.rate_),
-    mode_(f.mode_),
-    useTrigger_(f.useTrigger_),
-    doEvalAtReinit_(f.doEvalAtReinit_),
-    t_(f.t_),
-    independent_(f.independent_),
-    xs_(f.xs_),
-    ys_(f.ys_),
-    stoich_(f.stoich_)
-{
-    parser_.LinkVariables(xs_, ys_, &t_);
-}
-
-// Careful: This is a critical function.
+// Careful: This is a critical function. Also since during zombiefication, deep
+// copy is expected. Merely copying the parser won't work.
 Function& Function::operator=(const Function& rhs)
 {
     // protect from self-assignment.
@@ -348,12 +356,32 @@ Function& Function::operator=(const Function& rhs)
     value_ = rhs.value_;
     mode_ = rhs.mode_;
     useTrigger_ = rhs.useTrigger_;
+    doEvalAtReinit_ = rhs.doEvalAtReinit_;
+    allowUnknownVar_ = rhs.allowUnknownVar_;
     t_ = rhs.t_;
     rate_ = rhs.rate_;
-    independent_ = rhs.independent_;
-    xs_ = rhs.xs_;
-    ys_ = rhs.ys_;
-    parser_.LinkVariables(xs_, ys_, &t_);
+
+    // Deep copy; create new Variable and constant to link with new parser.
+    // Zombification requires it. DO NOT just copy the object/pointer of
+    // MooseParser.
+    xs_.clear();
+    ys_.clear();
+    varIndex_.clear();
+    parser_->ClearAll();
+    if(rhs.parser_->GetExpr().size() > 0)
+    {
+        // These are alreay indexed. So its OK to add them by name.
+        for(auto x: rhs.xs_)
+        {
+            xs_.push_back(shared_ptr<Variable>(new Variable(x->getName())));
+            varIndex_[x->getName()] = xs_.size()-1;
+        }
+        // Add all the Ys now.
+        for(size_t i=0; i < rhs.ys_.size(); i++)
+            ys_.push_back(shared_ptr<double>(new double(0.0)));
+        parser_->LinkVariables(xs_, ys_, &t_);
+        parser_->SetExpr(rhs.parser_->GetExpr());
+    }
     return *this;
 }
 
@@ -361,12 +389,53 @@ Function::~Function()
 {
 }
 
-
-void Function::showError(moose::Parser::exception_type &e) const
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Add a xn (index n). Make sure to add all missing i's such at we have all
+ * xi s from x0 to xn.
+ *
+ * FIXME: DO NOT CALL THIS FUNCTION if there are non xi in the xs_.
+ *
+ * @Param index
+ */
+/* ----------------------------------------------------------------------------*/
+void Function::addXByIndex(const unsigned int index)
 {
-    cerr << "Error occurred in parser.\n"
-         << "Message:  " << e.GetMsg() << "\n"
-         << endl;
+    // We have only xi's in xs_.
+    string name = 'x'+to_string(index);
+    if(symbolExists(name))
+        return;
+
+    if(index >= xs_.size())
+    {
+        for(size_t i = xs_.size(); i <= index; i++) 
+        {
+            xs_.push_back(shared_ptr<Variable>(new Variable('x'+to_string(i))));
+            varIndex_[name] = xs_.size()-1;
+        }
+    }
+    parser_->DefineVar(name, xs_[index]->ref());
+    varIndex_[name] = xs_.size()-1;
+    numVar_ = varIndex_.size();
+}
+
+void Function::addXByName(const string& name)
+{
+    if(symbolExists(name))
+        return;
+    xs_.push_back(shared_ptr<Variable>(new Variable(name)));
+    parser_->DefineVar(name, xs_.back()->ref());
+    varIndex_[name] = xs_.size()-1;
+    numVar_ = varIndex_.size();
+}
+
+void Function::addY(const unsigned int index)
+{
+    string name = 'y'+to_string(index);
+    if(index >= ys_.size())
+        ys_.resize(index+1);
+    ys_[index].reset(new double(0.0));
+    parser_->DefineVar(name, ys_[index].get());
 }
 
 /**
@@ -385,52 +454,69 @@ void Function::showError(moose::Parser::exception_type &e) const
 void Function::addVariable(const string& name)
 {
     // Names starting with x are variables, everything else is constant.
-    if (name[0] == 'x')
-    {
-        size_t index = (size_t)stoull(name.substr(1));
+    VarType vtype = getVarType(name);
 
-        // Only when i of xi is larger than the size of current xs_, we need to
-        // resize the container. Fill them with variables.
-        if (index >= xs_.size())
-        {
-            // Equality with index because we cound from 0.
-            for (size_t i = xs_.size(); i <= (size_t) index; i++)
-                xs_.push_back(new Variable());
-        }
+    if(XVAR_INDEX == vtype)
+    {
+        addXByIndex(stoul(name.substr(1)));
+        return;
+    }
+    if(XVAR_NAMED == vtype)
+    {
+        addXByName(name);
+        return;
+    }
 
-        // This must be true.
-        if(  xs_[index] )
-            parser_.DefineVar(name, xs_[index]->ref());
-        else
-            throw runtime_error( "Empty Variable." );
-        numVar_ = xs_.size();
-    }
-    else if (name[0] == 'y')
+    if(YVAR == vtype)
     {
-        size_t index = (size_t)stoull(name.substr(1).c_str());
-        // Only when i of xi is larger than the size of current xs_, we need to
-        // resize the container.
-        if (index >= ys_.size())
-        {
-            // Equality with index because we cound from 0.
-            for (size_t i = ys_.size(); i <= (size_t) index; i++)
-                ys_.push_back(new double(0.0));
-        }
-        parser_.DefineVar(name, ys_[index]);
+        addY(stoul(name.substr(1)));
+        return;
     }
-    else if (name == "t")
-        parser_.DefineVar("t", &t_);
-    else
+
+    if (TVAR == vtype)
     {
-        MOOSE_WARN( "Got an undefined symbol: " << name << endl
-                    << "Variables must be named xi or yi where i is integer index,"
-                    << " e.g., x0, x12, y9, y23 etc."
-                    << " Also you must define the constants beforehand using LookupField c: c[name]"
-                    " = value");
-        throw moose::Parser::ParserException("Undefined constant.");
+        parser_->DefineVar("t", &t_);
+        return;
     }
+
+    if(CONSTVAR == vtype)
+    {
+        // These are constants. Don't add them. We don't know there value just
+        // yet. 
+        return;
+    }
+
+    throw runtime_error(name + " is not supported or invalid name.");
 }
 
+void Function::callbackAddSymbol(const string& name)
+{
+    // Add only if doesn't exist.
+    if(varIndex_.find(name) == varIndex_.end())
+        addXByName(name);
+}
+ 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Return the type of Variable.
+ *
+ * @Param name
+ *
+ * @Returns   
+ */
+/* ----------------------------------------------------------------------------*/
+VarType Function::getVarType(const string& name) const
+{
+    if(regex_match(name, regex("x\\d+")))
+        return XVAR_INDEX;
+    if(regex_match(name, regex("y\\d+")))
+        return YVAR;
+    if(regex_match(name, regex("c\\d+")))
+        return CONSTVAR;
+    if(name == "t")
+        return TVAR;
+    return XVAR_NAMED;
+}
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -446,13 +532,13 @@ void Function::setExpr(const Eref& eref, const string expression)
     string expr = moose::trim(expression);
     if(expr.empty())
     {
-        MOOSE_WARN("Empy expression.");
+        // MOOSE_WARN("Empty expression.");
         return;
     }
 
-    if(valid_ && expr == parser_.GetExpr())
+    if(valid_ && expr == parser_->GetExpr())
     {
-        MOOSE_WARN( "No change in expression.");
+        MOOSE_WARN( "No changes in the expression.");
         return;
     }
 
@@ -469,24 +555,47 @@ void Function::setExpr(const Eref& eref, const string expression)
     }
 }
 
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Set expression in the parser. This function support two mode:
+ * with dynamic lookup and without it. When `dynamicLookup_` is set to true,
+ * unknown variables are created at the compile time. Otherwise, an error is
+ * raised.
+ *
+ * @Param eref
+ * @Param expr Expression to set.
+ * @Param dynamicLookup Weather to allow unknown variables in the expression.
+ * (default to true in moose>=4.0.0)
+ *
+ * @Returns  True if compilation was successful. 
+ */
+/* ----------------------------------------------------------------------------*/
 bool Function::innerSetExpr(const Eref& eref, const string expr)
 {
+    ASSERT_FALSE(expr.empty(), "Empty expression not allowed here.");
 
-    // Find all variables x\d+ or y\d+ etc, and add them to variable buffer.
+    // NOTE: Don't clear the expression here. Sometime the user extend the
+    // expression by calling this function agian. For example:
+    //
+    // >>> f.expr = 'x0+x2'
+    // >>> # connect x0 and x2
+    // >>> f.expr += '+ 100+y0' 
+    // >>> # connect more etc.
+
+    // First, set the xi, yi and t to the symbol table.
     set<string> xs;
     set<string> ys;
     moose::MooseParser::findXsYs(expr, xs, ys);
-
-    // Now create a map which maps the variable name to location of values. This
-    // is critical to make sure that pointers remain valid when multi-threaded
-    // encironment is used.
-    for(auto &x : xs) addVariable(x);
-    for(auto &y : ys) addVariable(y);
+    for(auto &x : xs) addXByIndex(std::stoul(x.substr(1)));
+    for(auto &y : ys) addY(std::stoul(y.substr(1)));
     addVariable("t");
+    
+    if(allowUnknownVar_)
+       return parser_->SetExprWithUnknown(expr, this);
 
-    // Set parser expression. Note that the symbol table is popultated by
-    // addVariable function above.
-    return parser_.SetExpr( expr );
+    // If we are here that mean we have only xi, yi and t in the expression.
+    // Find all variables x\d+ or y\d+ etc, and add them.
+    return parser_->SetExpr(expr);
 }
 
 string Function::getExpr( const Eref& e ) const
@@ -494,10 +603,10 @@ string Function::getExpr( const Eref& e ) const
     if (!valid_)
     {
         cout << "Error: " << e.objId().path() << "::getExpr() - invalid parser state" << endl;
-        cout << "\tExpression was : " << parser_.GetExpr() << endl;
+        cout << "\tExpression was : " << parser_->GetExpr() << endl;
         return "";
     }
-    return parser_.GetExpr();
+    return parser_->GetExpr();
 }
 
 void Function::setMode(unsigned int mode)
@@ -530,9 +639,20 @@ bool Function::getDoEvalAtReinit() const
     return doEvalAtReinit_;
 }
 
+void Function::setAllowUnknownVariable(bool value )
+{
+    allowUnknownVar_ = value;
+}
+
+bool Function::getAllowUnknowVariable() const
+{
+    return allowUnknownVar_;
+}
+
+
 double Function::getValue() const
 {
-    return parser_.Eval( );
+    return parser_->Eval( );
 }
 
 
@@ -559,9 +679,7 @@ vector< double > Function::getY() const
 {
     vector < double > ret(ys_.size());
     for (unsigned int ii = 0; ii < ret.size(); ++ii)
-    {
         ret[ii] = *ys_[ii];
-    }
     return ret;
 }
 
@@ -573,13 +691,13 @@ double Function::getDerivative() const
         cout << "Error: Function::getDerivative() - invalid state" << endl;
         return value;
     }
-    return parser_.Derivative(independent_);
+    return parser_->Derivative(independent_);
 }
 
 void Function::setNumVar(const unsigned int num)
 {
-    //cerr << "Deprecated: numVar has no effect. MOOSE can infer number of variables "
-    //     " from the expression. " << endl;
+    // Deprecated: numVar has no effect. MOOSE can infer number of variables
+    // from the expression.
     numVar_ = num;
 }
 
@@ -590,33 +708,33 @@ unsigned int Function::getNumVar() const
 
 void Function::setVar(unsigned int index, double value)
 {
-    //cout << "xs_[" << index << "]->setValue(" << value << ")" << endl;
-    if (index < xs_.size())
+    if(index < xs_.size())
+    {
         xs_[index]->setValue(value);
-    else
-        cerr << "Function: index " << index << " out of bounds." << endl;
+        return;
+    }
+    MOOSE_WARN("Function: index " << index << " out of bounds.");
 }
 
-Variable * Function::getVar(unsigned int ii)
+Variable* Function::getVar(unsigned int ii) 
 {
-    static Variable dummy;
-    if ( ii < xs_.size())
-        return xs_[ii];
-
-    MOOSE_WARN( "Warning: Function::getVar: index: "
-                << ii << " is out of range: "
-                << xs_.size() );
-    return &dummy;
+    static Variable dummy("DUMMY");
+    if(ii >= xs_.size())
+    {
+        MOOSE_WARN("No active variable for index " << ii);
+        return &dummy;
+    }
+    return xs_[ii].get();
 }
 
 void Function::setConst(string name, double value)
 {
-    parser_.DefineConst(name.c_str(), value);
+    parser_->DefineConst(name.c_str(), value);
 }
 
 double Function::getConst(string name) const
 {
-    moose::Parser::varmap_type cmap = parser_.GetConst();
+    moose::Parser::varmap_type cmap = parser_->GetConst();
     if (! cmap.empty() )
     {
         moose::Parser::varmap_type::const_iterator it = cmap.find(name);
@@ -628,10 +746,30 @@ double Function::getConst(string name) const
     return 0;
 }
 
+void Function::setVarIndex(string name, unsigned int val)
+{
+    cerr << "This should not be used." << endl;
+}
+
+unsigned int Function::getVarIndex(string name) const
+{
+    if(varIndex_.find(name) == varIndex_.end())
+        return numeric_limits<unsigned int>::max();
+    return varIndex_.at(name);
+}
+
+bool Function::symbolExists(const string& name) const
+{
+    return varIndex_.find(name) != varIndex_.end();
+}
+
 void Function::process(const Eref &e, ProcPtr p)
 {
-    if( ! valid_ )
+    if(! valid_)
+    {
+        cerr << "Warn: Invalid parser state. " << endl;
         return;
+    }
 
     // Update values of incoming variables.
     vector<double> databuf;
@@ -640,11 +778,6 @@ void Function::process(const Eref &e, ProcPtr p)
     t_ = p->currTime;
     value_ = getValue();
     rate_ = (value_ - lastValue_) / p->dt;
-
-#ifdef DEBUG_THIS_FILE
-    cout << "t= " << t_  << " value: " << getValue() << ", expr: " 
-        << parser_.GetExpr() << endl;
-#endif
 
     for (size_t ii = 0; (ii < databuf.size()) && (ii < ys_.size()); ++ii)
         *ys_[ii] = databuf[ii];
@@ -685,10 +818,10 @@ void Function::process(const Eref &e, ProcPtr p)
 
 void Function::reinit(const Eref &e, ProcPtr p)
 {
-    if (! (valid_ || parser_.GetExpr().empty()))
+    if (! (valid_ || parser_->GetExpr().empty()))
     {
         cout << "Error: " << e.objId().path() << "::reinit() - invalid parser state" << endl;
-        cout << " Expr: '" << parser_.GetExpr() << "'" << endl;
+        cout << " Expr: '" << parser_->GetExpr() << "'" << endl;
         return;
     }
 
@@ -723,4 +856,12 @@ void Function::reinit(const Eref &e, ProcPtr p)
         rateOut()->send(e, rate_);
         return;
     }
+}
+
+
+void Function::clearAll()
+{
+    xs_.clear();
+    ys_.clear();
+    varIndex_.clear();
 }

@@ -132,11 +132,12 @@ Id  makeStandardElements( Id pa, const string& modelname )
     if ( mgr == Id() )
         mgr = shell->doCreate( "Neutral", pa, modelname, 1, MooseGlobal );
     Id kinetics( modelPath + "/kinetics" );
-	if ( kinetics == Id() ) {
-		kinetics = shell->doCreate( "CubeMesh", mgr, "kinetics", 1,  MooseGlobal );
+    if ( kinetics == Id() )
+    {
+        kinetics = shell->doCreate( "CubeMesh", mgr, "kinetics", 1,  MooseGlobal );
         SetGet2< double, unsigned int >::set( kinetics, "buildDefaultMesh", 1e-15, 1 );
-		Id cInfo = shell->doCreate( "Annotator", kinetics, "info", 1 );
-		assert( cInfo != Id() );
+        Id cInfo = shell->doCreate( "Annotator", kinetics, "info", 1 );
+        assert( cInfo != Id() );
     }
     assert( kinetics != Id() );
 
@@ -1167,6 +1168,8 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
     if ( destId.element()->cinfo()->name() == "Pool" )
     {
         sumId = shell_->doCreate( "Function", destId, "func", 1 );
+        Field< bool >::set( sumId, "allowUnknownVariable", false );
+
         // Turn dest into a FuncPool.
         destId.element()->zombieSwap( BufPool::initCinfo() );
 
@@ -1255,12 +1258,12 @@ Id ReadKkit::buildChan( const vector< string >& args )
     //
     double permeability = atof( args[ chanMap_["perm"] ].c_str() );
     Id chan = shell_->doCreate( "ConcChan", pa, tail, 1 );
-	// Convert from perm in uM in GENESIS, to mM for MOOSE.
-	Field< double >::set( chan, "permeability", permeability *1000.0 );
+    // Convert from perm in uM in GENESIS, to mM for MOOSE.
+    Field< double >::set( chan, "permeability", permeability *1000.0 );
     assert( chan != Id() );
     string chanPath = clean.substr( 10 );
     chanIds_[ chanPath ] = chan;
-	Id info = buildInfo( chan, chanMap_, args );
+    Id info = buildInfo( chan, chanMap_, args );
     return chan;
 }
 

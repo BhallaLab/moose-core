@@ -25,13 +25,6 @@ test_dir_ = os.path.join(tempfile.gettempdir(), 'moose-examples')
 test_data_url_ = 'https://github.com/BhallaLab/moose-examples/archive/master.zip'
 test_repo_url_ = 'https://github.com/BhallaLab/moose-examples'
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-    datefmt='%m-%d %H:%M',
-    filename=os.path.join(test_dir_, '_moose_test.log'),
-    filemode='a')
-
 ignored_dict_ = defaultdict(list)
 test_status_ = defaultdict(list)
 total_ = 0

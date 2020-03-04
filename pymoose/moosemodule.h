@@ -486,6 +486,7 @@ template <class KeyType>
 int set_lookup_value(const ObjId& oid, string fname, char value_type_code, char key_type_code, PyObject * key, PyObject * value_obj)
 {
     bool success = false;
+    assert(key);
     KeyType *cpp_key = (KeyType*)to_cpp(key, key_type_code);
     if (cpp_key == NULL)
     {

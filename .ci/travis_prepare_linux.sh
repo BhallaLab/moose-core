@@ -13,6 +13,7 @@ apt-get install -qq make cmake
 apt-get install -qq python-numpy python-matplotlib python-networkx python-pip
 apt-get install -qq python3-numpy python3-matplotlib python3-networkx python3-pip
 apt-get install -qq python-tk python3-tk
+apt-get install -qq valgrind
 
 # Gsl
 apt-get install -qq libgsl0-dev || apt-get install -qq libgsl-dev

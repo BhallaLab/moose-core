@@ -11,13 +11,13 @@ matrix:
     osx_image: xcode11.3
 
 notifications:
-  email:
-    recipients:
-    - bhalla@ncbs.res.in
-    - dilawar.s.rajput@gmail.com
-    - hrani@ncbs.res.in
-    on_success: change
-    on_failure: always
+    email:
+        recipients:
+            - bhalla@ncbs.res.in
+            - dilawar.s.rajput@gmail.com
+            - hrani@ncbs.res.in
+        on_success: change
+        on_failure: always
 
 addons:
   apt:
