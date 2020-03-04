@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
-"""graph_utils.py:
+from __future__ import print_function, division, absolute_import
 
-Some network analysis utilities.
-"""
-
-from __future__ import print_function, division
+# Some network analysis utilities.
 
 __author__           = "Dilawar Singh"
 __copyright__        = "Copyright 2018-19, NCBS Bangalore"
@@ -13,13 +10,15 @@ __email__            = "dilawars@ncbs.res.in"
 
 import sys
 import hashlib
-from . import _moose
-from . import print_utils as pu
+import moose._moose as _moose
 import re
 
-pathPat = re.compile(r'.+?\[\d+\]$')
+import logging
+logger_ = logging.getLogger('moose.utils.graph')
 
-def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]'):
+pathPat_ = re.compile(r'.+?\[\d+\]$')
+
+def morphologyToGraphviz(filename=None, pat='/##[TYPE=Compartment]'):
     '''Write Electrical network to a dot graph.
 
     Params:
@@ -32,14 +31,14 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]'):
     def fix(path):
         '''Fix a given path so it can be written to a graphviz file'''
         # If no [0] is at end of the path then append it.
-        global pathPat
-        if not pathPat.match(path):
+        global pathPat_
+        if not pathPat_.match(path):
             path = path + '[0]'
         return path
 
     compList = _moose.wildcardFind(pat)
     if not compList:
-        pu.warn("No compartment found")
+        logger_.warn("No compartment found")
 
     dot = []
     dot.append("digraph G {")
@@ -65,13 +64,12 @@ def writeGraphviz(filename=None, pat='/##[TYPE=Compartment]'):
         print(dot)
     else:
         with open(filename, 'w') as graphviz:
-            debug.dump("INFO"
-                    , "Writing compartment topology to file {}".format(filename)
-                    )
+            logger_.info("Writing compartment topology to file {}".format(filename))
             graphviz.write(dot)
     return True
 
-def writeCRN(compt, path=None):
+
+def chemicalReactionNetworkToGraphviz(compt, path=None):
     """Write chemical reaction network to a graphviz file.
 
     :param compt: Given compartment.
@@ -83,6 +81,10 @@ def writeCRN(compt, path=None):
         return
     with open(path, 'w') as f:
         f.write(dot)
+
+# aliases
+crnToDot = chemicalReactionNetworkToGraphviz
+crnToGraphviz = chemicalReactionNetworkToGraphviz
 
 def _fixLabel(name):
     name = name.replace('*', 'star')
