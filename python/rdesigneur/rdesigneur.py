@@ -112,6 +112,7 @@ class rdesigneur:
             stimList = [],
             plotList = [],  # elecpath, geom_expr, object, field, title ['wave' [min max]]
             moogList = [], 
+            ode_method = "gsl",  # gsl, lsoda, gssa, gillespie
             params = None
         ):
         """ Constructor of the rdesigner. This just sets up internal fields
@@ -121,6 +122,7 @@ class rdesigneur:
         self.modelPath = modelPath
         self.turnOffElec = turnOffElec
         self.useGssa = useGssa
+        self.ode_method = ode_method
         self.combineSegments = combineSegments
         self.stealCellFromLibrary = stealCellFromLibrary
         self.verbose = verbose
@@ -1348,6 +1350,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             raise BuildError( "configureSolvers: no chem meshes defined." )
         fixXreacs.fixXreacs( self.chemid.path )
         dmksolve = moose.Ksolve( self.dendCompt.path + '/ksolve' )
+        dmksolve.method = self.ode_method
         dmdsolve = moose.Dsolve( self.dendCompt.path + '/dsolve' )
         dmstoich = moose.Stoich( self.dendCompt.path + '/stoich' )
         dmstoich.compartment = self.dendCompt
@@ -1361,6 +1364,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 smksolve = moose.Gsolve( self.spineCompt.path + '/ksolve' )
             else:
                 smksolve = moose.Ksolve( self.spineCompt.path + '/ksolve' )
+                smksolve.method = self.ode_method
             smdsolve = moose.Dsolve( self.spineCompt.path + '/dsolve' )
             smstoich = moose.Stoich( self.spineCompt.path + '/stoich' )
             smstoich.compartment = self.spineCompt
@@ -1372,6 +1376,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 pmksolve = moose.Gsolve( self.psdCompt.path + '/ksolve' )
             else:
                 pmksolve = moose.Ksolve( self.psdCompt.path + '/ksolve' )
+                pmksolve.method = self.ode_method
             pmdsolve = moose.Dsolve( self.psdCompt.path + '/dsolve' )
             pmstoich = moose.Stoich( self.psdCompt.path + '/stoich' )
             pmstoich.compartment = self.psdCompt

@@ -3,7 +3,6 @@ import sys
 import numpy as np
 import time
 import moose
-
 print('Using moose from %s' % moose.__file__ )
 
 compt = moose.CubeMesh( '/compt' )
@@ -29,10 +28,10 @@ for r in range( 10 ):
     pools += [ a1, a2, b1, b2 ]
 
 ksolve = moose.Ksolve( '/compt/ksolve' )
+ksolve.method = 'lsoda'
 stoich = moose.Stoich( '/compt/stoich' )
 stoich.compartment = compt
 stoich.ksolve = ksolve
-ksolve.numThreads = 2
 stoich.path = '/compt/##'
 moose.reinit()
 print( '[INFO] Using method = %s' % ksolve.method )

@@ -165,7 +165,7 @@ void Pool::vHandleMolWt( const Eref& e, double v )
 
 void Pool::vSetN( const Eref& e, double v )
 {
-    assert(isfinite(v));
+    assert(! std::isnan(v));
     n_ = v;
 }
 
@@ -176,7 +176,7 @@ double Pool::vGetN( const Eref& e ) const
 
 void Pool::vSetNinit( const Eref& e, double v )
 {
-    assert(isfinite(v));
+    assert(! std::isnan(v));
     nInit_ = v;
 }
 

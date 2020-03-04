@@ -37,6 +37,10 @@ public:
     double getEpsRel() const;
     void setEpsRel( double val );
 
+    // To make API consistent with GssaVoxelPools
+    double getRelativeAccuracy( ) const;
+    double getAbsoluteAccuracy( ) const;
+
     /// Assigns Stoich object to Ksolve.
     Id getStoich() const;
     void setStoich( Id stoich ); /// Inherited from ZombiePoolInterface.

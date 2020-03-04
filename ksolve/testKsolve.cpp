@@ -8,6 +8,7 @@
 **********************************************************************/
 #include "../basecode/header.h"
 #include "../shell/Shell.h"
+
 #include "RateTerm.h"
 #include "FuncTerm.h"
 #include "../basecode/SparseMatrix.h"
@@ -18,6 +19,7 @@
 #include "XferInfo.h"
 #include "ZombiePoolInterface.h"
 #include "Stoich.h"
+#include "../mesh/VoxelJunction.h"
 
 #include "../builtins/MooseParser.h"
 #include "../utility/testing_macros.hpp"
@@ -262,6 +264,39 @@ void testRunKsolve()
     s->doDelete( kin );
     cout << "." << flush;
 }
+
+void testRunKsolveWithLSODA()
+{
+    double simDt = 0.1;
+    // double plotDt = 0.1;
+    Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+    Id kin = makeReacTest();
+
+    Id ksolve = s->doCreate( "Ksolve", kin, "ksolve", 1 );
+    Field< string >::set( ksolve, "method", "lsoda" );
+
+    Id stoich = s->doCreate( "Stoich", ksolve, "stoich", 1 );
+    Field< Id >::set( stoich, "compartment", kin );
+    Field< Id >::set( stoich, "ksolve", ksolve );
+    Field< string >::set( stoich, "path", "/kinetics/##" );
+    s->doUseClock( "/kinetics/ksolve", "process", 4 );
+    s->doSetClock( 4, simDt );
+
+    s->doReinit();
+    s->doStart( 20.0 );
+    Id plots( "/kinetics/plots" );
+    for ( unsigned int i = 0; i < 7; ++i )
+    {
+        stringstream ss;
+        ss << "plot." << i;
+        SetGet2< string, string >::set( ObjId( plots, i )
+                , "xplot", "tsr2lsoda.plot", ss.str()
+                );
+    }
+    s->doDelete( kin );
+    cout << "." << flush;
+}
+
 
 void testRunGsolve()
 {

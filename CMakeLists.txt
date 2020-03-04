@@ -232,6 +232,7 @@ add_subdirectory(benchmarks)
 add_subdirectory(kinetics)
 add_subdirectory(synapse)
 add_subdirectory(intfire)
+add_subdirectory(external/libsoda)
 
 ###################################### LINKING #################################
 list(APPEND MOOSE_LIBRARIES
@@ -252,6 +253,7 @@ list(APPEND MOOSE_LIBRARIES
     signeur
     diffusion
     ksolve
+    lsoda
     device
     basecode
     )

@@ -700,13 +700,10 @@ void Clock::buildTicks( const Eref& e )
 void Clock::handleStart( const Eref& e, double runtime, bool notify )
 {
     notify_ = notify;
-
     if ( stride_ == 0 || stride_ == ~0U )
         stride_ = 1;
     unsigned long n = round( runtime / ( stride_ * dt_ ) );
-
     handleStep( e, n );
-
 }
 
 void Clock::handleStep( const Eref& e, unsigned long numSteps )

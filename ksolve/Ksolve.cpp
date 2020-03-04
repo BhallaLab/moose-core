@@ -59,7 +59,8 @@ const Cinfo* Ksolve::initCinfo()
         "rk4: The Runge-Kutta 4th order fixed dt method"
         "rk2: The Runge-Kutta 2,3 embedded fixed dt method"
         "rkck: The Runge-Kutta Cash-Karp (4,5) method"
-        "rk8: The Runge-Kutta Prince-Dormand (8,9) method" ,
+        "rk8: The Runge-Kutta Prince-Dormand (8,9) method"
+        "lsoda: LSODA method",
         &Ksolve::setMethod,
         &Ksolve::getMethod
     );
@@ -110,7 +111,7 @@ const Cinfo* Ksolve::initCinfo()
 
     static ValueFinfo< Ksolve, unsigned int > numThreads (
         "numThreads",
-        "Number of threads to use (applicable in deterministic case)",
+        "Number of threads to use",
         &Ksolve::setNumThreads,
         &Ksolve::getNumThreads
     );
@@ -257,20 +258,33 @@ string Ksolve::getMethod() const
 
 void Ksolve::setMethod( string method )
 {
+    std::transform(method.begin(), method.end(), method.begin(), ::tolower);
+    // If user is trying to set ksolve method after ksolve has been initialized,
+    // show a warning.
+    if( isBuilt_ )
+    {
+        moose::showWarn(
+            "You are trying to set Ksolve::method after moose::Stoich has been "
+            " initialized. This will be ignored. Please do before ksolve is assigned to "
+            " moose::Stoich."
+            );
+        return;
+    }
+
 #if USE_GSL
     if ( method == "rk5" || method == "gsl" )
     {
         method_ = "rk5";
     }
     else if ( method == "rk4"  || method == "rk2" ||
-              method == "rk8" || method == "rkck" )
+              method == "rk8" || method == "rkck" || method == "lsoda" )
     {
         method_ = method;
     }
     else
     {
         cout << "Warning: Ksolve::setMethod: '" << method <<
-             "' not known, using rk5\n";
+             "' is not known, using default rk5\n";
         method_ = "rk5";
     }
 #elif USE_BOOST_ODE
