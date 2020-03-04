@@ -8,7 +8,9 @@
 **********************************************************************/
 
 #include "../basecode/header.h"
+#if USE_BOOSE_ODE
 #include "../utility/boost_ode.h"
+#endif
 #include "MarkovOdeSolver.h"
 
 #ifdef  USE_GSL
