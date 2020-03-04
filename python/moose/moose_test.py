@@ -62,6 +62,10 @@ class Command(object):
         try:
             timer.start()
             output, errors = self.process.communicate()
+            try:
+                errors = errors.decode('utf8')
+            except Exception:
+                pass
             logging.warn('%s %s' % (output, errors))
         finally:
             timer.cancel()
