@@ -911,7 +911,7 @@ void Clock::buildDefaultTick()
     defaultTick_["HHChannel2D"] = 2;
     defaultTick_["Leakage"] = 2;
     defaultTick_["MarkovChannel"] = 2;
-    defaultTick_["MarkovGslSolver"] = 2;
+    defaultTick_["MarkovOdeSolver"] = 2;
     defaultTick_["MarkovRateTable"] = 2;
     defaultTick_["MarkovSolver"] = 2;
     defaultTick_["MarkovSolverBase"] = 2;

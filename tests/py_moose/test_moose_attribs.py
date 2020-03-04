@@ -24,7 +24,7 @@ attribs = ['AdExIF', 'AdThreshIF', 'Adaptor', 'Annotator', 'Arith', 'BufPool',
         'HHGate2D', 'HSolve', 'INFINITE', 'IntFire', 'IntFireBase', 'Interpol',
         'Interpol2D', 'IzhIF', 'IzhikevichNrn', 'Ksolve', 'LIF', 'Leakage',
         'LookupField', 'MMPump', 'MMenz', 'MarkovChannel' ,
-        # 'MarkovGslSolver', # This is GSL specific.
+        'MarkovOdeSolver',
         'MarkovRateTable', 'MarkovSolver', 'MarkovSolverBase', 'MeshEntry',
         'MgBlock', 'Msg', 'Mstring', 'NMDAChan', 'Nernst', 'NeuroMesh',
         'Neuron', 'Neutral', 'OneToAllMsg', 'OneToOneDataIndexMsg',
@@ -59,8 +59,8 @@ attribs = ['AdExIF', 'AdThreshIF', 'Adaptor', 'Annotator', 'Arith', 'BufPool',
 def main():
     global attribs
     for at in attribs:
+        print( "\tTesting for attrib %s" % at )
         assert hasattr( moose, at ), 'Attrib %s not found' % at 
-        print( getattr(moose, at ) )
 
 if __name__ == '__main__':
     main()
