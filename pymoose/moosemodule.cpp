@@ -2543,7 +2543,6 @@ int defineLookupFinfos(const Cinfo * cinfo)
     return 1;
 }
 
-
 int defineClass(PyObject * module_dict, const Cinfo * cinfo)
 {
     const string& className = cinfo->name();

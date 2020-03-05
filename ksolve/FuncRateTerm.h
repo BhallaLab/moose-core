@@ -32,7 +32,7 @@ class FuncRate: public ExternReac
         double operator() ( const double* S ) const {
             double t = Field< double >::get( Id(1), "currentTime" );
             auto v = (*func_)( S, t ); // get rate from func calculation.
-            assert(std::isfinite(v));
+            assert(! std::isnan(v));
             return v;
         }
 
@@ -68,7 +68,7 @@ class FuncRate: public ExternReac
 
         RateTerm* copyWithVolScaling(double vol, double sub, double prd ) const
         {
-            assert(std::isfinite(vol));
+            assert(! std::isnan(vol));
             double ratio = sub * pow( NA * vol, funcVolPower_ );
             FuncRate* ret = new FuncRate( k_ / ratio, func_->getTarget() );
             ret->funcVolPower_ = funcVolPower_;

@@ -102,6 +102,14 @@ if(WITH_ASAN AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address")
 endif()
 
+if(WITH_GSL)
+    set(WITH_BOOST OFF)
+    set(WITH_BOOST_ODE OFF)
+elseif(WITH_BOOST)
+    set(WITH_BOOST_ODE ON)
+    set(WITH_GSL OFF)
+endif()
+
 ################################### TARGETS ####################################
 
 link_directories(${CMAKE_BINARY_DIR})
@@ -112,17 +120,6 @@ add_executable(moose.bin basecode/main.cpp)
 ################################### SETUP BUILD ################################
 # default include paths.
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-
-if(WITH_BOOST)
-    set(WITH_BOOST_ODE ON)
-    set(WITH_GSL       OFF)
-endif(WITH_BOOST)
-
-# If using BOOST ODE2 library to solve ODE system, then don't use GSL.
-if(WITH_BOOST_ODE)
-    set(WITH_GSL OFF)
-endif(WITH_BOOST_ODE)
-
 set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
 set_target_properties(libmoose PROPERTIES PREFIX "")
 
@@ -235,6 +232,7 @@ add_subdirectory(benchmarks)
 add_subdirectory(kinetics)
 add_subdirectory(synapse)
 add_subdirectory(intfire)
+add_subdirectory(external/libsoda)
 
 ###################################### LINKING #################################
 list(APPEND MOOSE_LIBRARIES
@@ -255,6 +253,7 @@ list(APPEND MOOSE_LIBRARIES
     signeur
     diffusion
     ksolve
+    lsoda
     device
     basecode
     )

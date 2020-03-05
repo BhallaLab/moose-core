@@ -59,7 +59,7 @@ extern void testBiophysicsProcess();
 extern unsigned int initMsgManagers();
 extern void destroyMsgManagers();
 // void regressionTests();
-#endif
+#endif // DO_UNIT_TESTS
 extern void speedTestMultiNodeIntFireNetwork(
     unsigned int size, unsigned int runsteps );
 

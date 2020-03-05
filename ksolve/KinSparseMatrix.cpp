@@ -40,7 +40,7 @@ double KinSparseMatrix::computeRowRate(
     for ( const int* i = entry; i != end; ++i )
     {
         ret += *i * v[ *colIndex++ ];
-        assert(std::isfinite(ret));
+        assert(! std::isnan(ret));
     }
     //assert ( !std::isnan(ret) );
     return ret;

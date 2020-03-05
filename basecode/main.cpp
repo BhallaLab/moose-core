@@ -35,7 +35,6 @@ int testIndex = 0;
     f; \
     cout << std::right << "  [DONE]" << endl; \
 
-extern void testSync();
 extern void testAsync();
 extern void testSyncArray( unsigned int size, unsigned int method );
 extern void testShell();
@@ -67,9 +66,9 @@ extern void testSigNeurProcess();
 extern unsigned int initMsgManagers();
 extern void destroyMsgManagers();
 // void regressionTests();
-#endif
-extern void speedTestMultiNodeIntFireNetwork(
-    unsigned int size, unsigned int runsteps );
+#endif   // DO_UNIT_TESTS
+
+extern void speedTestMultiNodeIntFireNetwork(unsigned int size, unsigned int runsteps);
 
 #ifdef USE_SMOLDYN
 extern void testSmoldyn();
