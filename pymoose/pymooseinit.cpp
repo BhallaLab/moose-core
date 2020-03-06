@@ -109,12 +109,11 @@ void checkChildren( Id parent, const string& info )
     }
 }
 
-Id init( int argc, char** argv)
+Id init( int argc, char** argv, bool& doUnitTests)
 {
     unsigned int numCores = getNumCores();
     int numNodes = 1;
     int myNode = 0;
-    bool doUnitTests = false;
     bool isInfinite = 0;
     int opt;
     Cinfo::rebuildOpIndex();

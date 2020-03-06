@@ -29,6 +29,7 @@ set(PYMOOSE_SRCS
     pymooseinit.cpp
     melement.cpp
     PyRun.cpp
+    test_moosemodule.cpp
     )
 
 # Build python module in source directory and them copy everything to
