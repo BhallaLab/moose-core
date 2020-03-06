@@ -21,26 +21,33 @@ except Exception as e:
 
 import rdesigneur as rd
 
-rdes = rd.rdesigneur(
-    cellProto = [['somaProto', 'soma', 20e-6, 200e-6]],
-    chanProto = [['make_glu()', 'glu']],
-    chanDistrib = [['glu', 'soma', 'Gbar', '1' ]],
-    stimList = [['soma', '0.5', 'glu', 'randsyn', '50' ]],
-    # Deliver stimulus to glu synapse on soma, at mean 50 Hz Poisson.
-    plotList = [['soma', '1', '.', 'Vm', 'Soma membrane potential']]
-)
-rdes.buildModel()
-moose.reinit()
-moose.start( 0.3 )
-tables = moose.wildcardFind( '/##[TYPE=Table]' )
-res = [ ]
-for t in tables:
-    y = t.vector
-    u, s = np.mean(y), np.std(y)
-    res.append( (u,s) )
+def test_rdes():
+    rdes = rd.rdesigneur(
+        cellProto = [['somaProto', 'soma', 20e-6, 200e-6]],
+        chanProto = [['make_glu()', 'glu']],
+        chanDistrib = [['glu', 'soma', 'Gbar', '1' ]],
+        stimList = [['soma', '0.5', 'glu', 'randsyn', '50' ]],
+        # Deliver stimulus to glu synapse on soma, at mean 50 Hz Poisson.
+        plotList = [['soma', '1', '.', 'Vm', 'Soma membrane potential']]
+    )
+    rdes.buildModel()
+    moose.reinit()
+    moose.start( 0.3 )
+    tables = moose.wildcardFind( '/##[TYPE=Table]' )
+    res = [ ]
+    for t in tables:
+        y = t.vector
+        u, s = np.mean(y), np.std(y)
+        res.append( (u,s) )
 
 
-# Got these values from version compiled on Sep 20, 2018 with moose.seed set to
-# 100.
-expected = [(-0.051218660048699974, 0.01028490481294165)]
-assert np.isclose( expected, res, atol=1e-5).all(), "Expected %s, got %s" %(expected,res)
+    # Got these values from version compiled on Sep 20, 2018 with moose.seed
+    # set to 100.
+    expected = [(-0.051218660048699974, 0.01028490481294165)]
+    assert np.isclose( expected, res, atol=1e-5).all(), "Expected %s, got %s" %(expected,res)
+
+def main():
+    test_rdes()
+
+if __name__ == '__main__':
+    main()

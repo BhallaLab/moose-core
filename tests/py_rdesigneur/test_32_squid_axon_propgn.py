@@ -45,7 +45,7 @@ def makeAxonProto():
     
     return axon
 
-def test():
+def test_axon_propagation():
     """ Test squid axon propagation.
     """
     moose.Neutral( '/library' )
@@ -71,4 +71,4 @@ def test():
     return data
 
 if __name__ == '__main__':
-    test()
+    test_axon_propagation()

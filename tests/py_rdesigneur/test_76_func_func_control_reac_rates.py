@@ -45,10 +45,9 @@ def makeFuncRate():
     C.concInit = 0
     reac.Kb = 1
 
-
-makeFuncRate()
-
-rdes = rd.rdesigneur(
+def test_reac_rates():
+    makeFuncRate()
+    rdes = rd.rdesigneur(
         turnOffElec = True,
         #This subdivides the 50-micron cylinder into 2 micron voxels
         diffusionLength = 2e-6,
@@ -57,15 +56,15 @@ rdes = rd.rdesigneur(
         chemDistrib = [['chem', 'soma', 'install', '1' ]],
         plotList = [['soma', '1', 'dend/A', 'conc', 'A conc', 'wave'],
             ['soma', '1', 'dend/C', 'conc', 'C conc', 'wave']],
-)
-rdes.buildModel()
+    )
+    rdes.buildModel()
 
-C = moose.element( '/model/chem/dend/C' )
-C.vec.concInit = [ 1+np.sin(x/5.0) for x in range( len(C.vec) ) ]
-moose.reinit()
-moose.start(10)
+    C = moose.element( '/model/chem/dend/C' )
+    C.vec.concInit = [ 1+np.sin(x/5.0) for x in range( len(C.vec) ) ]
+    moose.reinit()
+    moose.start(10)
 
-E = (np.array([0.76793869, 0.69093771, 0.61740932, 0.55290337, 0.50043755,
+    E = (np.array([0.76793869, 0.69093771, 0.61740932, 0.55290337, 0.50043755,
        0.46090277, 0.43395074, 0.41882627, 0.41492281, 0.42206285,
        0.4405646 , 0.47111808, 0.51443061, 0.57058404, 0.63814939,
        0.71337226, 0.79003606, 0.86055299, 0.91814872, 0.95908718,
@@ -91,13 +90,16 @@ E = (np.array([0.76793869, 0.69093771, 0.61740932, 0.55290337, 0.50043755,
 
 
 
-A = []
-for t in moose.wildcardFind('/##[TYPE=Table2]'):
-    A.append(t.vector)
-m = np.mean(A, axis=1)
-u = np.std(A, axis=1)
+    A = []
+    for t in moose.wildcardFind('/##[TYPE=Table2]'):
+        A.append(t.vector)
+    m = np.mean(A, axis=1)
+    u = np.std(A, axis=1)
 
-# multithreaded version given different results.
-assert np.allclose(m, E[0], rtol=1e-3), (m-E[0])
-assert np.allclose(u, E[1], rtol=1e-3), (u-E[1])
-print('all done')
+    # multithreaded version given different results.
+    assert np.allclose(m, E[0], rtol=1e-3), (m-E[0])
+    assert np.allclose(u, E[1], rtol=1e-3), (u-E[1])
+    print('all done')
+
+if __name__ == '__main__':
+    test_reac_rates()

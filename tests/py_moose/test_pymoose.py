@@ -114,9 +114,6 @@ class TestNeutral1(unittest.TestCase):
     def testName(self):
         self.assertEqual(self.b.name, 'b')
 
-    def testPathEndingWithSlash(self):
-        self.assertRaises(ValueError, moose.Neutral, 'test/')
-
     def testNonExistentPath(self):
         self.assertRaises(ValueError, moose.Neutral, '/nonexistent_parent/invalid_child')
 

@@ -75,35 +75,23 @@ def makeModel():
     estoich.dsolve = edsolve
     estoich.path = "/model/endo/##"
     assert( edsolve.numPools == 1 )
-
     edsolve.buildMeshJunctions( dsolve )
-
-    plot1 = moose.Table2( '/model/plot1' )
-    plot2 = moose.Table2( '/model/plot2' )
-    plot3 = moose.Table2( '/model/plot3' )
-    moose.connect( '/model/plot1', 'requestOut', s, 'getN' )
-    moose.connect( '/model/plot2', 'requestOut', es, 'getN' )
-    moose.connect( '/model/plot3', 'requestOut', '/model/compartment/s_xfer_endo', 'getN' )
-    plot4 = moose.Table2( '/model/plot4' )
-    plot5 = moose.Table2( '/model/plot5' )
-    plot6 = moose.Table2( '/model/plot6' )
-    moose.connect( '/model/plot4', 'requestOut', s, 'getConc' )
-    moose.connect( '/model/plot5', 'requestOut', es, 'getConc' )
-    moose.connect( '/model/plot6', 'requestOut', '/model/compartment/s_xfer_endo', 'getConc' )
 
 def almostEq( a, b ):
     return abs(a-b)/(a+b) < 5e-5
 
-def main( standalone = False ):
+def test_xreac8():
     runtime = 100
     makeModel()
     moose.reinit()
     moose.start( runtime )
     assert( almostEq( moose.element( 'model/compartment/s' ).conc,
         moose.element( '/model/endo/s' ).conc ) )
-    moose.delete( '/model' )
+
+def main():
+    test_xreac8()
 
 
 # Run the 'main' if this script is executed standalone.
 if __name__ == '__main__':
-    main( standalone = True )
+    main()

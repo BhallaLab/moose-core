@@ -55,17 +55,6 @@ def test_function():
     print( 'Passed order vars' )
 
 
-def test_dynamic_lookup():
-    f, t = create_func( 'fmod', 'A+(B/2.0)' )
-    moose.reinit()
-    moose.start(20)
-    y = t.vector
-    assert (np.fmod(y, 2) == y).all()
-    assert(np.isclose(np.max(y), 1.9)), "Expected 1.9 got %s" % np.max(y)
-    assert(np.isclose(np.min(y), 0.0)), "Expected 0.0 got %s" % np.min(y)
-    print('Passed fmod(t,2)')
-
-
 def test_creation():
     a1 = moose.Neutral('a')
     a2 = moose.Neutral('//a')
@@ -77,13 +66,15 @@ def test_creation():
 
 def test_print():
     a = moose.Function('f', expr='sqrt(sin(x0))+cos(x1)^2+ln(20+sin(t))')
-
     # Get equivalent sympy expression. And do whatever you like with it.
-    sympyExpr = a.sympyExpr()
-    print('Sympy expression is:', sympyExpr)
+    try:
+        sympyExpr = a.sympyExpr()
+        print('Sympy expression is:', sympyExpr)
 
-    # Or pretty-print using sympy
-    a.printUsingSympy()
+        # Or pretty-print using sympy
+        a.printUsingSympy()
+    except ImportError:
+        pass
 
 def test_basic():
     f = moose.Function('f1')
@@ -94,10 +85,7 @@ def main():
     test_function()
     test_basic()
     test_creation()
-    try:
-        test_print()
-    except Exception:
-        pass
+    test_print()
 
 if __name__ == '__main__':
     main()

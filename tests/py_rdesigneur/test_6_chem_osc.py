@@ -2,7 +2,7 @@ import moose
 import numpy as np
 import rdesigneur as rd
 
-def test():
+def test_chem_osc():
     """Test chemical oscillation.
     """
     rdes = rd.rdesigneur(
@@ -24,6 +24,5 @@ def test():
     expected = ([0.13622532, 0.13261175], [0.08518292, 0.06766806])
     assert np.allclose(expected, [m,s]), (m,s)
 
-
 if __name__ == '__main__':
-    test()
+    test_chem_osc()

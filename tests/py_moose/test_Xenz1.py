@@ -100,11 +100,10 @@ def almostEq( a, b ):
     #print a, b, (a-b)/(a+b)
     return abs(a-b)/(a+b) < 5e-5
 
-def main( standalone = False ):
+def test_xreac1():
     for i in range( 10, 18 ):
         moose.setClock( i, 0.001 )
     runtime = 100
-    displayInterval = 2
     makeModel()
     moose.reinit()
     moose.start( runtime )
@@ -112,6 +111,5 @@ def main( standalone = False ):
         moose.element( '/model/endo/sub' ).n ) )
     moose.delete( '/model' )
 
-# Run the 'main' if this script is executed standalone.
 if __name__ == '__main__':
-	main( standalone = True )
+    test_xreac1()

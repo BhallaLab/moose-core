@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''
+r'''
 *******************************************************************
  * File:            writeSBML.py
  * Description:
@@ -31,7 +31,7 @@ Dec 03: add diff and motor constants to pool
 Nov 30: group id is changed from name to moose_id and group.name is added along with annotation for group listing
 Nov 22: searched for _xfer_ instead of xfer
 Nov 12: xfer cross compartment molecules are not written to SBML instead written the original molecule also for connecting Reaction and Enzyme 
-Nov 06: All the Mesh Cyl,Cube,Neuro,Endo Mesh's can be written into SBML format with annotation field where Meshtype\
+Nov 06: All the Mesh Cyl,Cube,Neuro,Endo Mesh's can be written into SBML format with annotation field where Meshtype
         numDiffCompts,isMembraneBound and surround are written out.
         For EndoMesh check made to see surround is specified
 Oct 20: EndoMesh added to SBML
@@ -48,8 +48,8 @@ Aug 8 : removed "findCompartment" function to chemConnectUtil and imported the f
         convertSpecialChar for setId and convertSpecialCharshot for setName.
         specialChar like /,\,[,],space are not allowed as moose doesn't take
 Aug 3 : Added recalculatecoordinates,cleanup in groupName
-
 '''
+
 import sys
 import re
 import os
@@ -233,7 +233,7 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
         consistencyMessages = ""
         SBMLok = validateModel(sbmlDoc)
         if (SBMLok):
-            if filepath != [" ","\/","/"]:
+            if filepath != [r" ", r"\/", r"/"]:
                 writeTofile = filepath + "/" + filename + '.xml'
             else:
                 writeTofile = filename+'.xml'

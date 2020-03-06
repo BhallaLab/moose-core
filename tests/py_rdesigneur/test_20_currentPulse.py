@@ -12,7 +12,7 @@ expected = (-0.051693861353435865, 0.004062563722923687
                 -0.05545587, -0.05354704, -0.05163822, -0.04972939, -0.04782056,
                 -0.04591174]))
 
-def test():
+def test_current_pulse():
     """Test current pulse.
     """
     rdes = rd.rdesigneur(
@@ -33,4 +33,4 @@ def test():
     print('Test is done')
 
 if __name__ == '__main__':
-    test()
+    test_current_pulse()

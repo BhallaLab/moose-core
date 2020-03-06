@@ -6,27 +6,28 @@ import moose
 
 print('Using moose from %s' % moose.__file__ )
 
-compt = moose.CubeMesh( '/compt' )
-compt.volume = 1e-20
+def test_ksolve():
+    compt = moose.CubeMesh( '/compt' )
+    compt.volume = 1e-20
 
-pools = []
-for r in range( 10 ):
-    a1 = moose.Pool( '/compt/a1%s' % r )
-    a1.concInit = 10
-    a2 = moose.Pool( '/compt/a2%s' % r )
-    a2.concInit = 5
-    b1 = moose.Pool( '/compt/b1%s' % r )
-    b1.concInit = 0.054
-    b2 = moose.Pool( '/compt/b2%s' % r )
-    b2.concInit = 3.9
-    r = moose.Reac( '/compt/reac%s'% r )
-    moose.connect( r, 'sub', a1, 'reac' )
-    moose.connect( r, 'sub', a2, 'reac' )
-    moose.connect( r, 'prd', b1, 'reac' )
-    moose.connect( r, 'prd', b2, 'reac' )
-    r.Kf = 2.9
-    r.Kb = 4.5
-    pools += [ a1, a2, b1, b2 ]
+    pools = []
+    for r in range( 10 ):
+        a1 = moose.Pool( '/compt/a1%s' % r )
+        a1.concInit = 10
+        a2 = moose.Pool( '/compt/a2%s' % r )
+        a2.concInit = 5
+        b1 = moose.Pool( '/compt/b1%s' % r )
+        b1.concInit = 0.054
+        b2 = moose.Pool( '/compt/b2%s' % r )
+        b2.concInit = 3.9
+        r = moose.Reac( '/compt/reac%s'% r )
+        moose.connect( r, 'sub', a1, 'reac' )
+        moose.connect( r, 'sub', a2, 'reac' )
+        moose.connect( r, 'prd', b1, 'reac' )
+        moose.connect( r, 'prd', b2, 'reac' )
+        r.Kf = 2.9
+        r.Kb = 4.5
+        pools += [ a1, a2, b1, b2 ]
 
 ksolve = moose.Ksolve( '/compt/ksolve' )
 stoich = moose.Stoich( '/compt/stoich' )

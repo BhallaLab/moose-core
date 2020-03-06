@@ -56,12 +56,12 @@ attribs = ['AdExIF', 'AdThreshIF', 'Adaptor', 'Annotator', 'Arith', 'BufPool',
         'test', 'testSched', 'toUnicode', 'useClock', 'utils', 'vec', 'version',
         'warnings', 'wildcardFind']
 
-def main():
+def test_attribs():
     global attribs
     for at in attribs:
         print( "\tTesting for attrib %s" % at )
         assert hasattr( moose, at ), 'Attrib %s not found' % at 
 
 if __name__ == '__main__':
-    main()
+    test_attribs()
 

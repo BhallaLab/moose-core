@@ -8,7 +8,7 @@ import rdesigneur as rd
 import numpy as np
 
 
-def test():
+def test_periodic_syninput():
     rdes = rd.rdesigneur(
         cellProto = [['somaProto', 'soma', 20e-6, 200e-6]],
         chanProto = [['make_glu()', 'glu']],
@@ -29,4 +29,4 @@ def test():
     return t
 
 if __name__ == '__main__':
-    test()
+    test_periodic_syninput()

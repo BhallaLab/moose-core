@@ -124,6 +124,9 @@ def main( standalone = False ):
     assert almostEq( 2 * s.conc, es.conc ), "%g=?%g" % (2*s.conc, es.conc)
     moose.delete( '/model' )
 
+def test_xdiff1():
+    main()
+
 # Run the 'main' if this script is executed standalone.
 if __name__ == '__main__':
-	main( standalone = True )
+    main()

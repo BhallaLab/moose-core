@@ -119,7 +119,7 @@ def addOneChan(chanpath, gbar,comp):
     moose.connect(chan, "channelOut", comp, "handleChannel")
     return chan
 
-if __name__ == '__main__':
+def test_diffshell():
     lib = moose.Neutral('/library')
     for tick in range(0, 7):
         moose.setClock(tick, dt)
@@ -212,3 +212,8 @@ if __name__ == '__main__':
                 header += ' difshell_' + str(i) + '_difbuff_' + str(j)
     np.savetxt(fname, res, header=header, comments='')
 
+def main():
+    test_diffshell()
+
+if __name__ == '__main__':
+    main()

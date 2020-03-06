@@ -72,28 +72,23 @@ def makeModel():
 
     edsolve.buildMeshJunctions( dsolve )
 
-    plot1 = moose.Table2( '/model/plot1' )
-    plot2 = moose.Table2( '/model/plot2' )
-    moose.connect( '/model/plot1', 'requestOut', s, 'getN' )
-    moose.connect( '/model/plot2', 'requestOut', es, 'getN' )
-    plot3 = moose.Table2( '/model/plot3' )
-    plot4 = moose.Table2( '/model/plot4' )
-    moose.connect( '/model/plot3', 'requestOut', s, 'getConc' )
-    moose.connect( '/model/plot4', 'requestOut', es, 'getConc' )
 
 def almostEq( a, b ):
     return abs(a-b)/(a+b) < 5e-5
 
-def main( standalone = False ):
+def test_xreac5a():
     runtime = 200
-    displayInterval = 2
     makeModel()
     moose.reinit()
     moose.start( runtime )
     assert( almostEq( 2.0 * moose.element( 'model/compartment/s' ).n,
         moose.element( '/model/endo/s' ).n ) )
-    moose.delete( '/model' )
+
+
+def main():
+    test_xreac5a()
+
 
 # Run the 'main' if this script is executed standalone.
 if __name__ == '__main__':
-	main( standalone = True )
+    main()

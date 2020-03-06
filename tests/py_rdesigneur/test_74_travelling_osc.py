@@ -33,7 +33,7 @@ expected = (np.array([0.1, 0.15516149, 0.1403528 , 0.12798643, 0.14763476,
         1.82237898e-01]))
 
 
-def test():
+def test_travelling_osc():
     """Test travelling wave.
     """
     rdes = rd.rdesigneur(
@@ -72,4 +72,4 @@ def test():
             
 
 if __name__ == '__main__':
-    test()
+    test_travelling_osc()

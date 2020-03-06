@@ -46,13 +46,16 @@ def make_synapse(path):
     m = moose.connect(spikegen, 'spikeOut', synH.synapse[0], 'addSpike') # this causes segfault
     return syn, spikegen
 
-if __name__ == '__main__':
+def test_synchan():
     model = moose.Neutral('/model')
     syn, spikegen = make_synapse('/model/synchan')
     moose.setClock(0, 0.01)
     moose.useClock(0, '/model/##', 'process')
     moose.reinit()
     moose.start(100)
+
+if __name__ == '__main__':
+    test_synchan()
 
 
 #

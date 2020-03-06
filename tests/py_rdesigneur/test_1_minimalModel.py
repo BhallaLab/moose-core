@@ -3,7 +3,7 @@ import moose
 print("[INFO ] MOOSE version=%s, loc=%s" % (moose.version(), moose.__file__))
 import rdesigneur as rd
 
-def test():
+def test_simple():
     """First test.
     >>> test()
     Rdesigneur: Elec model has 1 compartments and 0 spines on 0 compartments.

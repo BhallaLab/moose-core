@@ -15,7 +15,7 @@ import numpy as np
 import moose
 import rdesigneur as rd 
 
-def test2( ):
+def test_rdes2():
     if moose.exists( '/model' ):
         moose.delete( '/model' )
 
@@ -27,14 +27,14 @@ def test2( ):
     moose.reinit()
     moose.start( 0.3 )
 
-def test1( ):
+def test_rdes1():
     rdes = rd.rdesigneur()
     rdes.buildModel()
     moose.showfields( rdes.soma )
 
 def main( ):
-    test1()
-    test2( )
+    test_rdes1()
+    test_rdes2()
 
 if __name__ == '__main__':
     main()

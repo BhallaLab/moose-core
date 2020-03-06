@@ -18,7 +18,12 @@
 ##########################################################################
 from __future__ import print_function, absolute_import, division
 
-import imp
+try:
+    import importlib as imp
+except ImportError:
+    # Deprecated since 3.4
+    import imp
+
 import os
 import moose
 import numpy as np

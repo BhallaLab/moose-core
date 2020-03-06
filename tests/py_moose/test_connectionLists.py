@@ -15,10 +15,7 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-import sys
-import os
 import moose
-import numpy as np
 
 params = {
         'Rm': 1e10,
@@ -154,15 +151,15 @@ def makeRaster( network ):
     moose.connect(network, 'spikeOut', raster, 'spike', 'OneToOne')
     return raster
 
-def main():
-    mod = moose.Neutral( '/model' )
+def test_connection_list():
+    moose.Neutral( '/model' )
     inhib, output = makeGlobalBalanceNetwork()
     iraster = makeRaster( inhib )
-    oraster = makeRaster( output )
+    makeRaster( output )
     moose.reinit()
     moose.start( params['runtime'] )
     for i in range( len(iraster.vec) ):
         print( iraster.vec[i].vector )
 
 if __name__ == '__main__':
-    main()
+    test_connection_list()

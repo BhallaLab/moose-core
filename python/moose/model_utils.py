@@ -8,6 +8,9 @@ import os
 import moose._moose as _moose
 import moose.utils as mu
 
+import logging
+logger_ = logging.getLogger('moose.model')
+
 # sbml import.
 sbmlImport_, sbmlError_ = True, ''
 try:
@@ -53,7 +56,7 @@ except Exception as e:
     mergechemError_ = '%s' % e
 
 # SBML related functions.
-def mooseReadSBML(filepath, loadpath, solver='ee',validate="on"):
+def mooseReadSBML(filepath, loadpath, solver='ee', validate="on"):
     """Load SBML model.
 
     Parameter
@@ -76,17 +79,16 @@ def mooseReadSBML(filepath, loadpath, solver='ee',validate="on"):
             method = "gssa"
         elif sc in ["gsl","runge kutta","deterministic","ksolve","rungekutta","rk5","rkf","rk"]:
             method = "gsl"
-        elif sc in ["exponential euler","exponentialeuler","neutral"]:
+        elif sc in ["exponential euler","exponentialeuler","neutral", "ee"]:
             method = "ee"
         else:
             method = "ee"
 
         if method != 'ee':
-            chemError = _chemUtil.add_Delete_ChemicalSolver.mooseAddChemSolver(modelpath[0].path, method)
-
+            _chemUtil.add_Delete_ChemicalSolver.mooseAddChemSolver(modelpath[0].path, method)
         return modelpath
     else:
-        print( sbmlError_ )
+        logger_.error( sbmlError_ )
         return False
 
 def mooseWriteSBML(modelpath, filepath, sceneitems={}):
@@ -110,7 +112,7 @@ def mooseWriteSBML(modelpath, filepath, sceneitems={}):
     if sbmlImport_:
         return _writeSBML.mooseWriteSBML(modelpath, filepath, sceneitems)
     else:
-        print( sbmlError_ )
+        logger_.error( sbmlError_ )
         return False
 
 
@@ -238,9 +240,9 @@ def loadModel(filename, modelpath, solverclass="gsl"):
             method = "ee"
 
         if method != 'ee':
-            chemError = _chemUtil.add_Delete_ChemicalSolver.mooseAddChemSolver(modelpath, method)
+            _chemUtil.add_Delete_ChemicalSolver.mooseAddChemSolver(modelpath, method)
         return ret
     else:
-        mu.error( "Unknown model extenstion '%s'" % extension)
+        logger_.error( "Unknown model extenstion '%s'" % extension)
         return None
 

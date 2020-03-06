@@ -20,7 +20,6 @@ def create_func( funcname, expr ):
     return f, t
 
 def test_var_order():
-    moose.delete( '/' )
     nsteps = 5
     simtime = nsteps
     dt = 1.0
@@ -111,19 +110,12 @@ def test_fmod( ):
     assert(np.isclose(np.min(y), 0.0)), "Expected 0.0 got %s" % np.min(y)
     print('Passed fmod(t,2)')
 
-def test_dynamic_lookup():
-    f, t = create_func( 'fmod', 'A+(B/2.0)' )
-    moose.reinit()
-    moose.start(20)
-    y = t.vector
-    assert (np.fmod(y, 2) == y).all()
-    assert(np.isclose(np.max(y), 1.9)), "Expected 1.9 got %s" % np.max(y)
-    assert(np.isclose(np.min(y), 0.0)), "Expected 0.0 got %s" % np.min(y)
-    print('Passed fmod(t,2)')
-
-if __name__ == '__main__':
+def main():
     test_var_order()
     test_t()
     test_trig()
     test_rand()
     test_fmod()
+
+if __name__ == '__main__':
+    main()

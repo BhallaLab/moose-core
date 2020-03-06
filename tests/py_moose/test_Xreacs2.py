@@ -11,7 +11,7 @@ def countCrossings( plot, thresh ):
     #  print (vec[:-1] <= thresh)
     return sum( (vec[:-1] < thresh) * (vec[1:] >= thresh ) )
 
-def main( standalone = False ):
+def test_xreac2():
     mfile = os.path.join( os.path.dirname( __file__), 'OSC_diff_vols.g' )
     runtime = 4000.0
     modelId = moose.loadModel( mfile, 'model', 'ee' )
@@ -48,6 +48,9 @@ def main( standalone = False ):
     assert( nCrossings == 4 ), "Expected 4, got %d" % nCrossings
     moose.delete( '/model' )
 
+def main():
+    test_xreac2()
+
 # Run the 'main' if this script is executed standalone.
 if __name__ == '__main__':
-    main( standalone = True )
+    main()

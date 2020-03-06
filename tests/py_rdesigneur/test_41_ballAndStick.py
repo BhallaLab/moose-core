@@ -21,7 +21,7 @@ expected =  np.array([-0.065, -0.068, -0.07 , -0.071, -0.072, -0.072, -0.072, -0
     -0.069, -0.068, -0.066, -0.075, -0.076, -0.075, -0.075, -0.075,
     -0.075, -0.074, -0.074, -0.073, -0.073])
 
-def test():
+def test_ball_and_stick():
     """Test 41 Ball and Stick model.
     """
     rdes = rd.rdesigneur(
@@ -49,4 +49,4 @@ def test():
     return True
 
 if __name__ == '__main__':
-    test()
+    test_ball_and_stick()

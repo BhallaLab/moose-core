@@ -339,8 +339,11 @@ def run():
         print('doty',  doty )
     print( '[INFO] Run is over')
 
-if __name__ == '__main__':
+def test_expr_parser():
     moose.Neutral( '/library' )
     moose.Neutral( '/model' )
     run()
     print( 'All done' )
+
+if __name__ == '__main__':
+    test_expr_parser()

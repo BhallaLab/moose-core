@@ -47,7 +47,7 @@ E = (np.array([1.09014453e-07, 7.28082797e-13, 2.75389935e-08, 4.09373273e-01,
     )
 
 
-def test():
+def test_CICR():
     """Test CICR
     """
     rdes = rd.rdesigneur(
@@ -76,7 +76,6 @@ def test():
     IP3.vec.concInit = 0.004
     IP3.vec[0].concInit = 0.02
     moose.reinit()
-    k = moose.wildcardFind('/##[TYPE=Ksolve]')[0]
 
     moose.start(20)
     data = [t.vector for t in moose.wildcardFind('/##[TYPE=Table2]')]
@@ -92,4 +91,4 @@ def test():
     print('done')
 
 if __name__ == '__main__':
-    test()
+    test_CICR()

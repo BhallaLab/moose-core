@@ -57,7 +57,7 @@ def getState( ksolve, state, vol):
         return state.stateType, state.solutionStatus, a, vector
 
 
-def main():
+def test_dose_response():
     # Setup parameters for simulation and plotting
     simdt= 1e-2
     plotDt= 1
@@ -111,6 +111,9 @@ def main():
     # Close upto 2 decimal place is good enough.
     assert np.isclose(got, expected, atol=1e-2).all(), "Got %s, expected %s" % (got, expected)
     print( joint )
+
+def main():
+    test_dose_response()
 
 if __name__ == '__main__':
     main()

@@ -74,7 +74,7 @@ def makeModel():
     for i in range( num ):
         d.vec[i].concInit = concA * 2 * i / num
 
-def main():
+def test_diffusion_gsolve_dsolve():
     """
     This example illustrates how to set up a diffusion/transport model with
     a simple reaction-diffusion system in a tapering cylinder:
@@ -140,6 +140,9 @@ def main():
     error = got - expected
     rerror = np.abs( error ) / expected
     assert np.allclose(got, expected, atol=1e-3), "Got %s, expected %s" % (got, expected)
+
+def main():
+    test_diffusion_gsolve_dsolve()
 
 # Run the 'main' if this script is executed standalone.
 if __name__ == '__main__':

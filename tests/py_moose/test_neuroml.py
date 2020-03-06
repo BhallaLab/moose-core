@@ -13,16 +13,14 @@ __status__           = "Development"
 
 import sys
 import os
+import moose
+
 # the model lives in the same directory as the test script
 modeldir = os.path.dirname(__file__)
 
 import _neuroml
 from _neuroml.FvsI_CA1 import ca1_main, loadModel
 from _neuroml.CA1 import loadGran98NeuroML_L123
-
-def test_all():
-    test_ca1()
-    test_gran()
 
 def test_ca1():
     p = os.path.join(modeldir, '_neuroml/cells_channels/CA1soma.morph.xml')
@@ -36,6 +34,9 @@ def test_gran():
     p = os.path.join(modeldir, '_neuroml/CA1soma.net.xml')
     assert loadGran98NeuroML_L123(p) in [8,9]
 
+def main():
+    test_ca1()
+    test_gran()
+
 if __name__ == '__main__':
-    #unittest.main()
-    test_all()
+    main()
