@@ -428,7 +428,7 @@ endforeach()
 
 add_custom_target(pytest)
 set(PYTEST_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-file(GLOB_RECURSE PYTEST_TEST_SCRIPTS ${PYTEST_TEST_DIRECTORY}/*.py)
+file(GLOB_RECURSE PYTEST_TEST_SCRIPTS ${PYTEST_TEST_DIRECTORY}/test_*.py)
 
 foreach(_test_script ${PYTEST_TEST_SCRIPTS})
     get_filename_component(_name_we ${_test_script} NAME_WE)

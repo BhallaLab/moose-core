@@ -29,27 +29,30 @@ def test_ksolve():
         r.Kb = 4.5
         pools += [ a1, a2, b1, b2 ]
 
-ksolve = moose.Ksolve( '/compt/ksolve' )
-stoich = moose.Stoich( '/compt/stoich' )
-stoich.compartment = compt
-stoich.ksolve = ksolve
-ksolve.numThreads = 2
-stoich.path = '/compt/##'
-moose.reinit()
-print( '[INFO] Using method = %s' % ksolve.method )
-t1 = time.time()
-moose.start( 100 )
-print('[INFO] Time taken %s' % (time.time() - t1 ))
-expected = [ 7.77859 , 2.77858 , 2.27541 , 6.12141 , 7.77858 , 2.77858
-        , 2.27541 , 6.12141 , 7.77858 , 2.77858 , 2.27541 , 6.12141 , 7.77858
-        , 2.77858 , 2.27541 , 6.12141 , 7.77858 , 2.77858 , 2.27541 , 6.12141
-        , 7.77858 , 2.77858 , 2.27541 , 6.12141 , 7.77858 , 2.77858 , 2.27541
-        , 6.12141 , 7.77858 , 2.77858 , 2.27541 , 6.12141 , 7.77858 , 2.77858
-        , 2.27541 , 6.12141 , 7.77858 , 2.77858 , 2.27541 , 6.12141
-        ]
-concs = [ p.conc for p in pools ]
-if(not np.isclose( concs, expected ).all() ):
-    print( " Expected %s" % expected )
-    print( " Got %s" % concs )
-    quit(1)
-print( 'Test passed' )
+    ksolve = moose.Ksolve( '/compt/ksolve' )
+    stoich = moose.Stoich( '/compt/stoich' )
+    stoich.compartment = compt
+    stoich.ksolve = ksolve
+    ksolve.numThreads = 2
+    stoich.path = '/compt/##'
+    moose.reinit()
+    print( '[INFO] Using method = %s' % ksolve.method )
+    t1 = time.time()
+    moose.start( 100 )
+    print('[INFO] Time taken %s' % (time.time() - t1 ))
+    expected = [ 7.77859 , 2.77858 , 2.27541 , 6.12141 , 7.77858 , 2.77858
+            , 2.27541 , 6.12141 , 7.77858 , 2.77858 , 2.27541 , 6.12141 , 7.77858
+            , 2.77858 , 2.27541 , 6.12141 , 7.77858 , 2.77858 , 2.27541 , 6.12141
+            , 7.77858 , 2.77858 , 2.27541 , 6.12141 , 7.77858 , 2.77858 , 2.27541
+            , 6.12141 , 7.77858 , 2.77858 , 2.27541 , 6.12141 , 7.77858 , 2.77858
+            , 2.27541 , 6.12141 , 7.77858 , 2.77858 , 2.27541 , 6.12141
+            ]
+    concs = [ p.conc for p in pools ]
+    if(not np.isclose( concs, expected ).all() ):
+        print( " Expected %s" % expected )
+        print( " Got %s" % concs )
+        quit(1)
+    print( 'Test passed' )
+
+if __name__ == '__main__':
+    test_ksolve()

@@ -7,7 +7,8 @@ def test_import():
     import moose.genesis 
     import moose.SBML 
     import moose.chemMerge
-    import moose.utils as mu
+    import moose.utils 
+    import moose.network_utils
     print('done')
 
 def main():
