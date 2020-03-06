@@ -9,12 +9,6 @@
 # Functions for fitting common equations for Hodgkin-Huxley type gate
 # equations.
 
-# Change log:
-#
-# Tue May 21 16:33:59 IST 2013 - Subha refactored the code from
-# converter.py to hhfit.py.
-#
-
 import traceback
 import warnings
 import numpy as np
@@ -177,7 +171,7 @@ def randomized_curve_fit(fn, x, y, maxiter=10, best=True):
     min_err = 1e10  # A large value as placeholder
     for ii in range(maxiter):
         try:
-            p = curve_fit(fn, x, y, p0=p0, full_output=True)
+            p = curve_fit(fn, x, y, p0=p0)
         except (RuntimeError, RuntimeWarning):
             p = None
         # The last entry returned by scipy.optimize.leastsq used by

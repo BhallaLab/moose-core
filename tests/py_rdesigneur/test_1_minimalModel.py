@@ -5,7 +5,7 @@ import rdesigneur as rd
 
 def test_simple():
     """First test.
-    >>> test()
+    >>> test_simple() # doctest: +NORMALIZE_WHITESPACE
     Rdesigneur: Elec model has 1 compartments and 0 spines on 0 compartments.
     <BLANKLINE>
     [/model[0]/elec[0]/soma[0]]
@@ -36,10 +36,14 @@ def test_simple():
     z               =0.0
     z0              =0.0
     <BLANKLINE>
+    INCOMING:
+    /model[0]/elec[0]/soma ('parentMsg',) <--- /model[0]/elec ('childOut',)                                         
+    OUTGOING:
     """
     rdes = rd.rdesigneur()
     rdes.buildModel()
     moose.showfields(rdes.soma)
+    moose.showmsg(rdes.soma)
 
 if __name__ == '__main__':
     import doctest

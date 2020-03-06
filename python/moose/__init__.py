@@ -18,3 +18,6 @@ __version__ = version()
 
 # C++ core override
 from moose.wrapper import *
+
+# Import moose test.
+from moose.moose_test import test

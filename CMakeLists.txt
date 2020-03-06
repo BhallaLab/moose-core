@@ -461,7 +461,8 @@ endforeach()
 
 # Generate report at the end.
 add_custom_command(TARGET pytest POST_BUILD
-    COMMAND ${PYTHON_EXECUTABLE} -m coverage report
+    COMMAND ${PYTHON_EXECUTABLE} -m coverage report 
+    COMMAND ${PYTHON_EXECUTABLE} -m coverage html 
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Genearting coverage report"
     VERBATIM)

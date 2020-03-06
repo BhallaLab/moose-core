@@ -180,7 +180,7 @@ extern PyTypeObject moose_LookupField;
 extern PyTypeObject moose_ElementField;
 
 // Module globals
-int verbosity = 1;
+int verbosity = 0;
 static int isInfinite = 0;
 static unsigned int numNodes = 1;
 static int doUnitTests = 0;

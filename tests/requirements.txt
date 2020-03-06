@@ -2,3 +2,6 @@ coverage
 pytest
 pytest-cov
 python-libsbml
+pyneuroml
+scipy
+matplotlib

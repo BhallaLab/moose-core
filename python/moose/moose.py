@@ -7,38 +7,37 @@ from __future__ import print_function, division, absolute_import
 import warnings
 import os
 import pydoc
-from io import StringIO
+import io
 from contextlib import closing
 
 import moose._moose as _moose
 import moose.utils as mu
 
+
 def about():
     """info: Return some 'about me' information.
     """
-    return dict(path = os.path.dirname(__file__)
-            , version = _moose.VERSION
-            , docs = 'https://moose.readthedocs.io/en/latest/')
+    return dict(path=os.path.dirname(__file__),
+                version=_moose.VERSION,
+                docs='https://moose.readthedocs.io/en/latest/')
 
 
 # Version
-def version( ):
+def version():
     # Show user version.
     return _moose.VERSION
 
-# Tests
-from moose.moose_test import test
-################################################################
-# Wrappers for global functions
-################################################################
+
 def pwe():
     """Print present working element. Convenience function for GENESIS
     users. If you want to retrieve the element in stead of printing
     the path, use moose.getCwe()
 
+    >>> pwe()
+    >>> '/'
     """
     pwe_ = _moose.getCwe()
-    print(pwe_.getPath())
+    print(pwe_.path)
     return pwe_
 
 
@@ -65,12 +64,15 @@ def le(el=None):
         el = _moose.element(el)
     elif isinstance(el, _moose.vec):
         el = el[0]
-    print('Elements under', el.path)
+    print("Elements under '%s'" % el.path)
     for ch in el.children:
-        print(ch.path)
+        print(" %s" % ch.path)
     return [child.path for child in el.children]
 
-ce = _moose.setCwe  # ce is a GENESIS shorthand for change element.
+
+# ce is a GENESIS shorthand for change element.
+ce = _moose.setCwe
+
 
 def syncDataHandler(target):
     """Synchronize data handlers for target.
@@ -90,7 +92,8 @@ def syncDataHandler(target):
     This function is defined for completeness, but currently it does not work.
 
     """
-    raise NotImplementedError('The implementation is not working for IntFire - goes to invalid objects. \
+    raise NotImplementedError(
+        'The implementation is not working for IntFire - goes to invalid objects. \
 First fix that issue with SynBase or something in that line.')
     if isinstance(target, str):
         if not _moose.exists(target):
@@ -141,8 +144,9 @@ def showfield(el, field='*', showtype=False):
                 # The following hack is for handling both Python 2 and
                 # 3. Directly putting the print command in the if/else
                 # clause causes syntax error in both systems.
-                result.append(typestr+' ')
-            result.append(key.ljust(max_field_len + 4) + '=' + str(value)+'\n')
+                result.append(typestr + ' ')
+            result.append(
+                key.ljust(max_field_len + 4) + '=' + str(value) + '\n')
     else:
         try:
             result.append(field + '=' + el.getField(field))
@@ -161,12 +165,14 @@ def showfields(el, showtype=False):
         DeprecationWarning)
     return showfield(el, field='*', showtype=showtype)
 
+
 # Predefined field types and their human readable names
 finfotypes = [('valueFinfo', 'value field'),
               ('srcFinfo', 'source message field'),
               ('destFinfo', 'destination message field'),
               ('sharedFinfo', 'shared message field'),
               ('lookupFinfo', 'lookup field')]
+
 
 def listmsg(el):
     """Return a list containing the incoming and outgoing messages of
@@ -186,9 +192,9 @@ def listmsg(el):
     """
     obj = _moose.element(el)
     ret = []
-    for msg in obj.inMsg:
+    for msg in obj.msgIn:
         ret.append(msg)
-    for msg in obj.outMsg:
+    for msg in obj.msgOut:
         ret.append(msg)
     return ret
 
@@ -209,23 +215,15 @@ def showmsg(el):
     obj = _moose.element(el)
     print('INCOMING:')
     for msg in obj.msgIn:
-        print(
-            msg.e2.path,
-            msg.destFieldsOnE2,
-            '<---',
-            msg.e1.path,
-            msg.srcFieldsOnE1)
+        print(msg.e2.path, msg.destFieldsOnE2, '<---', msg.e1.path,
+              msg.srcFieldsOnE1)
     print('OUTGOING:')
     for msg in obj.msgOut:
-        print(
-            msg.e1.path,
-            msg.srcFieldsOnE1,
-            '--->',
-            msg.e2.path,
-            msg.destFieldsOnE2)
+        print(msg.e1.path, msg.srcFieldsOnE1, '--->', msg.e2.path,
+              msg.destFieldsOnE2)
 
 
-def getfielddoc(tokens, indent=''):
+def getFieldDoc(tokens, indent=''):
     """Return the documentation for field specified by `tokens`.
 
     Parameters
@@ -249,7 +247,7 @@ def getfielddoc(tokens, indent=''):
     NameError
         If the specified fieldName is not present in the specified class.
     """
-    assert(len(tokens) > 1)
+    assert (len(tokens) > 1)
     classname = tokens[0]
     fieldname = tokens[1]
     while True:
@@ -265,7 +263,8 @@ def getfielddoc(tokens, indent=''):
                         # /classes/{ParentClass}[0]/{fieldElementType}[N].
                         finfotype = fieldelement.name
                         return '{indent}{classname}.{fieldname}: type={type}, finfotype={finfotype}{baseinfo}\n\t{docs}\n'.format(
-                            indent=indent, classname=tokens[0],
+                            indent=indent,
+                            classname=tokens[0],
                             fieldname=fieldname,
                             type=fieldelement.type,
                             finfotype=finfotype,
@@ -273,95 +272,61 @@ def getfielddoc(tokens, indent=''):
                             docs=fieldelement.docs)
             classname = classelement.baseClass
         except ValueError:
-            raise NameError('`%s` has no field called `%s`'
-                            % (tokens[0], tokens[1]))
+            raise NameError('`%s` has no field called `%s`' %
+                            (tokens[0], tokens[1]))
 
-
-def toUnicode(v, encoding='utf8'):
-    # if isinstance(v, str):
-        # return v
+def _appendFinfoDocs(classname, docstring, indent):
+    """Append list of finfos in class name to docstring"""
     try:
-        return v.decode(encoding)
-    except (AttributeError, UnicodeEncodeError):
-        return str(v)
+        classElem = _moose.element('/classes/%s' % (classname))
+    except ValueError:
+        raise NameError('class \'%s\' not defined.' % (classname))
+    for ftype, rname in finfotypes:
+        docstring.write('\n*%s*\n' % (rname.capitalize()))
+        try:
+            finfo = _moose.element('%s/%s' % (classElem.path, ftype))
+            for field in finfo.vec:
+                docstring.write('%s%s: %s\n' %
+                                (indent, field.fieldName, field.type))
+        except ValueError:
+            docstring.write('%sNone\n' % (indent))
 
 
-def getmoosedoc(tokens, inherited=False):
+
+def _getMooseDoc(tokens, inherited=False):
     """Return MOOSE builtin documentation.
-
-    Parameters
-    ----------
-    tokens : (className, [fieldName])
-        tuple containing one or two strings specifying class name
-        and field name (optional) to get documentation for.
-
-    inherited: bool (default: False)
-        include inherited fields.
-
-    Returns
-    -------
-    docstring : str
-        Documentation string for class `className`.`fieldName` if both
-        are specified, for the class `className` if fieldName is not
-        specified. In the latter case, the fields and their data types
-        and finfo types are listed.
-
-    Raises
-    ------
-    NameError
-        If class or field does not exist.
-
     """
-    indent = '    '
-    docstring = StringIO()
+    indent = '  '
+    docstring = io.StringIO()
     with closing(docstring):
         if not tokens:
             return ""
         try:
-            class_element = _moose.element('/classes/%s' % (tokens[0]))
+            classElem = _moose.element('/classes/%s' % (tokens[0]))
         except ValueError as e:
-            raise NameError('name \'%s\' not defined.' % (tokens[0]))
+            raise NameError('Name \'%s\' not defined.' % (tokens[0]))
+
         if len(tokens) > 1:
-            docstring.write(toUnicode(getfielddoc(tokens)))
-        else:
-            docstring.write(toUnicode('%s\n' % (class_element.docs)))
-            append_finfodocs(tokens[0], docstring, indent)
-            if inherited:
-                mro = eval('_moose.%s' % (tokens[0])).mro()
-                for class_ in mro[1:]:
-                    if class_ == _moose.melement:
-                        break
-                    docstring.write(toUnicode(
-                        '\n\n#Inherited from %s#\n' % (class_.__name__)))
-                    append_finfodocs(class_.__name__, docstring, indent)
-                    if class_ == _moose.Neutral:    # Neutral is the toplevel moose class
-                        break
+            docstring.write(getFieldDoc(tokens))
+            return docstring.getvalue()
+
+        docstring.write('%s\n' % (classElem.docs))
+        _appendFinfoDocs(tokens[0], docstring, indent)
+        if not inherited:
+            return docstring.getvalue()
+
+        mro = eval('_moose.%s' % (tokens[0])).mro()
+        for class_ in mro[1:]:
+            if class_ == _moose.melement:
+                break
+            docstring.write("\n# Inherited from '%s'\n" % (class_.__name__))
+            _appendFinfoDocs(class_.__name__, docstring, indent)
+            if class_ == _moose.Neutral:
+                break
         return docstring.getvalue()
 
 
-def append_finfodocs(classname, docstring, indent):
-    """Append list of finfos in class name to docstring"""
-    try:
-        class_element = _moose.element('/classes/%s' % (classname))
-    except ValueError:
-        raise NameError('class \'%s\' not defined.' % (classname))
-    for ftype, rname in finfotypes:
-        docstring.write(toUnicode('\n*%s*\n' % (rname.capitalize())))
-        try:
-            finfo = _moose.element('%s/%s' % (class_element.path, ftype))
-            for field in finfo.vec:
-                docstring.write(toUnicode(
-                    '%s%s: %s\n' % (indent, field.fieldName, field.type)))
-        except ValueError:
-            docstring.write(toUnicode('%sNone\n' % (indent)))
-
-
-# the global pager is set from pydoc even if the user asks for paged
-# help once. this is to strike a balance between GENESIS user's
-# expectation of control returning to command line after printing the
-# help and python user's expectation of seeing the help via more/less.
-pager = None
-
+__pager = None
 
 def doc(arg, inherited=True, paged=True):
     """Display the documentation for class or field in a class.
@@ -398,14 +363,14 @@ def doc(arg, inherited=True, paged=True):
     # pydoc. (using properties requires copying all the docs strings
     # from MOOSE increasing the loading time by ~3x). Hence we provide a
     # separate function.
-    global pager
-    if paged and pager is None:
-        pager = pydoc.pager
+    global __pager
+    if paged and __pager is None:
+        __pager = pydoc.pager
     tokens = []
     text = ''
     if isinstance(arg, str):
         tokens = arg.split('.')
-        if tokens[0] == 'moose':
+        if tokens[0] in ['moose', '_moose']:
             tokens = tokens[1:]
     elif isinstance(arg, type):
         tokens = [arg.__name__]
@@ -413,11 +378,11 @@ def doc(arg, inherited=True, paged=True):
         text = '%s: %s\n\n' % (arg.path, arg.className)
         tokens = [arg.className]
     if tokens:
-        text += getmoosedoc(tokens, inherited=inherited)
+        text += _getMooseDoc(tokens, inherited=inherited)
     else:
         text += pydoc.getdoc(arg)
-    if pager:
-        pager(text)
+    if __pager:
+        __pager(text)
     else:
         print(text)
 

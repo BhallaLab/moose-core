@@ -10,13 +10,6 @@ from __future__ import absolute_import, print_function, division
 # NOTE: This script does not work with python3
 # See https://github.com/NeuroML/NeuroML2/issues/116 . If this bug is fixed then
 # remove this code block.
-import neuroml as nml
-a = nml.nml.nml.IonChannel()
-try:
-    b = {a.id : 1 }
-except TypeError as e:
-    print( 'Failed due to https://github.com/NeuroML/NeuroML2/issues/116' )
-    quit( 0 )
 
 import moose
 import moose.utils as mu

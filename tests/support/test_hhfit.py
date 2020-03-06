@@ -32,10 +32,8 @@ class TestFindRateFn(unittest.TestCase):
         self.p_exp = p_exp
         # Parameters for linoid function: alpha_n from original Hodgkin-Huxley K channel.
         p_linoid = (-0.01 * 1e3, -1 / 10e-3, 10e-3, 0.0)
-        self.linoid = p_linoid[3] + p_linoid[0] * (
-            self.v_array -
-            p_linoid[2]) / (np.exp(p_linoid[1] *
-                                   (self.v_array - p_linoid[2])) - 1)
+        self.linoid = p_linoid[3] + p_linoid[0] * \
+                (self.v_array - p_linoid[2]) / (np.exp(p_linoid[1] * (self.v_array - p_linoid[2])) - 1)
         self.p_linoid = p_linoid
         # This is tau_m of transient Ca2+ current (eq. 7) from
         # Huguenard and McCormick, J Neurophysiol, 68:1373-1383,
