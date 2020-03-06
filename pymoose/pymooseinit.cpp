@@ -43,36 +43,12 @@ extern void testMpiBuiltins();
 extern void testMpiShell();
 extern void testMsg();
 extern void testMpiMsg();
-// extern void testKinetics();
-// extern void testKineticSolvers();
-// extern void	testKineticSolversProcess();
 extern void testBiophysics();
 extern void testBiophysicsProcess();
-// extern void testHSolve();
-// extern void testKineticsProcess();
-// extern void testGeom();
-// extern void testMesh();
-// extern void testSimManager();
-// extern void testSigNeur();
-// extern void testSigNeurProcess();
-
 extern unsigned int initMsgManagers();
 extern void destroyMsgManagers();
-// void regressionTests();
 #endif // DO_UNIT_TESTS
-extern void speedTestMultiNodeIntFireNetwork(
-    unsigned int size, unsigned int runsteps );
-
-#ifdef USE_SMOLDYN
-extern void testSmoldyn();
-#endif
-// bool benchmarkTests( int argc, char** argv );
-
-extern void mooseBenchmarks( unsigned int option );
-
-//////////////////////////////////////////////////////////////////
-// System-dependent function here
-//////////////////////////////////////////////////////////////////
+extern void speedTestMultiNodeIntFireNetwork(unsigned int size, unsigned int runsteps );
 
 unsigned int getNumCores()
 {
@@ -133,15 +109,14 @@ void checkChildren( Id parent, const string& info )
     }
 }
 
-Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests,
-         unsigned int& benchmark )
+Id init( int argc, char** argv)
 {
     unsigned int numCores = getNumCores();
     int numNodes = 1;
     int myNode = 0;
+    bool doUnitTests = false;
     bool isInfinite = 0;
     int opt;
-    benchmark = 0; // Default, means don't do any benchmarks.
     Cinfo::rebuildOpIndex();
 #ifdef USE_MPI
     /*
@@ -175,16 +150,10 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests,
         case 'n': // Multiple nodes
             numNodes = (unsigned int)atoi( optarg );
             break;
-        case 'b': // Benchmark:
-            benchmark = atoi( optarg );
-            break;
         case 'B': // Benchmark plus dump data: handle later.
             break;
         case 'u': // Do unit tests, pass back.
             doUnitTests = 1;
-            break;
-        case 'r': // Do regression tests: pass back
-            doRegressionTests = 1;
             break;
         case 'q': // quit immediately after completion.
             quitFlag = 1;

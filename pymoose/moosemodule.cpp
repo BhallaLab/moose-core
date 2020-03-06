@@ -77,10 +77,7 @@ extern void nonMpiTests(Shell *);
 extern void test_moosemodule();
 
 
-extern Id init(
-    int argc, char ** argv, bool& doUnitTests
-    , bool& doRegressionTests, unsigned int& benchmark
-);
+extern Id init( int argc, char ** argv, bool& doUnitTests);
 
 extern void initMsgManagers();
 extern void destroyMsgManagers();
@@ -88,8 +85,6 @@ extern void destroyMsgManagers();
 extern void speedTestMultiNodeIntFireNetwork(
     unsigned int size, unsigned int runsteps
 );
-
-extern void mooseBenchmarks( unsigned int option );
 
 /*-----------------------------------------------------------------------------
  *  Random number generator for this module.
@@ -184,18 +179,11 @@ extern PyTypeObject moose_DestField;
 extern PyTypeObject moose_LookupField;
 extern PyTypeObject moose_ElementField;
 
-/////////////////////////////////////////////////////////////////
 // Module globals
-/////////////////////////////////////////////////////////////////
 int verbosity = 1;
-// static int isSingleThreaded = 0;
 static int isInfinite = 0;
 static unsigned int numNodes = 1;
-// static unsigned int numCores = 1;
-// static unsigned int myNode = 0;
-// static unsigned int numProcessThreads = 0;
 static int doUnitTests = 0;
-static int doRegressionTests = 0;
 static int quitFlag = 0;
 
 /**
@@ -941,11 +929,6 @@ vector <string> setup_runtime_env()
     {
         istringstream(it->second) >> doUnitTests;
     }
-    it = argmap.find("DOREGRESSIONTESTS");
-    if (it != argmap.end())
-    {
-        istringstream(it->second) >> doRegressionTests;
-    }
 
     if (verbosity > 0)
     {
@@ -957,7 +940,6 @@ vector <string> setup_runtime_env()
              // << "   NUMPTHREADS = " << numProcessThreads << endl
              << "   VERBOSITY = " << verbosity << endl
              << "   DOUNITTESTS = " << doUnitTests << endl
-             << "   DOREGRESSIONTESTS = " << doRegressionTests << endl
              << "========================================" << endl;
     }
     return args;
@@ -973,14 +955,12 @@ Id getShell(int argc, char ** argv)
 {
     static int inited = 0;
     if (inited)
-    {
         return Id(0);
-    }
+
     bool dounit = doUnitTests != 0;
-    bool doregress = doRegressionTests != 0;
-    unsigned int doBenchmark = 0;
+
     // Utilize the main::init function which has friend access to Id
-    Id shellId = init(argc, argv, dounit, doregress, doBenchmark );
+    Id shellId = init(argc, argv, dounit); 
     inited = 1;
     Shell * shellPtr = reinterpret_cast<Shell*>(shellId.eref().data());
     if (dounit)
@@ -1003,15 +983,7 @@ Id getShell(int argc, char ** argv)
             mpiTests();
             processTests( shellPtr );
         }
-        // if ( doRegressionTests ) regressionTests();
 #endif
-        // These are outside unit tests because they happen in optimized
-        // mode, using a command-line argument. As soon as they are done
-        // the system quits, in order to estimate timing.
-        if ( doBenchmark != 0 )
-        {
-            mooseBenchmarks( doBenchmark );
-        }
     }
     return shellId;
 } //! create_shell()
@@ -3114,26 +3086,6 @@ PyMODINIT_FUNC MODINIT(_moose)
 {
     clock_t modinit_start = clock();
 
-    //PyGILState_STATE gstate;
-    //gstate = PyGILState_Ensure();
-
-    // First of all create the Shell.  We convert the environment
-    // variables into c-like argv array
-    vector<string> args = setup_runtime_env();
-    int argc = args.size();
-    char ** argv = (char**)calloc(args.size(), sizeof(char*));
-    for (int ii = 0; ii < argc; ++ii)
-    {
-        argv[ii] = (char*)(calloc(args[ii].length()+1, sizeof(char)));
-        strncpy(argv[ii], args[ii].c_str(), args[ii].length()+1);
-    }
-
-    // Should not call. No pthreads now. PyEval_InitThreads();
-    Id shellId = getShell(argc, argv);
-    for (int ii = 1; ii < argc; ++ii)
-    {
-        free(argv[ii]);
-    }
     // Now initialize the module
 #ifdef PY3K
     PyObject * moose_module = PyModule_Create(&MooseModuleDef);

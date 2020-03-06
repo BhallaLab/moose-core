@@ -10,7 +10,7 @@ import unittest
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import hhfit
+import moose.neuroml2.hhfit as hhfit
 
 
 class TestFindRateFn(unittest.TestCase):
