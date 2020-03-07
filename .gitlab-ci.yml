@@ -16,7 +16,7 @@ build:
     - python3 -m pip install setuptools pip --user --upgrade
     - python3 -m pip install python-libsbml --user --upgrade
     - python3 -m pip install pyneuroml --user --upgrade
-    - python3 -m pip install sympy --user --upgrade
+    - python3 -m pip install sympy scipy --user --upgrade
     - python3 setup.py build test 
     - python3 setup.py install --user
     - python3 -c "import moose; moose.test()"

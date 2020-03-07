@@ -78,7 +78,7 @@ class TestFindRateFn(unittest.TestCase):
             plt.plot(self.v_array, self.exp, 'y-', self.v_array,
                      hhfit.exponential(self.v_array, *self.p_exp), 'b--',
                      self.v_array, fnval, 'r-.')
-            plt.legend('original exp %s fitted %s' % (self.p_expr, fn))
+            plt.legend('original exp %s fitted %s' % (self.p_exp, fn))
             out = "__test_exponential.png"
             plt.savefig(out)
             print('Plot is saved saved to %s' % out)

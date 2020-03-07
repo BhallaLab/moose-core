@@ -13,13 +13,12 @@ import traceback
 import warnings
 import numpy as np
 import logging
-logger_ = logging.getLogger('moose.hhfit')
+logger_ = logging.getLogger('moose.nml2.hhfit')
 
 try:
-    from scipy.optimize import curve_fit
+    import scipy.optimize as _SO
 except ImportError:
-    raise RuntimeError(
-        "To use this feature/module, please install python-scipy")
+    raise RuntimeError("To use this feature/module, please install scipy")
 
 
 def exponential2(x, a, scale, x0, y0=0):
@@ -99,8 +98,8 @@ def double_exp(x, a, k1, x1, k2, x2, y0=0):
     ret = np.zeros(len(x))
     try:
         ret = a / (np.exp(k1 * (x - x1)) + np.exp(k2 * (x - x2))) + y0
-    except RuntimeWarning:
-        traceback.print_exc()
+    except RuntimeWarning as e:
+        logger_.warn(e)
     return ret
 
 
@@ -171,13 +170,12 @@ def randomized_curve_fit(fn, x, y, maxiter=10, best=True):
     min_err = 1e10  # A large value as placeholder
     for ii in range(maxiter):
         try:
-            p = curve_fit(fn, x, y, p0=p0)
+            p = _SO.curve_fit(fn, x, y, p0=p0)
         except (RuntimeError, RuntimeWarning):
             p = None
         # The last entry returned by scipy.optimize.leastsq used by
         # curve_fit is 1, 2, 3 or 4 if it succeeds.
-        bad = (p is None) or np.any(
-            p[1] == np.inf) or (p[-1] not in [1, 2, 3, 4])
+        bad = (p is None) or (p[1] == np.inf).any()
         if not bad:
             if not best:
                 return p
