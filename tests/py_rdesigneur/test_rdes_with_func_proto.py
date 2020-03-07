@@ -20,32 +20,39 @@ Vrest = -0.065
 
 sdir_ = os.path.dirname(os.path.realpath(__file__))
 
-# Boilerplate
-rdes = rd.rdesigneur(
-    elecPlotDt = elecPlotDt,
-    elecDt = elecDt,
-    cellProto = [['somaProto', 'soma', sm_diam, sm_len]],
-    chanProto = [[ os.path.join(sdir_, 'Na_Chan_Migliore2018_.Na_Chan()'), 'Na']],
-    chanDistrib = [
-        ['Na', 'soma', 'Gbar', '360']
+def test_proto():
+    # Boilerplate
+    rdes = rd.rdesigneur(
+        elecPlotDt = elecPlotDt,
+        elecDt = elecDt,
+        cellProto = [['somaProto', 'soma', sm_diam, sm_len]],
+        chanProto = [[ os.path.join(sdir_, 'Na_Chan_Migliore2018_.Na_Chan()'), 'Na']],
+        chanDistrib = [
+            ['Na', 'soma', 'Gbar', '360']
+            ],
+        passiveDistrib = [
+            ['#', 'RM', str(RM), 'CM', str(CM), 'initVm', str(Vrest), 'Em', str(Vrest)],
         ],
-    passiveDistrib = [
-        ['#', 'RM', str(RM), 'CM', str(CM), 'initVm', str(Vrest), 'Em', str(Vrest)],
-    ],
-    stimList = [['soma', '1', '.', 'vclamp', '-0.065 + (t>0.1 && t<0.2) * 0.02' ]],
-    plotList = [
-        ['soma', '1', '.', 'Vm', 'Soma membrane potential'],
-        ['soma', '1', 'vclamp', 'current', 'Soma holding current'],
-    ]
-)
-rdes.buildModel()
+        stimList = [['soma', '1', '.', 'vclamp', '-0.065 + (t>0.1 && t<0.2) * 0.02' ]],
+        plotList = [
+            ['soma', '1', '.', 'Vm', 'Soma membrane potential'],
+            ['soma', '1', 'vclamp', 'current', 'Soma holding current'],
+        ]
+    )
+    rdes.buildModel()
 
-if moose.exists('/model/elec/soma/vclamp'):
-    moose.element( '/model/elec/soma/vclamp' ).gain = CM*sm_area/elecDt
-    moose.element( '/model/elec/soma/vclamp' ).tau = 5*elecDt
-    moose.element( '/model/elec/soma/vclamp' ).ti = elecDt*2
-    moose.element( '/model/elec/soma/vclamp' ).td = 0
+    if moose.exists('/model/elec/soma/vclamp'):
+        moose.element( '/model/elec/soma/vclamp' ).gain = CM*sm_area/elecDt
+        moose.element( '/model/elec/soma/vclamp' ).tau = 5*elecDt
+        moose.element( '/model/elec/soma/vclamp' ).ti = elecDt*2
+        moose.element( '/model/elec/soma/vclamp' ).td = 0
 
-moose.reinit()
-moose.start( 0.3 )
-rdes.display()
+    moose.reinit()
+    moose.start( 0.3 )
+    rdes.display()
+
+def main():
+    test_proto()
+
+if __name__ == '__main__':
+    main()
