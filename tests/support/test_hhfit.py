@@ -67,7 +67,9 @@ class TestFindRateFn(unittest.TestCase):
         fn, params = hhfit.find_ratefn(self.v_array, self.exp)
         print('Exponential params original:', self.p_exp, 'detected:', params)
         if params is not None:
-            fnval = hhfit.exponential(self.v_array, *params)
+            # The `find_ratefn` might return a parameter array for different
+            # function sometimes.
+            fnval = hhfit.exponential(self.v_array, *params[:5])
             self.assertEqual(hhfit.exponential, fn)
             # The same exponential can be satisfied by an infinite number
             # of parameter values. Hence we cannot compare the parameters,
