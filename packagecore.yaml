@@ -1,0 +1,27 @@
+name: pymoose
+command:
+  compile: |
+    cmake -DCMAKE_INSTALL_PREFIX=/usr && \
+    make -j4
+  install: |
+    make install DESTDIR="${BP_DESTDIR}"
+packages:
+  archlinux:
+    container: archlinux/base
+    builddeps:
+      - base-devel
+      - gawk
+      - gcc
+      - cmake 
+      - gsl
+      - python
+      - python-matplotlib
+      - python-numpy
+  ubuntu18.04:
+    builddeps:
+      - g++
+      - cmake
+      - libgsl-dev
+      - python-numpy
+      - python-matplotlib
+      - python-dev
