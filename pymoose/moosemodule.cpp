@@ -21,10 +21,6 @@
 #include <thread>
 #include <exception>
 
-#if USE_BOOST_ODE
-#include <boost/format.hpp>
-#endif
-
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
@@ -45,46 +41,9 @@
 
 using namespace std;
 
-#ifdef DO_UNIT_TESTS
-
-extern void testSync();
-extern void testAsync();
-
-extern void testSyncArray(
-    unsigned int size,
-    unsigned int numThreads,
-    unsigned int method
-);
-
-extern void testShell();
-extern void testScheduling();
-extern void testSchedulingProcess();
-extern void testBuiltins();
-extern void testBuiltinsProcess();
-
-extern void testMpiScheduling();
-extern void testMpiBuiltins();
-extern void testMpiShell();
-extern void testMsg();
-extern void testMpiMsg();
-extern void testKinetics();
-
-#endif
-
-extern void mpiTests();
-extern void processTests( Shell* );
-extern void nonMpiTests(Shell *);
-extern void test_moosemodule();
-
 
 extern Id init( int argc, char ** argv, bool& doUnitTests);
-
 extern void initMsgManagers();
-extern void destroyMsgManagers();
-
-extern void speedTestMultiNodeIntFireNetwork(
-    unsigned int size, unsigned int runsteps
-);
 
 /*-----------------------------------------------------------------------------
  *  Random number generator for this module.
@@ -957,16 +916,10 @@ Id getShell(int argc, char ** argv)
     if (inited)
         return Id(0);
 
-    bool dounit = doUnitTests != 0;
-
-    // Utilize the main::init function which has friend access to Id
+    bool dounit = false;
     Id shellId = init(argc, argv, dounit); 
     inited = 1;
     Shell * shellPtr = reinterpret_cast<Shell*>(shellId.eref().data());
-    if (dounit)
-    {
-        nonMpiTests( shellPtr ); // These tests do not need the process loop.
-    }
     if ( shellPtr->myNode() == 0 )
     {
         if ( Shell::numNodes() > 1 )
@@ -977,16 +930,9 @@ Id getShell(int argc, char ** argv)
             shellPtr->doUseClock( "/postmaster", "process", 9 );
             shellPtr->doSetClock( 9, 1.0 ); // Use a sensible default.
         }
-#ifdef DO_UNIT_TESTS
-        if ( dounit )
-        {
-            mpiTests();
-            processTests( shellPtr );
-        }
-#endif
     }
     return shellId;
-} //! create_shell()
+} 
 
 /**
    Clean up after yourself.
@@ -3202,8 +3148,6 @@ PyMODINIT_FUNC MODINIT(_moose)
          << (modinit_end - modinit_start) * 1.0 /CLOCKS_PER_SEC
        );
 
-    if (doUnitTests)
-        test_moosemodule();
 #ifdef PY3K
     return moose_module;
 #endif

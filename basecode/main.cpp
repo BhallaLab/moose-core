@@ -130,7 +130,7 @@ void checkChildren( Id parent, const string& info )
 }
 
 
-Id init( int argc, char** argv, bool& doUnitTests )
+Id init(int argc, char** argv, bool& doUnitTests)
 {
     unsigned int numCores = getNumCores();
     int numNodes = 1;
@@ -138,29 +138,18 @@ Id init( int argc, char** argv, bool& doUnitTests )
     bool isInfinite = 0;
     int opt;
     Cinfo::rebuildOpIndex();
-#ifdef USE_MPI
-    /*
-    // OpenMPI does not use argc or argv.
-    // unsigned int temp_argc = 1;
-    int provided;
-    MPI_Init_thread( &argc, &argv, MPI_THREAD_SERIALIZED, &provided );
-    */
-    MPI_Init( &argc, &argv );
 
+#ifdef USE_MPI
+    MPI_Init( &argc, &argv );
     MPI_Comm_size( MPI_COMM_WORLD, &numNodes );
     MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
-    /*
-       if ( provided < MPI_THREAD_SERIALIZED && myNode == 0 ) {
-       cout << "Warning: This MPI implementation does not like multithreading: " << provided << "\n";
-       }
-       */
-    // myNode = MPI::COMM_WORLD.Get_rank();
 #endif
+
     /**
      * Here we allow the user to override the automatic identification
      * of processor configuration
      */
-    while ( ( opt = getopt( argc, argv, "hiqurn:b:B:" ) ) != -1 )
+    while ( ( opt = getopt( argc, argv, "hiqun:b:B:" ) ) != -1 )
     {
         switch ( opt )
         {
@@ -173,7 +162,7 @@ Id init( int argc, char** argv, bool& doUnitTests )
         case 'B': // Benchmark plus dump data: handle later.
             break;
         case 'u': // Do unit tests, pass back.
-            doUnitTests = 1;
+            doUnitTests = true;
             break;
         case 'q': // quit immediately after completion.
             quitFlag = 1;

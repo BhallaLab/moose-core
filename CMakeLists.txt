@@ -438,7 +438,7 @@ endforeach()
 
 ################################# COVERAGE ###################################
 
-add_custom_target(pytest)
+add_custom_target(coverage)
 set(PYTEST_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 file(GLOB_RECURSE PYTEST_TEST_SCRIPTS ${PYTEST_TEST_DIRECTORY}/test_*.py)
 
@@ -456,11 +456,11 @@ foreach(_test_script ${PYTEST_TEST_SCRIPTS})
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Executing ${_test_script} using pytest"
         VERBATIM)
-    add_dependencies(pytest ${_test_name})
+    add_dependencies(coverage  ${_test_name})
 endforeach()
 
 # Generate report at the end.
-add_custom_command(TARGET pytest POST_BUILD
+add_custom_command(TARGET coverage POST_BUILD
     COMMAND ${PYTHON_EXECUTABLE} -m coverage report 
     COMMAND ${PYTHON_EXECUTABLE} -m coverage html 
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}

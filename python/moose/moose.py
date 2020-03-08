@@ -262,7 +262,7 @@ def getFieldDoc(tokens, indent=''):
                         # The field elements are
                         # /classes/{ParentClass}[0]/{fieldElementType}[N].
                         finfotype = fieldelement.name
-                        return '{indent}{classname}.{fieldname}: type={type}, finfotype={finfotype}{baseinfo}\n\t{docs}\n'.format(
+                        return u'{indent}{classname}.{fieldname}: type={type}, finfotype={finfotype}{baseinfo}\n\t{docs}\n'.format(
                             indent=indent,
                             classname=tokens[0],
                             fieldname=fieldname,
@@ -282,14 +282,14 @@ def _appendFinfoDocs(classname, docstring, indent):
     except ValueError:
         raise NameError('class \'%s\' not defined.' % (classname))
     for ftype, rname in finfotypes:
-        docstring.write('\n*%s*\n' % (rname.capitalize()))
+        docstring.write(u'\n*%s*\n' % (rname.capitalize()))
         try:
             finfo = _moose.element('%s/%s' % (classElem.path, ftype))
             for field in finfo.vec:
-                docstring.write('%s%s: %s\n' %
+                docstring.write(u'%s%s: %s\n' %
                                 (indent, field.fieldName, field.type))
         except ValueError:
-            docstring.write('%sNone\n' % (indent))
+            docstring.write(u'%sNone\n' % (indent))
 
 
 
@@ -303,14 +303,14 @@ def _getMooseDoc(tokens, inherited=False):
             return ""
         try:
             classElem = _moose.element('/classes/%s' % (tokens[0]))
-        except ValueError as e:
-            raise NameError('Name \'%s\' not defined.' % (tokens[0]))
+        except ValueError:
+            raise NameError("Name '%s' not defined." % (tokens[0]))
 
         if len(tokens) > 1:
             docstring.write(getFieldDoc(tokens))
             return docstring.getvalue()
 
-        docstring.write('%s\n' % (classElem.docs))
+        docstring.write(u'%s\n' % (classElem.docs))
         _appendFinfoDocs(tokens[0], docstring, indent)
         if not inherited:
             return docstring.getvalue()
@@ -319,7 +319,7 @@ def _getMooseDoc(tokens, inherited=False):
         for class_ in mro[1:]:
             if class_ == _moose.melement:
                 break
-            docstring.write("\n# Inherited from '%s'\n" % (class_.__name__))
+            docstring.write(u"\n# Inherited from '%s'\n" % (class_.__name__))
             _appendFinfoDocs(class_.__name__, docstring, indent)
             if class_ == _moose.Neutral:
                 break

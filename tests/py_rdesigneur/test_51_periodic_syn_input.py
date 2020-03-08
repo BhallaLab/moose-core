@@ -24,7 +24,7 @@ def test_periodic_syninput():
     t = moose.wildcardFind('/##[TYPE=Table]')[0].vector
     expected = np.array([-0.04995514162861773, 0.004795008283676097])
     got = np.array([t.mean(), t.std()])
-    assert np.allclose(expected, got, rtol=1e-4), (expected, got)
+    assert np.allclose(expected, got, rtol=1e-3), (expected, got)
     print('ok')
     return t
 

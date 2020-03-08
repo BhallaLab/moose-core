@@ -9,7 +9,7 @@ matrix:
         - xvfb
   - os: osx
     osx_image: 
-     - xcode10.3
+     - xcode11.3
 
 notifications:
     email:

@@ -16,14 +16,18 @@ PYTHON2="/usr/bin/python2"
 PYTHON3="/usr/bin/python3"
 
 $PYTHON2 -m pip install pip --upgrade --user
-$PYTHON2 -m pip install libNeuroML pyNeuroML python-libsbml --upgrade --user
+$PYTHON2 -m pip install libNeuroML numpy==1.14 scipy==1.2 \
+    pyNeuroML python-libsbml --upgrade --user
 
 $PYTHON3 -m pip install pip --upgrade --user
 $PYTHON3 -m pip install libNeuroML pyNeuroML python-libsbml --upgrade --user
 
 # sympy is only needed for pretty-priting for one test.
-$PYTHON3 -m pip install sympy --upgrade --user   
+$PYTHON3 -m pip install numpy sympy scipy --upgrade --user   
 
+# pytest requirements.
+$PYTHON3 -m pip install -r ./tests/requirements.txt --user
+ 
 NPROC=$(nproc)
 MAKE="make -j$NPROC"
 
@@ -47,9 +51,21 @@ $PYTHON3 -m compileall -q .
 
     # Run all tests in debug mode.
     MOOSE_NUM_THREADS=$NPROC ctest -j$NPROC --output-on-failure 
+
+
     make install || sudo make install 
     cd /tmp
     $PYTHON3 -c 'import moose;print(moose.__file__);print(moose.version())'
+)
+
+# BOOST and python3
+(
+    mkdir -p $BUILDDIR && cd $BUILDDIR && \
+        cmake -DWITH_BOOST_ODE=ON -DPYTHON_EXECUTABLE="$PYTHON3" \
+        -DCMAKE_INSTALL_PREFIX=/usr ..
+    # Run coverage 
+    export MOOSE_NUM_THREADS=3
+    make coverage 
 )
 
 # GSL and python2, failure is allowed
@@ -60,14 +76,5 @@ set +e
     $MAKE && MOOSE_NUM_THREADS=$NPROC ctest -j$NPROC --output-on-failure
 )
 set -e
-
-
-# BOOST and python3
-(
-    mkdir -p $BUILDDIR && cd $BUILDDIR && \
-        cmake -DWITH_BOOST_ODE=ON -DPYTHON_EXECUTABLE="$PYTHON3" \
-        -DCMAKE_INSTALL_PREFIX=/usr ..
-    $MAKE && MOOSE_NUM_THREADS=$NPROC ctest -j$NPROC --output-on-failure 
-)
 
 echo "All done"
