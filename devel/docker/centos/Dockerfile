@@ -10,6 +10,8 @@ RUN yum install -y git cmake3 gcc gcc-c++ make \
 RUN yum install -y gsl-devel   && yum -y clean all
 # These are required to run tests.
 RUN yum install -y python3-matplotlib python3-scipy python3-numpy && yum -y clean all 
+RUN yum install -y centos-release-scl && yum -y clean all
+RUN yum install -y devtoolset-8 && yum -y clean all
 RUN ln -s /usr/bin/cmake3 /usr/bin/cmake 
 RUN ln -s /usr/bin/ctest3 /usr/bin/ctest 
 WORKDIR /root
@@ -17,5 +19,8 @@ WORKDIR /root
 # Run docker build from project ROOT. 
 COPY . moose-core
 RUN python3 -m pip install matplotlib scipy sympy --user
+
+# enable devtoolset before building.
+SHELL [ "/usr/bin/scl", "enable", "devtoolset-8" ]
 RUN cd moose-core && python3 setup.py build test install
 CMD ["/usr/bin/python3", "-c", "'import moose;moose.test()'"]
