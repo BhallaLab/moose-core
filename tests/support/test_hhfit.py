@@ -3,6 +3,7 @@
 # Author: Subha
 # Maintainer: Dilawar Singh
 # Created: Tue May 21 16:34:45 2013 (+0530)
+# This test is fragile.
 
 from __future__ import print_function, division, absolute_import
 import numpy as np
@@ -11,6 +12,8 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import moose.neuroml2.hhfit as hhfit
+
+np.random.seed(10)
 
 
 class TestFindRateFn(unittest.TestCase):
@@ -68,8 +71,8 @@ class TestFindRateFn(unittest.TestCase):
         print('Exponential params original:', self.p_exp, 'detected:', params)
         if params is not None:
             # The `find_ratefn` might return a parameter array for different
-            # function sometimes.
-            fnval = hhfit.exponential(self.v_array, *params[:5])
+            # function sometimes. exponential takes only upto 5 parameters. 
+            fnval = hhfit.exponential(self.v_array, *params[:4])
             self.assertEqual(hhfit.exponential, fn)
             # The same exponential can be satisfied by an infinite number
             # of parameter values. Hence we cannot compare the parameters,
