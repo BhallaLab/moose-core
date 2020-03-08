@@ -18,14 +18,16 @@ add_definitions(-Wall
     -Wno-unused-function
     #-Wno-unused-private-field
     )
+
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    # gcc-4.9.0 has regex supports though moose will compile with 4.8.x;
+    # <regex> won't work.
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
+        message(FATAL_ERROR "Insufficient gcc version. Minimum requried 4.9")
+    endif()
     add_definitions( -Wno-unused-local-typedefs )
 elseif(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
     add_definitions( -Wno-unused-local-typedef )
-endif()
-
-if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" )
-    add_definitions( -Wno-unused-local-typedefs )
 endif()
 
 add_definitions(-fPIC)

@@ -233,6 +233,9 @@ add_subdirectory(synapse)
 add_subdirectory(intfire)
 add_subdirectory(external/libsoda)
 
+# development related.
+add_subdirectory(devel)
+
 ###################################### LINKING #################################
 list(APPEND MOOSE_LIBRARIES
     moose_builtins
@@ -516,10 +519,3 @@ foreach(_py_script ${PY_SCRIPTS})
     add_dependencies(pylint ${TGT_NAME} )
 endforeach( )
 
-# Replicate Travis-CI building using docker
-add_custom_target(docker
-    COMMAND docker build -t bhallalab/travis:latest
-        -f ${CMAKE_CURRENT_SOURCE_DIR}/devel/docker/travis/Dockerfile .
-    COMMENT "Replicating Travis-CI building using Docker."
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    VERBATIM)
