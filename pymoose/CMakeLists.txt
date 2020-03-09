@@ -59,8 +59,7 @@ execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --libs
 
 set_target_properties(_moose PROPERTIES
     COMPILE_DEFINITIONS "PYMOOSE"
-  COMPILE_FLAGS "${COMPILE_FLAGS} ${PYTHON_INCLUDE_FLAGS}"
-    )
+    COMPILE_FLAGS "${COMPILE_FLAGS} ${PYTHON_INCLUDE_FLAGS}")
 
 # Remove prefix lib from python module.
 if(NOT(PYTHON_SO_EXTENSION STREQUAL ""))

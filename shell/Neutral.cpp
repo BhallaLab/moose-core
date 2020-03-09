@@ -764,6 +764,7 @@ string Neutral::path( const Eref& e )
     stringstream ss;
 
     pathVec.push_back( curr );
+
     while ( curr.id != Id() )
     {
         ObjId mid = curr.eref().element()->findCaller( pafid );
@@ -776,8 +777,10 @@ string Neutral::path( const Eref& e )
         curr = Msg::getMsg( mid )->findOtherEnd( curr );
         pathVec.push_back( curr );
     }
+
     if ( pathVec.size() <= 1 )
         return "/";
+
     for ( unsigned int i = 1; i < pathVec.size(); ++i )
     {
         ss << "/";
@@ -792,6 +795,7 @@ string Neutral::path( const Eref& e )
         	ss << "[" << oid.dataIndex << "]";
         	*/
     }
+
     // Append braces if Eref was for a fieldElement. This should
     // work even if it is off-node.
     if ( e.element()->hasFields() )

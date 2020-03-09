@@ -76,11 +76,18 @@ string Id::id2str( Id id )
 string Id::path( const string& separator) const
 {
     string ret = Neutral::path( eref() );
-    // Trim off trailing []
-    assert( ret.length() > 0 );
-    // the 'back' operation is not supported by pre 2011 compilers
 
-    while ( ret[ ret.length() - 1 ] == ']' )
+#if 0
+    // NOTE/FIXME: Monday 09 March 2020 12:30:27 PM IST, Dilawar Singh
+    // This beaks the path comparison. Getting x.path from x returned in a 
+    // list by moose.wildcardFind() and getting path from here doesn't math
+    // when this is enabled.
+    // If we want to remove [0] then it should be done globally and not just
+    // here.
+
+    // Trim off trailing [] 
+    assert( ret.length() > 0 );
+    while ( ret.back() == ']' )
     {
         size_t pos = ret.find_last_of( '[' );
         if ( pos != string::npos && pos > 0 )
@@ -88,6 +95,7 @@ string Id::path( const string& separator) const
             ret = ret.substr( 0, pos );
         }
     }
+#endif 
 
     return ret;
 }

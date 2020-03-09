@@ -228,7 +228,7 @@ Table::~Table( )
     if( useFileStreamer_ )
     {
         mergeWithTime( data_ );
-        StreamerBase::writeToOutFile( outfile_, format_, "a", data_, columns_ );
+        StreamerBase::writeToOutFile( outfile_, format_, APPEND, data_, columns_ );
         clearAllVecs();
     }
 }
@@ -269,7 +269,7 @@ void Table::process( const Eref& e, ProcPtr p )
         if( fmod(lastTime_, 5.0) == 0.0 || getVecSize() >= 10000 )
         {
             mergeWithTime( data_ );
-            StreamerBase::writeToOutFile( outfile_, format_, "a", data_, columns_ );
+            StreamerBase::writeToOutFile( outfile_, format_, APPEND, data_, columns_ );
             clearAllVecs();
         }
         }
@@ -332,7 +332,7 @@ void Table::reinit( const Eref& e, ProcPtr p )
     if( useFileStreamer_ )
     {
         mergeWithTime( data_ );
-        StreamerBase::writeToOutFile( outfile_, format_, "w", data_, columns_);
+        StreamerBase::writeToOutFile( outfile_, format_, WRITE, data_, columns_);
         clearAllVecs();
     }
 }

@@ -185,10 +185,10 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
             if( tick != tableDt_[0] )
             {
                 moose::showWarn( "Table " + tableIds_[i].path() + " has "
-                        " different clock dt. "
-                        " Make sure all tables added to Streamer have the same "
-                        " dt value."
-                        );
+                                 " different clock dt. "
+                                 " Make sure all tables added to Streamer have the same "
+                                 " dt value."
+                               );
             }
         }
     }
@@ -209,12 +209,12 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
         if( tableTick_[i] != tableTick_[0] )
         {
             LOG( moose::warning
-                    , "Table " << tableIds_[i].path()
-                    << " has tick (dt) which is different than the first table."
-                    << endl
-                    << " Got " << tableTick_[i] << " expected " << tableTick_[0]
-                    << endl << " Disabling this table."
-                    );
+                 , "Table " << tableIds_[i].path()
+                 << " has tick (dt) which is different than the first table."
+                 << endl
+                 << " Got " << tableTick_[i] << " expected " << tableTick_[0]
+                 << endl << " Disabling this table."
+               );
             invalidTables.push_back( i );
         }
     }
@@ -236,7 +236,7 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
     // write now.
     currTime_ = 0.0;
     zipWithTime( );
-    StreamerBase::writeToOutFile(outfilePath_, format_, "w", data_, columns_);
+    StreamerBase::writeToOutFile(outfilePath_, format_, WRITE, data_, columns_);
     data_.clear( );
 }
 
@@ -247,7 +247,7 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
 void Streamer::cleanUp( )
 {
     zipWithTime( );
-    StreamerBase::writeToOutFile( outfilePath_, format_, "a", data_, columns_ );
+    StreamerBase::writeToOutFile( outfilePath_, format_, APPEND, data_, columns_ );
     data_.clear( );
 }
 
@@ -261,7 +261,7 @@ void Streamer::process(const Eref& e, ProcPtr p)
 {
     // LOG( moose::debug, "Writing Streamer data to file." );
     zipWithTime( );
-    StreamerBase::writeToOutFile( outfilePath_, format_, "a", data_, columns_ );
+    StreamerBase::writeToOutFile( outfilePath_, format_, APPEND, data_, columns_ );
     data_.clear();
     numWriteEvents_ += 1;
 }
@@ -284,12 +284,12 @@ void Streamer::addTable( Id table )
     tables_.push_back( t );
     tableTick_.push_back( table.element()->getTick() );
 
-    // NOTE: If user can make sure that names are unique in table, using name is
-    // better than using the full path.
-    if( t->getColumnName().size() > 0 )
-        columns_.push_back( t->getColumnName( ) );
+    // NOTE: Table can also have name. If name is set by User, use the name to
+    // for column name, else use full path of the table.
+    if(t->getColumnName().size() > 0)
+        columns_.push_back(t->getColumnName());
     else
-        columns_.push_back( moose::moosePathToUserPath( table.path() ) );
+        columns_.push_back(table.path());
 }
 
 /**
@@ -355,7 +355,7 @@ size_t Streamer::getNumTables( void ) const
  * @Synopsis  Get number of write events in streamer. Useful for debugging and
  * performance measuerments.
  *
- * @Returns   
+ * @Returns
  */
 /* ----------------------------------------------------------------------------*/
 size_t Streamer::getNumWriteEvents( void ) const
@@ -414,8 +414,8 @@ void Streamer::zipWithTime( )
         {
 #if 0
             LOG( moose::debug
-                    , "Table " << tables_[i]->getName( ) << " is not functional. Filling with zero "
-                    );
+                 , "Table " << tables_[i]->getName( ) << " is not functional. Filling with zero "
+               );
 #endif
             tVec.resize( numEntriesInEachTable, 0 );
         }
