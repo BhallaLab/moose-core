@@ -7,7 +7,7 @@ __credits__          = ["NCBS Bangalore"]
 __license__          = "GNU GPL"
 __version__          = "1.0.0"
 __maintainer__       = "Harsha Rani"
-__email__            = "hrani@ncbs.ees.in"
+__email__            = "hrani@ncbs.res.in"
 __status__           = "Development"
 __updated__          = "Jan 08 2020"
 #Jan 8: added a line to add compartment info
