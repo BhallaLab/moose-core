@@ -110,7 +110,7 @@ def almostEq( a, b ):
     #print a, b, (a-b)/(a+b)
     return abs(a-b)/(a+b) < 5e-5
 
-def main( standalone = False ):
+def test_xchan( standalone = False ):
     runtime = 100
     displayInterval = 2
     makeModel()
@@ -149,4 +149,4 @@ def main( standalone = False ):
 
 # Run the 'main' if this script is executed standalone.
 if __name__ == '__main__':
-	main( standalone = True )
+    test_xchan( standalone = True )

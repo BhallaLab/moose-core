@@ -18,8 +18,11 @@ import moose
 print( '[INFO] Using moose from %s' % moose.__file__ )
 print( '[INFO] Version : %s' % moose.version( ) )
 
-def main( ):
+def test_doc( ):
     moose.doc( 'Compartment' )
+
+def main():
+    test_doc()
 
 if __name__ == '__main__':
     main()

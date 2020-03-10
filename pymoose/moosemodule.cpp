@@ -21,10 +21,6 @@
 #include <thread>
 #include <exception>
 
-#if USE_BOOST_ODE
-#include <boost/format.hpp>
-#endif
-
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
@@ -45,51 +41,9 @@
 
 using namespace std;
 
-#ifdef DO_UNIT_TESTS
 
-extern void testSync();
-extern void testAsync();
-
-extern void testSyncArray(
-    unsigned int size,
-    unsigned int numThreads,
-    unsigned int method
-);
-
-extern void testShell();
-extern void testScheduling();
-extern void testSchedulingProcess();
-extern void testBuiltins();
-extern void testBuiltinsProcess();
-
-extern void testMpiScheduling();
-extern void testMpiBuiltins();
-extern void testMpiShell();
-extern void testMsg();
-extern void testMpiMsg();
-extern void testKinetics();
-
-#endif
-
-extern void mpiTests();
-extern void processTests( Shell* );
-extern void nonMpiTests(Shell *);
-extern void test_moosemodule();
-
-
-extern Id init(
-    int argc, char ** argv, bool& doUnitTests
-    , bool& doRegressionTests, unsigned int& benchmark
-);
-
+extern Id init( int argc, char ** argv, bool& doUnitTests);
 extern void initMsgManagers();
-extern void destroyMsgManagers();
-
-extern void speedTestMultiNodeIntFireNetwork(
-    unsigned int size, unsigned int runsteps
-);
-
-extern void mooseBenchmarks( unsigned int option );
 
 /*-----------------------------------------------------------------------------
  *  Random number generator for this module.
@@ -184,18 +138,11 @@ extern PyTypeObject moose_DestField;
 extern PyTypeObject moose_LookupField;
 extern PyTypeObject moose_ElementField;
 
-/////////////////////////////////////////////////////////////////
 // Module globals
-/////////////////////////////////////////////////////////////////
-int verbosity = 1;
-// static int isSingleThreaded = 0;
+int verbosity = 0;
 static int isInfinite = 0;
 static unsigned int numNodes = 1;
-// static unsigned int numCores = 1;
-// static unsigned int myNode = 0;
-// static unsigned int numProcessThreads = 0;
 static int doUnitTests = 0;
-static int doRegressionTests = 0;
 static int quitFlag = 0;
 
 /**
@@ -941,11 +888,6 @@ vector <string> setup_runtime_env()
     {
         istringstream(it->second) >> doUnitTests;
     }
-    it = argmap.find("DOREGRESSIONTESTS");
-    if (it != argmap.end())
-    {
-        istringstream(it->second) >> doRegressionTests;
-    }
 
     if (verbosity > 0)
     {
@@ -957,7 +899,6 @@ vector <string> setup_runtime_env()
              // << "   NUMPTHREADS = " << numProcessThreads << endl
              << "   VERBOSITY = " << verbosity << endl
              << "   DOUNITTESTS = " << doUnitTests << endl
-             << "   DOREGRESSIONTESTS = " << doRegressionTests << endl
              << "========================================" << endl;
     }
     return args;
@@ -973,20 +914,12 @@ Id getShell(int argc, char ** argv)
 {
     static int inited = 0;
     if (inited)
-    {
         return Id(0);
-    }
-    bool dounit = doUnitTests != 0;
-    bool doregress = doRegressionTests != 0;
-    unsigned int doBenchmark = 0;
-    // Utilize the main::init function which has friend access to Id
-    Id shellId = init(argc, argv, dounit, doregress, doBenchmark );
+
+    bool dounit = false;
+    Id shellId = init(argc, argv, dounit); 
     inited = 1;
     Shell * shellPtr = reinterpret_cast<Shell*>(shellId.eref().data());
-    if (dounit)
-    {
-        nonMpiTests( shellPtr ); // These tests do not need the process loop.
-    }
     if ( shellPtr->myNode() == 0 )
     {
         if ( Shell::numNodes() > 1 )
@@ -997,24 +930,9 @@ Id getShell(int argc, char ** argv)
             shellPtr->doUseClock( "/postmaster", "process", 9 );
             shellPtr->doSetClock( 9, 1.0 ); // Use a sensible default.
         }
-#ifdef DO_UNIT_TESTS
-        if ( dounit )
-        {
-            mpiTests();
-            processTests( shellPtr );
-        }
-        // if ( doRegressionTests ) regressionTests();
-#endif
-        // These are outside unit tests because they happen in optimized
-        // mode, using a command-line argument. As soon as they are done
-        // the system quits, in order to estimate timing.
-        if ( doBenchmark != 0 )
-        {
-            mooseBenchmarks( doBenchmark );
-        }
     }
     return shellId;
-} //! create_shell()
+} 
 
 /**
    Clean up after yourself.
@@ -3114,26 +3032,6 @@ PyMODINIT_FUNC MODINIT(_moose)
 {
     clock_t modinit_start = clock();
 
-    //PyGILState_STATE gstate;
-    //gstate = PyGILState_Ensure();
-
-    // First of all create the Shell.  We convert the environment
-    // variables into c-like argv array
-    vector<string> args = setup_runtime_env();
-    int argc = args.size();
-    char ** argv = (char**)calloc(args.size(), sizeof(char*));
-    for (int ii = 0; ii < argc; ++ii)
-    {
-        argv[ii] = (char*)(calloc(args[ii].length()+1, sizeof(char)));
-        strncpy(argv[ii], args[ii].c_str(), args[ii].length()+1);
-    }
-
-    // Should not call. No pthreads now. PyEval_InitThreads();
-    Id shellId = getShell(argc, argv);
-    for (int ii = 1; ii < argc; ++ii)
-    {
-        free(argv[ii]);
-    }
     // Now initialize the module
 #ifdef PY3K
     PyObject * moose_module = PyModule_Create(&MooseModuleDef);
@@ -3250,8 +3148,6 @@ PyMODINIT_FUNC MODINIT(_moose)
          << (modinit_end - modinit_start) * 1.0 /CLOCKS_PER_SEC
        );
 
-    if (doUnitTests)
-        test_moosemodule();
 #ifdef PY3K
     return moose_module;
 #endif

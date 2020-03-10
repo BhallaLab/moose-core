@@ -18,7 +18,9 @@
 ##########################################################################
 from __future__ import print_function, absolute_import, division
 
+# FIXME: Deprecated since 3.4
 import imp
+
 import os
 import moose
 import numpy as np

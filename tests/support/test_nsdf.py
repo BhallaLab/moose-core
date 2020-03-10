@@ -80,12 +80,12 @@ crossing times as Event data. '''
                                                                          t_lead.fieldIndex)
     nsdf.stringAttr[eventDataPath] = 's'
 
-if __name__ == '__main__':
+def test_nsdf():
     try:
         setup_model()
     except AttributeError as e:
         print( 'This MOOSE is not compiled with NSDF support' )
-        quit(0)
+        return 0
     except Exception as e:
         raise e
     # Very basic tests
@@ -97,3 +97,9 @@ if __name__ == '__main__':
 
     data = np.loadtxt( nsdfFile )
     assert len(data) == 4, "Expected 4 entries"
+
+def main():
+    test_nsdf()
+
+if __name__ == '__main__':
+    main()

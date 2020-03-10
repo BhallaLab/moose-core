@@ -84,23 +84,22 @@ def makeModel():
     plot1 = moose.Table2( '/model/plot1' )
     plot2 = moose.Table2( '/model/plot2' )
     plot3 = moose.Table2( '/model/plot3' )
-    moose.connect( '/model/plot1', 'requestOut', u, 'getN' )
-    moose.connect( '/model/plot2', 'requestOut', et, 'getN' )
-    moose.connect( '/model/plot3', 'requestOut', es, 'getN' )
+    moose.connect( plot1, 'requestOut', u, 'getN' )
+    moose.connect( plot2, 'requestOut', et, 'getN' )
+    moose.connect( plot3, 'requestOut', es, 'getN' )
     plot4 = moose.Table2( '/model/plot4' )
     plot5 = moose.Table2( '/model/plot5' )
     plot6 = moose.Table2( '/model/plot6' )
-    moose.connect( '/model/plot4', 'requestOut', u, 'getConc' )
-    moose.connect( '/model/plot5', 'requestOut', et, 'getConc' )
-    moose.connect( '/model/plot6', 'requestOut', es, 'getConc' )
+    moose.connect( plot4, 'requestOut', u, 'getConc' )
+    moose.connect( plot5, 'requestOut', et, 'getConc' )
+    moose.connect( plot6, 'requestOut', es, 'getConc' )
 
 def almostEq( a, b ):
     #print a, b, (a-b)/(a+b)
     return abs(a-b)/(a+b) < 5e-5
 
-def main( standalone = False ):
+def test_xreacs7():
     runtime = 100
-    displayInterval = 2
     makeModel()
     moose.reinit()
     moose.start( runtime )
@@ -111,4 +110,4 @@ def main( standalone = False ):
 
 # Run the 'main' if this script is executed standalone.
 if __name__ == '__main__':
-	main( standalone = True )
+    test_xreacs7()

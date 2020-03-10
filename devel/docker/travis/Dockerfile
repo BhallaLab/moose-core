@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:18.04
 MAINTAINER Dilawar Singh <dilawars@ncbs.res.in>
 
 ENV DEBIAN_FRONTEND=noninteractive

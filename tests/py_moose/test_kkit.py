@@ -7,7 +7,7 @@ import moose
 scriptdir = os.path.dirname(os.path.realpath(__file__))
 print('Script dir %s' % scriptdir)
 
-def main():
+def test_kkit():
     """This example illustrates loading, running, and saving a kinetic model
         defined in kkit format. It uses a default kkit model but you can
         specify another using the command line ``python filename runtime
@@ -31,6 +31,8 @@ def main():
     assert numpy.allclose(stats, expected,
                           rtol=1e-4), 'Got %s expected %s' % (stats, expected)
 
+def main():
+    test_kkit()
 
 # Run the 'main' if this script is executed standalone.
 if __name__ == '__main__':

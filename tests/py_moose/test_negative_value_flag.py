@@ -14,7 +14,7 @@ import os
 scriptDir = os.path.dirname(os.path.realpath(__file__))
 
 
-def main():
+def test_neg_value_flag():
     """
     This example illustrates loading, running, and saving a kinetic
     model defined in kkit format. It uses a default kkit model but
@@ -24,18 +24,12 @@ def main():
     The model already defines a couple of plots and sets the runtime 20 secs.
     """
 
+    global scriptDir
+
     solver = "gsl"  # Pick any of gsl, gssa, ee..
     mfile = os.path.join(scriptDir, '..', 'data', 'acc11.g')
+    assert os.path.isfile(mfile)
     runtime = 1000.0
-    if (len(sys.argv) >= 3):
-        if sys.argv[1][0] == '/':
-            mfile = sys.argv[1]
-        else:
-            mfile = sys.argv[1]
-            runtime = float(sys.argv[2])
-    if (len(sys.argv) == 4):
-        solver = sys.argv[3]
-
     modelId = moose.loadModel(mfile, 'model')
     moose.mooseAddChemSolver('model', solver)
     moose.element('/model/kinetics/neuroNOS/nNOS.arg').concInit = 0.1
@@ -68,6 +62,8 @@ def main():
             assert oneValIsBelowZero, "No value is negative: %s" % allVals
         assert x.vector.size in [0, 10001], x.vector.size
 
+def main():
+    test_neg_value_flag()
 
 if __name__ == '__main__':
     main()

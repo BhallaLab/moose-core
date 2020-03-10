@@ -78,9 +78,8 @@ def makeModel():
 def almostEq( a, b ):
     return abs(a-b)/(a+b) < 5e-5
 
-def main( standalone = False ):
+def test_xreac4():
     runtime = 200
-    displayInterval = 2
     makeModel()
     moose.reinit()
     moose.start( runtime )
@@ -88,7 +87,8 @@ def main( standalone = False ):
         moose.element( '/model/endo/s' ).conc ) )
     moose.delete( '/model' )
 
+def main():
+    test_xreac4()
 
-# Run the 'main' if this script is executed standalone.
 if __name__ == '__main__':
-    main( standalone = True )
+    main()

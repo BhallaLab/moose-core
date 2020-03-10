@@ -10,7 +10,7 @@ def printCompt(compt):
     print( 'x0=%s, x1=%s, diffLength=%s, numDiffCompt=%d' % (compt.x0, compt.x1,
         compt.diffLength, compt.numDiffCompts))
 
-def main( nT ):
+def test_gsolve_paralllel(nT=4):
     """
     This example implements a reaction-diffusion like system which is
     bistable and propagates losslessly. It is based on the NEURON example 
@@ -89,6 +89,9 @@ def main( nT ):
             , (1.997, 2.0, 1.0, 1997.0) ]
     print("Time = ", time.time() - t1)
     assert np.isclose(res, expected, atol=1, rtol=1).all(), "Got %s, expected %s" % (res, expected)
+
+def main(nT):
+    test_gsolve_paralllel(nT)
 
 if __name__ == '__main__':
     import sys

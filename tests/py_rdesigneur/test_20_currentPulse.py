@@ -12,7 +12,18 @@ expected = (-0.051693861353435865, 0.004062563722923687
                 -0.05545587, -0.05354704, -0.05163822, -0.04972939, -0.04782056,
                 -0.04591174]))
 
-def test():
+def test_msgs():
+    if moose.exists('/model'):
+        moose.delete('/model')
+    rdes = rd.rdesigneur(
+        stimList = [['soma', '1', '.', 'inject', '(t>0.1 && t<0.2) * 2e-8' ]],
+        plotList = [['soma', '1', '.', 'Vm', 'Soma membrane potential']]
+    )
+    rdes.buildModel()
+    msgs = moose.listmsg(rdes.soma)
+    assert len(msgs) == 3, msgs
+
+def test_current_pulse():
     """Test current pulse.
     """
     rdes = rd.rdesigneur(
@@ -30,7 +41,8 @@ def test():
     assert np.allclose(ys, expected[1])
     assert np.allclose(X[0], expected[2])
     assert np.allclose(X[1], expected[3])
-    print('Test is done')
+
 
 if __name__ == '__main__':
-    test()
+    test_current_pulse()
+    test_msgs()

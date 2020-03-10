@@ -15,7 +15,7 @@ import numpy as np
 import moose
 print( "[INFO ] Using moose from %s" % moose.__file__ )
 
-def main():
+def test_SS_solver():
     compartment = makeModel()
     ksolve = moose.Ksolve( '/model/compartment/ksolve' )
     stoich = moose.Stoich( '/model/compartment/stoich' )
@@ -88,7 +88,6 @@ def main():
     expected = 0.216, 0.03752
     assert np.isclose(got, expected, atol = 1e-4).all(), "Got %s, expected %s" % (got, expected)
     print( "[INFO ] Test 3 PASSED" )
-    quit()
 
 def makeModel():
     """ This function creates a bistable reaction system using explicit
@@ -146,6 +145,9 @@ def makeModel():
     reac.Kb = 0.01
 
     return compartment
+
+def main():
+    test_SS_solver()
 
 # Run the 'main' if this script is executed standalone.
 if __name__ == '__main__':

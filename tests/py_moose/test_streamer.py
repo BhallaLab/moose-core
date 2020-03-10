@@ -25,7 +25,7 @@ print('[INFO] Using moose form %s' % moose.__file__)
 all_done_ = False
 
 # Poll the file to see that we are really writing to it.
-def sanity_test( ):
+def test_sanity( ):
     a = moose.Table( '/t1' )
     b = moose.Table( '/t1/t1' )
     c = moose.Table( '/t1/t1/t1' )
@@ -66,7 +66,7 @@ def sanity_test( ):
     st.removeTables( [a, a, c] )
     assert st.numTables == 1
 
-def test( ):
+def test_streamer( ):
     compt = moose.CubeMesh( '/compt' )
     assert compt
     r = moose.Reac( '/compt/r' )
@@ -127,10 +127,9 @@ def test( ):
     return 0
 
 def main( ):
-    sanity_test( )
-    test( )
+    test_sanity( )
+    test_streamer( )
     print( '[INFO] All tests passed' )
-
 
 if __name__ == '__main__':
     main()

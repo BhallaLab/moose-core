@@ -14,7 +14,7 @@ import numpy as np
 
 moose.seed( 10 )
 
-def main():
+def test_GB2012_STDP():
     """
     Simulate a pseudo-STDP protocol and plot the STDP kernel
     that emerges from Ca plasticity of Graupner and Brunel 2012.
@@ -221,6 +221,9 @@ def main():
     got = (up, sp)
     expNew = (0.014485615086785508, 0.16206703949072981)
     assert np.isclose(got, expNew).all(), 'Expected: %s, Got: %s' % (str(expNew), str(got))
+
+def main():
+    test_GB2012_STDP()
 
 if __name__ == '__main__':
     main()

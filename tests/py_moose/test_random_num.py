@@ -19,9 +19,9 @@ try:
     reload
 except NameError:
     # Python 3
-    from imp import reload
+    from importlib import reload
 
-def unequal():
+def test_unequal():
     rand1, rand2 = [], []
     N = 10
     for i in range( N ):
@@ -34,7 +34,7 @@ def unequal():
 
     assert not np.equal( rand1, rand2 ).all()
 
-def equal():
+def test_equal():
     rand1, rand2 = [], []
     N = 10
     moose.seed( 10 )
@@ -51,8 +51,8 @@ def equal():
     assert np.equal( rand1, rand2 ).all()
 
 def main( ):
-    unequal()
-    equal()
+    test_unequal()
+    test_equal()
 
 if __name__ == '__main__':
     main()

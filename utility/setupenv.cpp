@@ -76,11 +76,6 @@ const map<string, string>& getArgMap()
         {
             argmap.insert(pair<string, string>("DOUNITTESTS", string(doUnitTests)));
         } 
-        char * doRegressionTests = getenv("DOREGRESSIONTESTS");
-        if (doRegressionTests != NULL)
-        {
-            argmap.insert(pair<string, string>("DOREGRESSIONTESTS", string(doRegressionTests)));
-        } 
     }
     return argmap;
 }

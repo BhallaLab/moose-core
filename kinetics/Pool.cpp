@@ -204,7 +204,7 @@ void Pool::vSetConcInit( const Eref& e, double c )
 
 void Pool::vSetDiffConst( const Eref& e, double v )
 {
-    if(! isnan(v))
+    if(! std::isnan(v))
         diffConst_ = v;
     else
         moose::showWarn("Trying to assign non-numeric value:"  + to_string(v) + ".  Ignored!");

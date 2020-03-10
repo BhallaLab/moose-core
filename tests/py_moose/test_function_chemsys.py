@@ -339,8 +339,14 @@ def run():
         print('doty',  doty )
     print( '[INFO] Run is over')
 
-if __name__ == '__main__':
+def test_function_chemsys():
     moose.Neutral( '/library' )
     moose.Neutral( '/model' )
     run()
     print( 'All done' )
+
+def main():
+    test_function_chemsys()
+
+if __name__ == '__main__':
+    main()

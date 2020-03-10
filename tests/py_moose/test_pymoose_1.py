@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
+from __future__ import print_function, division, absolute_import
+
 import sys
-try:
-    import unittest2 as unittest
-except:
-    import unittest
+import unittest
 import uuid
 import platform
 
@@ -12,6 +10,7 @@ import moose
 
 class TestVec(unittest.TestCase):
     """Test pymoose basics"""
+
     def testCreate(self):
         em = moose.vec('/test', 10, 0, 'Neutral')
         self.assertEqual(em.path, '/test')
@@ -114,9 +113,6 @@ class TestNeutral1(unittest.TestCase):
     def testName(self):
         self.assertEqual(self.b.name, 'b')
 
-    def testPathEndingWithSlash(self):
-        self.assertRaises(ValueError, moose.Neutral, 'test/')
-
     def testNonExistentPath(self):
         self.assertRaises(ValueError, moose.Neutral, '/nonexistent_parent/invalid_child')
 
@@ -161,7 +157,7 @@ class TestNeutral1(unittest.TestCase):
 class TestWildcardFind(unittest.TestCase):
     def setUp(self):
         self.x = moose.Neutral('/x', 10)
-        self.y = moose.IntFire('/x[5]/y', 10)
+        self.y = moose.IntFire('/x[5]/y', 10) 
         self.z = moose.PulseGen('/x[5]/z', 3)
         self.u = moose.IntFire('/x[5]/z[2]/u', 10)
 
@@ -212,9 +208,9 @@ class TestMessages(unittest.TestCase):
             destFieldsOnE2 = outmsgs_src[ii].getField('destFieldsOnE2')
             self.assertEqual(destFieldsOnE2[0], 'handleRaxial')
         print('OK')
-
+        print('Testing delete ...')
     def testDelete(self):
-        print('Testing delete ...', end=' ')
+        print('Testing delete ...')
         msg = self.src1.connect('raxial', self.dest1, 'axial')
         src2 = moose.PulseGen('/pulsegen')
         msg2 = moose.connect(src2, 'output', self.dest1, 'injectMsg')

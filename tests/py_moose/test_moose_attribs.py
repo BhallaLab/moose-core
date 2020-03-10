@@ -33,35 +33,33 @@ attribs = ['AdExIF', 'AdThreshIF', 'Adaptor', 'Annotator', 'Arith', 'BufPool',
         'Reac', 'ReacBase', 'SBML', 'STDPSynHandler', 'STDPSynapse',
         'SeqSynHandler', 'Shell', 'SimpleSynHandler', 'SingleMsg', 'SparseMsg',
         'Species', 'SpikeGen', 'SpikeStats', 'Spine', 'SpineMesh', 'Stats',
-        'SteadyState', 'StimulusTable', 'Stoich', 'Streamer', 'StringIO',
+        'SteadyState', 'StimulusTable', 'Stoich', 'Streamer',
         'SymCompartment', 'SynChan', 'SynHandlerBase', 'Synapse', 'Table',
         'Table2', 'TableBase', 'TimeTable', 'VClamp', 'VERSION', 'Variable',
         'VectorTable', 'ZombieBufPool', 'ZombieCaConc', 'ZombieCompartment',
         'ZombieEnz', 'ZombieFunction', 'ZombieHHChannel', 'ZombieMMenz',
         'ZombiePool', 'ZombieReac', '_moose', 
-        'append_finfodocs', 'ce', 'chemMerge',
+        'ce', 'chemMerge',
         'chemUtil', 'closing', 'connect', 'copy', 'delete', 'division', 'doc',
         'element', 'exists', 'finfotypes', 'fixXreacs', 'genesis', 'getCwe',
-        'getField', 'getFieldDict', 'getFieldNames', 'getfielddoc',
-        'getmoosedoc', 'isRunning', 
+        'getField', 'getFieldDict', 'getFieldNames', 'getFieldDoc', 'isRunning', 
         'le', 'listmsg', 'loadModelInternal', 'melement',
         'mergeChemModel', 'moose',
         'mooseAddChemSolver', 'mooseDeleteChemSolver', 'mooseReadNML2',
         'mooseReadSBML', 'mooseWriteKkit', 'mooseWriteNML2', 'mooseWriteSBML',
-        'moose_constants', 'moose_test', 'move',
-        'nml2Import_', 'pager', 'print_utils',
+        'moose_constants', 'moose_test', 'move', 'nml2Import_', 'print_utils',
         'pwe', 'pydoc', 'rand', 'reinit', 
         'seed', 'setClock', 'setCwe', 'showfield',
         'showfields', 'showmsg', 'start', 'stop', 'syncDataHandler',
-        'test', 'testSched', 'toUnicode', 'useClock', 'utils', 'vec', 'version',
+        'test', 'testSched', 'useClock', 'utils', 'vec', 'version',
         'warnings', 'wildcardFind']
 
-def main():
+def test_attribs():
     global attribs
     for at in attribs:
         print( "\tTesting for attrib %s" % at )
         assert hasattr( moose, at ), 'Attrib %s not found' % at 
 
 if __name__ == '__main__':
-    main()
+    test_attribs()
 

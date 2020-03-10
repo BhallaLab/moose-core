@@ -12,11 +12,8 @@ __maintainer__       = "Dilawar Singh"
 __email__            = "dilawars@ncbs.res.in"
 __status__           = "Development"
 
-import sys
 import os
-
 import moose
-import moose.utils as mu
 
 print( 'Using moose form %s' % moose.__file__ )
 print( '\t Moose version %s' % moose.version( ) )
@@ -24,19 +21,23 @@ print( '\t Moose version %s' % moose.version( ) )
 # the model lives in the same directory as the test script
 sdir_ = os.path.dirname( os.path.realpath( __file__ ) )
 
-def main():
+def test_sbml():
     modelname = os.path.join(sdir_, '..', 'data', '00001-sbml-l3v1.xml')
     model = moose.mooseReadSBML( modelname, '/sbml' )
-    c = moose.element('/clock')
+    if not model:
+        print("Most likely python-libsbml is not installed.")
+        return 0
     moose.reinit()
     moose.start(200)
-    check(  )
-
-def check( ):
     # TODO: Add more tests here.
     p = moose.wildcardFind( '/sbml/##' )
+    assert len(p) == 8
+    names = ['compartment', 'mesh', 'S1', 'info', 'S2', 'info', 'reaction1']
     for x in p:
-        print( x )
+        assert x.name in names
+
+def main():
+    test_sbml()
 
 if __name__ == '__main__':
     main()

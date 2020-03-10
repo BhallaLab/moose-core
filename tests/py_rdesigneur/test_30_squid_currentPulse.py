@@ -4,9 +4,9 @@ import numpy as np
 import moose
 import rdesigneur as rd
 
-def test():
+def test_current_pulse_squid():
     """Test current pulse.
-    >>> test()
+    >>> test_current_pulse_squid()
     Rdesigneur: Elec model has 1 compartments and 0 spines on 0 compartments.
     [array([-0.065     , -0.06525877, -0.06549723, ..., -0.06676325,
            -0.06676329, -0.06676332])]
@@ -29,4 +29,4 @@ def test():
     return True
 
 if __name__ == '__main__':
-    test()
+    test_current_pulse_squid()

@@ -43,7 +43,7 @@ def switchSolvers( solver ):
             stoich.ksolve = ksolve
             stoich.path = "/model/kinetics/##"
 
-def main():
+def test_switch_solvers():
     """
     At zero order, you can select the solver you want to use within the
     function moose.loadModel( filename, modelpath, solver ).
@@ -138,6 +138,9 @@ def main():
     assert gssa.shape == conc.shape == gsl.shape == ee.shape 
 
     print('all done')
+
+def main():
+    test_switch_solvers()
 
 if __name__ == '__main__':
     main()
