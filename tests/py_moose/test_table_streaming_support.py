@@ -22,7 +22,7 @@ print( '[INFO] Using moose form %s' % moose.__file__ )
 
 def print_table( table ):
     msg = ""
-    msg += " outfile : %s" % table.outfile
+    msg += " datafile : %s" % table.datafile
     msg += " useStreamer: %s" % table.useStreamer
     msg += ' Path: %s' % table.path
     print( msg )
@@ -46,11 +46,12 @@ def test_small( ):
     tabA.format = 'npy'
     tabA.useStreamer = 1   # Setting format alone is not good enough
 
+    # Setting datafile enables streamer.
     tabB = moose.Table2( '/compt/b/tabB' )
-    tabB.outfile = 'table2.npy'
+    tabB.datafile = 'table2.npy'
 
     tabC = moose.Table2( '/compt/c/tabC' )
-    tabC.outfile = 'tablec.csv'
+    tabC.datafile = 'tablec.csv'
 
     moose.connect( tabA, 'requestOut', a, 'getConc' )
     moose.connect( tabB, 'requestOut', b, 'getConc' )
@@ -64,7 +65,7 @@ def test_small( ):
     print( ' MOOSE is done' )
 
     # Now read the numpy and csv and check the results.
-    a = np.loadtxt( '_tables/compt/a/tabA.csv', skiprows=1 )
+    a = np.loadtxt( tabA.datafile, skiprows=1 )
     b = np.load( 'table2.npy' )
     c = np.loadtxt( 'tablec.csv', skiprows=1 )
     assert (len(a) == len(b) == len(c))
@@ -99,25 +100,25 @@ def buildLargeSystem(useStreamer = False):
 
     if useStreamer:
         s = moose.Streamer('/comptB/streamer')
-        s.outfile = 'data2.npy'
+        s.datafile = 'data2.npy'
         print("[INFO ] Total tables %d" % len(tables))
 
         # Add tables using wilcardFind.
-        s.addTables(moose.wildcardFind('/##[TYPE=Table2]'))
+        s.addTables(moose.wildcardFind('/comptB/##[TYPE=Table2]'))
 
         print("Streamer has %d table" % s.numTables)
-        assert s.numTables == len(tables)
+        assert s.numTables == len(tables), (s.numTables, len(tables))
 
     moose.reinit()
     moose.start(10)
 
     if useStreamer:
         # load the data
-        data = np.load(s.outfile)
+        data = np.load(s.datafile)
         header = str(data.dtype.names)
         assert len(header) > 2**16
     else:
-        data = { x.path : x.vector for x in tables }
+        data = { x.columnName : x.vector for x in tables }
     return data
 
 def test_large_system():
@@ -132,7 +133,7 @@ def test_large_system():
     # same column names.
     xNames = list(X.keys())
     yNames = list(Y.dtype.names)
-    assert set(yNames) - set(xNames)  == set(['time'])
+    assert set(yNames) - set(xNames)  == set(['time']), (yNames, xNames)
 
     # Test for equality in some tables.
     for i in range(1, 10):
@@ -142,7 +143,7 @@ def test_large_system():
 
 
 def main( ):
-    # test_small( )
+    test_small( )
     test_large_system()
     print( '[INFO] All tests passed' )
 

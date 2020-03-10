@@ -10,11 +10,7 @@
 #ifndef _TABLE_H
 #define _TABLE_H
 
-
-#if  USE_BOOST_FILESYSTEM
-#include <boost/filesystem.hpp>
-#endif     /* -----  USE_BOOST_FILESYSTEM  ----- */
-#include <fstream>
+using namespace std;
 
 /**
  * Receives and records inputs. Handles plot and spiking data in batch mode.
@@ -46,8 +42,8 @@ public:
     void setUseSpikeMode ( bool status );
     bool getUseSpikeMode ( void ) const;
 
-    void setOutfile ( string outfilepath );
-    string getOutfile ( void ) const;
+    void setDatafile ( string filepath );
+    string getDatafile ( void ) const;
 
     // Access the dt_ of table.
     double getDt ( void ) const;
@@ -88,7 +84,14 @@ private:
 
     vector<double> data_;
     vector<double> tvec_;                       /* time data */
-    vector<string> columns_;                    /* Store the name of tables */
+
+    // A table have 2 columns. First is time. We initialize this in reinit().
+    vector<string> columns_; 
+
+    /**
+     * @brief dt of its clock. Needed for creating time co-ordinates,
+     */
+    double dt_;
 
     // Upto which indices we have read the data. This variable is used when
     // SocketStreamer is used.
@@ -102,45 +105,20 @@ private:
     string tableColumnName_;
 
     /**
-     * @brief If stream is set to true, then stream to outfile_. Default value
-     * of outfile_ is table path starting from `pwd`/_tables_ . On table, set
+     * @brief If stream is set to true, then stream to datafile_. Default value
+     * of datafile_ is table path starting from `pwd`/_tables_ . On table, set
      * streamToFile to true.
      */
     bool useFileStreamer_;
 
-    /**
-     * @brief Table directory into which dump the stream data.
-     */
-    string rootdir_;
-
-    // On Table, set outfile to change this variable. By default it sets to,
+    // On Table, set datafile to change this variable. By default it sets to,
     // `pwd1/_tables_/table.path().
-    string outfile_;
-
-    /**
-     * @brief Wheather or not outfile path is set by user
-     */
-    bool outfileIsSet_;
+    string datafile_;
 
     /**
      * @brief format of data. Default to csv.
      */
     string format_;
-
-    /**
-     * @brief text_ to write.
-     */
-    string text_;
-
-    /**
-     * @brief dt of its clock. Needed for creating time co-ordinates,
-     */
-    double dt_;
-
-    /**
-     * @brief Output stream.
-     */
-    std::ofstream of_;
 
 };
 

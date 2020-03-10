@@ -77,8 +77,7 @@ string Id::path( const string& separator) const
 {
     string ret = Neutral::path( eref() );
 
-#if 0
-    // NOTE/FIXME: Monday 09 March 2020 12:30:27 PM IST, Dilawar Singh
+    // FIXME: Monday 09 March 2020 12:30:27 PM IST, Dilawar Singh
     // This beaks the path comparison. Getting x.path from x returned in a 
     // list by moose.wildcardFind() and getting path from here doesn't math
     // when this is enabled.
@@ -95,7 +94,6 @@ string Id::path( const string& separator) const
             ret = ret.substr( 0, pos );
         }
     }
-#endif 
 
     return ret;
 }

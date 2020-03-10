@@ -10,6 +10,7 @@
 #include "../basecode/header.h"
 #include "../basecode/global.h"
 #include <fstream>
+#include <array>
 
 #include "TableBase.h"
 #include "Table.h"
@@ -64,13 +65,21 @@ const Cinfo* Table::initCinfo()
         , &Table::getUseSpikeMode
     );
 
-    static ValueFinfo< Table, string > outfile(
-        "outfile"
+    static ValueFinfo< Table, string > datafile(
+        "datafile"
         , "Set the name of file to which data is written to. If set, "
         " streaming support is automatically enabled."
-        , &Table::setOutfile
-        , &Table::getOutfile
+        , &Table::setDatafile
+        , &Table::getDatafile
     );
+
+    static ValueFinfo< Table, string > outfile(
+        "outfile"
+        , "Use datafile (deprecated)"
+        , &Table::setDatafile
+        , &Table::getDatafile
+    );
+
 
     static ValueFinfo< Table, string > format(
         "format"
@@ -134,9 +143,10 @@ const Cinfo* Table::initCinfo()
         &threshold,		// Value
         &format,                // Value
         &columnName,            // Value
+        &datafile,              // Value
         &outfile,               // Value
         &useStreamer,           // Value
-        &useSpikeMode,           // Value
+        &useSpikeMode,          // Value
         handleInput(),		// DestFinfo
         &spike,			// DestFinfo
         requestOut(),		// SrcFinfo
@@ -212,14 +222,12 @@ Table::Table() :
     input_( 0.0 ),
     fired_(false),
     useSpikeMode_(false),
-    dt_( 0.0 )
+    dt_( 0.0 ),
+    lastN_(0),
+    useFileStreamer_(false),
+    datafile_(""),
+    format_("csv")
 {
-    // Initialize the directory to which each table should stream.
-    rootdir_ = "_tables";
-    useFileStreamer_ = false;
-    format_ = "csv";
-    outfileIsSet_ = false;
-    lastN_ = 0;
 }
 
 Table::~Table( )
@@ -228,7 +236,8 @@ Table::~Table( )
     if( useFileStreamer_ )
     {
         mergeWithTime( data_ );
-        StreamerBase::writeToOutFile( outfile_, format_, APPEND, data_, columns_ );
+        assert( ! datafile_.empty() );
+        StreamerBase::writeToOutFile( datafile_, format_, APPEND, data_, columns_);
         clearAllVecs();
     }
 }
@@ -269,7 +278,7 @@ void Table::process( const Eref& e, ProcPtr p )
         if( fmod(lastTime_, 5.0) == 0.0 || getVecSize() >= 10000 )
         {
             mergeWithTime( data_ );
-            StreamerBase::writeToOutFile( outfile_, format_, APPEND, data_, columns_ );
+            StreamerBase::writeToOutFile( datafile_, format_, APPEND, data_, columns_ );
             clearAllVecs();
         }
         }
@@ -294,23 +303,25 @@ void Table::reinit( const Eref& e, ProcPtr p )
     unsigned int numTick = e.element()->getTick();
     Clock* clk = reinterpret_cast<Clock*>(Id(1).eref().data());
 
+
     dt_ = clk->getTickDt( numTick );
     fired_ = false;
+
+    // Set column name for this table. It is used in Streamer to generate
+    // column names because path can be pretty verbose and name may not be
+    // unique. This is the default column name.
+    if( tableColumnName_.empty() )
+        tableColumnName_ = moose::moosePathToColumnName(tablePath_);
+
+    columns_ = {"time", tableColumnName_};
 
     /** Create the default filepath for this table.  */
     if( useFileStreamer_ )
     {
-        // The first column is variable time.
-        columns_.push_back( "time" );
-        // And the second column name is the name of the table.
-        columns_.push_back( moose::moosePathToUserPath( tablePath_ ) );
-
         // If user has not set the filepath, then use the table path prefixed
         // with rootdit as path.
-        if( ! outfileIsSet_ )
-            setOutfile( rootdir_ +
-                        moose::moosePathToUserPath(tablePath_) + '.' + format_
-                      );
+        if( datafile_.empty() )
+            setDatafile(moose::moosePathToUserPath(tablePath_) + '.' + format_);
     }
 
     input_ = 0.0;
@@ -332,7 +343,7 @@ void Table::reinit( const Eref& e, ProcPtr p )
     if( useFileStreamer_ )
     {
         mergeWithTime( data_ );
-        StreamerBase::writeToOutFile( outfile_, format_, WRITE, data_, columns_);
+        StreamerBase::writeToOutFile(datafile_, format_, WRITE, data_, columns_);
         clearAllVecs();
     }
 }
@@ -428,25 +439,23 @@ bool Table::getUseSpikeMode( void ) const
 }
 
 
-/*  set/get outfile_ */
-void Table::setOutfile( string outpath )
+/*  set/get datafile_ */
+void Table::setDatafile( string filepath )
 {
-    outfile_ = moose::createMOOSEPath( outpath );
-    if( ! moose::createParentDirs( outfile_ ) )
-        outfile_ = moose::toFilename( outfile_ );
+    datafile_ = moose::createMOOSEPath( filepath );
+    if( ! moose::createParentDirs( datafile_ ) )
+        datafile_ = moose::toFilename( datafile_ );
 
-    outfileIsSet_ = true;
     setUseStreamer( true );
-
     // If possible get the format of file as well.
-    format_ = moose::getExtension( outfile_, true );
+    format_ = moose::getExtension( datafile_, true );
     if( format_.size() == 0 )
         format_ = "csv";
 }
 
-string Table::getOutfile( void ) const
+string Table::getDatafile( void ) const
 {
-    return outfile_;
+    return datafile_;
 }
 
 // Get the dt_ of this table
