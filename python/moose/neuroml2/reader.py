@@ -1,33 +1,28 @@
 # -*- coding: utf-8 -*-
 
+# Description: NeuroML2 reader.
+#     Implementation of reader for NeuroML 2 models.
+#     TODO: handle morphologies of more than one segment...
+#
 # Author: Subhasis Ray, Padraig Gleeson
-# Maintainer: 
+# Maintainer: Dilawar Singh <dilawars@ncbs.res.in>
 # Created: Wed Jul 24 15:55:54 2013 (+0530)
+#
+# Notes: 
+#    For update/log, please see git-blame documentation or browse the github 
+#    repo https://github.com/BhallaLab/moose-core
 
-# Code:
-"""Implementation of reader for NeuroML 2 models.
-
-
-TODO: handle morphologies of more than one segment...
-
-"""
-from __future__ import print_function, division, absolute_import
-
+import os
+import math
 import numpy as np
 from moose.neuroml2.hhfit import exponential2
 from moose.neuroml2.hhfit import sigmoid2
 from moose.neuroml2.hhfit import linoid2
 from moose.neuroml2.units import SI
 import moose
-import logging
-import math
 
-loglevel = logging.DEBUG
-logstream = logging.StreamHandler()
-logstream.setLevel(loglevel)
-logstream.setFormatter(logging.Formatter('%s(asctime)s %(name)s %(filename)s %(funcName)s: %(message)s'))
-logger = logging.getLogger('nml2_reader')
-logger.addHandler(logstream)
+import logging
+logger_ = logging.getLogger('moose.nml2')
 
 try:
     import neuroml as nml
