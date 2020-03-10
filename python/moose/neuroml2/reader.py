@@ -1,48 +1,8 @@
 # -*- coding: utf-8 -*-
-# reader.py ---
-# 
-# Filename: reader.py
-# Description:
+
 # Author: Subhasis Ray, Padraig Gleeson
 # Maintainer: 
 # Created: Wed Jul 24 15:55:54 2013 (+0530)
-# Version: 
-# Last-Updated: 15 Jan 2018
-#           By: pgleeson
-#     Update #: --
-# URL:
-# Keywords:
-# Compatibility:
-#
-#
-
-# Commentary:
-#
-#
-#
-#
-
-# Change log:
-#
-#
-#
-#
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License as
-# published by the Free Software Foundation; either version 3, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program; see the file COPYING.  If not, write to
-# the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-# Floor, Boston, MA 02110-1301, USA.
-#
-#
 
 # Code:
 """Implementation of reader for NeuroML 2 models.
@@ -51,13 +11,8 @@
 TODO: handle morphologies of more than one segment...
 
 """
+from __future__ import print_function, division, absolute_import
 
-from __future__ import print_function
-try:
-    from future_builtins import zip, map
-except ImportError:
-    pass
-import sys, os
 import numpy as np
 from moose.neuroml2.hhfit import exponential2
 from moose.neuroml2.hhfit import sigmoid2
@@ -176,7 +131,7 @@ class NML2Reader(object):
         self.nml_cells_to_moose = {} # NeuroML object to MOOSE object
         self.nml_segs_to_moose = {} # NeuroML object to MOOSE object
         self.nml_chans_to_moose = {} # NeuroML object to MOOSE object
-        self.nml_conc_to_moose = {} # NeuroML object to MOOSE object
+        self.nml_concs_to_moose = {} # NeuroML object to MOOSE object
         self.moose_to_nml = {} # Moose object to NeuroML object
         self.proto_cells = {} # map id to prototype cell in moose
         self.proto_chans = {} # map id to prototype channels in moose
@@ -656,26 +611,16 @@ class NML2Reader(object):
 
     def createDecayingPoolConcentrationModel(self, concModel):
         """Create prototype for concentration model"""        
-        if concModel.name is not None:
+        name = concModel.id
+        if hasattr(concModel, 'name') and concModel.name is not None:
             name = concModel.name
-        else:
-            name = concModel.id
-        ca = moose.CaConc('%s/%s' % (self.lib.path, id))
-        print('11111', concModel.restingConc)
-        print('2222', concModel.decayConstant)
-        print('33333', concModel.shellThickness)
+        ca = moose.CaConc('%s/%s' % (self.lib.path, name))
 
-        ca.CaBasal = SI(concModel.restingConc)
-        ca.tau = SI(concModel.decayConstant)
-        ca.thick = SI(concModel.shellThickness)
+        ca.CaBasal = SI(concModel.resting_conc)
+        ca.tau = SI(concModel.decay_constant)
+        ca.thick = SI(concModel.shell_thickness)
         ca.B = 5.2e-6 # B = 5.2e-6/(Ad) where A is the area of the shell and d is thickness - must divide by shell volume when copying
         self.proto_pools[concModel.id] = ca
         self.nml_concs_to_moose[concModel.id] = ca
         self.moose_to_nml[ca] = concModel
         logger.debug('Created moose element: %s for nml conc %s' % (ca.path, concModel.id))
-
-
-
-
-# 
-# reader.py ends here
