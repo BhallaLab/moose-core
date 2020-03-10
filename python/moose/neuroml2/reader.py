@@ -618,4 +618,4 @@ class NML2Reader(object):
         self.proto_pools[concModel.id] = ca
         self.nml_concs_to_moose[concModel.id] = ca
         self.moose_to_nml[ca] = concModel
-        logger.debug('Created moose element: %s for nml conc %s' % (ca.path, concModel.id))
+        logger_.debug('Created moose element: %s for nml conc %s' % (ca.path, concModel.id))
