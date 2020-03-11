@@ -104,11 +104,6 @@ static int innerFind( const string& path, vector< ObjId >& ret)
     return wildcardRelativeFind( start, names, 0, ret );
 }
 
-/*
-static int wildcardRelativeFind( Id start, const vector< string >& path,
-		unsigned int depth, vector< Id >& ret )
-		*/
-
 /**
  * This is the basic wildcardFind function, working on a single
  * tree. It adds entries into the vector 'ret' with Ids found according

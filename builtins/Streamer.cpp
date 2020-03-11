@@ -21,13 +21,21 @@ const Cinfo* Streamer::initCinfo()
     /*-----------------------------------------------------------------------------
      * Finfos
      *-----------------------------------------------------------------------------*/
-    static ValueFinfo< Streamer, string > outfile(
-        "outfile"
+    static ValueFinfo< Streamer, string > datafile(
+        "datafile"
         , "File/stream to write table data to. Default is is __moose_tables__.dat.n"
         " By default, this object writes data every second \n"
-        , &Streamer::setOutFilepath
-        , &Streamer::getOutFilepath
+        , &Streamer::setDatafilePath
+        , &Streamer::getDatafilePath
     );
+
+    static ValueFinfo< Streamer, string > outfile(
+        "outfile"
+        , "Use datafile (deprecated)"
+        , &Streamer::setDatafilePath
+        , &Streamer::getDatafilePath
+    );
+
 
     static ValueFinfo< Streamer, string > format(
         "format"
@@ -104,7 +112,7 @@ const Cinfo* Streamer::initCinfo()
 
     static Finfo * tableStreamFinfos[] =
     {
-        &outfile, &format, &proc, &numTables, &numWriteEvents
+        &datafile, &outfile, &format, &proc, &numTables, &numWriteEvents
     };
 
     static string doc[] =
@@ -185,10 +193,10 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
             if( tick != tableDt_[0] )
             {
                 moose::showWarn( "Table " + tableIds_[i].path() + " has "
-                        " different clock dt. "
-                        " Make sure all tables added to Streamer have the same "
-                        " dt value."
-                        );
+                                 " different clock dt. "
+                                 " Make sure all tables added to Streamer have the same "
+                                 " dt value."
+                               );
             }
         }
     }
@@ -209,12 +217,12 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
         if( tableTick_[i] != tableTick_[0] )
         {
             LOG( moose::warning
-                    , "Table " << tableIds_[i].path()
-                    << " has tick (dt) which is different than the first table."
-                    << endl
-                    << " Got " << tableTick_[i] << " expected " << tableTick_[0]
-                    << endl << " Disabling this table."
-                    );
+                 , "Table " << tableIds_[i].path()
+                 << " has tick (dt) which is different than the first table."
+                 << endl
+                 << " Got " << tableTick_[i] << " expected " << tableTick_[0]
+                 << endl << " Disabling this table."
+               );
             invalidTables.push_back( i );
         }
     }
@@ -229,14 +237,14 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
     if( ! isOutfilePathSet_ )
     {
         string defaultPath = "_tables/" + moose::moosePathToUserPath( e.id().path() );
-        setOutFilepath( defaultPath );
+        setDatafilePath( defaultPath );
     }
 
     // Prepare data. Add columns names and write whatever values are available
     // write now.
     currTime_ = 0.0;
     zipWithTime( );
-    StreamerBase::writeToOutFile(outfilePath_, format_, "w", data_, columns_);
+    StreamerBase::writeToOutFile(datafilePath_, format_, WRITE, data_, columns_);
     data_.clear( );
 }
 
@@ -247,7 +255,7 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
 void Streamer::cleanUp( )
 {
     zipWithTime( );
-    StreamerBase::writeToOutFile( outfilePath_, format_, "a", data_, columns_ );
+    StreamerBase::writeToOutFile( datafilePath_, format_, APPEND, data_, columns_ );
     data_.clear( );
 }
 
@@ -261,7 +269,7 @@ void Streamer::process(const Eref& e, ProcPtr p)
 {
     // LOG( moose::debug, "Writing Streamer data to file." );
     zipWithTime( );
-    StreamerBase::writeToOutFile( outfilePath_, format_, "a", data_, columns_ );
+    StreamerBase::writeToOutFile( datafilePath_, format_, APPEND, data_, columns_ );
     data_.clear();
     numWriteEvents_ += 1;
 }
@@ -284,12 +292,13 @@ void Streamer::addTable( Id table )
     tables_.push_back( t );
     tableTick_.push_back( table.element()->getTick() );
 
-    // NOTE: If user can make sure that names are unique in table, using name is
-    // better than using the full path.
-    if( t->getColumnName().size() > 0 )
-        columns_.push_back( t->getColumnName( ) );
+    // NOTE: Table can also have name. If name is set by User, use the name to
+    // for column name, else use modify the table path to generate a suitable
+    // column name.
+    if(t->getColumnName().size() > 0)
+        columns_.push_back(t->getColumnName());
     else
-        columns_.push_back( moose::moosePathToUserPath( table.path() ) );
+        columns_.push_back(moose::moosePathToColumnName(table.path()));
 }
 
 /**
@@ -355,7 +364,7 @@ size_t Streamer::getNumTables( void ) const
  * @Synopsis  Get number of write events in streamer. Useful for debugging and
  * performance measuerments.
  *
- * @Returns   
+ * @Returns
  */
 /* ----------------------------------------------------------------------------*/
 size_t Streamer::getNumWriteEvents( void ) const
@@ -364,19 +373,19 @@ size_t Streamer::getNumWriteEvents( void ) const
 }
 
 
-string Streamer::getOutFilepath( void ) const
+string Streamer::getDatafilePath( void ) const
 {
-    return outfilePath_;
+    return datafilePath_;
 }
 
-void Streamer::setOutFilepath( string filepath )
+void Streamer::setDatafilePath( string filepath )
 {
-    outfilePath_ = filepath;
+    datafilePath_ = filepath;
     isOutfilePathSet_ = true;
     if( ! moose::createParentDirs( filepath ) )
-        outfilePath_ = moose::toFilename( outfilePath_ );
+        datafilePath_ = moose::toFilename( datafilePath_ );
 
-    string format = moose::getExtension( outfilePath_, true );
+    string format = moose::getExtension( datafilePath_, true );
     if( format.size() > 0)
         setFormat( format );
     else
@@ -414,8 +423,8 @@ void Streamer::zipWithTime( )
         {
 #if 0
             LOG( moose::debug
-                    , "Table " << tables_[i]->getName( ) << " is not functional. Filling with zero "
-                    );
+                 , "Table " << tables_[i]->getName( ) << " is not functional. Filling with zero "
+               );
 #endif
             tVec.resize( numEntriesInEachTable, 0 );
         }

@@ -66,7 +66,9 @@ def test_sanity( ):
     st.removeTables( [a, a, c] )
     assert st.numTables == 1
 
-def test_streamer( ):
+def buildSystem(outfile):
+    if moose.exists('/compt'):
+        moose.delete('/compt')
     compt = moose.CubeMesh( '/compt' )
     assert compt
     r = moose.Reac( '/compt/r' )
@@ -81,10 +83,6 @@ def test_streamer( ):
     moose.connect( r, 'prd', c, 'reac' )
     r.Kf = 0.1
     r.Kb = 0.01
-
-    outfile = 'streamer_test.csv'
-    if os.path.exists(outfile):
-        os.remove(outfile)
 
     tabA = moose.Table2( '/compt/a/tab' )
     tabB = moose.Table2( '/compt/tabB' )
@@ -103,33 +101,28 @@ def test_streamer( ):
     st.addTable( tabA )
     st.addTables( [ tabB, tabC ] )
     assert st.numTables == 3
+    return st
 
+def test_abit_more():
+    stCSV = buildSystem('data.csv')
     moose.reinit( )
-    t = 100
-    print( '[INFO] Running for %d seconds' % t )
-    moose.start(t)
-    outfile = st.outfile
-    moose.quit() # Otherwise Streamer won't flush the rest of entries.
+    moose.start(100)
+    csvData = np.loadtxt(stCSV.outfile, skiprows=1)
 
-    print('Moose is done. Waiting for monitor to shut down...')
+    stNumpy = buildSystem('data.npy')
+    moose.reinit()
+    moose.start(100)
+    npData = np.load(stNumpy.outfile)
 
-    # Now read the table and verify that we have written
-    print( '[INFO] Reading file %s' % outfile )
-    if 'csv' in outfile:
-        data = np.loadtxt(outfile, skiprows=1 )
-    else:
-        data = np.load( outfile )
-    # Total rows should be 58 (counting zero as well).
-    #  print(data)
-    # print( data.dtype )
-    assert data.shape >= (101,), data.shape
-    print( '[INFO] Test 2 passed' )
-    return 0
+    assert csvData.shape[0] == npData.shape[0], npData.shape
+    assert csvData.shape[1] == len(npData.dtype)   # cols
+
+    for i, name in enumerate(npData.dtype.names):
+        assert (csvData[:,i] == npData[name]).all()
 
 def main( ):
     test_sanity( )
-    test_streamer( )
-    print( '[INFO] All tests passed' )
+    test_abit_more( )
 
 if __name__ == '__main__':
     main()

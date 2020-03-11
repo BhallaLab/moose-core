@@ -4,25 +4,21 @@ from __future__ import print_function, division, absolute_import
 # Description: NeuroML2 reader.
 #     Implementation of reader for NeuroML 2 models.
 #     TODO: handle morphologies of more than one segment...
+#
 # Author: Subhasis Ray, Padraig Gleeson
-# Maintainer:  Dilawar Singh <dilawars@ncbs.res.in>
+# Maintainer: Dilawar Singh <dilawars@ncbs.res.in>
 # Created: Wed Jul 24 15:55:54 2013 (+0530)
+#
 # Notes: 
 #    For update/log, please see git-blame documentation or browse the github 
 #    repo https://github.com/BhallaLab/moose-core
-
-
-try:
-    from future_builtins import zip, map
-except ImportError as e:
-    pass
 
 import os
 import math
 import numpy as np
 import moose
-import logging
 
+import logging
 logger_ = logging.getLogger('moose.nml2')
 
 import neuroml         as nml
@@ -549,7 +545,10 @@ class NML2Reader(object):
         orig = chdens.id
         chid = moose.copy(proto_chan, comp, chdens.id)
         chan = moose.element(chid)
-        for p in self.paths_to_chan_elements.keys():
+
+        # We are updaing the keys() here. Need copy: using list(keys()) to
+        # create a copy.
+        for p in list(self.paths_to_chan_elements.keys()):
             pp = p.replace('%s/'%chdens.ion_channel,'%s/'%orig)
             self.paths_to_chan_elements[pp] = self.paths_to_chan_elements[p].replace('%s/'%chdens.ion_channel,'%s/'%orig)
         #logger_.info(self.paths_to_chan_elements)

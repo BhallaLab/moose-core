@@ -1027,8 +1027,8 @@ void Clock::buildDefaultTick()
     defaultDt_[16] = 0.1;
     defaultDt_[17] = 0.1;
     defaultDt_[18] = 1;             // For tables for chemical calculations.
-    defaultDt_[19] = 1;             // For Socket Streamer
-    defaultDt_[20] = 5;            // For CSV Streamer
+    defaultDt_[19] = 1;              // For Socket Streamer
+    defaultDt_[20] = 10;             // For CSV Streamer
 
     // 20-29 are not assigned.
     defaultDt_[30] = 1;    // For the HDF writer

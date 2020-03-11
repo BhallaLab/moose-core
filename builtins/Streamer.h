@@ -42,8 +42,8 @@ public:
     /* Cleaup before quitting */
     void cleanUp( void );
 
-    string getOutFilepath( void ) const;
-    void setOutFilepath( string path );
+    string getDatafilePath( void ) const;
+    void setDatafilePath( string path );
 
     string getFormat( void ) const;
     void setFormat( string format );
@@ -73,7 +73,7 @@ public:
 
 private:
 
-    string outfilePath_;
+    string datafilePath_;
     string format_;
 
     size_t numWriteEvents_;
