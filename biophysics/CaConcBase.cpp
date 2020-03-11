@@ -58,23 +58,32 @@ const Cinfo* CaConcBase::initCinfo()
     static ElementValueFinfo< CaConcBase, double > Ca( "Ca",
             "Calcium concentration.",
             &CaConcBase::setCa,
-            &CaConcBase::getCa
-                                                     );
+            &CaConcBase::getCa);
+
+    // NOTE: alias for Ca. NeuroML2 expect conc available on all
+    // ConncentrationModel. 
+    // FIXME: If it is not needed after neuroml2 is fully supported, remove it
+    // else remove this fixme.
+    static ElementValueFinfo< CaConcBase, double > conc( "conc",
+            "Calcium concentration (alias for Ca)",
+            &CaConcBase::setCa,
+            &CaConcBase::getCa);
+
     static ElementValueFinfo< CaConcBase, double > CaBasal( "CaBasal",
             "Basal Calcium concentration.",
             &CaConcBase::setCaBasal,
-            &CaConcBase::getCaBasal
-                                                          );
+            &CaConcBase::getCaBasal);
+
     static ElementValueFinfo< CaConcBase, double > Ca_base( "Ca_base",
             "Basal Calcium concentration, synonym for CaBasal",
             &CaConcBase::setCaBasal,
-            &CaConcBase::getCaBasal
-                                                          );
+            &CaConcBase::getCaBasal);
+
     static ElementValueFinfo< CaConcBase, double > tau( "tau",
             "Settling time for Ca concentration",
             &CaConcBase::setTau,
-            &CaConcBase::getTau
-                                                      );
+            &CaConcBase::getTau);
+
     static ElementValueFinfo< CaConcBase, double > B( "B",
             "Volume scaling factor. "
             "Deprecated. This is a legacy field from GENESIS and exposes "
@@ -82,36 +91,36 @@ const Cinfo* CaConcBase::initCinfo()
             "B = 1/(vol * F* VALENCE) so that it obeys:\n"
             "dC/dt = B*I_Ca - C/tau",
             &CaConcBase::setB,
-            &CaConcBase::getB
-                                                    );
+            &CaConcBase::getB);
+
     static ElementValueFinfo< CaConcBase, double > thick( "thick",
             "Thickness of Ca shell, assumed cylindrical. Legal range is between 0 \n"
             "and the radius. If outside this range it is taken as the radius. \n"
             " Default zero, ie, the shell is the entire thickness of the cylinder \n",
             &CaConcBase::setThickness,
-            &CaConcBase::getThickness
-                                                        );
+            &CaConcBase::getThickness);
+
     static ElementValueFinfo< CaConcBase, double > length( "length",
             "Length of Ca shell, assumed cylindrical",
             &CaConcBase::setLength,
-            &CaConcBase::getLength
-                                                         );
+            &CaConcBase::getLength);
+
     static ElementValueFinfo< CaConcBase, double > diameter( "diameter",
             "Diameter of Ca shell, assumed cylindrical",
             &CaConcBase::setDiameter,
-            &CaConcBase::getDiameter
-                                                           );
+            &CaConcBase::getDiameter);
+
     static ElementValueFinfo< CaConcBase, double > ceiling( "ceiling",
             "Ceiling value for Ca concentration. If Ca > ceiling, Ca = ceiling. \n"
             "If ceiling <= 0.0, there is no upper limit on Ca concentration value.",
             &CaConcBase::setCeiling,
-            &CaConcBase::getCeiling
-                                                          );
+            &CaConcBase::getCeiling);
+
     static ElementValueFinfo< CaConcBase, double > floor( "floor",
             "Floor value for Ca concentration. If Ca < floor, Ca = floor",
             &CaConcBase::setFloor,
-            &CaConcBase::getFloor
-                                                        );
+            &CaConcBase::getFloor);
+
 
     ///////////////////////////////////////////////////////
     // MsgDest definitions
@@ -147,6 +156,7 @@ const Cinfo* CaConcBase::initCinfo()
         &proc,		// Shared
         concOut(),	// Src
         &Ca,		// Value
+        &conc,          // Value
         &CaBasal,	// Value
         &Ca_base,	// Value
         &tau,		// Value

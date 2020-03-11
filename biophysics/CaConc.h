@@ -35,44 +35,44 @@
 
 class CaConc: public CaConcBase
 {
-	public:
-		CaConc();
-		///////////////////////////////////////////////////////////////
-		// Message handling functions
-		///////////////////////////////////////////////////////////////
-		void vReinit( const Eref&, ProcPtr info );
-		void vProcess( const Eref&, ProcPtr info );
+public:
+    CaConc();
+    ///////////////////////////////////////////////////////////////
+    // Message handling functions
+    ///////////////////////////////////////////////////////////////
+    void vReinit( const Eref&, ProcPtr info );
+    void vProcess( const Eref&, ProcPtr info );
 
-		void vCurrent( const Eref& e, double I );
-		void vCurrentFraction( const Eref& e, double I, double fraction );
-		void vIncrease( const Eref& e, double I );
-		void vDecrease( const Eref& e, double I );
-		///////////////////////////////////////////////////////////////
-		// Field handling functions
-		///////////////////////////////////////////////////////////////
-		void vSetCa( const Eref& e, double val );
-		double vGetCa( const Eref& e ) const;
-		void vSetCaBasal( const Eref& e, double val );
-		double vGetCaBasal( const Eref& e ) const;
-		void vSetTau( const Eref& e, double val );
-		double vGetTau( const Eref& e ) const;
-		void vSetB( const Eref& e, double val );
-		double vGetB( const Eref& e ) const;
-        void vSetCeiling( const Eref& e, double val );
-        double vGetCeiling( const Eref& e ) const;
-        void vSetFloor( const Eref& e, double val );
-        double vGetFloor( const Eref& e ) const;
+    void vCurrent( const Eref& e, double I );
+    void vCurrentFraction( const Eref& e, double I, double fraction );
+    void vIncrease( const Eref& e, double I );
+    void vDecrease( const Eref& e, double I );
+    ///////////////////////////////////////////////////////////////
+    // Field handling functions
+    ///////////////////////////////////////////////////////////////
+    void vSetCa( const Eref& e, double val );
+    double vGetCa( const Eref& e ) const;
+    void vSetCaBasal( const Eref& e, double val );
+    double vGetCaBasal( const Eref& e ) const;
+    void vSetTau( const Eref& e, double val );
+    double vGetTau( const Eref& e ) const;
+    void vSetB( const Eref& e, double val );
+    double vGetB( const Eref& e ) const;
+    void vSetCeiling( const Eref& e, double val );
+    double vGetCeiling( const Eref& e ) const;
+    void vSetFloor( const Eref& e, double val );
+    double vGetFloor( const Eref& e ) const;
 
-		static const Cinfo* initCinfo();
-	private:
-		double Ca_;
-		double CaBasal_;
-		double tau_;
-		double B_;
-		double c_;
-		double activation_;
-		double ceiling_;
-		double floor_;
+    static const Cinfo* initCinfo();
+private:
+    double Ca_;
+    double CaBasal_;
+    double tau_;
+    double B_;
+    double c_;
+    double activation_;
+    double ceiling_;
+    double floor_;
 };
 
 
