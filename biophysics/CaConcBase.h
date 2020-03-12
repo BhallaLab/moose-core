@@ -37,91 +37,91 @@
 
 class CaConcBase
 {
-	public:
-		CaConcBase();
-		///////////////////////////////////////////////////////////////
-		// Message handling functions
-		///////////////////////////////////////////////////////////////
-		void reinit( const Eref&, ProcPtr info );
-		void process( const Eref&, ProcPtr info );
+public:
+    CaConcBase();
+    ///////////////////////////////////////////////////////////////
+    // Message handling functions
+    ///////////////////////////////////////////////////////////////
+    void reinit( const Eref&, ProcPtr info );
+    void process( const Eref&, ProcPtr info );
 
-		void current( const Eref& e, double I );
-		void currentFraction( const Eref& e, double I, double fraction );
-		void increase( const Eref& e, double I );
-		void decrease( const Eref& e, double I );
-		///////////////////////////////////////////////////////////////
-		// Virtual Message handling functions
-		///////////////////////////////////////////////////////////////
-		virtual void vReinit( const Eref&, ProcPtr info ) = 0;
-		virtual void vProcess( const Eref&, ProcPtr info ) = 0;
+    void current( const Eref& e, double I );
+    void currentFraction( const Eref& e, double I, double fraction );
+    void increase( const Eref& e, double I );
+    void decrease( const Eref& e, double I );
+    ///////////////////////////////////////////////////////////////
+    // Virtual Message handling functions
+    ///////////////////////////////////////////////////////////////
+    virtual void vReinit( const Eref&, ProcPtr info ) = 0;
+    virtual void vProcess( const Eref&, ProcPtr info ) = 0;
 
-		virtual void vCurrent( const Eref& e, double I ) = 0;
-		virtual void vCurrentFraction( const Eref& e, double I, double fraction ) = 0;
-		virtual void vIncrease( const Eref& e, double I ) = 0;
-		virtual void vDecrease( const Eref& e, double I ) = 0;
-		///////////////////////////////////////////////////////////////
-		// Field handling functions
-		///////////////////////////////////////////////////////////////
-		void setCa( const Eref& e, double val );
-		double getCa( const Eref& e ) const;
-		void setCaBasal( const Eref& e, double val );
-		double getCaBasal( const Eref& e ) const;
-		void setTau( const Eref& e, double val );
-		double getTau( const Eref& e ) const;
-		void setB( const Eref& e, double val );
-		double getB( const Eref& e ) const;
-        void setCeiling( const Eref& e, double val );
-        double getCeiling( const Eref& e ) const;
-        void setFloor( const Eref& e, double val );
-        double getFloor( const Eref& e ) const;
-        void setThickness( const Eref& e, double val );
-        double getThickness( const Eref& e ) const;
-        void setLength( const Eref& e, double val );
-        double getLength( const Eref& e ) const;
-        void setDiameter( const Eref& e, double val );
-        double getDiameter( const Eref& e ) const;
-		///////////////////////////////////////////////////////////////
-		// Virtual Field handling functions
-		///////////////////////////////////////////////////////////////
-		virtual void vSetCa( const Eref& e, double val ) = 0;
-		virtual double vGetCa( const Eref& e ) const = 0;
-		virtual void vSetCaBasal( const Eref& e, double val ) = 0;
-		virtual double vGetCaBasal( const Eref& e ) const = 0;
-		virtual void vSetTau( const Eref& e, double val ) = 0;
-		virtual double vGetTau( const Eref& e ) const = 0;
-		virtual void vSetB( const Eref& e, double val ) = 0;
-		virtual double vGetB( const Eref& e ) const = 0;
-        virtual void vSetCeiling( const Eref& e, double val ) = 0;
-        virtual double vGetCeiling( const Eref& e ) const = 0;
-        virtual void vSetFloor( const Eref& e, double val ) = 0;
-        virtual double vGetFloor( const Eref& e ) const = 0;
+    virtual void vCurrent( const Eref& e, double I ) = 0;
+    virtual void vCurrentFraction( const Eref& e, double I, double fraction ) = 0;
+    virtual void vIncrease( const Eref& e, double I ) = 0;
+    virtual void vDecrease( const Eref& e, double I ) = 0;
+    ///////////////////////////////////////////////////////////////
+    // Field handling functions
+    ///////////////////////////////////////////////////////////////
+    void setCa( const Eref& e, double val );
+    double getCa( const Eref& e ) const;
+    void setCaBasal( const Eref& e, double val );
+    double getCaBasal( const Eref& e ) const;
+    void setTau( const Eref& e, double val );
+    double getTau( const Eref& e ) const;
+    void setB( const Eref& e, double val );
+    double getB( const Eref& e ) const;
+    void setCeiling( const Eref& e, double val );
+    double getCeiling( const Eref& e ) const;
+    void setFloor( const Eref& e, double val );
+    double getFloor( const Eref& e ) const;
+    void setThickness( const Eref& e, double val );
+    double getThickness( const Eref& e ) const;
+    void setLength( const Eref& e, double val );
+    double getLength( const Eref& e ) const;
+    void setDiameter( const Eref& e, double val );
+    double getDiameter( const Eref& e ) const;
+    ///////////////////////////////////////////////////////////////
+    // Virtual Field handling functions
+    ///////////////////////////////////////////////////////////////
+    virtual void vSetCa( const Eref& e, double val ) = 0;
+    virtual double vGetCa( const Eref& e ) const = 0;
+    virtual void vSetCaBasal( const Eref& e, double val ) = 0;
+    virtual double vGetCaBasal( const Eref& e ) const = 0;
+    virtual void vSetTau( const Eref& e, double val ) = 0;
+    virtual double vGetTau( const Eref& e ) const = 0;
+    virtual void vSetB( const Eref& e, double val ) = 0;
+    virtual double vGetB( const Eref& e ) const = 0;
+    virtual void vSetCeiling( const Eref& e, double val ) = 0;
+    virtual double vGetCeiling( const Eref& e ) const = 0;
+    virtual void vSetFloor( const Eref& e, double val ) = 0;
+    virtual double vGetFloor( const Eref& e ) const = 0;
 
-		///////////////////////////////////////////////////////////////
-		// Utility function in case length, dia or thickness is updated
-		void updateDimensions( const Eref& e );
+    ///////////////////////////////////////////////////////////////
+    // Utility function in case length, dia or thickness is updated
+    void updateDimensions( const Eref& e );
 
-		/// Used to set up the solver. Dummy for regular classes.
-		virtual void vSetSolver( const Eref& e, Id hsolve );
+    /// Used to set up the solver. Dummy for regular classes.
+    virtual void vSetSolver( const Eref& e, Id hsolve );
 
-		/**
-		 * Swaps Cinfos in order to make Zombies.
-		 */
-		static void zombify( Element* orig, const Cinfo* zClass,
-						Id hsolve );
+    /**
+     * Swaps Cinfos in order to make Zombies.
+     */
+    static void zombify( Element* orig, const Cinfo* zClass,
+                         Id hsolve );
 
-		/*
-		 * This Finfo is used to send out Ca concentration to channels.
-		 *
-		 * It is exposed here so that HSolve can also use it to send out
-		 * Ca concentration to the recipients.
-		 */
-		static SrcFinfo1< double >* concOut();
+    /*
+     * This Finfo is used to send out Ca concentration to channels.
+     *
+     * It is exposed here so that HSolve can also use it to send out
+     * Ca concentration to the recipients.
+     */
+    static SrcFinfo1< double >* concOut();
 
-		static const Cinfo* initCinfo();
-	private:
-		double thickness_;
-		double diameter_;
-		double length_;
+    static const Cinfo* initCinfo();
+private:
+    double thickness_;
+    double diameter_;
+    double length_;
 };
 
 

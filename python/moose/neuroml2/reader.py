@@ -12,7 +12,6 @@
 #    For update/log, please see git-blame documentation or browse the github
 #    repo https://github.com/BhallaLab/moose-core
 
-import os
 import math
 import numpy as np
 from moose.neuroml2.hhfit import exponential2
@@ -23,12 +22,13 @@ import moose
 
 import logging
 logger_ = logging.getLogger('moose.nml2')
+logger_.setLevel(logging.INFO)
 
 try:
-    import neuroml as nml
     import neuroml.loaders as loaders
     from pyneuroml import pynml
-except:
+except Exception as e:
+    print(e)
     print(
         "********************************************************************")
     print("* ")
@@ -42,7 +42,71 @@ except:
     print(
         "********************************************************************")
 
-# Utility functions
+
+# these gates are available in moose. These are prefixed by 'gate'
+_validMooseHHGateIds = ['X', 'Y', 'Z'] 
+
+def _unique(ls):
+    res = []
+    for l in ls:
+        if l not in res:
+            res.append(l)
+    return res
+
+
+def _whichGate(chan):
+    global _validMooseHHGateIds
+    c = chan.name[-1]
+    assert c in _validMooseHHGateIds
+    return c
+
+def _pairNmlGateWithMooseGates(mGates, nmlGates):
+    """Return moose gate id from nml.HHGate
+    """
+    global _validMooseHHGateIds
+    # deep copy
+    mooseGatesMap = {_whichGate(x) : x for x in mGates}
+    availableMooseGates = _validMooseHHGateIds[:]
+    mapping = {}
+    for nmlGate in nmlGates: 
+        if nmlGate is None:
+            continue
+        if hasattr(nmlGate, 'id') and nmlGate.id:
+            mapping[nmlGate.id.upper()] = nmlGate
+            availableMooseGates.remove(nmlGate.id.upper())
+        else:
+            mapping[availableMooseGates.pop(0)] = nmlGate
+
+    # Now replace 'X', 'Y', 'Z' with moose gates.
+    return [(mooseGatesMap[x], mapping[x]) for x in mapping]
+
+def _isConcDep(ct):
+    """_isConcDep
+    Check if componet is dependant on concentration. Most HHGates are
+    dependant on voltage.
+
+    :param ct: ComponentType
+    :type ct: nml.ComponentType 
+
+    :return: True if Component is depenant on conc, False otherwise.
+    """
+    if not hasattr(ct, 'extends'):
+        return False
+    if 'ConcDep' in ct.extends:
+        return True
+    return False
+
+
+def _findCaConc():
+    """_findCaConc
+    Find a suitable CaConc for computing HHGate tables.
+    This is a hack, though it is likely to work in most cases. 
+    """
+    caConcs = moose.wildcardFind('/library/##[TYPE=CaConc]')
+    assert len(caConcs) == 1, "No moose.CaConc found. Currently moose \
+            supports HHChannel which depends only on moose.CaConc ."
+
+    return caConcs[0]
 
 
 def sarea(comp):
@@ -161,6 +225,8 @@ class NML2Reader(object):
         self.seg_id_to_comp_name = {}
         self.paths_to_chan_elements = {}
 
+        # Just in case.
+        self._variables = {}
 
     def read(self, filename, symmetric=True):
         self.doc = loaders.read_neuroml2_file(filename,
@@ -425,8 +491,9 @@ class NML2Reader(object):
         'HHExpLinearRate': linoid2
     }
 
-    def calculateRateFn(self, ratefn, vmin, vmax, tablen=3000, vShift='0mV'):
+    def calculateRateFn(self, ratefn, mgate, vmin, vmax, tablen=3000, vShift='0mV'):
         """Returns A / B table from ngate."""
+
         tab = np.linspace(vmin, vmax, tablen)
         if self._is_standard_nml_rate(ratefn):
             midpoint, rate, scale = map(
@@ -437,16 +504,87 @@ class NML2Reader(object):
             if ratefn.type != ct.name:
                 continue
             logger_.info("Using %s to evaluate rate" % ct.name)
+            if not _isConcDep(ct):
+                return self._computeRateFn(ct, tab)
+            else:
+                ca = _findCaConc()
+                if _whichGate(mgate) != 'Z':
+                    raise RuntimeWarning("Concentration dependant gate "
+                            " should use gateZ of moose.HHChannel. "
+                            " If you know what you are doing, ignore this "
+                            " warning. "
+                            )
+                return self._computeRateFnCa(ca, ct, tab, vShift=vShift)
+
+    def _computeRateFnCa(self, ca, ct, tab, vShift):
+        rate = []
+        for v in tab:
+            req_vars = {
+                ca.name: '%sV' % v,
+                'vShift': vShift,
+                'temperature': self._getTemperature()
+            }
+            req_vars.update(self._variables)
+            vals = pynml.evaluate_component(ct, req_variables=req_vars)
+            '''print(vals)'''
+            if 'x' in vals:
+                rate.append(vals['x'])
+            if 't' in vals:
+                rate.append(vals['t'])
+            if 'r' in vals:
+                rate.append(vals['r'])
+        return np.array(rate)
+
+    def _computeRateFn(self, ct, tab, vShift):
+        rate = []
+        for v in tab:
+            req_vars = {
+                'v': '%sV' % v,
+                'vShift': vShift,
+                'temperature': self._getTemperature()
+            }
+            req_vars.update(self._variables)
+            vals = pynml.evaluate_component(ct, req_variables=req_vars)
+            '''print(vals)'''
+            if 'x' in vals:
+                rate.append(vals['x'])
+            if 't' in vals:
+                rate.append(vals['t'])
+            if 'r' in vals:
+                rate.append(vals['r'])
+        return np.array(rate)
+
+    def calculateRateFnCaDep(self,
+                             ratefn,
+                             ca,
+                             camin,
+                             camax,
+                             tablen=3000,
+                             vShift='0mV'):
+        """Returns A / B table from ngate.
+
+        This function compute rate which depends on ca. 
+        This must go into Z gate.
+        """
+        tab = np.linspace(camin, camax, tablen)
+        if self._is_standard_nml_rate(ratefn):
+            midpoint, rate, scale = map(
+                SI, (ratefn.midpoint, ratefn.rate, ratefn.scale))
+            return self.rate_fn_map[ratefn.type](tab, rate, scale, midpoint)
+
+        for ct in self.doc.ComponentType:
+            if ratefn.type != ct.name:
+                continue
+            logger_.info("Using %s to evaluate rate (caConc dependant)" %
+                         ct.name)
             rate = []
             for v in tab:
-                vars = {
-                    'v': '%sV' % v,
+                req_vars = {
+                    ca.name: '%sV' % v,
                     'vShift': vShift,
                     'temperature': self._getTemperature()
-                    }
-                for k in self.nml_concs_to_moose:
-                    vars.update({k: self.nml_concs_to_moose[k].conc})
-                vals = pynml.evaluate_component(ct, req_variables=vars)
+                }
+                vals = pynml.evaluate_component(ct, req_variables=req_vars)
                 '''print(vals)'''
                 if 'x' in vals:
                     rate.append(vals['x'])
@@ -553,89 +691,108 @@ class NML2Reader(object):
                rate.type=='HHSigmoidVariable'
 
     def createHHChannel(self, chan, vmin=-150e-3, vmax=100e-3, vdivs=5000):
-        mchan = moose.HHChannel('%s/%s' % (self.lib.path, chan.id))
-        mgates = map(moose.element, (mchan.gateX, mchan.gateY, mchan.gateZ))
-        assert (len(chan.gate_hh_rates) <= 3
-                )  # We handle only up to 3 gates in HHCHannel
+        path = '%s/%s' % (self.lib.path, chan.id)
+        if moose.exists(path):
+            mchan = moose.element(path)
+        else:
+            mchan =  moose.HHChannel(path)
+        mgates = [
+            moose.element(g) for g in [mchan.gateX, mchan.gateY, mchan.gateZ]
+        ]
+
+        # We handle only up to 3 gates in HHCHannel
+        assert len(chan.gate_hh_rates) <= 3, "No more than 3 gates"
 
         if self.verbose:
             print('== Creating channel: %s (%s) -> %s (%s)' %
                   (chan.id, chan.gate_hh_rates, mchan, mgates))
+
         all_gates = chan.gates + chan.gate_hh_rates
-        for ngate, mgate in zip(all_gates, mgates):
-            if mgate.name.endswith('X'):
-                mchan.Xpower = ngate.instances
-            elif mgate.name.endswith('Y'):
-                mchan.Ypower = ngate.instances
-            elif mgate.name.endswith('Z'):
-                mchan.Zpower = ngate.instance
-            mgate.min = vmin
-            mgate.max = vmax
-            mgate.divs = vdivs
 
-            # I saw only examples of GateHHRates in
-            # HH-channels, the meaning of forwardRate and
-            # reverseRate and steadyState are not clear in the
-            # classes GateHHRatesInf, GateHHRatesTau and in
-            # FateHHTauInf the meaning of timeCourse and
-            # steady state is not obvious. Is the last one
-            # refering to tau_inf and m_inf??
-            fwd = ngate.forward_rate
-            rev = ngate.reverse_rate
+        # If user set bnml channels' id to 'x', 'y' or 'z' then pair this gate
+        # with moose.HHChannel's gateX, gateY, gateZ respectively. Else pair
+        # them with gateX, gateY, gateZ acording to list order.
+        for mgate, ngate in _pairNmlGateWithMooseGates(mgates, all_gates):
+            self._addGateToHHChannel(chan, mchan, mgate, ngate, vmin, vmax,
+                                     vdivs)
+        logger_.debug('== Created', mchan.path, 'for', chan.id)
+        return mchan
 
-            self.paths_to_chan_elements[
-                '%s/%s' %
-                (chan.id, ngate.id)] = '%s/%s' % (chan.id, mgate.name)
+    def _addGateToHHChannel(self, chan, mchan, mgate, ngate, vmin, vmax,
+                            vdivs):
+        """Add gateX, gateY, gateZ etc to moose.HHChannel (mchan). 
 
-            q10_scale = 1
-            if ngate.q10_settings:
-                if ngate.q10_settings.type == 'q10Fixed':
-                    q10_scale = float(ngate.q10_settings.fixed_q10)
-                elif ngate.q10_settings.type == 'q10ExpTemp':
-                    q10_scale = math.pow(
-                        float(ngate.q10_settings.q10_factor),
-                        (self._getTemperature() -
-                         SI(ngate.q10_settings.experimental_temp)) / 10)
-                    #print('Q10: %s; %s; %s; %s'%(ngate.q10_settings.q10_factor, self._getTemperature(),SI(ngate.q10_settings.experimental_temp),q10_scale))
-                else:
-                    raise Exception(
-                        'Unknown Q10 scaling type %s: %s' %
-                        (ngate.q10_settings.type, ngate.q10_settings))
+        Each gate can be voltage dependant and/or concentration dependant.
+        Only caConc dependant channels are supported.
+        """
 
-            if self.verbose:
-                print(
-                    ' === Gate: %s; %s; %s; %s; %s; scale=%s' %
-                    (ngate.id, mgate.path, mchan.Xpower, fwd, rev, q10_scale))
+        # set mgate.Xpower, .Ypower etc.
+        setattr(mchan, _whichGate(mgate) + 'power', ngate.instances)
 
-            if (fwd is not None) and (rev is not None):
-                alpha = self.calculateRateFn(fwd, vmin, vmax, vdivs)
-                beta = self.calculateRateFn(rev, vmin, vmax, vdivs)
-                mgate.tableA = q10_scale * (alpha)
-                mgate.tableB = q10_scale * (alpha + beta)
+        mgate.min = vmin
+        mgate.max = vmax
+        mgate.divs = vdivs
 
-            # Assuming the meaning of the elements in GateHHTauInf ...
-            if hasattr(ngate,'time_course') and hasattr(ngate,'steady_state') \
-               and (ngate.time_course is not None) and (ngate.steady_state is not None):
-                tau = ngate.time_course
-                inf = ngate.steady_state
-                tau = self.calculateRateFn(tau, vmin, vmax, vdivs)
+        # Note by Padraig: 
+        # ---------------
+        # I saw only examples of GateHHRates in HH-channels, the meaning of
+        # forwardRate and reverseRate and steadyState are not clear in the
+        # classes GateHHRatesInf, GateHHRatesTau and in FateHHTauInf the
+        # meaning of timeCourse and steady state is not obvious. Is the last
+        # one # refering to tau_inf and m_inf??
+        fwd = ngate.forward_rate
+        rev = ngate.reverse_rate
+
+        self.paths_to_chan_elements['%s/%s'%(chan.id, ngate.id)] = \
+                '%s/%s' % (chan.id, mgate.name)
+
+        q10_scale = 1
+        if ngate.q10_settings:
+            if ngate.q10_settings.type == 'q10Fixed':
+                q10_scale = float(ngate.q10_settings.fixed_q10)
+            elif ngate.q10_settings.type == 'q10ExpTemp':
+                q10_scale = math.pow(
+                    float(ngate.q10_settings.q10_factor),
+                    (self._getTemperature() -
+                     SI(ngate.q10_settings.experimental_temp)) / 10)
+                logger_.debug(
+                    'Q10: %s; %s; %s; %s' %
+                    (ngate.q10_settings.q10_factor, self._getTemperature(),
+                     SI(ngate.q10_settings.experimental_temp), q10_scale))
+            else:
+                raise Exception('Unknown Q10 scaling type %s: %s' %
+                                (ngate.q10_settings.type, ngate.q10_settings))
+        logger_.info(' === Gate: %s; %s; %s; %s; %s; scale=%s' %
+                     (ngate.id, mgate.path, mchan.Xpower, fwd, rev, q10_scale))
+
+        if (fwd is not None) and (rev is not None):
+            # Note: MOOSE HHGate are either voltage of concentration
+            # dependant. Here we figure out if nml description of gate is
+            # concentration dependant or not.
+            alpha = self.calculateRateFn(fwd, mgate, vmin, vmax, vdivs)
+            beta = self.calculateRateFn(rev, mgate, vmin, vmax, vdivs)
+
+            mgate.tableA = q10_scale * (alpha)
+            mgate.tableB = q10_scale * (alpha + beta)
+
+        # Assuming the meaning of the elements in GateHHTauInf ...
+        if hasattr(ngate,'time_course') and hasattr(ngate,'steady_state') \
+           and (ngate.time_course is not None) and (ngate.steady_state is not None):
+            tau = ngate.time_course
+            inf = ngate.steady_state
+            tau = self.calculateRateFn(tau, mgate, vmin, vmax, vdivs)
+            inf = self.calculateRateFn(inf, mgate, vmin, vmax, vdivs)
+            mgate.tableA = q10_scale * (inf / tau)
+            mgate.tableB = q10_scale * (1 / tau)
+
+        if hasattr(ngate, 'steady_state') and (ngate.time_course is None) \
+                and (ngate.steady_state is not None):
+            inf = ngate.steady_state
+            tau = 1 / (alpha + beta)
+            if (inf is not None):
                 inf = self.calculateRateFn(inf, vmin, vmax, vdivs)
                 mgate.tableA = q10_scale * (inf / tau)
                 mgate.tableB = q10_scale * (1 / tau)
-
-            if hasattr(ngate,
-                       'steady_state') and (ngate.time_course is None) and (
-                           ngate.steady_state is not None):
-                inf = ngate.steady_state
-                tau = 1 / (alpha + beta)
-                if (inf is not None):
-                    inf = self.calculateRateFn(inf, vmin, vmax, vdivs)
-                    mgate.tableA = q10_scale * (inf / tau)
-                    mgate.tableB = q10_scale * (1 / tau)
-
-        if self.verbose:
-            print(self.filename, '== Created', mchan.path, 'for', chan.id)
-        return mchan
 
     def createPassiveChannel(self, chan):
         mchan = moose.Leakage('%s/%s' % (self.lib.path, chan.id))
@@ -666,7 +823,7 @@ class NML2Reader(object):
             else:
                 mchan = self.createHHChannel(chan)
 
-            assert chan.id
+            assert chan.id, "Empty id is not allowed"
             self.id_to_ionChannel[chan.id] = chan
             self.nml_chans_to_moose[chan.id] = mchan
             self.proto_chans[chan.id] = mchan
@@ -681,7 +838,7 @@ class NML2Reader(object):
 
     def createDecayingPoolConcentrationModel(self, concModel):
         """Create prototype for concentration model"""
-        assert concModel.id
+        assert concModel.id, "Empty id is not allowed"
         name = concModel.id
         if hasattr(concModel, 'name') and concModel.name is not None:
             name = concModel.name

@@ -16,8 +16,8 @@
  * without diffusion. It uses a simple exponential return of Ca
  * to baseline, with influxes from ion channels. It solves the
  * equation:
- * dC/dt = B*Ik - C/tau
- * where Ca = Ca_base + C.
+ *
+ * dC/dt = B*Ik - C/tau, where Ca = Ca_base + C.
  *
  * From the GENESIS notes:
  * In SI units, where concentration is moles/m^3

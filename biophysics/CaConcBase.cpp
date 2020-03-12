@@ -33,58 +33,49 @@ SrcFinfo1< double >* CaConcBase::concOut()
 
 const Cinfo* CaConcBase::initCinfo()
 {
-    ///////////////////////////////////////////////////////
     // Shared message definitions
-    ///////////////////////////////////////////////////////
-    static DestFinfo process( "process",
-                              "Handles process call",
-                              new ProcOpFunc< CaConcBase >( &CaConcBase::process ) );
-    static DestFinfo reinit( "reinit",
-                             "Handles reinit call",
-                             new ProcOpFunc< CaConcBase >( &CaConcBase::reinit ) );
+    static DestFinfo process("process",
+            "Handles process call",
+            new ProcOpFunc< CaConcBase >( &CaConcBase::process )
+            );
+
+    static DestFinfo reinit("reinit",
+            "Handles reinit call",
+            new ProcOpFunc< CaConcBase >( &CaConcBase::reinit )
+            );
 
     static Finfo* processShared[] =
     {
         &process, &reinit
     };
 
-    static SharedFinfo proc( "proc",
-                             "Shared message to receive Process message from scheduler",
-                             processShared, sizeof( processShared ) / sizeof( Finfo* ) );
+    static SharedFinfo proc("proc",
+            "Shared message to receive Process message from scheduler",
+            processShared, sizeof( processShared ) / sizeof( Finfo* )
+            );
 
-    ///////////////////////////////////////////////////////
     // Field definitions
-    ///////////////////////////////////////////////////////
     static ElementValueFinfo< CaConcBase, double > Ca( "Ca",
             "Calcium concentration.",
             &CaConcBase::setCa,
             &CaConcBase::getCa);
 
-    // NOTE: alias for Ca. NeuroML2 expect conc available on all
-    // ConncentrationModel. 
-    // FIXME: If it is not needed after neuroml2 is fully supported, remove it
-    // else remove this fixme.
-    static ElementValueFinfo< CaConcBase, double > conc( "conc",
-            "Calcium concentration (alias for Ca)",
-            &CaConcBase::setCa,
-            &CaConcBase::getCa);
-
-    static ElementValueFinfo< CaConcBase, double > CaBasal( "CaBasal",
+    static ElementValueFinfo< CaConcBase, double > CaBasal("CaBasal",
             "Basal Calcium concentration.",
             &CaConcBase::setCaBasal,
             &CaConcBase::getCaBasal);
 
-    static ElementValueFinfo< CaConcBase, double > Ca_base( "Ca_base",
+    static ElementValueFinfo< CaConcBase, double > Ca_base("Ca_base",
             "Basal Calcium concentration, synonym for CaBasal",
             &CaConcBase::setCaBasal,
             &CaConcBase::getCaBasal);
 
-    static ElementValueFinfo< CaConcBase, double > tau( "tau",
+    static ElementValueFinfo< CaConcBase, double > tau("tau",
             "Settling time for Ca concentration",
             &CaConcBase::setTau,
             &CaConcBase::getTau);
 
-    static ElementValueFinfo< CaConcBase, double > B( "B",
+    static ElementValueFinfo< CaConcBase, double > B("B",
             "Volume scaling factor. "
             "Deprecated. This is a legacy field from GENESIS and exposes "
             "internal calculations. Please do not use. \n"
@@ -127,36 +118,35 @@ const Cinfo* CaConcBase::initCinfo()
     ///////////////////////////////////////////////////////
 
     static DestFinfo current( "current",
-                              "Calcium Ion current, due to be converted to conc.",
-                              new EpFunc1< CaConcBase, double >( &CaConcBase::current )
-                            );
+            "Calcium Ion current, due to be converted to conc.",
+            new EpFunc1< CaConcBase, double >( &CaConcBase::current )
+            );
 
     static DestFinfo currentFraction( "currentFraction",
-                                      "Fraction of total Ion current, that is carried by Ca2+.",
-                                      new EpFunc2< CaConcBase, double, double >( &CaConcBase::currentFraction )
-                                    );
+            "Fraction of total Ion current, that is carried by Ca2+.",
+            new EpFunc2< CaConcBase, double, double >( &CaConcBase::currentFraction )
+            );
 
     static DestFinfo increase( "increase",
-                               "Any input current that increases the concentration.",
-                               new EpFunc1< CaConcBase, double >( &CaConcBase::increase )
-                             );
+            "Any input current that increases the concentration.",
+            new EpFunc1< CaConcBase, double >( &CaConcBase::increase )
+            );
 
     static DestFinfo decrease( "decrease",
-                               "Any input current that decreases the concentration.",
-                               new EpFunc1< CaConcBase, double >( &CaConcBase::decrease )
-                             );
+            "Any input current that decreases the concentration.",
+            new EpFunc1< CaConcBase, double >( &CaConcBase::decrease )
+            );
 
     static DestFinfo basal( "basal",
-                            "Synonym for assignment of basal conc.",
-                            new EpFunc1< CaConcBase, double >( &CaConcBase::setCaBasal )
-                          );
+            "Synonym for assignment of basal conc.",
+            new EpFunc1< CaConcBase, double >( &CaConcBase::setCaBasal )
+            );
 
     static Finfo* CaConcBaseFinfos[] =
     {
         &proc,		// Shared
         concOut(),	// Src
         &Ca,		// Value
-        &conc,          // Value
         &CaBasal,	// Value
         &Ca_base,	// Value
         &tau,		// Value
