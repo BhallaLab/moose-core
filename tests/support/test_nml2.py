@@ -204,16 +204,14 @@ def test_nml2_jkopsick():
 
 def test_parse_nml_files():
     import glob
-    files = glob.glob(os.path.join(SCRIPT_DIR, 'nml_files', '*.nml'))
+    files = glob.glob(os.path.join(SCRIPT_DIR, 'nml_files', 'NML2_*.nml'))
     print("Total %s files found" % len(files))
     for f in files:
         if moose.exists('/model'): moose.delete('/model')
         if moose.exists('/library'): moose.delete('/library')
-        print("\n\n=========================================")
+        print("=========================================")
         print("[INFO ] Reading file %s" % f)
         moose.mooseReadNML2(f)
-
-    quit()
     
 
 def main():

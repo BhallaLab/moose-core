@@ -21,12 +21,11 @@ def _addStreamer():
 def main(**kwargs):
     logger_.info("Reading file %s" % kwargs['nml2file'])
     moose.mooseReadNML2(kwargs['nml2file'])
-
     _addStreamer()
-
     moose.reinit()
     simtime = kwargs['runtime']
     moose.start(simtime)
+    logger_.info("All done")
 
 if __name__ == '__main__':
     import argparse

@@ -123,11 +123,9 @@ def _findCaConc():
     This is a hack, though it is likely to work in most cases. 
     """
     caConcs = moose.wildcardFind("/library/##[TYPE=CaConc]")
-    assert (
-        len(caConcs) == 1
-    ), "No moose.CaConc found. Currently moose \
-            supports HHChannel which depends only on moose.CaConc ."
-
+    assert len(caConcs) == 1, "No moose.CaConc found." + \
+        " Currently moose supports HHChannel which depends only " + \
+        " on moose.CaConc. %s" % str(caConcs)
     return caConcs[0]
 
 
@@ -288,6 +286,22 @@ class NML2Reader(object):
         return self.cells_in_populations[pop_id][index]
 
     def getComp(self, pop_id, cellIndex, segId):
+        if pop_id not in self.pop_to_cell_type:
+            logger_.error("%s is not in populations: %s" % (pop_id 
+                , str(list(self.pop_to_cell_type.keys()))))
+            raise LookupError("%s not found" % pop_id)
+
+        cellType = self.pop_to_cell_type[pop_id]
+        if cellType not in self.seg_id_to_comp_name:
+            logger_.error("%s not found in %s.compartments: %s" % (cellType
+                , pop_id, str(list(self.seg_id_to_comp_name.keys()))))
+            raise LookupError("%s not found" % cellType)
+
+        compt = self.seg_id_to_comp_name[cellType]
+        if segId not in compt:
+            logger_.error("%s not found in %s.%s.segments: %s" % (compt
+                , pop_id, cellType, str(list(compt.keys()))))
+            raise LookupError("%s not found" % segId)
         return moose.element(
             "%s/%s/%s/%s"
             % (
@@ -300,15 +314,29 @@ class NML2Reader(object):
 
     def createPopulations(self):
         for pop in self.network.populations:
+            # Sometime NML2 returns None instead of 0
+            logger_.info("Adding population %s" % pop)
+            pop.size = 0 if pop.size is None else pop.size
             mpop = moose.Neutral("%s/%s" % (self.lib.path, pop.id))
             self.cells_in_populations[pop.id] = {}
+
+            # Either population have size of instances
             for i in range(pop.size):
-                logger_.info("Creating (%d out of %d) instances of %s (Type %s) under %s"
-                    % (i, pop.size, pop.id, pop.component, mpop)
-                )
                 self.pop_to_cell_type[pop.id] = pop.component
                 chid = moose.copy(self.proto_cells[pop.component], mpop, "%d"%i)
                 self.cells_in_populations[pop.id][i] = chid
+                logger_.info("Created %s instances of %s (Type %s)"
+                    % (chid, pop.id, pop.component)
+                )
+
+            # Add instance of population.
+            for i, instance in enumerate(pop.instances):
+                self.pop_to_cell_type[pop.id] = pop.component
+                chid = moose.copy(self.proto_cells[pop.component], mpop, '%d'%instance.id)
+                self.cells_in_populations[pop.id][instance.id] = chid
+                logger_.info("Created %s instances of %s (Type %s)"
+                    % (chid, pop.id, pop.component)
+                )
 
     def getInput(self, input_id):
         return moose.element("%s/inputs/%s" % (self.lib.path, input_id))
@@ -349,16 +377,16 @@ class NML2Reader(object):
             mLIF.Rm = 1.0/SI(iaf.leak_conductance)
 
         if hasattr(iaf, 'leak_reversal'):
-            logger_.warning("moose.LIF does not supprot leakReversal")
+            logger_.warning("moose.LIF does not supprot 'leakReversal' ")
 
         self.proto_cells[iaf.id] = mLIF
         self.nml_cells_to_moose[iaf.id] = mLIF
         self.moose_to_nml[mLIF] = iaf
 
+        # IAF cells have no morphology. Only one element. We need to create an element which
+        # can recieve input.
+        self.seg_id_to_comp_name[iaf.id] = {0:''}
 
-        quit()
-        #  self.createMorphology(cell, nrn, symmetric=symmetric)
-        #  self.importBiophysics(cell, nrn)
         return iaf, mLIF
 
     def createCellPrototype(self, cell, symmetric=True):
@@ -378,7 +406,12 @@ class NML2Reader(object):
 
         """
         morphology = nmlcell.morphology
+        if morphology is None:
+            logger_.warning("%s has no morphology?" % nmlcell)
+            return
+
         segments = morphology.segments
+
         id_to_segment = dict([(seg.id, seg) for seg in segments])
         if symmetric:
             compclass = moose.SymCompartment
