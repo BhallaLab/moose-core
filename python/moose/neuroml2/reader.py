@@ -42,9 +42,9 @@ except Exception as e:
     print(
         "********************************************************************")
 
+# these are the gates available. These are prefixed by 'gate' in C++ codebase.
+_validMooseHHGateIds = ['X', 'Y', 'Z']
 
-# these gates are available in moose. These are prefixed by 'gate'
-_validMooseHHGateIds = ['X', 'Y', 'Z'] 
 
 def _unique(ls):
     res = []
@@ -60,18 +60,20 @@ def _whichGate(chan):
     assert c in _validMooseHHGateIds
     return c
 
+
 def _pairNmlGateWithMooseGates(mGates, nmlGates):
     """Return moose gate id from nml.HHGate
     """
     global _validMooseHHGateIds
     # deep copy
-    mooseGatesMap = {_whichGate(x) : x for x in mGates}
+    mooseGatesMap = {_whichGate(x): x for x in mGates}
     availableMooseGates = _validMooseHHGateIds[:]
     mapping = {}
-    for nmlGate in nmlGates: 
+    for nmlGate in nmlGates:
         if nmlGate is None:
             continue
-        if hasattr(nmlGate, 'id') and nmlGate.id:
+        if hasattr(nmlGate, 'id') and nmlGate.id \
+                and nmlGate.id.upper() in availableMooseGates:
             mapping[nmlGate.id.upper()] = nmlGate
             availableMooseGates.remove(nmlGate.id.upper())
         else:
@@ -79,6 +81,7 @@ def _pairNmlGateWithMooseGates(mGates, nmlGates):
 
     # Now replace 'X', 'Y', 'Z' with moose gates.
     return [(mooseGatesMap[x], mapping[x]) for x in mapping]
+
 
 def _isConcDep(ct):
     """_isConcDep
@@ -491,7 +494,13 @@ class NML2Reader(object):
         'HHExpLinearRate': linoid2
     }
 
-    def calculateRateFn(self, ratefn, mgate, vmin, vmax, tablen=3000, vShift='0mV'):
+    def calculateRateFn(self,
+                        ratefn,
+                        mgate,
+                        vmin,
+                        vmax,
+                        tablen=3000,
+                        vShift='0mV'):
         """Returns A / B table from ngate."""
 
         tab = np.linspace(vmin, vmax, tablen)
@@ -509,11 +518,11 @@ class NML2Reader(object):
             else:
                 ca = _findCaConc()
                 if _whichGate(mgate) != 'Z':
-                    raise RuntimeWarning("Concentration dependant gate "
-                            " should use gateZ of moose.HHChannel. "
-                            " If you know what you are doing, ignore this "
-                            " warning. "
-                            )
+                    raise RuntimeWarning(
+                        "Concentration dependant gate "
+                        " should use gateZ of moose.HHChannel. "
+                        " If you know what you are doing, ignore this "
+                        " warning. ")
                 return self._computeRateFnCa(ca, ct, tab, vShift=vShift)
 
     def _computeRateFnCa(self, ca, ct, tab, vShift):
@@ -695,7 +704,7 @@ class NML2Reader(object):
         if moose.exists(path):
             mchan = moose.element(path)
         else:
-            mchan =  moose.HHChannel(path)
+            mchan = moose.HHChannel(path)
         mgates = [
             moose.element(g) for g in [mchan.gateX, mchan.gateY, mchan.gateZ]
         ]
@@ -733,7 +742,7 @@ class NML2Reader(object):
         mgate.max = vmax
         mgate.divs = vdivs
 
-        # Note by Padraig: 
+        # Note by Padraig:
         # ---------------
         # I saw only examples of GateHHRates in HH-channels, the meaning of
         # forwardRate and reverseRate and steadyState are not clear in the

@@ -26,13 +26,12 @@ try:
     import moose.neuroml2 as _neuroml2
 except Exception as e:
     nml2Import_ = False
-    nml2ImportError_ = ' '.join( [
-        "NML2 support is disabled because `libneuroml` and "
-        , "`pyneuroml` modules are not found.\n"
-        , "     $ pip install pyneuroml libneuroml \n"
-        , " should fix it."
-        , " Actual error: %s " % e ]
-        )
+    nml2ImportError_ = ' '.join([
+        "NML2 support is disabled because `libneuroml` and ",
+        "`pyneuroml` modules are not found.\n",
+        "     $ pip install pyneuroml libneuroml \n", " should fix it.",
+        " Actual error: %s " % e
+    ])
 
 chemImport_, chemError_ = True, ''
 try:
@@ -55,6 +54,7 @@ except Exception as e:
     mergechemImport_ = False
     mergechemError_ = '%s' % e
 
+
 # SBML related functions.
 def mooseReadSBML(filepath, loadpath, solver='ee', validate="on"):
     """Load SBML model.
@@ -73,23 +73,29 @@ def mooseReadSBML(filepath, loadpath, solver='ee', validate="on"):
     """
     global sbmlImport_
     if sbmlImport_:
-        modelpath = _readSBML.mooseReadSBML(filepath, loadpath, solver, validate)
+        modelpath = _readSBML.mooseReadSBML(filepath, loadpath, solver,
+                                            validate)
         sc = solver.lower()
-        if sc in ["gssa","gillespie","stochastic","gsolve"]:
+        if sc in ["gssa", "gillespie", "stochastic", "gsolve"]:
             method = "gssa"
-        elif sc in ["gsl","runge kutta","deterministic","ksolve","rungekutta","rk5","rkf","rk"]:
+        elif sc in [
+                "gsl", "runge kutta", "deterministic", "ksolve", "rungekutta",
+                "rk5", "rkf", "rk"
+        ]:
             method = "gsl"
-        elif sc in ["exponential euler","exponentialeuler","neutral", "ee"]:
+        elif sc in ["exponential euler", "exponentialeuler", "neutral", "ee"]:
             method = "ee"
         else:
             method = "ee"
 
         if method != 'ee':
-            _chemUtil.add_Delete_ChemicalSolver.mooseAddChemSolver(modelpath[0].path, method)
+            _chemUtil.add_Delete_ChemicalSolver.mooseAddChemSolver(
+                modelpath[0].path, method)
         return modelpath
     else:
-        logger_.error( sbmlError_ )
+        logger_.error(sbmlError_)
         return False
+
 
 def mooseWriteSBML(modelpath, filepath, sceneitems={}):
     """mooseWriteSBML: Writes loaded model under modelpath to a file in SBML format.
@@ -112,7 +118,7 @@ def mooseWriteSBML(modelpath, filepath, sceneitems={}):
     if sbmlImport_:
         return _writeSBML.mooseWriteSBML(modelpath, filepath, sceneitems)
     else:
-        logger_.error( sbmlError_ )
+        logger_.error(sbmlError_)
         return False
 
 
@@ -128,10 +134,10 @@ def mooseWriteKkit(modelpath, filepath, sceneitems={}):
     """
     global kkitImport_, kkitImport_err_
     if not kkitImport_:
-        print( '[WARN] Could not import module to enable this function' )
-        print( '\tError was %s' % kkitImport_error_ )
+        print('[WARN] Could not import module to enable this function')
+        print('\tError was %s' % kkitImport_error_)
         return False
-    return _writeKkit.mooseWriteKkit(modelpath, filepath,sceneitems)
+    return _writeKkit.mooseWriteKkit(modelpath, filepath, sceneitems)
 
 
 def mooseDeleteChemSolver(modelpath):
@@ -145,9 +151,10 @@ def mooseDeleteChemSolver(modelpath):
     to simulate else default is Exponential Euler (ee)
     """
     if chemImport_:
-        return _chemUtil.add_Delete_ChemicalSolver.mooseDeleteChemSolver(modelpath)
+        return _chemUtil.add_Delete_ChemicalSolver.mooseDeleteChemSolver(
+            modelpath)
     else:
-        print( chemError_ )
+        print(chemError_)
         return False
 
 
@@ -165,11 +172,13 @@ def mooseAddChemSolver(modelpath, solver):
         Runge Kutta ("gsl") etc. Link to documentation?
     """
     if chemImport_:
-        chemError_ = _chemUtil.add_Delete_ChemicalSolver.mooseAddChemSolver(modelpath, solver)
+        chemError_ = _chemUtil.add_Delete_ChemicalSolver.mooseAddChemSolver(
+            modelpath, solver)
         return chemError_
     else:
-        print( chemError_ )
+        print(chemError_)
         return False
+
 
 def mergeChemModel(src, des):
     """mergeChemModel: Merges two chemical model.
@@ -177,25 +186,26 @@ def mergeChemModel(src, des):
     """
     #global mergechemImport_
     if mergechemImport_:
-        return _chemMerge.merge.mergeChemModel(src,des)
+        return _chemMerge.merge.mergeChemModel(src, des)
     else:
         return False
 
+
 # NML2 reader and writer function.
-def mooseReadNML2( modelpath, verbose = False ):
+def mooseReadNML2(modelpath, verbose=False):
     """Read NeuroML model (version 2) and return reader object.
     """
     global nml2Import_
     if not nml2Import_:
-        mu.warn( nml2ImportError_ )
-        raise RuntimeError( "Could not load NML2 support." )
+        raise RuntimeError(nml2ImportError_)
 
-    reader = _neuroml2.NML2Reader( verbose = verbose )
-    reader.read( modelpath )
+    reader = _neuroml2.NML2Reader(verbose=verbose)
+    reader.read(modelpath)
     return reader
 
-def mooseWriteNML2( outfile ):
-    raise NotImplementedError( "Writing to NML2 is not supported yet" )
+
+def mooseWriteNML2(outfile):
+    raise NotImplementedError("Writing to NML2 is not supported yet")
 
 
 def loadModel(filename, modelpath, solverclass="gsl"):
@@ -217,32 +227,36 @@ def loadModel(filename, modelpath, solverclass="gsl"):
         moose.element if succcessful else None.
     """
 
-    if not os.path.isfile( os.path.realpath(filename) ):
-        mu.warn( "Model file '%s' does not exists or is not readable." % filename )
+    if not os.path.isfile(os.path.realpath(filename)):
+        mu.warn("Model file '%s' does not exists or is not readable." %
+                filename)
         return None
 
     extension = os.path.splitext(filename)[1]
     if extension in [".swc", ".p"]:
-        return _moose.loadModelInternal(filename, modelpath, "Neutral" )
+        return _moose.loadModelInternal(filename, modelpath, "Neutral")
 
     if extension in [".g", ".cspace"]:
         # only if genesis or cspace file and method != ee then only
         # mooseAddChemSolver is called.
         ret = _moose.loadModelInternal(filename, modelpath, "ee")
         sc = solverclass.lower()
-        if sc in ["gssa","gillespie","stochastic","gsolve"]:
+        if sc in ["gssa", "gillespie", "stochastic", "gsolve"]:
             method = "gssa"
-        elif sc in ["gsl","runge kutta","deterministic","ksolve","rungekutta","rk5","rkf","rk"]:
+        elif sc in [
+                "gsl", "runge kutta", "deterministic", "ksolve", "rungekutta",
+                "rk5", "rkf", "rk"
+        ]:
             method = "gsl"
-        elif sc in ["exponential euler","exponentialeuler","neutral"]:
+        elif sc in ["exponential euler", "exponentialeuler", "neutral"]:
             method = "ee"
         else:
             method = "ee"
 
         if method != 'ee':
-            _chemUtil.add_Delete_ChemicalSolver.mooseAddChemSolver(modelpath, method)
+            _chemUtil.add_Delete_ChemicalSolver.mooseAddChemSolver(
+                modelpath, method)
         return ret
     else:
-        logger_.error( "Unknown model extenstion '%s'" % extension)
+        logger_.error("Unknown model extenstion '%s'" % extension)
         return None
-

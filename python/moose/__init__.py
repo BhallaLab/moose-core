@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
 
+import logging
+logging.basicConfig(format='%(asctime)-15s %(name)-12s %(levelname)-8s %(message)s')
+
 # Bring everything from c++ module to global namespace. 
 from moose._moose import *
 
