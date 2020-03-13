@@ -202,8 +202,22 @@ def test_nml2_jkopsick():
     plt.tight_layout()
     plt.savefig(__file__ + ".png")
 
+def test_parse_nml_files():
+    import glob
+    files = glob.glob(os.path.join(SCRIPT_DIR, 'nml_files', '*.nml'))
+    print("Total %s files found" % len(files))
+    for f in files:
+        if moose.exists('/model'): moose.delete('/model')
+        if moose.exists('/library'): moose.delete('/library')
+        print("\n\n=========================================")
+        print("[INFO ] Reading file %s" % f)
+        moose.mooseReadNML2(f)
+
+    quit()
+    
 
 def main():
+    test_parse_nml_files()
     test_nml2()
     test_nml2_jkopsick()
 

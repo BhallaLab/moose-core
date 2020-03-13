@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<neuroml xmlns="http://www.neuroml.org/schema/neuroml2"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.neuroml.org/schema/neuroml2 ../Schemas/NeuroML2/NeuroML_v2beta4.xsd"
+    id="NML2_InstanceBasedNetwork">
+
+<!-- Example of a network specified as a set of location and connection instances in NeuroML 2 --> 
+
+    <expOneSynapse id="syn1" gbase="5nS" erev="0mV" tauDecay="3ms" />
+    <expOneSynapse id="syn2" gbase="10nS" erev="0mV" tauDecay="2ms" />
+
+    <iafCell id="iaf" leakReversal="-60mV" thresh="-55mV" reset="-62mV" C="1.0nF" leakConductance="0.05uS"/>
+
+    <pulseGenerator id="pulseGen1" delay="100ms" duration="100ms" amplitude="0.3nA"/>
+    <pulseGenerator id="pulseGen2" delay="100ms" duration="100ms" amplitude="0.4nA"/>
+
+    <network id="InstanceBasedNetwork">
+
+        <population id="iafCells" type="populationList" component="iaf" size="3">
+            <instance id="0">
+                <location x="120" y="230" z="567"/>
+            </instance>
+            <instance id="1">
+                <location x="270" y="450" z="56"/>
+            </instance>
+            <instance id="2">
+                <location x="54" y="234" z="89"/>
+            </instance>
+        </population>
+
+
+        <projection id="internal1" presynapticPopulation="iafCells" postsynapticPopulation="iafCells" synapse="syn1">
+            <!--TODO: Fix! want to define synapse in here, so that multiple synapses per connection can be defined  
+            <synapseComponent component="syn1"/>-->
+            <!--TODO: Fix! want to use preCellId="0"  -->
+            <connection id="0" preCellId="../iafCells/0/iaf" postCellId="../iafCells/1/iaf"/>
+        </projection>
+
+        <projection id="internal2" presynapticPopulation="iafCells" postsynapticPopulation="iafCells" synapse="syn2">
+            <connection id="0" preCellId="../iafCells/0/iaf" postCellId="../iafCells/2/iaf"/>
+        </projection>
+
+
+        <inputList id="stimInput" component="pulseGen1" population="iafCells">
+            <!--TODO: Fix! want to use target="0"  -->
+            <input id="0" target="../iafCells/0/iaf" destination="synapses"/>
+        </inputList>
+        
+
+    </network>
+
+</neuroml>
+
+
+
+
+
+
+
+

@@ -59,6 +59,21 @@ def _whichGate(chan):
     assert c in _validMooseHHGateIds
     return c
 
+def _setAttrFromNMLAttr(mObj, mAttr, nObj, nAttr, convertToSI=False):
+    """Set MOOSE's object attribute from NML attribute
+
+    :param mObj: MOOSE object.
+    :param mAttr: MOOSE object's attribute
+    :param nObj: NML2 Object
+    :param nAttr: NML2 Object attribute.
+    :param convertToSI: If `True` convert value to si unit.
+    """
+    if not hasattr(nObj, nAttr):
+        return 
+    if not hasattr(mObj, mAttr):
+        return
+    val = SI(getattr(nObj, nAttr)) if convertToSI else getattr(nObj, nAttr)
+    setattr(mObj, mAttr, val)
 
 def _pairNmlGateWithMooseGates(mGates, nmlGates):
     """Return moose gate id from nml.HHGate
@@ -255,6 +270,9 @@ class NML2Reader(object):
         for cell in self.doc.cells:
             self.createCellPrototype(cell, symmetric=symmetric)
 
+        for iaf in self.doc.iaf_cells:
+            self.createIAFCellPrototype(iaf)
+
         if len(self.doc.networks) >= 1:
             self.createPopulations()
             self.createInputs()
@@ -285,12 +303,11 @@ class NML2Reader(object):
             mpop = moose.Neutral("%s/%s" % (self.lib.path, pop.id))
             self.cells_in_populations[pop.id] = {}
             for i in range(pop.size):
-                print(
-                    "Creating %s/%s instances of %s under %s"
-                    % (i, pop.size, pop.component, mpop)
+                logger_.info("Creating (%d out of %d) instances of %s (Type %s) under %s"
+                    % (i, pop.size, pop.id, pop.component, mpop)
                 )
                 self.pop_to_cell_type[pop.id] = pop.component
-                chid = moose.copy(self.proto_cells[pop.component], mpop, "%s" % (i))
+                chid = moose.copy(self.proto_cells[pop.component], mpop, "%d"%i)
                 self.cells_in_populations[pop.id][i] = chid
 
     def getInput(self, input_id):
@@ -317,6 +334,32 @@ class NML2Reader(object):
                     ),
                     "injectMsg",
                 )
+
+    def createIAFCellPrototype(self, iaf):
+        """FIXME: Not tested.
+        """
+        mLIF = moose.LIF("%s/%s" % (self.lib.path, iaf.id))
+        _setAttrFromNMLAttr(mLIF, 'vReset', iaf, 'reset', True)
+        _setAttrFromNMLAttr(mLIF, 'thres', iaf, 'thres', True)
+        _setAttrFromNMLAttr(mLIF, 'refractoryPeriod', iaf, 'refrac', True)
+        _setAttrFromNMLAttr(mLIF, 'Cm', iaf, 'C', True)
+        _setAttrFromNMLAttr(mLIF, 'Ra', iaf, 'Ra', True)
+
+        if iaf.leak_conductance:
+            mLIF.Rm = 1.0/SI(iaf.leak_conductance)
+
+        if hasattr(iaf, 'leak_reversal'):
+            logger_.warning("moose.LIF does not supprot leakReversal")
+
+        self.proto_cells[iaf.id] = mLIF
+        self.nml_cells_to_moose[iaf.id] = mLIF
+        self.moose_to_nml[mLIF] = iaf
+
+
+        quit()
+        #  self.createMorphology(cell, nrn, symmetric=symmetric)
+        #  self.importBiophysics(cell, nrn)
+        return iaf, mLIF
 
     def createCellPrototype(self, cell, symmetric=True):
         """To be completed - create the morphology, channels in prototype"""

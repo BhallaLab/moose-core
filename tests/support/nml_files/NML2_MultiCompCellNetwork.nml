@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<neuroml xmlns="http://www.neuroml.org/schema/neuroml2"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.neuroml.org/schema/neuroml2 ../Schemas/NeuroML2/NeuroML_v2beta4.xsd"
+         id="NML2_MultiCompCellNetwork">
+
+    <!-- Example of a network with connections between multicompartmental cells --> 
+
+    <include href="NML2_SingleCompHHCell.nml"/> <!-- Used to import channels from HH example-->
+
+    <expTwoSynapse id="AMPA" tauRise="3e-5s" tauDecay="0.5e-3s" gbase=".3nS" erev="0V"/>
+    
+    
+    <blockingPlasticSynapse id="NMDA" gbase=".8nS" tauRise="1e-3s" tauDecay="13.3333e-3s" erev="0V">
+
+        <blockMechanism type="voltageConcDepBlockMechanism" species="mg" 
+                        blockConcentration="1.2mM" scalingConc="1.9205441817997078mM" 
+                        scalingVolt="0.016129032258064516V"/>
+
+    </blockingPlasticSynapse>
+
+    <cell id="MultiCompCell">
+
+        <notes>Multicompartmental cell</notes>
+
+        <morphology id="MultiCompCell_morphology">
+
+            <segment id ="0" name="Soma">
+                <proximal x="0" y="0" z="0" diameter="10"/>
+                <distal x="0" y="10" z="0" diameter="10"/>
+            </segment>
+
+            <segment id ="1" name="Dendrite1">
+                <parent segment="0"/>
+                <proximal x="0" y="10" z="0" diameter="3"/>
+                <distal x="0" y="20" z="0" diameter="3"/>
+            </segment>
+
+            <segment id ="2" name="Dendrite2a">
+                <parent segment="1"/>
+                <proximal x="0" y="20" z="0" diameter="3"/>
+                <distal x="0" y="30" z="0" diameter="2.5"/>
+            </segment>
+            
+            <segment id ="3" name="Dendrite2b">
+                <parent segment="2"/>
+                <distal x="0" y="50" z="0" diameter="1.5"/>
+            </segment>
+            
+            
+            <segmentGroup id="soma" neuroLexId="sao864921383">    <!--
+                This group contains an unbranched set of segments, and all of the segmentGroups marked with
+                neuroLexId = sao864921383 form a non-overlapping set of all of the segments. 
+                These segmentGroups correspond to the 'cables' of NeuroML v1.8.1. -->
+
+                <member segment="0"/>
+            </segmentGroup>
+            
+            <segmentGroup id="dendSec1" neuroLexId="sao864921383">   
+                <member segment="1"/>
+            </segmentGroup>
+            
+            <segmentGroup id="dendSec2" neuroLexId="sao864921383">   
+                <property tag="numberInternalDivisions" value="9"/>
+                <member segment="2"/>
+                <member segment="3"/>
+            </segmentGroup>
+            
+            <segmentGroup id="soma_group"> 
+                <include segmentGroup="soma"/>
+            </segmentGroup>
+
+           <segmentGroup id="dendrite_group">  
+                <include segmentGroup="dendSec1"/>
+                <include segmentGroup="dendSec2"/>
+            </segmentGroup>
+
+        </morphology>
+
+        <biophysicalProperties id="bioPhys1">
+            
+            <membraneProperties>
+                        
+                <channelDensity id="leak" ionChannel="passiveChan" condDensity="3.0 S_per_m2" erev="-54.3mV" ion="non_specific"/>
+                <channelDensity id="naChans" ionChannel="naChan" condDensity="120.0 mS_per_cm2" erev="50.0 mV" ion="na"/>
+                <channelDensity id="kChans" ionChannel="kChan" condDensity="360 S_per_m2" erev="-77mV" ion="k"/>
+
+                <spikeThresh value="-20mV"/>
+                <specificCapacitance value="1.0 uF_per_cm2"/>
+                <initMembPotential value="-65mV"/>
+
+            </membraneProperties>
+
+            <intracellularProperties>
+                <resistivity value="100 kohm_cm"/>   
+            </intracellularProperties>
+
+        </biophysicalProperties>
+    </cell>
+    
+    <pulseGenerator id="pulseGen2" delay="20ms" duration="100ms" amplitude="0.2nA"/>
+    <pulseGenerator id="pulseGen3" delay="30ms" duration="100ms" amplitude="0.18nA"/>
+
+    <network id="MultiCompCellNetwork">
+
+        <population id="pop0" type="populationList" component="MultiCompCell">
+            <instance id="0">
+                <location x="0" y="0" z="0"/>
+            </instance>
+            <instance id="1">
+                <location x="30" y="0" z="0"/>
+            </instance>
+            <instance id="2">
+                <location x="60" y="0" z="0"/>
+            </instance>
+        </population>
+
+        <projection id="projAMPA" presynapticPopulation="pop0" postsynapticPopulation="pop0" synapse="AMPA">
+            <connection id="0" preCellId="../pop0/0/MultiCompCell" postCellId="../pop0/1/MultiCompCell" preSegmentId="0" preFractionAlong="0.5" postSegmentId="0" postFractionAlong="0.5"/>
+            <connection id="1" preCellId="../pop0/0/MultiCompCell" postCellId="../pop0/1/MultiCompCell" preSegmentId="0" preFractionAlong="0.5" postSegmentId="3" postFractionAlong="0.3"/>
+            
+            <connection id="2" preCellId="../pop0/2/MultiCompCell" postCellId="../pop0/1/MultiCompCell" preSegmentId="0" preFractionAlong="0.5" postSegmentId="0" postFractionAlong="0.5"/>
+            <connection id="3" preCellId="../pop0/2/MultiCompCell" postCellId="../pop0/1/MultiCompCell" preSegmentId="0" preFractionAlong="0.5" postSegmentId="1" postFractionAlong="0.5"/>
+            <connection id="4" preCellId="../pop0/2/MultiCompCell" postCellId="../pop0/1/MultiCompCell" preSegmentId="0" preFractionAlong="0.5" postSegmentId="3" postFractionAlong="0.25"/>
+        </projection>
+
+        <projection id="projNMDA" presynapticPopulation="pop0" postsynapticPopulation="pop0" synapse="NMDA">
+            <connection id="0" preCellId="../pop0/0/MultiCompCell" postCellId="../pop0/1/MultiCompCell" preSegmentId="0" preFractionAlong="0.5" postSegmentId="0" postFractionAlong="0.5"/>
+            <connection id="1" preCellId="../pop0/0/MultiCompCell" postCellId="../pop0/1/MultiCompCell" preSegmentId="0" preFractionAlong="0.5" postSegmentId="3" postFractionAlong="0.5"/>
+            
+            <connection id="2" preCellId="../pop0/2/MultiCompCell" postCellId="../pop0/1/MultiCompCell" preSegmentId="0" preFractionAlong="0.5" postSegmentId="0" postFractionAlong="0.5"/>
+            <connection id="3" preCellId="../pop0/2/MultiCompCell" postCellId="../pop0/1/MultiCompCell" preSegmentId="0" preFractionAlong="0.5" postSegmentId="1" postFractionAlong="0.5"/>
+            <connection id="4" preCellId="../pop0/2/MultiCompCell" postCellId="../pop0/1/MultiCompCell" preSegmentId="0" preFractionAlong="0.5" postSegmentId="3" postFractionAlong="0.25"/>
+        </projection>
+
+        <inputList id="stimInput1" component="pulseGen2" population="pop0">
+            <input id="0" target="../pop0/0/MultiCompCell" segmentId="0" fractionAlong="0.5" destination="synapses"/>
+        </inputList>
+
+        <inputList id="stimInput2" component="pulseGen3" population="pop0">
+            <input id="1" target="../pop0/2/MultiCompCell" segmentId="0" fractionAlong="0.5" destination="synapses"/>
+        </inputList>
+        
+    </network>
+
+</neuroml>
+
+
+
+
+
+
+
+
