@@ -7,6 +7,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <cmath>
+
 #include "../basecode/header.h"
 #include "../basecode/ElementValueFinfo.h"
 #include "../utility/print_function.hpp"
