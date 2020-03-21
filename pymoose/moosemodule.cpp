@@ -496,92 +496,44 @@ PyObject * to_pytuple(void * obj, char typecode)
     {
         vector< double > * vec = static_cast< vector < double >* >(obj);
         assert(vec != NULL);
-#ifndef USE_NUMPY
-        ret = PyTuple_New((Py_ssize_t)vec->size());
-        for (unsigned int ii = 0; ii < vec->size(); ++ii)
-        {
-            if (0 != PyTuple_SetItem(ret, ii, PyFloat_FromDouble(vec->at(ii))))
-            {
-                Py_DECREF(ret);
-                return NULL;
-            }
-        }
-#else
         npy_intp size = (npy_intp)(vec->size());
         ret = PyArray_SimpleNew(1, &size, NPY_DOUBLE);
         assert(ret != NULL);
         char * ptr = PyArray_BYTES((PyArrayObject*)ret);
         memcpy(ptr, &(*vec)[0], vec->size() * sizeof(double));
-#endif
         return ret;
     }
     case 'i':   // vector<int>
     {
         vector< int > * vec = static_cast< vector < int >* >(obj);
         assert(vec != NULL);
-#ifndef USE_NUMPY
-        ret = PyTuple_New((Py_ssize_t)vec->size());
-        for (unsigned int ii = 0; ii < vec->size(); ++ii)
-        {
-            if (0 != PyTuple_SetItem(ret, ii, PyInt_FromLong(vec->at(ii))))
-            {
-                Py_DECREF(ret);
-                return NULL;
-            }
-        }
-#else
         npy_intp size = (npy_intp)(vec->size());
         ret = PyArray_SimpleNew(1, &size, NPY_INT);
         assert(ret != NULL);
         char * ptr = PyArray_BYTES((PyArrayObject*)ret);
         memcpy(ptr, &(*vec)[0], size * sizeof(int));
-#endif
         return ret;
     }
     case 'I':   // vector<unsigned int>
     {
         vector< int > * vec = static_cast< vector < int >* >(obj);
         assert(vec != NULL);
-#ifndef USE_NUMPY
-        ret = PyTuple_New((Py_ssize_t)vec->size());
-        for (unsigned int ii = 0; ii < vec->size(); ++ii)
-        {
-            if (0 != PyTuple_SetItem(ret, ii, PyLong_FromLong(vec->at(ii))))
-            {
-                Py_DECREF(ret);
-                return NULL;
-            }
-        }
-#else
         npy_intp size = (npy_intp)(vec->size());
         ret = PyArray_SimpleNew(1, &size, NPY_UINT);
         assert(ret != NULL);
         char * ptr = PyArray_BYTES((PyArrayObject*)ret);
         memcpy(ptr, &(*vec)[0], size * sizeof(unsigned int));
-#endif
         return ret;
     }
     case 'l':   // vector<long>
     {
         vector< long > * vec = static_cast< vector < long >* >(obj);
         assert(vec != NULL);
-#ifndef USE_NUMPY
-        ret = PyTuple_New((Py_ssize_t)vec->size());
-        for (unsigned int ii = 0; ii < vec->size(); ++ii)
-        {
-            if (0 != PyTuple_SetItem(ret, ii, PyLong_FromLong(vec->at(ii))))
-            {
-                Py_DECREF(ret);
-                return NULL;
-            }
-        }
-#else
         npy_intp size = (npy_intp)(vec->size());
         ret = PyArray_SimpleNew(1, &size, NPY_INT);
         assert(ret != NULL);
         char * ptr = PyArray_BYTES((PyArrayObject*)ret);
         memcpy(ptr, &(*vec)[0], size * sizeof(long));
-#endif
         return ret;
     }
     case 'x':   // vector<Id>
@@ -648,23 +600,11 @@ PyObject * to_pytuple(void * obj, char typecode)
     {
         vector< unsigned int > * vec = static_cast< vector < unsigned int >* >(obj);
         assert(vec != NULL);
-#ifndef USE_NUMPY
-        ret = PyTuple_New((Py_ssize_t)vec->size());
-        for (unsigned int ii = 0; ii < vec->size(); ++ii)
-        {
-            if (0 != PyTuple_SetItem(ret, ii, PyLong_FromUnsignedLong(vec->at(ii))))
-            {
-                Py_DECREF(ret);
-                return NULL;
-            }
-        }
-#else
         npy_intp size = (npy_intp)(vec->size());
         ret = PyArray_SimpleNew(1, &size, NPY_UINT);
         assert(ret != NULL);
         char * ptr = PyArray_BYTES((PyArrayObject*)ret);
         memcpy(ptr, &(*vec)[0], size * sizeof(unsigned int));
-#endif
         return ret;
     }
     case 'L':   // vector<long long> - this is not used at present
@@ -672,68 +612,33 @@ PyObject * to_pytuple(void * obj, char typecode)
         vector< long long> * vec = static_cast< vector < long long>* >(obj);
         assert(vec != NULL);
         ret = PyTuple_New((Py_ssize_t)vec->size());
-#ifndef USE_NUMPY
-        for (unsigned int ii = 0; ii < vec->size(); ++ii)
-        {
-            if (0 != PyTuple_SetItem(ret, ii, PyLong_FromLongLong(vec->at(ii))))
-            {
-                Py_DECREF(ret);
-                return NULL;
-            }
-        }
-#else
         npy_intp size = (npy_intp)(vec->size());
         ret = PyArray_SimpleNew(1, &size, NPY_LONGLONG);
         assert(ret != NULL);
         char * ptr = PyArray_BYTES((PyArrayObject*)ret);
         memcpy(ptr, &(*vec)[0], size * sizeof(long long));
-#endif
         return ret;
     }
     case 'K':   // vector<unsigned long long> - this is not used at present
     {
         vector< unsigned long long> * vec = static_cast< vector < unsigned long long>* >(obj);
         assert(vec != NULL);
-#ifndef USE_NUMPY
-        ret = PyTuple_New((Py_ssize_t)vec->size());
-        for (unsigned int ii = 0; ii < vec->size(); ++ii)
-        {
-            if (0 != PyTuple_SetItem(ret, ii, PyLong_FromUnsignedLongLong(vec->at(ii))))
-            {
-                Py_DECREF(ret);
-                return NULL;
-            }
-        }
-#else
         npy_intp size = (npy_intp)(vec->size());
         ret = PyArray_SimpleNew(1, &size, NPY_ULONGLONG);
         assert(ret != NULL);
         char * ptr = PyArray_BYTES((PyArrayObject*)ret);
         memcpy(ptr, &(*vec)[0], size * sizeof(unsigned long long));
-#endif
         return ret;
     }
     case 'F':   // vector<float>
     {
         vector< float > * vec = static_cast< vector < float >* >(obj);
         assert(vec != NULL);
-#ifndef USE_NUMPY
-        ret = PyTuple_New((Py_ssize_t)vec->size());
-        for (unsigned int ii = 0; ii < vec->size(); ++ii)
-        {
-            if (0 != PyTuple_SetItem(ret, ii, PyFloat_FromDouble(vec->at(ii))))
-            {
-                Py_DECREF(ret);
-                return NULL;
-            }
-        }
-#else
         npy_intp size = (npy_intp)(vec->size());
         ret = PyArray_SimpleNew(1, &size, NPY_FLOAT);
         assert(ret != NULL);
         char * ptr = PyArray_BYTES((PyArrayObject*)ret);
         memcpy(ptr, &(*vec)[0], size * sizeof(float));
-#endif
         return ret;
     }
     case 's':   // vector<string>
@@ -3056,9 +2961,8 @@ PyMODINIT_FUNC MODINIT(_moose)
     {
         cerr << "Failed to register finalize() to be called at exit. " << endl;
     }
-#ifdef USE_NUMPY
     import_array();
-#endif
+
     // Add Id type
     // Py_TYPE(&IdType) = &PyType_Type; // unnecessary - filled in by PyType_Ready
     IdType.tp_new = PyType_GenericNew;

@@ -15,7 +15,6 @@ endif()
 
 include_directories(${NUMPY_INCLUDE_DIRS})
 add_definitions(-std=c++11)
-add_definitions(-DUSE_NUMPY)
 add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
 
 set(PYTHON_SO_EXTENSION ".so")
