@@ -5,7 +5,7 @@
 // Created: Mon Jul 22 16:46:37 2013 (+0530)
 
 #include <Python.h>
-#include <structmember.h> // This defines the type id macros like T_STRING
+#include <structmember.h>
 
 #include <iostream>
 #include <typeinfo>

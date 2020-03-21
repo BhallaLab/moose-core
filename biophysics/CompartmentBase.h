@@ -11,14 +11,6 @@
 #ifndef _COMPARTMENT_BASE_H
 #define _COMPARTMENT_BASE_H
 
-#ifdef  CYMOOSE
-
-template<typename A>
-class SrcFinfo1;
-
-
-#endif     /* -----  CYMOOSE  ----- */
-
 /**
  * The CompartmentBase class sets up the interface for all the
  * derived Compartment classes, used in

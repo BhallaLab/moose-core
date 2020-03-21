@@ -5,10 +5,6 @@
 #include <Python.h>
 #include <structmember.h>
 
-#ifdef USE_BOOST_ODE
-#include <boost/format.hpp>
-#endif
-
 #include <iostream>
 #include <typeinfo>
 #include <cstring>
