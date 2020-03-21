@@ -2873,9 +2873,8 @@ PyObject * moose_element(PyObject* dummy, PyObject * args)
     Id id;
     unsigned int numData = 0;
 
-    // Parse into str or bytes-like object. Using 's' parses into const char*
-    // which is portable with bytes often returned when working with python3.
-    if (PyArg_ParseTuple(args, "s*", &path))
+    // Don't use s* here: See https://github.com/BhallaLab/moose-core/issues/397
+    if (PyArg_ParseTuple(args, "s", &path))
     {
         oid = ObjId(path);
         if ( oid.bad() )
