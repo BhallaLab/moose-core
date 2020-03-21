@@ -29,27 +29,25 @@
 unsigned int getNumCores()
 {
     auto numCores = std::thread::hardware_concurrency();
-    if(0 == numCores)
+    if (0 == numCores)
         numCores = 1;
     return numCores;
 }
 
 //////////////////////////////////////////////////////////////////
 
-void checkChildren( Id parent, const string& info )
+void checkChildren(Id parent, const string &info)
 {
-    vector< Id > ret;
-    Neutral::children( parent.eref(), ret );
-    cout << info << " checkChildren of " <<
-         parent.element()->getName() << ": " <<
-         ret.size() << " children\n";
-    for ( vector< Id >::iterator i = ret.begin(); i != ret.end(); ++i )
-    {
+    vector<Id> ret;
+    Neutral::children(parent.eref(), ret);
+    cout << info << " checkChildren of " << parent.element()->getName() << ": "
+         << ret.size() << " children\n";
+    for (vector<Id>::iterator i = ret.begin(); i != ret.end(); ++i) {
         cout << i->element()->getName() << endl;
     }
 }
 
-Id init( int argc, char** argv, bool& doUnitTests)
+Id init(int argc, char **argv, bool &doUnitTests)
 {
     unsigned int numCores = getNumCores();
     int numNodes = 1;
@@ -59,46 +57,45 @@ Id init( int argc, char** argv, bool& doUnitTests)
     Cinfo::rebuildOpIndex();
 
 #ifdef USE_MPI
-    MPI_Init( &argc, &argv );
-    MPI_Comm_size( MPI_COMM_WORLD, &numNodes );
-    MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &numNodes);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myNode);
 #endif
 
     Id shellId;
-    Element* shelle =
-        new GlobalDataElement( shellId, Shell::initCinfo(), "root", 1 );
+    Element *shelle = new GlobalDataElement(shellId, Shell::initCinfo(), "root", 1);
 
     Id clockId = Id::nextId();
-    assert( clockId.value() == 1 );
+    assert(clockId.value() == 1);
     Id classMasterId = Id::nextId();
     Id postMasterId = Id::nextId();
 
-    Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
-    s->setShellElement( shelle );
-    s->setHardware( numCores, numNodes, myNode );
+    Shell *s = reinterpret_cast<Shell *>(shellId.eref().data());
+    s->setShellElement(shelle);
+    s->setHardware(numCores, numNodes, myNode);
     s->loadBalance();
 
     /// Sets up the Elements that represent each class of Msg.
     unsigned int numMsg = Msg::initMsgManagers();
 
-    new GlobalDataElement( clockId, Clock::initCinfo(), "clock", 1 );
-    new GlobalDataElement( classMasterId, Neutral::initCinfo(), "classes", 1);
-    new GlobalDataElement( postMasterId, PostMaster::initCinfo(), "postmaster", 1 );
+    new GlobalDataElement(clockId, Clock::initCinfo(), "clock", 1);
+    new GlobalDataElement(classMasterId, Neutral::initCinfo(), "classes", 1);
+    new GlobalDataElement(postMasterId, PostMaster::initCinfo(), "postmaster", 1);
 
-    assert ( shellId == Id() );
-    assert( clockId == Id( 1 ) );
-    assert( classMasterId == Id( 2 ) );
-    assert( postMasterId == Id( 3 ) );
+    assert(shellId == Id());
+    assert(clockId == Id(1));
+    assert(classMasterId == Id(2));
+    assert(postMasterId == Id(3));
 
     // s->connectMasterMsg();
 
-    Shell::adopt( shellId, clockId, numMsg++ );
-    Shell::adopt( shellId, classMasterId, numMsg++ );
-    Shell::adopt( shellId, postMasterId, numMsg++ );
+    Shell::adopt(shellId, clockId, numMsg++);
+    Shell::adopt(shellId, classMasterId, numMsg++);
+    Shell::adopt(shellId, postMasterId, numMsg++);
 
-    assert( numMsg == 10 ); // Must be the same on all nodes.
+    assert(numMsg == 10); // Must be the same on all nodes.
 
-    Cinfo::makeCinfoElements( classMasterId );
+    Cinfo::makeCinfoElements(classMasterId);
 
     return shellId;
 }
