@@ -13,11 +13,12 @@ r'''
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Friday May 27 12:19:00 2016(+0530)
 Version
-Last-Updated: Wed 8 Jan 14:15:10 2020(+0530)
+Last-Updated: Fri 20 Mar 13:15:10 2020(+0530)
           By: HarshaRani
 **********************************************************************/
 /****************************
 2020
+Mar 20: Channel Annotation is cleaned up
 Jan 08: added function to write Concchannel in form of MMenz
         Km in the kinetic law for MMenz is written to the power based on the number of substrate
 2019
@@ -259,7 +260,8 @@ def writeChannel(modelpath, cremodel_, sceneitems,groupInfo):
         compt = ""
         notesE = ""
         groupName = moose.element("/")
-
+        if not moose.exists(chan.path+'/info'):
+            moose.Annotator(chan.path+'/info')
         if moose.exists(chan.path + '/info'):
             Anno = moose.Annotator(chan.path + '/info')
             notesE = Anno.notes
@@ -267,15 +269,16 @@ def writeChannel(modelpath, cremodel_, sceneitems,groupInfo):
             ele = getGroupinfo(element)
             ele = findGroup_compt(element)
             chanAnno = " "
-            if ele.className == "Neutral" or sceneitems or Anno.x or Anno.y:
-                    chanannoexist = True
+            #if ele.className == "Neutral" or sceneitems or Anno.x or Anno.y:
+            #        chanannoexist = True
+            chanannoexist = True
             if chanannoexist:
                 chanAnno = "<moose:ModelAnnotation>\n"
                 if ele.className == "Neutral":
                     groupName = ele
                 if sceneitems:
                     #Saved from GUI, then scene co-ordinates are passed
-                    chanGpnCorCol = chanGpnCorCol + "<moose:xCord>" + \
+                    chanGpnCorCol = "<moose:xCord>" + \
                             str(sceneitems[chan]['x']) + "</moose:xCord>\n" + \
                             "<moose:yCord>" + \
                             str(sceneitems[chan]['y'])+ "</moose:yCord>\n"
@@ -283,7 +286,7 @@ def writeChannel(modelpath, cremodel_, sceneitems,groupInfo):
                     #Saved from cmdline,genesis coordinates are kept as its
                     # SBML, cspace, python, then auto-coordinates are done
                     #and coordinates are updated in moose Annotation field
-                    chanGpnCorCol = chanGpnCorCol + "<moose:xCord>" + \
+                    chanGpnCorCol = "<moose:xCord>" + \
                             str(Anno.x) + "</moose:xCord>\n" + \
                             "<moose:yCord>" + \
                             str(Anno.y)+ "</moose:yCord>\n"
@@ -313,7 +316,6 @@ def writeChannel(modelpath, cremodel_, sceneitems,groupInfo):
                                          str(chan.getDataIndex()) +
                                          "_"))
             channel.setId(chansetId)
-            
             if groupName != moose.element('/'):
                 if groupName not in groupInfo:
                     groupInfo[groupName]=[chansetId]
@@ -322,12 +324,11 @@ def writeChannel(modelpath, cremodel_, sceneitems,groupInfo):
 
             channel.setName(str(idBeginWith(convertSpecialCharshot(chan.name))))
             channel.setReversible(True)
-            channel.setFast(False)        
-            if chanannoexist:
-                canAnno = chanAnno + chanGpnCorCol
-                chanAnno = "<moose:ConcChannel>\n" + \
-                    chanGpnCorCol + "</moose:ConcChannel>"
-                channel.setAnnotation(chanAnno)
+            channel.setFast(False)
+            chanAnno = "<moose:ModelAnnotation>\n <moose:Channel>ConcChannel</moose:Channel>\n" + \
+                    chanGpnCorCol + "</moose:ModelAnnotation>"
+            channel.setAnnotation(chanAnno)
+
             noofSub, sRateLawS = getSubprd(cremodel_, False, "sub", chanSub)
             # Modifier
             chanMod = chan.neighbors["setNumChan"]
@@ -1118,10 +1119,8 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
                     if not moose.exists(spe.path+'/info'):
                         cplxinfo = moose.Annotator(spe.path+'/info')
                         enzpath = moose.element(spe.parent.path+'/info')
-                        
-                        cplxinfo.x = moose.element(moose.element(spe.parent.path+'/info').x)
-                        
-                        cplxinfo.y = int((moose.element(spe.parent.path+'/info').y))+10
+                        cplxinfo.x = moose.element(enzpath).x
+                        cplxinfo.y = int((moose.element(enzpath).y))+10
                  
                     if (moose.element(enz.parent), moose.PoolBase):
                         # print " found a cplx name ",spe.parent,
