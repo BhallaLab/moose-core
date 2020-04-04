@@ -61,9 +61,12 @@ def _prettifyExpr(expr):
         return expr
 
 
-# Generic wrapper around moose.Neutral
-class Neutral(_moose.Neutral):
-    def __init__(self, path, n=1, g=0, dtype="Neutral", **kwargs):
+# Generic wrapper around moose.Neutral.
+# This did break some isinstance method: see issue 402
+
+class __Wrapper__(_moose.Neutral):
+
+    def __init__(self, path, n=1, g=0, dtype='Neutral', **kwargs):
         super(Neutral, self).__init__(path, n, g, dtype)
         for k in kwargs:
             try:
@@ -111,7 +114,8 @@ class Neutral(_moose.Neutral):
         _moose.connect(self, srcField, dest, destField)
 
 
-class Function(_moose.Function, Neutral):
+
+class Function(_moose.Function, __Wrapper__):
     """Overides moose._Function
 
     Provides a convinient way to set expression and connect variables.
@@ -182,7 +186,7 @@ def addAttrib(mooseObject, **kwargs):
             logger_.warn("Attribute {0} not found on {1}".format(k, v))
 
 
-class StimulusTable(_moose.StimulusTable, Neutral):
+class StimulusTable(_moose.StimulusTable, __Wrapper__):
     """StimulusTable
     Wrapper around _moose.StimulusTable
     """
