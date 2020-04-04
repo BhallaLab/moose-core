@@ -67,7 +67,7 @@ def _prettifyExpr(expr):
 class __Wrapper__(_moose.Neutral):
 
     def __init__(self, path, n=1, g=0, dtype='Neutral', **kwargs):
-        super(Neutral, self).__init__(path, n, g, dtype)
+        super(__Wrapper__, self).__init__(path, n, g, dtype)
         for k in kwargs:
             try:
                 setattr(self, k, kwargs[k])
@@ -81,7 +81,7 @@ class __Wrapper__(_moose.Neutral):
         if _moose.exists(path):
             #  logger_.info("%s already exists. Returning old element."%path)
             return _moose.element(path)
-        return super(Neutral, cls).__new__(cls, pathOrObject, n, g, dtype)
+        return super(__Wrapper__, cls).__new__(cls, pathOrObject, n, g, dtype)
 
     def connect(self, srcField, dest, destField):
         """Wrapper around moose.connect.
@@ -196,7 +196,7 @@ class StimulusTable(_moose.StimulusTable, __Wrapper__):
         addAttrib(self, **kwargs)
 
 
-class IntFire(_moose.IntFire, Neutral):
+class IntFire(_moose.IntFire, __Wrapper__):
     """IntFire
     Wrapper around _moose.IntFire
     """
@@ -206,7 +206,7 @@ class IntFire(_moose.IntFire, Neutral):
         addAttrib(self, **kwargs)
 
 
-class PulseGen(_moose.PulseGen, Neutral):
+class PulseGen(_moose.PulseGen, __Wrapper__):
     """PulseGen
     Wrapper around _moose.PulseGen
     """
