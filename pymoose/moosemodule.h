@@ -33,11 +33,11 @@ PyMODINIT_FUNC PyInit_moose();
 #define PyString_Check PyUnicode_Check
 #define PyString_FromString PyUnicode_FromString
 #define PyString_FromFormat PyUnicode_FromFormat
-#define PyString_AsString(str)                                          \
-    PyBytes_AS_STRING(PyUnicode_AsEncodedString(str, "utf-8", "Error~"))
-// Python 3 does not like global module state
+#define PyString_AsString(str)  PyBytes_AS_STRING(PyUnicode_AsEncodedString(str, "utf-8", "Error~"))
 #define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+
 #else // Python 2
+
 PyMODINIT_FUNC init_moose();
 static struct module_state _state;
 #define GETSTATE(m) (&_state)
@@ -57,11 +57,11 @@ static struct module_state _state;
 
 // Minimum number of arguments for setting destFinfo - 1-st
 // the finfo name.
-#define minArgs 1
+#define MIN_ARGS 1
 
 // Arbitrarily setting maximum on variable argument list. Read:
 // http://www.swig.org/Doc1.3/Varargs.html to understand why
-#define maxArgs 10
+#define MAX_ARGS 10
 
 
 ///////////////////////////////////

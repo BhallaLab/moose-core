@@ -89,7 +89,7 @@ def colorCheck(fc_bgcolor):
             hexlist ="#"
             for n in fc_bgcolor:
                 if c < 3:
-                    #hexlist = hexlist+str("%02x" % int(n))
+                    hexlist = hexlist+str("%02x" % int(n))
                     c = c+1;
             fc_bgcolor = hexlist
         return(fc_bgcolor)

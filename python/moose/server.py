@@ -27,7 +27,6 @@ import tempfile
 import threading 
 import subprocess
 
-# create a logger for this server.
 import logging
 logger_ = logging.getLogger('moose.server')
 
@@ -179,7 +178,7 @@ def writeTarfile( data ):
     # Sleep for some time so that file can be written to disk.
     time.sleep(0.1)
     if not tarfile.is_tarfile(tfile):
-        logger_.warn( 'Not a valid tar file: %s' % tfile)
+        logger_.warning( 'Not a valid tar file: %s' % tfile)
         return None
     return tfile
 
@@ -255,7 +254,7 @@ def extract_files(tfile, to):
         try:
             f.extractall( to )
         except Exception as e:
-            logger_.warn( e)
+            logger_.warning( e)
     # now check if all files have been extracted properly
     for f in userFiles:
         if not os.path.exists(f):
@@ -340,7 +339,7 @@ def handle_client(conn, ip, port):
     while isActive:
         tarfileName, nBytes = savePayload(conn)
         if tarfileName is None:
-            logger_.warn( "Could not recieve data." )
+            logger_.warning( "Could not recieve data." )
             isActive = False
         if not os.path.isfile(tarfileName):
             send_msg("[ERROR] %s is not a valid tarfile. Retry"%tarfileName, conn)
