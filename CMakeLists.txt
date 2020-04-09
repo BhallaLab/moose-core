@@ -102,10 +102,8 @@ if(WITH_ASAN AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address")
 endif()
 
-if(WITH_GSL)
-    set(WITH_BOOST OFF)
-    set(WITH_BOOST_ODE OFF)
-elseif(WITH_BOOST)
+# Override default GSL solvers when BOOST is enabled.
+if(WITH_BOOST OR WITH_BOOST_ODE)
     set(WITH_BOOST_ODE ON)
     set(WITH_GSL OFF)
 endif()
