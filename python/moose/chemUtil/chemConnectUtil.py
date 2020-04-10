@@ -29,7 +29,7 @@ for name,hexno in matplotlib.colors.cnames.items():
     matplotcolor[name]=hexno
 
 def getRandColor():
-    k = random.choice(matplotcolor.keys())
+    k = random.choice(list(matplotcolor.keys()))
     if k in ignoreColor:
         return getRandColor()
     else:

@@ -430,6 +430,7 @@ def getModelAnnotation(obj, baseId, basepath):
                             baseinfo.runtime = runtime
                         if nodeName == "solver":
                             solver = (grandChildNode.getChild(0).toXMLString())
+                            solver = solver.replace(" ","")
                             baseinfo.solver = solver
                         if(nodeName == "plots"):
                             plotValue = (
