@@ -112,6 +112,7 @@ def addOneChan(chanpath, gbar,comp):
 
     SA = np.pi * comp.length * comp.diameter
     proto = moose.element('/library/' + chanpath)
+    #  print(proto)
     chan = moose.copy(proto, comp, chanpath)
     chan.Gbar = gbar * SA
     # If we are using GHK AND it is a calcium channel, connect it to GHK

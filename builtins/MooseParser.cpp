@@ -12,8 +12,9 @@
 #include <regex>
 #include <algorithm>
 
-#include "../basecode/global.h"
 #include "../basecode/header.h"
+
+#include "../randnum/randnum.h"
 
 #include "../utility/testing_macros.hpp"
 #include "../utility/print_function.hpp"
@@ -61,7 +62,7 @@ double MooseParser::Rand( )
 double MooseParser::SRand( double seed = -1 )
 {
     if( seed >= 0 )
-        moose::mtseed( (size_t) seed );
+        moose::mtseed( (unsigned int) seed );
     return moose::mtrand();
 }
 
@@ -73,7 +74,7 @@ double MooseParser::Rand2( double a, double b )
 double MooseParser::SRand2( double a, double b, double seed = -1 )
 {
     if( seed >= 0 )
-        moose::mtseed( (size_t) seed );
+        moose::mtseed( (unsigned int) seed );
     return moose::mtrand( a, b );
 }
 
@@ -86,12 +87,12 @@ double MooseParser::Fmod( double a, double b )
 /*-----------------------------------------------------------------------------
  *  Get/Set
  *-----------------------------------------------------------------------------*/
-Parser::symbol_table_t& MooseParser::GetSymbolTable(const size_t nth)
+Parser::symbol_table_t& MooseParser::GetSymbolTable(const unsigned int nth)
 {
     return expression_.get_symbol_table(nth);
 }
 
-const Parser::symbol_table_t& MooseParser::GetSymbolTable(const size_t nth) const
+const Parser::symbol_table_t& MooseParser::GetSymbolTable(const unsigned int nth) const
 {
     return expression_.get_symbol_table(nth);
 }
@@ -105,7 +106,7 @@ void MooseParser::PrintSymbolTable(void) const
 {
     stringstream ss;
     auto symbTable = GetSymbolTable();
-    vector<std::pair<string, double>> vars;
+    vector<pair<string, double>> vars;
     auto n = symbTable.get_variable_list(vars);
     ss << "More Information:\nTotal variables " << n << ".";
     for (auto i : vars)
@@ -238,9 +239,9 @@ bool MooseParser::CompileExpr()
     bool res = parser.compile(expr_, expression_);
     if(! res)
     {
-        std::stringstream ss;
+        stringstream ss;
         ss << "Failed to parse '" << expr_ << "' :" << endl;
-        for (std::size_t i = 0; i < parser.error_count(); ++i)
+        for (unsigned int i = 0; i < parser.error_count(); ++i)
         {
             Parser::error_t error = parser.get_error(i);
             ss << "Error[" << i << "] Position: " << error.token.position
@@ -249,7 +250,7 @@ bool MooseParser::CompileExpr()
 
             // map is
             auto symbTable = GetSymbolTable();
-            vector<std::pair<string, double>> vars;
+            vector<pair<string, double>> vars;
             auto n = symbTable.get_variable_list(vars);
             ss << "More Information:\nTotal variables " << n << ".";
             for (auto i : vars)
@@ -278,7 +279,7 @@ bool MooseParser::CompileExprWithUnknown(Function* func)
     // Get all symbols and create Variable() for them. Note that now the
     // previos symbol table and compiled expressions are invalid.
     auto symbTable = GetSymbolTable();
-    vector<std::pair<string, double>> vars;
+    vector<pair<string, double>> vars;
     symbTable.get_variable_list(vars);
 
     // note: Don't clear the symbol table. Constants will also get cleared
@@ -302,9 +303,9 @@ bool MooseParser::CompileExprWithUnknown(Function* func)
     res = parser.compile(expr_, expression_);
     if(! res)
     {
-        std::stringstream ss;
+        stringstream ss;
         ss << "Failed to parse '" << expr_ << "' :" << endl;
-        for (std::size_t i = 0; i < parser.error_count(); ++i)
+        for (unsigned int i = 0; i < parser.error_count(); ++i)
         {
             Parser::error_t error = parser.get_error(i);
             ss << "Error[" << i << "] Position: " << error.token.position
@@ -313,7 +314,7 @@ bool MooseParser::CompileExprWithUnknown(Function* func)
 
             // map is
             auto symbTable = GetSymbolTable();
-            vector<std::pair<string, double>> vars;
+            vector<pair<string, double>> vars;
             auto n = symbTable.get_variable_list(vars);
             ss << "More Information:\nTotal variables " << n << ".";
             for (auto i : vars)
@@ -327,7 +328,7 @@ bool MooseParser::CompileExprWithUnknown(Function* func)
 }
 
 
-double MooseParser::Derivative(const string& name, size_t nth) const
+double MooseParser::Derivative(const string& name, unsigned int nth) const
 {
     if(nth > 3)
     {
@@ -345,13 +346,13 @@ double MooseParser::Eval(bool check) const
 {
     if(! valid_)
     {
-        cout << "Warn: Invalid parser state." << endl;
+        cout << "MooseParser::Eval: Warn: Invalid parser state." << endl;
         return 0.0;
     }
 
     if(expr_.empty())
     {
-        cout << "warn: Expr is empty " << endl;
+        cout << "MooseParser::Eval: warn: Expr is empty " << endl;
         return 0.0;
     }
 
@@ -394,10 +395,10 @@ const string MooseParser::GetExpr( ) const
 
 void MooseParser::LinkVariables(vector<Variable*>& xs, vector<double*>& ys, double* t)
 {
-    for(size_t i = 0; i < xs.size(); i++)
+    for(unsigned int i = 0; i < xs.size(); i++)
         DefineVar('x'+to_string(i), xs[i]->ref());
 
-    for (size_t i = 0; i < ys.size(); i++) 
+    for (unsigned int i = 0; i < ys.size(); i++) 
         DefineVar('y'+to_string(i), ys[i]);
 
     DefineVar("t", t);
@@ -405,10 +406,10 @@ void MooseParser::LinkVariables(vector<Variable*>& xs, vector<double*>& ys, doub
 
 void MooseParser::LinkVariables(vector<shared_ptr<Variable>>& xs, vector<shared_ptr<double>>& ys, double* t)
 {
-    for(size_t i = 0; i < xs.size(); i++)
+    for(unsigned int i = 0; i < xs.size(); i++)
         DefineVar('x'+to_string(i), xs[i]->ref());
 
-    for (size_t i = 0; i < ys.size(); i++) 
+    for (unsigned int i = 0; i < ys.size(); i++) 
         DefineVar('y'+to_string(i), ys[i].get());
 
     DefineVar("t", t);

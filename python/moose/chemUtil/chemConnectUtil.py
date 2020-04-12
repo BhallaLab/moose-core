@@ -110,6 +110,8 @@ def validColorcheck(color):
         return(matplotlib.colors.cnames["orange"])
 
 def xyPosition(objInfo,xory):
+    if objInfo is None:
+        return 0.0
     try:
         return float(moose.element(objInfo).getField(xory))
     except ValueError as e:
@@ -152,13 +154,14 @@ def setupMeshObj(modelRoot):
         tablist  = moose.wildcardFind(meshEnt.path+'/##[ISA=StimulusTable]')
         if mol_cpl or funclist or enzlist or realist or tablist:
             for m in mol_cpl:
-                if isinstance(moose.element(m.parent),moose.CplxEnzBase):
+                objInfo = None
+                if m.parent.isA['CplxEnzBase']:
                     cplxlist.append(m)
                     objInfo = m.parent.path+'/info'
-                elif isinstance(moose.element(m),moose.PoolBase):
+                elif m.isA['PoolBase']:
                     mollist.append(m)
                     objInfo =m.path+'/info'
-                if moose.exists(objInfo):
+                if objInfo is not None and moose.exists(objInfo):
                     listOfitems[moose.element(moose.element(objInfo).parent)]={'x':xyPosition(objInfo,'x'),'y':xyPosition(objInfo,'y')}
 
                 xcord.append(xyPosition(objInfo,'x'))
@@ -287,12 +290,13 @@ def countitems(mitems,objtype):
 
 def findCompartment(element):
     if element.path == '/':
-        return moose.element('/')
-    elif mooseIsInstance(element, ["CubeMesh", "CylMesh","EndoMesh","NeuroMesh"]):
-        return (element)
-    else:
-        return findCompartment(moose.element(element.parent))
-    
+        return element
+    if element.isA['ChemCompt']:
+        return element
+    return findCompartment(element.parent)
 
-def mooseIsInstance(element, classNames):
-    return moose.element(element).__class__.__name__ in classNames
+def mooseIsInstance(elem, classes):
+    for cl in classes:
+        if elem.isA[cl]:
+            return True
+    return False

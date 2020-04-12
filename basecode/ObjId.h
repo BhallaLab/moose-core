@@ -10,8 +10,6 @@
 #ifndef _OBJ_ID_H
 #define _OBJ_ID_H
 
-#include "Id.h"
-
 /**
  * This class manages lookups for specific data entries in elements,
  * in a node-independent manner.
@@ -38,8 +36,14 @@ public:
     /**
      * Creates a ObjId using specified Id and DataIndex
      */
-    ObjId( Id i, unsigned int d, unsigned int f = 0 )
+    ObjId( Id i, unsigned int d, unsigned int f)
         : id( i ), dataIndex( d ), fieldIndex( f )
+    {
+        ;
+    }
+
+    ObjId( Id i, unsigned int d)
+        : id( i ), dataIndex( d ), fieldIndex(0)
     {
         ;
     }

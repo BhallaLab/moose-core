@@ -853,7 +853,7 @@ int moose_Id_setattro(_Id *self, PyObject *attr, PyObject *value)
         return -1;
     }
     char ftype = shortType(fieldtype);
-    Py_ssize_t length = moose_Id_getLength(self);
+    Py_sunsigned int length = moose_Id_getLength(self);
     bool is_seq = true;
     if (!PySequence_Check(value)) {
         is_seq = false;

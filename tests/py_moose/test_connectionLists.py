@@ -58,6 +58,10 @@ def makeGlobalBalanceNetwork():
     ov = moose.vec( outsyn.path + '/synapse' )
     oiv = moose.vec( outInhSyn.path + '/synapse' )
 
+    assert len(iv) == 0
+    assert len(ov) == 0
+    assert len(oiv) == 0
+
     temp = moose.connect( stim, 'spikeOut', iv, 'addSpike', 'Sparse' )
     inhibMatrix = moose.element( temp )
     inhibMatrix.setRandomConnectivity( 
@@ -103,6 +107,7 @@ def makeGlobalBalanceNetwork():
     assert numInhSyns == expected, "Expected %s, got %s" % (expected,numInhSyns)
 
     for i in moose.vec( outsyn ):
+        print('111', i)
         nov += i.synapse.num
         if i.synapse.num > 0:
             i.synapse.weight = params['wtStimToOut']
@@ -111,7 +116,7 @@ def makeGlobalBalanceNetwork():
         #print i.synapse.num
         if i.synapse.num > 0:
             i.synapse.weight = params['wtInhToOut']
-     
+
     print("SUMS: ", sum( iv.numField ), sum( ov.numField ), sum( oiv.numField ))
     assert [1, 64, 25] == [sum( iv.numField ), sum( ov.numField ), sum( oiv.numField )]
     print("SUMS2: ", niv, nov, noiv)

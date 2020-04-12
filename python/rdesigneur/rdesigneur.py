@@ -661,7 +661,7 @@ class rdesigneur:
             chemCompt = path[:pos]
             if chemCompt[-5:] == "_endo":
                 chemCompt = chemCompt[0:-5]
-            cc = moose.element( self.modelPath + '/chem/' + chemCompt)
+            cc = moose.element(self.modelPath + '/chem/' + chemCompt)
             voxelVec = []
             temp = [ self._makeUniqueNameStr( i ) for i in comptList ]
             #print( temp )

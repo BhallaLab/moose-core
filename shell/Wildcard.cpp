@@ -35,11 +35,11 @@ static bool wildcardFieldComparison( ObjId oid, const string& mid )
     // where = could be the usual comparison operators and val
     // could be a number. No strings yet
 
-    string::size_type pos = mid.find(')');
+    auto pos = mid.find(')');
     if ( pos == string::npos )
         return 0;
     string fieldName = mid.substr( 0, pos );
-    string::size_type pos2 = mid.find_last_of( "=<>" );
+    auto pos2 = mid.find_last_of( "=<>" );
     if ( pos2 == string::npos )
         return 0;
     string op = mid.substr( pos + 1, pos2 - pos );
@@ -153,6 +153,13 @@ int wildcardFind(const string& path, vector<ObjId>& ret, bool clear)
     simpleWildcardFind( path, ret );
     myUnique( ret );
     return ret.size();
+}
+
+vector<ObjId> wildcardFind2(const char* path)
+{
+    vector<ObjId> ret;
+    wildcardFind(path, ret, true);
+    return ret;
 }
 
 /**
@@ -311,7 +318,7 @@ bool matchInsideBrace( ObjId id, const string& inside )
             inside.substr(0, 5 ) == "CLASS" ||
             inside.substr(0, 3 ) == "ISA" )
     {
-        string::size_type pos = inside.rfind( "=" );
+        auto pos = inside.rfind( "=" );
         if ( pos == string::npos )
             return false;
         bool isEquality = ( inside[ pos - 1 ] != '!' );
@@ -445,8 +452,8 @@ bool matchBeforeBrace( ObjId id, const string& wild )
 
     /*
 
-    string::size_type pre = name.find( "#" );
-    string::size_type post = name.rfind( "#" );
+    auto pre = name.find( "#" );
+    auto post = name.rfind( "#" );
 
     // # may only be used once in the wildcard, but substitutes for any
     // number of characters.

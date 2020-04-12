@@ -72,4 +72,3 @@ double RNG::uniform( void )
 }
 
 }
-

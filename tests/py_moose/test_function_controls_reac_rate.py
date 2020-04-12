@@ -59,6 +59,7 @@ def test():
                 ['soma', '1', 'dend/C', 'conc', 'C conc', 'wave']],
     )
     rdes.buildModel()
+    ts = moose.wildcardFind('/##[TYPE=Table2]')
 
     C = moose.element( '/model/chem/dend/C' )
     C.vec.concInit = [ 1+np.sin(x/5.0) for x in range( len(C.vec) ) ]
@@ -68,12 +69,16 @@ def test():
         rdes.display()
     ts = moose.wildcardFind( '/##[TYPE=Table2]')
     mat = []
+    assert len(ts) == 50, len(ts)
+
     for t in ts:
+        print(t)
         if 'plot1' in t.path:
             mat.append(t.vector)
     mat = np.matrix(mat)
+
     exMean, exStd = 1.1619681711817156, 0.6944155817587526
-    assert np.isclose( np.mean(mat), exMean), mp.mean(mat)
+    assert np.isclose( np.mean(mat), exMean), (np.mean(mat), exMean)
     assert np.isclose( np.std(mat), exStd), mp.std(mat)
     assert( np.isclose(np.mean(mat, axis=0), exMean).all() )
     assert( np.isclose(np.std(mat, axis=0), exStd).all() )

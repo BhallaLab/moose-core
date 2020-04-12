@@ -57,8 +57,8 @@ def makeModel():
     stoich.dsolve = dsolve
     stoich.path = "/model/compartment/##"
     assert( dsolve.numPools == 4 )
-    s.vec.concInit = [1]*num
-    t.vec.concInit = [1]*num
+    s.vec.concInit = [1.0]*num
+    t.vec.concInit = [1.0]*num
 
     estoich = moose.Stoich( '/model/endo/stoich' )
     estoich.compartment = endo

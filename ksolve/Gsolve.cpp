@@ -7,7 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 #include "../basecode/header.h"
-#include "../basecode/global.h"
+#include "../randnum/randnum.h"
 
 #include "../mesh/VoxelJunction.h"
 #include "../utility/print_function.hpp"

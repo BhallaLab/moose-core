@@ -61,12 +61,18 @@ def test_ksolver_parallel( nthreads = 4 ):
     stoich.ksolve = ksolve
     stoich.dsolve = dsolve
     stoich.path = '/cylinder/##'
+    assert stoich.path == '/cylinder/##'
     for i in range( 10, 18 ):
         moose.setClock( i, dt )
 
     #initialize
     x = np.arange( 0, compt.x1, compt.diffLength )
-    c.vec.nInit = [ (q < 0.2 * compt.x1) for q in x ]
+    assert len(c.vec) == 10000, len(c.vec)
+    nInit = [(float(q < 0.2) * compt.x1) for q in x]
+    c.vec.nInit = nInit
+    assert np.allclose(c.vec.nInit, nInit), (c.vec.nInit, nInit)
+    #  print(nInit)
+    #  quit()
 
     expected = [ (0.2, 0.40000000000000013)
             , (2.6704795776286974e-07, 1.2678976830753021e-17)
@@ -80,8 +86,10 @@ def test_ksolver_parallel( nthreads = 4 ):
     updateDt = 50
     runtime = updateDt * 4
     yvec = c.vec.n
+    print(yvec, '111')
+    quit()
     u1, m1 = np.mean( yvec ), np.std( yvec )
-    print( u1, m1 )
+    print(u1, m1)
     assert np.isclose( (u1, m1), expected[0], atol=1e-5).all(), expected[0]
     t1 = time.time()
     for i, t in enumerate(range( 0, runtime-1, updateDt)):

@@ -20,3 +20,9 @@ build:
     - python3 setup.py build test 
     - python3 setup.py install --user
     - python3 -c "import moose; moose.test()"
+
+  except:
+      - pybind11
+      - devel
+      - temp
+

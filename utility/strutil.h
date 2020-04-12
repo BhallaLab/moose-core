@@ -55,6 +55,9 @@ namespace moose
     std::string random_string( const unsigned size );
 
 
+    std::pair<std::string, std::string> splitPath(const std::string& path);
+
+
     // Replace occurance of a substring in a given string.
     void str_replace_all( std::string& str, const std::string& a, const std::string& b);
 

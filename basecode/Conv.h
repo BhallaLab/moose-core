@@ -100,7 +100,7 @@ template< class T > class Conv
                 return "Id";
             if ( typeid( T ) == typeid( ObjId ) )
                 return "ObjId";
-            return typeid( T ).name(); // this is not portable but may be more useful than "bad"
+            return typeid(T).name(); // this is not portable but may be more useful than "bad"
         }
 
     private:

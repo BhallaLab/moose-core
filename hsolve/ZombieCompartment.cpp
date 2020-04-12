@@ -8,10 +8,9 @@
 **********************************************************************/
 
 #include "ZombieCompartment.h"
+#include "../randnum/randnum.h"
 
-using namespace moose;
 const double ZombieCompartment::EPSILON = 1.0e-15;
-
 
 /**
  * The initCinfo() function sets up the Compartment class.

@@ -1,5 +1,5 @@
 # Compiler check.
-# Must support c++11
+# Must support c++14
 # If python2 is supported then we can not use c++17. 
 if(COMPILER_IS_TESTED)
     return()
@@ -20,12 +20,12 @@ add_definitions(-Wall
     )
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    # gcc-4.9.0 has regex supports though moose will compile with 4.8.x;
-    # <regex> won't work.
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
-        message(FATAL_ERROR "Insufficient gcc version. Minimum requried 4.9")
+    # Requires C++14 support.
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0")
+        message(FATAL_ERROR "Insufficient gcc version. Minimum requried 5.0")
     endif()
     add_definitions( -Wno-unused-local-typedefs )
+    add_definitions( -fmax-errors=5 )
 elseif(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
     add_definitions( -Wno-unused-local-typedef )
 endif()
@@ -44,13 +44,13 @@ if(COMPILER_SUPPORT_UNUSED_BUT_SET_VARIABLE_NO_WARN)
 endif(COMPILER_SUPPORT_UNUSED_BUT_SET_VARIABLE_NO_WARN)
 
 if(COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
     if(APPLE)
         add_definitions( -mllvm -inline-threshold=1000 )
     endif(APPLE)
 else(COMPILER_SUPPORTS_CXX11)
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} is too old. \n"
-      "Please use a compiler which has c++11 support."
+      "Please use a compiler which has c++14 support."
       )
 endif(COMPILER_SUPPORTS_CXX11)
 

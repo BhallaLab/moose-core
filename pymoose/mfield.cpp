@@ -311,8 +311,8 @@ PyObject * moose_DestField_call(PyObject * self, PyObject * args,
         return NULL;
     }
     // copy the arguments in `args` into the new argument tuple
-    Py_ssize_t argc =  PyTuple_Size(args);
-    for (Py_ssize_t ii = 0; ii < argc; ++ii)
+    Py_sunsigned int argc =  PyTuple_Size(args);
+    for (Py_sunsigned int ii = 0; ii < argc; ++ii)
     {
         PyObject * arg = PyTuple_GetItem(args, ii);
         Py_INCREF(arg);
@@ -558,14 +558,14 @@ int moose_ElementField_setNum(_Field * self, PyObject * args, void * closure)
     return 0;
 }
 
-Py_ssize_t moose_ElementField_getLen(_Field * self, void * closure)
+Py_sunsigned int moose_ElementField_getLen(_Field * self, void * closure)
 {
     if (self->owner->oid_.bad())
     {
         RAISE_INVALID_ID(-1, "moose_ElementField_getLen");
     }
     unsigned int num = Field<unsigned int>::get(self->myoid, "numField");
-    return Py_ssize_t(num);
+    return Py_sunsigned int(num);
 }
 
 PyObject * moose_ElementField_getPath(_Field * self, void * closure)
@@ -608,7 +608,7 @@ PyObject * moose_ElementField_getDataId(_Field * self, void * closure)
     return Py_BuildValue("I", self->owner->oid_.dataIndex);
 }
 
-PyObject * moose_ElementField_getItem(_Field * self, Py_ssize_t index)
+PyObject * moose_ElementField_getItem(_Field * self, Py_sunsigned int index)
 {
     if (self->owner->oid_.bad())
     {
@@ -641,7 +641,7 @@ PyObject * moose_ElementField_getItem(_Field * self, Py_ssize_t index)
     return oid_to_element(oid);
 }
 
-PyObject * moose_ElementField_getSlice(_Field * self, Py_ssize_t start, Py_ssize_t end)
+PyObject * moose_ElementField_getSlice(_Field * self, Py_sunsigned int start, Py_sunsigned int end)
 {
     assert(start >= 0);
     assert(end >= 0);
@@ -650,7 +650,7 @@ PyObject * moose_ElementField_getSlice(_Field * self, Py_ssize_t start, Py_ssize
     {
         RAISE_INVALID_ID(NULL, "moose_ElementField_getSlice");
     }
-    Py_ssize_t len = Field<unsigned int>::get(self->myoid, "numField");
+    Py_sunsigned int len = Field<unsigned int>::get(self->myoid, "numField");
     while (start < 0)
     {
         start += len;
@@ -666,12 +666,12 @@ PyObject * moose_ElementField_getSlice(_Field * self, Py_ssize_t start, Py_ssize
         // Python itself returns empty tuple in such cases, follow that
         return PyTuple_New(0);
     }
-    PyObject * ret = PyTuple_New((Py_ssize_t)(end - start));
+    PyObject * ret = PyTuple_New((Py_sunsigned int)(end - start));
     for ( int ii = start; ii < end; ++ii)
     {
         ObjId oid(self->myoid.id, self->myoid.dataIndex, ii);
         PyObject * value = oid_to_element(oid);
-        if (PyTuple_SetItem(ret, (Py_ssize_t)(ii-start), value))
+        if (PyTuple_SetItem(ret, (Py_sunsigned int)(ii-start), value))
         {
             Py_XDECREF(ret);
             // Py_XDECREF(value);
@@ -852,7 +852,7 @@ int moose_ElementField_setattro(_Field * self, PyObject * attr, PyObject * value
         return -1;
     }
     char ftype = shortType(fieldtype);
-    Py_ssize_t length = moose_ElementField_getLen(self, NULL);
+    Py_sunsigned int length = moose_ElementField_getLen(self, NULL);
     bool is_seq = true;
     if (!PySequence_Check(value))
     {

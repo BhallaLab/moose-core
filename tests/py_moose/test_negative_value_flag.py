@@ -46,7 +46,9 @@ def test_neg_value_flag():
 
     ########################################################
     # Run it again with negative values allowed
-    moose.element('/model/kinetics/stoich').allowNegative = True
+    stoich = moose.element('/model/kinetics/stoich')
+    print(moose.wildcardFind('/##[TYPE=Stoich]'))
+    stoich.allowNegative = True
     moose.reinit()
     moose.start(runtime)
     oneValIsBelowZero = False

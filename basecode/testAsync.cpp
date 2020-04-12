@@ -30,7 +30,7 @@
 #include "../scheduling/Clock.h"
 #include "../builtins/Arith.h"
 #include "../biophysics/IntFire.h"
-#include "../randnum/RNG.h"
+#include "../randnum/randnum.h"
 
 #include <queue>
 

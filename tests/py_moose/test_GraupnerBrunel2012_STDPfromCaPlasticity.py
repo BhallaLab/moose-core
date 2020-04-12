@@ -42,6 +42,7 @@ def test_GB2012_STDP():
     network = moose.LIF( 'network', 2 );
     moose.le( '/network' )
     network.vec.Em = Vrest
+    assert np.allclose(network.vec.Em, Vrest), (network.vec.Em, Vrest)
     network.vec.thresh = Vt_base
     network.vec.refractoryPeriod = refrT
     network.vec.Rm = R

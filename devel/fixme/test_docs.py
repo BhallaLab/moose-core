@@ -19,7 +19,8 @@ print( '[INFO] Using moose from %s' % moose.__file__ )
 print( '[INFO] Version : %s' % moose.version( ) )
 
 def test_doc( ):
-    moose.doc( 'Compartment' )
+    print('==Testing docs')
+    moose.doc('Compartment')
 
 def main():
     test_doc()

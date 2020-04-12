@@ -9,7 +9,6 @@
 #ifndef _DEST_FINFO_H
 #define _DEST_FINFO_H
 
-
 /*
  * DestFinfo manages function requests. All messages terminate on
  * the functions stored in DestFinfos. No templates here, as all the

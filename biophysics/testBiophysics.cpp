@@ -9,7 +9,7 @@
 
 
 #include "../basecode/header.h"
-#include "../basecode/global.h"
+#include "../randnum/randnum.h"
 #include "../shell/Shell.h"
 #include "../utility/testing_macros.hpp"
 
@@ -67,7 +67,7 @@ void testIntFireNetwork( unsigned int runsteps = 5 )
     unsigned int nd = syn->totNumLocalField();
     if ( Shell::numNodes() == 1 )
     {
-        EXPECT_EQ( nd, NUM_TOT_SYN, "" );
+        EXPECT_EQ( nd, NUM_TOT_SYN, "NUM_NODES=1" );
     }
     else if ( Shell::numNodes() == 2 )
         assert( nd == 52446 );

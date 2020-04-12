@@ -31,7 +31,7 @@ def test_sbml():
     moose.start(200)
     # TODO: Add more tests here.
     p = moose.wildcardFind( '/sbml/##' )
-    assert len(p) == 8
+    assert len(p) == 8, p
     names = ['compartment', 'mesh', 'S1', 'info', 'S2', 'info', 'reaction1']
     for x in p:
         assert x.name in names

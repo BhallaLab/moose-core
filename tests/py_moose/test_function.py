@@ -29,6 +29,7 @@ def test_var_order():
     dt = 1.0
     # fn0 = moose.Function('/fn0')
     fn1 = moose.Function('/fn1')
+    print(fn1.x.num)
     fn1.x.num = 2
     fn1.expr = 'y1+y0+x1+x0'
     fn1.mode = 1

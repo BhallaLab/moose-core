@@ -134,11 +134,6 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
                 else:
                     loadpath ='/'+loadpath
                     baseId = moose.Neutral(loadpath)
-                    basePath = baseId
-        
-                    # All the model will be created under model as
-                    # a thumbrule
-                    basePath = moose.Neutral(baseId.path)
                     # Map Compartment's SBML id as key and value is
                     # list of[ Moose ID and SpatialDimensions ]
                     global comptSbmlidMooseIdMap
@@ -159,14 +154,14 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
                     mapParameter(model, globparameterIdValue)
                     msgCmpt = ""
                     errorFlag,msgCmpt = createCompartment(
-                        basePath, model, comptSbmlidMooseIdMap)
+                        baseId, model, comptSbmlidMooseIdMap)
 
-                    groupInfo = checkGroup(basePath,model,comptSbmlidMooseIdMap)
+                    groupInfo = checkGroup(baseId,model,comptSbmlidMooseIdMap)
                     funcDef = checkFuncDef(model)
                     if errorFlag:
                         specInfoMap = {}
                         errorFlag,warning = createSpecies(
-                            basePath, model, comptSbmlidMooseIdMap, specInfoMap, modelAnnotaInfo,groupInfo)
+                            baseId, model, comptSbmlidMooseIdMap, specInfoMap, modelAnnotaInfo,groupInfo)
                         if errorFlag:
                             msgRule = createRules(
                                  model, specInfoMap, globparameterIdValue)
@@ -176,8 +171,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
                                 if len(moose.wildcardFind(moose.element(loadpath).path+"/##[ISA=ReacBase],/##[ISA=EnzBase]")) == 0:
                                     errorFlag = False
                                     noRE = ("Atleast one reaction should be present to display in the widget ")
-                        getModelAnnotation(
-                            model, baseId, basePath)
+                        getModelAnnotation(model, baseId)
                     if not errorFlag:
                         # Any time in the middle if SBML does not read then I
                         # delete everything from model level This is important
@@ -409,7 +403,7 @@ def populatedict(annoDict, label, value):
         annoDict[label] = {value}
 
 
-def getModelAnnotation(obj, baseId, basepath):
+def getModelAnnotation(obj, baseId):
     annotationNode = obj.getAnnotation()
     if annotationNode is not None:
         numchild = annotationNode.getNumChildren()
@@ -434,7 +428,6 @@ def getModelAnnotation(obj, baseId, basepath):
                         if(nodeName == "plots"):
                             plotValue = (
                                 grandChildNode.getChild(0).toXMLString())
-                            p = moose.element(baseId)
                             datapath = moose.element(baseId).path + "/data"
                             if not moose.exists(datapath):
                                 datapath = moose.Neutral(baseId.path + "/data")
@@ -445,9 +438,10 @@ def getModelAnnotation(obj, baseId, basepath):
                                 for plots in plotlist:
                                     plots = plots.replace(" ", "")
                                     plotorg = plots
-                                    if( moose.exists(basepath.path + plotorg) and isinstance(moose.element(basepath.path+plotorg),moose.PoolBase)) :
+                                    if( moose.exists(baseId.path + plotorg) and
+                                            isinstance(moose.element(baseId.path+plotorg),moose.PoolBase)) :
                                         plotSId = moose.element(
-                                            basepath.path + plotorg)
+                                            baseId.path + plotorg)
                                         # plotorg = convertSpecialChar(plotorg)
                                         plot2 = plots.replace('/', '_')
                                         plot3 = plot2.replace('[', '_')

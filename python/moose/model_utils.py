@@ -245,4 +245,3 @@ def loadModel(filename, modelpath, solverclass="gsl"):
     else:
         logger_.error( "Unknown model extenstion '%s'" % extension)
         return None
-

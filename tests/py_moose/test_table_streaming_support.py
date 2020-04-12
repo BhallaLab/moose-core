@@ -43,8 +43,8 @@ def test_small( ):
     r.Kb = 0.01
 
     tabA = moose.Table2( '/compt/a/tabA' )
-    tabA.format = 'npy'
-    tabA.useStreamer = 1   # Setting format alone is not good enough
+    #  tabA.format = 'npy'
+    tabA.useStreamer = True   # Setting format alone is not good enough
 
     # Setting datafile enables streamer.
     tabB = moose.Table2( '/compt/b/tabB' )
@@ -62,13 +62,13 @@ def test_small( ):
     runtime = 1000
     print( 'Starting moose for %d secs' % runtime )
     moose.start( runtime, 1 )
-    print( ' MOOSE is done' )
 
     # Now read the numpy and csv and check the results.
     a = np.loadtxt( tabA.datafile, skiprows=1 )
     b = np.load( 'table2.npy' )
     c = np.loadtxt( 'tablec.csv', skiprows=1 )
     assert (len(a) == len(b) == len(c))
+    print( ' MOOSE is done' )
 
 def buildLargeSystem(useStreamer = False):
     # create a huge system.

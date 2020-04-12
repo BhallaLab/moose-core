@@ -482,9 +482,9 @@ def setDefaultDt(elecdt=1e-5, chemdt=0.01, tabdt=1e-5, plotdt1=1.0, plotdt2=0.25
     moose.setClock(9, plotdt2) # electrical sim
 
 def assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='hsolve'):
-    if isinstance(modelRoot, moose.melement) or isinstance(modelRoot, moose.vec):
+    if not isinstance(modelRoot, str):
         modelRoot = modelRoot.path
-    if isinstance(dataRoot, moose.melement) or isinstance(dataRoot, moose.vec):
+    if not isinstance(dataRoot, str):
         dataRoot = dataRoot.path
     if solver != 'hsolve' or len(moose.wildcardFind('%s/##[ISA=HSolve]' % (modelRoot))) == 0:
         moose.useClock(0, '%s/##[ISA=Compartment]' % (modelRoot), 'init')
@@ -891,7 +891,7 @@ def connect_CaConc(compartment_list, temperature=None):
                                     nernst = moose.Nernst(channel.path+'/nernst')
                                     nernst_params = child.value.split(',')
                                     nernst.Cout = float(nernst_params[0])
-                                    nernst.valence = float(nernst_params[1])
+                                    nernst.valence = int(nernst_params[1])
                                     nernst.Temperature = temperature
                                     moose.connect(nernst,'Eout',channel,'setEk')
                                     moose.connect(caconc,'concOut',nernst,'ci')

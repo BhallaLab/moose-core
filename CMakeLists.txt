@@ -18,11 +18,7 @@ if(NOT PYTHONINTERP_FOUND)
   find_package(PythonInterp 2.7)
 endif()
 
-# Disable rpath on OSX.
-if(APPLE)
-  set(CMAKE_MACOSX_RPATH OFF)
-endif()
-
+set(CMAKE_MACOSX_RPATH OFF)
 
 # NOTE: version should be changed in setup.py file.
 # If moose version is not given, use setup.py file to get the default version.
@@ -55,6 +51,7 @@ if( CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
 endif()
 
 ################################ CMAKE OPTIONS ##################################
+option(WITH_PYBIND11        "Use pybind11 to generate python binding (beta)" ON)
 option(WITH_NSDF            "Enable NSDF support. Requires hdf5" OFF )
 
 option(DEBUG                "Build with debug support" OFF)
@@ -64,8 +61,6 @@ option(WITH_MPI             "Enable Openmpi support" OFF)
 option(WITH_BOOST           "Enable boost. Prefer boost over stl" OFF)
 option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" OFF)
 option(WITH_GSL             "Use gsl-library. Alternative is WITH_BOOST" ON)
-option(PARALLELIZED_CLOCK   "High level parallelization of moose::Clock (alpha)" OFF )
-option(USE_PRIVATE_RNG      "Stochastic Objects use their private RNG" ON)
 option(WITH_ASAN            "Use AddressSanitizer in DEBUG mode." OFF)
 
 
@@ -102,10 +97,8 @@ if(WITH_ASAN AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address")
 endif()
 
-if(WITH_GSL)
-    set(WITH_BOOST OFF)
-    set(WITH_BOOST_ODE OFF)
-elseif(WITH_BOOST)
+# Allows WITH_BOOST to turn off WITH_GSL=ON (default).
+if(WITH_BOOST OR WITH_BOOST_ODE)
     set(WITH_BOOST_ODE ON)
     set(WITH_GSL OFF)
 endif()
@@ -304,12 +297,16 @@ if( WITH_BOOST )
     target_link_libraries( moose.bin ${Boost_LIBRARIES} )
 endif( WITH_BOOST )
 
-
 ######################### BUILD PYMOOSE ########################################
 
+if(WITH_PYBIND11)
+    message(STATUS "Using pybind11 to generate python extension module")
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/pybind11)
+    add_subdirectory(pybind11)
+else()
+    add_subdirectory(pymoose)
+endif()
 
-# This target is built by pymoose/CMakeLists.txt file.
-add_subdirectory(pymoose)
 
 # always override debian default installation directory. It will be installed in
 # site-packages instead of dist-packages.
@@ -428,7 +425,8 @@ endforeach( )
 set(PYMOOSE_ISSUES_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/devel/issues)
 file(GLOB PY_ISSUES_SCRIPTS "${PYMOOSE_ISSUES_DIRECTORY}/*.py" )
 foreach(_test_script ${PY_ISSUES_SCRIPTS})
-    get_filename_component( _test_name ${_test_script} NAME_WE)
+    get_filename_component(_file_name ${_test_script} NAME_WE)
+    set(_test_name "issue_${_file_name}")
     add_test(NAME ${_test_name}
         COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
 	CONFIGURATIONS Devel
@@ -446,8 +444,8 @@ set(PYTEST_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 file(GLOB_RECURSE PYTEST_TEST_SCRIPTS ${PYTEST_TEST_DIRECTORY}/test_*.py)
 
 foreach(_test_script ${PYTEST_TEST_SCRIPTS})
-    get_filename_component(_name_we ${_test_script} NAME_WE)
-    set(_test_name "pytest_${_name_we}")
+    file(SHA1 ${_test_script} _test_hash)
+    set(_test_name "coverage_${_test_hash}")
     # message(STATUS "Adding test ${_test_name}")
     add_custom_target(${_test_name}
         # We collect coverage data but do not show report during each test.
@@ -459,7 +457,7 @@ foreach(_test_script ${PYTEST_TEST_SCRIPTS})
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Executing ${_test_script} using pytest"
         VERBATIM)
-    add_dependencies(coverage  ${_test_name})
+    add_dependencies(coverage ${_test_name})
 endforeach()
 
 # Generate report at the end.
@@ -519,3 +517,17 @@ foreach(_py_script ${PY_SCRIPTS})
     add_dependencies(pylint ${TGT_NAME} )
 endforeach( )
 
+########################  DOCS ###############################################
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+    set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/devel/Doxyfile.in)
+    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+    configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+    add_custom_target(doc
+        COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating API documentation using Doxygen."
+        VERBATIM)
+else()
+    message(STATUS "Doxygen needs to be installed to generate API docs")
+endif()
