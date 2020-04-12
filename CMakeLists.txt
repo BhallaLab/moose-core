@@ -335,9 +335,6 @@ endif()
 install(TARGETS moose.bin DESTINATION bin CONFIGURATIONS Debug)
 install(TARGETS libmoose DESTINATION lib CONFIGURATIONS Debug)
 
-# NOTE: Install macro for _moose (pymoose) has been moved to
-# pymoose/CMakeLists.txt file.
-
 # Print message to start build process
 if(${CMAKE_BUILD_TOOL} MATCHES "make")
     message(
