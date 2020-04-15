@@ -204,7 +204,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
                         print("             events: " +
                                str(model.getNumEvents()))
                         print("\n")
-                        moose.delete(basePath)
+                        moose.delete(baseId.path)
                         loadpath = moose.Shell('/')
 
             loaderror = msgCmpt+str(msgRule)+msgReac+noRE

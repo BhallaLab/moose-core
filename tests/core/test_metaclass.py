@@ -9,7 +9,7 @@ import moose
 try:
     import six
 except ImportError:
-    print(f"[INFO ] Requires `six` to run this test.")
+    print("[INFO ] Requires `six` to run this test.")
     quit(0)
 
 # Can't use type here. Use metaclass of the base class (i.e.
