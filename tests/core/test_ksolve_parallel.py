@@ -71,10 +71,8 @@ def test_ksolver_parallel( nthreads = 4 ):
     nInit = [(float(q < 0.2) * compt.x1) for q in x]
     c.vec.nInit = nInit
     assert np.allclose(c.vec.nInit, nInit), (c.vec.nInit, nInit)
-    #  print(nInit)
-    #  quit()
 
-    expected = [ (0.2, 0.40000000000000013)
+    expected = [ (0.01, 0.0)
             , (2.6704795776286974e-07, 1.2678976830753021e-17)
             , (8.167639617309419e-14, 3.8777269301457245e-24)
             , (2.498062905267963e-20, 1.1860363878961374e-30)
@@ -86,17 +84,15 @@ def test_ksolver_parallel( nthreads = 4 ):
     updateDt = 50
     runtime = updateDt * 4
     yvec = c.vec.n
-    print(yvec, '111')
-    quit()
     u1, m1 = np.mean( yvec ), np.std( yvec )
     print(u1, m1)
-    assert np.isclose( (u1, m1), expected[0], atol=1e-5).all(), expected[0]
+    assert np.isclose((u1, m1), expected[0], atol=1e-5).all(), ((u1, m1), expected[0])
     t1 = time.time()
     for i, t in enumerate(range( 0, runtime-1, updateDt)):
-        moose.start( updateDt )
+        moose.start(updateDt)
         yvec = c.vec.n
-        u1, m1 = np.mean( yvec ), np.std( yvec )
-        print( u1, m1 )
+        u1, m1 = np.mean(yvec), np.std(yvec)
+        print(u1, m1)
         np.isclose( (u1,m1), expected[i+1], atol=1e-5 ).all(), expected[i+1]
     return time.time() - t1
 

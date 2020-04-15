@@ -84,7 +84,7 @@ endforeach()
 ################################# COVERAGE ###################################
 
 add_custom_target(coverage)
-set(PYTEST_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+set(PYTEST_TEST_DIRECTORY ${CMAKE_SOURCE_DIR}/tests)
 file(GLOB_RECURSE PYTEST_TEST_SCRIPTS ${PYTEST_TEST_DIRECTORY}/test_*.py)
 
 foreach(_test_script ${PYTEST_TEST_SCRIPTS})

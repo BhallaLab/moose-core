@@ -19,7 +19,7 @@ import moose
 
 cwd = os.path.dirname( os.path.realpath( __file__ ) )
 
-def main():
+def test_kkit():
     """ 
     The script demonstates to convert Chemical (Genesis) file back to Genesis 
     file using moose 
@@ -29,4 +29,4 @@ def main():
     print( written )
 
 if __name__ == '__main__':
-    main()
+    test_kkit()

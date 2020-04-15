@@ -1,7 +1,6 @@
 # Modified from function.py ---
 
 import numpy as np
-import sys
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -10,8 +9,8 @@ import moose
 
 simtime = 1.0
 
-def example():
-    demo = moose.Neutral('/model')
+def test_example():
+    moose.Neutral('/model')
     function = moose.Function('/model/function')
     function.c['c0'] = 1.0
     function.c['c1'] = 2.0
@@ -95,4 +94,4 @@ def example():
     plt.savefig(__file__+'.png')
 
 if __name__ == '__main__':
-    example()
+    test_example()

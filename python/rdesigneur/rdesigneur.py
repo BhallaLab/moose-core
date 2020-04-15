@@ -1358,7 +1358,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
         dmstoich.compartment = self.dendCompt
         dmstoich.ksolve = dmksolve
         dmstoich.dsolve = dmdsolve
-        dmstoich.path = self.dendCompt.path + "/##"
+        dmstoich.reacSystemPath = self.dendCompt.path + "/##"
         # Below we have code that only applies if there are spines
         # Put in spine solvers. Note that these get info from the dendCompt
         if hasattr( self, 'spineCompt' ):
@@ -1372,7 +1372,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             smstoich.compartment = self.spineCompt
             smstoich.ksolve = smksolve
             smstoich.dsolve = smdsolve
-            smstoich.path = self.spineCompt.path + "/##"
+            smstoich.reacSystemPath = self.spineCompt.path + "/##"
             # Put in PSD solvers. Note that these get info from the dendCompt
             if self.useGssa:
                 pmksolve = moose.Gsolve( self.psdCompt.path + '/ksolve' )
@@ -1386,7 +1386,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             pmstoich.dsolve = pmdsolve
             if len( moose.wildcardFind( 'self.psdCompt.path/##[ISA=PoolBase]' ) ) == 0:
                 moose.Pool( self.psdCompt.path + '/dummy' )
-            pmstoich.path = self.psdCompt.path + "/##"
+            pmstoich.reacSystemPath = self.psdCompt.path + "/##"
 
             # Here we should test what kind of geom we have to use
             # Put in cross-compartment diffusion between ksolvers
@@ -1411,7 +1411,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             estoich.compartment = i[0]
             estoich.ksolve = eksolve
             estoich.dsolve = edsolve
-            estoich.path = path + "/##"
+            estoich.reacSystemPath = path + "/##"
             edsolve.buildMeshJunctions( moose.element(i[1].path + '/dsolve' ))
     ################################################################
 

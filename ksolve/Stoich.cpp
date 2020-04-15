@@ -327,14 +327,14 @@ void filterWildcards(vector<Id>& ret, const vector<ObjId>& elist)
 void Stoich::setElist(const Eref& e, const vector<ObjId>& elist)
 {
     if(compartment_ == Id()) {
-        cout << "Warning: Stoich::setElist/setPath: Compartment not set. "
-                "Aborting.\n";
+        cerr << "Warning: Stoich::setElist/setReacSystemPath: Compartment not "
+                "set. Aborting." << endl;
         status_ = 4;
         return;
     }
     if(!(kinterface_ || dinterface_)) {
-        cout << "Warning: Stoich::setElist/setPath: Neither solver has been "
-                "set. Aborting.\n";
+        cerr << "Warning: Stoich::setElist/setReacSystemPath: Neither solver "
+                "has been set. Aborting." << endl;
         status_ = 8;
         return;
     }
@@ -346,9 +346,8 @@ void Stoich::setElist(const Eref& e, const vector<ObjId>& elist)
     vector<Id> temp;
     filterWildcards(temp, elist);
     if(temp.size() == 0) {
-        cout << "Warning: Stoich::setElist/setPath: No kinetics objects "
-                "found "
-                "on path. Aborting.\n";
+        cerr << "Warning: Stoich::setElist/setReacSystemPath: No kinetics objects "
+                "found on path. Aborting." << endl;
         status_ = 16;
         return;
     }

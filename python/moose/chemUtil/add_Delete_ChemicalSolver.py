@@ -127,7 +127,7 @@ def setCompartmentSolver(modelRoot, solver):
                     stoich.dsolve = dsolve
 
                 stoich.compartment = compt
-                stoich.path = compt.path + "/##"
+                stoich.reacSystemPath = compt.path + "/##"
 
 
         dsolveList = moose.wildcardFind(modelRoot+'/##[ISA=Dsolve]')

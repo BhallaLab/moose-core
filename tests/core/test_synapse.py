@@ -4,7 +4,7 @@ import moose
 import random  
 import numpy as np
 
-def main():
+def test_synapse():
     """
     In this example we walk through creation of a vector of IntFire
     elements and setting up synaptic connection between them. Synapse on
@@ -110,4 +110,4 @@ def main():
         print("Weights for synapses on ", syn.path, ":", syn.synapse.vec.weight)
 
 if __name__ == "__main__":
-    main()
+    test_synapse()
