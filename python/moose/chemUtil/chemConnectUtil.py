@@ -152,10 +152,12 @@ def setupMeshObj(modelRoot):
         tablist  = moose.wildcardFind(meshEnt.path+'/##[ISA=StimulusTable]')
         if mol_cpl or funclist or enzlist or realist or tablist:
             for m in mol_cpl:
-                if isinstance(moose.element(m.parent),moose.CplxEnzBase):
+                #if isinstance(moose.element(m.parent),moose.CplxEnzBase):
+                if moose.element(m.parent).isA["CplxEnzBase"]:
                     cplxlist.append(m)
                     objInfo = m.parent.path+'/info'
-                elif isinstance(moose.element(m),moose.PoolBase):
+                #elif isinstance(moose.element(m),moose.PoolBase):
+                elif moose.element(m.parent).isA["PoolBase"]:
                     mollist.append(m)
                     objInfo =m.path+'/info'
                 if moose.exists(objInfo):
@@ -191,7 +193,8 @@ def getxyCord(xcord,ycord,list1,listOfitems):
         #     objInfo = moose.element(item.parent).path+'/info'
         # else:
         #     objInfo = item.path+'/info'
-        if not isinstance(item,moose.Function):
+        #if not isinstance(item,moose.Function):
+        if not item.isA["Function"]:
             objInfo = item.path+'/info'
             xcord.append(xyPosition(objInfo,'x'))
             ycord.append(xyPosition(objInfo,'y'))

@@ -253,7 +253,7 @@ def writeConcChan(modelpath,f,sceneitems):
             if len(moose.element(cChan).neighbors['setNumChan']) == 1:
                 chanParent = moose.element(moose.element(cChan).neighbors['setNumChan'][0])
     
-            if not (isinstance(chanParent,moose.PoolBase)):
+            if not (chanParent.isA["PoolBase"]):
                 print(" raise exception Channel doesn't have pool as parent %s",moose.element(cChan).path)
                 return False,"raise exception Channel doesn't have pool as parent"
             else:
@@ -307,7 +307,7 @@ def writeEnz( modelpath,f,sceneitems):
             if len(moose.element(enz).neighbors['enzDest']) == 1:
                 enzParent = moose.element(moose.element(enz).neighbors['enzDest'][0])
     
-            if not (isinstance(enzParent,moose.PoolBase)):
+            if not (enzParent.isA["PoolBase"]):
                 print(" raise exception enz doesn't have pool as parent %s",moose.element(enz).path)
                 return False
             else:
@@ -434,7 +434,7 @@ def trimPath(mobj):
     original = mobj
     mobj = moose.element(mobj)
     found = False
-    while not isinstance(mobj,moose.ChemCompt) and mobj.path != "/":
+    while not (mobj.isA["ChemCompt"]) and mobj.path != "/":
         mobj = moose.element(mobj.parent)
         found = True
     if mobj.path == "/":
