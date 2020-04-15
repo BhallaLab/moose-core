@@ -1,16 +1,19 @@
 /**********************************************************************
-** This program is part of 'MOOSE', the
-** Messaging Object Oriented Simulation Environment,
-** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2013 Upinder S. Bhalla. and NCBS
-** It is made available under the terms of the
-** GNU Lesser General Public License version 2.1
-** See the file COPYING.LIB for the full notice.
+* This program is part of 'MOOSE', the
+* Messaging Object Oriented Simulation Environment,
+* also known as GENESIS 3 base code.
+*           copyright (C) 2003-2013 Upinder S. Bhalla. and NCBS
+* It is made available under the terms of the
+* GNU Lesser General Public License version 2.1
+* See the file COPYING.LIB for the full notice.
 **********************************************************************/
+
 #include "header.h"
 #include "Finfo.h"
 #include "../shell/Shell.h"
 #include "Dinfo.h"
+
+#include <iomanip>
 
 // Static declaration.
 unsigned int Cinfo::numCoreOpFunc_ = 0;
@@ -124,15 +127,20 @@ void Cinfo::registerFinfo(Finfo* f)
     f->registerFinfo(this);
     if(dynamic_cast<DestFinfo*>(f)) {
         destFinfos_.push_back(f);
-    } else if(dynamic_cast<SrcFinfo*>(f)) {
+    }
+    else if(dynamic_cast<SrcFinfo*>(f)) {
         srcFinfos_.push_back(f);
-    } else if(dynamic_cast<ValueFinfoBase*>(f)) {
+    }
+    else if(dynamic_cast<ValueFinfoBase*>(f)) {
         valueFinfos_.push_back(f);
-    } else if(dynamic_cast<LookupValueFinfoBase*>(f)) {
+    }
+    else if(dynamic_cast<LookupValueFinfoBase*>(f)) {
         lookupFinfos_.push_back(f);
-    } else if(dynamic_cast<SharedFinfo*>(f)) {
+    }
+    else if(dynamic_cast<SharedFinfo*>(f)) {
         sharedFinfos_.push_back(f);
-    } else if(dynamic_cast<FieldElementFinfoBase*>(f)) {
+    }
+    else if(dynamic_cast<FieldElementFinfoBase*>(f)) {
         fieldElementFinfos_.push_back(f);
     }
 }
@@ -152,15 +160,20 @@ string Cinfo::getFinfoType(const Finfo* f) const
 {
     if(dynamic_cast<const DestFinfo*>(f)) {
         return "DestFinfo";
-    } else if(dynamic_cast<const SrcFinfo*>(f)) {
+    }
+    else if(dynamic_cast<const SrcFinfo*>(f)) {
         return "SrcFinfo";
-    } else if(dynamic_cast<const ValueFinfoBase*>(f)) {
+    }
+    else if(dynamic_cast<const ValueFinfoBase*>(f)) {
         return "ValueFinfo";
-    } else if(dynamic_cast<const LookupValueFinfoBase*>(f)) {
+    }
+    else if(dynamic_cast<const LookupValueFinfoBase*>(f)) {
         return "LookupValueFinfo";
-    } else if(dynamic_cast<const SharedFinfo*>(f)) {
+    }
+    else if(dynamic_cast<const SharedFinfo*>(f)) {
         return "SharedFinfo";
-    } else if(dynamic_cast<const FieldElementFinfoBase*>(f)) {
+    }
+    else if(dynamic_cast<const FieldElementFinfoBase*>(f)) {
         return "FieldElementFinfo";
     }
     return "";
@@ -367,8 +380,9 @@ const Cinfo* Cinfo::initCinfo()
                            "Author",      "Upi Bhalla",
                            "Description", "Class information object."};
 
-    static Finfo* cinfoFinfos[] = {&docs,       // ReadOnlyValue
-                                   &baseClass,  // ReadOnlyValue
+    static Finfo* cinfoFinfos[] = {
+        &docs,       // ReadOnlyValue
+        &baseClass,  // ReadOnlyValue
     };
 
     static Dinfo<Cinfo> dinfo;
@@ -387,10 +401,10 @@ static const Cinfo* cinfoCinfo = Cinfo::initCinfo();
 string Cinfo::getDocs() const
 {
     ostringstream doc;
-    for(map<string, string>::const_iterator ii = doc_.begin(); ii != doc_.end();
-        ++ii) {
-        doc << '\n' << ii->first << ":\t\t" << ii->second << endl;
+    for(auto ii = doc_.cbegin(); ii != doc_.cend(); ++ii) {
+        doc << endl << std::setw(15) << std::left << ii->first << ": " << ii->second;
     }
+    doc << endl;
     return doc.str();
 }
 
@@ -536,8 +550,8 @@ Finfo* Cinfo::getFieldElementFinfo(unsigned int i) const
         return &dummy;
     if(baseCinfo_) {
         if(i >= baseCinfo_->getNumFieldElementFinfo())
-            return fieldElementFinfos_
-                [i - baseCinfo_->getNumFieldElementFinfo()];
+            return fieldElementFinfos_[i -
+                                       baseCinfo_->getNumFieldElementFinfo()];
         else
             return const_cast<Cinfo*>(baseCinfo_)->getFieldElementFinfo(i);
     }

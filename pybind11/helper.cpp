@@ -121,7 +121,8 @@ ObjId createIdFromPath(string path, string type, unsigned int numData)
     if(pos != string::npos) {
         name = trimmed_path.substr(pos + 1);
         parent_path = trimmed_path.substr(0, pos);
-    } else {
+    }
+    else {
         name = trimmed_path;
     }
     // handle relative path
@@ -131,7 +132,8 @@ ObjId createIdFromPath(string path, string type, unsigned int numData)
             parent_path = current_path + "/" + parent_path;
         else
             parent_path = current_path + parent_path;
-    } else if(parent_path.empty())
+    }
+    else if(parent_path.empty())
         parent_path = "/";
 
     ObjId parent_id(parent_path);
@@ -164,7 +166,8 @@ ObjId loadModelInternal(const string& fname, const string& modelpath,
     Id model;
     if(solverclass.empty()) {
         model = getShellPtr()->doLoadModel(fname, modelpath);
-    } else {
+    }
+    else {
         model = getShellPtr()->doLoadModel(fname, modelpath, solverclass);
     }
 
@@ -201,8 +204,8 @@ ObjId getElementFieldItem(const ObjId& objid, const string& fname,
         index += len;
     }
     if(index < 0) {
-        throw runtime_error("ElementField.getItem: invalid index: " +
-                            to_string(index) + ".");
+        throw runtime_error(
+            "ElementField.getItem: invalid index: " + to_string(index) + ".");
         return ObjId();
     }
     return ObjId(oid.id, oid.dataIndex, index);
@@ -296,28 +299,33 @@ map<string, string> mooseGetFieldDict(const string& className,
             auto* finfo = cinfo->getValueFinfo(ii);
             fieldDict[finfo->name()] = finfo->rttiType();
         }
-    } else if(finfoType == "srcFinfo" || finfoType == "src") {
+    }
+    else if(finfoType == "srcFinfo" || finfoType == "src") {
         for(unsigned int ii = 0; ii < cinfo->getNumSrcFinfo(); ++ii) {
             auto* finfo = cinfo->getSrcFinfo(ii);
             fieldDict[finfo->name()] = finfo->rttiType();
         }
-    } else if(finfoType == "destFinfo" || finfoType == "dest") {
+    }
+    else if(finfoType == "destFinfo" || finfoType == "dest") {
         for(unsigned int ii = 0; ii < cinfo->getNumDestFinfo(); ++ii) {
             auto* finfo = cinfo->getDestFinfo(ii);
             fieldDict[finfo->name()] = finfo->rttiType();
         }
-    } else if(finfoType == "lookupFinfo" || finfoType == "lookup") {
+    }
+    else if(finfoType == "lookupFinfo" || finfoType == "lookup") {
         for(unsigned int ii = 0; ii < cinfo->getNumLookupFinfo(); ++ii) {
             auto* finfo = cinfo->getLookupFinfo(ii);
             fieldDict[finfo->name()] = finfo->rttiType();
         }
-    } else if(finfoType == "sharedFinfo" || finfoType == "shared") {
+    }
+    else if(finfoType == "sharedFinfo" || finfoType == "shared") {
         for(unsigned int ii = 0; ii < cinfo->getNumSrcFinfo(); ++ii) {
             auto* finfo = cinfo->getSrcFinfo(ii);
             fieldDict[finfo->name()] = finfo->rttiType();
         }
-    } else if(finfoType == "fieldElementFinfo" || finfoType == "field" ||
-              finfoType == "fieldElement") {
+    }
+    else if(finfoType == "fieldElementFinfo" || finfoType == "field" ||
+            finfoType == "fieldElement") {
         for(unsigned int ii = 0; ii < cinfo->getNumFieldElementFinfo(); ++ii) {
             auto* finfo = cinfo->getFieldElementFinfo(ii);
             fieldDict[finfo->name()] = finfo->rttiType();
@@ -388,27 +396,32 @@ vector<string> mooseGetFieldNames(const string& className,
             Finfo* finfo = cinfo->getValueFinfo(ii);
             ret.push_back(finfo->name());
         }
-    } else if(finfoType == "srcFinfo" || finfoType == "src") {
+    }
+    else if(finfoType == "srcFinfo" || finfoType == "src") {
         for(unsigned int ii = 0; ii < cinfo->getNumSrcFinfo(); ++ii) {
             Finfo* finfo = cinfo->getSrcFinfo(ii);
             ret.push_back(finfo->name());
         }
-    } else if(finfoType == "destFinfo" || finfoType == "dest") {
+    }
+    else if(finfoType == "destFinfo" || finfoType == "dest") {
         for(unsigned int ii = 0; ii < cinfo->getNumDestFinfo(); ++ii) {
             Finfo* finfo = cinfo->getDestFinfo(ii);
             ret.push_back(finfo->name());
         }
-    } else if(finfoType == "lookupFinfo" || finfoType == "lookup") {
+    }
+    else if(finfoType == "lookupFinfo" || finfoType == "lookup") {
         for(unsigned int ii = 0; ii < cinfo->getNumLookupFinfo(); ++ii) {
             Finfo* finfo = cinfo->getLookupFinfo(ii);
             ret.push_back(finfo->name());
         }
-    } else if(finfoType == "sharedFinfo" || finfoType == "shared") {
+    }
+    else if(finfoType == "sharedFinfo" || finfoType == "shared") {
         for(unsigned int ii = 0; ii < cinfo->getNumSrcFinfo(); ++ii) {
             Finfo* finfo = cinfo->getSrcFinfo(ii);
             ret.push_back(finfo->name());
         }
-    } else if(finfoType == "fieldElementFinfo" || finfoType == "fieldElement") {
+    }
+    else if(finfoType == "fieldElementFinfo" || finfoType == "fieldElement") {
         for(unsigned int ii = 0; ii < cinfo->getNumFieldElementFinfo(); ++ii) {
             Finfo* finfo = cinfo->getFieldElementFinfo(ii);
             ret.push_back(finfo->name());
@@ -424,7 +437,7 @@ string finfoNotFoundMsg(const Cinfo* cinfo)
     ss << "Available attributes:" << endl;
     for(size_t i = 0; i < fmap.size(); i++) {
         ss << setw(15) << fmap[i].first;
-        if((i+1) % 5 == 0)
+        if((i + 1) % 5 == 0)
             ss << endl;
     }
     return ss.str();
@@ -437,5 +450,35 @@ bool mooseIsRunning()
 
 string mooseClassDoc(const string& className)
 {
-    return className;
+    stringstream ss;
+
+    auto cinfo = Cinfo::find(className);
+    if(!cinfo) {
+        ss << "This class is not valid." << endl;
+        return ss.str();
+    }
+
+    ss << cinfo->getDocs() << endl;
+
+    // Documentation of base class.
+    const Cinfo* baseClassCinfo = cinfo->baseCinfo();
+    if(baseClassCinfo) {
+        ss << "BaseClass: " << baseClassCinfo->name() << endl;
+        ss << baseClassCinfo->getDocs() << endl;
+    }
+
+    // Documentation of Finfo.
+    // auto finfos = cinfo->finfoMap();
+    // for(const auto& item : finfos) {
+        // ss << item.first << endl;
+        // ss << moose::textwrap(item.second->docs(), "  ", 70) << endl;
+    // }
+//
+    for(unsigned int ii = 0; ii < cinfo->getNumValueFinfo(); ++ii) {
+        auto* finfo = cinfo->getValueFinfo(ii);
+        // fieldDict[finfo->name()] = finfo->rttiType();
+        ss << '*' << finfo->name() << '*' << endl;
+        ss << moose::textwrap(finfo->docs(), "  ", 70) << endl;
+    }
+    return ss.str();
 }

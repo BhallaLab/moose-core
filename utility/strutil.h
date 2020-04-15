@@ -74,6 +74,8 @@ namespace moose
     // Is string a prefix of string b.
     bool isPrefix(const std::string& a, const std::string& b);
 
+    std::string textwrap(const std::string& text, const std::string& prefix="", const size_t width=80);
+
     /* --------------------------------------------------------------------------*/
     /**
      * @Synopsis Converts a vector to string.

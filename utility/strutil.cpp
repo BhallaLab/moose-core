@@ -220,4 +220,28 @@ string normalizePath(const string& path)
     return s;
 }
 
+string textwrap(const string& text, const string& prefix, const size_t width)
+{
+    // Get words out of the text first.
+    vector<string> words;
+    tokenize(text, " \n", words);
+
+    string res;
+    size_t size = 0;
+    for(auto w: words) {
+        if(size == 0) {
+            res += prefix;
+            size = prefix.size();
+        }
+        res += w + ' ';
+        size += w.size() + 1;
+        if(size > width) { 
+            res += '\n';
+            size = 0;
+        }
+    }
+    return res;
+}
+
+
 }
