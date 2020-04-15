@@ -12,6 +12,7 @@ __status__           = "Development"
 import sys
 import os
 import moose
+print(moose.about())
 
 attribs = ['AdExIF', 'AdThreshIF', 'Adaptor', 'Annotator', 'Arith', 'BufPool',
         'CaConc', 'CaConcBase', 'ChanBase', 'ChemCompt', 'Cinfo', 'Clock',
@@ -51,10 +52,9 @@ attribs = ['AdExIF', 'AdThreshIF', 'Adaptor', 'Annotator', 'Arith', 'BufPool',
         'getField', 'getFieldDict'
         , 'getFieldNames'
         , 'getFieldDoc'
-        #, 'isRunning', 
         , 'le', 'listmsg', 'loadModelInternal'
-        # , 'melement'
-        , 'mergeChemModel', 'moose',
+        , 'melement'
+        , 'mergeChemModel',
         'mooseAddChemSolver', 'mooseDeleteChemSolver', 'mooseReadNML2',
         'mooseReadSBML', 'mooseWriteKkit', 'mooseWriteNML2', 'mooseWriteSBML',
         'moose_constants', 'moose_test', 'move', 'nml2Import_', 'print_utils',
@@ -67,7 +67,6 @@ attribs = ['AdExIF', 'AdThreshIF', 'Adaptor', 'Annotator', 'Arith', 'BufPool',
 def test_attribs():
     global attribs
     for at in attribs:
-        print( "\tTesting for attrib %s" % at )
         assert hasattr( moose, at ), '%s not found' % at 
 
 if __name__ == '__main__':

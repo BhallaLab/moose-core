@@ -24,5 +24,4 @@ build:
   except:
       - pybind11
       - devel
-      - temp
 

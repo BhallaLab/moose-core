@@ -15,7 +15,7 @@ string get_program_name()
 {
     wchar_t * progname = Py_GetProgramName();
     char buffer[PATH_MAX+1];
-    unsigned int ret = wcstombs(buffer, progname, PATH_MAX);
+    size_t ret = wcstombs(buffer, progname, PATH_MAX);
     buffer[ret] = '\0';
     return string(buffer);
 }

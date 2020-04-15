@@ -91,7 +91,7 @@ def test_func_change_expr():
     moose.start( 100.0 ) 
     b = moose.element('/model/compartment/b')
     assert int(b.n) == int(106384558.57472235), b.n
-    xs = func.x.vec
+    xs = func.x
     assert len(xs.value) == 2, (len(xs.value), xs.value)
     assert (xs.value == [0, 0]).all(), xs.value
 

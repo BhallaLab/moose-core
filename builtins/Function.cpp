@@ -328,7 +328,7 @@ in the same order as the y indices.
 static const Cinfo * functionCinfo = Function::initCinfo();
 
 Function::Function():
-    valid_(false)
+    valid_(true)
     , numVar_(0)
     , lastValue_(0.0)
     , value_(0.0)
@@ -533,10 +533,7 @@ void Function::setExpr(const Eref& eref, const string expression)
 {
     string expr = moose::trim(expression);
     if(expr.empty())
-    {
-        // MOOSE_WARN("Empty expression.");
         return;
-    }
 
     if(valid_ && expr == parser_->GetExpr())
     {
@@ -604,7 +601,7 @@ string Function::getExpr( const Eref& e ) const
 {
     if (!valid_)
     {
-        cout << "Error: " << e.objId().path() << "::getExpr() - invalid parser state" << endl;
+        cerr << __func__ << " Error: " << e.objId().path() << "::getExpr() - invalid parser state" << endl;
         cout << "\tExpression was : " << parser_->GetExpr() << endl;
         return "";
     }
@@ -661,9 +658,7 @@ double Function::getValue() const
 double Function::getRate() const
 {
     if (!valid_)
-    {
-        cout << "Error: Function::getValue() - invalid state" << endl;
-    }
+        cerr << __func__ << "Error: invalid state" << endl;
     return rate_;
 }
 
@@ -688,9 +683,8 @@ vector< double > Function::getY() const
 double Function::getDerivative() const
 {
     double value = 0.0;
-    if (!valid_)
-    {
-        cout << "Error: Function::getDerivative() - invalid state" << endl;
+    if (!valid_) {
+        cerr << __func__ << "Error:  invalid state" << endl;
         return value;
     }
     return parser_->Derivative(independent_);

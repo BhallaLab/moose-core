@@ -187,10 +187,8 @@ Id Shell::doCreate(string type, ObjId parent, string name, unsigned int numData,
 
         Element* pa = parent.element();
         if (!pa) {
-            stringstream ss;
-            ss << "Shell::doCreate: Parent Element'" << parent
-               << "' not found. No Element created";
-            warning(ss.str());
+            cerr << "Shell::doCreate: Parent Element'" << parent
+               << "' not found. No Element created." << endl;
             return Id();
         }
 
@@ -238,11 +236,6 @@ Id Shell::doCreate(string type, ObjId parent, string name, unsigned int numData,
 Id Shell::doCreate2(string type, ObjId parent, string name,
                        unsigned int numData)
 {
-    // if (parent.bad()) {
-    //    string message = "Parent element does not exist: " + parent.path();
-    //    throw runtime_error(message);
-    //    return Id();
-    //}
     return doCreate(type, parent, name, numData, MooseBlockBalance, 1);
 }
 

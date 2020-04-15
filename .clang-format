@@ -1,9 +1,11 @@
 ---
 AccessModifierOffset: -4
+SortIncludes: false
 ConstructorInitializerIndentWidth: 4
 AlignEscapedNewlinesLeft: true
 AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortFunctionsOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakTemplateDeclarations: true

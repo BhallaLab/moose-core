@@ -27,7 +27,7 @@
 
 #include "../utility/print_function.hpp"
 #include "../basecode/header.h"
-#include "../basecode/global.h"
+#include "../randnum/randnum.h"
 #include "../basecode/Id.h"
 #include "../basecode/ObjId.h"
 #include "../shell/Shell.h"
@@ -495,7 +495,7 @@ PyObject *to_pytuple(void *obj, char typecode)
     {
         vector<Id> *vec = static_cast<vector<Id> *>(obj);
         assert(vec != NULL);
-        ret = PyTuple_New((Py_sunsigned int)vec->size());
+        ret = PyTuple_New((Py_ssize_t)vec->size());
         assert(ret != NULL);
         for (unsigned int ii = 0; ii < vec->size(); ++ii) {
             if (convert_and_set_tuple_entry(ret, ii, (void *)&vec->at(ii), typecode) == NULL) {
@@ -508,7 +508,7 @@ PyObject *to_pytuple(void *obj, char typecode)
     {
         vector<ObjId> *vec = static_cast<vector<ObjId> *>(obj);
         assert(vec != NULL);
-        ret = PyTuple_New((Py_sunsigned int)vec->size());
+        ret = PyTuple_New((Py_ssize_t)vec->size());
         assert(ret != NULL);
         for (unsigned int ii = 0; ii < vec->size(); ++ii) {
             if (convert_and_set_tuple_entry(ret, ii, (void *)&vec->at(ii), typecode) == NULL) {
@@ -521,7 +521,7 @@ PyObject *to_pytuple(void *obj, char typecode)
     {
         vector<char> *vec = static_cast<vector<char> *>(obj);
         assert(vec != NULL);
-        ret = PyTuple_New((Py_sunsigned int)vec->size());
+        ret = PyTuple_New((Py_ssize_t)vec->size());
         assert(ret != NULL);
         for (unsigned int ii = 0; ii < vec->size(); ++ii) {
             if (convert_and_set_tuple_entry(ret, ii, (void *)&vec->at(ii), typecode) == NULL) {
@@ -534,7 +534,7 @@ PyObject *to_pytuple(void *obj, char typecode)
     {
         vector<short> *vec = static_cast<vector<short> *>(obj);
         assert(vec != NULL);
-        ret = PyTuple_New((Py_sunsigned int)vec->size());
+        ret = PyTuple_New((Py_ssize_t)vec->size());
         assert(ret != NULL);
         for (unsigned int ii = 0; ii < vec->size(); ++ii) {
             if (convert_and_set_tuple_entry(ret, ii, (void *)&vec->at(ii), typecode) == NULL) {
@@ -592,7 +592,7 @@ PyObject *to_pytuple(void *obj, char typecode)
     {
         vector<string> *vec = static_cast<vector<string> *>(obj);
         assert(vec != NULL);
-        ret = PyTuple_New((Py_sunsigned int)vec->size());
+        ret = PyTuple_New((Py_ssize_t)vec->size());
         assert(ret != NULL);
         for (unsigned int ii = 0; ii < vec->size(); ++ii) {
             string v = vec->at(ii);
@@ -607,7 +607,7 @@ PyObject *to_pytuple(void *obj, char typecode)
         vector<vector<unsigned int>> *vec =
             static_cast<vector<vector<unsigned int>> *>(obj);
         assert(vec != NULL);
-        ret = PyTuple_New((Py_sunsigned int)vec->size());
+        ret = PyTuple_New((Py_ssize_t)vec->size());
         assert(ret != NULL);
         for (unsigned int ii = 0; ii < vec->size(); ++ii) {
             if (convert_and_set_tuple_entry(ret, ii, (void *)&vec->at(ii), typecode) == NULL) {
@@ -620,7 +620,7 @@ PyObject *to_pytuple(void *obj, char typecode)
     {
         vector<vector<int>> *vec = static_cast<vector<vector<int>> *>(obj);
         assert(vec != NULL);
-        ret = PyTuple_New((Py_sunsigned int)vec->size());
+        ret = PyTuple_New((Py_ssize_t)vec->size());
         assert(ret != NULL);
         for (unsigned int ii = 0; ii < vec->size(); ++ii) {
             if (convert_and_set_tuple_entry(ret, ii, (void *)&vec->at(ii), typecode) == NULL) {
@@ -633,7 +633,7 @@ PyObject *to_pytuple(void *obj, char typecode)
     {
         vector<vector<double>> *vec = static_cast<vector<vector<double>> *>(obj);
         assert(vec != NULL);
-        ret = PyTuple_New((Py_sunsigned int)vec->size());
+        ret = PyTuple_New((Py_ssize_t)vec->size());
         assert(ret != NULL);
         for (unsigned int ii = 0; ii < vec->size(); ++ii) {
             if (convert_and_set_tuple_entry(ret, ii, (void *)&vec->at(ii), typecode) == NULL) {
@@ -2078,6 +2078,7 @@ int defineClass(PyObject *module_dict, const Cinfo *cinfo)
     new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HEAPTYPE;
     PyHeapTypeObject *et = (PyHeapTypeObject *)new_class;
     et->ht_name = PyUnicode_FromString(className.c_str());
+#if PY_MINOR_VERSION >= 3
     et->ht_qualname = PyUnicode_FromString(str.c_str());
 #endif
 #else
@@ -2697,7 +2698,7 @@ PyMODINIT_FUNC MODINIT(_moose)
     // PyModule_AddIntConstant(moose_module, "MYNODE", myNode);
     PyModule_AddIntConstant(moose_module, "INFINITE", isInfinite);
     PyModule_AddStringConstant(moose_module, "__version__", SHELLPTR->doVersion().c_str());
-    PyModule_AddStringConstant(moose_module, "VERSION", SHELLPTR->doVersion().c_str());
+    PyModule_AddStringConstant(moose_module, "__generated_by__", "python_c_api");
     PyObject *module_dict = PyModule_GetDict(moose_module);
     if (!defineAllClasses(module_dict)) {
         PyErr_Print();

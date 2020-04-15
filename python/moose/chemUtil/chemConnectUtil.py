@@ -155,7 +155,8 @@ def setupMeshObj(modelRoot):
         if mol_cpl or funclist or enzlist or realist or tablist:
             for m in mol_cpl:
                 objInfo = None
-                if m.parent.isA['CplxEnzBase']:
+                # if m.parent.isA['CplxEnzBase']: # New bindings
+                if moose.element(m.parent).isA['CplxEnzBase']:
                     cplxlist.append(m)
                     objInfo = m.parent.path+'/info'
                 elif m.isA['PoolBase']:
@@ -288,7 +289,8 @@ def countitems(mitems,objtype):
     countuniqItems = dict((i, items.count(i)) for i in items)
     return(uniqItems,countuniqItems)
 
-def findCompartment(element):
+def findCompartment(elem):
+    element = moose.element(elem)
     if element.path == '/':
         return element
     if element.isA['ChemCompt']:

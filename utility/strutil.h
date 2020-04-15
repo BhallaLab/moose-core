@@ -54,6 +54,16 @@ namespace moose
      */
     std::string random_string( const unsigned size );
 
+    /* ---------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Normalize given path.
+     *
+     * @Param path
+     *
+     * @Returns   
+     */
+    /* ---------------------------------------------------------------------*/
+    std::string normalizePath(const std::string& path);
 
     std::pair<std::string, std::string> splitPath(const std::string& path);
 

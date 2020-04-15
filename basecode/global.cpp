@@ -32,13 +32,7 @@ unsigned int totalTests = 0;
 
 stringstream errorSS;
 
-
 clock_t simClock = clock();
-
-extern int checkPath(const string& path);
-extern string joinPath(string pathA, string pathB);
-extern string fixPath(string path);
-extern string dumpStats(int);
 
 namespace moose
 {
@@ -250,24 +244,5 @@ void printSolverProfMap()
              << v.second[1] << ")" << endl;
 }
 
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis  Normalize a given path by removing multiple repeating // to / and
- * /./ to /
- *
- * @Param path
- *
- * @Returns   
- */
-/* ----------------------------------------------------------------------------*/
-string normalizePath(const string& path)
-{
-    string s(path);
-    static std::regex e0("/+");    // Remove multiple / by single /
-    s = std::regex_replace(s, e0, "/");
-    static std::regex e1("/(\\./)+");    // Remove multiple / by single /
-    s = std::regex_replace(s, e1, "/");
-    return s;
-}
 
 }

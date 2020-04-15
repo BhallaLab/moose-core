@@ -51,18 +51,20 @@ if( CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
 endif()
 
 ################################ CMAKE OPTIONS ##################################
-option(WITH_PYBIND11        "Use pybind11 to generate python binding (beta)" ON)
-option(WITH_NSDF            "Enable NSDF support. Requires hdf5" OFF )
-
 option(DEBUG                "Build with debug support" OFF)
 option(GPROF                "Build for profiling using gprof" OFF)
 option(ENABLE_UNIT_TESTS    "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_MPI             "Enable Openmpi support" OFF)
+
 option(WITH_BOOST           "Enable boost. Prefer boost over stl" OFF)
 option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" OFF)
 option(WITH_GSL             "Use gsl-library. Alternative is WITH_BOOST" ON)
+
 option(WITH_ASAN            "Use AddressSanitizer in DEBUG mode." OFF)
 
+option(WITH_NSDF            "Enable NSDF support. Requires hdf5" OFF )
+
+option(WITH_LEGACY_BINDING  "Use legacy python-bindings" OFF)
 
 ############################ BUILD CONFIGURATION #################################
 
@@ -299,11 +301,11 @@ endif( WITH_BOOST )
 
 ######################### BUILD PYMOOSE ########################################
 
-if(WITH_PYBIND11)
-    message(STATUS "Using pybind11 to generate python extension module")
+if(NOT WITH_LEGACY_BINDING)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/pybind11)
     add_subdirectory(pybind11)
 else()
+    message(STATUS "Building legacy python binding.")
     add_subdirectory(pymoose)
 endif()
 
@@ -347,124 +349,8 @@ endif()
 
 
 ############################ CTEST ######################################
-include( CTest )
-set(CTEST_NIGHTLY_START_TIME "05:30:00 UTC")
-set(CTEST_SUBMIT_URL "http://my.cdash.org/submit.php?project=moose")
-
-if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    # Run this test in debug mode. In Release mode, this does not do anything.
-    set(MOOSE_BIN_LOCATION $<TARGET_FILE:moose.bin>)
-    message(STATUS "Executable moose.bin will be at ${MOOSE_BIN_LOCATION}" )
-
-    add_test(NAME moose.bin-raw-run COMMAND moose.bin -u -q)
-endif()
-
-# Core tests.
-set(PYMOOSE_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/py_moose)
-file(GLOB PY_TEST_SCRIPTS "${PYMOOSE_TEST_DIRECTORY}/test_*.py" )
-foreach(_test_script ${PY_TEST_SCRIPTS} )
-    get_filename_component(_name_we ${_test_script} NAME_WE)
-    set(_test_name "core_${_name_we}")
-    add_test(NAME ${_test_name}
-        COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
-        WORKING_DIRECTORY ${PYMOOSE_TEST_DIRECTORY})
-     set_tests_properties(${_test_name}
-         PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python"
-        )
-endforeach()
-
-# Tests for supported formats such as neuroml, sbml etc.
-set(SUPPORT_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/support)
-file(GLOB PY_TEST_SCRIPTS "${SUPPORT_TEST_DIRECTORY}/test_*.py" )
-foreach(_test_script ${PY_TEST_SCRIPTS} )
-    get_filename_component(_name_we ${_test_script} NAME_WE)
-    set(_test_name "support_${_name_we}")
-    add_test(NAME ${_test_name}
-        COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
-        WORKING_DIRECTORY ${SUPPORT_TEST_DIRECTORY})
-     set_tests_properties(${_test_name}
-         PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python"
-        )
-endforeach()
-
-# rdesigneur tests. These tests require matplotlib.
-set(RDES_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests/py_rdesigneur) 
-file(GLOB RDES_TEST_SCRIPTS "${RDES_TEST_DIRECTORY}/test_*.py" )
-foreach(_test_script ${RDES_TEST_SCRIPTS})
-    get_filename_component(_name_we ${_test_script} NAME_WE)
-    set(_test_name "rdes_${_name_we}")
-    add_test(NAME ${_test_name}
-        COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
-        WORKING_DIRECTORY ${RDES_TEST_DIRECTORY}
-        )
-    set_tests_properties(${_test_name} PROPERTIES 
-        ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python;MOOSE_NUM_THREADS=4"
-        )
-endforeach()
-
-# FIXME TESTS. These should not run by default. We need to fix them.
-set(PYMOOSE_FIXME_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/devel/fixme)
-file(GLOB PY_FIXME_TEST_SCRIPTS "${PYMOOSE_FIXME_TEST_DIRECTORY}/*.py" )
-foreach( _test_script ${PY_FIXME_TEST_SCRIPTS} )
-    get_filename_component( _name_we ${_test_script} NAME_WE)
-    set(_test_name "alpha_${_name_we}")
-    add_test( NAME ${_test_name}
-        COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
-        CONFIGURATIONS alpha
-	WORKING_DIRECTORY ${PYMOOSE_ALPHA_TEST_DIRECTORY}
-        )
-     set_tests_properties( ${_test_name}
-         PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python"
-        )
-endforeach( )
-
-# Regression and github issues. These should not run by default.
-set(PYMOOSE_ISSUES_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/devel/issues)
-file(GLOB PY_ISSUES_SCRIPTS "${PYMOOSE_ISSUES_DIRECTORY}/*.py" )
-foreach(_test_script ${PY_ISSUES_SCRIPTS})
-    get_filename_component(_file_name ${_test_script} NAME_WE)
-    set(_test_name "issue_${_file_name}")
-    add_test(NAME ${_test_name}
-        COMMAND ${PYTHON_EXECUTABLE} ${_test_script}
-	CONFIGURATIONS Devel
-	WORKING_DIRECTORY ${PYMOOSE_ISSUES_DIRECTORY}
-        )
-     set_tests_properties(${_test_name}
-         PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python"
-        )
-endforeach()
-
-################################# COVERAGE ###################################
-
-add_custom_target(coverage)
-set(PYTEST_TEST_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-file(GLOB_RECURSE PYTEST_TEST_SCRIPTS ${PYTEST_TEST_DIRECTORY}/test_*.py)
-
-foreach(_test_script ${PYTEST_TEST_SCRIPTS})
-    file(SHA1 ${_test_script} _test_hash)
-    set(_test_name "coverage_${_test_hash}")
-    # message(STATUS "Adding test ${_test_name}")
-    add_custom_target(${_test_name}
-        # We collect coverage data but do not show report during each test.
-        # We show report at the end of all tests. Set `--cov-report=` 
-        COMMAND ${PYTHON_EXECUTABLE} -m pytest 
-            --cov=moose --cov=rdesigneur --cov-append --cov-report= 
-            ${_test_script}
-        DEPENDS _moose
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        COMMENT "Executing ${_test_script} using pytest"
-        VERBATIM)
-    add_dependencies(coverage ${_test_name})
-endforeach()
-
-# Generate report at the end.
-add_custom_command(TARGET coverage POST_BUILD
-    COMMAND ${PYTHON_EXECUTABLE} -m coverage report 
-    COMMAND ${PYTHON_EXECUTABLE} -m coverage html 
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Genearting coverage report"
-    VERBATIM)
-
+include(CTest)
+add_subdirectory(tests)
 
 ########################### RELEASE #########################################
 set(PYMOOSE_SDIST_FILE ${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.tar.gz)

@@ -122,14 +122,14 @@ typedef struct
 int moose_ElementField_init(_Field * self, PyObject * args, PyObject * kwargs);
 int moose_ElementField_setNum(_Field * self, PyObject * num, void * closure);
 PyObject* moose_ElementField_getNum(_Field * self, void * closure);
-Py_sunsigned int moose_ElementField_getLen(_Field * self, void * closure);
-PyObject * moose_ElementField_getItem(_Field * self, Py_sunsigned int index);
+Py_ssize_t moose_ElementField_getLen(_Field * self, void * closure);
+PyObject * moose_ElementField_getItem(_Field * self, Py_ssize_t index);
 PyObject * moose_ElementField_getPath(_Field * self, void * closure);
 PyObject * moose_ElementField_getId(_Field * self, void * closure);
 PyObject * moose_ElementField_getName(_Field * self, void * closure);
 PyObject * moose_ElementField_getOwner(_Field * self, void * closure);
 PyObject * moose_ElementField_getDataId(_Field * self, void * closure);
-PyObject * moose_ElementField_getSlice(_Field * self, Py_sunsigned int start, Py_sunsigned int end);
+PyObject * moose_ElementField_getSlice(_Field * self, Py_ssize_t start, Py_ssize_t end);
 PyObject * moose_ElementField_getattro(_Field * self, PyObject * attr);
 int moose_ElementField_setattro(_Field * self, PyObject * attr, PyObject * value);
 /* PyObject * moose_ElementField_richcmp(_Field * self, void * closure); */
@@ -147,10 +147,10 @@ PyObject * moose_Id_delete(_Id * self);
 PyObject * moose_Id_getValue(_Id * self);
 PyObject * moose_Id_getPath(_Id * self);
 /* Id functions to allow part of sequence protocol */
-Py_sunsigned int moose_Id_getLength(_Id * self);
-PyObject * moose_Id_getItem(_Id * self, Py_sunsigned int index);
+Py_ssize_t moose_Id_getLength(_Id * self);
+PyObject * moose_Id_getItem(_Id * self, Py_ssize_t index);
 #ifndef PY3K
-PyObject * moose_Id_getSlice(_Id * self, Py_sunsigned int start, Py_sunsigned int end);
+PyObject * moose_Id_getSlice(_Id * self, Py_ssize_t start, Py_ssize_t end);
 #endif
 PyObject * moose_Id_getShape(_Id * self);
 PyObject * moose_Id_subscript(_Id * self, PyObject * op);
@@ -180,9 +180,9 @@ PyObject * moose_ObjId_getNeighbors(_ObjId * self, PyObject * args);
 PyObject * moose_ObjId_getId(_ObjId * self);
 PyObject * moose_ObjId_connect(_ObjId * self, PyObject * args);
 PyObject * moose_ObjId_richcompare(_ObjId * self, PyObject * args, int op);
-PyObject * moose_ObjId_getItem(_ObjId * self, Py_sunsigned int index);
-PyObject * moose_ObjId_getSlice(_ObjId * self, Py_sunsigned int start, Py_sunsigned int end);
-Py_sunsigned int moose_ObjId_getLength(_ObjId * self);
+PyObject * moose_ObjId_getItem(_ObjId * self, Py_ssize_t index);
+PyObject * moose_ObjId_getSlice(_ObjId * self, Py_ssize_t start, Py_ssize_t end);
+Py_ssize_t moose_ObjId_getLength(_ObjId * self);
 
 ////////////////////////////////////////////
 // Methods for LookupField
@@ -284,7 +284,7 @@ PyObject * convert_and_set_tuple_entry(PyObject * tuple, unsigned int index, voi
 template <typename T>
 vector< T > * PySequenceToVector(PyObject * seq, char typecode)
 {
-    Py_sunsigned int length = PySequence_Length(seq);
+    Py_ssize_t length = PySequence_Length(seq);
     vector <T> * ret = new vector<T>((unsigned int)length);
     T * value;
     for (unsigned int ii = 0; ii < length; ++ii)
@@ -317,7 +317,7 @@ vector< T > * PySequenceToVector(PyObject * seq, char typecode)
 template <typename T>
 vector < vector < T > > * PySequenceToVectorOfVectors(PyObject * seq, char typecode)
 {
-    Py_sunsigned int outerLength = PySequence_Length(seq);
+    Py_ssize_t outerLength = PySequence_Length(seq);
     vector < vector <T> > * ret = new vector < vector < T > >((unsigned int) outerLength);
     for (unsigned int ii = 0; ii < outerLength; ++ii)
     {

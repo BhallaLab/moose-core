@@ -253,7 +253,7 @@ long moose_ObjId_hash(_ObjId *self)
     /* attempt to make it with 32 bit system - assuming id will
      * have its value within least significant 16 bits and
      * dataIndex and fieldIndex will be limited to first 8 bits */
-    if (sizeof(unsigned int) == 8) {
+    if (sizeof(size_t) == 8) {
         return id << 48 | dataIndex << 16 | fieldIndex;
     } else {
         return id << 16 | dataIndex << 8 | fieldIndex;
@@ -799,7 +799,7 @@ int moose_ObjId_setattro(_ObjId *self, PyObject *attr, PyObject *value)
                             "For setting vector<int> field, specified "
                             "value must be a sequence.");
         }
-        Py_sunsigned int length = PySequence_Length(value);
+        Py_ssize_t length = PySequence_Length(value);
         vector<int> _value;
         for (int ii = 0; ii < length; ++ii) {
             PyObject *vo = PySequence_GetItem(value, ii);
@@ -1077,7 +1077,7 @@ Py_ssize_t moose_ObjId_getLength(_ObjId *self)
     if (fe == NULL) {
         return 0;
     }
-    return (Py_sunsigned int)(fe->numData());
+    return (Py_ssize_t)(fe->numData());
 }
 
 /// Inner function for looking up value from LookupField on object

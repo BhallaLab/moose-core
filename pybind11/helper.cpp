@@ -153,9 +153,8 @@ ObjId createIdFromPath(string path, string type, unsigned int numData)
     return nId;
 }
 
-bool mooseExists(const string& p)
+bool mooseExists(const string& path)
 {
-    string path = moose::normalizePath(p);
     return Id(path) != Id() || path == "/" || path == "/root";
 }
 
@@ -429,4 +428,9 @@ string finfoNotFoundMsg(const Cinfo* cinfo)
             ss << endl;
     }
     return ss.str();
+}
+
+bool mooseIsRunning()
+{
+    return getShellPtr()->isRunning();
 }

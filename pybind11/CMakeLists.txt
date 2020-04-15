@@ -1,20 +1,12 @@
-cmake_minimum_required(VERSION 2.8)
+# Add pybind11 module.
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/../CheckCXXCompiler.cmake)
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake_modules/")
-
-pybind11_add_module(_moose 
-    pymoose.cpp 
-    helper.cpp 
-    Finfo.cpp 
-    MooseVec.cpp
-    PyRun.cpp)
+pybind11_add_module(_moose pymoose.cpp helper.cpp Finfo.cpp MooseVec.cpp PyRun.cpp)
+add_dependencies(_moose libmoose)
 
 set_target_properties(_moose PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/python/moose
+    PREFIX ""
     SUFFIX ".so")
-
-add_dependencies(_moose libmoose)
 
 if(APPLE)
     set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
@@ -38,17 +30,39 @@ else(APPLE)
         ${SYSTEM_SHARED_LIBS})
 endif()
 
-# copy __init__.py and moose.py to python/moose folder.
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
-    DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../python/moose/)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/moose.py
-    DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../python/moose/)
-
 
 # Copy python tree to BUILD directory. User can set PYTHONPATH to
-# ${CMAKE_BINARY_DIR}/python.
+# ${CMAKE_BINARY_DIR}/python. 
+set(PYMOOSE_BUILD_DIR ${CMAKE_BINARY_DIR}/python)
 add_custom_target(copy_python_tree ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/python ${CMAKE_BINARY_DIR}/python
-    COMMENT "Copying python source tree: ${CMAKE_SOURCE_DIR}/python -> ${CMAKE_BINARY_DIR}/python"
+    # Copy whole Python's source tree to build directory.
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/python/
+        ${PYMOOSE_BUILD_DIR}
+    COMMENT "pybind11: Copying Python src ${CMAKE_SOURCE_DIR}/python → ${PYMOOSE_BUILD_DIR}"
     DEPENDS _moose 
     VERBATIM)
+
+ 
+# Create a binary distribution inside a directory. Installation will copy that
+# directory.
+set(_platform "CMAKE")
+set(PYMOOSE_BDIST_FILE ${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.${_platform}.tar.gz)
+set(PYMOOSE_INSTALL_DIR ${CMAKE_BINARY_DIR}/_pymoose_temp_install)
+file(MAKE_DIRECTORY ${PYMOOSE_INSTALL_DIR})
+
+add_custom_command(OUTPUT ${PYMOOSE_BDIST_FILE}
+  COMMAND ${PYTHON_EXECUTABLE} setup.py build_py  
+  COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_dumb 
+    --skip-build -p "${_platform}" -d ${CMAKE_BINARY_DIR} 
+  COMMAND ${CMAKE_COMMAND} -E chdir ${PYMOOSE_INSTALL_DIR} tar xf ${PYMOOSE_BDIST_FILE}
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  COMMENT "python's binary distribution is saved to ${CMAKE_BINARY_DIR}"
+  VERBATIM)
+
+add_custom_target(pymoose_sdist ALL
+    DEPENDS ${PYMOOSE_BDIST_FILE} _moose
+    COMMENT "Building pymoose source distribution.")
+
+install(DIRECTORY ${PYMOOSE_INSTALL_DIR}/usr/local/
+    DESTINATION ${CMAKE_INSTALL_PREFIX}
+    CONFIGURATIONS Debug Release)

@@ -88,7 +88,7 @@ def main():
         # create synapse fields with random size between 1 and 10, end points
         # included. Below is one (inefficient) way of setting the individual weights of
         # the elements in 'synapse'
-        syns  = syn.synapse.vec
+        syns  = syn.synapse
         for ii in range(len(syns)):
             syns[ii].weight = random.random() * weightMax
 

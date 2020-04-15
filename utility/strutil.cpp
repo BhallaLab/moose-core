@@ -8,6 +8,8 @@
 
 #include <string>
 #include <sstream>
+#include <regex>
+#include <cassert>
 #include <iostream>
 #include <vector>
 #include "strutil.h"
@@ -191,12 +193,31 @@ bool isPrefix(const string& a, const string& b)
 /* ----------------------------------------------------------------------------*/
 std::pair<std::string, std::string> splitPath(const std::string& path)
 {
-    string p(path);
-    if (p[0] != '/')
-        p = '/' + path;
-    auto i = p.find_last_of('/');
-    auto parentPath = i > 0 ? p.substr(0, i) : "/";
-    return std::make_pair(parentPath, p.substr(i + 1));
+    assert(path[0] == '/');
+    auto i = path.find_last_of('/');
+    auto parentPath = i > 0 ? path.substr(0, i) : "/";
+    return std::make_pair(parentPath, path.substr(i + 1));
+}
+
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @Synopsis  Normalize a given path by removing multiple repeating // to / and
+ * /./ to /
+ *
+ * @Param path
+ *
+ * @Returns   
+ */
+/* ----------------------------------------------------------------------------*/
+string normalizePath(const string& path)
+{
+    string s(path);
+    static std::regex e0("/+");    // Remove multiple / by single /
+    s = std::regex_replace(s, e0, "/");
+    static std::regex e1("/(\\./)+");    // Remove multiple / by single /
+    s = std::regex_replace(s, e1, "/");
+    return s;
 }
 
 }

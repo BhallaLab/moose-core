@@ -111,16 +111,6 @@ string createMOOSEPath(const string& path);
  */
 string toString(double x);
 
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis  Normalize given path.
- *
- * @Param path
- *
- * @Returns   
- */
-/* ----------------------------------------------------------------------------*/
-string normalizePath(const string& path);
 
 /**
  * @brief Create directory, recursively.

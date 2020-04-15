@@ -432,6 +432,7 @@ def writeReac(modelpath,f,sceneitems):
     return reacList,error
  
 def trimPath(mobj):
+    mobj = moose.element(mobj)
     original = mobj
     while not mobj.isA['ChemCompt'] and mobj.path != "/":
         mobj = moose.element(mobj.parent)
@@ -599,8 +600,9 @@ def writePool(modelpath,f,volIndex,sceneitems):
                             slave_enable = 0
                             break
 
-            if (not p.parent.isA['Enz']) and (not p.parent.isA['ZombieEnz']):
-                #Assuming "p.parent.className !=Enzyme is cplx which is not written to genesis"
+            pp = moose.element(p.parent)
+            if (not pp.isA['Enz']) and (not pp.isA['ZombieEnz']):
+                # Assuming "p.parent.className !=Enzyme is cplx which is not written to genesis"
 
                 # x = sceneitems[p]['x']
                 # y = sceneitems[p]['y']

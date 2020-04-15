@@ -25,9 +25,12 @@
 #########################################################################
 
 import math
+
 import numpy as np
 import moose
 import moose.fixXreacs as fixXreacs
+
+print(moose.about())
 
 
 def makeModel():

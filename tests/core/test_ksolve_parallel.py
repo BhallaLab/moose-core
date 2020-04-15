@@ -60,8 +60,8 @@ def test_ksolver_parallel( nthreads = 4 ):
     stoich.compartment = compt
     stoich.ksolve = ksolve
     stoich.dsolve = dsolve
-    stoich.path = '/cylinder/##'
-    assert stoich.path == '/cylinder/##'
+    stoich.reacSystemPath = '/cylinder/##'
+    assert stoich.reacSystemPath == '/cylinder/##'
     for i in range( 10, 18 ):
         moose.setClock( i, dt )
 

@@ -18,6 +18,9 @@
 #define HELPER_H
 
 #include "../shell/Shell.h"
+#include "../utility/strutil.h"
+
+#include "../external/prettyprint.hpp"
 
 #include "MooseVec.h"
 #include "Finfo.h"
@@ -94,33 +97,43 @@ inline ObjId mooseCreateFromPath(const string type, const string& p,
                                  unsigned int numdata)
 {
 
-#if 0
-    // NOTE: This function is costly because of regex use. But it can be
-    // enabled later.
-    auto newpath = moose::normalizePath(path);
-#endif
+    // NOTE: This function is bit costly because of regex use. One can replace
+    // it with bit more efficient one if required.
+    auto path = moose::normalizePath(p);
 
-    // relative path.
-    string path(p);
-    if(path[0] != '/')
-        path = mooseGetCweId().path() + '/' + path;
-
-    // If path exists and user is asking for the same type then return the
-    // object else raise exception.
-    if(mooseExists(path)) {
-        auto oid = ObjId(path);
-        if(oid.element()->cinfo()->name() == type)
-            return oid;
+    if(path.at(0) != '/') {
+        string cwe = mooseGetCweId().path();
+        if(cwe.back() != '/')
+            cwe += '/';
+        path = cwe + path;
     }
 
     // Split into dirname and basename component.
     auto pp = moose::splitPath(path);
-
-    // Name must not end with [\d*] etc.  normalizePath takes care of it if
-    // enabled.
     string name(pp.second);
     if(name.back() == ']')
         name = name.substr(0, name.find_last_of('['));
+
+    // Check if parent exists.
+    auto parent = ObjId(pp.first);
+    if(parent.bad()) {
+        throw py::key_error("Parent '" + pp.first +
+                            "' is not found. Not creating...");
+        return Id();
+    }
+
+    // If path exists and user is asking for the same type then return the
+    // underlying object else raise an exception.
+    auto oid = ObjId(path);
+    if(not oid.bad()) {
+        if(oid.element()->cinfo()->name() == type)
+            return oid;
+        else
+            throw runtime_error("An object with path'" + path +
+                                "' already "
+                                "exists. Use moose.element to access it.");
+    }
+
     return getShellPtr()->doCreate2(type, ObjId(pp.first), name, numdata);
 }
 
@@ -196,5 +209,7 @@ vector<string> mooseGetFieldNames(const string& className,
                                   const string& finfoType);
 
 string finfoNotFoundMsg(const Cinfo* cinfo);
+
+bool mooseIsRunning();
 
 #endif /* end of include guard: HELPER_H */
