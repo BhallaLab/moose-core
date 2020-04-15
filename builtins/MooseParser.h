@@ -121,7 +121,6 @@ private:
 
     /* data */
     string expr_;
-    double value=0.0;
 
     Parser::varmap_type const_map_;
 
@@ -129,7 +128,7 @@ private:
 
     size_t num_user_defined_funcs_ = 0;
 
-    bool valid_;
+    bool valid_{false};
 
 };
 

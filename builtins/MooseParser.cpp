@@ -28,7 +28,7 @@ using namespace std;
 namespace moose
 {
 
-MooseParser::MooseParser(): valid_(true)
+MooseParser::MooseParser(): expr_("0"), valid_(true)
 {
     Parser::symbol_table_t symbolTable;
     symbolTable.add_function("ln", MooseParser::Ln);
@@ -39,6 +39,7 @@ MooseParser::MooseParser(): valid_(true)
     symbolTable.add_function("srand2", MooseParser::SRand2);
     symbolTable.add_function("fmod", MooseParser::Fmod);
     expression_.register_symbol_table(symbolTable);
+    SetExpr(expr_);
 }
 
 MooseParser::~MooseParser()
