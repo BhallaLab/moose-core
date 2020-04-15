@@ -228,12 +228,10 @@ py::object __Finfo__::getFieldValue(const ObjId& oid, const Finfo* f)
     if(rttType == "double" or rttType == "float")
         r = pybind11::float_(getField<double>(oid, fname));
     else if(rttType == "vector<double>") {
-        r = py::cast(getField<vector<double>>(oid, fname));
-        // r = getFieldNumpy<double>(oid, fname);
+        r = getFieldNumpy<double>(oid, fname);
     }
     else if(rttType == "vector<unsigned int>") {
-        r = pybind11::cast(getField<vector<unsigned int>>(oid, fname));
-        // r = getFieldNumpy<unsigned int>(oid, fname);
+        r = getFieldNumpy<unsigned int>(oid, fname);
     }
     else if(rttType == "string")
         r = pybind11::str(getField<string>(oid, fname));
