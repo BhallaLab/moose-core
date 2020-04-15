@@ -238,7 +238,7 @@ PYBIND11_MODULE(_moose, m)
      * @name ObjId. This class serves as a base of ObjId/Id.
      * @{ */
     /**  @} */
-    py::class_<ObjId>(m, "PyObjId")
+    py::class_<ObjId>(m, "melement")
         // Custom constructor.
         .def(py::init([](const ObjId &oid) {
             return ObjId(oid.id, oid.dataIndex, oid.fieldIndex);
@@ -362,7 +362,7 @@ PYBIND11_MODULE(_moose, m)
     m.def("delete", &mooseDeleteObj);
     m.def("create", &mooseCreateFromPath);
     m.def("create", &mooseCreateFromObjId);
-    m.def("create", &mooseCreateFromId);
+    // m.def("create", &mooseCreateFromId);
     m.def("create", &mooseCreateFromMooseVec);
     m.def("move", &mooseMove<ObjId, ObjId>);
     m.def("move", &mooseMove<ObjId, string>);

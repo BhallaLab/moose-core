@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division, absolute_import
 
-__author__           = "Dilawar Singh"
-__copyright__        = "Copyright 2019-, Dilawar Singh"
-__maintainer__       = "Dilawar Singh"
-__email__            = "dilawars@ncbs.res.in"
+__author__ = "Dilawar Singh"
+__copyright__ = "Copyright 2019-, Dilawar Singh"
+__maintainer__ = "Dilawar Singh"
+__email__ = "dilawars@ncbs.res.in"
 
 import warnings
 import os
@@ -16,13 +16,15 @@ import moose
 import moose._moose as _moose
 
 import logging
-logger_ = logging.getLogger('moose')
+
+logger_ = logging.getLogger("moose")
 
 # Keep mapping for cinfo name's to MOOSE classes. E.g. {'Neutral': Neutral}
-# etc. 
+# etc.
 __moose_classes__ = {}
 
-class melement(_moose.PyObjId):
+
+class __melement__(_moose.melement):
     __type__ = "UNKNOWN"
 
     def __init__(self, x, ndata=1, **kwargs):
@@ -43,6 +45,7 @@ class melement(_moose.PyObjId):
         except Exception:
             return self.__dict__[k]
 
+
 def to_melement(obj):
     global __moose_classes__
     mc = __moose_classes__[obj.type](obj)
@@ -50,9 +53,9 @@ def to_melement(obj):
 
 
 # Create MOOSE classes from available Cinfos.
-for p in _moose.wildcardFind('/##[TYPE=Cinfo]'):
+for p in _moose.wildcardFind("/##[TYPE=Cinfo]"):
     # create a class declaration and add to moose.
-    cls = type(p.name, (melement, ), {"__type__": p.name})
+    cls = type(p.name, (__melement__,), {"__type__": p.name})
     setattr(moose, cls.__name__, cls)
     __moose_classes__[cls.__name__] = cls
 
@@ -69,9 +72,12 @@ def version():
 def about():
     """info: Return some 'about me' information.
     """
-    return dict(path=os.path.dirname(__file__),
-                version=_moose.__version__,
-                docs='https://moose.readthedocs.io/en/latest/')
+    return dict(
+        path=os.path.dirname(__file__),
+        version=_moose.__version__,
+        docs="https://moose.readthedocs.io/en/latest/",
+    )
+
 
 def wildcardFind(pattern):
     # return _moose.wildcardFind(pattern)
@@ -131,16 +137,14 @@ def le(el=None):
         el = _moose.getCwe()
     elif isinstance(el, str):
         if not _moose.exists(el):
-            raise ValueError('no such element')
+            raise ValueError("no such element")
         el = _moose.element(el)
     elif isinstance(el, _moose.vec):
-      el = el[0]
+        el = el[0]
     print("Elements under '%s'" % el)
     for ch in el.children:
         print(" %s" % ch.path)
     return [child.path for child in el.children]
-    print(str([]))
-    return []
 
 
 def syncDataHandler(target):
@@ -162,16 +166,17 @@ def syncDataHandler(target):
 
     """
     raise NotImplementedError(
-        'The implementation is not working for IntFire - goes to invalid objects. \
-First fix that issue with SynBase or something in that line.')
+        "The implementation is not working for IntFire - goes to invalid objects. \
+First fix that issue with SynBase or something in that line."
+    )
     if isinstance(target, str):
         if not _moose.exists(target):
-            raise ValueError('%s: element does not exist.' % (target))
+            raise ValueError("%s: element does not exist." % (target))
         target = _moose.vec(target)
         _moose.syncDataHandler(target)
 
 
-def showfield(el, field='*', showtype=False):
+def showfield(el, field="*", showtype=False):
     """Show the fields of the element `el`, their data types and
     values in human readable format. Convenience function for GENESIS
     users.
@@ -194,18 +199,23 @@ def showfield(el, field='*', showtype=False):
     """
     if isinstance(el, str):
         if not _moose.exists(el):
-            raise ValueError('no such element: %s' % el)
+            raise ValueError("no such element: %s" % el)
         el = _moose.element(el)
     result = []
-    if field == '*':
-        value_field_dict = _moose.getFieldDict(el.className, 'valueFinfo')
+    if field == "*":
+        value_field_dict = _moose.getFieldDict(el.className, "valueFinfo")
         max_type_len = max(len(dtype) for dtype in value_field_dict.values())
         max_field_len = max(len(dtype) for dtype in value_field_dict.keys())
-        result.append('\n[' + el.path + ']\n')
+        result.append("\n[" + el.path + "]\n")
         for key, dtype in sorted(value_field_dict.items()):
-            if dtype == 'bad' or key == 'this' or key == 'dummy' \
-                or key == 'me' or dtype.startswith('vector') \
-                or 'ObjId' in dtype:
+            if (
+                dtype == "bad"
+                or key == "this"
+                or key == "dummy"
+                or key == "me"
+                or dtype.startswith("vector")
+                or "ObjId" in dtype
+            ):
                 continue
             value = el.getField(key)
             if showtype:
@@ -213,16 +223,15 @@ def showfield(el, field='*', showtype=False):
                 # The following hack is for handling both Python 2 and
                 # 3. Directly putting the print command in the if/else
                 # clause causes syntax error in both systems.
-                result.append(typestr + ' ')
-            result.append(
-                key.ljust(max_field_len + 4) + '=' + str(value) + '\n')
+                result.append(typestr + " ")
+            result.append(key.ljust(max_field_len + 4) + "=" + str(value) + "\n")
     else:
         try:
-            result.append(field + '=' + el.getField(field))
+            result.append(field + "=" + el.getField(field))
         except AttributeError:
             pass  # Genesis silently ignores non existent fields
-    print(''.join(result))
-    return ''.join(result)
+    print("".join(result))
+    return "".join(result)
 
 
 def showfields(el, showtype=False):
@@ -231,16 +240,19 @@ def showfields(el, showtype=False):
     """
     warnings.warn(
         'Deprecated. Use showfield(element, field="*", showtype=True) instead.',
-        DeprecationWarning)
-    return showfield(el, field='*', showtype=showtype)
+        DeprecationWarning,
+    )
+    return showfield(el, field="*", showtype=showtype)
 
 
 # Predefined field types and their human readable names
-finfotypes = [('valueFinfo', 'value field'),
-              ('srcFinfo', 'source message field'),
-              ('destFinfo', 'destination message field'),
-              ('sharedFinfo', 'shared message field'),
-              ('lookupFinfo', 'lookup field')]
+finfotypes = [
+    ("valueFinfo", "value field"),
+    ("srcFinfo", "source message field"),
+    ("destFinfo", "destination message field"),
+    ("sharedFinfo", "shared message field"),
+    ("lookupFinfo", "lookup field"),
+]
 
 
 def listmsg(el):
@@ -284,17 +296,15 @@ def showmsg(el):
 
     """
     obj = _moose.element(el)
-    print('INCOMING:')
+    print("INCOMING:")
     for msg in obj.msgIn:
-        print(msg.e2.path, msg.destFieldsOnE2, '<---', msg.e1.path,
-              msg.srcFieldsOnE1)
-    print('OUTGOING:')
+        print(msg.e2.path, msg.destFieldsOnE2, "<---", msg.e1.path, msg.srcFieldsOnE1)
+    print("OUTGOING:")
     for msg in obj.msgOut:
-        print(msg.e1.path, msg.srcFieldsOnE1, '--->', msg.e2.path,
-              msg.destFieldsOnE2)
+        print(msg.e1.path, msg.srcFieldsOnE1, "--->", msg.e2.path, msg.destFieldsOnE2)
 
 
-def getFieldDoc(tokens, indent=''):
+def getFieldDoc(tokens, indent=""):
     """Return the documentation for field specified by `tokens`.
 
     Parameters
@@ -318,60 +328,59 @@ def getFieldDoc(tokens, indent=''):
     NameError
         If the specified fieldName is not present in the specified class.
     """
-    assert (len(tokens) > 1)
+    assert len(tokens) > 1
     classname = tokens[0]
     fieldname = tokens[1]
     while True:
         try:
-            classelement = _moose.element('/classes/' + classname)
+            classelement = _moose.element("/classes/" + classname)
             for finfo in classelement.children:
                 # FIXME
-                print(finfo, 'x')
+                print(finfo, "x")
                 return
                 for fieldelement in finfo:
-                    baseinfo = ''
+                    baseinfo = ""
                     if classname != tokens[0]:
-                        baseinfo = ' (inherited from {})'.format(classname)
+                        baseinfo = " (inherited from {})".format(classname)
                     if fieldelement.fieldName == fieldname:
                         # The field elements are
                         # /classes/{ParentClass}[0]/{fieldElementType}[N].
                         finfotype = fieldelement.name
-                        return u'{indent}{classname}.{fieldname}: type={type}, finfotype={finfotype}{baseinfo}\n\t{docs}\n'.format(
+                        return u"{indent}{classname}.{fieldname}: type={type}, finfotype={finfotype}{baseinfo}\n\t{docs}\n".format(
                             indent=indent,
                             classname=tokens[0],
                             fieldname=fieldname,
                             type=fieldelement.type,
                             finfotype=finfotype,
                             baseinfo=baseinfo,
-                            docs=fieldelement.docs)
+                            docs=fieldelement.docs,
+                        )
             classname = classelement.baseClass
         except ValueError:
-            raise NameError('`%s` has no field called `%s`' %
-                            (tokens[0], tokens[1]))
+            raise NameError("`%s` has no field called `%s`" % (tokens[0], tokens[1]))
 
 
 def _appendFinfoDocs(classname, docstring, indent):
     """Append list of finfos in class name to docstring"""
     try:
-        classElem = _moose.element('/classes/%s' % (classname))
+        classElem = _moose.element("/classes/%s" % (classname))
     except ValueError:
-        raise NameError('class \'%s\' not defined.' % (classname))
+        raise NameError("class '%s' not defined." % (classname))
 
     for ftype, rname in finfotypes:
-        docstring.write(u'\n*%s*\n' % (rname.capitalize()))
-        finfo = _moose.element('%s/%s' % (classElem.path, ftype))
+        docstring.write(u"\n*%s*\n" % (rname.capitalize()))
+        finfo = _moose.element("%s/%s" % (classElem.path, ftype))
         for field in finfo.vec:
-            docstring.write(u'%s%s: %s\n' %
-                            (indent, field.fieldName, field.type))
+            docstring.write(u"%s%s: %s\n" % (indent, field.fieldName, field.type))
 
 
 def _getMooseDoc(tokens, inherited=False):
     """Return MOOSE builtin documentation.
     """
-    indent = '  '
+    indent = "  "
     docstring = io.StringIO()
     with contextlib.closing(docstring):
-        classElem = _moose.element('/classes/%s' % tokens[0])
+        classElem = _moose.element("/classes/%s" % tokens[0])
         if len(tokens) > 1:
             docstring.write(getFieldDoc(tokens))
             return docstring.getvalue()
@@ -423,10 +432,10 @@ def doc(arg, inherited=True, paged=True):
     if paged and __pager is None:
         __pager = pydoc.pager
     tokens = []
-    text = ''
+    text = ""
     if isinstance(arg, str):
-        tokens = arg.split('.')
-        if tokens[0] in ['moose', '_moose']:
+        tokens = arg.split(".")
+        if tokens[0] in ["moose", "_moose"]:
             tokens = tokens[1:]
     assert tokens
     text += _getMooseDoc(tokens, inherited=inherited)
