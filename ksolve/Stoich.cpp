@@ -278,8 +278,8 @@ bool Stoich::getAllowNegative() const
 
 void Stoich::setPath(const Eref& e, string v)
 {
-    cout << "DeprecationWarning:: Use Soitch::wildcard instead. In future, "
-            " it will be an error."
+    cout << "DeprecationWarning:: Use Soitch::readSystemPath instead. In "
+            "the future, it will be an error."
          << endl;
     setReacSystemPath(e, v);
 }
@@ -288,7 +288,7 @@ void Stoich::setReacSystemPath(const Eref& e, string v)
 {
     if(wildcard_ != "" && wildcard_ != v) {
         // unzombify( wildcard_ );
-        cout << "Stoich::setReacSystemPath: need to clear old reacSystemPath.\n";
+        cerr << __func__ << ":: need to clear old reacSystemPath." << endl;
         status_ = -1;
         return;
     }
@@ -377,8 +377,8 @@ void Stoich::setElist(const Eref& e, const vector<ObjId>& elist)
 
 string Stoich::getPath(const Eref& e) const
 {
-    cout << "DeprecationWarning:: Use Soitch::wildcard instead. In future, "
-            " it will be an error."
+    cout << "DeprecationWarning:: Use Soitch::reacSystemPath instead. In "
+            "the future, it will be an error."
          << endl;
     return getReacSystemPath(e);
 }
