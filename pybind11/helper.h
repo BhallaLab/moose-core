@@ -212,4 +212,6 @@ string finfoNotFoundMsg(const Cinfo* cinfo);
 
 bool mooseIsRunning();
 
+string mooseClassDoc(const string& classname);
+
 #endif /* end of include guard: HELPER_H */

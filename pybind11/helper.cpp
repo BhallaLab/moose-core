@@ -434,3 +434,8 @@ bool mooseIsRunning()
 {
     return getShellPtr()->isRunning();
 }
+
+string mooseClassDoc(const string& className)
+{
+    return className;
+}

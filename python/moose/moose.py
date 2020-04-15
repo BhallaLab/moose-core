@@ -26,6 +26,7 @@ __moose_classes__ = {}
 
 class __melement__(_moose.melement):
     __type__ = "UNKNOWN"
+    __doc__ = ""
 
     def __init__(self, x, ndata=1, **kwargs):
         obj = _moose.create(self.__type__, x, ndata)
@@ -55,7 +56,8 @@ def to_melement(obj):
 # Create MOOSE classes from available Cinfos.
 for p in _moose.wildcardFind("/##[TYPE=Cinfo]"):
     # create a class declaration and add to moose.
-    cls = type(p.name, (__melement__,), {"__type__": p.name})
+    cls = type(p.name, (__melement__,), {"__type__": p.name, 
+        "__doc__": _moose.classDoc(p.name)})
     setattr(moose, cls.__name__, cls)
     __moose_classes__[cls.__name__] = cls
 

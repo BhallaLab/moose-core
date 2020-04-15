@@ -247,7 +247,11 @@ PYBIND11_MODULE(_moose, m)
         //  Readonly properties.
         //---------------------------------------------------------------------
         .def_property_readonly("vec",
-                               [](const ObjId &oid) { return MooseVec(oid); })
+                               [](const ObjId &oid) { return MooseVec(oid); }
+                               , R"pbdoc(
+                               Returns a vectorized version of object.
+                               )pbdoc"
+                               )
         .def_property_readonly(
             "parent", [](const ObjId &oid) { return Neutral::parent(oid); })
         .def_property_readonly(
@@ -368,15 +372,18 @@ PYBIND11_MODULE(_moose, m)
     m.def("move", &mooseMove<ObjId, string>);
     m.def("move", &mooseMove<string, ObjId>);
     m.def("move", &mooseMove<string, string>);
-    m.def("reinit", &mooseReinit);
-    m.def("start", &mooseStart, "runtime"_a, "notify"_a = false);
-    m.def("stop", &mooseStop);
-    m.def("isRunning", &mooseIsRunning);
+
     m.def("element", &mooseObjIdPath);
     m.def("element", &mooseObjIdObj);
     m.def("element", &mooseObjIdId);
     m.def("element", &mooseObjIdField);
     m.def("element", &mooseObjIdMooseVec);
+
+    m.def("reinit", &mooseReinit);
+    m.def("start", &mooseStart, "runtime"_a, "notify"_a = false);
+    m.def("stop", &mooseStop);
+    m.def("isRunning", &mooseIsRunning);
+
     m.def("exists", &mooseExists);
     m.def("getCwe", &mooseGetCwe);
     m.def("setCwe", &mooseSetCwe);
@@ -396,6 +403,9 @@ PYBIND11_MODULE(_moose, m)
 
     m.def("copy", &mooseCopy, "orig"_a, "newParent"_a, "newName"_a, "num"_a = 1,
           "toGlobal"_a = false, "copyExtMsgs"_a = false);
+
+    // Documentation.
+    m.def("classDoc", &mooseClassDoc);
 
     // Attributes.
     m.attr("NA") = NA;

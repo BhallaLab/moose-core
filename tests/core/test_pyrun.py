@@ -361,7 +361,7 @@ def test_pyrun():
     assert len(got) > 3500
     assert expected.replace(' ', '') in got.replace(' ', ''), got
     s = difflib.SequenceMatcher(None, expected, got)
-    assert s.ratio() > 0.95, ("Difference is too large", s.ration())
+    assert s.ratio() >= 0.90, ("Difference is too large", s.ratio())
     print('All done')
 
 if __name__ == '__main__':
