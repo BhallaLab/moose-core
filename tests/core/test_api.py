@@ -49,6 +49,10 @@ def test_other():
 def test_vec():
     a = moose.Pool('/p111', 100)
     v = moose.vec(a)
+
+    # le can cause segfault in some cases.
+    moose.le(v)
+
     assert len(v) == 100, len(v)
     assert v == v.vec
     assert v[0] == v.vec[0], (v[0], v.vec[0])

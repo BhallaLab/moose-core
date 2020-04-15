@@ -133,12 +133,14 @@ def le(el=None):
         if not _moose.exists(el):
             raise ValueError('no such element')
         el = _moose.element(el)
-    #elif isinstance(el, _moose.vec):
-    #    el = el[0]
+    elif isinstance(el, _moose.vec):
+      el = el[0]
     print("Elements under '%s'" % el)
     for ch in el.children:
         print(" %s" % ch.path)
     return [child.path for child in el.children]
+    print(str([]))
+    return []
 
 
 def syncDataHandler(target):
