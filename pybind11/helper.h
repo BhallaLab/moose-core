@@ -20,7 +20,7 @@
 #include "../shell/Shell.h"
 #include "../utility/strutil.h"
 
-#include "../external/prettyprint.hpp"
+#include "../external/fmt-6.2.0/include/fmt/core.h"
 
 #include "MooseVec.h"
 #include "Finfo.h"
@@ -192,7 +192,14 @@ void mooseSetClock(const unsigned int clockId, double dt);
 
 void mooseUseClock(size_t tick, const string& path, const string& field);
 
+// API.
 map<string, string> mooseGetFieldDict(const string& className,
+                                      const string& finfoType);
+
+// Internal.
+map<string, Finfo*> getFieldDict(const string& className,
+                                 const string& finfoType);
+map<string, Finfo*> innerGetFieldDict(const Cinfo* cinfo,
                                       const string& finfoType);
 
 void mooseReinit();

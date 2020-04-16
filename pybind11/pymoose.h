@@ -17,14 +17,11 @@
 #ifndef PYMOOSE_H
 #define PYMOOSE_H
 
-#include "../external/prettyprint.hpp"
 #include "MooseVec.h"
 
 template <typename T>
 inline bool setField(const ObjId& id, const string& fname, T val)
 {
-    // cout << "Setting " << fname << " to value " << val << typeid(T).name() <<
-    // endl;
     return Field<T>::set(id, fname, val);
 }
 

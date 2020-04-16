@@ -12,6 +12,7 @@
 #include <cassert>
 #include <iostream>
 #include <vector>
+
 #include "strutil.h"
 
 using namespace std;
@@ -26,7 +27,7 @@ void tokenize(const string& str, const string& delimiters,
     string::size_type begin = str.find_first_not_of(delimiters, 0);
     string::size_type end = str.find_first_of(delimiters, begin);
 
-    while (string::npos != begin || string::npos != end) {
+    while(string::npos != begin || string::npos != end) {
         // Found a token, add it to the vector.
         tokens.push_back(str.substr(begin, end - begin));
 
@@ -38,13 +39,13 @@ void tokenize(const string& str, const string& delimiters,
 
 string& clean_type_name(string& arg)
 {
-    for (size_t pos = arg.find(' '); pos != string::npos; pos = arg.find(' ')) {
+    for(size_t pos = arg.find(' '); pos != string::npos; pos = arg.find(' ')) {
         arg.replace(pos, 1, 1, '_');
     }
-    for (size_t pos = arg.find('<'); pos != string::npos; pos = arg.find('<')) {
+    for(size_t pos = arg.find('<'); pos != string::npos; pos = arg.find('<')) {
         arg.replace(pos, 1, 1, '_');
     }
-    for (size_t pos = arg.find('>'); pos != string::npos; pos = arg.find('>')) {
+    for(size_t pos = arg.find('>'); pos != string::npos; pos = arg.find('>')) {
         arg.replace(pos, 1, 1, '_');
     }
     return arg;
@@ -52,14 +53,14 @@ string& clean_type_name(string& arg)
 
 std::string trim(const std::string myString, const string& delimiters)
 {
-    if (myString.length() == 0) {
+    if(myString.length() == 0) {
         return myString;
     }
 
     string::size_type end = myString.find_last_not_of(delimiters);
     string::size_type begin = myString.find_first_not_of(delimiters);
 
-    if (begin != string::npos) {
+    if(begin != string::npos) {
         return std::string(myString, begin, end - begin + 1);
     }
 
@@ -75,9 +76,9 @@ std::string fix(const std::string userPath, const string& delimiters)
 
     // In this loop, we check if there are more than one '/' together. If yes,
     // then accept only first one and reject other.
-    for (unsigned int i = 0; i < trimmedPath.size(); ++i) {
+    for(unsigned int i = 0; i < trimmedPath.size(); ++i) {
         const char c = trimmedPath[i];
-        if (c != '/' || c != prev)
+        if(c != '/' || c != prev)
             fixedPath.push_back(c);
         prev = c;
     }
@@ -87,26 +88,36 @@ std::string fix(const std::string userPath, const string& delimiters)
 int testTrim()
 {
 
-    std::string testStrings[] = {
-        " space at beginning",       "space at end ",
-        " space at both sides ",     "\ttab at beginning",
-        "tab at end\t",              "\ttab at both sides\t",
-        "\nnewline at beginning",    "newline at end\n",
-        "\nnewline at both sides\n", "\n\tnewline and tab at beginning",
-        "space and tab at end \t",   "   \rtab and return at both sides \r"};
+    std::string testStrings[] = {" space at beginning",
+                                 "space at end ",
+                                 " space at both sides ",
+                                 "\ttab at beginning",
+                                 "tab at end\t",
+                                 "\ttab at both sides\t",
+                                 "\nnewline at beginning",
+                                 "newline at end\n",
+                                 "\nnewline at both sides\n",
+                                 "\n\tnewline and tab at beginning",
+                                 "space and tab at end \t",
+                                 "   \rtab and return at both sides \r"};
 
-    std::string results[] = {
-        "space at beginning",    "space at end",
-        "space at both sides",   "tab at beginning",
-        "tab at end",            "tab at both sides",
-        "newline at beginning",  "newline at end",
-        "newline at both sides", "newline and tab at beginning",
-        "space and tab at end",  "tab and return at both sides"};
+    std::string results[] = {"space at beginning",
+                             "space at end",
+                             "space at both sides",
+                             "tab at beginning",
+                             "tab at end",
+                             "tab at both sides",
+                             "newline at beginning",
+                             "newline at end",
+                             "newline at both sides",
+                             "newline and tab at beginning",
+                             "space and tab at end",
+                             "tab and return at both sides"};
 
     bool success = true;
 
-    for (unsigned int i = 0; i < sizeof(testStrings) / sizeof(*testStrings);
-         ++i) {
+    for(unsigned int i = 0; i < sizeof(testStrings) / sizeof(*testStrings);
+        ++i) {
         std::string trimmed = trim(testStrings[i]);
         success = (results[i].compare(trimmed) == 0);
 
@@ -118,7 +129,7 @@ int testTrim()
 
 bool endswith(const string& full, const string& ending)
 {
-    if (full.length() < ending.length()) {
+    if(full.length() < ending.length()) {
         return false;
     }
     return (0 == full.compare(full.length() - ending.length(), ending.length(),
@@ -128,11 +139,11 @@ bool endswith(const string& full, const string& ending)
 /* Compare two strings. */
 int strncasecmp(const string& a, const string& b, size_t n)
 {
-    for (size_t i = 0; i < std::min(n, b.size()); ++i)
-        if (tolower(a[i]) != tolower(b[i]))
+    for(size_t i = 0; i < std::min(n, b.size()); ++i)
+        if(tolower(a[i]) != tolower(b[i]))
             return tolower(a[i]) - tolower(b[i]);
 
-    if (b.size() < n)
+    if(b.size() < n)
         return a.size() - b.size();
 
     return 0;
@@ -148,7 +159,7 @@ string random_string(const unsigned len)
         "abcdefghijklmnopqrstuvwxyz";
 
     string s(len, '_');
-    for (unsigned i = 0; i < len; ++i) {
+    for(unsigned i = 0; i < len; ++i) {
         s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
     }
 
@@ -157,15 +168,15 @@ string random_string(const unsigned len)
 
 void str_replace_all(string& str, const string& a, const string& b)
 {
-    if (a.size() == 0)
+    if(a.size() == 0)
         return;
 
     size_t index = 0;
-    while (true) {
+    while(true) {
         /* Locate the substring to replace. */
         index = str.find(a, index);
 
-        if (index == std::string::npos)
+        if(index == std::string::npos)
             break;
 
         /* Make the replacement. */
@@ -176,7 +187,7 @@ void str_replace_all(string& str, const string& a, const string& b)
 
 bool isPrefix(const string& a, const string& b)
 {
-    if (a.size() < b.size())
+    if(a.size() < b.size())
         return false;
     return (b.find(a, 0) == 0);
 }
@@ -199,7 +210,6 @@ std::pair<std::string, std::string> splitPath(const std::string& path)
     return std::make_pair(parentPath, path.substr(i + 1));
 }
 
-
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis  Normalize a given path by removing multiple repeating // to / and
@@ -207,15 +217,15 @@ std::pair<std::string, std::string> splitPath(const std::string& path)
  *
  * @Param path
  *
- * @Returns   
+ * @Returns
  */
 /* ----------------------------------------------------------------------------*/
 string normalizePath(const string& path)
 {
     string s(path);
-    static std::regex e0("/+");    // Remove multiple / by single /
+    static std::regex e0("/+");  // Remove multiple / by single /
     s = std::regex_replace(s, e0, "/");
-    static std::regex e1("/(\\./)+");    // Remove multiple / by single /
+    static std::regex e1("/(\\./)+");  // Remove multiple / by single /
     s = std::regex_replace(s, e1, "/");
     return s;
 }
@@ -225,17 +235,16 @@ string textwrap(const string& text, const string& prefix, const size_t width)
     // Get words out of the text first.
     vector<string> words;
     tokenize(text, " \n", words);
-
     string res;
     size_t size = 0;
-    for(auto w: words) {
+    for(const auto w : words) {
         if(size == 0) {
             res += prefix;
             size = prefix.size();
         }
         res += w + ' ';
         size += w.size() + 1;
-        if(size > width) { 
+        if(size > width) {
             res += '\n';
             size = 0;
         }
@@ -243,5 +252,12 @@ string textwrap(const string& text, const string& prefix, const size_t width)
     return res;
 }
 
-
+std::string boxed(const string& text, const size_t width)
+{
+    return fmt::format(
+      "┌{0:─^{2}}┐\n"
+      "│{1: ^{2}}│\n"
+      "└{0:─^{2}}┘\n", "", text, width);
 }
+
+}  // namespace moose

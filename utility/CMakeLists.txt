@@ -12,8 +12,10 @@ add_library(utility
     fileutils.cpp
     utility.cpp
     )
+target_link_libraries(utility fmt::fmt)
 
 add_executable(test_cnpy test_cnpy.cpp)
+
 target_link_libraries(test_cnpy utility)
 
 set(TEST_SCRIPT ${CMAKE_BINARY_DIR}/test_cnpy.py)

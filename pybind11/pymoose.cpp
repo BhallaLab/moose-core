@@ -181,7 +181,7 @@ PYBIND11_MODULE(_moose, m)
         .def("__getitem__", [](const Id &id, size_t i) { return ObjId(id, i); })
         .def("__repr__",
              [](const Id &id) {
-                 return "<melement id=" + std::to_string(id.value()) +
+                 return "<melement: id=" + std::to_string(id.value()) +
                         " path=" + id.path() +
                         " class=" + id.element()->cinfo()->name() + ">";
              })
@@ -283,6 +283,7 @@ PYBIND11_MODULE(_moose, m)
         .def("getField", &getFieldGeneric,
              py::return_value_policy::reference_internal)
         .def("setField", &setFieldGeneric)
+
         .def("__getattr__", &getFieldGeneric,
              py::return_value_policy::reference_internal)
         .def("__setattr__", &setFieldGeneric)
@@ -391,15 +392,13 @@ PYBIND11_MODULE(_moose, m)
     m.def("useClock", &mooseUseClock);
     m.def("loadModelInternal", &loadModelInternal);
     m.def("getFieldNames", &mooseGetFieldNames);
+    m.def("getFieldDict", &mooseGetFieldDict, "classname"_a, "fieldtype"_a="*");
     m.def("getField",
           [](const ObjId &oid, const string &fieldName, const string &ftype) {
               // ftype is not needed anymore.
               return getFieldGeneric(oid, fieldName);
           },
           "el"_a, "fieldname"_a, "ftype"_a = "");
-
-    m.def("getFieldDict", &mooseGetFieldDict, "className"_a,
-          "finfoType"_a = "");
 
     m.def("copy", &mooseCopy, "orig"_a, "newParent"_a, "newName"_a, "num"_a = 1,
           "toGlobal"_a = false, "copyExtMsgs"_a = false);

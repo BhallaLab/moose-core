@@ -23,6 +23,8 @@
 #include "../external/pybind11/include/pybind11/pybind11.h"
 #include "../external/pybind11/include/pybind11/stl.h"
 
+#include "../external/fmt-6.2.0/include/fmt/format-inl.h"
+
 namespace py = pybind11;
 
 // See
@@ -276,59 +278,68 @@ void mooseSetCwe(const py::object& arg)
 }
 
 map<string, string> mooseGetFieldDict(const string& className,
-                                      const string& finfoType = "")
+                                      const string& finfoType = "*")
+{
+    map<string, string> res;
+    for(const auto& v : getFieldDict(className, finfoType))
+        res[v.first] = v.second->rttiType();
+    return res;
+}
+
+map<string, Finfo*> getFieldDict(const string& className,
+                                 const string& finfoType = "*")
 {
     const Cinfo* cinfo = Cinfo::find(className);
     if(!cinfo) {
         cout << "Warning: Invalid class " << className << endl;
         return {};
     }
+    return innerGetFieldDict(cinfo, finfoType);
+}
 
-    map<string, string> fieldDict;
-    if(finfoType == "") {
-        auto finfos = cinfo->finfoMap();
-        for(auto& v : finfos)
-            fieldDict[v.first] = v.second->rttiType();
-        return fieldDict;
-    }
+map<string, Finfo*> innerGetFieldDict(const Cinfo* cinfo,
+                                      const string& finfoType = "*")
+{
+    if(finfoType == "*")
+        return cinfo->finfoMap();
 
-    // Now the specific one.
-    // FIXME: Fix the typeids  or remove the 'get' and 'set'
+    map<string, Finfo*> fieldDict;
+
     if(finfoType == "valueFinfo" || finfoType == "value") {
         for(unsigned int ii = 0; ii < cinfo->getNumValueFinfo(); ++ii) {
             auto* finfo = cinfo->getValueFinfo(ii);
-            fieldDict[finfo->name()] = finfo->rttiType();
+            fieldDict[finfo->name()] = finfo;
         }
     }
     else if(finfoType == "srcFinfo" || finfoType == "src") {
         for(unsigned int ii = 0; ii < cinfo->getNumSrcFinfo(); ++ii) {
             auto* finfo = cinfo->getSrcFinfo(ii);
-            fieldDict[finfo->name()] = finfo->rttiType();
+            fieldDict[finfo->name()] = finfo;
         }
     }
     else if(finfoType == "destFinfo" || finfoType == "dest") {
         for(unsigned int ii = 0; ii < cinfo->getNumDestFinfo(); ++ii) {
             auto* finfo = cinfo->getDestFinfo(ii);
-            fieldDict[finfo->name()] = finfo->rttiType();
+            fieldDict[finfo->name()] = finfo;
         }
     }
     else if(finfoType == "lookupFinfo" || finfoType == "lookup") {
         for(unsigned int ii = 0; ii < cinfo->getNumLookupFinfo(); ++ii) {
             auto* finfo = cinfo->getLookupFinfo(ii);
-            fieldDict[finfo->name()] = finfo->rttiType();
+            fieldDict[finfo->name()] = finfo;
         }
     }
     else if(finfoType == "sharedFinfo" || finfoType == "shared") {
         for(unsigned int ii = 0; ii < cinfo->getNumSrcFinfo(); ++ii) {
             auto* finfo = cinfo->getSrcFinfo(ii);
-            fieldDict[finfo->name()] = finfo->rttiType();
+            fieldDict[finfo->name()] = finfo;
         }
     }
     else if(finfoType == "fieldElementFinfo" || finfoType == "field" ||
             finfoType == "fieldElement") {
         for(unsigned int ii = 0; ii < cinfo->getNumFieldElementFinfo(); ++ii) {
             auto* finfo = cinfo->getFieldElementFinfo(ii);
-            fieldDict[finfo->name()] = finfo->rttiType();
+            fieldDict[finfo->name()] = finfo;
         }
     }
     return fieldDict;
@@ -448,6 +459,37 @@ bool mooseIsRunning()
     return getShellPtr()->isRunning();
 }
 
+string fieldDocFormatted(const string& name, const Cinfo* cinfo,
+                         const Finfo* finfo)
+{
+    return fmt::format("{0:<15}\n Type: {1:}\n{2}\n\n", name, finfo->rttiType(),
+                       moose::textwrap(finfo->docs(), "  "));
+}
+
+string mooseClassFieldDoc(const Cinfo* cinfo, const string& ftype)
+{
+    stringstream ss;
+
+    auto fmap = innerGetFieldDict(cinfo, ftype);
+
+    for(const auto& v : fmap)
+        ss << fieldDocFormatted(v.first, cinfo, v.second);
+
+    // There are from base classes.
+    const Cinfo* baseClassCinfo = cinfo->baseCinfo();
+    while(baseClassCinfo) {
+        auto baseFmap = innerGetFieldDict(baseClassCinfo, ftype);
+        for(const auto& vv : baseFmap) {
+            if(fmap.find(vv.first) == fmap.end()) {
+                fmap[vv.first] = vv.second;
+                ss << fieldDocFormatted(vv.first, baseClassCinfo, vv.second);
+            }
+        }
+        baseClassCinfo = baseClassCinfo->baseCinfo();
+    }
+    return ss.str();
+}
+
 string mooseClassDoc(const string& className)
 {
     stringstream ss;
@@ -458,27 +500,31 @@ string mooseClassDoc(const string& className)
         return ss.str();
     }
 
-    ss << cinfo->getDocs() << endl;
-
-    // Documentation of base class.
-    const Cinfo* baseClassCinfo = cinfo->baseCinfo();
-    if(baseClassCinfo) {
-        ss << "BaseClass: " << baseClassCinfo->name() << endl;
-        ss << baseClassCinfo->getDocs() << endl;
-    }
+    // ss << fmt::format(
+    //     "{0:—^{2}}\n{1: ^{2}}{0:—^{2}}\n", "",
+    //     moose::textwrap(
+    //         "Following document is generated from the source code for quick "
+    //         " reference. Go to [https://moose.readthedocs.io/en/latest/] for"
+    //         " tutorials and examples."),
+    //     70);
+    // ss << cinfo->getDocs();
 
     // Documentation of Finfo.
     // auto finfos = cinfo->finfoMap();
     // for(const auto& item : finfos) {
-        // ss << item.first << endl;
-        // ss << moose::textwrap(item.second->docs(), "  ", 70) << endl;
+    // ss << item.first << endl;
+    // ss << moose::textwrap(item.second->docs(), "  ", 70) << endl;
     // }
-//
-    for(unsigned int ii = 0; ii < cinfo->getNumValueFinfo(); ++ii) {
-        auto* finfo = cinfo->getValueFinfo(ii);
-        // fieldDict[finfo->name()] = finfo->rttiType();
-        ss << '*' << finfo->name() << '*' << endl;
-        ss << moose::textwrap(finfo->docs(), "  ", 70) << endl;
-    }
+
+    // ss << moose::boxed("Value Field");
+    ss << mooseClassFieldDoc(cinfo, "value");
+
+    // Collect all field from this class and the base classes.
+    // for(unsigned int ii = 0; ii < cinfo->getNumValueFinfo(); ++ii) {
+    //    auto* finfo = cinfo->getValueFinfo(ii);
+    //    ss << fmt::format("{0}\n{1}\n\n", finfo->name(),
+    //                      moose::textwrap(finfo->docs(), "  "));
+    //}
+
     return ss.str();
 }

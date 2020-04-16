@@ -15,6 +15,9 @@ if(APPLE)
     set_target_properties(_moose PROPERTIES MACOSX_RPATH OFF)
 endif(APPLE)
 
+# Link libfmt. It in the external.
+target_link_libraries(_moose PRIVATE fmt::fmt)
+
 if(APPLE)
     target_link_libraries(_moose PRIVATE
         "-Wl,-all_load"
