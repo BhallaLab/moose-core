@@ -362,12 +362,14 @@ PYBIND11_MODULE(_moose, m)
     // This is a wrapper to Shell::wildcardFind. The python interface must
     // override it.
     m.def("wildcardFind", &wildcardFind2);
+
     m.def("delete", &mooseDeleteStr);
     m.def("delete", &mooseDeleteObj);
+
     m.def("create", &mooseCreateFromPath);
     m.def("create", &mooseCreateFromObjId);
-    // m.def("create", &mooseCreateFromId);
     m.def("create", &mooseCreateFromMooseVec);
+
     m.def("move", &mooseMove<ObjId, ObjId>);
     m.def("move", &mooseMove<ObjId, string>);
     m.def("move", &mooseMove<string, ObjId>);

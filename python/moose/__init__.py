@@ -82,7 +82,7 @@ def about():
 
 
 def wildcardFind(pattern):
-    """Find objects by wildcard.
+    """Find objects using wildcard pattern 
 
     Parameters
     ----------
@@ -155,7 +155,6 @@ def connect(src, srcfield, dest, destfield, msgtype="Single"):
          - `Reduce` 
          - `Sparse`  
     
-
      Returns
      -------
      msgmanager: melement
@@ -174,6 +173,261 @@ def connect(src, srcfield, dest, destfield, msgtype="Single"):
     if isinstance(dest, str):
         dest = _moose.element(dest)
     return src.connect(srcfield, dest, destfield, msgtype)
+
+
+def delete(arg):
+    """Delete the underlying moose object(s). This does not delete any of the
+    Python objects referring to this vec but does invalidate them. Any
+    attempt to access them will raise a ValueError.
+
+    Parameters
+    ----------
+    arg : vec/str/melement
+        path of the object to be deleted.
+
+    Returns
+    -------
+    None
+    """
+    _moose.delete(arg)
+
+
+def element(arg):
+    """Convert a path or an object to the appropriate builtin moose class instance
+
+    Parameters
+    ----------
+    arg : str/vec/moose object
+        path of the moose element to be converted or another element (possibly
+        available as a superclass instance).
+
+    Returns
+    -------
+    melement
+        MOOSE element (object) corresponding to the `arg` converted to write
+        subclass.
+    """
+    return _moose.element(arg)
+
+
+def exists(path):
+    """Returns True if an object with given path already exists."""
+    return _moose.exists(path)
+
+
+def getCwe():
+    """Return current working elemement.
+
+    See also
+    --------
+    moose.setCwe
+    """
+    return _moose.getCwe()
+
+
+def getField(classname, fieldname):
+    return _moose.getField(classname, fieldname)
+
+
+def getFieldDict(classname, finfoType=""):
+    """Get dictionary of field names and types for specified class.
+
+    Parameters
+    ----------
+    className : str
+        MOOSE class to find the fields of.
+    finfoType : str (default '')
+        Finfo type of the fields to find. If empty or not specified, allfields
+        will be retrieved.
+
+    Returns
+    -------
+    dict
+        field names and their types.
+
+    Notes
+    -----
+    This behaviour is different from `getFieldNames` where only `valueFinfo`s
+    are returned when `finfoType` remains unspecified.
+
+    Examples
+    --------
+    List all the source fields on class Neutral
+
+    >>> moose.getFieldDict('Neutral', 'srcFinfo')
+       {'childMsg': 'int'}
+    """
+    return _moose.getFieldClass(classname, finfoType)
+
+
+def getFieldNames(classname, fieldtype="*"):
+    """Get a tuple containing the name of all the fields of `finfoType` kind.
+
+    Parameters
+    ----------
+    className : string
+        Name of the class to look up.
+    finfoType : string
+        The kind of field
+        -  valueFinfo
+        -  srcFinfo
+        -  destFinfo
+        -  lookupFinfo
+        -  fieldElementFinfo
+
+    Returns
+    -------
+    list
+        Names of the fields of type `finfoType` in class `className`.
+    """
+    return _moose.getFieldNames(classname, fieldtype)
+
+
+def isRunning():
+    """True if the simulation is currently running."""
+    return _moose.isRunning()
+
+
+def move(src, dest):
+    """Move a moose element `src` to destination"""
+    return _moose.move(src, dest)
+
+
+def reinit():
+    """Reinitialize simulation.
+
+    This function (re)initializes moose simulation. It must be called before
+    you start the simulation (see moose.start). If you want to continue
+    simulation after you have called moose.reinit() and moose.start(), you must
+    NOT call moose.reinit() again. Calling moose.reinit() again will take the
+    system back to initial setting (like clear out all data recording tables,
+    set state variables to their initial values, etc.  
+    """
+    _moose.reinit()
+
+
+def start(runtime, notify=False):
+    """Run simulation for `t` time. Advances the simulator clock by `t` time. If
+    'notify = True', a message is written to terminal whenever 10\% of
+    simulation time is over. \
+
+    After setting up a simulation, YOU MUST CALL MOOSE.REINIT() before CALLING
+    MOOSE.START() TO EXECUTE THE SIMULATION. Otherwise, the simulator behaviour
+    will be undefined. Once moose.reinit() has been called, you can call
+    `moose.start(t)` as many time as you like. This will continue the
+    simulation from the last state for `t` time.
+
+    Parameters
+    ----------
+    t : float
+        duration of simulation.
+    notify: bool
+        default False. If True, notify user whenever 10\% of simultion is over.
+
+    Returns
+    -------
+        None
+
+    See also
+    --------
+    moose.reinit : (Re)initialize simulation
+    """
+    _moose.start(runtime, notify)
+
+
+def stop():
+    """Stop simulation"""
+    _moose.stop()
+
+
+def setCwe(arg):
+    """Set the current working element.
+
+    Parameters
+    ----------
+    arg: str, melement, vec
+        moose element or path to be set as cwe.
+
+    See also
+    --------
+    getCwe
+    """
+    _moose.setCwe(arg)
+
+
+def useClock(tick, path, fn):
+    """Schedule `fn` function of every object that matches `path` on tick no
+    `tick`. Usually you don't have to use it.
+    
+    (FIXME: Needs update) The sequence of clockticks with the same dt is
+    according to their number.  This is utilized for controlling the order of
+    updates in various objects where it matters.  The following convention
+    should be observed when assigning clockticks to various components of a
+    model: Clock ticks 0-3 are for electrical (biophysical) components, 4 and 5
+    are for chemical kinetics, 6 and 7 are for lookup tables and stimulus, 8
+    and 9 are for recording tables. 
+     
+    Parameters
+    ----------
+    tick : int
+        tick number on which the targets should be scheduled.
+    path : str
+        path of the target element(s). This can be a wildcard also.
+    fn : str
+        name of the function to be called on each tick. Commonly `process`.
+    
+    Examples
+    --------
+    In multi-compartmental neuron model a compartment's membrane potential (Vm)
+    is dependent on its neighbours' membrane potential. Thus it must get the
+    neighbour's present Vm before computing its own Vm in next time step.  This
+    ordering is achieved by scheduling the `init` function, which communicates
+    membrane potential, on tick 0 and `process` function on tick 1.
+
+    >>> moose.useClock(0, '/model/compartment_1', 'init')
+    >>> moose.useClock(1, '/model/compartment_1', 'process'));
+    """
+    _moose.useClock(tick, path, fn)
+
+
+def setClock(clockid, dt):
+    """set the ticking interval of `tick` to `dt`.
+
+    A tick with interval `dt` will call the functions scheduled on that tick
+    every `dt` timestep.
+
+    Parameters
+    ----------
+    tick : int
+        tick number
+    dt : double
+        ticking interval
+
+    """
+    _moose.setClock(clockid, dt)
+
+
+def loadModelInternal(filename, modelpath, solverclass="gsl"):
+    """Load model from a file to a specified path.
+
+    This function should not be used by users. It is meants for developers.
+    Please see `moose.loadModel` function.
+
+    Parameters
+    ----------
+    filename : str
+        model description file.
+    modelpath : str
+        moose path for the top level element of the model to be created.
+    solverclass : str, optional
+        solver type to be used for simulating the model.
+
+    Returns
+    -------
+    vec
+        loaded model container vec.
+    """
+    return _moose.loadModelInternal(filename, modelpath, solverclass)
 
 
 def copy(src, dest, name="", n=1, toGlobal=False, copyExtMsg=False):
@@ -207,6 +461,54 @@ def copy(src, dest, name="", n=1, toGlobal=False, copyExtMsg=False):
     if not name:
         name = src.name
     return _moose.copy(src.id, dest, name, n, toGlobal, copyExtMsg)
+
+
+def rand(a=0.0, b=1.0):
+    """Generate random number from the interval [0.0, 1.0)
+
+    Returns
+    -------
+    float in [0, 1) real interval generated by MT19937.
+
+    See also
+    --------
+    moose.seed() : reseed the random number generator.
+
+    Notes
+    -----
+    MOOSE does not automatically seed the random number generator. You
+    must explicitly call moose.seed() to create a new sequence of random
+    numbers each time.
+    """
+    return _moose.rand(a, b)
+
+
+def seed(seed=0):
+    """Reseed MOOSE random number generator.
+
+    Parameters
+    ----------
+    seed : int 
+        Value to use for seeding. 
+        default: random number generated using system random device
+
+    Notes
+    -----
+    All RNGs in moose except rand functions in moose.Function expression use
+    this seed.
+
+    By default (when this function is not called) seed is initializecd to some
+    random value using system random device (if available). 
+    
+    Returns
+    -------
+    None
+    
+    See also
+    --------
+    moose.rand() : get a pseudorandom number in the [0,1) interval.
+    """
+    _moose.seed(seed)
 
 
 def pwe():
@@ -515,6 +817,7 @@ def doc(arg, paged=True):
         __pager(text)
     else:
         print(text)
+
 
 # Import from other modules as well.
 from moose.server import *

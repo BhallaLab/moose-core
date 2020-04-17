@@ -246,9 +246,9 @@ void mooseSetClock(const unsigned int clockId, double dt)
     getShellPtr()->doSetClock(clockId, dt);
 }
 
-void mooseUseClock(size_t tick, const string& path, const string& field)
+void mooseUseClock(size_t tick, const string& path, const string& fn)
 {
-    getShellPtr()->doUseClock(path, field, tick);
+    getShellPtr()->doUseClock(path, fn, tick);
 }
 
 /* --------------------------------------------------------------------------*/
