@@ -404,7 +404,6 @@ string Cinfo::getDocs() const
     for(auto ii = doc_.cbegin(); ii != doc_.cend(); ++ii) {
         doc << endl << std::setw(15) << std::left << ii->first << ": " << ii->second;
     }
-    doc << endl;
     return doc.str();
 }
 
