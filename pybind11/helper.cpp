@@ -23,8 +23,6 @@
 #include "../external/pybind11/include/pybind11/pybind11.h"
 #include "../external/pybind11/include/pybind11/stl.h"
 
-#include "../external/fmt-6.2.0/include/fmt/format-inl.h"
-
 namespace py = pybind11;
 
 // See
@@ -460,20 +458,26 @@ bool mooseIsRunning()
 }
 
 string fieldDocFormatted(const string& name, const Cinfo* cinfo,
-                         const Finfo* finfo)
+                         const Finfo* finfo, const string& prefix = "")
 {
-    return fmt::format("{0:<15}\n Type: {1:}\n{2}\n\n", name, finfo->rttiType(),
-                       moose::textwrap(finfo->docs(), "  "));
+    return prefix + fmt::format("{0} (type: {1}, class: {3})\n{2}\n\n", name,
+                                finfo->rttiType(),
+                                moose::textwrap(finfo->docs(), prefix + "  "),
+                                cinfo->name());
 }
 
-string mooseClassFieldDoc(const Cinfo* cinfo, const string& ftype)
+string mooseClassFieldDoc(const Cinfo* cinfo, const string& ftype,
+                          const string& prefix)
 {
     stringstream ss;
 
     auto fmap = innerGetFieldDict(cinfo, ftype);
 
-    for(const auto& v : fmap)
-        ss << fieldDocFormatted(v.first, cinfo, v.second);
+    ss << moose::underlined<'-'>(moose::capitalize(ftype) + " Attributes:");
+
+    for(auto v : fmap) {
+        ss << fieldDocFormatted(v.first, cinfo, v.second, prefix);
+    }
 
     // There are from base classes.
     const Cinfo* baseClassCinfo = cinfo->baseCinfo();
@@ -482,7 +486,8 @@ string mooseClassFieldDoc(const Cinfo* cinfo, const string& ftype)
         for(const auto& vv : baseFmap) {
             if(fmap.find(vv.first) == fmap.end()) {
                 fmap[vv.first] = vv.second;
-                ss << fieldDocFormatted(vv.first, baseClassCinfo, vv.second);
+                ss << fieldDocFormatted(vv.first, baseClassCinfo, vv.second,
+                                        prefix);
             }
         }
         baseClassCinfo = baseClassCinfo->baseCinfo();
@@ -500,31 +505,28 @@ string mooseClassDoc(const string& className)
         return ss.str();
     }
 
-    // ss << fmt::format(
-    //     "{0:—^{2}}\n{1: ^{2}}{0:—^{2}}\n", "",
-    //     moose::textwrap(
-    //         "Following document is generated from the source code for quick "
-    //         " reference. Go to [https://moose.readthedocs.io/en/latest/] for"
-    //         " tutorials and examples."),
-    //     70);
-    // ss << cinfo->getDocs();
+    ss << moose::underlined<'='>("Attributes:");
+    ss << endl;
 
-    // Documentation of Finfo.
-    // auto finfos = cinfo->finfoMap();
-    // for(const auto& item : finfos) {
-    // ss << item.first << endl;
-    // ss << moose::textwrap(item.second->docs(), "  ", 70) << endl;
-    // }
-
-    // ss << moose::boxed("Value Field");
-    ss << mooseClassFieldDoc(cinfo, "value");
-
-    // Collect all field from this class and the base classes.
-    // for(unsigned int ii = 0; ii < cinfo->getNumValueFinfo(); ++ii) {
-    //    auto* finfo = cinfo->getValueFinfo(ii);
-    //    ss << fmt::format("{0}\n{1}\n\n", finfo->name(),
-    //                      moose::textwrap(finfo->docs(), "  "));
+    // for(string f : {"value", "lookup", "src", "dest", "shared", "field"}) {
+    //    ss << moose::underlined<'-'>(moose::capitalize(f) + " Attributes:");
+    //    ss << mooseClassFieldDoc(cinfo, f, "");
     //}
 
+    ss << moose::underlined<'-'>("Value Attributes:");
+
+    ss << "\nValue attributes can be assigned directly on a moose object. "
+          "E.g.,\n\n"
+          ".. code-block:: python\n\n"
+          "   >>> pool = moose.Pool('/pool1')\n"
+          "   >>> pool.concInit = 0.91\n"
+          "\n\n";
+
+    ss << mooseClassFieldDoc(cinfo, "value", "");
+
+    ss << moose::underlined<'-'>("Lookup Attributes:");
+    ss << mooseClassFieldDoc(cinfo, "lookup", "");
+
+    ss << moose::underlined<'='>("C++ Developer Document");
     return ss.str();
 }

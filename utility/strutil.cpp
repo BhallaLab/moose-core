@@ -230,9 +230,21 @@ string normalizePath(const string& path)
     return s;
 }
 
+void split(const string& text, const string& delimiter, vector<string>& res)
+{
+    // From https://stackoverflow.com/a/46931770/1805129
+    string token;
+    size_t pos_start = 0, pos_end, delim_len = delimiter.size();
+    while ((pos_end = text.find (delimiter, pos_start)) != string::npos) {
+        token = text.substr (pos_start, pos_end - pos_start);
+        pos_start = pos_end + delim_len;
+        res.push_back (token);
+    }
+    res.push_back (text.substr (pos_start));
+}
+
 string textwrap(const string& text, const string& prefix, const size_t width)
 {
-    // Get words out of the text first.
     vector<string> words;
     tokenize(text, " \n", words);
     string res;
@@ -255,9 +267,17 @@ string textwrap(const string& text, const string& prefix, const size_t width)
 std::string boxed(const string& text, const size_t width)
 {
     return fmt::format(
-      "┌{0:─^{2}}┐\n"
-      "│{1: ^{2}}│\n"
-      "└{0:─^{2}}┘\n", "", text, width);
+        "┌{0:─^{2}}┐\n"
+        "│{1: ^{2}}│\n"
+        "└{0:─^{2}}┘\n",
+        "", text, width);
+}
+
+std::string capitalize(const string& f)
+{
+    string ff(f);
+    ff[0] = std::toupper(ff[0]);
+    return ff;
 }
 
 }  // namespace moose

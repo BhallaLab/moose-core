@@ -15,16 +15,15 @@ if(APPLE)
     set_target_properties(_moose PROPERTIES MACOSX_RPATH OFF)
 endif(APPLE)
 
-# Link libfmt. It in the external.
-target_link_libraries(_moose PRIVATE fmt::fmt)
-
 if(APPLE)
+    # OSX
     target_link_libraries(_moose PRIVATE
         "-Wl,-all_load"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES})
     target_link_libraries(_moose PRIVATE ${SYSTEM_SHARED_LIBS})
 else(APPLE)
+    # Linux
     target_link_libraries(_moose PRIVATE
         "-Wl,--whole-archive" 
         ${MOOSE_LIBRARIES} 

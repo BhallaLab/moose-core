@@ -5,9 +5,9 @@ Test MOOSE installation with moose-examples.
 
 from __future__ import print_function, division
 
-__author__ = "Dilawar Singh"
+__author__    = "Dilawar Singh"
 __copyright__ = "Copyright 2016, Dilawar Singh"
-__email__ = "dilawars@ncbs.res.in"
+__email__     = "dilawars@ncbs.res.in"
 
 import sys
 import os

@@ -23,7 +23,6 @@ logger_ = logging.getLogger("moose")
 # etc.
 __moose_classes__ = {}
 
-
 class melement(_moose.ObjId):
     __type__ = "UNKNOWN"
     __doc__ = ""

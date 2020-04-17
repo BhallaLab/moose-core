@@ -20,8 +20,6 @@
 #include "../shell/Shell.h"
 #include "../utility/strutil.h"
 
-#include "../external/fmt-6.2.0/include/fmt/core.h"
-
 #include "MooseVec.h"
 #include "Finfo.h"
 

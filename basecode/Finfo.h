@@ -9,10 +9,9 @@
 #ifndef _FINFO_H
 #define _FINFO_H
 
-class Finfo
-{
+class Finfo {
 public:
-    Finfo( const string& name, const string& doc );
+    Finfo(const string& name, const string& doc);
     virtual ~Finfo()
     {
         ;
@@ -35,23 +34,23 @@ public:
     /**
      * Assign function Ids, bindIndex and so on.
      */
-    virtual void registerFinfo( Cinfo* c ) = 0;
+    virtual void registerFinfo(Cinfo* c) = 0;
 
     /**
      * Function to set this field using a string argument.
      * Returns true on success.
      * Normally called only from SetGet::strSet.
      */
-    virtual bool strSet( const Eref& tgt, const string& field,
-                         const string& arg ) const = 0;
+    virtual bool strSet(const Eref& tgt, const string& field,
+                        const string& arg) const = 0;
 
     /**
      * Function to return value of field into a string argument.
      * Returns true on success.
      * Normally called only from SetGet::strGet.
      */
-    virtual bool strGet( const Eref& tgt, const string& field,
-                         string& returnValue ) const = 0;
+    virtual bool strGet(const Eref& tgt, const string& field,
+                        string& returnValue) const = 0;
 
     /**
      * This function is called on each new Element after
@@ -60,7 +59,7 @@ public:
      * as soon as the parent is made.
      * Used in FieldElementFinfo.h
      */
-    virtual void postCreationFunc( Id newId, Element* newElm ) const
+    virtual void postCreationFunc(Id newId, Element* newElm) const
     {
         ;
     }
@@ -78,7 +77,7 @@ public:
      * Is called only from msg src, so most Finfos return 0.
      * SrcFinfo and SharedFinfo will need to implement this.
      */
-    virtual bool checkTarget( const Finfo* target) const
+    virtual bool checkTarget(const Finfo* target) const
     {
         return 0;
     }
@@ -89,7 +88,7 @@ public:
      * Returns 1 on success.
      * Defaults to 0 because many Finfo combinations won't work.
      */
-    virtual bool addMsg( const Finfo* target, ObjId mid, Element* src ) const
+    virtual bool addMsg(const Finfo* target, ObjId mid, Element* src) const
     {
         return 0;
     }
@@ -130,12 +129,12 @@ public:
     /**
      * Returns subsidiary SrcFinfos
      */
-    virtual vector< string > innerSrc() const;
+    virtual vector<string> innerSrc() const;
 
     /**
      * Returns subsidiary DestFinfos
      */
-    virtual vector< string > innerDest() const;
+    virtual vector<string> innerDest() const;
 
     /**
      * Returns the Class Info for this Finfo
@@ -148,33 +147,31 @@ private:
 };
 
 // Wrapper to handle the access functions to the Finfo objects.
-class FinfoWrapper
-{
+class FinfoWrapper {
 public:
-    FinfoWrapper( const Finfo* other )
-        : f_( other )
+    FinfoWrapper(const Finfo* other) : f_(other)
     {
         ;
     }
 
-    string getName( ) const;
-    string docs( ) const;
-    string type( ) const;
+    string getName() const;
+    string docs() const;
+    string type() const;
     /**
      * Returns the list of subsidiary SrcFinfos.
      * Used in Shared Finfos, empty otherwise. Goes via
      * internal virtual function.
      */
-    vector< string > src( ) const;
+    vector<string> src() const;
     /**
      * Returns the list of subsidiary destFinfos.
      * Used in SharedFinfos and ValueFinfos, empty otherwise. Goes via
      * internal virtual function.
      */
-    vector< string > dest( ) const;
+    vector<string> dest() const;
 
 private:
     const Finfo* f_;
 };
 
-#endif // _FINFO_H
+#endif  // _FINFO_H

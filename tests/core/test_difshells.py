@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import moose
-print( 'Using moose from %s. VERSION=%s' %  (moose.__file__, moose.__version__) )
+print(moose.about())
 import numpy as np
 import chan_proto
 import param_chan

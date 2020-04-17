@@ -109,19 +109,16 @@ endif()
 
 link_directories(${CMAKE_BINARY_DIR})
 add_library(libmoose SHARED basecode/main.cpp)
+set_target_properties(libmoose PROPERTIES PREFIX "")
 add_executable(moose.bin basecode/main.cpp)
 
 
 ################################### SETUP BUILD ################################
-# default include paths.
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-set_target_properties(libmoose PROPERTIES COMPILE_DEFINITIONS  "MOOSE_LIB")
-set_target_properties(libmoose PROPERTIES PREFIX "")
 
-## Variable to collect all static libraries.
+# Variable to collect all static libraries.
 set(STATIC_LIBRARIES "" )
 # Collect all shared libraries here.
-set(SYSTEM_SHARED_LIBS ${LibXML2_LIBRARIES})
+set(SYSTEM_SHARED_LIBS "")
 
 # BOOST ode library performs better than GSL and ideally should be made default.
 # Unfortunately Boost does not have a very good matrix library; it has ublas
@@ -266,7 +263,7 @@ endif( )
 # especially section 'Mac OS X and the RPATH'
 # Switching is OFF since all libraries are statically linked in module.
 if(APPLE)
-    set_target_properties( libmoose PROPERTIES MACOSX_RPATH OFF)
+    set_target_properties(libmoose PROPERTIES MACOSX_RPATH OFF)
 endif(APPLE)
 
 # MAC linker does not understand many of gnu-ld options.

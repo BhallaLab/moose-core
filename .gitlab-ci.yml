@@ -20,7 +20,7 @@ build:
     - python3 -m pip install pytest --user --upgrade
     - python3 setup.py build test 
     - python3 setup.py install --user
-    - python3 -c "import moose; moose.test()"
+    - python3 -c "import moose.tests; moose.tests.test()"
 
   except:
       - pybind11

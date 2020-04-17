@@ -12,7 +12,7 @@ add_library(utility
     fileutils.cpp
     utility.cpp
     )
-target_link_libraries(utility fmt::fmt)
+target_link_libraries(utility PRIVATE fmt)
 
 add_executable(test_cnpy test_cnpy.cpp)
 

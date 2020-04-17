@@ -20,9 +20,8 @@ add_definitions(-Wall
     )
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    # Requires C++14 support.
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0")
-        message(FATAL_ERROR "Insufficient gcc version. Minimum requried 5.0")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
+        message(FATAL_ERROR "Insufficient gcc version. Minimum requried 4.9")
     endif()
     add_definitions( -Wno-unused-local-typedefs )
     add_definitions( -fmax-errors=5 )
@@ -44,13 +43,13 @@ if(COMPILER_SUPPORT_UNUSED_BUT_SET_VARIABLE_NO_WARN)
 endif(COMPILER_SUPPORT_UNUSED_BUT_SET_VARIABLE_NO_WARN)
 
 if(COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     if(APPLE)
         add_definitions( -mllvm -inline-threshold=1000 )
     endif(APPLE)
 else(COMPILER_SUPPORTS_CXX11)
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} is too old. \n"
-      "Please use a compiler which has c++14 support."
+      "Please use a compiler which has full c++11 support."
       )
 endif(COMPILER_SUPPORTS_CXX11)
 

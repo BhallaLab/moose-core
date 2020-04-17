@@ -8,11 +8,13 @@
 #ifndef _STRINGUTIL_H
 #define _STRINGUTIL_H
 
+#include "../external/fmt/include/fmt/core.h"
+
 #include <string>
 #include <sstream>
 #include <vector>
 
-#include "../external/fmt-6.2.0/include/fmt/core.h"
+using namespace std;
 
 namespace moose {
 /** List of characters considered to be whitespace */
@@ -78,7 +80,19 @@ bool isPrefix(const std::string& a, const std::string& b);
 std::string textwrap(const std::string& text, const std::string& prefix = "",
                      const size_t width = 70);
 
-std::string boxed(const std::string& text, const size_t width=70);
+std::string boxed(const std::string& text, const size_t width = 70);
+
+std::string capitalize(const string& f);
+
+void split(const string& text, const string& splitat, vector<string>& res);
+
+template <char U = '-'>
+std::string underlined(const string& text)
+{
+    // This is bit clumsy to read.
+    return fmt::format(string("{1:^{2}}\n{0:") + U + string("^{2}}\n"), "",
+                       text, text.size());
+}
 
 /* --------------------------------------------------------------------------*/
 /**
