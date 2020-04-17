@@ -181,7 +181,7 @@ PYBIND11_MODULE(_moose, m)
         .def("__getitem__", [](const Id &id, size_t i) { return ObjId(id, i); })
         .def("__repr__",
              [](const Id &id) {
-                 return "<melement: id=" + std::to_string(id.value()) +
+                 return "<Id: id=" + std::to_string(id.value()) +
                         " path=" + id.path() +
                         " class=" + id.element()->cinfo()->name() + ">";
              })
@@ -238,7 +238,7 @@ PYBIND11_MODULE(_moose, m)
      * @name ObjId. This class serves as a base of ObjId/Id.
      * @{ */
     /**  @} */
-    py::class_<ObjId>(m, "melement")
+    py::class_<ObjId>(m, "ObjId")
         // Custom constructor.
         .def(py::init([](const ObjId &oid) {
             return ObjId(oid.id, oid.dataIndex, oid.fieldIndex);
