@@ -221,4 +221,8 @@ string mooseClassDoc(const string& classname);
 
 string mooseDoc(const string& string);
 
+string mooseLe(const ObjId& obj);
+
+string mooseShowMsg(const ObjId& obj);
+
 #endif /* end of include guard: HELPER_H */

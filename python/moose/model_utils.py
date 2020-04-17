@@ -4,7 +4,6 @@
 
 from __future__ import absolute_import, print_function, division
 
-import os
 import moose._moose as _moose
 import moose.utils as mu
 
@@ -198,24 +197,8 @@ def mooseWriteNML2( outfile ):
     raise NotImplementedError( "Writing to NML2 is not supported yet" )
 
 
-def loadModel(filename, modelpath, solverclass="gsl"):
-    """loadModel: Load model from a file to a specified path.
-
-    Parameters
-    ----------
-    filename: str
-        model description file.
-    modelpath: str
-        moose path for the top level element of the model to be created.
-    method: str
-        solver type to be used for simulating the model.
-        TODO: Link to detailed description of solvers?
-
-    Returns
-    -------
-    object
-        moose.element if succcessful else None.
-    """
+def loadModelWithSolverChange(filename, modelpath, solverclass="gsl"):
+    """helper function. Called by `loadModel` function."""
 
     if not os.path.isfile( os.path.realpath(filename) ):
         mu.warn( "Model file '%s' does not exists or is not readable." % filename )

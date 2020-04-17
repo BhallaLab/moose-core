@@ -545,3 +545,27 @@ string mooseDoc(const string& query)
 
     throw runtime_error(__func__ + string(":: Not supported '" + query + "'"));
 }
+
+
+string mooseLe(const ObjId& obj)
+{
+    vector<Id> children;
+    Neutral::children(obj.eref(), children);
+    string res = "Elements under " + obj.path() + '\n';
+    for(auto ch: children)
+        res += "    " + ch.path() + '\n';
+    return res;
+}
+
+string mooseShowMsg(const ObjId& obj)
+{
+    stringstream ss("INCOMING:\n");
+    for(auto oid : obj.element()->msgIn()) {
+        Msg* msg = Msg::getMsg(oid);
+        if(! msg) {
+            cerr << "No Msg found on " << obj.path() << endl;
+            continue;
+    }
+    ss << "OUTGOING:" << endl;
+    return ss.str();
+}

@@ -23,9 +23,10 @@ import contextlib
 
 import moose._moose as _moose
 
-from moose import model_utils 
+from moose import model_utils
 
 __moose_classes__ = {}
+
 
 class melement(_moose.ObjId):
     """Base class for all moose classes.
@@ -50,8 +51,9 @@ def __to_melement(obj):
 # Create MOOSE classes from available Cinfos.
 for p in _moose.wildcardFind("/##[TYPE=Cinfo]"):
     cls = type(
-        p.name, (melement,), {"__type__": p.name, "__doc__":
-            _moose.__generatedoc__(p.name)}
+        p.name,
+        (melement,),
+        {"__type__": p.name, "__doc__": _moose.__generatedoc__(p.name)},
     )
     setattr(_moose, cls.__name__, cls)
     __moose_classes__[cls.__name__] = cls
@@ -61,9 +63,11 @@ for p in _moose.wildcardFind("/##[TYPE=Cinfo]"):
 # class types to _moose.
 from moose._moose import *
 
+
 def version():
     """Reutrns moose version string."""
     return _moose.__version__
+
 
 def version_info():
     """Return detailed version information.
@@ -76,6 +80,7 @@ def version_info():
      'patch': '1'}
     """
     return _moose.version_info()
+
 
 def about():
     """general information about pyMOOSE.
@@ -425,6 +430,7 @@ def setClock(clockid, dt):
     """
     _moose.setClock(clockid, dt)
 
+
 def loadModel(filename, modelpath, solverclass="gsl"):
     """loadModel: Load model from a file to a specified path.
 
@@ -565,18 +571,12 @@ def le(el=None):
         path of all children
 
     """
-    if el is None:
-        el = _moose.getCwe()
-    elif isinstance(el, str):
-        if not _moose.exists(el):
-            raise ValueError("no such element")
+    el = _moose.getCwe() if el is None else el
+    if isinstance(el, str):
         el = _moose.element(el)
     elif isinstance(el, _moose.vec):
         el = el[0]
-    print("Elements under '%s'" % el)
-    for ch in el.children:
-        print(" %s" % ch.path)
-    return [x.path for x in el.children]
+    print(_moose.le(el))
 
 
 def showfield(el, field="*", showtype=False):
@@ -600,51 +600,43 @@ def showfield(el, field="*", showtype=False):
     string
 
     """
-    if isinstance(el, str):
-        if not _moose.exists(el):
-            raise ValueError("no such element: %s" % el)
-        el = _moose.element(el)
-    result = []
-    if field == "*":
-        value_field_dict = _moose.getFieldDict(el.className, "valueFinfo")
-        max_type_len = max(len(dtype) for dtype in value_field_dict.values())
-        max_field_len = max(len(dtype) for dtype in value_field_dict.keys())
-        result.append("\n[" + el.path + "]\n")
-        for key, dtype in sorted(value_field_dict.items()):
-            if (
-                dtype == "bad"
-                or key == "this"
-                or key == "dummy"
-                or key == "me"
-                or dtype.startswith("vector")
-                or "ObjId" in dtype
-            ):
-                continue
-            value = el.getField(key)
-            if showtype:
-                typestr = dtype.ljust(max_type_len + 4)
-                # The following hack is for handling both Python 2 and
-                # 3. Directly putting the print command in the if/else
-                # clause causes syntax error in both systems.
-                result.append(typestr + " ")
-            result.append(key.ljust(max_field_len + 4) + "=" + str(value) + "\n")
-    else:
-        try:
-            result.append(field + "=" + el.getField(field))
-        except AttributeError:
-            pass  # Genesis silently ignores non existent fields
-    print("".join(result))
-    return "".join(result)
+    _moose.showfield(el, field, showtype)
 
-
-# Predefined field types and their human readable names
-__finfotypes = [
-    ("valueFinfo", "value field"),
-    ("srcFinfo", "source message field"),
-    ("destFinfo", "destination message field"),
-    ("sharedFinfo", "shared message field"),
-    ("lookupFinfo", "lookup field"),
-]
+    #  if isinstance(el, str):
+        #  if not _moose.exists(el):
+            #  raise ValueError("no such element: %s" % el)
+        #  el = _moose.element(el)
+    #  result = []
+    #  if field == "*":
+        #  value_field_dict = _moose.getFieldDict(el.className, "valueFinfo")
+        #  max_type_len = max(len(dtype) for dtype in value_field_dict.values())
+        #  max_field_len = max(len(dtype) for dtype in value_field_dict.keys())
+        #  result.append("\n[" + el.path + "]\n")
+        #  for key, dtype in sorted(value_field_dict.items()):
+            #  if (
+                #  dtype == "bad"
+                #  or key == "this"
+                #  or key == "dummy"
+                #  or key == "me"
+                #  or dtype.startswith("vector")
+                #  or "ObjId" in dtype
+            #  ):
+                #  continue
+            #  value = el.getField(key)
+            #  if showtype:
+                #  typestr = dtype.ljust(max_type_len + 4)
+                #  The following hack is for handling both Python 2 and
+                #  3. Directly putting the print command in the if/else
+                #  clause causes syntax error in both systems.
+                #  result.append(typestr + " ")
+            #  result.append(key.ljust(max_field_len + 4) + "=" + str(value) + "\n")
+    #  else:
+        #  try:
+            #  result.append(field + "=" + el.getField(field))
+        #  except AttributeError:
+            #  pass  # Genesis silently ignores non existent fields
+    #  print("".join(result))
+    #  return "".join(result)
 
 
 def listmsg(el):
@@ -687,99 +679,7 @@ def showmsg(el):
     None
 
     """
-    obj = _moose.element(el)
-    print("INCOMING:")
-    for msg in obj.msgIn:
-        print(msg.e2.path, msg.destFieldsOnE2, "<---", msg.e1.path, msg.srcFieldsOnE1)
-    print("OUTGOING:")
-    for msg in obj.msgOut:
-        print(msg.e1.path, msg.srcFieldsOnE1, "--->", msg.e2.path, msg.destFieldsOnE2)
-
-
-def getFieldDoc(tokens, indent=""):
-    """Return the documentation for field specified by `tokens`.
-
-    Parameters
-    ----------
-    tokens : (className, fieldName) str
-        A sequence whose first element is a MOOSE class name and second
-        is the field name.
-
-    indent : str
-        indentation (default: empty string) prepended to builtin
-        documentation string.
-
-    Returns
-    -------
-    docstring : str
-        string of the form
-        `{indent}{className}.{fieldName}: {datatype} - {finfoType}\n{Description}\n`
-
-    Raises
-    ------
-    NameError
-        If the specified fieldName is not present in the specified class.
-    """
-    assert len(tokens) > 1
-    classname = tokens[0]
-    fieldname = tokens[1]
-    while True:
-        try:
-            classelement = _moose.element("/classes/" + classname)
-            for finfo in classelement.children:
-                for fieldelement in finfo:
-                    baseinfo = ""
-                    if classname != tokens[0]:
-                        baseinfo = " (inherited from {})".format(classname)
-                    if fieldelement.fieldName == fieldname:
-                        # The field elements are
-                        # /classes/{ParentClass}[0]/{fieldElementType}[N].
-                        finfotype = fieldelement.name
-                        return u"{indent}{classname}.{fieldname}: type={type}, finfotype={finfotype}{baseinfo}\n\t{docs}\n".format(
-                            indent=indent,
-                            classname=tokens[0],
-                            fieldname=fieldname,
-                            type=fieldelement.type,
-                            finfotype=finfotype,
-                            baseinfo=baseinfo,
-                            docs=fieldelement.docs,
-                        )
-            classname = classelement.baseClass
-        except ValueError:
-            raise NameError("`%s` has no field called `%s`" % (tokens[0], tokens[1]))
-
-
-def _appendFinfoDocs(classname, docstring, indent):
-    """Append list of finfos in class name to docstring"""
-    try:
-        classElem = _moose.element("/classes/%s" % (classname))
-    except ValueError:
-        raise NameError("class '%s' not defined." % (classname))
-
-    for ftype, rname in __finfotypes:
-        docstring.write(u"\n*%s*\n" % (rname.capitalize()))
-        finfo = _moose.element("%s/%s" % (classElem.path, ftype))
-        for field in finfo.vec:
-            docstring.write(u"%s%s: %s\n" % (indent, field.fieldName, field.type))
-
-
-def _getMooseDoc(tokens, inherited=False):
-    """Return MOOSE builtin documentation.
-    """
-    indent = "  "
-    docstring = io.StringIO("")
-    with contextlib.closing(docstring):
-        classElem = _moose.element("/classes/%s" % tokens[0])
-        if len(tokens) > 1:
-            docstring.write(getFieldDoc(tokens))
-            return docstring.getvalue()
-
-        docstring.write(classElem.docs)
-        _appendFinfoDocs(tokens[0], docstring, indent)
-        return docstring.getvalue()
-
-
-__pager = None
+    print(_moose.showmsg(_moose.element(el)))
 
 
 def doc(arg, paged=True):
@@ -813,14 +713,7 @@ def doc(arg, paged=True):
         If class or field does not exist.
 
     """
-    # There is no way to dynamically access the MOOSE docs using
-    # pydoc. (using properties requires copying all the docs strings
-    # from MOOSE increasing the loading time by ~3x). Hence we provide a
-    # separate function.
-
-    global __pager
-    if paged and __pager is None:
-        __pager = pydoc.pager
+    __pager = pydoc.pager
     tokens = []
     if isinstance(arg, str):
         tokens = arg.split(".")
@@ -833,3 +726,56 @@ def doc(arg, paged=True):
         __pager(text)
     else:
         print(text)
+
+
+# SBML related functions.
+def readSBML(filepath, loadpath, solver="ee", validate="on"):
+    """Load SBML model.
+
+    Parameter
+    --------
+    filepath: str
+        filepath to be loaded.
+    loadpath : str
+        Root path for this model e.g. /model/mymodel
+    solver : str
+        Solver to use (default 'ee').
+        Available options are "ee", "gsl", "stochastic", "gillespie"
+            "rk", "deterministic"
+            For full list see ??
+    """
+    return model_utils.mooseReadSBML(filepath, loadpath, solver, validate)
+
+
+def writeSBML(modelpath, filepath, sceneitems={}):
+    """Writes loaded model under modelpath to a file in SBML format.
+
+    Parameters
+    ----------
+    modelpath : str
+        model path in moose e.g /model/mymodel \n
+    filepath : str
+        Path of output file. \n
+    sceneitems : dict
+        UserWarning: user need not worry about this layout position is saved in
+        Annotation field of all the moose Object (pool,Reaction,enzyme).
+        If this function is called from
+        * GUI - the layout position of moose object is passed
+        * command line - NA
+        * if genesis/kkit model is loaded then layout position is taken from the file
+        * otherwise auto-coordinates is used for layout position.
+    """
+    return model_utils.mooseWriteSBML(modelpath, filepath, sceneitems)
+
+
+def writeKkit(modelpath, filepath, sceneitems={}):
+    """Writes  loded model under modelpath to a file in Kkit format.
+
+    Parameters
+    ----------
+    modelpath : str
+        Model path in moose.
+    filepath : str
+        Path of output file.
+    """
+    return model_utils.mooseWriteKkit(modelpath, filepath, sceneitems)

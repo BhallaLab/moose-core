@@ -414,6 +414,9 @@ PYBIND11_MODULE(_moose, m)
     m.def("setClock", &mooseSetClock);
     m.def("useClock", &mooseUseClock);
 
+    m.def("le", &mooseLe);
+    m.def("showmsg", &mooseShowMsg);
+
     m.def("loadModelInternal", &loadModelInternal);
 
     m.def("getFieldNames", &mooseGetFieldNames);
