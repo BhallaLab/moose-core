@@ -417,7 +417,7 @@ PYBIND11_MODULE(_moose, m)
 
     m.def("getFieldDict", &mooseGetFieldDict, "classname"_a, "fieldtype"_a="*");
 
-    m.def("generateDoc", &mooseDoc);
+    m.def("__generatedoc__", &mooseDoc, "Generate class documentation (developer only)");
 
     m.def("getField",
           [](const ObjId &oid, const string &fieldName, const string &ftype) {

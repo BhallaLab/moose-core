@@ -49,7 +49,8 @@ def __to_melement(obj):
 # Create MOOSE classes from available Cinfos.
 for p in _moose.wildcardFind("/##[TYPE=Cinfo]"):
     cls = type(
-        p.name, (melement,), {"__type__": p.name, "__doc__": _moose.generateDoc(p.name)}
+        p.name, (melement,), {"__type__": p.name, "__doc__":
+            _moose.__generatedoc__(p.name)}
     )
     setattr(_moose, cls.__name__, cls)
     __moose_classes__[cls.__name__] = cls
@@ -68,7 +69,19 @@ def version_info():
     return _moose.version_info()
 
 def about():
-    """general information about these bindings.
+    """general information about pyMOOSE.
+
+    Returns
+    -------
+    A dict
+
+    Example
+    -------
+    >>> moose.about()
+    {'path': '/home/dilawars/Work/GITLAB/moose-core/_build/python/moose',
+     'version': '4.0.0.dev20200417',
+     'docs': 'https://moose.readthedocs.io/en/latest/',
+     'development': 'https://github.com/BhallaLab/moose-core'}
     """
     return dict(
         path=os.path.dirname(__file__),
