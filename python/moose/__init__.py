@@ -23,8 +23,9 @@ import contextlib
 
 import moose._moose as _moose
 
-__moose_classes__ = {}
+from moose import model_utils 
 
+__moose_classes__ = {}
 
 class melement(_moose.ObjId):
     """Base class for all moose classes.
@@ -34,7 +35,7 @@ class melement(_moose.ObjId):
     __doc__ = ""
 
     def __init__(self, x, ndata=1, **kwargs):
-        obj = _moose.create(self.__type__, x, ndata)
+        obj = _moose.__create__(self.__type__, x, ndata)
         super().__init__(obj)
         for k, v in kwargs.items():
             super().setField(k, v)
@@ -60,12 +61,20 @@ for p in _moose.wildcardFind("/##[TYPE=Cinfo]"):
 # class types to _moose.
 from moose._moose import *
 
-
 def version():
     """Reutrns moose version string."""
     return _moose.__version__
 
 def version_info():
+    """Return detailed version information.
+
+    >>> moose.version_info()
+    {'build_datetime': 'Friday Fri Apr 17 22:13:00 2020',
+     'compiler_string': 'GNU,/usr/bin/c++,7.5.0',
+     'major': '3',
+     'minor': '3',
+     'patch': '1'}
+    """
     return _moose.version_info()
 
 def about():
@@ -416,28 +425,25 @@ def setClock(clockid, dt):
     """
     _moose.setClock(clockid, dt)
 
-
-def loadModelInternal(filename, modelpath, solverclass="gsl"):
-    """Load model from a file to a specified path.
-
-    This function should not be used by users. It is meants for developers.
-    Please see `moose.loadModel` function.
+def loadModel(filename, modelpath, solverclass="gsl"):
+    """loadModel: Load model from a file to a specified path.
 
     Parameters
     ----------
-    filename : str
+    filename: str
         model description file.
-    modelpath : str
+    modelpath: str
         moose path for the top level element of the model to be created.
-    solverclass : str, optional
+    method: str
         solver type to be used for simulating the model.
+        TODO: Link to detailed description of solvers?
 
     Returns
     -------
-    vec
-        loaded model container vec.
+    object
+        moose.element if succcessful else None.
     """
-    return _moose.loadModelInternal(filename, modelpath, solverclass)
+    return model_utils.loadModel(filename, modelpath, solverclass)
 
 
 def copy(src, dest, name="", n=1, toGlobal=False, copyExtMsg=False):
@@ -827,8 +833,3 @@ def doc(arg, paged=True):
         __pager(text)
     else:
         print(text)
-
-
-# Import from other modules as well.
-from moose.server import *
-from moose.model_utils import *

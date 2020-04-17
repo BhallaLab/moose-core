@@ -52,10 +52,13 @@ map<string, string> mooseVersionInfo()
 
     vector<string> vers;
     moose::tokenize(string(MOOSE_VERSION), ".", vers);
+    if(vers.size()==3)
+        vers.push_back("1");
     return {
         {"major", vers[0]}, 
         {"minor", vers[1]},
-        {"patch", vers[2]}, 
+        {"micro", vers[2]}, 
+        {"releaselevel", vers[3]},
         {"build_datetime", string(mbstr)},
         {"compiler_string", string(COMPILER_STRING)}
     };
@@ -384,9 +387,9 @@ PYBIND11_MODULE(_moose, m)
     m.def("delete", &mooseDeleteStr);
     m.def("delete", &mooseDeleteObj);
 
-    m.def("create", &mooseCreateFromPath);
-    m.def("create", &mooseCreateFromObjId);
-    m.def("create", &mooseCreateFromMooseVec);
+    m.def("__create__", &mooseCreateFromPath);
+    m.def("__create__", &mooseCreateFromObjId);
+    m.def("__create__", &mooseCreateFromMooseVec);
 
     m.def("move", &mooseMove<ObjId, ObjId>);
     m.def("move", &mooseMove<ObjId, string>);
