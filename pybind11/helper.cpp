@@ -479,8 +479,9 @@ string mooseClassFieldsDoc(const Cinfo* cinfo, const string& ftype,
                            const string& prefix)
 {
     stringstream ss;
-
     auto fmap = innerGetFieldDict(cinfo, ftype);
+    if(fmap.size() == 0)
+        return "\n";
 
     ss << moose::underlined<'-'>(moose::capitalize(ftype) + " Attributes:");
 
@@ -517,24 +518,8 @@ string mooseClassDoc(const string& className)
     ss << moose::underlined<'='>("Attributes:");
     ss << endl;
 
-    // for(string f : {"value", "lookup", "src", "dest", "shared", "field"}) {
-    //    ss << moose::underlined<'-'>(moose::capitalize(f) + " Attributes:");
-    //    ss << mooseClassFieldsDoc(cinfo, f, "");
-    //}
-
-    ss << moose::underlined<'-'>("Value Attributes:");
-
-    ss << "\nValue attributes can be assigned directly on a moose object. "
-          "E.g.,\n\n"
-          ".. code-block:: python\n\n"
-          "   >>> pool = moose.Pool('/pool1')\n"
-          "   >>> pool.concInit = 0.91\n"
-          "\n\n";
-
-    ss << mooseClassFieldsDoc(cinfo, "value", "");
-
-    ss << moose::underlined<'-'>("Lookup Attributes:");
-    ss << mooseClassFieldsDoc(cinfo, "lookup", "");
+    for(string f : {"value", "lookup", "src", "dest", "shared", "field"})
+        ss << mooseClassFieldsDoc(cinfo, f, "");
 
     ss << moose::underlined<'='>("C++ Developer Document");
     return ss.str();

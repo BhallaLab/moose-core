@@ -166,8 +166,9 @@ py::object getFieldGeneric(const ObjId &oid, const string &fieldName)
 /* ----------------------------------------------------------------------------*/
 PYBIND11_MODULE(_moose, m)
 {
-    // py::options options;
-    // options.disable_function_signatures();
+    // Disable function signatures. They will be confusing to python users.
+    py::options options;
+    options.disable_function_signatures();
 
     m.doc() = R"moosedoc(
     pyMOOSE: Multiscale Object-Oriented Simulation Environment.
