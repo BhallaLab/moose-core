@@ -466,8 +466,17 @@ string fieldDocFormatted(const string& name, const Cinfo* cinfo,
                                 cinfo->name());
 }
 
-string mooseClassFieldDoc(const Cinfo* cinfo, const string& ftype,
-                          const string& prefix)
+string mooseClassAttributeDoc(const Cinfo* cinfo, const string& fname)
+{
+    const Finfo* finfo = cinfo->findFinfo(fname);
+    if(!finfo)
+        return "Error: '" + fname + "' not found.";
+    return fmt::format("{0}: {1} - {2}\n{3}", fname, finfo->rttiType(),
+                       cinfo->getFinfoType(finfo), finfo->docs());
+}
+
+string mooseClassFieldsDoc(const Cinfo* cinfo, const string& ftype,
+                           const string& prefix)
 {
     stringstream ss;
 
@@ -510,7 +519,7 @@ string mooseClassDoc(const string& className)
 
     // for(string f : {"value", "lookup", "src", "dest", "shared", "field"}) {
     //    ss << moose::underlined<'-'>(moose::capitalize(f) + " Attributes:");
-    //    ss << mooseClassFieldDoc(cinfo, f, "");
+    //    ss << mooseClassFieldsDoc(cinfo, f, "");
     //}
 
     ss << moose::underlined<'-'>("Value Attributes:");
@@ -522,11 +531,32 @@ string mooseClassDoc(const string& className)
           "   >>> pool.concInit = 0.91\n"
           "\n\n";
 
-    ss << mooseClassFieldDoc(cinfo, "value", "");
+    ss << mooseClassFieldsDoc(cinfo, "value", "");
 
     ss << moose::underlined<'-'>("Lookup Attributes:");
-    ss << mooseClassFieldDoc(cinfo, "lookup", "");
+    ss << mooseClassFieldsDoc(cinfo, "lookup", "");
 
     ss << moose::underlined<'='>("C++ Developer Document");
     return ss.str();
+}
+
+string mooseDoc(const string& query)
+{
+    vector<string> tokens;
+    moose::tokenize(query, ".", tokens);
+
+    auto cinfo = Cinfo::find(tokens[0]);
+    if(!cinfo)
+        throw py::key_error("Class '" + tokens[0] +
+                            "' is not a valid MOOSE class.");
+
+    if(tokens.size() == 1)
+        return mooseClassDoc(tokens[0]);
+
+    if(tokens.size() == 2) {
+        cout << "Query: " << tokens[1] << endl;
+        return mooseClassAttributeDoc(cinfo, tokens[1]);
+    }
+
+    throw runtime_error(__func__ + string(":: Not supported '" + query + "'"));
 }

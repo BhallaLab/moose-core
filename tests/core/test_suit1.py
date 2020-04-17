@@ -26,17 +26,11 @@ def library1():
     assert len(aa) == 10
 
     try:
-        moose.syncDataHandler('/a')
-    except NotImplementedError:
-        pass
-
-    try:
         moose.showfield('/x')
     except ValueError:
         pass
 
     moose.showfield('/a')
-    moose.showfields('/a')
 
 def test_library():
     library1()

@@ -1,12 +1,12 @@
 /**********************************************************************
-* This program is part of 'MOOSE', the
-* Messaging Object Oriented Simulation Environment,
-* also known as GENESIS 3 base code.
-*           copyright (C) 2003-2013 Upinder S. Bhalla. and NCBS
-* It is made available under the terms of the
-* GNU Lesser General Public License version 2.1
-* See the file COPYING.LIB for the full notice.
-**********************************************************************/
+ * This program is part of 'MOOSE', the
+ * Messaging Object Oriented Simulation Environment,
+ * also known as GENESIS 3 base code.
+ *           copyright (C) 2003-2013 Upinder S. Bhalla. and NCBS
+ * It is made available under the terms of the
+ * GNU Lesser General Public License version 2.1
+ * See the file COPYING.LIB for the full notice.
+ **********************************************************************/
 
 #include "header.h"
 #include "Finfo.h"
@@ -147,9 +147,7 @@ void Cinfo::registerFinfo(Finfo* f)
 
 /* --------------------------------------------------------------------------*/
 /**
- * @Synopsis  The runtime type of Finfo. Use dynamic_cast to figure it out. Use
- * RTTI to check if downcast is correct. This is not so costly when used in
- *Python interface.
+ * @Synopsis Finfo derived class, using `dynamic_cast` figure out. 
  *
  * @Param f const Finfo*
  *
@@ -402,7 +400,8 @@ string Cinfo::getDocs() const
 {
     ostringstream doc;
     for(auto ii = doc_.cbegin(); ii != doc_.cend(); ++ii) {
-        doc << endl << std::setw(15) << std::left << ii->first << ": " << ii->second;
+        doc << endl
+            << std::setw(15) << std::left << ii->first << ": " << ii->second;
     }
     return doc.str();
 }

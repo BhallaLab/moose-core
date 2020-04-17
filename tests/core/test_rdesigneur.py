@@ -30,7 +30,7 @@ def test_rdes2():
 def test_rdes1():
     rdes = rd.rdesigneur()
     rdes.buildModel()
-    moose.showfields( rdes.soma )
+    moose.showfield(rdes.soma)
 
 def main( ):
     test_rdes1()

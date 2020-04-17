@@ -1512,8 +1512,6 @@ void testFinfoFields()
 
 void testCinfoFields()
 {
-    cout << "DOCS:'" << IntFire::initCinfo()->getDocs() << "'" << endl;
-
     assert(IntFire::initCinfo()->getDocs() == "");
     assert(SimpleSynHandler::initCinfo()->getBaseClass() == "SynHandlerBase");
 

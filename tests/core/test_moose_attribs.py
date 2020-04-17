@@ -48,7 +48,7 @@ attribs = ['AdExIF', 'AdThreshIF', 'Adaptor', 'Annotator', 'Arith', 'BufPool',
         'ZombiePool', 'ZombieReac', '_moose', 
         'chemMerge',
         'chemUtil', 'connect', 'copy', 'delete', 'division', 'doc',
-        'element', 'exists', 'finfotypes', 'fixXreacs', 'genesis', 'getCwe',
+        'element', 'exists', 'fixXreacs', 'genesis', 'getCwe',
         'getField', 'getFieldDict'
         , 'getFieldNames'
         , 'getFieldDoc'
@@ -59,10 +59,9 @@ attribs = ['AdExIF', 'AdThreshIF', 'Adaptor', 'Annotator', 'Arith', 'BufPool',
         'mooseReadSBML', 'mooseWriteKkit', 'mooseWriteNML2', 'mooseWriteSBML',
         'moose_constants', 'move', 'nml2Import_', 'print_utils',
         'pwe', 'pydoc', 'rand', 'reinit', 
-        'seed', 'setClock' , 'setCwe', 'showfield',
-        'showfields', 'showmsg', 'start', 'stop', 'syncDataHandler',
+        'seed', 'setClock' , 'setCwe', 'showfield', 'showmsg', 'start', 'stop', 
         'useClock', 'utils', 'vec', 'version',
-        'warnings', 'wildcardFind']
+        'wildcardFind']
 
 def test_attribs():
     global attribs

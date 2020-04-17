@@ -381,6 +381,7 @@ PYBIND11_MODULE(_moose, m)
     m.def("reinit", &mooseReinit);
     m.def("start", &mooseStart, "runtime"_a, "notify"_a = false);
     m.def("stop", &mooseStop);
+
     m.def("isRunning", &mooseIsRunning);
 
     m.def("exists", &mooseExists);
@@ -388,9 +389,15 @@ PYBIND11_MODULE(_moose, m)
     m.def("setCwe", &mooseSetCwe);
     m.def("setClock", &mooseSetClock);
     m.def("useClock", &mooseUseClock);
+
     m.def("loadModelInternal", &loadModelInternal);
+
     m.def("getFieldNames", &mooseGetFieldNames);
+
     m.def("getFieldDict", &mooseGetFieldDict, "classname"_a, "fieldtype"_a="*");
+
+    m.def("generateDoc", &mooseDoc);
+
     m.def("getField",
           [](const ObjId &oid, const string &fieldName, const string &ftype) {
               // ftype is not needed anymore.
@@ -400,9 +407,6 @@ PYBIND11_MODULE(_moose, m)
 
     m.def("copy", &mooseCopy, "orig"_a, "newParent"_a, "newName"_a, "num"_a = 1,
           "toGlobal"_a = false, "copyExtMsgs"_a = false);
-
-    // Documentation.
-    m.def("classDoc", &mooseClassDoc);
 
     // Attributes.
     m.attr("NA") = NA;

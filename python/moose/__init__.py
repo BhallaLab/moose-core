@@ -2,15 +2,34 @@
 
 Python bindings of MOOSE simulator.
 
-Documentation: https://moose.readthedocs.io/en/latest/i
-Development  : https://github.com/BhallaLab/moose-core
+References:
+-----------
+
+- `Documentation https://moose.readthedocs.io/en/latest/`
+- `Development https://github.com/BhallaLab/moose-core`
+
 """
+
+# Use these guidelines for docstring:
+# https://numpydoc.readthedocs.io/en/latest/format.html
+
+import pydoc
+import os
+import io
+import contextlib
+
+# Bring all C++ functions to global namespace. We can overwrite some of these
+# methods later.
 
 import moose._moose as _moose
 
 __moose_classes__ = {}
 
+
 class melement(_moose.ObjId):
+    """Base class for all moose classes.
+    """
+
     __type__ = "UNKNOWN"
     __doc__ = ""
 
@@ -20,6 +39,7 @@ class melement(_moose.ObjId):
         for k, v in kwargs.items():
             super().setField(k, v)
 
+
 def __to_melement(obj):
     global __moose_classes__
     mc = __moose_classes__[obj.type](obj)
@@ -28,39 +48,127 @@ def __to_melement(obj):
 
 # Create MOOSE classes from available Cinfos.
 for p in _moose.wildcardFind("/##[TYPE=Cinfo]"):
-    # create a class declaration and add to moose.
-    cls = type(p.name, (melement,), {"__type__": p.name, 
-        "__doc__": _moose.classDoc(p.name)})
+    cls = type(
+        p.name, (melement,), {"__type__": p.name, "__doc__": _moose.generateDoc(p.name)}
+    )
     setattr(_moose, cls.__name__, cls)
     __moose_classes__[cls.__name__] = cls
 
-#############################################################################
-#                             API                                           #
-#############################################################################
+
+# Import all attributes to global namespace. We must do it here after adding
+# class types to _moose.
+from moose._moose import *
 
 
 def version():
-    # Show user version.
+    """version.
+
+    Returns
+    -------
+        version of pyMOOSE.
+    """
     return _moose.__version__
 
 
 def about():
-    """info: Return some 'about me' information.
+    """general information about these bindings.
     """
     return dict(
         path=os.path.dirname(__file__),
         version=_moose.__version__,
         docs="https://moose.readthedocs.io/en/latest/",
+        development="https://github.com/BhallaLab/moose-core",
     )
 
 
 def wildcardFind(pattern):
-    # return _moose.wildcardFind(pattern)
-    return [to_melement(x) for x in _moose.wildcardFind(pattern)]
+    """Find objects by wildcard.
+
+    Parameters
+    ----------
+    pattern: str
+       Wildcard (see note below)
+
+    .. note:: Wildcard
+
+    MOOSE allows wildcard expressions of the form
+    {PATH}/{WILDCARD}[{CONDITION}].
+    
+    {PATH} is valid path in the element tree, {WILDCARD} can be
+    # or ##. # causes the search to be restricted to the children
+    of the element specified by {PATH}. ## makes the search to
+    recursively go through all the descendants of the {PATH} element.  
+
+    {CONDITION} can be:
+    
+    - TYPE={CLASSNAME}: an element satisfies this condition if it is of
+      class {CLASSNAME}.
+    - ISA={CLASSNAME}: alias for TYPE={CLASSNAME}
+    - CLASS={CLASSNAME}: alias for TYPE={CLASSNAME}
+    - FIELD({FIELDNAME}){OPERATOR}{VALUE} : compare field {FIELDNAME} with
+      {VALUE} by {OPERATOR} where {OPERATOR} is a comparison
+      operator (=, !=, >, <, >=, <=).
+
+    Returns
+    -------
+    list
+        A list of found MOOSE objects
+
+    Examples
+    --------
+    Following returns a list of all the objects under /mymodel whose Vm field
+    is >= -65.
+
+    >>> moose.wildcardFind("/mymodel/##[FIELD(Vm)>=-65]")
+    """
+
+    return [__to_melement(x) for x in _moose.wildcardFind(pattern)]
 
 
 def connect(src, srcfield, dest, destfield, msgtype="Single"):
-    # FIXME: Move to pymoose.cpp
+    """Create a message between `srcfield` on `src` object to 
+     `destfield` on `dest` object.
+
+     This function is used mainly, to say, connect two entities, and 
+     to denote what kind of give-and-take relationship they share.
+     It enables the 'destfield' (of the 'destobj') to acquire the 
+     data, from 'srcfield'(of the 'src').
+     
+     Parameters
+     ----------
+     src : element/vec/string
+         the source object (or its path).
+         (the one that provides information)
+     srcfield : str
+         source field on self.(type of the information)
+     destobj : element
+         Destination object to connect to.
+         (The one that need to get information)
+     destfield : str
+         field to connect to on `destobj`
+     msgtype : str
+         type of the message. It ca be one of the following (default Single).
+         - `Single`
+         - `OneToAll`  
+         - `AllToOne`  
+         - `OneToOne`  
+         - `Reduce` 
+         - `Sparse`  
+    
+
+     Returns
+     -------
+     msgmanager: melement
+         message-manager for the newly created message.
+
+     Examples
+     --------
+     Connect the output of a pulse generator to the input of a spike generator::
+
+     >>> pulsegen = moose.PulseGen('pulsegen')
+     >>> spikegen = moose.SpikeGen('spikegen')
+     >>> moose.connect(spikegen, 'output', spikegen, 'Vm')
+    """
     if isinstance(src, str):
         src = _moose.element(src)
     if isinstance(dest, str):
@@ -68,25 +176,54 @@ def connect(src, srcfield, dest, destfield, msgtype="Single"):
     return src.connect(srcfield, dest, destfield, msgtype)
 
 
-def copy(elem, newParent, newName="", n=1):
-    # FIXME: move to pybind11/pymoose.cpp
+def copy(src, dest, name="", n=1, toGlobal=False, copyExtMsg=False):
+    """Make copies of a moose object.
 
-    if isinstance(elem, str):
-        elem = _moose.element(elem)
-    if isinstance(newParent, str):
-        newParent = _moose.element(newParent)
-    if not newName:
-        newName = elem.name
-    return _moose.copy(elem.id, newParent, newName, n, False, False)
+    Parameters
+    ----------
+    src : vec, element or str
+        source object.
+    dest : vec, element or str
+        Destination object to copy into.
+    name : str
+        Name of the new object. If omitted, name of the original will be used.
+    n : int
+        Number of copies to make (default=1).
+    toGlobal : bool
+        Relevant for parallel environments only. If false, the copies will
+        reside on local node, otherwise all nodes get the copies.
+    copyExtMsg : bool
+        If true, messages to/from external objects are also copied.
+    
+    Returns
+    -------
+    vec
+        newly copied vec
+    """
+    if isinstance(src, str):
+        src = _moose.element(src)
+    if isinstance(dest, str):
+        dest = _moose.element(dest)
+    if not name:
+        name = src.name
+    return _moose.copy(src.id, dest, name, n, toGlobal, copyExtMsg)
 
 
 def pwe():
-    """Print present working element. Convenience function for GENESIS
-    users. If you want to retrieve the element in stead of printing
-    the path, use moose.getCwe()
+    """Print present working element's path.
+    
+    Convenience function for GENESIS users. If you want to retrieve the element
+    in stead of printing the path, use moose.getCwe().
 
+    Returns
+    ------
+    melement
+        current MOOSE element
+
+    Example
+    -------
     >>> pwe()
-    >>> '/'
+    '/'
     """
     pwe_ = _moose.getCwe()
     print(pwe_.path)
@@ -100,12 +237,14 @@ def le(el=None):
     Parameters
     ----------
     el : str/melement/vec/None
-        The element or the path under which to look. If `None`, children
-         of current working element are displayed.
+
+        The element or the path under which to look. If `None`, children of
+        current working element are displayed.
 
     Returns
     -------
-    List of path of child elements
+    List[str]
+        path of all children
 
     """
     if el is None:
@@ -119,36 +258,7 @@ def le(el=None):
     print("Elements under '%s'" % el)
     for ch in el.children:
         print(" %s" % ch.path)
-    return [child.path for child in el.children]
-
-
-def syncDataHandler(target):
-    """Synchronize data handlers for target.
-
-    Parameters
-    ----------
-    target : melement/vec/str
-        Target element or vec or path string.
-
-    Raises
-    ------
-    NotImplementedError
-        The call to the underlying C++ function does not work.
-
-    Notes
-    -----
-    This function is defined for completeness, but currently it does not work.
-
-    """
-    raise NotImplementedError(
-        "The implementation is not working for IntFire - goes to invalid objects. \
-First fix that issue with SynBase or something in that line."
-    )
-    if isinstance(target, str):
-        if not _moose.exists(target):
-            raise ValueError("%s: element does not exist." % (target))
-        target = _moose.vec(target)
-        _moose.syncDataHandler(target)
+    return [x.path for x in el.children]
 
 
 def showfield(el, field="*", showtype=False):
@@ -209,19 +319,8 @@ def showfield(el, field="*", showtype=False):
     return "".join(result)
 
 
-def showfields(el, showtype=False):
-    """
-    Print all fields on a a given element.
-    """
-    warnings.warn(
-        'Deprecated. Use showfield(element, field="*", showtype=True) instead.',
-        DeprecationWarning,
-    )
-    return showfield(el, field="*", showtype=showtype)
-
-
 # Predefined field types and their human readable names
-finfotypes = [
+__finfotypes = [
     ("valueFinfo", "value field"),
     ("srcFinfo", "source message field"),
     ("destFinfo", "destination message field"),
@@ -310,9 +409,6 @@ def getFieldDoc(tokens, indent=""):
         try:
             classelement = _moose.element("/classes/" + classname)
             for finfo in classelement.children:
-                # FIXME
-                print(finfo, "x")
-                return
                 for fieldelement in finfo:
                     baseinfo = ""
                     if classname != tokens[0]:
@@ -342,7 +438,7 @@ def _appendFinfoDocs(classname, docstring, indent):
     except ValueError:
         raise NameError("class '%s' not defined." % (classname))
 
-    for ftype, rname in finfotypes:
+    for ftype, rname in __finfotypes:
         docstring.write(u"\n*%s*\n" % (rname.capitalize()))
         finfo = _moose.element("%s/%s" % (classElem.path, ftype))
         for field in finfo.vec:
@@ -353,7 +449,7 @@ def _getMooseDoc(tokens, inherited=False):
     """Return MOOSE builtin documentation.
     """
     indent = "  "
-    docstring = io.StringIO()
+    docstring = io.StringIO("")
     with contextlib.closing(docstring):
         classElem = _moose.element("/classes/%s" % tokens[0])
         if len(tokens) > 1:
@@ -368,7 +464,7 @@ def _getMooseDoc(tokens, inherited=False):
 __pager = None
 
 
-def doc(arg, inherited=True, paged=True):
+def doc(arg, paged=True):
     """Display the documentation for class or field in a class.
 
     Parameters
@@ -403,24 +499,23 @@ def doc(arg, inherited=True, paged=True):
     # pydoc. (using properties requires copying all the docs strings
     # from MOOSE increasing the loading time by ~3x). Hence we provide a
     # separate function.
+
     global __pager
     if paged and __pager is None:
         __pager = pydoc.pager
     tokens = []
-    text = ""
     if isinstance(arg, str):
         tokens = arg.split(".")
         if tokens[0] in ["moose", "_moose"]:
             tokens = tokens[1:]
     assert tokens
-    text += _getMooseDoc(tokens, inherited=inherited)
+    text = _moose.generateDoc(".".join(tokens))
 
     if __pager:
         __pager(text)
     else:
         print(text)
 
-
-from moose._moose import *
+# Import from other modules as well.
 from moose.server import *
 from moose.model_utils import *
