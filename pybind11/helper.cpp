@@ -559,13 +559,33 @@ string mooseLe(const ObjId& obj)
 
 string mooseShowMsg(const ObjId& obj)
 {
-    stringstream ss("INCOMING:\n");
-    for(auto oid : obj.element()->msgIn()) {
-        Msg* msg = Msg::getMsg(oid);
+    stringstream ss;
+    ss << "INCOMING:" << endl;
+    auto inmsgs = Field<vector<ObjId>>::get(obj, "msgIn");
+    for(const auto inobj : inmsgs) {
+        const Msg* msg = Msg::getMsg(inobj);
         if(! msg) {
             cerr << "No Msg found on " << obj.path() << endl;
             continue;
+        }
+        ss << fmt::format("  {0}, [{1}] <-- {2}, [{3}]\n", msg->getE2().path() 
+                , moose::vectorToCSV<string>(msg->getDestFieldsOnE2())
+                , msg->getE1().path() 
+                , moose::vectorToCSV<string>(msg->getSrcFieldsOnE1()));
     }
+    ss << endl;
+    auto outmsgs = Field<vector<ObjId>>::get(obj, "msgOut");
     ss << "OUTGOING:" << endl;
+    for(const auto outobj : outmsgs) {
+        const Msg* msg = Msg::getMsg(outobj);
+        if(! msg) {
+            cerr << "No Msg found on " << obj.path() << endl;
+            continue;
+        }
+        ss << fmt::format("  {0}, [{1}] <-- {2}, [{3}]\n", msg->getE1().path() 
+                , moose::vectorToCSV<string>(msg->getSrcFieldsOnE1())
+                , msg->getE2().path() 
+                , moose::vectorToCSV<string>(msg->getDestFieldsOnE2()));
+    }
     return ss.str();
 }

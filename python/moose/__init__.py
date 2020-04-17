@@ -600,44 +600,42 @@ def showfield(el, field="*", showtype=False):
     string
 
     """
-    _moose.showfield(el, field, showtype)
-
-    #  if isinstance(el, str):
-        #  if not _moose.exists(el):
-            #  raise ValueError("no such element: %s" % el)
-        #  el = _moose.element(el)
-    #  result = []
-    #  if field == "*":
-        #  value_field_dict = _moose.getFieldDict(el.className, "valueFinfo")
-        #  max_type_len = max(len(dtype) for dtype in value_field_dict.values())
-        #  max_field_len = max(len(dtype) for dtype in value_field_dict.keys())
-        #  result.append("\n[" + el.path + "]\n")
-        #  for key, dtype in sorted(value_field_dict.items()):
-            #  if (
-                #  dtype == "bad"
-                #  or key == "this"
-                #  or key == "dummy"
-                #  or key == "me"
-                #  or dtype.startswith("vector")
-                #  or "ObjId" in dtype
-            #  ):
-                #  continue
-            #  value = el.getField(key)
-            #  if showtype:
-                #  typestr = dtype.ljust(max_type_len + 4)
-                #  The following hack is for handling both Python 2 and
-                #  3. Directly putting the print command in the if/else
-                #  clause causes syntax error in both systems.
-                #  result.append(typestr + " ")
-            #  result.append(key.ljust(max_field_len + 4) + "=" + str(value) + "\n")
-    #  else:
-        #  try:
-            #  result.append(field + "=" + el.getField(field))
-        #  except AttributeError:
-            #  pass  # Genesis silently ignores non existent fields
-    #  print("".join(result))
-    #  return "".join(result)
-
+    if isinstance(el, str):
+        if not _moose.exists(el):
+            raise ValueError("no such element: %s" % el)
+        el = _moose.element(el)
+    result = []
+    if field == "*":
+        value_field_dict = _moose.getFieldDict(el.className, "valueFinfo")
+        max_type_len = max(len(dtype) for dtype in value_field_dict.values())
+        max_field_len = max(len(dtype) for dtype in value_field_dict.keys())
+        result.append("\n[" + el.path + "]\n")
+        for key, dtype in sorted(value_field_dict.items()):
+            if (
+                dtype == "bad"
+                or key == "this"
+                or key == "dummy"
+                or key == "me"
+                or dtype.startswith("vector")
+                or "ObjId" in dtype
+            ):
+                continue
+            value = el.getField(key)
+            if showtype:
+                typestr = dtype.ljust(max_type_len + 4)
+                ## The following hack is for handling both Python 2 and
+                ## 3. Directly putting the print command in the if/else
+                ## clause causes syntax error in both systems.
+                result.append(typestr + " ")
+            result.append(key.ljust(max_field_len + 4) + "=" + str(value) + "\n")
+    else:
+        try:
+            result.append(field + "=" + el.getField(field))
+        except AttributeError:
+            pass  # Genesis silently ignores non existent fields
+    print("".join(result))
+    return "".join(result)
+#
 
 def listmsg(el):
     """Return a list containing the incoming and outgoing messages of
@@ -720,7 +718,7 @@ def doc(arg, paged=True):
         if tokens[0] in ["moose", "_moose"]:
             tokens = tokens[1:]
     assert tokens
-    text = _moose.generateDoc(".".join(tokens))
+    text = _moose.__generatedoc__(".".join(tokens))
 
     if __pager:
         __pager(text)

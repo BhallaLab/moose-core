@@ -41,11 +41,18 @@ def test_tutorial():
 
     >>> test_tutorial()  #doctest: +NORMALIZE_WHITESPACE 
     ['childOut', 'output']
+    output: double - SrcFinfo
+    Current output level.
     """
     a = moose.getFieldNames('PulseGen', 'srcFinfo')
     print(a)
     moose.doc('PulseGen.output')
 
+def test_msg():
+    a = moose.Pool('dada')
+    moose.showmsg(a)
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
+    test_msg()
