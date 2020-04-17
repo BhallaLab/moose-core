@@ -1,7 +1,21 @@
 # Add pybind11 module.
 
-pybind11_add_module(_moose pymoose.cpp helper.cpp Finfo.cpp MooseVec.cpp PyRun.cpp)
+execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version
+    OUTPUT_VARIABLE COMPILER_STRING
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+pybind11_add_module(_moose 
+    pymoose.cpp 
+    helper.cpp 
+    Finfo.cpp
+    MooseVec.cpp 
+    PyRun.cpp)
+
 add_dependencies(_moose libmoose)
+
+# Use in version_info dict.
+target_compile_definitions(_moose PRIVATE
+    COMPILER_STRING="${CMAKE_CXX_COMPILER_ID},${CMAKE_CXX_COMPILER},${CMAKE_CXX_COMPILER_VERSION}")
 
 set_target_properties(_moose PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/python/moose

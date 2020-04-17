@@ -198,11 +198,11 @@ def test_elements():
     assert xe.isA['HHGate']
     assert ye.isA['HHGate']
     assert ze.isA['HHGate']
+    print(moose.version_info())
 
 def test_paths():
     x = moose.Neutral('///x')
     assert x.path == '/x', x.path
-
 
 def main():
     test_paths()

@@ -61,14 +61,11 @@ from moose._moose import *
 
 
 def version():
-    """version.
-
-    Returns
-    -------
-        version of pyMOOSE.
-    """
+    """Reutrns moose version string."""
     return _moose.__version__
 
+def version_info():
+    return _moose.version_info()
 
 def about():
     """general information about these bindings.
@@ -257,7 +254,7 @@ def getFieldDict(classname, finfoType=""):
     >>> moose.getFieldDict('Neutral', 'srcFinfo')
        {'childMsg': 'int'}
     """
-    return _moose.getFieldClass(classname, finfoType)
+    return _moose.getFieldDict(classname, finfoType)
 
 
 def getFieldNames(classname, fieldtype="*"):

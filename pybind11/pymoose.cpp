@@ -16,6 +16,7 @@
 #include <utility>
 #include <vector>
 #include <functional>
+#include <chrono>
 
 #include "../external/pybind11/include/pybind11/pybind11.h"
 #include "../external/pybind11/include/pybind11/stl.h"
@@ -41,6 +42,23 @@ using namespace pybind11::literals;
 Id initModule(py::module &m)
 {
     return initShell();
+}
+
+map<string, string> mooseVersionInfo()
+{
+    std::time_t t = std::time(nullptr);
+    char mbstr[100];
+    std::strftime(mbstr, sizeof(mbstr), "%A %c", std::localtime(&t));
+
+    vector<string> vers;
+    moose::tokenize(string(MOOSE_VERSION), ".", vers);
+    return {
+        {"major", vers[0]}, 
+        {"minor", vers[1]},
+        {"patch", vers[2]}, 
+        {"build_datetime", string(mbstr)},
+        {"compiler_string", string(COMPILER_STRING)}
+    };
 }
 
 bool setFieldGeneric(const ObjId &oid, const string &fieldName,
@@ -410,6 +428,8 @@ PYBIND11_MODULE(_moose, m)
 
     m.def("copy", &mooseCopy, "orig"_a, "newParent"_a, "newName"_a, "num"_a = 1,
           "toGlobal"_a = false, "copyExtMsgs"_a = false);
+
+    m.def("version_info", &mooseVersionInfo);
 
     // Attributes.
     m.attr("NA") = NA;
