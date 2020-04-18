@@ -9,6 +9,7 @@ import moose
 import pytest
 import sys
 import io
+import difflib
 
 stdout_ = sys.stdout
 if sys.version_info.major > 2:
@@ -350,19 +351,16 @@ print( 'output =', output )
     moose.start(10.0)
 
 
-@pytest.mark.skip(reason="No way this will pass with pytest with default settings.")
 def test_pyrun():
-    import difflib
-    global stream_, stdout_
+    global stream_, stdout_, expected
     run_sequence()
     moose.delete('/model')
     input_output()
     sys.stdout = stdout_
-    got = stream_.getvalue()
+    expected = expected.split('\n')[-50:]
+    got = stream_.getvalue().split('\n')[-50:]
+    assert got == expected
     # Deleted first 3 lines.
-    assert len(expected) - len(got) < 200, (len(expected), len(got))
-    assert len(got) > 3500
-    assert expected.replace(' ', '') in got.replace(' ', ''), got
     s = difflib.SequenceMatcher(None, expected, got)
     assert s.ratio() >= 0.90, ("Difference is too large", s.ratio())
     print('All done')
