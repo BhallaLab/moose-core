@@ -11,7 +11,7 @@ print("[INFO ] Using moose from", moose.about())
 def test_showfield_func():
     """Show field of a function.
     >>> test_showfield_func()   #doctest: +NORMALIZE_WHITESPACE
-    [/dadada]
+    [/dadada[0]]
     allowUnknownVariable    =True
     className               =Function
     derivative              =nan
@@ -36,23 +36,6 @@ def test_showfield_func():
     f = moose.Function('/dadada')
     moose.showfield(f)
 
-def test_tutorial():
-    """test tutorial comands.
-
-    >>> test_tutorial()  #doctest: +NORMALIZE_WHITESPACE 
-    ['childOut', 'output']
-    output: double - SrcFinfo
-    Current output level.
-    """
-    a = moose.getFieldNames('PulseGen', 'srcFinfo')
-    print(a)
-    moose.doc('PulseGen.output')
-
-def test_msg():
-    a = moose.Pool('dada')
-    moose.showmsg(a)
-
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
-    test_msg()

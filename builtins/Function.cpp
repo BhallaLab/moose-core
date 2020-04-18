@@ -14,6 +14,7 @@
 #include "../utility/strutil.h"
 #include "../utility/numutil.h"
 #include "../utility/testing_macros.hpp"
+#include "../utility/print_function.hpp"
 
 #include "../builtins/MooseParser.h"
 
@@ -813,8 +814,8 @@ void Function::reinit(const Eref &e, ProcPtr p)
 {
     if (! (valid_ || parser_->GetExpr().empty()))
     {
-        cout << "Error: " << e.objId().path() << "::reinit() - invalid parser state" << endl;
-        cout << " Expr: '" << parser_->GetExpr() << "'" << endl;
+        MOOSE_WARN("Error: " << e.objId().path() << "::reinit() - invalid parser state"
+                << endl << " Expr: '" << parser_->GetExpr() << "'.");
         return;
     }
 
