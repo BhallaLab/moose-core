@@ -275,7 +275,7 @@ PYBIND11_MODULE(_moose, m)
         .def_property_readonly(
             "parent", [](const ObjId &oid) { return Neutral::parent(oid); })
         .def_property_readonly(
-            "name", [](const ObjId &oid) { return oid.element()->getName(); })
+            "name", [](const ObjId &oid) -> string { return oid.element()->getName(); })
         .def_property_readonly(
             "className",
             [](const ObjId &oid) { return oid.element()->cinfo()->name(); })

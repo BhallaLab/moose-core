@@ -14,6 +14,7 @@ References:
 # -----
 # Use these guidelines for docstring: https://numpydoc.readthedocs.io/en/latest/format.html
 
+import sys
 import pydoc
 import os
 
@@ -31,9 +32,15 @@ class melement(_moose.ObjId):
 
     def __init__(self, x, ndata=1, **kwargs):
         obj = _moose.__create__(self.__type__, x, ndata)
-        super().__init__(obj)
-        for k, v in kwargs.items():
-            super().setField(k, v)
+        if sys.version_info.major > 2:
+            super().__init__(obj)
+            for k, v in kwargs.items():
+                super().setField(k, v)
+        else:
+            # Support for dead python2.
+            super(melement, self).__init__(obj)
+            for k, v in kwargs.items():
+                super(melement, self).setField(k, v)
 
 
 def __to_melement(obj):
@@ -44,11 +51,19 @@ def __to_melement(obj):
 
 # Create MOOSE classes from available Cinfos.
 for p in _moose.wildcardFind("/##[TYPE=Cinfo]"):
-    cls = type(
-        p.name,
-        (melement,),
-        {"__type__": p.name, "__doc__": _moose.__generatedoc__(p.name)},
-    )
+    if sys.version_info.major > 2:
+        cls = type(
+            p.name,
+            (melement,),
+            {"__type__": p.name, "__doc__": _moose.__generatedoc__(p.name)},
+        )
+    else:
+        # Python2.
+        cls = type(
+            str(p.name),
+            (melement,),
+            {"__type__": p.name, "__doc__": _moose.__generatedoc__(p.name)},
+        )
     setattr(_moose, cls.__name__, cls)
     __moose_classes__[cls.__name__] = cls
 
@@ -186,10 +201,9 @@ def connect(src, srcfield, dest, destfield, msgtype="Single"):
      >>> spikegen = moose.SpikeGen('spikegen')
      >>> moose.connect(spikegen, 'output', spikegen, 'Vm')
     """
-    if isinstance(src, str):
-        src = _moose.element(src)
-    if isinstance(dest, str):
-        dest = _moose.element(dest)
+
+    src = _moose.element(src)
+    dest = _moose.element(dest)
     return src.connect(srcfield, dest, destfield, msgtype)
 
 

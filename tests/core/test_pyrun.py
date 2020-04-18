@@ -11,7 +11,10 @@ import sys
 import io
 
 stdout_ = sys.stdout
-stream_ = io.StringIO()
+if sys.version_info.major > 2:
+    stream_ = io.StringIO()
+else:
+    stream_ = io.BytesIO()
 sys.stdout = stream_
 
 # Removed first 3 lines since they change during each run.

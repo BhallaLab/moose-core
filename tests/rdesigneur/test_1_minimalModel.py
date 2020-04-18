@@ -42,7 +42,7 @@ def test_simple():
     """
     rdes = rd.rdesigneur()
     rdes.buildModel()
-    moose.showfields(rdes.soma)
+    moose.showfield(rdes.soma)
     moose.showmsg(rdes.soma)
 
 if __name__ == '__main__':
