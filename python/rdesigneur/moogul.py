@@ -190,7 +190,7 @@ class MooDrawable:
 
     def updateValues( self ):
         ''' Obtains values from the associated cell'''
-        self.val = np.array([moose.getField( i, self.field, 'double' ) for i in self.activeObjs]) * self.fieldScale
+        self.val = np.array([moose.getField(i, self.field) for i in self.activeObjs]) * self.fieldScale
         cmap = plt.get_cmap( self.colormap )
         if self.autoscale:
             valMin = min( self.val )

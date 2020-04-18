@@ -52,16 +52,14 @@ map<string, string> mooseVersionInfo()
 
     vector<string> vers;
     moose::tokenize(string(MOOSE_VERSION), ".", vers);
-    if(vers.size()==3)
+    if(vers.size() == 3)
         vers.push_back("1");
-    return {
-        {"major", vers[0]}, 
-        {"minor", vers[1]},
-        {"micro", vers[2]}, 
-        {"releaselevel", vers[3]},
-        {"build_datetime", string(mbstr)},
-        {"compiler_string", string(COMPILER_STRING)}
-    };
+    return {{"major", vers[0]},
+            {"minor", vers[1]},
+            {"micro", vers[2]},
+            {"releaselevel", vers[3]},
+            {"build_datetime", string(mbstr)},
+            {"compiler_string", string(COMPILER_STRING)}};
 }
 
 bool setFieldGeneric(const ObjId &oid, const string &fieldName,
@@ -275,7 +273,8 @@ PYBIND11_MODULE(_moose, m)
         .def_property_readonly(
             "parent", [](const ObjId &oid) { return Neutral::parent(oid); })
         .def_property_readonly(
-            "name", [](const ObjId &oid) -> string { return oid.element()->getName(); })
+            "name",
+            [](const ObjId &oid) -> string { return oid.element()->getName(); })
         .def_property_readonly(
             "className",
             [](const ObjId &oid) { return oid.element()->cinfo()->name(); })
@@ -421,16 +420,16 @@ PYBIND11_MODULE(_moose, m)
 
     m.def("getFieldNames", &mooseGetFieldNames);
 
-    m.def("getFieldDict", &mooseGetFieldDict, "classname"_a, "fieldtype"_a="*");
+    m.def("getFieldDict", &mooseGetFieldDict, "classname"_a,
+          "fieldtype"_a = "*");
 
-    m.def("__generatedoc__", &mooseDoc, "Generate class documentation (developer only)");
+    m.def("__generatedoc__", &mooseDoc,
+          "Generate class documentation (developer only)");
 
-    m.def("getField",
-          [](const ObjId &oid, const string &fieldName, const string &ftype) {
-              // ftype is not needed anymore.
-              return getFieldGeneric(oid, fieldName);
-          },
-          "el"_a, "fieldname"_a, "ftype"_a = "");
+    m.def("getField", [](const ObjId &oid, const string &fieldName) {
+        // ftype is not needed anymore.
+        return getFieldGeneric(oid, fieldName);
+    });
 
     m.def("copy", &mooseCopy, "orig"_a, "newParent"_a, "newName"_a, "num"_a = 1,
           "toGlobal"_a = false, "copyExtMsgs"_a = false);

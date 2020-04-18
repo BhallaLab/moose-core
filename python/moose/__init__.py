@@ -258,6 +258,7 @@ def getCwe():
 
 
 def getField(classname, fieldname):
+    """Get specified field of specified class."""
     return _moose.getField(classname, fieldname)
 
 
