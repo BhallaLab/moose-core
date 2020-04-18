@@ -29,7 +29,7 @@ for name,hexno in matplotlib.colors.cnames.items():
     matplotcolor[name]=hexno
 
 def getRandColor():
-    k = random.choice(matplotcolor.keys())
+    k = random.choice(list(matplotcolor.keys()))
     if k in ignoreColor:
         return getRandColor()
     else:
@@ -195,7 +195,8 @@ def getxyCord(xcord,ycord,list1,listOfitems):
         #     objInfo = moose.element(item.parent).path+'/info'
         # else:
         #     objInfo = item.path+'/info'
-        if not isinstance(item,moose.Function):
+        #if not isinstance(item,moose.Function):
+        if not item.isA["Function"]:
             objInfo = item.path+'/info'
             xcord.append(xyPosition(objInfo,'x'))
             ycord.append(xyPosition(objInfo,'y'))
