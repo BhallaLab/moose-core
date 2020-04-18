@@ -11,8 +11,6 @@
 
 #include <cstring>
 
-class Neutral;
-
 /**
  * This set of templates defines converters. The conversions are from
  * string to object, object to string, and
@@ -104,8 +102,6 @@ template< class T > class Conv
                 return "Id";
             if ( typeid( T ) == typeid( ObjId ) )
                 return "ObjId";
-            if ( typeid( T ) == typeid( Neutral ) )
-                return "Neutral";
             if ( typeid( T ) == typeid( vector<ObjId>) )
                 return "vector<ObjId>";
             if ( typeid( T ) == typeid( vector<ObjId>*) )
@@ -114,10 +110,17 @@ template< class T > class Conv
                 return "vector<Id>";
             if ( typeid( T ) == typeid( vector<Id>*) )
                 return "vector<Id>*";
+#if 0
+            // typeid of incomplete type Neutral (after forward declarting it)
+            // is not supported by c++ standard. Though following compiles with
+            // gcc (but not with clang).
+            if ( typeid( T ) == typeid( Neutral ) )
+                return "Neutral";
             if ( typeid( T ) == typeid( vector<Neutral> ) )
                 return "vector<Neutral>";
             if ( typeid( T ) == typeid( vector<Neutral>*) )
                 return "vector<Neutral>*";
+#endif
             if ( typeid( T ) == typeid( vector<string>) )
                 return "vector<string>";
             if ( typeid( T ) == typeid( vector<double>) )
