@@ -31,7 +31,6 @@ def test_neg_value_flag():
     assert os.path.isfile(mfile)
     runtime = 1000.0
     modelId = moose.loadModel(mfile, 'model')
-    moose.mooseAddChemSolver('model', solver)
     moose.element('/model/kinetics/neuroNOS/nNOS.arg').concInit = 0.1
     moose.reinit()
     moose.start(runtime)

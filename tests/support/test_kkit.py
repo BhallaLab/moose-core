@@ -25,7 +25,7 @@ def test_kkit():
     file using moose 
     """
     moose.loadModel(os.path.join( cwd, '../data/reaction.g'), '/model')
-    written = moose.mooseWriteKkit('/model', 'testsave.g')
+    written = moose.writeKkit('/model', 'testsave.g')
     print( written )
 
 if __name__ == '__main__':

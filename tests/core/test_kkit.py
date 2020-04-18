@@ -8,17 +8,17 @@ scriptdir = os.path.dirname(os.path.realpath(__file__))
 print('Script dir %s' % scriptdir)
 
 def test_kkit():
+
     """This example illustrates loading, running, and saving a kinetic model
-        defined in kkit format. It uses a default kkit model but you can
-        specify another using the command line ``python filename runtime
-        solver``. We use the gsl solver here. The model already defines a
-        couple of plots and sets the runtime to 20 seconds.
-        """
+    defined in kkit format. It uses a default kkit model but you can specify
+    another using the command line ``python filename runtime solver``. We use
+    the gsl solver here. The model already defines a couple of plots and sets
+    the runtime to 20 seconds.  """
+
     solver = "gsl"  # Pick any of gsl, gssa, ee..
     mfile = os.path.join(scriptdir, '..', 'data', 'kkit_objects_example.g')
     runtime = 20.0
     modelId = moose.loadModel(mfile, 'model')
-    moose.mooseAddChemSolver('model', solver)
     moose.reinit()
     moose.start(runtime)
 

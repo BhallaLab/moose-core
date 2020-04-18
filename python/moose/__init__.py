@@ -10,23 +10,17 @@ References:
 
 """
 
-# Use these guidelines for docstring:
-# https://numpydoc.readthedocs.io/en/latest/format.html
+# Notes
+# -----
+# Use these guidelines for docstring: https://numpydoc.readthedocs.io/en/latest/format.html
 
 import pydoc
 import os
-import io
-import contextlib
-
-# Bring all C++ functions to global namespace. We can overwrite some of these
-# methods later.
 
 import moose._moose as _moose
-
 from moose import model_utils
 
 __moose_classes__ = {}
-
 
 class melement(_moose.ObjId):
     """Base class for all moose classes.
@@ -432,7 +426,7 @@ def setClock(clockid, dt):
 
 
 def loadModel(filename, modelpath, solverclass="gsl"):
-    """loadModel: Load model from a file to a specified path.
+    """loadModel: Load model (genesis/cspace) from a file to a specified path.
 
     Parameters
     ----------
@@ -446,10 +440,17 @@ def loadModel(filename, modelpath, solverclass="gsl"):
 
     Returns
     -------
-    object
+    melement
         moose.element if succcessful else None.
+
+    See also
+    --------
+    moose.readNML2
+    moose.writeNML2 (NotImplemented)
+    moose.readSBML
+    moose.writeSBML
     """
-    return model_utils.loadModel(filename, modelpath, solverclass)
+    return model_utils.mooseReadKkitGenesis(filename, modelpath, solverclass)
 
 
 def copy(src, dest, name="", n=1, toGlobal=False, copyExtMsg=False):
@@ -569,14 +570,13 @@ def le(el=None):
     -------
     List[str]
         path of all children
-
     """
     el = _moose.getCwe() if el is None else el
     if isinstance(el, str):
         el = _moose.element(el)
     elif isinstance(el, _moose.vec):
         el = el[0]
-    print(_moose.le(el))
+    return _moose.le(el)
 
 
 def showfield(el, field="*", showtype=False):
@@ -635,7 +635,10 @@ def showfield(el, field="*", showtype=False):
             pass  # Genesis silently ignores non existent fields
     print("".join(result))
     return "".join(result)
+
+
 #
+
 
 def listmsg(el):
     """Return a list containing the incoming and outgoing messages of
@@ -727,11 +730,11 @@ def doc(arg, paged=True):
 
 
 # SBML related functions.
-def readSBML(filepath, loadpath, solver="ee", validate="on"):
+def readSBML(filepath, loadpath, solver="ee", validate=True):
     """Load SBML model.
 
-    Parameter
-    --------
+    Parameters
+    ----------
     filepath: str
         filepath to be loaded.
     loadpath : str
@@ -741,6 +744,8 @@ def readSBML(filepath, loadpath, solver="ee", validate="on"):
         Available options are "ee", "gsl", "stochastic", "gillespie"
             "rk", "deterministic"
             For full list see ??
+    validate: bool
+        When True, run the schema validation.
     """
     return model_utils.mooseReadSBML(filepath, loadpath, solver, validate)
 
@@ -751,9 +756,9 @@ def writeSBML(modelpath, filepath, sceneitems={}):
     Parameters
     ----------
     modelpath : str
-        model path in moose e.g /model/mymodel \n
+        model path in moose e.g /model/mymodel
     filepath : str
-        Path of output file. \n
+        Path of output file.
     sceneitems : dict
         UserWarning: user need not worry about this layout position is saved in
         Annotation field of all the moose Object (pool,Reaction,enzyme).
@@ -777,3 +782,85 @@ def writeKkit(modelpath, filepath, sceneitems={}):
         Path of output file.
     """
     return model_utils.mooseWriteKkit(modelpath, filepath, sceneitems)
+
+
+def readNML2(modelpath, verbose=False):
+    """Load neuroml2 model.
+
+    Parameters
+    ----------
+    modelpath: str
+        Path of nml2 file.
+
+    verbose: True 
+        (defalt False)
+        If True, enable verbose logging.
+
+    Raises
+    ------
+    FileNotFoundError: If modelpath is not found or not readable.
+    """
+    return model_utils.mooseReadNML2(modelpath, verbose)
+
+
+def writeNML2(outfile):
+    raise NotImplementedError("Writing to NML2 is not supported yet")
+
+
+def addChemSolver(modelpath, solver):
+    """Add solver on chemical compartment and its children for calculation. 
+    (For developers)
+
+    Parameters
+    ----------
+    modelpath : str
+        Model path that is loaded into moose.
+    solver : str
+        Exponential Euler "ee" is default. Other options are Gillespie ("gssa"),
+        Runge Kutta ("gsl"/"rk"/"rungekutta").
+
+    TODO
+    ----
+    Documentation
+
+    See also
+    --------
+    deleteChemSolver
+    """
+    return model_utils.mooseAddChemSolver(modelpath, solver)
+
+
+def deleteChemSolver(modelpath):
+    """Deletes solver on all the compartment and its children
+
+    Notes
+    -----
+    This is neccesary while created a new moose object on a pre-existing modelpath,
+    this should be followed by mooseAddChemSolver for add solvers on to compartment
+    to simulate else default is Exponential Euler (ee)
+
+    See also
+    --------
+    addChemSolver
+    """
+    return model_utils.mooseDeleteChemSolver(modelpath)
+
+
+def mergeChemModel(modelpath, dest):
+    """Merges two models.
+
+    Merge chemical model in a file `modelpath` with existing MOOSE model at 
+    path `dest`.
+
+    Parameters
+    ----------
+    modelpath : str
+        Filepath containing a chemical model.
+    dest : path
+        Existing MOOSE path.
+
+    TODO
+    ----
+        No example file which shows its use. Deprecated?
+    """
+    return model_utils.mooseMergeChemModel(modelpath, dest)

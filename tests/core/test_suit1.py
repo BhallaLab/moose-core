@@ -5,7 +5,8 @@ import moose
 
 try:
     import libsbml
-except ImportError:
+except ImportError as e:
+    print(e)
     pass
 
 def library1():

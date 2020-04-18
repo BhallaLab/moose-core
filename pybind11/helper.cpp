@@ -547,14 +547,19 @@ string mooseDoc(const string& query)
 }
 
 
-string mooseLe(const ObjId& obj)
+vector<string> mooseLe(const ObjId& obj)
 {
     vector<Id> children;
+    vector<string> chPaths;
     Neutral::children(obj.eref(), children);
-    string res = "Elements under " + obj.path() + '\n';
-    for(auto ch: children)
-        res += "    " + ch.path() + '\n';
-    return res;
+    stringstream ss;
+    ss << "Elements under " << obj.path() << endl;
+    for(auto ch: children) {
+        ss << "    " + ch.path() << endl;
+        chPaths.push_back(ch.path());
+    }
+    py::print(ss.str());
+    return chPaths;
 }
 
 string mooseShowMsg(const ObjId& obj)

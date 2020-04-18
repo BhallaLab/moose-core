@@ -221,7 +221,7 @@ string mooseClassDoc(const string& classname);
 
 string mooseDoc(const string& string);
 
-string mooseLe(const ObjId& obj);
+vector<string> mooseLe(const ObjId& obj);
 
 string mooseShowMsg(const ObjId& obj);
 
