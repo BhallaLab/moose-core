@@ -646,7 +646,7 @@ def writePool(modelpath,f,volIndex,sceneitems):
     return error
 
 def getColorCheck(color,GENESIS_COLOR_SEQUENCE):
-    if isinstance(color, basestring):
+    if isinstance(color, str):
         if color.startswith("#"):
             color = ( int(color[1:3], 16)
                                 , int(color[3:5], 16)
