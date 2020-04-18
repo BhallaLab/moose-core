@@ -9,9 +9,7 @@ import types
 import parser
 import token
 import symbol
-import os
 import math
-import warnings
 from datetime import datetime
 from collections import defaultdict
 import re
@@ -20,6 +18,7 @@ import logging
 
 logger_ = logging.getLogger("moose.utils")
 
+import moose
 from moose.moose_constants import *
 from moose.print_utils import *
 
@@ -1033,8 +1032,8 @@ def connect_CaConc(compartment_list, temperature=None):
                         * caconc.thick
                     )
                 )
-            for child in compartment.children:
-                if child.className == "HHChannel":
+            for neutralwrap in compartment.children:
+                if neutralwrap.className == "HHChannel":
                     channel = moose.HHChannel(child)
                     ## If child Mstring 'ion' is present and is Ca, connect channel current to caconc
                     for childid in channel.children:
