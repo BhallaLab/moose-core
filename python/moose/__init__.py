@@ -803,6 +803,8 @@ def readNML2(modelpath, verbose=False):
 
 
 def writeNML2(outfile):
+    """Write model to NML2. (Not implemented)
+    """
     raise NotImplementedError("Writing to NML2 is not supported yet")
 
 
