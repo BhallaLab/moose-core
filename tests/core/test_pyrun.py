@@ -351,6 +351,8 @@ print( 'output =', output )
     moose.start(10.0)
 
 
+# This test will not pass with doctest and coverage
+@pytest.mark.xfail(reason="Would not pass with python-coverage")
 def test_pyrun():
     global stream_, stdout_, expected
     run_sequence()
