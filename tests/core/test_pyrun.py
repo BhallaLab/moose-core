@@ -359,7 +359,9 @@ def test_pyrun():
     moose.delete('/model')
     input_output()
     sys.stdout = stdout_
+    stdout_.flush()
     expected = expected.split('\n')[-50:]
+    stream_.flush()
     got = stream_.getvalue().split('\n')[-50:]
 
     try:
