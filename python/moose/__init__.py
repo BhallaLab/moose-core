@@ -116,7 +116,7 @@ def about():
 
 
 def wildcardFind(pattern):
-    """Find objects using wildcard pattern 
+    """Find objects using wildcard pattern
 
     Parameters
     ----------
@@ -127,14 +127,14 @@ def wildcardFind(pattern):
 
     MOOSE allows wildcard expressions of the form
     {PATH}/{WILDCARD}[{CONDITION}].
-    
+
     {PATH} is valid path in the element tree, {WILDCARD} can be
     # or ##. # causes the search to be restricted to the children
     of the element specified by {PATH}. ## makes the search to
-    recursively go through all the descendants of the {PATH} element.  
+    recursively go through all the descendants of the {PATH} element.
 
     {CONDITION} can be:
-    
+
     - TYPE={CLASSNAME}: an element satisfies this condition if it is of
       class {CLASSNAME}.
     - ISA={CLASSNAME}: alias for TYPE={CLASSNAME}
@@ -159,35 +159,34 @@ def wildcardFind(pattern):
 
 
 def connect(src, srcfield, dest, destfield, msgtype="Single"):
-    """Create a message between `srcfield` on `src` object to 
-     `destfield` on `dest` object. 
+    """Create a message between `srcfield` on `src` object to
+     `destfield` on `dest` object.
 
-     This function is used mainly, to say, connect two entities, and 
+     This function is used mainly, to say, connect two entities, and
      to denote what kind of give-and-take relationship they share.
-     It enables the 'destfield' (of the 'destobj') to acquire the 
+     It enables the 'destfield' (of the 'destobj') to acquire the
      data, from 'srcfield'(of the 'src').
-     
+
      Parameters
      ----------
      src : element/vec/string
-         the source object (or its path).
-         (the one that provides information)
+         the source object (or its path) the one that provides information.
      srcfield : str
-         source field on self.(type of the information)
+         source field on self (type of the information).
      destobj : element
-         Destination object to connect to.
-         (The one that need to get information)
+         Destination object to connect to (The one that need to get
+         information).
      destfield : str
          field to connect to on `destobj`
      msgtype : str
          type of the message. It ca be one of the following (default Single).
-         - `Single`
-         - `OneToAll`  
-         - `AllToOne`  
-         - `OneToOne`  
-         - `Reduce` 
-         - `Sparse`  
-    
+         - Single
+         - OneToAll
+         - AllToOne
+         - OneToOne
+         - Reduce
+         - Sparse
+
      Returns
      -------
      msgmanager: melement
@@ -207,10 +206,9 @@ def connect(src, srcfield, dest, destfield, msgtype="Single"):
      >>> pulsegen = moose.PulseGen('pulsegen')
      >>> spikegen = moose.SpikeGen('spikegen')
      >>> moose.connect(pulsegen, 'output', spikegen, 'Vm')
-     Or, 
+     Or,
      >>> pulsegen.connect('output', spikegen, 'Vm')
     """
-
     src = _moose.element(src)
     dest = _moose.element(dest)
     return src.connect(srcfield, dest, destfield, msgtype)
@@ -343,7 +341,7 @@ def reinit():
     simulation after you have called moose.reinit() and moose.start(), you must
     NOT call moose.reinit() again. Calling moose.reinit() again will take the
     system back to initial setting (like clear out all data recording tables,
-    set state variables to their initial values, etc.  
+    set state variables to their initial values, etc.
     """
     _moose.reinit()
 
@@ -400,15 +398,15 @@ def setCwe(arg):
 def useClock(tick, path, fn):
     """Schedule `fn` function of every object that matches `path` on tick no
     `tick`. Usually you don't have to use it.
-    
+
     (FIXME: Needs update) The sequence of clockticks with the same dt is
     according to their number.  This is utilized for controlling the order of
     updates in various objects where it matters.  The following convention
     should be observed when assigning clockticks to various components of a
     model: Clock ticks 0-3 are for electrical (biophysical) components, 4 and 5
     are for chemical kinetics, 6 and 7 are for lookup tables and stimulus, 8
-    and 9 are for recording tables. 
-     
+    and 9 are for recording tables.
+
     Parameters
     ----------
     tick : int
@@ -417,7 +415,7 @@ def useClock(tick, path, fn):
         path of the target element(s). This can be a wildcard also.
     fn : str
         name of the function to be called on each tick. Commonly `process`.
-    
+
     Examples
     --------
     In multi-compartmental neuron model a compartment's membrane potential (Vm)
@@ -495,7 +493,7 @@ def copy(src, dest, name="", n=1, toGlobal=False, copyExtMsg=False):
         reside on local node, otherwise all nodes get the copies.
     copyExtMsg : bool
         If true, messages to/from external objects are also copied.
-    
+
     Returns
     -------
     vec
@@ -535,8 +533,8 @@ def seed(seed=0):
 
     Parameters
     ----------
-    seed : int 
-        Value to use for seeding. 
+    seed : int
+        Value to use for seeding.
         default: random number generated using system random device
 
     Notes
@@ -545,12 +543,12 @@ def seed(seed=0):
     this seed.
 
     By default (when this function is not called) seed is initializecd to some
-    random value using system random device (if available). 
-    
+    random value using system random device (if available).
+
     Returns
     -------
     None
-    
+
     See also
     --------
     moose.rand() : get a pseudorandom number in the [0,1) interval.
@@ -560,7 +558,7 @@ def seed(seed=0):
 
 def pwe():
     """Print present working element's path.
-    
+
     Convenience function for GENESIS users. If you want to retrieve the element
     in stead of printing the path, use moose.getCwe().
 
@@ -603,7 +601,7 @@ def le(el=None):
     return _moose.le(el)
 
 
-def showfield(el, field="*", showtype=False):
+def showfields(el, field="*", showtype=False):
     """Show the fields of the element `el`, their data types and
     values in human readable format. Convenience function for GENESIS
     users.
@@ -661,7 +659,9 @@ def showfield(el, field="*", showtype=False):
     return "".join(result)
 
 
-#
+def showfield(el, field="*", showtype=False):
+    """Alias for showfields."""
+    return showfields(el, field, showtype)
 
 
 def listmsg(arg):
@@ -799,7 +799,7 @@ def readNML2(modelpath, verbose=False):
     modelpath: str
         Path of nml2 file.
 
-    verbose: True 
+    verbose: True
         (defalt False)
         If True, enable verbose logging.
 
@@ -817,7 +817,7 @@ def writeNML2(outfile):
 
 
 def addChemSolver(modelpath, solver):
-    """Add solver on chemical compartment and its children for calculation. 
+    """Add solver on chemical compartment and its children for calculation.
     (For developers)
 
     Parameters
@@ -858,7 +858,7 @@ def deleteChemSolver(modelpath):
 def mergeChemModel(modelpath, dest):
     """Merges two models.
 
-    Merge chemical model in a file `modelpath` with existing MOOSE model at 
+    Merge chemical model in a file `modelpath` with existing MOOSE model at
     path `dest`.
 
     Parameters
