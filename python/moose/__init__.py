@@ -23,6 +23,7 @@ from moose import model_utils
 
 __moose_classes__ = {}
 
+
 class melement(_moose.ObjId):
     """Base class for all moose classes.
     """
