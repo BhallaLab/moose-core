@@ -32,25 +32,16 @@ unsigned int totalTests = 0;
 
 stringstream errorSS;
 
-bool isRNGInitialized = false;
-
 clock_t simClock = clock();
-
-extern int checkPath(const string& path);
-extern string joinPath(string pathA, string pathB);
-extern string fixPath(string path);
-extern string dumpStats(int);
 
 namespace moose
 {
 
-unsigned long __rng_seed__ = 0;
 
 map<string, valarray<double>> solverProfMap = {{"Ksolve", {0.0, 0}},
     {"HSolve", {0.0, 0}}
 };
 
-moose::RNG rng;
 
 /* Check if path is OK */
 int checkPath(const string& path)
@@ -85,29 +76,6 @@ string fixPath(string path)
     else if (pathOk == MISSING_BRACKET_AT_END)
         return path + "[0]";
     return path;
-}
-
-/**
- * @brief Set the global seed or all rngs.
- *
- * @param x
- */
-void mtseed(unsigned int x)
-{
-    moose::__rng_seed__ = x;
-    moose::rng.setSeed(x);
-    isRNGInitialized = true;
-}
-
-/*  Generate a random number */
-double mtrand(void)
-{
-    return moose::rng.uniform();
-}
-
-double mtrand(double a, double b)
-{
-    return (b - a) * mtrand() + a;
 }
 
 // MOOSE suffixes [0] to all elements to path. Remove [0] with null
@@ -251,6 +219,7 @@ string moosePathToColumnName(const string& path, char delim, size_t maxParents)
     return colname;
 }
 
+
 /*  Return formatted string
  *  Precision is upto 17 decimal points.
  */
@@ -261,15 +230,6 @@ string toString(double x)
     return string(buffer);
 }
 
-int getGlobalSeed()
-{
-    return __rng_seed__;
-}
-
-void setGlobalSeed(int seed)
-{
-    __rng_seed__ = seed;
-}
 
 void addSolverProf(const string& name, double time, size_t steps)
 {
@@ -283,4 +243,6 @@ void printSolverProfMap()
         cout << '\t' << v.first << ": " << v.second[0] << " sec ("
              << v.second[1] << ")" << endl;
 }
+
+
 }

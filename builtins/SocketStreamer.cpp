@@ -27,7 +27,7 @@ const Cinfo* SocketStreamer::initCinfo()
     /*-----------------------------------------------------------------------------
      * Finfos
      *-----------------------------------------------------------------------------*/
-    static ValueFinfo< SocketStreamer, size_t > port(
+    static ValueFinfo< SocketStreamer, unsigned int > port(
         "port"
         , "Set port number for streaming. Valid only of TCP socket."
         , &SocketStreamer::setPort
@@ -42,7 +42,7 @@ const Cinfo* SocketStreamer::initCinfo()
         , &SocketStreamer::getAddress
     );
 
-    static ReadOnlyValueFinfo< SocketStreamer, size_t > numTables (
+    static ReadOnlyValueFinfo< SocketStreamer, unsigned int > numTables (
         "numTables"
         , "Number of Tables handled by SocketStreamer "
         , &SocketStreamer::getNumTables
@@ -193,7 +193,7 @@ void SocketStreamer::addStringToDoubleVec(vector<double>&res, const string s)
  * any more connections.
  */
 /* ----------------------------------------------------------------------------*/
-void SocketStreamer::listenToClients(size_t numMaxClients)
+void SocketStreamer::listenToClients(unsigned int numMaxClients)
 {
     assert(0 < sockfd_ );
     assert( numMaxClients > 0 );
@@ -314,7 +314,7 @@ void SocketStreamer::initTCPServer( void )
 /* ----------------------------------------------------------------------------*/
 void SocketStreamer::dataToStream(map<string, vector<double>>& data)
 {
-    for( size_t i = 0; i < tables_.size(); i++)
+    for( unsigned int i = 0; i < tables_.size(); i++)
     {
         vector<double> vec;
         tables_[i]->collectData(vec, true, false);
@@ -359,7 +359,7 @@ int SocketStreamer::streamData( )
         vecToStream_.insert(vecToStream_.end(), v.second.begin(), v.second.end());
     }
 
-    size_t dtypeSize = sizeof(double);
+    unsigned int dtypeSize = sizeof(double);
     int sent = send(clientfd_, (void*) &vecToStream_[0], dtypeSize*vecToStream_.size(), MSG_MORE);
     LOG(moose::debug, "Sent " << sent << " bytes." );
     if( sent < 0 )
@@ -370,10 +370,10 @@ int SocketStreamer::streamData( )
 }
 
 
-bool SocketStreamer::enoughDataToStream(size_t minsize)
+bool SocketStreamer::enoughDataToStream(unsigned int minsize)
 {
-    for( size_t i = 0; i < tables_.size(); i++)
-        if(tables_[i]->getVec().size() >= minsize)
+    for( unsigned int i = 0; i < tables_.size(); i++)
+        if(tables_[i]->getVector().size() >= minsize)
             return true;
     return false;
 }
@@ -443,7 +443,7 @@ void SocketStreamer::reinit(const Eref& e, ProcPtr p)
     thisDt_ = clk_->getTickDt( e.element()->getTick() );
 
     // Push each table dt_ into vector of dt
-    for( size_t i = 0; i < tables_.size(); i++)
+    for( unsigned int i = 0; i < tables_.size(); i++)
     {
         Id tId = tableIds_[i];
         int tickNum = tId.element()->getTick();
@@ -483,7 +483,7 @@ void SocketStreamer::process(const Eref& e, ProcPtr p)
 void SocketStreamer::addTable( ObjId table )
 {
     // If this table is not already in the vector, add it.
-    for( size_t i = 0; i < tableIds_.size(); i++)
+    for( unsigned int i = 0; i < tableIds_.size(); i++)
         if( table.path() == tableIds_[i].path() )
             return;                             /* Already added. */
 
@@ -522,7 +522,7 @@ void SocketStreamer::addTables( vector<ObjId> tables )
 void SocketStreamer::removeTable( ObjId table )
 {
     int matchIndex = -1;
-    for (size_t i = 0; i < tableIds_.size(); i++)
+    for (unsigned int i = 0; i < tableIds_.size(); i++)
     {
         if( table.path() == tableIds_[i].path() )
         {
@@ -554,18 +554,18 @@ void SocketStreamer::removeTables( vector<ObjId> tables )
  *
  * @return  Number of tables.
  */
-size_t SocketStreamer::getNumTables( void ) const
+unsigned int SocketStreamer::getNumTables( void ) const
 {
     return tables_.size();
 }
 
 
-void SocketStreamer::setPort( const size_t port )
+void SocketStreamer::setPort( const unsigned int port )
 {
     sockInfo_.port = port;
 }
 
-size_t SocketStreamer::getPort( void ) const
+unsigned int SocketStreamer::getPort( void ) const
 {
     return sockInfo_.port;
 }

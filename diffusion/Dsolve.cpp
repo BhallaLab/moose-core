@@ -133,7 +133,7 @@ const Cinfo* Dsolve::initCinfo()
     static DestFinfo buildMeshJunctions( "buildMeshJunctions",
             "Builds junctions between mesh on current Dsolve, and another"
             " Dsolve. The meshes have to be compatible. ",
-            new EpFunc1< Dsolve, Id >(&Dsolve::buildMeshJunctions )
+            new EpFunc1< Dsolve, ObjId >(&Dsolve::buildMeshJunctions )
             );
 
     static DestFinfo buildNeuroMeshJunctions( "buildNeuroMeshJunctions",
@@ -907,7 +907,7 @@ void Dsolve::buildNeuroMeshJunctions( const Eref& e, Id spineD, Id psdD )
     innerBuildMeshJunctions( psdD, spineD, false );
 }
 
-void Dsolve::buildMeshJunctions( const Eref& e, Id other )
+void Dsolve::buildMeshJunctions( const Eref& e, ObjId other )
 {
     Id otherMesh;
     if ( other.element()->cinfo()->isA( "Dsolve" ) )

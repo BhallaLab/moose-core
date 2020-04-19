@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 include( ${CMAKE_CURRENT_SOURCE_DIR}/../CheckCXXCompiler.cmake )
 add_library(basecode
-	consts.cpp
 	Element.cpp
 	DataElement.cpp
 	GlobalDataElement.cpp
@@ -26,3 +25,9 @@ add_library(basecode
 	doubleEq.cpp
 	testAsync.cpp
     )
+
+add_executable(test_globals testGlobals.cpp global.cpp)
+
+enable_testing()
+add_test(NAME cpp_test_globals  COMMAND $<TARGET_FILE:test_globals>)
+

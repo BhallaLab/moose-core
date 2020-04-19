@@ -46,12 +46,12 @@ int test_normal_dist( )
                   << p.first << ' ' << std::string(p.second/200, '*') << '\n';
     }
 
-    ASSERT_DOUBLE_EQ( "NORMALDIST", hist[-3], 542 );
-    ASSERT_DOUBLE_EQ( "NORMALDIST", hist[-2], 5987 );
-    ASSERT_DOUBLE_EQ( "NORMALDIST", hist[-1], 24262 );
-    ASSERT_DOUBLE_EQ( "NORMALDIST", hist[0],  38236 );
-    ASSERT_DOUBLE_EQ( "NORMALDIST", hist[1],  24386 );
-    ASSERT_DOUBLE_EQ( "NORMALDIST", hist[2],  6071 );
+    ASSERT_DOUBLE_EQ( hist[-3], 542 , "NORMALDIST")
+    ASSERT_DOUBLE_EQ( hist[-2], 5987 , "NORMALDIST");
+    ASSERT_DOUBLE_EQ( hist[-1], 24262, "NORMALDIST");
+    ASSERT_DOUBLE_EQ( hist[0],  38236, "NORMALDIST");
+    ASSERT_DOUBLE_EQ( hist[1],  24386, "NORMALDIST");
+    ASSERT_DOUBLE_EQ( hist[2],  6071 , "NORMALDIST");
 
     return 0;
 }

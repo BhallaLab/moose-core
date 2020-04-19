@@ -38,7 +38,7 @@ void Shell::doSaveModel( Id model, const string& fileName, bool qFlag )
 	// 	return;
 	// }
 
-	size_t pos = fileName.find( "." );
+	unsigned int pos = fileName.find( "." );
 	string fileType = fileName.substr( pos );
 
 	if ( fileType == ".g" ) { // kkit model requested.

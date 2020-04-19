@@ -56,7 +56,7 @@ using namespace std;
 hid_t require_attribute(hid_t file_id, string path,
                         hid_t data_type, hid_t data_id)
 {
-    size_t attr_start = path.rfind("/");
+    unsigned int attr_start = path.rfind("/");
     string node_path = ".";
     string attr_name = "";
     if (attr_start == string::npos){
@@ -111,16 +111,16 @@ hid_t require_group(hid_t file, string path)
 /**
    Create a new 1D dataset. Make it extensible.
 */
-hid_t HDF5WriterBase::createDoubleDataset(hid_t parent_id, std::string name, hsize_t size, hsize_t maxsize)
+hid_t HDF5WriterBase::createDoubleDataset(hid_t parent_id, std::string name, hunsigned int size, hunsigned int maxsize)
 {
     herr_t status;
-    hsize_t dims[1] = {size};
-    hsize_t maxdims[] = {maxsize};
-    hsize_t _chunkSize = chunkSize_;
+    hunsigned int dims[1] = {size};
+    hunsigned int maxdims[] = {maxsize};
+    hunsigned int _chunkSize = chunkSize_;
     if (_chunkSize > maxsize){
         _chunkSize = maxsize;
     }
-    hsize_t chunk_dims[] = {_chunkSize};
+    hunsigned int chunk_dims[] = {_chunkSize};
     hid_t chunk_params = H5Pcreate(H5P_DATASET_CREATE);
     status = H5Pset_chunk(chunk_params, 1, chunk_dims);
     assert( status >= 0 );
@@ -141,20 +141,20 @@ hid_t HDF5WriterBase::createDoubleDataset(hid_t parent_id, std::string name, hsi
     return dataset_id;
 }
 
-hid_t HDF5WriterBase::createStringDataset(hid_t parent_id, string name, hsize_t size, hsize_t maxsize)
+hid_t HDF5WriterBase::createStringDataset(hid_t parent_id, string name, hunsigned int size, hunsigned int maxsize)
 {
     herr_t status;
     hid_t ftype = H5Tcopy(H5T_C_S1);
     if (H5Tset_size(ftype, H5T_VARIABLE) < 0){
         return -1;
     }
-    hsize_t dims[] = {size};
-    hsize_t maxdims[] = {maxsize};
-    hsize_t _chunkSize = chunkSize_;
+    hunsigned int dims[] = {size};
+    hunsigned int maxdims[] = {maxsize};
+    hunsigned int _chunkSize = chunkSize_;
     if (maxsize < _chunkSize){
         _chunkSize = maxsize;
     }
-    hsize_t chunk_dims[] = {_chunkSize};
+    hunsigned int chunk_dims[] = {_chunkSize};
     hid_t chunk_params = H5Pcreate(H5P_DATASET_CREATE);
     status = H5Pset_chunk(chunk_params, 1, chunk_dims);
     assert( status >= 0 );
@@ -193,15 +193,15 @@ herr_t HDF5WriterBase::appendToDataset(hid_t dataset_id, const vector< double >&
     if (data.size() == 0){
         return 0;
     }
-    hsize_t size = H5Sget_simple_extent_npoints(filespace) + data.size();
+    hunsigned int size = H5Sget_simple_extent_npoints(filespace) + data.size();
     status = H5Dset_extent(dataset_id, &size);
     if (status < 0){
         return status;
     }
     filespace = H5Dget_space(dataset_id);
-    hsize_t size_increment = data.size();
+    hunsigned int size_increment = data.size();
     hid_t memspace = H5Screate_simple(1, &size_increment, NULL);
-    hsize_t start = size - data.size();
+    hunsigned int start = size - data.size();
     H5Sselect_hyperslab(filespace, H5S_SELECT_SET, &start, NULL,
                         &size_increment, NULL);
     status = H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, memspace, filespace,
@@ -221,7 +221,7 @@ hid_t HDF5WriterBase::createDataset2D(hid_t parent, string name, unsigned int ro
     }
     herr_t status;
     // we need chunking here to allow extensibility
-    hsize_t chunkdims[] = {rows, chunkSize_};
+    hunsigned int chunkdims[] = {rows, chunkSize_};
     hid_t chunk_params = H5Pcreate(H5P_DATASET_CREATE);
     status = H5Pset_chunk(chunk_params, 2, chunkdims);
     assert(status >= 0);
@@ -233,8 +233,8 @@ hid_t HDF5WriterBase::createDataset2D(hid_t parent, string name, unsigned int ro
         status = H5Pset_szip(chunk_params, sz_opt_mask,
                              HDF5WriterBase::CHUNK_SIZE);
     }
-    hsize_t dims[2] = {rows, 0};
-    hsize_t maxdims[2] = {rows, H5S_UNLIMITED};
+    hunsigned int dims[2] = {rows, 0};
+    hunsigned int maxdims[2] = {rows, H5S_UNLIMITED};
     hid_t dataspace = H5Screate_simple(2, dims, maxdims);
     hid_t dset = H5Dcreate2(parent, name.c_str(), H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, chunk_params, H5P_DEFAULT);
     H5Pclose(chunk_params);
@@ -338,7 +338,7 @@ herr_t writeScalarAttr(hid_t file_id, string path, int value)
 template <>
 herr_t writeVectorAttr(hid_t file_id, string path, vector < string > value)
 {
-    hsize_t dims[] = {value.size()};
+    hunsigned int dims[] = {value.size()};
     hid_t space = H5Screate_simple(1, dims, NULL);
     hid_t dtype = H5Tcopy(H5T_C_S1);
     H5Tset_size(dtype, H5T_VARIABLE);
@@ -357,7 +357,7 @@ herr_t writeVectorAttr(hid_t file_id, string path, vector < string > value)
 template <>
 herr_t writeVectorAttr(hid_t file_id, string path, vector < double > value)
 {
-    hsize_t dims[] = {value.size()};
+    hunsigned int dims[] = {value.size()};
     hid_t data_id = H5Screate_simple(1, dims, NULL);
     hid_t dtype = H5T_NATIVE_DOUBLE;
     H5Tset_size(dtype, value.size());
@@ -371,7 +371,7 @@ herr_t writeVectorAttr(hid_t file_id, string path, vector < double > value)
 template <>
 herr_t writeVectorAttr(hid_t file_id, string path, vector < long > value)
 {
-    hsize_t dims[] = {value.size()};
+    hunsigned int dims[] = {value.size()};
     hid_t data_id = H5Screate_simple(1, dims, NULL);
     hid_t dtype = H5T_NATIVE_LONG;
     H5Tset_size(dtype, value.size());
@@ -515,7 +515,7 @@ const Cinfo* HDF5WriterBase::initCinfo()
   return &hdf5Cinfo;
 }
 
-const hssize_t HDF5WriterBase::CHUNK_SIZE = 1024; // default chunk size
+const hsunsigned int HDF5WriterBase::CHUNK_SIZE = 1024; // default chunk size
 
 
 HDF5WriterBase::HDF5WriterBase():

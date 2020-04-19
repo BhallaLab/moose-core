@@ -457,7 +457,7 @@ static void spinyTraverse( unsigned int dendIndex,
 static void sortByShaftIds( vector< Id >& shaftId, vector< Id >& headId,
 	vector< unsigned int >& spineParent )
 {
-	size_t sortedIndex(0);
+	unsigned int sortedIndex(0);
 	vector<int> y(shaftId.size());
 	generate(begin(y), end(y), [&]{ return sortedIndex++; });
 	sort(  begin(y), end(y),
@@ -470,7 +470,7 @@ static void sortByShaftIds( vector< Id >& shaftId, vector< Id >& headId,
 	auto a = shaftId;
 	auto b = headId;
 	auto c = spineParent;
-	for ( size_t i = 0; i < sortedIndex; ++i) {
+	for ( unsigned int i = 0; i < sortedIndex; ++i) {
 		shaftId[i] = a[y[i]];
 		headId[i] = b[y[i]];
 		spineParent[i] = c[y[i]];
