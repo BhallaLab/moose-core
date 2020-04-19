@@ -155,13 +155,12 @@ def wildcardFind(pattern):
 
     >>> moose.wildcardFind("/mymodel/##[FIELD(Vm)>=-65]")
     """
-
     return [__to_melement(x) for x in _moose.wildcardFind(pattern)]
 
 
 def connect(src, srcfield, dest, destfield, msgtype="Single"):
     """Create a message between `srcfield` on `src` object to 
-     `destfield` on `dest` object.
+     `destfield` on `dest` object. 
 
      This function is used mainly, to say, connect two entities, and 
      to denote what kind of give-and-take relationship they share.
@@ -194,13 +193,22 @@ def connect(src, srcfield, dest, destfield, msgtype="Single"):
      msgmanager: melement
          message-manager for the newly created message.
 
+     Note
+     -----
+     Alternatively, one can also use the following form::
+
+     >>> src.connect(srcfield, dest, destfield, msgtype)
+
+
      Examples
      --------
      Connect the output of a pulse generator to the input of a spike generator::
 
      >>> pulsegen = moose.PulseGen('pulsegen')
      >>> spikegen = moose.SpikeGen('spikegen')
-     >>> moose.connect(spikegen, 'output', spikegen, 'Vm')
+     >>> moose.connect(pulsegen, 'output', spikegen, 'Vm')
+     Or, 
+     >>> pulsegen.connect('output', spikegen, 'Vm')
     """
 
     src = _moose.element(src)
