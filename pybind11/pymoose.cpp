@@ -415,6 +415,7 @@ PYBIND11_MODULE(_moose, m)
 
     m.def("le", &mooseLe);
     m.def("showmsg", &mooseShowMsg);
+    m.def("listmsg", &mooseListMsg);
 
     m.def("loadModelInternal", &loadModelInternal);
 

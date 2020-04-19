@@ -561,6 +561,26 @@ vector<string> mooseLe(const ObjId& obj)
     return chPaths;
 }
 
+vector<ObjId> mooseListMsg(const ObjId& obj)
+{
+    vector<ObjId> res;
+    auto inmsgs = Field<vector<ObjId>>::get(obj, "msgIn");
+    for(const auto inobj : inmsgs) {
+        const Msg* msg = Msg::getMsg(inobj);
+        if(! msg) {
+            cerr << "No Msg found on " << obj.path() << endl;
+            continue;
+        }
+        res.push_back(msg->mid());
+    }
+    auto outmsgs = Field<vector<ObjId>>::get(obj, "msgOut");
+    for(const auto outobj : outmsgs) {
+        const Msg* msg = Msg::getMsg(outobj);
+        res.push_back(msg->mid());
+    }
+    return res;
+}
+
 string mooseShowMsg(const ObjId& obj)
 {
     stringstream ss;

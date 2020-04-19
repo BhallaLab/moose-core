@@ -656,31 +656,25 @@ def showfield(el, field="*", showtype=False):
 #
 
 
-def listmsg(el):
+def listmsg(arg):
     """Return a list containing the incoming and outgoing messages of
     `el`.
 
     Parameters
     ----------
-    el : melement/vec/str
+    arg : melement/vec/str
         MOOSE object or path of the object to look into.
 
     Returns
     -------
     msg : list
-        List of Msg objects corresponding to incoming and outgoing
-        connections of `el`.
+        List of Msg objects corresponding to incoming and outgoing connections
+        of `arg`.
 
     """
-    obj = el
-    if isinstance(el, str):
-        obj = _moose.element(el)
-    ret = []
-    for msg in obj.msgIn:
-        ret.append(msg)
-    for msg in obj.msgOut:
-        ret.append(msg)
-    return ret
+    obj = _moose.element(arg)
+    assert obj
+    return _moose.listmsg(obj)
 
 
 def showmsg(el):
@@ -730,19 +724,8 @@ def doc(arg, paged=True):
         If class or field does not exist.
 
     """
-    __pager = pydoc.pager
-    tokens = []
-    if isinstance(arg, str):
-        tokens = arg.split(".")
-        if tokens[0] in ["moose", "_moose"]:
-            tokens = tokens[1:]
-    assert tokens
-    text = _moose.__generatedoc__(".".join(tokens))
-
-    if __pager:
-        __pager(text)
-    else:
-        print(text)
+    text = _moose.__generatedoc__(arg)
+    pydoc.pager(text) if pydoc.pager else print(text)
 
 
 # SBML related functions.

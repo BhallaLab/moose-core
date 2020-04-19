@@ -225,4 +225,6 @@ vector<string> mooseLe(const ObjId& obj);
 
 string mooseShowMsg(const ObjId& obj);
 
+vector<ObjId> mooseListMsg(const ObjId& obj);
+
 #endif /* end of include guard: HELPER_H */

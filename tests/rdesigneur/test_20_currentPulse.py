@@ -21,6 +21,7 @@ def test_msgs():
     )
     rdes.buildModel()
     msgs = moose.listmsg(rdes.soma)
+    assert [msg.isA['Msg'] for msg in msgs] == [True, True, True]
     assert len(msgs) == 3, msgs
 
 def test_current_pulse():
