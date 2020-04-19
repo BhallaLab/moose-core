@@ -362,17 +362,17 @@ def test_pyrun():
     expected = expected.split('\n')[-50:]
     got = stream_.getvalue().split('\n')[-50:]
 
-    if got != expected:
-        print("== got")
-        print(got)
-        print("== expected")
-        print(expected)
-        raise AssertionError()
-
-    # Deleted first 3 lines.
-    s = difflib.SequenceMatcher(None, ''.join(expected), ''.join(got))
-    assert s.ratio() >= 0.90, ("Difference is too large", s.ratio())
-    print('All done')
+    try:
+        if got != expected:
+            print("== got")
+            print(got)
+            print("== expected")
+            print(expected)
+            raise AssertionError()
+    except Exception:
+        s = difflib.SequenceMatcher(None, ''.join(expected), ''.join(got))
+        assert s.ratio() >= 0.90, ("Difference is too large", s.ratio())
+        print('All done')
 
 
 if __name__ == '__main__':
