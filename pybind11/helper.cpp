@@ -521,7 +521,6 @@ string mooseClassDoc(const string& className)
     for(string f : {"value", "lookup", "src", "dest", "shared", "field"})
         ss << mooseClassFieldsDoc(cinfo, f, "");
 
-    ss << moose::underlined<'='>("C++ Developer Document");
     return ss.str();
 }
 
