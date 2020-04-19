@@ -394,6 +394,9 @@ def setCwe(arg):
     """
     _moose.setCwe(arg)
 
+def ce(arg):
+    """Alias for setCwe"""
+    _moose.setCwe(arg)
 
 def useClock(tick, path, fn):
     """Schedule `fn` function of every object that matches `path` on tick no
@@ -733,7 +736,10 @@ def doc(arg, paged=True):
 
     """
     text = _moose.__generatedoc__(arg)
-    pydoc.pager(text) if pydoc.pager else print(text)
+    if pydoc.page:
+        pydoc.pager(text) 
+    else:
+        print(text)
 
 
 # SBML related functions.

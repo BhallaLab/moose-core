@@ -167,6 +167,7 @@ attribs = [
     "move",
     "print_utils",
     "pwe",
+    "ce",
     "pydoc",
     "rand",
     "reinit",
