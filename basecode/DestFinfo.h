@@ -9,35 +9,32 @@
 #ifndef _DEST_FINFO_H
 #define _DEST_FINFO_H
 
-
 /*
  * DestFinfo manages function requests. All messages terminate on
  * the functions stored in DestFinfos. No templates here, as all the
  * type-specific work is done by the OpFunc.
-*/
-class DestFinfo: public Finfo
-{
-	public:
-		~DestFinfo();
-		DestFinfo( const string& name, const string& doc,OpFunc* func );
-		void registerFinfo( Cinfo* c );
-		bool strSet( const Eref& tgt, const string& field,
-			const string& arg ) const;
-		bool strGet( const Eref& tgt, const string& field,
-			string& returnValue ) const;
+ */
+class DestFinfo : public Finfo {
+public:
+    ~DestFinfo();
+    DestFinfo(const string& name, const string& doc, OpFunc* func);
+    void registerFinfo(Cinfo* c);
+    bool strSet(const Eref& tgt, const string& field, const string& arg) const;
+    bool strGet(const Eref& tgt, const string& field,
+                string& returnValue) const;
 
-		const OpFunc* getOpFunc() const;
-		FuncId getFid() const;
+    const OpFunc* getOpFunc() const;
+    FuncId getFid() const;
 
-		///////////////////////////////////////////////////////////////
-		// Override the default virtual function for the rtti info
-		///////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////
+    // Override the default virtual function for the rtti info
+    ///////////////////////////////////////////////////////////////
 
-		string rttiType() const;
+    string rttiType() const;
 
-	private:
-		OpFunc* func_;
-		FuncId fid_;
+private:
+    OpFunc* func_;
+    FuncId fid_;
 };
 
-#endif // _DEST_FINFO_H
+#endif  // _DEST_FINFO_H

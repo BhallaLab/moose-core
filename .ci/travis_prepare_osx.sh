@@ -45,3 +45,4 @@ $PYTHON3 -m pip install matplotlib --user --upgrade
 $PYTHON3 -m pip install pyNeuroML libNeuroML --user
 $PYTHON3 -m pip install scipy --user
 $PYTHON3 -m pip install pylint --user
+$PYTHON3 -m pip install pytest --user

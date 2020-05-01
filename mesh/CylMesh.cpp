@@ -289,7 +289,7 @@ double CylMesh::getR0( const Eref& e ) const
 void CylMesh::setX1( const Eref& e, double v )
 {
 
-    size_t numVoxels = (v - x0_) / diffLength_;
+    unsigned int numVoxels = (v - x0_) / diffLength_;
     x1_ = v;
     if( numVoxels >= SM_MAX_COLUMNS )
     {
@@ -406,7 +406,7 @@ vector< double > CylMesh::getCoords( const Eref& e ) const
 void CylMesh::setDiffLength( const Eref& e, double v )
 {
     diffLength_ = v;
-    size_t numVoxels = (size_t) ((x1_-x0_)/diffLength_);
+    unsigned int numVoxels = (unsigned int) ((x1_-x0_)/diffLength_);
     if( numVoxels >= SM_MAX_COLUMNS )
     {
         stringstream ss;

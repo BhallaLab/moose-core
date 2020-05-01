@@ -208,7 +208,7 @@ void HDF5DataWriter::reinit(const Eref & e, ProcPtr p)
     openFile();
     for (unsigned int ii = 0; ii < src_.size(); ++ii){
         string varname = func_[ii];
-        size_t found = varname.find("get");
+        unsigned int found = varname.find("get");
         if (found == 0){
             varname = varname.substr(3);
             if (varname.length() == 0){
@@ -239,7 +239,7 @@ hid_t HDF5DataWriter::getDataset(string path)
     }
     herr_t status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     // Create the groups corresponding to this path
-    string::size_type lastslash = path.find_last_of("/");
+    string::unsigned intype lastslash = path.find_last_of("/");
     vector<string> pathTokens;
     moose::tokenize(path, "/", pathTokens);
     hid_t prev_id = filehandle_;

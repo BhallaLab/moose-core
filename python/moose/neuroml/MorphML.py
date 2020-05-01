@@ -96,7 +96,9 @@ class MorphML():
         else:
             self.length_factor = 1.0
         cellname = cell.attrib["name"]
-        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
+        # creates /library in MOOSE tree; elif present, wraps
+        if not moose.exists('/library'):
+            moose.Neutral('/library') 
         _logger.info("Loading cell %s into /library ." % cellname)
 
         #~ moosecell = moose.Cell('/library/'+cellname)

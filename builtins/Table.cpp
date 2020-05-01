@@ -395,7 +395,7 @@ void Table::setFormat( string format )
     else
         LOG( moose::warning
              , "Unsupported format " << format
-             << " only sv is supported"
+             << " only csv is supported for single table."
            );
 }
 
@@ -471,7 +471,7 @@ double Table::getDt( void ) const
 void Table::mergeWithTime( vector<double>& data )
 {
     auto v = vec();
-    for (size_t i = 0; i < v.size(); i++)
+    for (unsigned int i = 0; i < v.size(); i++)
     {
         data.push_back(tvec_[i]);
         data.push_back(v[i]);
@@ -492,7 +492,7 @@ string Table::toJSON(bool withTime, bool clear)
     if( clear )
         lastN_ = 0;
 
-    for (size_t i = lastN_; i < v.size(); i++)
+    for (unsigned int i = lastN_; i < v.size(); i++)
     {
         if(withTime)
             ss << '[' << tvec_[i] << ',' << v[i] << "],";
@@ -527,7 +527,7 @@ void Table::collectData(vector<double>& data, bool withTime, bool clear)
     if( clear )
         lastN_ = 0;
 
-    for (size_t i = lastN_; i < v.size(); i++)
+    for (unsigned int i = lastN_; i < v.size(); i++)
     {
         if(withTime)
             data.push_back(tvec_[i]);

@@ -110,10 +110,10 @@ void StreamerBase::writeToCSVFile( const string& filepath, const OpenMode openmo
     }
 
     string text = "";
-    for( size_t i = 0; i < data.size(); i+=columns.size() )
+    for( unsigned int i = 0; i < data.size(); i+=columns.size() )
     {
         // Start of a new row.
-        for( size_t ii = 0; ii < columns.size(); ii++ )
+        for( unsigned int ii = 0; ii < columns.size(); ii++ )
             text += moose::toString( data[i+ii] ) + delimiter_;
 
         // At the end of each row, we remove the delimiter_ and append newline_.

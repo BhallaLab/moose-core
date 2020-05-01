@@ -46,7 +46,7 @@ public:
     // get/set the value of variable `name`
     void setVar(unsigned int index, double value);
 
-    Variable* getVar(unsigned int ii);
+    Variable* getX(unsigned int ii);
 
     // get function eval result
     double getValue() const;

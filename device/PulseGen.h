@@ -37,8 +37,7 @@
  * separated by specified delay.
  */
 
-class PulseGen
-{
+class PulseGen {
     /**
        With trigMode = FREE_RUN the pulse generator will create a
        train of pulses determined by the firstDealy, firstWidth,
@@ -60,7 +59,7 @@ class PulseGen
        will be no second pulse.
 
      */
-    static const  int EXT_TRIG = 1;
+    static const int EXT_TRIG = 1;
     /**
        With trigMode = EXT_GATE, the pulse occurs firstDelay later
        from the leading edge of the input.
@@ -70,7 +69,7 @@ class PulseGen
 #ifdef DO_UNIT_TESTS
     friend void testPulseGen();
 #endif
-  public:
+public:
     PulseGen();
     ~PulseGen();
 
@@ -78,23 +77,23 @@ class PulseGen
     // Value field access function definitions
     /////////////////////////////////////////////////////////////
 
-    void setFirstDelay(double value );
+    void setFirstDelay(double value);
     double getFirstDelay() const;
-    void setFirstWidth(double value );
-    double getFirstWidth(  ) const;
-    void setFirstLevel(double value );
-    double getFirstLevel(  ) const;
-    void setSecondDelay(double value );
-    double getSecondDelay(  ) const;
-    void setSecondWidth(double value );
-    double getSecondWidth(  ) const;
-    void setSecondLevel(double value );
-    double getSecondLevel(  ) const;
+    void setFirstWidth(double value);
+    double getFirstWidth() const;
+    void setFirstLevel(double value);
+    double getFirstLevel() const;
+    void setSecondDelay(double value);
+    double getSecondDelay() const;
+    void setSecondWidth(double value);
+    double getSecondWidth() const;
+    void setSecondLevel(double value);
+    double getSecondLevel() const;
     void setBaseLevel(double value);
     double getBaseLevel() const;
     void setTrigMode(unsigned int value);
     unsigned int getTrigMode() const;
-    double getOutput() const ;
+    double getOutput() const;
     double getTrigTime() const;
     int getPreviousInput() const;
     void setCount(unsigned int count);
@@ -112,17 +111,17 @@ class PulseGen
 
     void input(double input);
 
-    void process( const Eref& e, ProcPtr p );
+    void process(const Eref& e, ProcPtr p);
 
-    void reinit( const Eref& e, ProcPtr p );
+    void reinit(const Eref& e, ProcPtr p);
 
     /////////////////////////////////////////////////////////////
     static const Cinfo* initCinfo();
 
-  protected:
-    vector <double> delay_;
-    vector <double> level_;
-    vector <double> width_;
+protected:
+    vector<double> delay_;
+    vector<double> level_;
+    vector<double> width_;
 
     double output_;
     double baseLevel_;
@@ -134,6 +133,6 @@ class PulseGen
     int input_;
 };
 
-#endif // _PULSEGEN_H
-//
-// PulseGen.h ends here
+#endif  // _PULSEGEN_H
+        //
+        // PulseGen.h ends here

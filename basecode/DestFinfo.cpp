@@ -10,58 +10,58 @@
 #include <typeinfo>
 #include "header.h"
 
-DestFinfo::~DestFinfo() {
-	delete func_;
+DestFinfo::~DestFinfo()
+{
+    delete func_;
 }
 
-DestFinfo::DestFinfo( const string& name, const string& doc,
-	OpFunc* func )
-	: Finfo( name, doc ), func_( func )
+DestFinfo::DestFinfo(const string& name, const string& doc, OpFunc* func)
+    : Finfo(name, doc), func_(func)
 {
-	;
+    ;
 }
 
-void DestFinfo::registerFinfo( Cinfo* c )
+void DestFinfo::registerFinfo(Cinfo* c)
 {
-	if ( c->baseCinfo() ) {
-		const Finfo* bf = c->baseCinfo()->findFinfo( name() );
-		if ( bf ) {
-			const DestFinfo* df = dynamic_cast< const DestFinfo* >( bf );
-			assert( df );
-			fid_ = df->fid_;
-			c->overrideFunc( fid_, func_ );
-			return;
-		}
-	}
-	fid_ = c->registerOpFunc( func_ );
-//	cout << c->name() << "." << name() << ": " << fid_ << endl;
+    if(c->baseCinfo()) {
+        const Finfo* bf = c->baseCinfo()->findFinfo(name());
+        if(bf) {
+            const DestFinfo* df = dynamic_cast<const DestFinfo*>(bf);
+            assert(df);
+            fid_ = df->fid_;
+            c->overrideFunc(fid_, func_);
+            return;
+        }
+    }
+    fid_ = c->registerOpFunc(func_);
+    //	cout << c->name() << "." << name() << ": " << fid_ << endl;
 }
 
 const OpFunc* DestFinfo::getOpFunc() const
 {
-	return func_;
+    return func_;
 }
 
 FuncId DestFinfo::getFid() const
 {
-	return fid_;
+    return fid_;
 }
 
-bool DestFinfo::strSet(
-	const Eref& tgt, const string& field, const string& arg ) const
+bool DestFinfo::strSet(const Eref& tgt, const string& field,
+                       const string& arg) const
 {
-	assert( 0 );
-	return false;
+    assert(0);
+    return false;
 }
 
-bool DestFinfo::strGet(
-	const Eref& tgt, const string& field, string& returnValue ) const
+bool DestFinfo::strGet(const Eref& tgt, const string& field,
+                       string& returnValue) const
 {
-	assert( 0 );
-	return false;
+    assert(0);
+    return false;
 }
 
 string DestFinfo::rttiType() const
 {
-	return func_->rttiType();
+    return func_->rttiType();
 }
