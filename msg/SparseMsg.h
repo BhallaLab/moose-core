@@ -10,7 +10,7 @@
 #ifndef _SPARSE_MSG_H
 #define _SPARSE_MSG_H
 
-#include "../randnum/RNG.h"
+#include "../randnum/randnum.h"
 
 /**
  * This is a parallelized sparse message.

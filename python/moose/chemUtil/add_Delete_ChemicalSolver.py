@@ -28,7 +28,8 @@ def mooseDeleteChemSolver(modelRoot):
     """Delete solvers from Chemical Compartment    """
 
     compts = moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]')
-    if all(isinstance(x, (moose.CubeMesh,moose.CylMesh)) for x in compts):
+    #if all(isinstance(x, (moose.CubeMesh,moose.CylMesh)) for x in compts):
+    if all( ( x.isA["CubeMesh"] or x.isA["CylMesh"])  for x in compts):
         for compt in compts:
             if moose.exists(compt.path + '/stoich'):
                 st = moose.element(compt.path + '/stoich')
@@ -61,7 +62,8 @@ def mooseAddChemSolver(modelRoot, solver):
     Add the solvers only if all are Chemical compartment
     """
     compts = moose.wildcardFind(modelRoot + '/##[ISA=ChemCompt]')
-    if all(isinstance(x, (moose.CubeMesh,moose.CylMesh)) for x in compts):
+    #if all(isinstance(x, (moose.CubeMesh,moose.CylMesh)) for x in compts):
+    if all( ( x.isA["CubeMesh"] or x.isA["CylMesh"])  for x in compts):
         if not compts:
             return ("Atleast one compartment is required ")
         elif ( len(compts) > 3 ):
@@ -127,7 +129,7 @@ def setCompartmentSolver(modelRoot, solver):
                     stoich.dsolve = dsolve
 
                 stoich.compartment = compt
-                stoich.path = compt.path + "/##"
+                stoich.reacSystemPath = compt.path + "/##"
 
 
         dsolveList = moose.wildcardFind(modelRoot+'/##[ISA=Dsolve]')

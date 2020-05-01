@@ -609,8 +609,8 @@ bool Interpol2D::operator<( const Interpol2D& other ) const
 	if ( table_.size() > other.table_.size() )
 		return 0;
 
-	for ( size_t i = 0; i < table_.size(); i++ ) {
-		for ( size_t j = 0; j < table_[ i ].size(); j++ ) {
+	for ( unsigned int i = 0; i < table_.size(); i++ ) {
+		for ( unsigned int j = 0; j < table_[ i ].size(); j++ ) {
 			if ( table_[ i ][ j ] < other.table_[ i ][ j ] )
 				return 1;
 			if ( table_[ i ][ j ] > other.table_[ i ][ j ] )

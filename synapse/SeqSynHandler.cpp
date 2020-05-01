@@ -8,8 +8,11 @@
 **********************************************************************/
 
 #include <queue>
-#include "../basecode/global.h"
+#include <numeric>
+
+#include "../randnum/randnum.h"
 #include "../basecode/header.h"
+
 #include "Synapse.h"
 #include "SynEvent.h"
 #include "SynHandlerBase.h"
@@ -278,7 +281,7 @@ void SeqSynHandler::fixSynapseOrder()
 {
     unsigned int sz = synapseOrder_.size();
     vector< unsigned int > availableEntries( sz );
-    iota( availableEntries.begin(), availableEntries.end(), 0 );
+    std::iota( availableEntries.begin(), availableEntries.end(), 0 );
     for( unsigned int i = 0; i < sz; ++i )
     {
         if ( synapseOrder_[i] < sz )
@@ -299,14 +302,14 @@ void SeqSynHandler::fixSynapseOrder()
 
 // Beautiful snippet from Lukasz Wiklendt on StackOverflow. Returns order
 // of entries in a vector.
-template <typename T> vector<size_t> sort_indexes(const vector<T> &v)
+template <typename T> vector<unsigned int> sort_indexes(const vector<T> &v)
 {
     // initialize original index locations
-    vector<size_t> idx(v.size());
+    vector<unsigned int> idx(v.size());
     iota(idx.begin(), idx.end(), 0);
     // sort indexes based on comparing values in v
     sort(idx.begin(), idx.end(),
-         [&v](size_t i1, size_t i2)
+         [&v](unsigned int i1, unsigned int i2)
     {
         return v[i1] < v[i2];
     });

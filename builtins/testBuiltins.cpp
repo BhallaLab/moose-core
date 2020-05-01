@@ -257,7 +257,9 @@ void testTable()
 	for ( unsigned int i = 0; i < 100; ++i ) {
 		t->input( sqrt((double) i ) );
 	}
+
 	vector< double > values = Field< vector< double > >::get( tabid, "vector");
+
 	assert( values.size() == 100 );
 	for ( unsigned int i = 0; i < 100; ++i ) {
 		double ret = LookupField< unsigned int, double >::get( tabid, "y", i );

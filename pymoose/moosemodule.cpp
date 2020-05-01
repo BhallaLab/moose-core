@@ -27,7 +27,7 @@
 
 #include "../utility/print_function.hpp"
 #include "../basecode/header.h"
-#include "../basecode/global.h"
+#include "../randnum/randnum.h"
 #include "../basecode/Id.h"
 #include "../basecode/ObjId.h"
 #include "../shell/Shell.h"
@@ -2698,7 +2698,7 @@ PyMODINIT_FUNC MODINIT(_moose)
     // PyModule_AddIntConstant(moose_module, "MYNODE", myNode);
     PyModule_AddIntConstant(moose_module, "INFINITE", isInfinite);
     PyModule_AddStringConstant(moose_module, "__version__", SHELLPTR->doVersion().c_str());
-    PyModule_AddStringConstant(moose_module, "VERSION", SHELLPTR->doVersion().c_str());
+    PyModule_AddStringConstant(moose_module, "__generated_by__", "python_c_api");
     PyObject *module_dict = PyModule_GetDict(moose_module);
     if (!defineAllClasses(module_dict)) {
         PyErr_Print();

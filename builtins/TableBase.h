@@ -24,10 +24,11 @@ public:
     /*-----------------------------------------------------------------------------
      *  Functions related to field assignment.
      *-----------------------------------------------------------------------------*/
-    vector< double > getVec() const;
+    vector< double > getVector() const;
+
     const vector< double >& data( );
 
-    void setVec( vector< double > val );
+    void setVector( vector< double > val );
 
     double getOutputValue() const;
     void setOutputValue( double val );

@@ -8,6 +8,9 @@
 **********************************************************************/
 
 #include "../basecode/header.h"
+
+#include "../randnum/randnum.h"
+
 #include "Synapse.h"
 #include "SynEvent.h" // only using the SynEvent class from this
 #include "SynHandlerBase.h"

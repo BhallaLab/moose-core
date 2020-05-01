@@ -50,8 +50,7 @@ class ObjId;
  *   [ISA!=<string>]
  *   [FIELD(<fieldName)=<string>]
  */
-int simpleWildcardFind( const string& path, vector<ObjId>& ret);
-
+int simpleWildcardFind(const string& path, vector<ObjId>& ret);
 
 /**
  * wildcardFind returns the number of Ids found.
@@ -61,6 +60,8 @@ int simpleWildcardFind( const string& path, vector<ObjId>& ret);
  * If clear=true, then reset the ret to 0 size.
  */
 int wildcardFind(const string& n, vector<ObjId>& ret, bool clear = true);
+
+vector<ObjId> wildcardFind2(const char* pattern);
 
 /**
  * Recursive function to compare all descendants and cram matches into ret.
@@ -78,9 +79,8 @@ int wildcardFind(const string& n, vector<ObjId>& ret, bool clear = true);
  *   [ISA!=<string>]
  *   [FIELD(<fieldName)=<string>]
  */
-int allChildren( ObjId start, unsigned int index,
-				const string& insideBrace, vector< ObjId >& ret );
-
+int allChildren(ObjId start, unsigned int index, const string& insideBrace,
+                vector<ObjId>& ret);
 
 /**
  * matchBeforeBrace checks to see if the wildcard string 'name' matches
@@ -94,6 +94,6 @@ int allChildren( ObjId start, unsigned int index,
  *
  * 		If bracesInName, then the Id name itself includes braces.
  */
-bool matchBeforeBrace( ObjId id, const string& wild );
+bool matchBeforeBrace(ObjId id, const string& wild);
 
-#endif // _WILDCARD_H
+#endif  // _WILDCARD_H

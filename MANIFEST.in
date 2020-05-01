@@ -34,3 +34,5 @@ recursive-include signeur *
 recursive-include synapse *
 recursive-include tests *
 recursive-include utility *
+recursive-include pybind11 *
+recursive-include devel *

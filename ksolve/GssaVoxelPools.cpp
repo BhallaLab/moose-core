@@ -8,8 +8,7 @@
 **********************************************************************/
 
 #include "../basecode/header.h"
-#include "../basecode/global.h"
-#include "../randnum/RNG.h"
+#include "../randnum/randnum.h"
 #include "RateTerm.h"
 #include "FuncTerm.h"
 #include "../basecode/SparseMatrix.h"

@@ -8,7 +8,9 @@
 **********************************************************************/
 
 #include "../basecode/header.h"
+
 #include <fstream>
+
 #include "../utility/strutil.h"
 #include "TableBase.h"
 
@@ -20,8 +22,8 @@ const Cinfo* TableBase::initCinfo()
     static ValueFinfo< TableBase, vector< double > > vec(
         "vector",
         "vector with all table entries",
-        &TableBase::setVec,
-        &TableBase::getVec
+        &TableBase::setVector,
+        &TableBase::getVector
     );
 
     static ValueFinfo< TableBase, string > plotDump(
@@ -201,7 +203,7 @@ bool isNamedPlot( const string& line, const string& plotname )
     if ( line[0] == '/' && line[1] == 'p' )
     {
         string name = line.substr( strlen( "/plotname" ) );
-        string::size_type pos = name.find_first_not_of( " 	" );
+        auto pos = name.find_first_not_of( " 	" );
         if ( pos == string::npos )
         {
             cout << "TableBase::loadXplot: Malformed plotname line '" <<
@@ -507,12 +509,12 @@ unsigned int TableBase::getVecSize() const
     return vec_.size();
 }
 
-vector< double > TableBase::getVec() const
+vector< double > TableBase::getVector() const
 {
     return vec_;
 }
 
-void TableBase::setVec( vector< double >  val )
+void TableBase::setVector( vector< double >  val )
 {
     vec_ = val;
 }
@@ -537,7 +539,7 @@ string TableBase::getPlotDump() const
 void TableBase::setPlotDump( string v )
 {
 
-    std::size_t pos = v.rfind(" ");
+    auto pos = v.rfind(" ");
     string fname = v.substr( 0, pos );
     string plotname = "plot";
     if ( pos != string::npos )

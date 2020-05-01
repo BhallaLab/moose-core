@@ -60,7 +60,8 @@ class ChannelML():
         else:
             pu.fatal("Wrong units %s exiting ..." % units)
             sys.exit(1)
-        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
+        if not moose.exists('/library'):
+            moose.Neutral('/library') 
         synname = synapseElement.attrib['name']
         if utils.neuroml_debug:
            pu.info("Loading synapse : %s into /library" % synname)
@@ -109,9 +110,11 @@ class ChannelML():
             Gfactor = 1.0
             concfactor = 1.0
         else:
-            pu.fatal("Wrong units %s. Existing" % units)
-            sys.exit(1)
-        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
+            raise RuntimeError("Wrong units %s. Existing" % units)
+
+        if not moose.exists('/library'):
+            moose.Neutral('/library')
+
         channel_name = channelElement.attrib['name']
         if utils.neuroml_debug:
            pu.info("Loading channel %s into /library" % channel_name)
@@ -226,7 +229,10 @@ class ChannelML():
             ## Getting handle to gate using the gate's path.
             gate_path = moosechannel.path + '/' + gate_full_name[ num ]
             if concdep is None:
-                moosegate = moose.HHGate( gate_path )
+                if not moose.exists(gate_path):
+                    moosegate = moose.HHGate(gate_path)
+                else:
+                    moosegate = moose.element(gate_path)
                 ## set SI values inside MOOSE
                 moosegate.min = VMIN_here*Vfactor
                 moosegate.max = VMAX_here*Vfactor
