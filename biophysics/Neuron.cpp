@@ -7,25 +7,25 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
-#include "ElementValueFinfo.h"
-#include "LookupElementValueFinfo.h"
-#include "shell/Shell.h"
-#include "shell/Wildcard.h"
+#include "../basecode/header.h"
+#include "../basecode/ElementValueFinfo.h"
+#include "../basecode/LookupElementValueFinfo.h"
+#include "../shell/Shell.h"
+#include "../shell/Wildcard.h"
 #include "ReadCell.h"
-#include "utility/Vec.h"
+#include "../utility/Vec.h"
 #include "SwcSegment.h"
 #include "Spine.h"
 #include "Neuron.h"
-#include "basecode/global.h"
+#include "../basecode/global.h"
 
-#include "muParser.h"
+#include "../builtins/MooseParser.h"
 
-class nuParser: public mu::Parser
+class nuParser: public moose::MooseParser
 {
 public:
     nuParser( const string& expr ):
-        mu::Parser(),
+        moose::MooseParser(),
         p(0.0), // geometrical path distance wound through dendrite
         g(0.0), // geometrical path distance direct from soma.
         L(0.0), // electrical distance arg
@@ -40,21 +40,23 @@ public:
         oldVal(0.0), // Original value of field, if needed.
         useOldVal( false ) // is the 'orig' field needed?
     {
-        DefineVar( "p", &p );
-        DefineVar( "g", &g );
-        DefineVar( "L", &L );
-        DefineVar( "len", &len );
-        DefineVar( "dia", &dia );
-        DefineVar( "maxP", &maxP );
-        DefineVar( "maxG", &maxG );
-        DefineVar( "maxL", &maxL );
-        DefineVar( "x", &x );
-        DefineVar( "y", &y );
-        DefineVar( "z", &z );
+        DefineVar( "p",      &p );
+        DefineVar( "g",      &g );
+        DefineVar( "L",      &L );
+        DefineVar( "len",    &len );
+        DefineVar( "dia",    &dia );
+        DefineVar( "maxP",   &maxP );
+        DefineVar( "maxG",   &maxG );
+        DefineVar( "maxL",   &maxL );
+        DefineVar( "x",      &x );
+        DefineVar( "y",      &y );
+        DefineVar( "z",      &z );
         DefineVar( "oldVal", &oldVal );
-        DefineFun( "H", nuParser::H );
+        DefineFun1( "H",     nuParser::H );
+
         if ( expr.find( "oldVal" ) != string::npos )
             useOldVal = true;
+
         SetExpr( expr );
     }
 
@@ -315,7 +317,7 @@ const Cinfo* Neuron::initCinfo()
         "The expression for the *spacing* field must evaluate to > 0 for "
         "the spine to be installed. For example, if the expresssion is\n"
         "		H(1 - L) \n"
-        "then the system will only put spines closer than "
+        "then the systemwill only put spines closer than "
         "one length constant from the soma, and zero elsewhere. \n"
         "Available spine parameters are: \n"
         "spacing, minSpacing, size, sizeDistrib "
@@ -781,7 +783,7 @@ static void setCompartmentParams(
             }
         }
     }
-    catch ( mu::Parser::exception_type& err )
+    catch ( moose::Parser::exception_type& err )
     {
         cout << err.GetMsg() << endl;
     }
@@ -807,7 +809,7 @@ static void setMechParams(
             }
         }
     }
-    catch ( mu::Parser::exception_type& err )
+    catch ( moose::Parser::exception_type& err )
     {
         cout << err.GetMsg() << endl;
     }
@@ -1141,10 +1143,29 @@ void Neuron::setChannelDistribution( const Eref& e, vector< string > v )
     vector< vector< string > > lines;
     if ( parseDistrib( lines, v ) )
     {
+		unsigned int index = 0;
+		vector< unsigned int > chanIndices;
+		vector< unsigned int > temp;
         channelDistribution_ = v;
+		// We need to ensure that Ca_concs are created before any channels
+		// since the channels may want to connect to them.
         for ( unsigned int i = 0; i < lines.size(); ++i )
         {
-            vector< string >& temp = lines[i];
+    		Id proto( "/library/" + lines[i][0] );
+    		if ( proto != Id() ) {
+				if ( proto.element()->cinfo()->isA( "CaConcBase" ) ) {
+					chanIndices.push_back( i );
+				} else {
+					temp.push_back( i );
+				}
+			}
+		}
+		chanIndices.insert( chanIndices.end(), temp.begin(), temp.end() );
+		assert( chanIndices.size() == lines.size() );
+
+        for ( unsigned int i = 0; i < lines.size(); ++i )
+        {
+            vector< string >& temp = lines[chanIndices[i]];
             vector< ObjId > elist;
             vector< double > val;
             buildElist( e, temp, elist, val );
@@ -1532,7 +1553,7 @@ void Neuron::evalExprForElist( const vector< ObjId >& elist,
             valIndex += nuParser::numVal;
         }
     }
-    catch ( mu::Parser::exception_type& err )
+    catch ( moose::Parser::exception_type& err )
     {
         cout << err.GetMsg() << endl;
     }
@@ -1891,9 +1912,9 @@ void Neuron::makeSpacingDistrib( const vector< ObjId >& elist,
             }
         }
     }
-    catch ( mu::Parser::exception_type& err )
+    catch ( moose::Parser::exception_type& err )
     {
-        cout << err.GetMsg() << endl;
+        cerr << err.GetMsg() << endl;
     }
 }
 
@@ -1935,7 +1956,7 @@ static void makeAngleDistrib ( const vector< ObjId >& elist,
                 theta[k] = angle;
         }
     }
-    catch ( mu::Parser::exception_type& err )
+    catch ( moose::Parser::exception_type& err )
     {
         cout << err.GetMsg() << endl;
     }
@@ -1977,7 +1998,7 @@ static void makeSizeDistrib ( const vector< ObjId >& elist,
                 size[k] = sz;
         }
     }
-    catch ( mu::Parser::exception_type& err )
+    catch ( moose::Parser::exception_type& err )
     {
         cout << err.GetMsg() << endl;
     }

@@ -46,7 +46,7 @@
 // Code:
 
 #ifdef USE_HDF5
-#include "header.h"
+#include "../basecode/header.h"
 #include "hdf5.h"
 
 #include "NSDFWriter.h"
@@ -98,7 +98,8 @@ void InputVariable::setOwner( NSDFWriter * owner)
 
 void InputVariable::epSetValue( const Eref& eref, double value)
 {
-    if (owner_){
+    if (owner_)
+    {
         owner_->setInput(eref.fieldIndex(), value);
     }
 }

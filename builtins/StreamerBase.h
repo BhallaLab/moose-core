@@ -28,6 +28,8 @@ using namespace std;
 
 class TableBase;
 
+enum OpenMode {WRITE, APPEND, WRITE_STR, APPEND_STR, WRITE_BIN, APPEND_BIN};
+
 class StreamerBase : public TableBase
 {
 
@@ -63,7 +65,7 @@ public:
      */
     static void writeToOutFile(
             const string& filepath, const string& format
-            , const string& openmode
+            , const OpenMode openmode
             , const vector<double>& data
             , const vector<string>& columns
             );
@@ -72,7 +74,7 @@ public:
      * @brief Write data to csv file. See the documentation of writeToOutfile
      * for details.
      */
-    static void writeToCSVFile( const string& filepath, const string& openmode
+    static void writeToCSVFile( const string& filepath, const OpenMode openMode
             , const vector<double>& data, const vector<string>& columns
             );
 
@@ -80,11 +82,22 @@ public:
      * @brief  Write to NPY format. See the documentation of
      * writeToOutfile for more details.
      */
-    static void writeToNPYFile( const string& filepath, const string& openmode
+    static void writeToNPYFile( const string& filepath, const OpenMode openmode
             , const vector<double>& data
             , const vector<string>& columns
             );
 
+
+    /* --------------------------------------------------------------------------*/
+    /**
+     * @Synopsis  Return a csv representation of a vector.
+     *
+     * @Param ys vector of double.
+     *
+     * @Returns CSV string.
+     */
+    /* ----------------------------------------------------------------------------*/
+    string vectorToCSV( const vector<double>& ys, const string& fmt  );
 
 private:
 

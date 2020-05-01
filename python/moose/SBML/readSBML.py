@@ -13,10 +13,24 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Thu May 13 10:19:00 2016(+0530)
 Version
-Last-Updated: Fri May 21 11:21:00 2018(+0530)
+Last-Updated: Fri Mar 20 1:30:00 2020(+0530)
           By:HarshaRani
 **********************************************************************/
+2010:
+Mar 04: - Enzyme-cplx reactant/product's based on stoichiometry number of connection are made.
+Jan 09: - reading channel back from MMenz 
+2019:
+Jun 06: - both compartment name and Id is mapped to the values in comptSbmlidMooseIdMap
+May 23: - checking for integer in Assignment expr
+Jan 19: - validator flag is set 'on' from True
+         - groupname if missing in the sbml file then groupid is taken, 
+         if both are missing then its not a valide sbml file
 2018
+Dec 3:  - reading motor and diffconstant from pool
+Nov 30: - groups and subgroups are read from xml to moose 
+Nov 19: - reading and creating CylMesh and EndoMesh if specified in the Annotation field in compartment
+          definition, also checking if EndoMesh missing/wrong surround compartment 
+Oct 26: - validator can be switchedoff by passing validate="off" while readSBML files
 May 18: - cleanedup and connected cplx pool to correct parent enzyme 
 Jan 6:  - only if valid model exists, then printing the no of compartment,pool,reaction etc
         - at reaction level a check made to see if path exist while creating a new reaction
@@ -77,15 +91,14 @@ try:
 except ImportError:
     pass
 
-def mooseReadSBML(filepath, loadpath, solver="ee"):
+def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
     """Load SBML model 
     """
     global foundLibSBML_
     if not foundLibSBML_:
-        print('No python-libsbml found.'
-            '\nThis module can be installed by following command in terminal:'
-            '\n\t easy_install python-libsbml'
-            '\n\t apt-get install python-libsbml'
+        print('[WARN] No python-libsbml found.'
+            '\nThis module can be installed by using `pip` in terminal:'
+            '\n\t $ pip install python-libsbml --user'
             )
         return moose.element('/')
 
@@ -93,21 +106,25 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
         print('%s is not found ' % filepath)
         return moose.element('/')
 
-
     with open(filepath, "r") as filep:
         loadpath  = loadpath[loadpath.find('/')+1:]
         loaderror = None
+        errorFlag = ""
         filep = open(filepath, "r")
         document = libsbml.readSBML(filepath)
         tobecontinue = False
-        tobecontinue = validateModel(document)
+        if validate == "on":
+            tobecontinue,errorFlag = validateModel(document)
+        else:
+            tobecontinue = True
+
         if tobecontinue:
             level = document.getLevel()
             version = document.getVersion()
-            print(("\n" + "File: " + filepath + " (Level " +
-                   str(level) + ", version " + str(version) + ")"))
+            print("\nFile: " + filepath + " (Level " +
+                   str(level) + ", version " + str(version) + ")")
             model = document.getModel()
-            if (model is None):
+            if model is None:
                 print("No model present.")
                 return moose.element('/')
             else:
@@ -118,6 +135,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                     loadpath ='/'+loadpath
                     baseId = moose.Neutral(loadpath)
                     basePath = baseId
+        
                     # All the model will be created under model as
                     # a thumbrule
                     basePath = moose.Neutral(baseId.path)
@@ -134,14 +152,16 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                     groupInfo  = {}
                     funcDef = {}
                     modelAnnotaInfo = {}
-                    comptSbmlidMooseIdMap = {}
+                    #comptSbmlidMooseIdMap = {}
+                    comptSbmlidMooseIdMap = dict()
                     globparameterIdValue = {}
 
                     mapParameter(model, globparameterIdValue)
-                    errorFlag = createCompartment(
+                    msgCmpt = ""
+                    errorFlag,msgCmpt = createCompartment(
                         basePath, model, comptSbmlidMooseIdMap)
 
-                    groupInfo = checkGroup(basePath,model)
+                    groupInfo = checkGroup(basePath,model,comptSbmlidMooseIdMap)
                     funcDef = checkFuncDef(model)
                     if errorFlag:
                         specInfoMap = {}
@@ -155,7 +175,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                                     model, specInfoMap, modelAnnotaInfo, globparameterIdValue,funcDef,groupInfo)
                                 if len(moose.wildcardFind(moose.element(loadpath).path+"/##[ISA=ReacBase],/##[ISA=EnzBase]")) == 0:
                                     errorFlag = False
-                                    noRE = ("Atleast one reaction should be present ")
+                                    noRE = ("Atleast one reaction should be present to display in the widget ")
                         getModelAnnotation(
                             model, baseId, basePath)
                     if not errorFlag:
@@ -164,42 +184,45 @@ def mooseReadSBML(filepath, loadpath, solver="ee"):
                         # as while reading in GUI the model will show up untill
                         # built which is not correct print "Deleted rest of the
                         # model"
-                        print((" model: " + str(model)))
-                        print(("functionDefinitions: " +
-                            str(model.getNumFunctionDefinitions())))
-                        print(("    unitDefinitions: " +
-                            str(model.getNumUnitDefinitions())))
-                        print(("   compartmentTypes: " +
-                               str(model.getNumCompartmentTypes())))
-                        print(("        specieTypes: " +
-                               str(model.getNumSpeciesTypes())))
-                        print(("       compartments: " +
-                               str(model.getNumCompartments())))
-                        print(("            species: " +
-                               str(model.getNumSpecies())))
-                        print(("         parameters: " +
-                               str(model.getNumParameters())))
-                        print((" initialAssignments: " +
-                               str(model.getNumInitialAssignments())))
-                        print(("              rules: " +
-                               str(model.getNumRules())))
-                        print(("        constraints: " +
-                               str(model.getNumConstraints())))
-                        print(("          reactions: " +
-                               str(model.getNumReactions())))
-                        print(("             events: " +
-                               str(model.getNumEvents())))
+                        print(" model: " + str(model))
+                        print("functionDefinitions: " +
+                            str(model.getNumFunctionDefinitions()))
+                        print("    unitDefinitions: " +
+                            str(model.getNumUnitDefinitions()))
+                        print("   compartmentTypes: " +
+                               str(model.getNumCompartmentTypes()))
+                        print("        specieTypes: " +
+                               str(model.getNumSpeciesTypes()))
+                        print("       compartments: " +
+                               str(model.getNumCompartments()))
+                        print("            species: " +
+                               str(model.getNumSpecies()))
+                        print("         parameters: " +
+                               str(model.getNumParameters()))
+                        print(" initialAssignments: " +
+                               str(model.getNumInitialAssignments()))
+                        print("              rules: " +
+                               str(model.getNumRules()))
+                        print("        constraints: " +
+                               str(model.getNumConstraints()))
+                        print("          reactions: " +
+                               str(model.getNumReactions()))
+                        print("             events: " +
+                               str(model.getNumEvents()))
                         print("\n")
                         moose.delete(basePath)
                         loadpath = moose.Shell('/')
-            #return basePath, ""
-            loaderror = msgRule+msgReac+noRE
+
+            loaderror = msgCmpt+str(msgRule)+msgReac+noRE
             if loaderror != "":
-                loaderror = loaderror +" to display in the widget"
+                loaderror = loaderror
             return moose.element(loadpath), loaderror
         else:
-            print("Validation failed while reading the model.")
-            return moose.element('/'), "This document is not valid SBML"
+            print("Validation failed while reading the model.\n"+errorFlag)
+            if errorFlag != "":
+                return moose.element('/'), errorFlag
+            else:
+                return moose.element('/'), "This document is not a valid SBML"
 
 def checkFuncDef(model):
     funcDef = {}
@@ -219,7 +242,8 @@ def checkFuncDef(model):
         if foundbvar and foundfuncMathML:
             funcDef[f.getName()] = {'bvar':bvar, "MathML": fmath.getRightChild()}
     return funcDef
-def checkGroup(basePath,model):
+
+def checkGroup(basePath,model,comptSbmlidMooseIdMap):
     groupInfo = {}
     modelAnnotaInfo = {}
     if model.getPlugin("groups") != None:
@@ -227,32 +251,47 @@ def checkGroup(basePath,model):
         modelgn = mplugin.getNumGroups()
         for gindex in range(0, mplugin.getNumGroups()):
             p = mplugin.getGroup(gindex)
+            grpName = ""
             groupAnnoInfo = {}
             groupAnnoInfo = getObjAnnotation(p, modelAnnotaInfo)
+            
             if groupAnnoInfo != {}:
-                if moose.exists(basePath.path+'/'+groupAnnoInfo["Compartment"]):
-                    if not moose.exists(basePath.path+'/'+groupAnnoInfo["Compartment"]+'/'+p.getId()):
-                        moosegrp = moose.Neutral(basePath.path+'/'+groupAnnoInfo["Compartment"]+'/'+p.getId())
+                if moose.exists(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name):
+                    groupName = p.getName()
+                    if groupName == " ":
+                        groupName = p.getId()
+                    if "Group" in groupAnnoInfo:
+                        if moose.exists(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name+'/'+groupAnnoInfo["Group"]):
+                            if moose.exists(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name+'/'+groupAnnoInfo["Group"]+'/'+groupName):
+                                moosegrp = moose.element(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name+'/'+groupAnnoInfo["Group"]+'/'+groupName)
+                            else:
+                                moosegrp = moose.Neutral(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name+'/'+groupAnnoInfo["Group"]+'/'+groupName)
+                        else:
+                            moose.Neutral(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name+'/'+groupAnnoInfo["Group"])
+                            if moose.exists(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name+'/'+groupAnnoInfo["Group"]+'/'+groupName):
+                                moosegrp = moose.element(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name+'/'+groupAnnoInfo["Group"]+'/'+groupName)
+                            else:
+                                moosegrp = moose.Neutral(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name+'/'+groupAnnoInfo["Group"]+'/'+groupName)
                     else:
-                        moosegrp = moose.element(basePath.path+'/'+groupAnnoInfo["Compartment"]+'/'+p.getId())
+                        if not moose.exists(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name+'/'+groupName):
+                            moosegrp = moose.Neutral(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name+'/'+groupName)
+                        else:
+                            moosegrp = moose.element(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name+'/'+groupName)
+                    
                     moosegrpinfo = moose.Annotator(moosegrp.path+'/info')
                     moosegrpinfo.color = groupAnnoInfo["bgColor"]
-            else:
-                print ("Compartment not found")
-
+                else:
+                    print ("Group's compartment not found in xml file")
             if p.getKind() == 2:
                 if p.getId() not in groupInfo:
-                    #groupInfo[p.getId()]
+                    memlists = []
                     for gmemIndex in range(0,p.getNumMembers()):
                         mem = p.getMember(gmemIndex)
-
-                        if p.getId() in groupInfo:
-                            groupInfo[p.getId()].append(mem.getIdRef())
-                        else:
-                            groupInfo[p.getId()] =[mem.getIdRef()]
+                        memlists.append(mem.getIdRef())
+                    groupInfo[p.getId()] = {"mpath":moosegrp, "splist":memlists}
     return groupInfo
-def setupEnzymaticReaction(enz, groupName, enzName,
-                           specInfoMap, modelAnnotaInfo,deletcplxMol):
+
+def setupEnzymaticReaction(enz, groupName, enzName, specInfoMap, modelAnnotaInfo,deletcplxMol):
     enzPool = (modelAnnotaInfo[groupName]["enzyme"])
     enzPool = str(idBeginWith(enzPool))
     enzParent = specInfoMap[enzPool]["Mpath"]
@@ -268,17 +307,42 @@ def setupEnzymaticReaction(enz, groupName, enzName,
     prdlist = (modelAnnotaInfo[groupName]["product"])
     deletcplxMol.append(complx.path)
     complx = complx1
+    
+    enz_sublist = {}
+    enz_prdlist = {}
+    #getting the reference of enz_complex_formation to get substrate and its stoichiometry    
+    enz_cplx_form = (modelAnnotaInfo[groupName]["enz_id_s1"])
+    for tr in range(0,enz_cplx_form.getNumReactants()):
+        sp = enz_cplx_form.getReactant(tr)
+        spspieces = sp.getSpecies()
+        enz_sublist[spspieces] = int(sp.getStoichiometry())
+
+    for tr in range(0,enz.getNumProducts()):
+        sp = enz.getProduct(tr)
+        spspieces = sp.getSpecies()
+        enz_prdlist[spspieces] = int(sp.getStoichiometry())
+
     for si in range(0, len(sublist)):
         sl = sublist[si]
         sl = str(idBeginWith(sl))
         mSId = specInfoMap[sl]["Mpath"]
-        moose.connect(enzyme_, "sub", mSId, "reac")
+        substoic = 1
+        if sl in enz_sublist:
+            substoic = enz_sublist[sl]
+        
+        for sls in range(0,substoic):
+            moose.connect(enzyme_, "sub", mSId, "reac")
+
 
     for pi in range(0, len(prdlist)):
         pl = prdlist[pi]
         pl = str(idBeginWith(pl))
         mPId = specInfoMap[pl]["Mpath"]
-        moose.connect(enzyme_, "prd", mPId, "reac")
+        prdstoic = 1
+        if pl in enz_prdlist:
+            prdstoic = enz_prdlist[pl]
+        for pls in range(0,prdstoic):
+            moose.connect(enzyme_, "prd", mPId, "reac")
 
     if (enz.isSetNotes):
         pullnotes(enz, enzyme_)
@@ -297,16 +361,16 @@ def addSubPrd(reac, reName, type, reactSBMLIdMooseId, specInfoMap):
                 rctMapIter[sp] = rct.getStoichiometry()
             else:
                 rctMapIter[sp] = 1
-            if rct.getStoichiometry() > 1:
-                pass
-                # print " stoich ",reac.name,rct.getStoichiometry()
             noplusStoichsub = noplusStoichsub + rct.getStoichiometry()
         for key, value in list(rctMapIter.items()):
             key = str(idBeginWith(key))
             src = specInfoMap[key]["Mpath"]
             des = reactSBMLIdMooseId[reName]["MooseId"]
             for s in range(0, int(value)):
-                moose.connect(des, 'sub', src, 'reac', 'OneToOne')
+                if (reactSBMLIdMooseId[reName]["MooseId"]).className == "ConcChan":
+                    moose.connect(des, 'in', src, 'reac', 'OneToOne')
+                else:
+                    moose.connect(des, 'sub', src, 'reac', 'OneToOne')
         addSubinfo = {"nSub": noplusStoichsub}
         reactSBMLIdMooseId[reName].update(addSubinfo)
 
@@ -321,9 +385,6 @@ def addSubPrd(reac, reName, type, reactSBMLIdMooseId, specInfoMap):
             else:
                 rctMapIter[sp] = 1
             
-            if rct.getStoichiometry() > 1:
-                pass
-                # print " stoich prd",reac.name,rct.getStoichiometry()
             noplusStoichprd = noplusStoichprd + rct.getStoichiometry()
 
         for key, values in list(rctMapIter.items()):
@@ -332,7 +393,10 @@ def addSubPrd(reac, reName, type, reactSBMLIdMooseId, specInfoMap):
             key = parentSp = str(idBeginWith(key))
             des = specInfoMap[key]["Mpath"]
             for i in range(0, int(values)):
-                moose.connect(src, 'prd', des, 'reac', 'OneToOne')
+                if (reactSBMLIdMooseId[reName]["MooseId"]).className == "ConcChan":
+                    moose.connect(src, 'out', des, 'reac', 'OneToOne')
+                else:
+                    moose.connect(src, 'prd', des, 'reac', 'OneToOne')
         addPrdinfo = {"nPrd": noplusStoichprd}
         reactSBMLIdMooseId[reName].update(addPrdinfo)
 
@@ -398,6 +462,36 @@ def getModelAnnotation(obj, baseId, basepath):
                                             tablelistname.append(fullPath)
                                             moose.connect(tab, "requestOut", plotSId, "getConc")
 
+def getCmptAnnotation(obj):
+    annotateMap = {}
+    if (obj.getAnnotation() is not None):
+        annoNode = obj.getAnnotation()
+        for ch in range(0, annoNode.getNumChildren()):
+            childNode = annoNode.getChild(ch)
+            if (childNode.getPrefix() == "moose" and (childNode.getName() in["CompartmentAnnotation"])):
+                sublist = []
+                for gch in range(0, childNode.getNumChildren()):
+                    grandChildNode = childNode.getChild(gch)
+                    nodeName = grandChildNode.getName()
+                    nodeValue = ""
+                    if (grandChildNode.getNumChildren() == 1):
+                        nodeValue = grandChildNode.getChild(0).toXMLString()
+                    else:
+                        print(
+                            "Error: expected exactly ONE child of ", nodeName)
+                    if nodeName == "Mesh":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "numDiffCompts":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "isMembraneBound":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "totLength":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "diffLength":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "surround":
+                        annotateMap[nodeName] = nodeValue
+    return annotateMap
 
 def getObjAnnotation(obj, modelAnnotationInfo):
     name = obj.getId()
@@ -431,6 +525,14 @@ def getObjAnnotation(obj, modelAnnotationInfo):
                     if nodeName == "Group":
                         annotateMap[nodeName] = nodeValue
                     if nodeName == "Compartment":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "diffConstant":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "motorConstant":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "Channel":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "Permeability":
                         annotateMap[nodeName] = nodeValue
     return annotateMap
 
@@ -503,7 +605,8 @@ def getEnzAnnotation(obj, modelAnnotaInfo, rev,
                      "stage": list(annotateMap["stage"])[0],
                      "substrate": sublist,
                      "k1": k1,
-                     "k2": k2
+                     "k2": k2,
+                     "enz_id_s1":obj
                      }
                 )
             else:
@@ -512,7 +615,8 @@ def getEnzAnnotation(obj, modelAnnotaInfo, rev,
                     "stage": list(annotateMap["stage"])[0],
                     "substrate": sublist,
                     "k1": k1,
-                    "k2": k2
+                    "k2": k2,
+                    "enz_id_s1":obj
                     #"group" : list(annotateMap["Group"])[0],
                     #"xCord" : list(annotateMap["xCord"])[0],
                     #"yCord" : list(annotateMap["yCord"]) [0]
@@ -556,6 +660,7 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,fun
 
     for ritem in range(0, model.getNumReactions()):
         reactionCreated = False
+        channelCreated = False
         groupName = ""
         rName = ""
         rId = ""
@@ -565,12 +670,15 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,fun
         reacAnnoInfo = getObjAnnotation(reac, modelAnnotaInfo)
         # if "Group" in reacAnnoInfo:
         #     group = reacAnnoInfo["Group"]
-
         if (reac.isSetId()):
             rId = reac.getId()
-            groups = [k for k, v in groupInfo.items() if rId in v]
-            if groups:
-                group = groups[0]
+            #groups = [k for k, v in groupInfo.items() if rId in v]
+            for k,v in groupInfo.items():
+                if rId in v["splist"]:
+                    group = v["mpath"]
+
+            # if groups:
+            #     group = groups[0]
         if (reac.isSetName()):
             rName = reac.getName()
             rName = rName.replace(" ", "_space_")
@@ -586,7 +694,6 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,fun
         if (reac.getAnnotation() is not None):
             groupName = getEnzAnnotation(
                 reac, modelAnnotaInfo, rev, globparameterIdValue, specInfoMap,funcDef)
-
         if (groupName != "" and list(
                 modelAnnotaInfo[groupName]["stage"])[0] == 3):
             reaction_, reactionCreated = setupEnzymaticReaction(
@@ -617,7 +724,10 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,fun
                         reacInfo.textColor = v
 
         elif(groupName == ""):
-
+            channelfound = False
+            for k, v in list(reacAnnoInfo.items()):
+                if k == "Channel":
+                    channelfound = True
             numRcts = reac.getNumReactants()
             numPdts = reac.getNumProducts()
             nummodifiers = reac.getNumModifiers()
@@ -626,11 +736,17 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,fun
             #     reactionCreated = False
 
             if not (numRcts and numPdts):
-                print("Warning: %s" %(rName)," : Substrate or Product is missing, we will be skiping creating this reaction in MOOSE")
+                #print("Warning: %s" %(rName)," : Substrate or Product is missing, we will be skiping creating this reaction in MOOSE")
+                print("Warning: %s" %(rName)," : Substrate or Product is missing, we will be skiping creating this %s" %("reaction" if not channelfound  else "Channel") +" in MOOSE")
                 reactionCreated = False
             elif (reac.getNumModifiers() > 0):
-                reactionCreated, reaction_ = setupMMEnzymeReaction(
-                    reac, rName, specInfoMap, reactSBMLIdMooseId, modelAnnotaInfo, model, globparameterIdValue)
+                if not channelfound:
+                    reactionCreated, reaction_ = setupMMEnzymeReaction(
+                        reac, rName, specInfoMap, reactSBMLIdMooseId, modelAnnotaInfo, model, globparameterIdValue)
+                else:
+                    channelCreated, channel_ = setupConcChannel(reac,rName,specInfoMap,reactSBMLIdMooseId, modelAnnotaInfo, model, globparameterIdValue)
+                    reactSBMLIdMooseId[rName] = {
+                        "MooseId": channel_}
             # elif (reac.getNumModifiers() > 0):
             #     reactionCreated = setupMMEnzymeReaction(reac,rName,specInfoMap,reactSBMLIdMooseId,modelAnnotaInfo,model,globparameterIdValue)
             #     reaction_ = reactSBMLIdMooseId['classical']['MooseId']
@@ -644,18 +760,18 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,fun
                     sp = react.getSpecies()
                     sp = str(idBeginWith(sp))
                     speCompt = specInfoMap[sp]["comptId"].path
-
                     if group:
-                        if moose.exists(speCompt+'/'+group):
-                            speCompt = speCompt+'/'+group
-                        else:
-                            speCompt = (moose.Neutral(speCompt+'/'+group)).path
+                        speCompt = group.path
+                        # if moose.exists(speCompt+'/'+group):
+                        #     speCompt = speCompt+'/'+group
+                        # else:
+                        #     speCompt = (moose.Neutral(speCompt+'/'+group)).path
                     if moose.exists(speCompt + '/' + rName):
                         rName =rId
                     reaction_ = moose.Reac(speCompt + '/' + rName)
                     reactionCreated = True
                     reactSBMLIdMooseId[rName] = {
-                        "MooseId": reaction_, "className ": "reaction"}
+                        "MooseId": reaction_}
             elif (numPdts):
                 # In moose, reactions compartment are decided from first Substrate compartment info
                 # substrate is missing then check for product
@@ -667,8 +783,11 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,fun
                     reaction_ = moose.Reac(speCompt + '/' + rName)
                     reactionCreated = True
                     reactSBMLIdMooseId[rId] = {
-                        "MooseId": reaction_, "className": "reaction"}
-            if reactionCreated:
+                        "MooseId": reaction_}
+            if reactionCreated or channelCreated:
+                if channelCreated:
+                    reaction_ = channel_
+
                 if (reac.isSetNotes):
                     pullnotes(reac, reaction_)
                     reacAnnoInfo = {}
@@ -711,6 +830,8 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,fun
                         elif reaction_.className == "MMenz":
                             reaction_.kcat = kfvalue
                             reaction_.Km = kbvalue
+                        elif reaction_.className == "ConcChan":
+                            reaction_.permeability = kfvalue
     for l in deletecplxMol:
         if moose.exists(l):
             moose.delete(moose.element(l))
@@ -858,23 +979,17 @@ def unitsforRates(model):
 def getMembers(node, ruleMemlist):
     msg = ""
     found = True
+
     if node == None:
         pass
+
     elif node.getType() == libsbml.AST_POWER:
         pass
     
     elif node.getType() == libsbml.AST_FUNCTION:
-        #print " function"
-        #funcName = node.getName()
-        #funcValue = []
-        #functionfound = False
         for i in range(0,node.getNumChildren()):
-            #functionfound = True
-            #print " $$ ",node.getChild(i).getName()
-            #funcValue.append(node.getChild(i).getName())
             getMembers(node.getChild(i),ruleMemlist)
-        #funcKL[node.getName()] = funcValue
-
+    
     elif node.getType() == libsbml.AST_PLUS:
         #print " plus ", node.getNumChildren()
         if node.getNumChildren() == 0:
@@ -918,7 +1033,6 @@ def getMembers(node, ruleMemlist):
         for i in range(1, node.getNumChildren()):
             # Multiplication
             getMembers(node.getChild(i), ruleMemlist)
-
     elif node.getType() == libsbml.AST_LAMBDA:
         #In lambda get Bvar values and getRighChild which will be kineticLaw
         if node.getNumChildren() == 0:
@@ -935,9 +1049,15 @@ def getMembers(node, ruleMemlist):
         for i in range (0,node.getNumBvars()):
             ruleMemlist.append(node.getChild(i).getName())
         #funcD[funcName] = {"bvar" : bvar, "MathML":node.getRightChild()}
+    elif node.getType() == libsbml.AST_INTEGER:
+        #value is constant
+        #ruleMemlist.append(node.getValue())
+        pass
+
     elif node.getType() == libsbml.AST_FUNCTION_POWER:
         msg = msg + "\n moose is yet to handle \""+node.getName() + "\" operator"
         found = False
+    
     elif node.getType() == libsbml.AST_FUNCTION_PIECEWISE:
         #print " piecewise ", libsbml.formulaToL3String(node)
         msg = msg + "\n moose is yet to handle \""+node.getName() + "\" operator"
@@ -953,7 +1073,6 @@ def getMembers(node, ruleMemlist):
             getMembers(rchild, ruleMemlist)
         '''
     else:
-        #print(" this case need to be handled", node.getName())
         msg = msg + "\n moose is yet to handle \""+node.getName() + "\" operator"
         found = False
     # if len(ruleMemlist) > 2:
@@ -1030,7 +1149,7 @@ def createRules(model, specInfoMap, globparameterIdValue):
                                     funcId.numVars = numVars + 1
 
                                 elif not(i in globparameterIdValue):
-                                    msg = msg + "check the variable name in mathML, this object neither pool or a constant \"" + i+"\" in assignmentRule " +rule.getVariable()
+                                    msg = msg + "check the variable name in mathML, this object neither pool or a constant \"" + str(i)+"\" in assignmentRule " +rule.getVariable()
 
                                 exp = rule.getFormula()
                                 exprOK = True
@@ -1038,7 +1157,6 @@ def createRules(model, specInfoMap, globparameterIdValue):
                             for mem in ruleMemlist:
                                 if (mem in specInfoMap):
                                     #exp1 = exp.replace(mem, str(speFunXterm[mem]))
-                                    #print " mem ",mem, "$ ", speFunXterm[mem], "$$ ",exp
                                     exp1 = re.sub(r'\b%s\b'% (mem), speFunXterm[mem], exp)
                                     exp = exp1
                                 elif(mem in globparameterIdValue):
@@ -1088,7 +1206,6 @@ def pullnotes(sbmlId, mooseId):
             objInfo = moose.element(mooseId.path + '/info')
         objInfo.notes = notes
 
-
 def createSpecies(basePath, model, comptSbmlidMooseIdMap,
                   specInfoMap, modelAnnotaInfo,groupInfo):
     # ToDo:
@@ -1108,10 +1225,13 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
 
             sName = None
             sId = spe.getId()
-
-            groups = [k for k, v in groupInfo.items() if sId in v]
-            if groups:
-                group = groups[0]
+            group = ""
+            #groups = [k for k, v in groupInfo.items() if sId in v]
+            for k,v in groupInfo.items():
+                if sId in v["splist"]:
+                    group = v["mpath"]
+            # if groups:
+            #     group = groups[0]
             if spe.isSetName():
                 sName = spe.getName()
                 sName = sName.replace(" ", "_space_")
@@ -1129,10 +1249,11 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
             # "false": is {unit of amount}/{unit of size} (i.e., concentration or density).
             # "true": then the value is interpreted as having a unit of amount only.
             if group:
-                if moose.exists(comptEl+'/'+group):
-                    comptEl = comptEl+'/'+group
-                else:
-                    comptEl = (moose.Neutral(comptEl+'/'+group)).path
+                comptEl = group.path
+                # if moose.exists(comptEl+'/'+group):
+                #     comptEl = comptEl+'/'+group
+                # else:
+                #     comptEl = (moose.Neutral(comptEl+'/'+group)).path
             if (boundaryCondition):
                 poolId = moose.BufPool(comptEl + '/' + sName)
             else:
@@ -1145,7 +1266,7 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
                 poolInfo = moose.Annotator(poolId.path + '/info')
             else:
                 poolInfo = moose.element(poolId.path + '/info')
-            
+
             for k, v in list(specAnnoInfo.items()):
                 if k == 'xCord':
                     poolInfo.x = float(v)
@@ -1153,9 +1274,13 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
                     poolInfo.y = float(v)
                 elif k == 'bgColor':
                     poolInfo.color = v
-                elif k == 'Color':
+                elif k == 'textColor':
                     poolInfo.textColor = v
-                    
+                elif k == 'diffConstant':
+                    poolId.diffConst = float(v)
+                elif k == 'motorConstant':
+                    poolId.motorConst = float(v)
+            
             specInfoMap[sId] = {
                 "Mpath": poolId,
                 "const": constant,
@@ -1215,7 +1340,6 @@ def createSpecies(basePath, model, comptSbmlidMooseIdMap,
                     return (False,"Invalid SBML: Either initialConcentration or initialAmount must be set or it should be found in assignmentRule but non happening for ",sName)
 
     return (True," ")
-
 
 def transformUnit(unitForObject, hasonlySubUnit=False):
     # print "unit
@@ -1297,10 +1421,12 @@ def transformUnit(unitForObject, hasonlySubUnit=False):
 def createCompartment(basePath, model, comptSbmlidMooseIdMap):
     # ToDoList : Check what should be done for the spaitialdimension is 2 or
     # 1, area or length
-    #print " createCompartment ",model.getNumCompartments()
+    cmptAnnotaInfo = {}
+    
     if not(model.getNumCompartments()):
-        return False, "Model has no compartment, atleast one compartment should exist to display the widget"
+        return False, "Model has no compartment, atleast one compartment should exist to display in the widget"
     else:
+        endo_surr = {}
         for c in range(0, model.getNumCompartments()):
             compt = model.getCompartment(c)
             # print("Compartment " + str(c) + ": "+ UnitDefinition.printUnits(compt.getDerivedUnitDefinition()))
@@ -1329,19 +1455,62 @@ def createCompartment(basePath, model, comptSbmlidMooseIdMap):
                 unitfactor, unitset, unittype = transformUnit(compt)
 
             else:
-                print(
-                    " Currently we don't deal with spatial Dimension less than 3 and unit's area or length")
-                return False
+                return False," Currently we don't deal with spatial Dimension less than 3 and unit's area or length" 
 
             if not(name):
                 name = sbmlCmptId
+            cmptAnnotaInfo = {}
+            cmptAnnotaInfo = getCmptAnnotation(compt)
+            if "Mesh" in cmptAnnotaInfo.keys():
+                if cmptAnnotaInfo["Mesh"] == "CubeMesh" or cmptAnnotaInfo["Mesh"] == "NeuroMesh":
+                    mooseCmptId = moose.CubeMesh(basePath.path + '/' + name)
+                
+                elif cmptAnnotaInfo["Mesh"] == "CylMesh":
+                    mooseCmptId = moose.CylMesh(basePath.path + '/' + name)
+                    ln = (float(cmptAnnotaInfo["totLength"])/float(cmptAnnotaInfo["diffLength"]))*float(cmptAnnotaInfo["diffLength"])
+                    mooseCmptId.x1 = ln
+                    mooseCmptId.diffLength = float(cmptAnnotaInfo["diffLength"])
+                
+                elif cmptAnnotaInfo["Mesh"] == "EndoMesh":
+                    mooseCmptId = moose.EndoMesh(basePath.path + '/' + name)
+                    endo_surr[sbmlCmptId] = cmptAnnotaInfo["surround"]
 
-            mooseCmptId = moose.CubeMesh(basePath.path + '/' + name)
+                if cmptAnnotaInfo["isMembraneBound"] == 'True':
+                    mooseCmptId.isMembraneBound = bool(cmptAnnotaInfo["isMembraneBound"])
+            else:
+                mooseCmptId = moose.CubeMesh(basePath.path+'/'+name)
+            
             mooseCmptId.volume = (msize * unitfactor)
-            comptSbmlidMooseIdMap[sbmlCmptId] = {
-                "MooseId": mooseCmptId, "spatialDim": dimension, "size": msize}
-    return True
+            #both compartment name and Id is mapped to the values
+            comptSbmlidMooseIdMap.update(dict.fromkeys([sbmlCmptId,name], {"MooseId": mooseCmptId, "spatialDim": dimension, "size": msize}))
+            #comptSbmlidMooseIdMap[sbmlCmptId] = {
+            #    "MooseId": mooseCmptId, "spatialDim": dimension, "size": msize}
+        for key,value in endo_surr.items():
+            if value in comptSbmlidMooseIdMap:
+                endomesh = comptSbmlidMooseIdMap[key]["MooseId"]
+                endomesh.surround = comptSbmlidMooseIdMap[value]["MooseId"]
+            elif key in comptSbmlidMooseIdMap:
+                del(comptSbmlidMooseIdMap[key])
+                return False," EndoMesh's surrounding compartment missing or wrong deleting the compartment check the file"
+    return True,""
 
+def setupConcChannel(reac, rName, specInfoMap, reactSBMLIdMooseId,
+                          modelAnnotaInfo, model, globparameterIdValue):
+    msg = ""
+    errorFlag = ""
+    numRcts = reac.getNumReactants()
+    numPdts = reac.getNumProducts()
+    nummodifiers = reac.getNumModifiers()
+    if (nummodifiers):
+        parent = reac.getModifier(0)
+        parentSp = parent.getSpecies()
+        parentSp = str(idBeginWith(parentSp))
+        enzParent = specInfoMap[parentSp]["Mpath"]
+        ConcChan = moose.ConcChan(enzParent.path + '/' + rName)
+        moose.connect(enzParent, "nOut", ConcChan, "setNumChan")
+        channelCreated = True
+        if channelCreated:
+            return (channelCreated,ConcChan)
 
 def setupMMEnzymeReaction(reac, rName, specInfoMap, reactSBMLIdMooseId,
                           modelAnnotaInfo, model, globparameterIdValue):
@@ -1358,7 +1527,7 @@ def setupMMEnzymeReaction(reac, rName, specInfoMap, reactSBMLIdMooseId,
         MMEnz = moose.MMenz(enzParent.path + '/' + rName)
         moose.connect(enzParent, "nOut", MMEnz, "enzDest")
         reactionCreated = True
-        reactSBMLIdMooseId[rName] = {"MooseId": MMEnz, "className": "MMEnz"}
+        reactSBMLIdMooseId[rName] = {"MooseId": MMEnz}
         if reactionCreated:
             if (reac.isSetNotes):
                 pullnotes(reac, MMEnz)

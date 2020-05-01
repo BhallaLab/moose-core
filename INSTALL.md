@@ -1,137 +1,71 @@
-# Pre-built packages
+# Building MOOSE 
 
-## Linux
+To build `MOOSE` from source, you need `cmake` and `python-setuptools`. We
+recommend to use Python 3.5 or higher. Python 2.7 is also supported. 
 
-Use our repositories hosted at [Open Build Service](http://build.opensuse.org).
-We have packages for Debian, Ubuntu, CentOS, Fedora, OpenSUSE/SUSE, RHEL,
-Scientific Linux.  Visit the following page for instructions.
-
-https://software.opensuse.org/download.html?project=home:moose&package=moose
-
-## MacOSX
-
-MOOSE is available via [homebrew](http://brew.sh).
-
-    $ brew install homebrew/science/moose
-
-
-# Building MOOSE from source
-
-To build `MOOSE` from source, you can either use `cmake` (recommended) or GNU `make` based flow.
-
-Download the latest source code of moose from github.
-
-    $ git clone -b master https://github.com/BhallaLab/moose-core
-
-## Install dependencies
-
-For moose-core:
+Before running the following command to build and install, make sure that
+followings are installed.
 
 - gsl-1.16 or higher.
-- libhdf5-dev (optional)
-- python-dev
 - python-numpy
 
-On Ubuntu-12.04 or higher, these can be installed with:
+On Ubuntu-16.04 or higher, these dependencies can be installed with:
 
-    sudo apt-get install python-dev python-numpy libhdf5-dev cmake libgsl0-dev g++
+```
+sudo apt-get install python-pip python-numpy cmake libgsl-dev g++
+```
 
-__NOTE__ : On Ubuntu 12.04, gsl version is 1.15. You should skip `libgsl0-dev` install gsl-1.16 or higher manually.
+Now use `pip` to download and install the `pymoose`.
 
-SBML support is enabled by installing [python-libsbml](http://sbml.org/Software/libSBML/docs/python-api/libsbml-installation.html). Alternatively, it can be installed by using `python-pip`
+```
+$ pip install git+https://github.com/BhallaLab/moose-core --user
+```
 
-    $ sudo pip install python-libsbml
+## Using cmake (For developers)
 
-## Use `cmake` to build moose:
+`pip`  builds `pymoose` with default options, it runs `cmake` behind the scene.
+If you are developing moose, build it with different options, or needs to test
+and profile it, `cmake` based flow is recommended.
 
-    $ cd /path/to/moose-core
+Install the required dependencies and download the latest source code of moose
+from github.
+
+    $ git clone https://github.com/BhallaLab/moose-core --depth 50 
+    $ cd moose-core
     $ mkdir _build
     $ cd _build
     $ cmake ..
-    $ make  
-    $ ctest --output-on-failure
+    $ make -j3  
+    $ ctest -j3 --output-on-failure
 
-This will build moose and its python extentions, `ctest` will run few tests to
-check if build process was successful.
+This will build moose, `ctest` will run few tests to check if build process was
+successful.
 
-To install MOOSE into non-standard directory, pass additional argument `-DCMAKE_INSTALL_PREFIX=path/to/install/dir` to cmake.
+To install MOOSE into non-standard directory, pass additional argument
+`-DCMAKE_INSTALL_PREFIX=path/to/install/dir` to during configuration. E.g.,
 
-### Python3
+   $ mkdir _build && cd _build    # inside moose-core directory.
+   $ cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local ..
+   $ make && make install
 
-You just need to one command in previous set of instructions to following
+Will build and install pymoose to `~/.local`.
 
-    cmake -DPYTHON_EXECUTABLE=/opt/bin/python3 ..
+To use a non-default python installation, set
+`PYTHON_EXECUTATBLE=/path/to/python` e.g.,
 
-### Install
-
-    $ sudo make install
-
-##  Using gnu-make
-
-__This may or may not work (not maintained by packager)__
-
-You may need to inform make of C++ include directories and library directories
-if your installed packages are at non-standard location. For example, if your
-have libsbml installed in `/opt/libsbml` and the header files are located in
-`/opt/libsbml/include` and lib files are located in `/opt/libsbml/lib`, you can
-set the environment variables `CXXFLAGS` and `LDFLAGS` to include these before
-calling make:
-
-    export CXXFLAGS= -I/opt/libsbml/include
-    export LDFLAGS= -L/opt/libsbml/lib
-
-
-### Release build:
-
-    cd moose
-    make BUILD=release
-
-### Debug build:
-
-    cd moose
-    make BUILD=debug
-
-### Python 3K
-
-By default, MOOSE is built for Python 2. In case you want to build MOOSE for
-Python 3K, you need to pass the additional flag:
-
-    PYTHON=3
-
-like:
-
-    make BUILD=release PYTHON=3
-
-## Installation:
-
-For system-wide installation you can run:
-
-    sudo make install
+    $ cmake -DPYTHON_EXECUTABLE=/opt/bin/python3 ..
 
 ## Post installation
 
 Now you can import moose in a Python script or interpreter with the statement:
 
-    import moose
+    >>> import moose
+    >>> moose.test()   # will take time. Not all tests will pass.
 
-If you have installed the GUI dependencies below for running the graphical user
-interface, then you can run the GUI by double-clicking on the desktop icon or
-via the main-menu.  The squid axon tutorial/demo is also accessible via these
-routes.
+# Notes
 
-## Local-installation
+SBML support is enabled by installing
+[python-libsbml](http://sbml.org/Software/libSBML/docs/python-api/libsbml-installation.html).
+Alternatively, it can be installed by using `python-pip`
 
-If you do not have permission to install it in system directories, you can let
-it be where it was built or copy the `python` subdirectory of MOOSE source tree
-to a location of your choice and add the path to your PYTHONPATH environment
-variable. Suppose you have a ~/lib directory where you keep all your locally
-built libraries, do:
-
-    cp -r {moose-source-directory}/python ~/lib/
-
-and add this to your .bashrc file (if you use bash shell):
-
-    export PYTHONPATH="$HOME/lib/python":"$PYTHONPATH"
-
-For other shells, look up your shell's manual to find out how to set environment
-variable in it.
+    $ sudo pip install python-libsbml

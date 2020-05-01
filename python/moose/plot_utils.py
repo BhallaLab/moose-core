@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-#
-# plot_utils.py: Some utility function for plotting data in moose.
-
 from __future__ import print_function, division, absolute_import
 
 __author__           = "Dilawar Singh"
@@ -18,10 +15,7 @@ import matplotlib.pyplot as plt
 import moose
 import moose.print_utils as pu
 import re
-
-# To support python 2.6. On Python3.6+, dictionaries are ordered by default.
-# This is here to fill this gap.
-from moose.OrderedDict import OrderedDict
+from collections import OrderedDict
 
 def plotAscii(yvec, xvec = None, file=None):
     """Plot two list-like object in terminal using gnuplot.
@@ -131,14 +125,23 @@ def plotTable(table, **kwargs):
         plt.legend(loc='best')
 
 def plotTables(tables, outfile=None, **kwargs):
-    """Plot a list of tables onto one figure only.
+    """Plot a dict of tables.
+
+    Each axis will be labeled with dict keys. The dict values must be
+    moose.Table/moose.Table2.
+
+    :param outfile: Default `None`. If given, plot will be saved to this filepath.
+    :param grid: A tuple with (cols, rows), default is (len(tables)//2+1, 2)
+    :param figsize: Size of figure (W, H) in inches. Default (10, 1.5*len(tables))
     """
     assert type(tables) == dict, "Expected a dict of moose.Table"
-    plt.figure(figsize=(10, 1.5*len(tables)))
+    plt.figure(figsize=kwargs.get('figsize', (10, 1.5*len(tables))))
     subplot = kwargs.get('subplot', True)
+    gridSize = kwargs.get('grid', (len(tables)//2+1, 2))
     for i, tname in enumerate(tables):
         if subplot:
-            plt.subplot(len(tables), 1, i+1)
+            assert gridSize[0] <= 9
+            plt.subplot(100*gridSize[0]+10*gridSize[1]+(i+1))
         yvec = tables[tname].vector
         xvec = np.linspace(0, moose.Clock('/clock').currentTime, len(yvec))
         plt.plot(xvec, yvec, label=tname)
@@ -155,9 +158,7 @@ def plotTables(tables, outfile=None, **kwargs):
         try:
             plt.savefig(outfile, transparent=True)
         except Exception as e:
-            pu.dump("WARN"
-                    , "Failed to save figure, plotting onto a window"
-                    )
+            pu.dump("WARN", "Failed to save figure. Errror %s"%e)
             plt.show()
     else:
         plt.show()
@@ -225,7 +226,7 @@ def saveRecords(records, xvec = None, **kwargs):
     for k in records:
         try:
             yvec = records[k].vector
-        except AtrributeError as e:
+        except AttributeError as e:
             yevc = records[k]
         yvecs.append(yvec)
     xvec = np.linspace(0, clock.currentTime, len(yvecs[0]))
@@ -242,10 +243,9 @@ def plotRecords(records, xvec = None, **kwargs):
     try:
         for k in sorted(records.keys(), key=str.lower):
             dataDict[k] = records[k]
-    except Exception as e:
+    except Exception:
         dataDict = records
 
-    legend = kwargs.get('legend', True)
     outfile = kwargs.get('outfile', None)
     subplot = kwargs.get('subplot', False)
     filters = [ x.lower() for x in kwargs.get('filter', [])]
@@ -287,7 +287,7 @@ def plotRecords(records, xvec = None, **kwargs):
     plt.close( )
 
 
-def plotTables( regex = '.*', **kwargs ):
+def plotTablesByRegex( regex = '.*', **kwargs ):
     """plotTables Plot all moose.Table/moose.Table2 matching given regex. By
     default plot all tables. Table names must be unique. Table name are used as
     legend.

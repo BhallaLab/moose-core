@@ -42,13 +42,14 @@ public:
     /* Cleaup before quitting */
     void cleanUp( void );
 
-    string getOutFilepath( void ) const;
-    void setOutFilepath( string path );
+    string getDatafilePath( void ) const;
+    void setDatafilePath( string path );
 
     string getFormat( void ) const;
     void setFormat( string format );
 
     size_t getNumTables( void ) const;
+    size_t getNumWriteEvents( void ) const;
 
     void addTable( Id table );
     void addTables( vector<Id> tables);
@@ -72,8 +73,11 @@ public:
 
 private:
 
-    string outfilePath_;
+    string datafilePath_;
     string format_;
+
+    size_t numWriteEvents_;
+
     bool isOutfilePathSet_;
 
     // dt_ and tick number of Table's clock

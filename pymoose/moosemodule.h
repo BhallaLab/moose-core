@@ -1,19 +1,12 @@
 // moosemodule.h ---
-//
-// Filename: moosemodule.h
-// Description:
+
 // Author: Subhasis Ray
 // Maintainer: Dilawar Singh
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
-// Last-Updated: Mon 25 Apr 2016 11:09:02 AM IST
-//           By: Dilawar
-// URL:
 
 #ifndef _MOOSEMODULE_H
 #define _MOOSEMODULE_H
-
-#include <string>
 
 extern char shortType(string);
 
@@ -26,23 +19,6 @@ struct module_state
     PyObject *error;
 };
 
-
-// The endianness check is from:
-// http://stackoverflow.com/questions/2100331/c-macro-definition-to-determine-big-endian-or-little-endian-machine
-enum
-{
-    O32_LITTLE_ENDIAN = 0x03020100ul,
-    O32_BIG_ENDIAN = 0x00010203ul,
-    O32_PDP_ENDIAN = 0x01000302ul
-};
-
-const union
-{
-    unsigned char bytes[4];
-    uint32_t value;
-} o32_host_order =  { { 0, 1, 2, 3 } };
-
-#define O32_HOST_ORDER (o32_host_order.value)
 
 #if PY_MAJOR_VERSION >= 3
 #define PY3K
@@ -57,11 +33,11 @@ PyMODINIT_FUNC PyInit_moose();
 #define PyString_Check PyUnicode_Check
 #define PyString_FromString PyUnicode_FromString
 #define PyString_FromFormat PyUnicode_FromFormat
-#define PyString_AsString(str)                                          \
-    PyBytes_AS_STRING(PyUnicode_AsEncodedString(str, "utf-8", "Error~"))
-// Python 3 does not like global module state
+#define PyString_AsString(str)  PyBytes_AS_STRING(PyUnicode_AsEncodedString(str, "utf-8", "Error~"))
 #define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+
 #else // Python 2
+
 PyMODINIT_FUNC init_moose();
 static struct module_state _state;
 #define GETSTATE(m) (&_state)
@@ -81,11 +57,11 @@ static struct module_state _state;
 
 // Minimum number of arguments for setting destFinfo - 1-st
 // the finfo name.
-#define minArgs 1
+#define MIN_ARGS 1
 
 // Arbitrarily setting maximum on variable argument list. Read:
 // http://www.swig.org/Doc1.3/Varargs.html to understand why
-#define maxArgs 10
+#define MAX_ARGS 10
 
 
 ///////////////////////////////////
@@ -234,7 +210,7 @@ PyObject * moose_reinit(PyObject * dummy, PyObject * args);
 PyObject * moose_stop(PyObject * dummy, PyObject * args);
 PyObject * moose_isRunning(PyObject * dummy, PyObject * args);
 PyObject * moose_exists(PyObject * dummy, PyObject * args);
-PyObject * moose_loadModel(PyObject * dummy, PyObject * args);
+PyObject * moose_loadModelInternal(PyObject * dummy, PyObject * args);
 //PyObject * moose_saveModel(PyObject * dummy, PyObject * args);
 PyObject * moose_setCwe(PyObject * dummy, PyObject * args);
 PyObject * moose_getCwe(PyObject * dummy, PyObject * args);
@@ -486,6 +462,7 @@ template <class KeyType>
 int set_lookup_value(const ObjId& oid, string fname, char value_type_code, char key_type_code, PyObject * key, PyObject * value_obj)
 {
     bool success = false;
+    assert(key);
     KeyType *cpp_key = (KeyType*)to_cpp(key, key_type_code);
     if (cpp_key == NULL)
     {

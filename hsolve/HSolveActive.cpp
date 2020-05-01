@@ -7,7 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include "header.h"
+#include "../basecode/header.h"
 #include <queue>
 #include "HSolveStruct.h"
 #include "HinesMatrix.h"
@@ -59,10 +59,9 @@ void HSolveActive::step( ProcPtr info )
     HSolvePassive::backwardSubstitute();
     advanceCalcium();
     advanceSynChans( info );
-
     sendValues( info );
     sendSpikes( info );
-
+    prevExtCurr_ = externalCurrent_;
     externalCurrent_.assign( externalCurrent_.size(), 0.0 );
 }
 
