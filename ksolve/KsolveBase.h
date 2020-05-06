@@ -30,6 +30,9 @@ public:
     /// Get # of molecules in given pool and voxel. Varies with time.
     virtual double getN( const Eref& e ) const = 0;
 
+    /// Set buffer status of pool. Changes class between Pool and BufPool
+    virtual void setIsBuffered( const Eref& e, bool val ) {;}
+
     /// Diffusion constant: Only one per pool, voxel number is ignored.
     virtual void setDiffConst( const Eref& e, double val ) = 0;
     /// Diffusion constant: Only one per pool, voxel number is ignored.
@@ -37,6 +40,8 @@ public:
 
     /// Motor constant: Only one per pool, voxel number is ignored.
     /// Used only in Dsolves, so here I put in a dummy.
+    virtual double getMotorConst( const Eref& e )
+    { return 0.0;}
     virtual void setMotorConst( const Eref& e, double val )
     {;}
 

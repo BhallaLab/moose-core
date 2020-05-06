@@ -43,6 +43,7 @@
 #include <thread>
 
 using namespace std::chrono;
+map< Id, unsigned int > Ksolve::defaultPoolLookup_;
 
 const unsigned int OFFNODE = ~0;
 

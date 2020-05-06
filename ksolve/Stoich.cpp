@@ -6,6 +6,7 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+class KsolveBase;
 
 #include "../basecode/header.h"
 #include "../basecode/ElementValueFinfo.h"
@@ -1176,8 +1177,6 @@ void Stoich::zombifyModel(const Eref& e, const vector<Id>& elist)
     static const Cinfo* reacCinfo = Cinfo::find("Reac");
     static const Cinfo* enzCinfo = Cinfo::find("Enz");
     static const Cinfo* mmEnzCinfo = Cinfo::find("MMenz");
-    static const Cinfo* zombiePoolCinfo = Cinfo::find("ZombiePool");
-    static const Cinfo* zombieBufPoolCinfo = Cinfo::find("ZombieBufPool");
     static const Cinfo* zombieReacCinfo = Cinfo::find("ZombieReac");
     static const Cinfo* zombieMMenzCinfo = Cinfo::find("ZombieMMenz");
     static const Cinfo* zombieEnzCinfo = Cinfo::find("ZombieEnz");
@@ -1211,7 +1210,7 @@ void Stoich::zombifyModel(const Eref& e, const vector<Id>& elist)
             else {
                 funcId = zombifyPoolFuncWithScaling(*i);
             }
-            PoolBase::zombify(ei, zombiePoolCinfo, ksolve_, dsolve_);
+            //PoolBase::zombify(ei, zombiePoolCinfo, ksolve_, dsolve_);
             ei->resize(numVoxels_);
             for(unsigned int j = 0; j < numVoxels_; ++j) {
                 ObjId oi(ei->id(), j);
@@ -1236,7 +1235,7 @@ void Stoich::zombifyModel(const Eref& e, const vector<Id>& elist)
                     ZombieFunction::zombify(fe, zfCinfo, ksolve_, dsolve_);
                 }
             }
-            PoolBase::zombify(ei, zombieBufPoolCinfo, ksolve_, dsolve_);
+            //PoolBase::zombify(ei, zombieBufPoolCinfo, ksolve_, dsolve_);
             ei->resize(numVoxels_);
             for(unsigned int j = 0; j < numVoxels_; ++j) {
                 ObjId oi(ei->id(), j);
@@ -1271,23 +1270,17 @@ void Stoich::unZombifyPools()
 {
     static const Cinfo* poolCinfo = Cinfo::find("Pool");
     static const Cinfo* bufPoolCinfo = Cinfo::find("BufPool");
-    static const Cinfo* zombiePoolCinfo = Cinfo::find("ZombiePool");
-    static const Cinfo* zombieBufPoolCinfo = Cinfo::find("ZombieBufPool");
     unsigned int i;
     for(i = 0; i < varPoolVec_.size(); ++i) {
         Element* e = varPoolVec_[i].element();
         if(!e || e->isDoomed())
             continue;
-        if(e != 0 && e->cinfo() == zombiePoolCinfo)
-            PoolBase::zombify(e, poolCinfo, Id(), Id());
     }
 
     for(i = 0; i < bufPoolVec_.size(); ++i) {
         Element* e = bufPoolVec_[i].element();
         if(!e || e->isDoomed())
             continue;
-        if(e != 0 && e->cinfo() == zombieBufPoolCinfo)
-            PoolBase::zombify(e, bufPoolCinfo, Id(), Id());
     }
 }
 

@@ -26,9 +26,7 @@ endif(WITH_BOOST_ODE)
 
 set(KSOLVE_SRCS
     KinSparseMatrix.cpp
-    ZombiePool.cpp
     ZombieFunction.cpp
-    ZombieBufPool.cpp
     ZombieReac.cpp
     ZombieEnz.cpp
     ZombieMMenz.cpp

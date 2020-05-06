@@ -15,9 +15,6 @@
 #include "../basecode/header.h"
 #include "../utility/utility.h"
 
-#include "PoolBase.h"
-#include "Pool.h"
-#include "BufPool.h"
 #include "ReacBase.h"
 #include "EnzBase.h"
 #include "lookupVolumeFromMesh.h"
@@ -206,9 +203,9 @@ void writeReac( ofstream& fout, Id id,
 unsigned int getSlaveEnable( Id id )
 {
     static const Finfo* setNinitFinfo =
-        PoolBase::initCinfo()->findFinfo( "set_nInit" );
+        Cinfo::find("PoolBase")->findFinfo( "set_nInit" );
     static const Finfo* setConcInitFinfo =
-        PoolBase::initCinfo()->findFinfo( "set_concInit" );
+        Cinfo::find("PoolBase")->findFinfo( "set_concInit" );
     unsigned int ret = 0;
     vector< Id > src;
     if ( id.element()->cinfo()->isA( "BufPool" ) )

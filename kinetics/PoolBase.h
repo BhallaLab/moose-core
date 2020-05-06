@@ -10,13 +10,9 @@
 #ifndef _POOL_BASE_H
 #define _POOL_BASE_H
 
-/**
- * SpeciesId identifies molecular species. This is a unique identifier for
- * any given molecular species, regardless of which compartment or solver
- * is handling it.
- */
 typedef unsigned int SpeciesId;
 extern const SpeciesId DefaultSpeciesId;
+
 
 /**
  * The PoolBase class is the base class for molecular pools.
@@ -26,6 +22,7 @@ extern const SpeciesId DefaultSpeciesId;
  * other solvers.
  * PoolBase is the base class for mass-action, single particle
  * and other numerical variants of pools.
+ * Note that in this version it only acts as an interface for the solvers.
  */
 class PoolBase
 {
@@ -36,7 +33,7 @@ class PoolBase
 
 public:
     PoolBase();
-    virtual ~PoolBase();
+    ~PoolBase();
 
     //////////////////////////////////////////////////////////////////
     // Field assignment stuff: Interface for the Cinfo, hence regular
@@ -73,60 +70,6 @@ public:
      */
     void setIsBuffered( const Eref& e, bool v );
     bool getIsBuffered( const Eref& e ) const;
-
-    //////////////////////////////////////////////////////////////////
-    // Here are the inner virtual funcs for fields.
-    // All these are pure virtual
-    //////////////////////////////////////////////////////////////////
-
-    virtual void vSetN( const Eref& e, double v ) = 0;
-    virtual double vGetN( const Eref& e ) const = 0;
-    virtual void vSetNinit( const Eref& e, double v ) = 0;
-    virtual double vGetNinit( const Eref& e ) const = 0;
-    virtual void vSetDiffConst( const Eref& e, double v ) = 0;
-    virtual double vGetDiffConst( const Eref& e ) const = 0;
-    virtual void vSetMotorConst( const Eref& e, double v );
-    virtual double vGetMotorConst( const Eref& e ) const;
-
-    virtual void vSetConc( const Eref& e, double v ) = 0;
-    virtual double vGetConc( const Eref& e ) const = 0;
-    virtual void vSetConcInit( const Eref& e, double v ) = 0;
-    virtual double vGetConcInit( const Eref& e ) const;
-    virtual double vGetVolume( const Eref& e ) const = 0;
-    virtual void vSetVolume( const Eref& e, double v ) = 0;
-    virtual void vSetSpecies( const Eref& e, SpeciesId v ) = 0;
-    virtual SpeciesId vGetSpecies( const Eref& e ) const = 0;
-    /// I put in a default empty function for vSetIsBuffered.
-    virtual void vSetIsBuffered( const Eref& e, bool v );
-    virtual bool vGetIsBuffered( const Eref& e) const = 0;
-    /**
-     * Assign whatever info is needed by the zombie based on the
-     * solver Element. Encapsulates some unpleasant field extraction,
-     * casting, and assignment. Default version of this function does
-     * nothing.
-     */
-    virtual void vSetSolver( Id ksolve, Id dsolve );
-
-    //////////////////////////////////////////////////////////////////
-    /**
-     * zombify is the base function for conversion between pool
-     * subclasses. This can be overridden, but should work for most
-     * things. This takes the original Element, and without touching
-     * its messaging, replaces it with a new data object of the
-     * specified zClass. It does the best it can with conversion of
-     * fields. Typically needs to be followed by rescheduling and
-     * possibly a class-specific function for assigning further
-     * zombie fields outside the ken of the PoolBase.
-     * The 'solver' argument specifies which objects handle the solver
-     * for this conversion. For the Pool this is either or both of
-     * a kinetic solver /ksolve/ and a diffusion solver /dsolve/.
-     * The term zombie arises because this operation was originally
-     * carried out to strip an object of independent function, and
-     * replace it with a solver-controlled facsimile.
-     */
-    static void zombify( Element* original, const Cinfo* zClass,
-                         Id ksolve, Id dsolve );
-
     //////////////////////////////////////////////////////////////////
     // Dest funcs
     //////////////////////////////////////////////////////////////////
@@ -145,26 +88,23 @@ public:
 	void notifyAddMsgSrc( const Eref& e, ObjId msgId );
 	void notifyAddMsgDest( const Eref& e, ObjId msgId );
 
-    //////////////////////////////////////////////////////////////////
-    // Virtual Dest funcs. Most of these have a generic do-nothing
-    // function here, as most of the derived classes don't need to
-    // do anything.
-    //////////////////////////////////////////////////////////////////
-    virtual void vProcess( const Eref& e, ProcPtr p );
-    virtual void vReinit( const Eref& e, ProcPtr p );
-    virtual void vReac( double A, double B );
-    virtual void vHandleMolWt( const Eref& e, double v);
-    virtual void vIncrement( double val );
-    virtual void vDecrement( double val );
-    virtual void vnIn( double val );
 
-    //////////////////////////////////////////////////////////////////
-    static const Cinfo* initCinfo();
-
-private:
-    double concInit_; /// Initial concentration.
-    // We don't store the conc here as this is computed on the fly
-    // by derived classes. But the PoolBase::concInit is authoritative.
+    static const Cinfo* initPoolBaseCinfo();
+    static const Cinfo* initPoolCinfo();
+    static const Cinfo* initBufPoolCinfo();
+protected:
+    /**
+     * The KsolveBase pointers hold the solvers for the
+     * PoolBase. At least one must be assigned. Field assignments
+     * propagate from the pool to whichever is assigned. Field
+     * lookups first check the dsolve, then the ksolve.
+     * The PoolBase may be managed by the diffusion solver without
+     * the involvement of the Stoich class at all. So instead of
+     * routing the zombie operations through the Stoich, we have
+     * pointers directly into the Dsolve and Ksolve.
+     */
+    KsolveBase* dsolve_;
+    KsolveBase* ksolve_;
 };
 
 #endif	// _POOL_BASE_H

@@ -12,9 +12,6 @@
 #include <iomanip>
 #include <fstream>
 #include "../basecode/header.h"
-#include "PoolBase.h"
-#include "Pool.h"
-#include "BufPool.h"
 #include "ReacBase.h"
 #include "EnzBase.h"
 #include "lookupVolumeFromMesh.h"
@@ -1171,7 +1168,7 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
         Field< bool >::set( sumId, "allowUnknownVariable", false );
 
         // Turn dest into a FuncPool.
-        destId.element()->zombieSwap( BufPool::initCinfo() );
+        // destId.element()->zombieSwap( BufPool::initCinfo() );
 
         ObjId ret = shell_->doAddMsg( "single",
                                       ObjId( sumId, 0 ), "valueOut",
@@ -1550,11 +1547,7 @@ void ReadKkit::setupSlaveMsg( const string& src, const string& dest )
     // Convert the pool to a BufPool, if it isn't one already
     Id destId( basePath_ + "/kinetics/" + dest );
     assert( destId != Id() );
-
-    if( !destId.element()->cinfo()->isA( "BufPool" ))
-    {
-        destId.element()->zombieSwap( BufPool::initCinfo() );
-    }
+	Field< bool >::set( destId, "isBuffered", true );
 
     map< string, Id >* nameMap;
     // Check if the src is a table or a stim

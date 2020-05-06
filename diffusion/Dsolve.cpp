@@ -28,10 +28,6 @@
 #include "../mesh/MeshCompt.h"
 #include "../shell/Wildcard.h"
 #include "../kinetics/PoolBase.h"
-#include "../kinetics/Pool.h"
-#include "../kinetics/BufPool.h"
-#include "../ksolve/ZombiePool.h"
-#include "../ksolve/ZombieBufPool.h"
 
 #include <thread>
 
@@ -782,21 +778,6 @@ void Dsolve::setPath( const Eref& e, string path )
         double diffConst = Field< double >::get( id, "diffConst" );
         double motorConst = Field< double >::get( id, "motorConst" );
         const Cinfo* c = id.element()->cinfo();
-        if ( c == Pool::initCinfo() )
-        {
-            PoolBase::zombify( id.element(), ZombiePool::initCinfo(), Id(), e.id() );
-        }
-        else if ( c == BufPool::initCinfo() )
-        {
-            PoolBase::zombify( id.element(), ZombieBufPool::initCinfo(), Id(), e.id() );
-            // Any Functions will have to continue to manage the BufPools.
-            // This needs them to be replicated, and for their messages
-            // to be copied over. Not really set up here.
-        }
-        else
-        {
-            cout << "Error: Dsolve::setPath( " << path << " ): unknown pool class:" << c->name() << endl;
-        }
         id.element()->resize( numVoxels_ );
 
         unsigned int j = temp[i].value() - poolMapStart_;
