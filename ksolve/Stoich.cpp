@@ -21,7 +21,7 @@
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
 #include "XferInfo.h"
-#include "ZombiePoolInterface.h"
+#include "KsolveBase.h"
 #include "../builtins/Variable.h"
 #include "../builtins/Function.h"
 #include "ZombieFunction.h"
@@ -37,9 +37,11 @@ const Cinfo* Stoich::initCinfo()
     //////////////////////////////////////////////////////////////
     // Field Definitions
     //////////////////////////////////////////////////////////////
+		/*
     static ElementValueFinfo<Stoich, string> path(
         "path", "Wildcard path for reaction system handled by Stoich",
         &Stoich::setPath, &Stoich::getPath);
+		*/
 
     static ElementValueFinfo<Stoich, string> reacSystemPath(
         "reacSystemPath", "Wildcard path for reaction system handled by Stoich",
@@ -186,7 +188,7 @@ const Cinfo* Stoich::initCinfo()
     //////////////////////////////////////////////////////////////
 
     static Finfo* stoichFinfos[] = {
-        &path,               // ElementValue, deprecated.
+        // &path,               // ElementValue, deprecated.
         &reacSystemPath,     // ElementValue
         &ksolve,             // Value
         &dsolve,             // Value
@@ -399,7 +401,7 @@ void Stoich::setKsolve(Id ksolve)
     }
 
     ksolve_ = ksolve;
-    kinterface_ = reinterpret_cast<ZombiePoolInterface*>(ksolve.eref().data());
+    kinterface_ = reinterpret_cast<KsolveBase*>(ksolve.eref().data());
 
     if(ksolve.element()->cinfo()->isA("Gsolve"))
         setOneWay(true);
@@ -422,7 +424,7 @@ void Stoich::setDsolve(Id dsolve)
         return;
     }
     dsolve_ = dsolve;
-    dinterface_ = reinterpret_cast<ZombiePoolInterface*>(dsolve.eref().data());
+    dinterface_ = reinterpret_cast<KsolveBase*>(dsolve.eref().data());
 }
 
 Id Stoich::getDsolve() const

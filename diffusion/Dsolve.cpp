@@ -14,7 +14,7 @@
 #include "../ksolve/VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
 #include "../ksolve/XferInfo.h"
-#include "../ksolve/ZombiePoolInterface.h"
+#include "../ksolve/KsolveBase.h"
 #include "../kinetics/ConcChan.h"
 #include "DiffPoolVec.h"
 #include "ConcChanInfo.h"

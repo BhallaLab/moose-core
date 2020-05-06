@@ -26,7 +26,7 @@
  * Some DiffPoolVecs are for molecules that don't diffuse. These
  * simply have an empty opvec.
  */
-class Dsolve: public ZombiePoolInterface
+class Dsolve: public KsolveBase
 {
 public:
     Dsolve();
@@ -124,7 +124,7 @@ public:
     void calcJunction_chunk( const size_t begin, const size_t end, double dt );
 
     //////////////////////////////////////////////////////////////////
-    // Inherited virtual funcs from ZombiePoolInterface
+    // Inherited virtual funcs from KsolveBase
     //////////////////////////////////////////////////////////////////
     double getNinit( const Eref& e ) const;
     void setNinit( const Eref& e, double value );

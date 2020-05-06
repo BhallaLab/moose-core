@@ -150,8 +150,24 @@ const Cinfo* Neutral::initCinfo()
     /////////////////////////////////////////////////////////////////
     // DestFinfos
     /////////////////////////////////////////////////////////////////
-    static DestFinfo parentMsg("parentMsg", "Message from Parent Element(s)",
-                               new EpFunc1<Neutral, int>(&Neutral::destroy));
+    static DestFinfo notifyCreate("notifyCreate", 
+				"Called when object is created. Arg is parent.", 
+				new EpFunc1<Neutral, ObjId >(&Neutral::notifyCreate));
+    static DestFinfo notifyDestroy("notifyDestroy", 
+				"Called when object is destroyed.", 
+				new EpFunc0<Neutral>(&Neutral::notifyDestroy));
+    static DestFinfo notifyMove("notifyMove", 
+				"Called when object is moved. Arg is new parent.", 
+				new EpFunc1<Neutral, ObjId>(&Neutral::notifyMove));
+    static DestFinfo notifyAddMsgSrc("notifyAddMsgSrc", 
+				"Called when a message is created, current object is src. Arg is msgId.", 
+				new EpFunc1<Neutral, ObjId>(&Neutral::notifyAddMsgSrc));
+    static DestFinfo notifyAddMsgDest("notifyAddMsgDest", 
+				"Called when a message is created, current object is dest. Arg is msgId.", 
+				new EpFunc1<Neutral, ObjId>(&Neutral::notifyAddMsgDest));
+
+    static DestFinfo parentMsg("parentMsg", "Message from Parent Element(s)", 
+				new EpFunc1<Neutral, int>(&Neutral::destroy));
 
     static DestFinfo blockNodeBalance(
         "blockNodeBalance",
@@ -206,6 +222,11 @@ const Cinfo* Neutral::initCinfo()
                                      &msgDests,          // ReadOnlyLookupValue
                                      &msgDestFunctions,  // ReadOnlyLookupValue
                                      &isA,               // ReadOnlyLookupValue
+									 &notifyCreate,		 // DestFinfo
+									 &notifyDestroy,	 // DestFinfo
+									 &notifyMove,		 // DestFinfo
+									 &notifyAddMsgSrc,	 // DestFinfo
+									 &notifyAddMsgDest,	 // DestFinfo
     };
 
     /////////////////////////////////////////////////////////////////
@@ -544,6 +565,19 @@ unsigned int Neutral::buildTree(const Eref& e, vector<Id>& tree) const
 //////////////////////////////////////////////////////////////////////////
 // Dest Functions
 //////////////////////////////////////////////////////////////////////////
+
+/// Default notification functions, do nothing in the Neutral.
+void Neutral::notifyDestroy(const Eref& e)
+{;}
+void Neutral::notifyCreate(const Eref& e, ObjId parent)
+{;}
+void Neutral::notifyMove(const Eref& e, ObjId newParent)
+{;}
+void Neutral::notifyAddMsgSrc(const Eref& e, ObjId msgId)
+{;}
+void Neutral::notifyAddMsgDest(const Eref& e, ObjId msgId)
+{;}
+
 
 //
 // Stage 0: Check if it is a Msg. This is deleted by Msg::deleteMsg( ObjId )

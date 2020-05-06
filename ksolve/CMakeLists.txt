@@ -40,7 +40,7 @@ set(KSOLVE_SRCS
     Stoich.cpp
     Ksolve.cpp
     Gsolve.cpp
-    ZombiePoolInterface.cpp
+    KsolveBase.cpp
     testKsolve.cpp
     )
 

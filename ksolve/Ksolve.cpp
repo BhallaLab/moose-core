@@ -21,7 +21,7 @@
 #include "VoxelPoolsBase.h"
 #include "VoxelPools.h"
 #include "../mesh/VoxelJunction.h"
-#include "ZombiePoolInterface.h"
+#include "KsolveBase.h"
 
 #include "RateTerm.h"
 #include "../basecode/SparseMatrix.h"
@@ -433,7 +433,7 @@ void Ksolve::setDsolve( Id dsolve )
     else if ( dsolve.element()->cinfo()->isA( "Dsolve" ) )
     {
         dsolve_ = dsolve;
-        dsolvePtr_ = reinterpret_cast<ZombiePoolInterface*>(dsolve.eref().data());
+        dsolvePtr_ = reinterpret_cast<KsolveBase*>(dsolve.eref().data());
     }
     else
     {
@@ -677,6 +677,12 @@ void Ksolve::updateRateTerms( unsigned int index )
 
 unsigned int Ksolve::getPoolIndex( const Eref& e ) const
 {
+	if (!stoichPtr_) {
+		auto ret = defaultPoolLookup_.find( e.id() );
+		if ( ret != defaultPoolLookup_.end() )
+			return ret->second;
+		return ~0U;
+	}
     return stoichPtr_->convertIdToPoolIndex( e.id() );
 }
 
@@ -689,7 +695,7 @@ unsigned int Ksolve::getVoxelIndex( const Eref& e ) const
 }
 
 //////////////////////////////////////////////////////////////
-// Zombie Pool Access functions
+// Pool Access functions
 //////////////////////////////////////////////////////////////
 
 void Ksolve::setN( const Eref& e, double v )
@@ -770,7 +776,43 @@ double Ksolve::volume( unsigned int i ) const
         return pools_[i].getVolume();
     return 0.0;
 }
+///////////////////////////////////////////////////////////////////
+// Here is a block of notify events
+///////////////////////////////////////////////////////////////////
+void Ksolve::notifyDestroyPool( const Eref& e )
+{
+	notifyRemovePool( e );
+}
 
+void Ksolve::notifyAddPool( const Eref& e )
+{
+	if ( stoichPtr_ ) {
+		// stoichPtr_->notifyAddPool( e );
+	} else {
+		size_t idx = pools_[0].size();
+		pools_[0].resizeArrays( idx + 1 );
+		defaultPoolLookup_[ e.id() ] = idx;
+	}
+}
+
+void Ksolve::notifyRemovePool( const Eref& e )
+{
+	if ( stoichPtr_ ) {
+		// stoichPtr_->notifyRemovePool( e );
+	} else {
+		defaultPoolLookup_[ e.id() ] = ~0U;
+	}
+}
+
+void Ksolve::notifyAddMsgSrcPool( const Eref& e, ObjId msgId )
+{
+}
+
+void Ksolve::notifyAddMsgDestPool( const Eref& e, ObjId msgId )
+{
+}
+
+///////////////////////////////////////////////////////////////////
 void Ksolve::getBlock( vector< double >& values ) const
 {
     unsigned int startVoxel = values[0];

@@ -15,7 +15,7 @@
 
 #include "VoxelPoolsBase.h"
 #include "XferInfo.h"
-#include "ZombiePoolInterface.h"
+#include "KsolveBase.h"
 
 #include "RateTerm.h"
 #include "FuncTerm.h"
@@ -925,7 +925,7 @@ void Gsolve::setDsolve( Id dsolve )
     else if ( dsolve.element()->cinfo()->isA( "Dsolve" ) )
     {
         dsolve_ = dsolve;
-        dsolvePtr_ = reinterpret_cast<ZombiePoolInterface*>(dsolve.eref().data());
+        dsolvePtr_ = reinterpret_cast<KsolveBase*>(dsolve.eref().data());
     }
     else
     {

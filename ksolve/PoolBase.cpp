@@ -16,7 +16,7 @@
 
 const SpeciesId DefaultSpeciesId = 0;
 
-const Cinfo* PoolBase::initCinfo()
+const Cinfo* PoolBase::initPoolBaseCinfo()
 {
     //////////////////////////////////////////////////////////////
     // Field Definitions
@@ -222,9 +222,10 @@ const Cinfo* PoolBase::initCinfo()
     {
         "Name", "PoolBase",
         "Author", "Upi Bhalla",
-        "Description", "Abstract base class for pools."
+        "Description", "Base class for pools."
     };
-    static ZeroSizeDinfo< int > dinfo;
+    // static ZeroSizeDinfo< int > dinfo;
+	static Dinfo< PoolBase > dinfo;
     static Cinfo poolCinfo (
         "PoolBase",
         Neutral::initCinfo(),
@@ -239,14 +240,59 @@ const Cinfo* PoolBase::initCinfo()
     return &poolCinfo;
 }
 
+const Cinfo* PoolBase::initPoolCinfo()
+{
+    static string doc[] =
+    {
+        "Name", "Pool",
+        "Author", "Upi Bhalla",
+        "Description", "Pool of molecules of a given species."
+    };
+	static Dinfo< PoolBase > dinfo;
+	static Cinfo poolCinfo (
+		"Pool",
+		PoolBase::initCinfo(),
+		0,
+		0,
+		&dinfo,
+		doc, sizeof( doc )/sizeof( string )
+	);
+	return &poolCinfo;
+}
+
+const Cinfo* PoolBase::initBufPoolCinfo()
+{
+    static string doc[] =
+    {
+        "Name", "BufPool",
+        "Author", "Upi Bhalla",
+        "Description", "Buffered Pool of molecules of a given species."
+    };
+	static Dinfo< PoolBase > dinfo;
+	static Cinfo poolCinfo (
+		"BufPool",
+		PoolBase::initCinfo(),
+		0,
+		0,
+		&dinfo,
+		doc, sizeof( doc )/sizeof( string )
+	);
+	return &poolCinfo;
+}
+
 //////////////////////////////////////////////////////////////
 // Class definitions
 //////////////////////////////////////////////////////////////
-static const Cinfo* poolCinfo = PoolBase::initCinfo();
+static const Cinfo* poolBaseCinfo = PoolBase::initPoolBaseCinfo();
+static const Cinfo* poolCinfo = PoolBase::initPoolCinfo();
+static const Cinfo* bufPoolCinfo = PoolBase::initBufPoolCinfo();
 
 //////////////////////////////////////////////////////////////
 PoolBase::PoolBase() : concInit_( 0.0 )
-{;}
+{
+	static Ksolve defaultKsolve;
+	ksolve_ = defaultKsolve;
+}
 
 PoolBase::~PoolBase()
 {;}
@@ -256,81 +302,86 @@ PoolBase::~PoolBase()
 //////////////////////////////////////////////////////////////
 
 void PoolBase::process( const Eref& e, ProcPtr p )
-{
-    vProcess( e, p );
-}
+{;}
 
 void PoolBase::reinit( const Eref& e, ProcPtr p )
-{
-    vReinit( e, p );
-}
+{;}
 
 void PoolBase::increment( double val )
 {
-    vIncrement(val);
 }
 
 void PoolBase::decrement( double val )
 {
-    vDecrement( val );
 }
 
 void PoolBase::nIn( double val)
 {
-    vnIn(val);
 }
 
 void PoolBase::reac( double A, double B )
 {
-    vReac( A, B );
 }
 
 void PoolBase::handleMolWt( const Eref& e, double v )
 {
-    vHandleMolWt( e, v );
 }
 
+//////////////////////////////////////////////////////////////
 /// notification functions
+//////////////////////////////////////////////////////////////
+
+const KsolveBase* findParentSolvers( ObjId parent )
+{
+	static Ksolve defaultKsolve;
+	static Dsolve defaultDsolve;
+	static KsolveBase* ret[2];
+	// Traverse for parent here
+	
+	// Fallback here
+	ret[0] = &defaultKsolve;
+	ret[1] = &defaultDsolve;
+	return ret;
+}
+
 void PoolBase::notifyDestroy(const Eref& e)
-{;}
+{
+	ksolve_->notifyRemovePool( e );
+	dsolve_->notifyRemovePool( e );
+}
+
 void PoolBase::notifyCreate(const Eref& e, ObjId parent)
 {
 	cout << "Creating poolBase " << e.id().path() << " on " << parent.path() << endl;
-		}
+	parentSolvers = findParentSolvers( parent );
+	ksolve_->notifyAddPool( e );
+	dsolve_->notifyAddPool( e );
+}
+
 void PoolBase::notifyMove(const Eref& e, ObjId newParent)
 {
 	cout << "Moving poolBase " << e.id().path() << " onto " << newParent.path() << endl;
-		;}
+		;
+	newSolvers = findParentSolvers( newParent );
+	if ( newSolvers[0] != ksolve ) {
+		ksolve_->notifyRemovePool( e );
+		newSolvers[0]->notifyAddPool( e );
+	}
+	if ( newSolvers[1] != dsolve ) {
+		dsolve_->notifyRemovePool( e );
+		newSolvers[1]->notifyAddPool( e );
+	}
+}
 
 void PoolBase::notifyAddMsgSrc(const Eref& e, ObjId msgId)
-{;}
+{
+	ksolve_->notifyAddMsgSrcPool( e, msgId );
+}
+
 void PoolBase::notifyAddMsgDest(const Eref& e, ObjId msgId)
-{;}
-
-//////////////////////////////////////////////////////////////
-// virtual MsgDest Definitions
-//////////////////////////////////////////////////////////////
-
-void PoolBase::vProcess( const Eref& e, ProcPtr p )
-{;}
-
-void PoolBase::vReinit( const Eref& e, ProcPtr p )
-{;}
-
-void PoolBase::vReac( double A, double B )
-{;}
-
-void PoolBase::vHandleMolWt( const Eref& e, double v )
-{;}
-
-void PoolBase::vIncrement( double val )
-{;}
-
-void PoolBase::vDecrement( double val )
-{;}
-
-void PoolBase::vnIn( double val)
-{;}
+{
+	ksolve_->notifyAddMsgDestPool( e, msgId );
+}
 
 //////////////////////////////////////////////////////////////
 // Field Definitions
@@ -338,167 +389,115 @@ void PoolBase::vnIn( double val)
 
 void PoolBase::setN( const Eref& e, double v )
 {
-    vSetN( e, v );
+    ksolve_->setN(e, v);
+    dsolve_->setN(e, v);
 }
 
 double PoolBase::getN( const Eref& e ) const
 {
-    return vGetN( e );
+    return ksolve_->getN( e );
 }
 
 void PoolBase::setNinit( const Eref& e, double v )
 {
-    concInit_ =  v / ( NA * lookupVolumeFromMesh( e ) );
-    vSetNinit( e, v );
+    ksolve_->setNinit( e, v );
+    dsolve_->setNinit( e, v );
 }
 
 double PoolBase::getNinit( const Eref& e ) const
 {
-    return vGetNinit( e );
+	return ksolve_->getNinit( e );
 }
 
 // Conc is given in millimolar. Volume is in m^3
 void PoolBase::setConc( const Eref& e, double c )
 {
-    vSetConc( e, c );
+    double n = NA * conc * lookupVolumeFromMesh( e );
+    setN( e, n );
 }
 
 // Returns conc in millimolar.
 double PoolBase::getConc( const Eref& e ) const
 {
-    return vGetConc( e );
+    return getN( e ) / ( NA * lookupVolumeFromMesh( e ) );
 }
 
 void PoolBase::setConcInit( const Eref& e, double c )
 {
-    concInit_ = c;
-    vSetConcInit( e, c );
-}
-
-double PoolBase::vGetConcInit( const Eref& e ) const
-{
-    return concInit_;
+    double n = NA * conc * lookupVolumeFromMesh( e );
+    setNinit( e, n );
 }
 
 double PoolBase::getConcInit( const Eref& e ) const
 {
-    // return concInit_;
-    return vGetConcInit( e );
+    return getNinit( e ) / (NA * lookupVolumeFromMesh( e ) );
 }
 
 void PoolBase::setDiffConst( const Eref& e, double v )
 {
-    vSetDiffConst( e, v );
+    dsolve_->setDiffConst( e, v );
 }
 
 double PoolBase::getDiffConst(const Eref& e ) const
 {
-    return vGetDiffConst( e );
+    return dsolve_->getDiffConst( e );
 }
 
 void PoolBase::setMotorConst( const Eref& e, double v )
 {
-    vSetMotorConst( e, v );
+    dsolve_->setMotorConst( e, v );
 }
 
 double PoolBase::getMotorConst(const Eref& e ) const
 {
-    return vGetMotorConst( e );
+    return dsolve_->getMotorConst( e );
 }
 
 void PoolBase::setVolume( const Eref& e, double v )
 {
-    vSetVolume( e, v );
+	; // illegal op
 }
 
 double PoolBase::getVolume( const Eref& e ) const
 {
-    return vGetVolume( e );
+    return lookupVolumeFromMesh( e );
 }
 
 void PoolBase::setSpecies( const Eref& e, unsigned int v )
 {
-    vSetSpecies( e, v );
+    ;
 }
 
 unsigned int PoolBase::getSpecies( const Eref& e ) const
 {
-    return vGetSpecies( e );
+    return 0;
 }
 
 /**
- * setIsBuffered is active only for Pool and BufPool. Otherwise ignored.
+ * Changing the buffering flag changes the class between Pool and BufPool.
  */
 void PoolBase::setIsBuffered( const Eref& e, bool v )
 {
-    vSetIsBuffered( e, v );
+	// const Cinfo* poolCinfo = Cinfo::find( "Pool" );
+	// const Cinfo* bufPoolCinfo = Cinfo::find( "BufPool" );
+
+	Element* elm = e.element();
+	// bool isBuf = (elm->cinfo()->name() == "BufPool");
+	bool isBuf = ( elm->cinfo() == bufPoolCinfo );
+	if ( v == isBuf ) return;
+
+	if ( isBuf ) {
+		elm->replaceCinfo( poolCinfo );
+	} else {
+		elm->replaceCinfo( bufPoolCinfo );
+	}
+	
+	ksolve_->setIsBuffered( e, isBuf );
+	dsolve_->setIsBuffered( e, isBuf );
 }
 
 bool PoolBase::getIsBuffered( const Eref& e ) const
 {
-    return vGetIsBuffered( e );
-}
-
-//////////////////////////////////////////////////////////////
-// Virtual Field Definitions
-//////////////////////////////////////////////////////////////
-
-/// Dummy MotorConst field for most Pool subclasses.
-void PoolBase::vSetMotorConst( const Eref& e, double v )
-{;}
-
-double PoolBase::vGetMotorConst(const Eref& e ) const
-{
-    return 0.0;
-}
-
-/// Dummy default function for most pool subclasses.
-void PoolBase::vSetIsBuffered( const Eref& e, bool v )
-{;}
-
-//////////////////////////////////////////////////////////////
-// Zombie conversion routine: Converts Pool subclasses. There
-// will typically be a target specific follow-up function, for example,
-// to assign a pointer to the stoichiometry class.
-// There should also be a subsequent call to resched for the entire tree.
-//////////////////////////////////////////////////////////////
-// static func
-void PoolBase::zombify(Element* orig, const Cinfo* zClass, Id ksolve, Id dsolve)
-{
-    if ( orig->cinfo() == zClass )
-        return;
-    unsigned int start = orig->localDataStart();
-    unsigned int num = orig->numLocalData();
-    if ( num == 0 )
-        return;
-    vector< unsigned int > species( num, 0 );
-    vector< double > concInit( num, 0.0 );
-    vector< double > diffConst( num, 0.0 );
-    vector< double > motorConst( num, 0.0 );
-    for ( unsigned int i = 0; i < num; ++i )
-    {
-        Eref er( orig, i + start );
-        const PoolBase* pb = reinterpret_cast< const PoolBase* >( er.data() );
-        species[ i ] = pb->getSpecies( er );
-        concInit[ i ] = pb->getConcInit( er );
-        diffConst[ i ] = pb->getDiffConst( er );
-        motorConst[ i ] = pb->getMotorConst( er );
-    }
-    orig->zombieSwap( zClass );
-    for ( unsigned int i = 0; i < num; ++i )
-    {
-        Eref er( orig, i + start );
-        PoolBase* pb = reinterpret_cast< PoolBase* >( er.data() );
-        pb->vSetSolver( ksolve, dsolve );
-        pb->setSpecies( er, species[i] );
-        pb->setConcInit( er, concInit[i] );
-        pb->setDiffConst( er, diffConst[i] );
-        pb->setMotorConst( er, motorConst[i] );
-    }
-}
-
-// Virtual func: default does nothing.
-void PoolBase::vSetSolver( Id ksolve, Id dsolve )
-{
-    ;
+	// return e.element()->cinfo()->name() == "BufPool";
+	return e.element()->cinfo() == bufPoolCinfo;
 }

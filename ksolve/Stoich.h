@@ -512,9 +512,9 @@ private:
     Id compartment_;
 
     /// Pointer for ksolve
-    ZombiePoolInterface* kinterface_;
+    KsolveBase* kinterface_;
     /// Pointer for dsolve
-    ZombiePoolInterface* dinterface_;
+    KsolveBase* dinterface_;
 
     /**
      * Lookup from each molecule to its Species identifer

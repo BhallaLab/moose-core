@@ -12,7 +12,7 @@
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
 #include "XferInfo.h"
-#include "ZombiePoolInterface.h"
+#include "KsolveBase.h"
 #include "ZombiePool.h"
 #include "../kinetics/lookupVolumeFromMesh.h"
 
@@ -192,11 +192,11 @@ void ZombiePool::vSetSolver( Id ksolve, Id dsolve )
 {
     // Nasty unsafe typecast. I would have preferred to pass in a
     // safely typed pointer but that would have exposed a low-level
-    // class for the ZombiePoolInterface.
+    // class for the KsolveBase.
     if ( ksolve.element()->cinfo()->isA( "Ksolve" ) ||
             ksolve.element()->cinfo()->isA( "Gsolve" ) )
     {
-        ksolve_= reinterpret_cast< ZombiePoolInterface *>(
+        ksolve_= reinterpret_cast< KsolveBase *>(
                      ObjId( ksolve, 0 ).data() );
     }
     else if ( ksolve == Id() )
@@ -213,7 +213,7 @@ void ZombiePool::vSetSolver( Id ksolve, Id dsolve )
 
     if ( dsolve.element()->cinfo()->isA( "Dsolve" ) )
     {
-        dsolve_= reinterpret_cast< ZombiePoolInterface *>(
+        dsolve_= reinterpret_cast< KsolveBase *>(
                      ObjId( dsolve, 0 ).data() );
     }
     else if ( dsolve == Id() )

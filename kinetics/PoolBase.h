@@ -138,6 +138,13 @@ public:
     void decrement( double val );
     void nIn( double val );
 
+	void notifyDestroy( const Eref& e );
+
+	void notifyCreate( const Eref& e, ObjId parent );
+	void notifyMove( const Eref& e, ObjId newParent );
+	void notifyAddMsgSrc( const Eref& e, ObjId msgId );
+	void notifyAddMsgDest( const Eref& e, ObjId msgId );
+
     //////////////////////////////////////////////////////////////////
     // Virtual Dest funcs. Most of these have a generic do-nothing
     // function here, as most of the derived classes don't need to

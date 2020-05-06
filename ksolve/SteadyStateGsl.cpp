@@ -29,7 +29,7 @@
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
 #include "XferInfo.h"
-#include "ZombiePoolInterface.h"
+#include "KsolveBase.h"
 #include "Stoich.h"
 
 #ifdef USE_GSL

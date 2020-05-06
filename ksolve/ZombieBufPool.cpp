@@ -11,7 +11,7 @@
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
 #include "XferInfo.h"
-#include "ZombiePoolInterface.h"
+#include "KsolveBase.h"
 #include "ZombiePool.h"
 #include "ZombieBufPool.h"
 #include "../kinetics/lookupVolumeFromMesh.h"

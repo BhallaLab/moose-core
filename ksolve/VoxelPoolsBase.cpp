@@ -10,7 +10,7 @@
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
 #include "XferInfo.h"
-#include "ZombiePoolInterface.h"
+#include "KsolveBase.h"
 #include "RateTerm.h"
 #include "FuncTerm.h"
 #include "../basecode/SparseMatrix.h"

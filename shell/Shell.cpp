@@ -645,6 +645,7 @@ void Shell::innerCreate(string type, ObjId parent, Id newElm, string name,
         assert(ret);
         adopt(parent, newElm, msgIndex);
         ret->setTick(Clock::lookupDefaultTick(c->name()));
+		SetGet1< ObjId >::set( newElm, "notifyCreate", parent ); 
     } else
         assert(0);
 }
@@ -655,6 +656,7 @@ void Shell::destroy(const Eref& e, ObjId oid)
     assert(n);
     // cout << myNode_ << ": Shell::destroy done for element id: " << eid << ",
     // name = " << eid.element()->getName() << endl;
+	SetGet0::set( oid, "notifyDestroy" );
     n->destroy(oid.eref(), 0);
     if (cwe_.id == oid.id) cwe_ = ObjId();
 }
@@ -725,6 +727,8 @@ const Msg* Shell::innerAddMsg(string msgType, ObjId src, string srcField,
     }
     if (m) {
         if (f1->addMsg(f2, m->mid(), src.id.element())) {
+			SetGet1< ObjId >::set( src, "notifyAddMsgSrc", m->mid() );
+			SetGet1< ObjId >::set( dest, "notifyAddMsgDest", m->mid() );
             return m;
         }
         delete m;
@@ -758,6 +762,7 @@ bool Shell::innerMove(Id orig, ObjId newParent)
              << orig.element()->getName() << "\n";
         return 0;
     }
+	SetGet1< ObjId >::set( orig, "notifyMove", newParent );
     return 1;
 }
 

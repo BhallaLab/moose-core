@@ -58,7 +58,7 @@ public:
     static const Cinfo* initCinfo();
 protected:
     /**
-     * The ZombiePoolInterface pointers hold the solvers for the
+     * The KsolveBase pointers hold the solvers for the
      * ZombiePool. At least one must be assigned. Field assignments
      * propagate from the pool to whichever is assigned. Field
      * lookups first check the dsolve, then the ksolve.
@@ -67,8 +67,8 @@ protected:
      * routing the zombie operations through the Stoich, we have
      * pointers directly into the Dsolve and Ksolve.
      */
-    ZombiePoolInterface* dsolve_;
-    ZombiePoolInterface* ksolve_;
+    KsolveBase* dsolve_;
+    KsolveBase* ksolve_;
     double diffConst_;
     double motorConst_;
 };
