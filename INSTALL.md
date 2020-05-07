@@ -41,6 +41,9 @@ from github.
 This will build moose, `ctest` will run few tests to check if build process was
 successful.
 
+To make in debug mode use:
+    $ cmake -DCMAKE_BUILD_TYPE=Debug ..
+
 To install MOOSE into non-standard directory, pass additional argument
 `-DCMAKE_INSTALL_PREFIX=path/to/install/dir` to during configuration. E.g.,
 

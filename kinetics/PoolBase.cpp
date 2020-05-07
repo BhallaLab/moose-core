@@ -135,6 +135,11 @@ const Cinfo* PoolBase::initPoolBaseCinfo()
     static DestFinfo notifyAddMsgDest("notifyAddMsgSrc", 
 				"Called when a message is created, current object is dest. Arg is msgId.", 
 				new EpFunc1<PoolBase, ObjId>(&PoolBase::notifyAddMsgDest));
+
+    static DestFinfo setSolvers( "setSolvers",
+                "Assigns solvers to Pool. Args: ksolve, dsolve",
+                new EpFunc2< PoolBase, ObjId, ObjId >(&PoolBase::setSolvers)
+    );
     //////////////////////////////////////////////////////////////
     // MsgDest Definitions: These three are used for non-reaction
     // calculations involving algebraically defined rate terms.
@@ -220,6 +225,7 @@ const Cinfo* PoolBase::initPoolBaseCinfo()
 		&notifyMove,		 // DestFinfo
 		&notifyAddMsgSrc,	 // DestFinfo
 		&notifyAddMsgDest,	 // DestFinfo
+		&setSolvers,	 // DestFinfo
     };
 
     static string doc[] =
@@ -349,7 +355,7 @@ void PoolBase::notifyDestroy(const Eref& e)
 
 void PoolBase::notifyCreate(const Eref& e, ObjId parent)
 {
-	cout << "Creating poolBase " << e.id().path() << " on " << parent.path() << endl;
+	// cout << "Creating poolBase " << e.id().path() << endl;
 	ksolve_->notifyAddPool( e );
 	if ( dsolve_ )
 		dsolve_->notifyAddPool( e );
@@ -357,7 +363,7 @@ void PoolBase::notifyCreate(const Eref& e, ObjId parent)
 
 void PoolBase::notifyMove(const Eref& e, ObjId newParent)
 {
-	cout << "Moving poolBase " << e.id().path() << " onto " << newParent.path() << endl;
+	// cout << "Moving poolBase " << e.id().path() << " onto " << newParent.path() << endl;
 	if ( defaultKsolve() != ksolve_ ) {
 		ksolve_->notifyRemovePool( e );
 		defaultKsolve()->notifyAddPool( e );
@@ -473,6 +479,34 @@ void PoolBase::setSpecies( const Eref& e, unsigned int v )
 unsigned int PoolBase::getSpecies( const Eref& e ) const
 {
     return 0;
+}
+
+void PoolBase::setSolvers( const Eref& e, ObjId ksolve, ObjId dsolve )
+{
+	if ( ! ksolve.bad() ) {
+		string nm = ksolve.element()->cinfo()->name();
+		if ( nm == "Ksolve" || nm == "Gsolve" ) {
+			KsolveBase* k = reinterpret_cast< KsolveBase *>(ksolve.data() );
+			if ( k && k != ksolve_ ) {
+				if ( ksolve_ )
+					ksolve_->notifyRemovePool( e );
+				ksolve_ = k;
+				k->notifyAddPool( e );
+			}
+		}
+	}
+	if ( ! dsolve.bad() ) {
+		string nm = dsolve.element()->cinfo()->name();
+		if ( nm == "Dsolve" ) {
+			KsolveBase* d = reinterpret_cast< KsolveBase *>(dsolve.data() );
+			if ( d && d != dsolve_ ) {
+				if ( dsolve_ )
+					dsolve_->notifyRemovePool( e );
+				dsolve_ = d;
+				d->notifyAddPool( e );
+			}
+		}
+	}
 }
 
 /**

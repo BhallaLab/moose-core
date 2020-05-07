@@ -1210,6 +1210,7 @@ void Stoich::zombifyModel(const Eref& e, const vector<Id>& elist)
             else {
                 funcId = zombifyPoolFuncWithScaling(*i);
             }
+			SetGet2< ObjId, ObjId >::set( *i, "setSolvers", ksolve_, dsolve_);
             //PoolBase::zombify(ei, zombiePoolCinfo, ksolve_, dsolve_);
             ei->resize(numVoxels_);
             for(unsigned int j = 0; j < numVoxels_; ++j) {

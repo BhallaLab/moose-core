@@ -88,6 +88,10 @@ public:
 	void notifyAddMsgSrc( const Eref& e, ObjId msgId );
 	void notifyAddMsgDest( const Eref& e, ObjId msgId );
 
+    //////////////////////////////////////////////////////////////////
+	void setSolvers( const Eref& e, ObjId ksolve, ObjId dsolve );
+
+    //////////////////////////////////////////////////////////////////
 
     static const Cinfo* initPoolBaseCinfo();
     static const Cinfo* initPoolCinfo();
