@@ -153,6 +153,9 @@ const Cinfo* Neutral::initCinfo()
     static DestFinfo notifyCreate("notifyCreate", 
 				"Called when object is created. Arg is parent.", 
 				new EpFunc1<Neutral, ObjId >(&Neutral::notifyCreate));
+    static DestFinfo notifyCopy("notifyCopy", 
+				"Called when object is copied. Arg is original.", 
+				new EpFunc1<Neutral, ObjId >(&Neutral::notifyCreate));
     static DestFinfo notifyDestroy("notifyDestroy", 
 				"Called when object is destroyed.", 
 				new EpFunc0<Neutral>(&Neutral::notifyDestroy));
@@ -223,6 +226,7 @@ const Cinfo* Neutral::initCinfo()
                                      &msgDestFunctions,  // ReadOnlyLookupValue
                                      &isA,               // ReadOnlyLookupValue
 									 &notifyCreate,		 // DestFinfo
+									 &notifyCopy,		 // DestFinfo
 									 &notifyDestroy,	 // DestFinfo
 									 &notifyMove,		 // DestFinfo
 									 &notifyAddMsgSrc,	 // DestFinfo
@@ -570,6 +574,8 @@ unsigned int Neutral::buildTree(const Eref& e, vector<Id>& tree) const
 void Neutral::notifyDestroy(const Eref& e)
 {;}
 void Neutral::notifyCreate(const Eref& e, ObjId parent)
+{;}
+void Neutral::notifyCopy(const Eref& e, ObjId original)
 {;}
 void Neutral::notifyMove(const Eref& e, ObjId newParent)
 {;}

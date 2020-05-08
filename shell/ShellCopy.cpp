@@ -70,7 +70,7 @@ Element* innerCopyElements(Id orig, ObjId newParent, Id newId, unsigned int n,
     assert(e);
     Shell::adopt(newParent, newId, 0);
     e->setTick(Clock::lookupDefaultTick(e->cinfo()->name()));
-	SetGet1< ObjId >::set( newId, "notifyCreate", newParent );
+	SetGet1< ObjId >::set( newId, "notifyCopy", orig );
 
     // cout << Shell::myNode() << ": Copy: orig= " << orig << ", newParent = "
     // << newParent << ", newId = " << newId << endl;

@@ -123,6 +123,9 @@ const Cinfo* PoolBase::initPoolBaseCinfo()
     static DestFinfo notifyCreate("notifyCreate", 
 				"Called when object is created. Arg is parent.", 
 				new EpFunc1<PoolBase, ObjId >(&PoolBase::notifyCreate));
+    static DestFinfo notifyCopy("notifyCopy", 
+				"Called when object is created. Arg is original.", 
+				new EpFunc1<PoolBase, ObjId >(&PoolBase::notifyCopy));
     static DestFinfo notifyDestroy("notifyDestroy", 
 				"Called when object is destroyed.", 
 				new EpFunc0<PoolBase>(&PoolBase::notifyDestroy));
@@ -221,6 +224,7 @@ const Cinfo* PoolBase::initPoolBaseCinfo()
         &proc,				// SharedFinfo
         &species,			// SharedFinfo
 		&notifyCreate,		 // DestFinfo
+		&notifyCopy,		 // DestFinfo
 		&notifyDestroy,	 	// DestFinfo
 		&notifyMove,		 // DestFinfo
 		&notifyAddMsgSrc,	 // DestFinfo
@@ -359,6 +363,20 @@ void PoolBase::notifyCreate(const Eref& e, ObjId parent)
 	ksolve_->notifyAddPool( e );
 	if ( dsolve_ )
 		dsolve_->notifyAddPool( e );
+}
+
+void PoolBase::notifyCopy(const Eref& e, ObjId old)
+{
+	ksolve_->notifyAddPool( e );
+	if ( dsolve_ )
+		dsolve_->notifyAddPool( e );
+
+	// setNinit( e, Field< double >::get( old, "nInit" ) );
+	// setN( e, Field< double >::get( old, "n" ) );
+	double c = Field< double >::get( old, "concInit" );
+	setConcInit( e, c );
+	c = Field< double >::get( old, "conc" );
+	setConc( e, c );
 }
 
 void PoolBase::notifyMove(const Eref& e, ObjId newParent)

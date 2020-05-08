@@ -1196,8 +1196,7 @@ void Stoich::zombifyModel(const Eref& e, const vector<Id>& elist)
             // We need to check the increment message before we zombify the
             // pool, because ZombiePool doesn't have this message.
             Id funcId = findFuncMsgSrc(*i, "increment");
-            double concInit =
-                Field<double>::get(ObjId(ei->id(), 0), "concInit");
+            double concInit = Field<double>::get( *i, "concInit");
             // Look for func setting rate of change of pool
             // Id funcId = Neutral::child( i->eref(), "func" );
             if(funcId != Id()) {
@@ -1211,6 +1210,8 @@ void Stoich::zombifyModel(const Eref& e, const vector<Id>& elist)
                 funcId = zombifyPoolFuncWithScaling(*i);
             }
 			SetGet2< ObjId, ObjId >::set( *i, "setSolvers", ksolve_, dsolve_);
+			cout << "Setting concinit = " << concInit << endl;
+            Field<double>::set(*i, "concInit", concInit);
             //PoolBase::zombify(ei, zombiePoolCinfo, ksolve_, dsolve_);
             ei->resize(numVoxels_);
             for(unsigned int j = 0; j < numVoxels_; ++j) {
