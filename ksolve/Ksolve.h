@@ -98,8 +98,9 @@ public:
     void setN( const Eref& e, double v );
     double getN( const Eref& e ) const;
 
-    void setNinit( const Eref& e, double v );
-    double getNinit( const Eref& e ) const;
+    void setConcInit( const Eref& e, double v );
+    double getConcInit( const Eref& e ) const;
+    double getVolumeOfPool( const Eref& e ) const;
 
     void setDiffConst( const Eref& e, double v );
     double getDiffConst( const Eref& e ) const;

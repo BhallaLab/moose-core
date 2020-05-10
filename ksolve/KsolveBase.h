@@ -20,10 +20,10 @@ class KsolveBase
 public:
     KsolveBase();
 
-    /// Set initial # of molecules in given pool and voxel. Bdry cond.
-    virtual void setNinit( const Eref& e, double val ) = 0;
-    /// get initial # of molecules in given pool and voxel. Bdry cond.
-    virtual double getNinit( const Eref& e ) const = 0;
+    /// Set initial conc of molecules in given pool and voxel. Bdry cond.
+    virtual void setConcInit( const Eref& e, double val ) = 0;
+    /// get initial conc of molecules in given pool and voxel. Bdry cond.
+    virtual double getConcInit( const Eref& e ) const = 0;
 
     /// Set # of molecules in given pool and voxel. Varies with time.
     virtual void setN( const Eref& e, double val ) = 0;
@@ -62,6 +62,9 @@ public:
 
     /// Return volume of voxel i.
     virtual double volume( unsigned int i ) const = 0;
+
+	/// Return volume of pool e.
+    virtual double getVolumeOfPool( const Eref& e ) const = 0;
 
 	///////////////////////////////////////////////////////////////////
 	// Here is a block of notify events

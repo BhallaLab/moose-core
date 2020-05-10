@@ -419,38 +419,40 @@ double PoolBase::getN( const Eref& e ) const
 
 void PoolBase::setNinit( const Eref& e, double v )
 {
-    ksolve_->setNinit( e, v );
+    double c = v / ( NA * getVolume( e ) );
+    ksolve_->setConcInit( e, c );
 	if ( dsolve_ )
-    	dsolve_->setNinit( e, v );
+    	dsolve_->setConcInit( e, c );
 }
 
 double PoolBase::getNinit( const Eref& e ) const
 {
-	return ksolve_->getNinit( e );
+	return ksolve_->getConcInit( e ) * NA * getVolume( e );
 }
 
 // Conc is given in millimolar. Volume is in m^3
 void PoolBase::setConc( const Eref& e, double conc )
 {
-    double n = NA * conc * lookupVolumeFromMesh( e );
+    double n = NA * conc * getVolume( e );
     setN( e, n );
 }
 
 // Returns conc in millimolar.
 double PoolBase::getConc( const Eref& e ) const
 {
-    return getN( e ) / ( NA * lookupVolumeFromMesh( e ) );
+    return getN( e ) / ( NA * getVolume( e ) );
 }
 
 void PoolBase::setConcInit( const Eref& e, double conc )
 {
-    double n = NA * conc * lookupVolumeFromMesh( e );
-    setNinit( e, n );
+	ksolve_->setConcInit( e, conc );
+	if ( dsolve_ )
+    	dsolve_->setConcInit( e, conc );
 }
 
 double PoolBase::getConcInit( const Eref& e ) const
 {
-    return getNinit( e ) / (NA * lookupVolumeFromMesh( e ) );
+	return ksolve_->getConcInit( e );
 }
 
 void PoolBase::setDiffConst( const Eref& e, double v )
@@ -486,7 +488,8 @@ void PoolBase::setVolume( const Eref& e, double v )
 
 double PoolBase::getVolume( const Eref& e ) const
 {
-    return lookupVolumeFromMesh( e );
+	return ksolve_->getVolumeOfPool( e );
+    // return lookupVolumeFromMesh( e );
 }
 
 void PoolBase::setSpecies( const Eref& e, unsigned int v )

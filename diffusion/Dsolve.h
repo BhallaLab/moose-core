@@ -126,10 +126,11 @@ public:
     //////////////////////////////////////////////////////////////////
     // Inherited virtual funcs from KsolveBase
     //////////////////////////////////////////////////////////////////
-    double getNinit( const Eref& e ) const;
-    void setNinit( const Eref& e, double value );
+    double getConcInit( const Eref& e ) const;
+    void setConcInit( const Eref& e, double value );
     double getN( const Eref& e ) const;
     void setN( const Eref& e, double value );
+	double getVolumeOfPool( const Eref& e ) const;
     double getDiffConst( const Eref& e ) const;
     void setDiffConst( const Eref& e, double value );
     void setMotorConst( const Eref& e, double value );
@@ -177,7 +178,7 @@ public:
      * the Dsolve, and the stoich is assigned.
      * Called during the setStoich function.
      */
-    void build( double dt );
+    void build( double dt, const MeshCompt* m );
     void rebuildPools();
     void calcJnDiff( const DiffJunction& jn, Dsolve* other, double dt );
     void calcJnXfer( const DiffJunction& jn,

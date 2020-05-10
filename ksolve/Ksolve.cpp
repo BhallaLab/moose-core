@@ -714,19 +714,25 @@ double Ksolve::getN( const Eref& e ) const
     return 0.0;
 }
 
-void Ksolve::setNinit( const Eref& e, double v )
+void Ksolve::setConcInit( const Eref& e, double v )
 {
     unsigned int vox = getVoxelIndex( e );
     if ( vox != OFFNODE )
-        pools_[vox].setNinit( getPoolIndex( e ), v );
+        pools_[vox].setConcInit( getPoolIndex( e ), v );
 }
 
-double Ksolve::getNinit( const Eref& e ) const
+double Ksolve::getConcInit( const Eref& e ) const
 {
     unsigned int vox = getVoxelIndex( e );
     if ( vox != OFFNODE )
-        return pools_[vox].getNinit( getPoolIndex( e ) );
+        return pools_[vox].getConcInit( getPoolIndex( e ) );
     return 0.0;
+}
+
+double Ksolve::getVolumeOfPool( const Eref& e ) const
+{
+    unsigned int vox = getVoxelIndex( e );
+    return pools_[vox].getVolume();
 }
 
 void Ksolve::setDiffConst( const Eref& e, double v )

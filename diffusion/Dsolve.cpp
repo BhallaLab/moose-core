@@ -21,13 +21,13 @@
 #include "FastMatrixElim.h"
 #include "../mesh/VoxelJunction.h"
 #include "DiffJunction.h"
-#include "Dsolve.h"
 #include "../mesh/Boundary.h"
 #include "../mesh/MeshEntry.h"
 #include "../mesh/ChemCompt.h"
 #include "../mesh/MeshCompt.h"
 #include "../shell/Wildcard.h"
 #include "../kinetics/PoolBase.h"
+#include "Dsolve.h"
 
 #include <thread>
 
@@ -556,9 +556,11 @@ void Dsolve::process( const Eref& e, ProcPtr p )
 
 void Dsolve::reinit( const Eref& e, ProcPtr p )
 {
-    build( p->dt );
+	const MeshCompt* m = reinterpret_cast< const MeshCompt* >(
+                              compartment_.eref().data() );
+    build( p->dt, m );
     for (auto i = pools_.begin(); i != pools_.end(); ++i )
-        i->reinit();
+		i->reinit( m->vGetVoxelVolume() );
 }
 
 void Dsolve::updateJunctions( double dt )
@@ -814,7 +816,7 @@ string Dsolve::getPath( const Eref& e ) const
  * each reinit.
  */
 
-void Dsolve::build( double dt )
+void Dsolve::build( double dt, const MeshCompt *m )
 {
     if ( doubleEq( dt, dt_ ) )
         return;
@@ -825,8 +827,6 @@ void Dsolve::build( double dt )
         return;
     }
     dt_ = dt;
-    const MeshCompt* m = reinterpret_cast< const MeshCompt* >(
-                             compartment_.eref().data() );
     unsigned int numVoxels = m->getNumEntries();
 
     for ( unsigned int i = 0; i < numLocalPools_; ++i )
@@ -1158,7 +1158,7 @@ double Dsolve::getN( const Eref& e ) const
     return 0.0;
 }
 
-void Dsolve::setNinit( const Eref& e, double v )
+void Dsolve::setConcInit( const Eref& e, double v )
 {
     unsigned int pid = convertIdToPoolIndex( e );
     if ( pid == ~0U || pid >= pools_.size() )  // Ignore silently
@@ -1166,25 +1166,31 @@ void Dsolve::setNinit( const Eref& e, double v )
     unsigned int vox = e.dataIndex();
     if ( vox < numVoxels_ )
     {
-        pools_[ pid ].setNinit( vox, v );
+        pools_[ pid ].setConcInit( vox, v );
         return;
     }
-    cout << "Warning: Dsolve::setNinit: Eref " << e << " out of range " <<
+    cout << "Warning: Dsolve::setConcInit: Eref " << e << " out of range " <<
          pools_.size() << ", " << numVoxels_ << "\n";
 }
 
-double Dsolve::getNinit( const Eref& e ) const
+double Dsolve::getConcInit( const Eref& e ) const
 {
     unsigned int pid = convertIdToPoolIndex( e );
     if ( pid == ~0U || pid >= pools_.size() ) return 0.0; //ignore silently
     unsigned int vox = e.dataIndex();
     if ( vox < numVoxels_ )
     {
-        return pools_[ pid ].getNinit( vox );
+        return pools_[ pid ].getConcInit( vox );
     }
-    cout << "Warning: Dsolve::getNinit: Eref " << e << " out of range " <<
+    cout << "Warning: Dsolve::getConcInit: Eref " << e << " out of range " <<
          pools_.size() << ", " << numVoxels_ << "\n";
     return 0.0;
+}
+
+double Dsolve::getVolumeOfPool( const Eref& e ) const
+{
+	unsigned int vox = e.dataIndex();
+	return volume( vox ); // This is a dummy function, below.
 }
 
 void Dsolve::setDiffConst( const Eref& e, double v )
