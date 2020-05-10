@@ -333,7 +333,7 @@ void VoxelPoolsBase::filterCrossRateTerms(
             {
                 k++; // Delete the next entry too, it is the reverse reacn.
                 assert( k < rates_.size() );
-                if ( reacCinfo->isA( "ReacBase" ) )
+                if ( reacCinfo->isA( "Reac" ) )
                 {
                     if ( rates_[k] )
                         delete rates_[k];

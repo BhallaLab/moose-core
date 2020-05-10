@@ -12,7 +12,8 @@
 #include <iomanip>
 #include <fstream>
 #include "../basecode/header.h"
-#include "ReacBase.h"
+class Stoich;
+#include "Reac.h"
 #include "EnzBase.h"
 #include "lookupVolumeFromMesh.h"
 
@@ -835,7 +836,7 @@ void ReadKkit::assignPoolCompartments()
 Id findParentComptOfReac( Id reac )
 {
     static const Finfo* subFinfo =
-        ReacBase::initCinfo()->findFinfo( "subOut" );
+        Reac::initCinfo()->findFinfo( "subOut" );
     assert( subFinfo );
 
     vector< Id > subVec;

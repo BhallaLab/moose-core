@@ -13,7 +13,7 @@
 #include "ReadCspace.h"
 #include "EnzBase.h"
 #include "MMenz.h"
-#include "ReacBase.h"
+class Stoich;
 #include "Reac.h"
 
 void testReadKkit()

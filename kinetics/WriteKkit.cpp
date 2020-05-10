@@ -15,7 +15,8 @@
 #include "../basecode/header.h"
 #include "../utility/utility.h"
 
-#include "ReacBase.h"
+class Stoich;
+#include "Reac.h"
 #include "EnzBase.h"
 #include "lookupVolumeFromMesh.h"
 #include <sstream>
@@ -605,7 +606,7 @@ void writeKkit( Id model, const string& fname )
         }
         // Reaction
         vector< ObjId > Compt_Reac;
-        wildcardFind(comptPath+"/##[ISA=ReacBase]",Compt_Reac);
+        wildcardFind(comptPath+"/##[ISA=Reac]",Compt_Reac);
         for (vector <ObjId> :: iterator itrR= Compt_Reac.begin(); itrR != Compt_Reac.end(); itrR++)
         {
             string path = Field<string> :: get(*itrR,"path");

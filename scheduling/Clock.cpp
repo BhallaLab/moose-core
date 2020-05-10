@@ -927,8 +927,6 @@ void Clock::buildDefaultTick()
     defaultTick_["Enz"] = 14;
     defaultTick_["EnzBase"] = 14;
     defaultTick_["MMenz"] = 14;
-    defaultTick_["Reac"] = 14;
-    defaultTick_["ReacBase"] = 14;
     defaultTick_["Gsolve"] = 16; // Note this uses an 'init' at t-1
     defaultTick_["Ksolve"] = 16; // Note this uses an 'init' at t-1
     defaultTick_["Stats"] = 17;
@@ -974,6 +972,7 @@ void Clock::buildDefaultTick()
     defaultTick_["Pool"] = ~0U;
     defaultTick_["BufPool"] = ~0U;
     defaultTick_["PsdMesh"] = ~0U;
+    defaultTick_["Reac"] = ~0U;
     defaultTick_["Shell"] = ~0U;
     defaultTick_["SingleMsg"] = ~0U;
     defaultTick_["SparseMsg"] = ~0U;
@@ -993,7 +992,6 @@ void Clock::buildDefaultTick()
     defaultTick_["ZombieFunction"] = ~0U;
     defaultTick_["ZombieHHChannel"] = ~0U;
     defaultTick_["ZombieMMenz"] = ~0U;
-    defaultTick_["ZombieReac"] = ~0U;
 
     defaultDt_.assign( Clock::numTicks, 0.0 );
     defaultDt_[0] = 50.0e-6;
