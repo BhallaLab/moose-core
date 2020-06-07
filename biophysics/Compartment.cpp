@@ -8,7 +8,7 @@
 **********************************************************************/
 
 #include "../basecode/header.h"
-#include "../basecode/global.h"
+#include "../randnum/randnum.h"
 #include "CompartmentBase.h"
 #include "Compartment.h"
 

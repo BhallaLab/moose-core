@@ -76,7 +76,7 @@ public:
     string filepath;
     string host;
     bool valid;
-    size_t port;
+    unsigned int port;
 };
 
 

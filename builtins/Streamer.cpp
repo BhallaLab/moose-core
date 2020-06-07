@@ -44,13 +44,13 @@ const Cinfo* Streamer::initCinfo()
         , &Streamer::getFormat
     );
 
-    static ReadOnlyValueFinfo<Streamer, size_t> numTables (
+    static ReadOnlyValueFinfo<Streamer, unsigned int> numTables (
         "numTables"
         , "Number of Tables handled by Streamer "
         , &Streamer::getNumTables
     );
 
-    static ReadOnlyValueFinfo<Streamer, size_t> numWriteEvents(
+    static ReadOnlyValueFinfo<Streamer, unsigned int> numWriteEvents(
         "numWriteEvents"
         , "Number of time streamer was called to write. (For debugging/performance reason only)"
         , &Streamer::getNumWriteEvents
@@ -75,25 +75,25 @@ const Cinfo* Streamer::initCinfo()
     static DestFinfo addTable(
         "addTable"
         , "Add a table to Streamer"
-        , new OpFunc1<Streamer, Id>( &Streamer::addTable )
+        , new OpFunc1<Streamer, ObjId>( &Streamer::addTable )
     );
 
     static DestFinfo addTables(
         "addTables"
         , "Add many tables to Streamer"
-        , new OpFunc1<Streamer, vector<Id> >( &Streamer::addTables )
+        , new OpFunc1<Streamer, vector<ObjId> >( &Streamer::addTables )
     );
 
     static DestFinfo removeTable(
         "removeTable"
         , "Remove a table from Streamer"
-        , new OpFunc1<Streamer, Id>( &Streamer::removeTable )
+        , new OpFunc1<Streamer, ObjId>( &Streamer::removeTable )
     );
 
     static DestFinfo removeTables(
         "removeTables"
         , "Remove tables -- if found -- from Streamer"
-        , new OpFunc1<Streamer, vector<Id> >( &Streamer::removeTables )
+        , new OpFunc1<Streamer, vector<ObjId> >( &Streamer::removeTables )
     );
 
     /*-----------------------------------------------------------------------------
@@ -182,7 +182,7 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
     }
 
     Clock* clk = reinterpret_cast<Clock*>( Id(1).eref().data() );
-    for (size_t i = 0; i < tableIds_.size(); i++)
+    for (unsigned int i = 0; i < tableIds_.size(); i++)
     {
         int tickNum = tableIds_[i].element()->getTick();
         double tick = clk->getTickDt( tickNum );
@@ -203,7 +203,7 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
 
 
     // Push each table dt_ into vector of dt
-    for( size_t i = 0; i < tables_.size(); i++)
+    for( unsigned int i = 0; i < tables_.size(); i++)
     {
         Id tId = tableIds_[i];
         int tickNum = tId.element()->getTick();
@@ -212,7 +212,7 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
 
     // Make sure all tables have same dt_ else disable the streamer.
     vector<unsigned int> invalidTables;
-    for (size_t i = 1; i < tableTick_.size(); i++)
+    for (unsigned int i = 1; i < tableTick_.size(); i++)
     {
         if( tableTick_[i] != tableTick_[0] )
         {
@@ -227,7 +227,7 @@ void Streamer::reinit(const Eref& e, ProcPtr p)
         }
     }
 
-    for (size_t i = 0; i < invalidTables.size(); i++)
+    for (unsigned int i = 0; i < invalidTables.size(); i++)
     {
         tables_.erase( tables_.begin() + i );
         tableDt_.erase( tableDt_.begin() + i );
@@ -280,10 +280,10 @@ void Streamer::process(const Eref& e, ProcPtr p)
  *
  * @param table Id of table.
  */
-void Streamer::addTable( Id table )
+void Streamer::addTable( ObjId table )
 {
     // If this table is not already in the vector, add it.
-    for( size_t i = 0; i < tableIds_.size(); i++)
+    for( unsigned int i = 0; i < tableIds_.size(); i++)
         if( table.path() == tableIds_[i].path() )
             return;                             /* Already added. */
 
@@ -306,11 +306,11 @@ void Streamer::addTable( Id table )
  *
  * @param tables
  */
-void Streamer::addTables( vector<Id> tables )
+void Streamer::addTables( vector<ObjId> tables )
 {
     if( tables.size() == 0 )
         return;
-    for( vector<Id>::const_iterator it = tables.begin(); it != tables.end(); it++)
+    for(auto it = tables.begin(); it != tables.end(); it++)
         addTable( *it );
 }
 
@@ -320,10 +320,10 @@ void Streamer::addTables( vector<Id> tables )
  *
  * @param table. Id of table.
  */
-void Streamer::removeTable( Id table )
+void Streamer::removeTable( ObjId table )
 {
     int matchIndex = -1;
-    for (size_t i = 0; i < tableIds_.size(); i++)
+    for (unsigned int i = 0; i < tableIds_.size(); i++)
         if( table.path() == tableIds_[i].path() )
         {
             matchIndex = i;
@@ -343,9 +343,9 @@ void Streamer::removeTable( Id table )
  *
  * @param tables
  */
-void Streamer::removeTables( vector<Id> tables )
+void Streamer::removeTables( vector<ObjId> tables )
 {
-    for( vector<Id>::const_iterator it = tables.begin(); it != tables.end(); it++)
+    for(auto it = tables.cbegin(); it != tables.cend(); it++)
         removeTable( *it );
 }
 
@@ -354,7 +354,7 @@ void Streamer::removeTables( vector<Id> tables )
  *
  * @return  Number of tables.
  */
-size_t Streamer::getNumTables( void ) const
+unsigned int Streamer::getNumTables( void ) const
 {
     return tables_.size();
 }
@@ -367,7 +367,7 @@ size_t Streamer::getNumTables( void ) const
  * @Returns
  */
 /* ----------------------------------------------------------------------------*/
-size_t Streamer::getNumWriteEvents( void ) const
+unsigned int Streamer::getNumWriteEvents( void ) const
 {
     return numWriteEvents_;
 }
@@ -409,16 +409,16 @@ string Streamer::getFormat( void ) const
  */
 void Streamer::zipWithTime( )
 {
-    size_t numEntriesInEachTable = tables_[0]->getVecSize( );
+    unsigned int numEntriesInEachTable = tables_[0]->getVecSize( );
 
     //LOG( moose::debug, "Entries in each table " << numEntriesInEachTable );
 
     // Collect data from all table. If some table does not have enough data,
     // fill it with nan
     vector< vector< double > > collectedData;
-    for( size_t i = 0; i < tables_.size( ); i++ )
+    for( unsigned int i = 0; i < tables_.size( ); i++ )
     {
-        vector<double> tVec( tables_[i]->getVec( ) );
+        vector<double> tVec( tables_[i]->getVector( ) );
         if( tVec.size( ) <= numEntriesInEachTable )
         {
 #if 0
@@ -434,16 +434,16 @@ void Streamer::zipWithTime( )
     // Turn it into a table format. Its like taking a transpose of vector<
     // vector >.
     double allTableDt = tableDt_[ 0 ];
-    for( size_t i = 0; i < collectedData[0].size( ); i++ )
+    for( unsigned int i = 0; i < collectedData[0].size( ); i++ )
     {
         data_.push_back( currTime_ );
         currTime_ += allTableDt;
-        for( size_t ii = 0; ii < collectedData.size(); ii++ )
+        for( unsigned int ii = 0; ii < collectedData.size(); ii++ )
             data_.push_back( collectedData[ ii ][ i ] );
     }
 
     // After collection data from table, clear tables.
-    for(size_t i = 0; i < tables_.size(); i++ )
+    for(unsigned int i = 0; i < tables_.size(); i++ )
         tables_[i]->clearVec( );
 
     return;

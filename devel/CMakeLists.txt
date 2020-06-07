@@ -12,3 +12,9 @@ add_custom_target(centos
     COMMENT "Building moose on centos"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     VERBATIM)
+
+add_custom_target(gitlab
+    COMMAND gitlab-runner exec docker build 
+    COMMENT "Replicating gitlab build using Docker."
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    VERBATIM)

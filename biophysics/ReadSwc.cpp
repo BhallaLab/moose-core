@@ -37,7 +37,7 @@ ReadSwc::ReadSwc( const string& fname )
     {
         if ( temp.length() == 0 )
             continue;
-        string::size_type pos = temp.find_first_not_of( "\t " );
+        auto pos = temp.find_first_not_of( "\t " );
         if ( pos == string::npos )
             continue;
         if ( temp[pos] == '#' )
