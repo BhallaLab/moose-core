@@ -82,7 +82,7 @@ public:
      * there may be many molecules which diffuse across each diffusion
      * junction.
      */
-    void buildNeuroMeshJunctions( const Eref& e, Id spineD, Id psdD );
+    void buildNeuroMeshJunctions( const Eref& e, ObjId spineD, ObjId psdD );
 
     /**
      * Builds junctions between current Dsolve and another. For this
