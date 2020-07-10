@@ -1229,10 +1229,10 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
     def _loadElec( self, efile, elecname ):
         if ( efile[ len( efile ) - 2:] == ".p" ):
-            self.elecid = moose.loadModel( efile, '/library/' + elecname)[0]
+            self.elecid = moose.loadModel( efile, '/library/' + elecname)
             print(self.elecid)
         elif ( efile[ len( efile ) - 4:] == ".swc" ):
-            self.elecid = moose.loadModel( efile, '/library/' + elecname)[0]
+            self.elecid = moose.loadModel( efile, '/library/' + elecname)
         else:
             nm = NeuroML()
             print("in _loadElec, combineSegments = ", self.combineSegments)
