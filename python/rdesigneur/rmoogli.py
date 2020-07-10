@@ -39,7 +39,7 @@ def makeMoogli( rd, mooObj, args, fieldInfo ):
                 valMin = ymin, valMax = ymax )
         viewer.addDrawable( reacSystem )
     else:
-        neuron = moogul.MooNeuron( rd.elecid, fieldInfo,
+        neuron = moogul.MooNeuron( mooObj, fieldInfo,
                 field = mooField, relativeObj = relObjPath,
                 valMin = ymin, valMax = ymax )
         print( "min = {}, max = {}".format(ymin, ymax) )
