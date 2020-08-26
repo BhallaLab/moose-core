@@ -200,8 +200,11 @@ PyRun::PyRun():mode_(0), initstr_(""), runstr_(""),
 
 PyRun::~PyRun()
 {
+#if 0
+    // Fixes to BhallaLab/moose-core#420
     Py_XDECREF(globals_);
     Py_XDECREF(locals_);
+#endif
 }
 
 void PyRun::setRunString(string statement)
