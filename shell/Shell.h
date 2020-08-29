@@ -24,6 +24,7 @@ extern DestFinfo* receiveGet();
 //extern SrcFinfo2< unsigned int, unsigned int >* ack(); // Not currently used.
 
 enum NodePolicy { MooseGlobal, MooseBlockBalance, MooseSingleNode };
+
 class NodeBalance
 {
 public:
@@ -84,6 +85,10 @@ public:
                  unsigned int numData,
                  NodePolicy nodePolicy = MooseBlockBalance,
                  unsigned int preferredNode = 1 );
+
+    // Same as before but with default nodePolicy and preferredNode. We are
+    // hidning them away from the python bindings.
+    Id doCreate2( string type, ObjId parent, string name, unsigned int numData);
 
     /**
      * Delete specified Element and all its children and all
@@ -496,8 +501,6 @@ public:
      */
     static bool chopPath( const string& path, vector< string >& ret,
                           vector< unsigned int >& index );
-
-    // static void wildcard( const string& path, vector< Id >& list );
 
     /**
      * Cleans up all Elements except /root itself, /clock, /classes,

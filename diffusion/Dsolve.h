@@ -89,7 +89,7 @@ public:
      * to work the respective meshes must be compatible.
      * These junctions handle diffusion between different meshes.
      */
-    void buildMeshJunctions( const Eref& e, Id other );
+    void buildMeshJunctions( const Eref& e, ObjId other );
 
     /**
      * buildMeshJunctions is the inner utility function for building

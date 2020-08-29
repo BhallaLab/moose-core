@@ -1327,7 +1327,7 @@ def writeSimulationAnnotation(modelpath):
         modelAnno = modelAnno + "<moose:runTime> " + \
             str(modelAnnotation.runtime) + " </moose:runTime>\n"
         modelAnno = modelAnno + "<moose:solver> " + \
-            modelAnnotation.solver + " </moose:solver>\n"
+            modelAnnotation.solver.replace(" ","") + " </moose:solver>\n"
         modelAnno = modelAnno + "<moose:simdt>" + \
             str(mooseclock.dts[12]) + " </moose:simdt>\n"
         modelAnno = modelAnno + "<moose:plotdt> " + \

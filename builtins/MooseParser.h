@@ -64,8 +64,8 @@ public:
     /*-----------------------------------------------------------------------------
      *  Set/Get
      *-----------------------------------------------------------------------------*/
-    Parser::symbol_table_t& GetSymbolTable(const size_t nth=0);
-    const Parser::symbol_table_t& GetSymbolTable(const size_t nth=0) const;
+    Parser::symbol_table_t& GetSymbolTable(const unsigned int nth=0);
+    const Parser::symbol_table_t& GetSymbolTable(const unsigned int nth=0) const;
 
     /*-----------------------------------------------------------------------------
      *  User interface.
@@ -93,7 +93,7 @@ public:
 
     double Eval(bool check=false) const;
 
-    double Derivative(const string& name, size_t nth=1) const;
+    double Derivative(const string& name, unsigned int nth=1) const;
 
     double Diff( const double a, const double b) const;
 
@@ -126,7 +126,7 @@ private:
 
     Parser::expression_t expression_;     /* expression type */
 
-    size_t num_user_defined_funcs_ = 0;
+    unsigned int num_user_defined_funcs_ = 0;
 
     bool valid_{false};
 

@@ -80,37 +80,38 @@ static PyMethodDef IdMethods[] = {
     // {"init", (PyCFunction)moose_Id_init, METH_VARARGS,
     //  "Initialize a Id object."},
     {"delete", (PyCFunction)moose_Id_delete, METH_NOARGS, moose_Id_delete_doc},
-    {"getValue",  (PyCFunction)moose_Id_getValue,
-     METH_NOARGS, "Returns integer representation of the id of the element."},
-    {"getPath",   (PyCFunction)moose_Id_getPath,
-     METH_NOARGS, "Returns the path of this vec object."},
-    {"getShape",  (PyCFunction)moose_Id_getShape,
-     METH_NOARGS, "Returns the shape of the vec object as a tuple."},
-    {"setField",   (PyCFunction)moose_Id_setField,
-     METH_VARARGS, moose_Id_setField_doc},
+    {"getValue", (PyCFunction)moose_Id_getValue, METH_NOARGS,
+     "Returns integer representation of the id of the element."},
+    {"getPath", (PyCFunction)moose_Id_getPath, METH_NOARGS,
+     "Returns the path of this vec object."},
+    {"getShape", (PyCFunction)moose_Id_getShape, METH_NOARGS,
+     "Returns the shape of the vec object as a tuple."},
+    {"setField", (PyCFunction)moose_Id_setField, METH_VARARGS,
+     moose_Id_setField_doc},
     {NULL, NULL, 0, NULL}, /* Sentinel */
 };
 
 static PySequenceMethods IdSequenceMethods = {
-    (lenfunc)moose_Id_getLength,    // sq_length
-    0,                              // sq_concat
-    0,                              // sq_repeat
-    (ssizeargfunc)moose_Id_getItem, // sq_item
+    (lenfunc)moose_Id_getLength,     // sq_length
+    0,                               // sq_concat
+    0,                               // sq_repeat
+    (ssizeargfunc)moose_Id_getItem,  // sq_item
 #ifndef PY3K
-    (ssizessizeargfunc)moose_Id_getSlice, // getslice
+    (ssizessizeargfunc)moose_Id_getSlice,  // getslice
 #else
     0,
 #endif
-    0,                             // sq_ass_item
-    0,                             // setslice
-    (objobjproc)moose_Id_contains, // sq_contains
-    0,                             // sq_inplace_concat
-    0                              // sq_inplace_repeat
+    0,                              // sq_ass_item
+    0,                              // setslice
+    (objobjproc)moose_Id_contains,  // sq_contains
+    0,                              // sq_inplace_concat
+    0                               // sq_inplace_repeat
 };
 
-static PyMappingMethods IdMappingMethods = {(lenfunc)moose_Id_getLength, // mp_length
-                                            (binaryfunc)moose_Id_subscript, // mp_subscript
-                                            0 // mp_ass_subscript
+static PyMappingMethods IdMappingMethods = {
+    (lenfunc)moose_Id_getLength,     // mp_length
+    (binaryfunc)moose_Id_subscript,  // mp_subscript
+    0                                // mp_ass_subscript
 };
 
 ///////////////////////////////////////////////
@@ -210,44 +211,46 @@ PyDoc_STRVAR(
     "\n        >>> print iaf.Vm"
     "\n            array([ 0.,  1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9.])");
 
-PyTypeObject IdType = {PyVarObject_HEAD_INIT(NULL, 0)   /* tp_head */
-                       "moose.vec",                     /* tp_name */
-                       sizeof(_Id),                     /* tp_basicsize */
-                       0,                               /* tp_itemsize */
-                       0,                               /* tp_dealloc */
-                       0,                               /* tp_print */
-                       0,                               /* tp_getattr */
-                       0,                               /* tp_setattr */
-                       0,                               /* tp_compare */
-                       (reprfunc)moose_Id_repr,         /* tp_repr */
-                       0,                               /* tp_as_number */
-                       &IdSequenceMethods,              /* tp_as_sequence */
-                       &IdMappingMethods,               /* tp_as_mapping */
-                       (hashfunc)moose_Id_hash,         /* tp_hash */
-                       0,                               /* tp_call */
-                       (reprfunc)moose_Id_str,          /* tp_str */
-                       (getattrofunc)moose_Id_getattro, /* tp_getattro */
-                       (setattrofunc)moose_Id_setattro, /* tp_setattro */
-                       0,                               /* tp_as_buffer */
-                       Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-                       moose_Id_doc, 0,                   /* tp_traverse */
-                       0,                                 /* tp_clear */
-                       (richcmpfunc)moose_Id_richCompare, /* tp_richcompare */
-                       0,                       /* tp_weaklistoffset */
-                       0,                       /* tp_iter */
-                       0,                       /* tp_iternext */
-                       IdMethods,               /* tp_methods */
-                       0,                       /* tp_members */
-                       0,                       /* tp_getset */
-                       0,                       /* tp_base */
-                       0,                       /* tp_dict */
-                       0,                       /* tp_descr_get */
-                       0,                       /* tp_descr_set */
-                       0,                       /* tp_dictoffset */
-                       (initproc)moose_Id_init, /* tp_init */
-                       0,                       /* tp_alloc */
-                       0,                       /* tp_new */
-                       0,                       /* tp_free */
+PyTypeObject IdType = {
+    PyVarObject_HEAD_INIT(NULL, 0)   /* tp_head */
+    "moose.vec",                     /* tp_name */
+    sizeof(_Id),                     /* tp_basicsize */
+    0,                               /* tp_itemsize */
+    0,                               /* tp_dealloc */
+    0,                               /* tp_print */
+    0,                               /* tp_getattr */
+    0,                               /* tp_setattr */
+    0,                               /* tp_compare */
+    (reprfunc)moose_Id_repr,         /* tp_repr */
+    0,                               /* tp_as_number */
+    &IdSequenceMethods,              /* tp_as_sequence */
+    &IdMappingMethods,               /* tp_as_mapping */
+    (hashfunc)moose_Id_hash,         /* tp_hash */
+    0,                               /* tp_call */
+    (reprfunc)moose_Id_str,          /* tp_str */
+    (getattrofunc)moose_Id_getattro, /* tp_getattro */
+    (setattrofunc)moose_Id_setattro, /* tp_setattro */
+    0,                               /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
+    moose_Id_doc,
+    0,                                 /* tp_traverse */
+    0,                                 /* tp_clear */
+    (richcmpfunc)moose_Id_richCompare, /* tp_richcompare */
+    0,                                 /* tp_weaklistoffset */
+    0,                                 /* tp_iter */
+    0,                                 /* tp_iternext */
+    IdMethods,                         /* tp_methods */
+    0,                                 /* tp_members */
+    0,                                 /* tp_getset */
+    0,                                 /* tp_base */
+    0,                                 /* tp_dict */
+    0,                                 /* tp_descr_get */
+    0,                                 /* tp_descr_set */
+    0,                                 /* tp_dictoffset */
+    (initproc)moose_Id_init,           /* tp_init */
+    0,                                 /* tp_alloc */
+    0,                                 /* tp_new */
+    0,                                 /* tp_free */
 };
 
 extern PyTypeObject ObjIdType;
@@ -258,16 +261,20 @@ extern PyTypeObject ObjIdType;
 
 PyObject *get_Id_attr(_Id *id, string attribute)
 {
-    if (attribute == "path") {
+    if(attribute == "path") {
         return moose_Id_getPath(id);
-    } else if (attribute == "name") {
+    }
+    else if(attribute == "name") {
         string name = Field<string>::get(id->id_, "name");
         return Py_BuildValue("s", name.c_str());
-    } else if (attribute == "value") {
+    }
+    else if(attribute == "value") {
         return moose_Id_getValue(id);
-    } else if (attribute == "shape") {
+    }
+    else if(attribute == "shape") {
         return moose_Id_getShape(id);
-    } else if (attribute == "className") {
+    }
+    else if(attribute == "className") {
         // !NOTE: Subha: 2012-08-20 19:52:21 (+0530) - the second
         // !check is to catch a strange bug where the field passed
         // !to moose_Id_getattro is 'class' in stead of
@@ -293,41 +300,45 @@ PyObject *get_Id_attr(_Id *id, string attribute)
    Utility function to create objects from full path, dimensions
    and classname.
 */
-Id create_Id_from_path(string path, unsigned int numData, unsigned int isGlobal, string type)
+Id create_Id_from_path(string path, unsigned int numData, unsigned int isGlobal,
+                       string type)
 {
     string parent_path;
     string name;
 
     string trimmed_path = moose::trim(path);
     size_t pos = trimmed_path.rfind("/");
-    if (pos != string::npos) {
+    if(pos != string::npos) {
         name = trimmed_path.substr(pos + 1);
         parent_path = trimmed_path.substr(0, pos);
         // cerr << "Parent path is : " << parent_path << endl;
-    } else {
+    }
+    else {
         name = trimmed_path;
     }
     // handle relative path
-    if (trimmed_path[0] != '/') {
+    if(trimmed_path[0] != '/') {
         string current_path = SHELLPTR->getCwe().path();
-        if (current_path != "/") {
+        if(current_path != "/") {
             parent_path = current_path + "/" + parent_path;
-        } else {
+        }
+        else {
             parent_path = current_path + parent_path;
         }
-    } else if (parent_path.empty()) {
+    }
+    else if(parent_path.empty()) {
         parent_path = "/";
     }
     ObjId parent_id(parent_path);
-    if (parent_id.bad()) {
+    if(parent_id.bad()) {
         string message = "Parent element does not exist: ";
         message += parent_path;
         PyErr_SetString(PyExc_ValueError, message.c_str());
         return Id();
     }
-    Id nId = SHELLPTR->doCreate(
-        type, parent_id, string(name), numData, static_cast<NodePolicy>(isGlobal));
-    if (nId == Id() && trimmed_path != "/" && trimmed_path != "/root") {
+    Id nId = SHELLPTR->doCreate(type, parent_id, string(name), numData,
+                                static_cast<NodePolicy>(isGlobal));
+    if(nId == Id() && trimmed_path != "/" && trimmed_path != "/root") {
         string message = "no such moose class : " + type;
         PyErr_SetString(PyExc_TypeError, message.c_str());
     }
@@ -363,14 +374,14 @@ int moose_Id_init(_Id *self, PyObject *args, PyObject *kwargs)
        [unsigned int isGlobal] - default: 0
        [string type] - default: Neutral
     */
-    if (PyArg_ParseTupleAndKeywords(
-            args, kwargs, "s|IIs:moose_Id_init", kwlist, &path, &numData, &isGlobal, &type)) {
+    if(PyArg_ParseTupleAndKeywords(args, kwargs, "s|IIs:moose_Id_init", kwlist,
+                                   &path, &numData, &isGlobal, &type)) {
         // Parsing args successful, if any error happens now,
         // different argument processing will not help. Return error
         string trimmed_path(path);
         trimmed_path = moose::trim(trimmed_path);
         size_t length = trimmed_path.length();
-        if (length <= 0) {
+        if(length <= 0) {
             PyErr_SetString(PyExc_ValueError,
                             "moose_Id_init: path must be non-empty string.");
             return -1;
@@ -378,10 +389,10 @@ int moose_Id_init(_Id *self, PyObject *args, PyObject *kwargs)
         self->id_ = Id(trimmed_path);
 
         // Return already existing object
-        if (self->id_ != Id() || trimmed_path == "/" ||
-            trimmed_path == "/root") {
-            if ((numData > 0) &&
-                (numData != Field<unsigned int>::get(self->id_, "numData"))) {
+        if(self->id_ != Id() || trimmed_path == "/" ||
+           trimmed_path == "/root") {
+            if((numData > 0) &&
+               (numData != Field<unsigned int>::get(self->id_, "numData"))) {
                 PyErr_WarnEx(NULL,
                              "moose_Id_init_: Length specified does not match "
                              "that of existing object.",
@@ -389,13 +400,13 @@ int moose_Id_init(_Id *self, PyObject *args, PyObject *kwargs)
             }
             return 0;
         }
-        if (type == NULL)
+        if(type == NULL)
             type = _default_type;
-        if (numData <= 0)
+        if(numData <= 0)
             numData = 1;
 
         self->id_ = create_Id_from_path(trimmed_path, numData, isGlobal, type);
-        if (self->id_ == Id() && PyErr_Occurred()) {
+        if(self->id_ == Id() && PyErr_Occurred()) {
             return -1;
         }
         return 0;
@@ -403,29 +414,31 @@ int moose_Id_init(_Id *self, PyObject *args, PyObject *kwargs)
     // The arguments could not be parsed as (path, dims, class),
     // try to parse it as an existing Id
     PyErr_Clear();
-    if (PyArg_ParseTuple(args, "O:moose_Id_init", &src) && Id_SubtypeCheck(src)) {
+    if(PyArg_ParseTuple(args, "O:moose_Id_init", &src) &&
+       Id_SubtypeCheck(src)) {
         self->id_ = ((_Id *)src)->id_;
         return 0;
     }
     // The arguments could not be parsed as (path, dims, class), or Id
     // try to parse it as an existing ObjId
     PyErr_Clear();
-    if (PyArg_ParseTuple(args, "O:moose_Id_init", &src) && ObjId_SubtypeCheck(src)) {
+    if(PyArg_ParseTuple(args, "O:moose_Id_init", &src) &&
+       ObjId_SubtypeCheck(src)) {
         self->id_ = ((_ObjId *)src)->oid_.id;
         return 0;
     }
     // Next try to parse it as an integer value for an existing Id
-    PyErr_Clear(); // clear the error from parsing error
-    if (PyArg_ParseTuple(args, "I:moose_Id_init", &id)) {
+    PyErr_Clear();  // clear the error from parsing error
+    if(PyArg_ParseTuple(args, "I:moose_Id_init", &id)) {
         self->id_ = Id(id);
         return 0;
     }
     return -1;
-} // ! moose_Id_init
+}  // ! moose_Id_init
 
 long moose_Id_hash(_Id *self)
 {
-    return self->id_.value(); // hash is the same as the Id value
+    return self->id_.value();  // hash is the same as the Id value
 }
 
 // This IS UGLY! Destroying one
@@ -434,7 +447,7 @@ long moose_Id_hash(_Id *self)
 PyObject *deleteObjId(ObjId oid)
 {
 #ifndef NDEBUG
-    if (verbosity > 1) {
+    if(verbosity > 1) {
         cout << "Deleting ObjId " << oid << endl;
     }
 #endif
@@ -444,12 +457,12 @@ PyObject *deleteObjId(ObjId oid)
 
 PyObject *moose_Id_delete(_Id *self)
 {
-    if (self->id_ == Id()) {
+    if(self->id_ == Id()) {
         PyErr_SetString(PyExc_ValueError,
                         "moose_Id_delete: cannot delete moose shell.");
         return NULL;
     }
-    if (!Id::isValid(self->id_)) {
+    if(!Id::isValid(self->id_)) {
         RAISE_INVALID_ID(NULL, "moose_Id_delete");
     }
     deleteObjId(self->id_);
@@ -460,27 +473,28 @@ PyObject *moose_Id_delete(_Id *self)
 
 PyObject *moose_Id_repr(_Id *self)
 {
-    if (!Id::isValid(self->id_)) {
+    if(!Id::isValid(self->id_)) {
         RAISE_INVALID_ID(NULL, "moose_Id_repr");
     }
     ostringstream repr;
-    repr << "<moose.vec: class=" << Field<string>::get(self->id_, "className") << ", "
+    repr << "<moose.vec: class=" << Field<string>::get(self->id_, "className")
+         << ", "
          << "id=" << self->id_.value() << ", "
          << "path=" << self->id_.path() << ">";
     return PyString_FromString(repr.str().c_str());
-} // !  moose_Id_repr
+}  // !  moose_Id_repr
 
 // The string representation is unused. repr is used everywhere.
 PyObject *moose_Id_str(_Id *self)
 {
-    if (!Id::isValid(self->id_)) {
+    if(!Id::isValid(self->id_)) {
         RAISE_INVALID_ID(NULL, "moose_Id_str");
     }
-    return PyString_FromFormat("<moose.vec: class=%s, id=%u, path=%s>",
-                               Field<string>::get(self->id_, "className").c_str(),
-                               self->id_.value(),
-                               self->id_.path().c_str());
-} // !  moose_Id_str
+    return PyString_FromFormat(
+        "<moose.vec: class=%s, id=%u, path=%s>",
+        Field<string>::get(self->id_, "className").c_str(), self->id_.value(),
+        self->id_.path().c_str());
+}  // !  moose_Id_str
 
 // 2011-03-23 15:09:19 (+0530)
 PyObject *moose_Id_getValue(_Id *self)
@@ -495,12 +509,12 @@ PyObject *moose_Id_getValue(_Id *self)
 */
 PyObject *moose_Id_getPath(_Id *self)
 {
-    if (!Id::isValid(self->id_)) {
+    if(!Id::isValid(self->id_)) {
         RAISE_INVALID_ID(NULL, "moose_Id_getPath");
     }
     string path = self->id_.path();
     string default_end("[0]");
-    if (moose::endswith(path, default_end)) {
+    if(moose::endswith(path, default_end)) {
         path.erase(path.length() - default_end.length(), default_end.length());
     }
     PyObject *ret = Py_BuildValue("s", path.c_str());
@@ -512,31 +526,33 @@ PyObject *moose_Id_getPath(_Id *self)
 ////////////////////////////////////////////
 Py_ssize_t moose_Id_getLength(_Id *self)
 {
-    if (!Id::isValid(self->id_)) {
+    if(!Id::isValid(self->id_)) {
         RAISE_INVALID_ID(-1, "moose_Id_getLength");
     }
-    if (self->id_.element()->hasFields()) {
+    if(self->id_.element()->hasFields()) {
         return (Py_ssize_t)(Field<unsigned int>::get(self->id_, "numField"));
-    } else {
+    }
+    else {
         return (Py_ssize_t)(self->id_.element()->numData());
     }
 }
 
 PyObject *moose_Id_getShape(_Id *self)
 {
-    if (!Id::isValid(self->id_)) {
+    if(!Id::isValid(self->id_)) {
         RAISE_INVALID_ID(NULL, "moose_Id_getShape");
     }
     unsigned int numData = 1;
-    if (self->id_.element()->hasFields()) {
+    if(self->id_.element()->hasFields()) {
         numData = Field<unsigned int>::get(self->id_, "numField");
-    } else {
+    }
+    else {
         //            numData = Field < unsigned int >::get(self->id_,
         // "numData");
         numData = self->id_.element()->numData();
     }
     PyObject *ret = PyTuple_New((Py_ssize_t)1);
-    if (PyTuple_SetItem(ret, (Py_ssize_t)0, Py_BuildValue("I", numData))) {
+    if(PyTuple_SetItem(ret, (Py_ssize_t)0, Py_BuildValue("I", numData))) {
         Py_XDECREF(ret);
         PyErr_SetString(PyExc_RuntimeError,
                         "moose_Id_getShape: could not set tuple entry.");
@@ -547,36 +563,38 @@ PyObject *moose_Id_getShape(_Id *self)
 
 PyObject *moose_Id_getItem(_Id *self, Py_ssize_t index)
 {
-    if (!Id::isValid(self->id_)) {
+    if(!Id::isValid(self->id_)) {
         RAISE_INVALID_ID(NULL, "moose_Id_getItem");
     }
-    if (index < 0) {
+    if(index < 0) {
         index += moose_Id_getLength(self);
     }
-    if ((index < 0) || (index >= moose_Id_getLength(self))) {
+    if((index < 0) || (index >= moose_Id_getLength(self))) {
         PyErr_SetString(PyExc_IndexError, "index out of bounds.");
         return NULL;
     }
-    ObjId oid(self->id_.path()); // This is just to get the dataIndex of parent
-    if (self->id_.element()->hasFields()) {
+    ObjId oid(self->id_.path());  // This is just to get the dataIndex of parent
+    if(self->id_.element()->hasFields()) {
         // How to efficiently get the dataIndex of parent element
         // without creating ObjId from path?
         oid = ObjId(self->id_, oid.dataIndex, index);
-    } else {
+    }
+    else {
         oid = ObjId(self->id_, index, 0);
     }
     return oid_to_element(oid);
 }
 
-static PyObject *moose_Id_fillSlice(_Id *self, Py_ssize_t start, Py_ssize_t end, Py_ssize_t step, Py_ssize_t slicelength)
+static PyObject *moose_Id_fillSlice(_Id *self, Py_ssize_t start, Py_ssize_t end,
+                                    Py_ssize_t step, Py_ssize_t slicelength)
 {
 
     PyObject *ret = PyTuple_New(slicelength);
     bool has_fields = self->id_.element()->hasFields();
-    for (int ii = start; ii < end; ii += step) {
+    for(int ii = start; ii < end; ii += step) {
         ObjId oid(self->id_.path());
         PyObject *value;
-        if (has_fields)
+        if(has_fields)
             value = oid_to_element(ObjId(self->id_, oid.dataIndex, ii));
         else
             value = oid_to_element(ObjId(self->id_, ii));
@@ -589,17 +607,18 @@ static PyObject *moose_Id_fillSlice(_Id *self, Py_ssize_t start, Py_ssize_t end,
 #ifndef PY3K
 PyObject *moose_Id_getSlice(_Id *self, Py_ssize_t start, Py_ssize_t end)
 {
-    if (!Id::isValid(self->id_)) {
+    if(!Id::isValid(self->id_)) {
         RAISE_INVALID_ID(NULL, "moose_Id_getSlice");
     }
     Py_ssize_t len = moose_Id_getLength(self);
-    while (start < 0) {
+    while(start < 0) {
         start += len;
     }
-    while (end < 0) {
+    while(end < 0) {
         end += len;
     }
-    return moose_Id_fillSlice(self, start, end, 1, std::max(end - start, (Py_ssize_t)0));
+    return moose_Id_fillSlice(self, start, end, 1,
+                              std::max(end - start, (Py_ssize_t)0));
 }
 #endif
 
@@ -614,20 +633,22 @@ PyObject *moose_Id_getSlice(_Id *self, Py_ssize_t start, Py_ssize_t end)
 ///////////////////////////////////////////////////
 PyObject *moose_Id_subscript(_Id *self, PyObject *op)
 {
-    if (PySlice_Check(op)) {
+    if(PySlice_Check(op)) {
         const Py_ssize_t len = moose_Id_getLength(self);
         Py_ssize_t start, stop, step, slicelength;
 
-        if (PySlice_GetIndicesEx(SLICE_OBJ(op), len, &start, &stop, &step, &slicelength) < 0)
+        if(PySlice_GetIndicesEx(SLICE_OBJ(op), len, &start, &stop, &step,
+                                &slicelength) < 0)
             return NULL;
 
         return moose_Id_fillSlice(self, start, stop, step, slicelength);
     }
 
-    if (PyInt_Check(op) || PyLong_Check(op)) {
+    if(PyInt_Check(op) || PyLong_Check(op)) {
         Py_ssize_t value = PyInt_AsLong(op);
         return moose_Id_getItem(self, value);
-    } else {
+    }
+    else {
         PyErr_SetString(PyExc_KeyError, "moose_Id_subscript: invalid index.");
         return NULL;
     }
@@ -638,24 +659,31 @@ PyObject *moose_Id_richCompare(_Id *self, PyObject *other, int op)
     extern PyTypeObject IdType;
     bool ret = false;
     Id other_id = ((_Id *)other)->id_;
-    if (!self || !other) {
+    if(!self || !other) {
         ret = false;
-    } else if (!PyObject_IsInstance(other, (PyObject *)&IdType)) {
+    }
+    else if(!PyObject_IsInstance(other, (PyObject *)&IdType)) {
         ret = false;
-    } else if (op == Py_EQ) {
+    }
+    else if(op == Py_EQ) {
         ret = self->id_ == other_id;
-    } else if (op == Py_NE) {
+    }
+    else if(op == Py_NE) {
         ret = self->id_ != other_id;
-    } else if (op == Py_LT) {
+    }
+    else if(op == Py_LT) {
         ret = self->id_ < other_id;
-    } else if (op == Py_GT) {
+    }
+    else if(op == Py_GT) {
         ret = other_id < self->id_;
-    } else if (op == Py_LE) {
+    }
+    else if(op == Py_LE) {
         ret = (self->id_ < other_id) || (self->id_ == other_id);
-    } else if (op == Py_GE) {
+    }
+    else if(op == Py_GE) {
         ret = (other_id < self->id_) || (self->id_ == other_id);
     }
-    if (ret) {
+    if(ret) {
         Py_RETURN_TRUE;
     }
     Py_RETURN_FALSE;
@@ -665,7 +693,7 @@ int moose_Id_contains(_Id *self, PyObject *obj)
 {
     extern PyTypeObject ObjIdType;
     int ret = 0;
-    if (ObjId_SubtypeCheck(obj)) {
+    if(ObjId_SubtypeCheck(obj)) {
         ret = (((_ObjId *)obj)->oid_.id == self->id_);
     }
     return ret;
@@ -674,128 +702,131 @@ int moose_Id_contains(_Id *self, PyObject *obj)
 PyObject *moose_Id_getattro(_Id *self, PyObject *attr)
 {
     int new_attr = 0;
-    if (!Id::isValid(self->id_)) {
+    if(!Id::isValid(self->id_)) {
         RAISE_INVALID_ID(NULL, "moose_Id_getattro");
     }
     char *field = PyString_AsString(attr);
     PyObject *_ret = get_Id_attr(self, field);
-    if (_ret != NULL) {
+    if(_ret != NULL) {
         return _ret;
     }
     string className = Field<string>::get(self->id_, "className");
     string type = getFieldType(className, string(field));
-    if (type.empty()) {
+    if(type.empty()) {
         // Check if this field name is aliased and update fieldname and type if
         // so.
-        map<string, string>::const_iterator it = get_field_alias().find(string(field));
-        if (it != get_field_alias().end()) {
+        map<string, string>::const_iterator it =
+            get_field_alias().find(string(field));
+        if(it != get_field_alias().end()) {
             field = const_cast<char *>((it->second).c_str());
-            type = getFieldType(Field<string>::get(self->id_, "className"), it->second);
+            type = getFieldType(Field<string>::get(self->id_, "className"),
+                                it->second);
             // Update attr for next level (PyObject_GenericGetAttr) in case.
             // Py_XDECREF(attr);
             attr = PyString_FromString(field);
             new_attr = 1;
         }
     }
-    if (type.empty()) {
+    if(type.empty()) {
         return PyObject_GenericGetAttr((PyObject *)self, attr);
     }
     char ftype = shortType(type);
-    if (!ftype) {
+    if(!ftype) {
         return PyObject_GenericGetAttr((PyObject *)self, attr);
     }
 
-    switch (ftype) {
-    case 'd': {
-        vector<double> val;
-        Field<double>::getVec(self->id_, string(field), val);
-        _ret = to_pytuple(&val, ftype);
-        break;
+    switch(ftype) {
+        case 'd': {
+            vector<double> val;
+            Field<double>::getVec(self->id_, string(field), val);
+            _ret = to_pytuple(&val, ftype);
+            break;
+        }
+        case 's': {
+            vector<string> val;
+            Field<string>::getVec(self->id_, string(field), val);
+            _ret = to_pytuple(&val, ftype);
+            break;
+        }
+        case 'l': {
+            vector<long> val;
+            Field<long>::getVec(self->id_, string(field), val);
+            _ret = to_pytuple(&val, ftype);
+            break;
+        }
+        case 'x': {
+            vector<Id> val;
+            Field<Id>::getVec(self->id_, string(field), val);
+            _ret = to_pytuple(&val, ftype);
+            break;
+        }
+        case 'y': {
+            vector<ObjId> val;
+            Field<ObjId>::getVec(self->id_, string(field), val);
+            _ret = to_pytuple(&val, ftype);
+            break;
+        }
+        case 'i': {
+            vector<int> val;
+            Field<int>::getVec(self->id_, string(field), val);
+            _ret = to_pytuple(&val, ftype);
+            break;
+        }
+        case 'I': {
+            vector<unsigned int> val;
+            Field<unsigned int>::getVec(self->id_, string(field), val);
+            _ret = to_pytuple(&val, ftype);
+            break;
+        }
+        case 'k': {
+            vector<unsigned long> val;
+            Field<unsigned long>::getVec(self->id_, string(field), val);
+            _ret = to_pytuple(&val, ftype);
+            break;
+        }
+        case 'f': {
+            vector<float> val;
+            Field<float>::getVec(self->id_, string(field), val);
+            _ret = to_pytuple(&val, ftype);
+            break;
+        }
+        case 'b': {
+            vector<bool> val;
+            Field<bool>::getVec(self->id_, string(field), val);
+            _ret = to_pytuple(&val, ftype);
+            break;
+        }
+        case 'c': {
+            vector<char> val;
+            Field<char>::getVec(self->id_, string(field), val);
+            _ret = to_pytuple(&val, ftype);
+            break;
+        }
+        case 'h': {
+            vector<short> val;
+            Field<short>::getVec(self->id_, string(field), val);
+            _ret = to_pytuple(&val, ftype);
+            break;
+        }
+        case 'z': {
+            PyErr_SetString(
+                PyExc_NotImplementedError,
+                "moose_Id_getattro: DataId handling not implemented yet.");
+            _ret = NULL;
+            break;
+        }
+        default:
+            ostringstream msg;
+            msg << "moose_Id_getattro: unhandled field type '" << type << "'\n"
+                << "This is a vec object. Perhaps you are trying to access the "
+                   "field in an"
+                << " element in this. Then use indexing to get the element "
+                   "first.";
+            PyErr_SetString(PyExc_ValueError, msg.str().c_str());
+            _ret = NULL;
+            break;
     }
-    case 's': {
-        vector<string> val;
-        Field<string>::getVec(self->id_, string(field), val);
-        _ret = to_pytuple(&val, ftype);
-        break;
-    }
-    case 'l': {
-        vector<long> val;
-        Field<long>::getVec(self->id_, string(field), val);
-        _ret = to_pytuple(&val, ftype);
-        break;
-    }
-    case 'x': {
-        vector<Id> val;
-        Field<Id>::getVec(self->id_, string(field), val);
-        _ret = to_pytuple(&val, ftype);
-        break;
-    }
-    case 'y': {
-        vector<ObjId> val;
-        Field<ObjId>::getVec(self->id_, string(field), val);
-        _ret = to_pytuple(&val, ftype);
-        break;
-    }
-    case 'i': {
-        vector<int> val;
-        Field<int>::getVec(self->id_, string(field), val);
-        _ret = to_pytuple(&val, ftype);
-        break;
-    }
-    case 'I': {
-        vector<unsigned int> val;
-        Field<unsigned int>::getVec(self->id_, string(field), val);
-        _ret = to_pytuple(&val, ftype);
-        break;
-    }
-    case 'k': {
-        vector<unsigned long> val;
-        Field<unsigned long>::getVec(self->id_, string(field), val);
-        _ret = to_pytuple(&val, ftype);
-        break;
-    }
-    case 'f': {
-        vector<float> val;
-        Field<float>::getVec(self->id_, string(field), val);
-        _ret = to_pytuple(&val, ftype);
-        break;
-    }
-    case 'b': {
-        vector<bool> val;
-        Field<bool>::getVec(self->id_, string(field), val);
-        _ret = to_pytuple(&val, ftype);
-        break;
-    }
-    case 'c': {
-        vector<char> val;
-        Field<char>::getVec(self->id_, string(field), val);
-        _ret = to_pytuple(&val, ftype);
-        break;
-    }
-    case 'h': {
-        vector<short> val;
-        Field<short>::getVec(self->id_, string(field), val);
-        _ret = to_pytuple(&val, ftype);
-        break;
-    }
-    case 'z': {
-        PyErr_SetString(
-            PyExc_NotImplementedError,
-            "moose_Id_getattro: DataId handling not implemented yet.");
-        _ret = NULL;
-        break;
-    }
-    default:
-        ostringstream msg;
-        msg << "moose_Id_getattro: unhandled field type '" << type << "'\n"
-            << "This is a vec object. Perhaps you are trying to access the "
-               "field in an"
-            << " element in this. Then use indexing to get the element first.";
-        PyErr_SetString(PyExc_ValueError, msg.str().c_str());
-        _ret = NULL;
-        break;
-    }
-    if (new_attr) {
+    if(new_attr) {
         Py_DECREF(attr);
     }
     return _ret;
@@ -803,15 +834,15 @@ PyObject *moose_Id_getattro(_Id *self, PyObject *attr)
 
 PyObject *moose_Id_setField(_Id *self, PyObject *args)
 {
-    if (!Id::isValid(self->id_)) {
+    if(!Id::isValid(self->id_)) {
         RAISE_INVALID_ID(NULL, "moose_Id_setField");
     }
     PyObject *field = NULL;
     PyObject *value = NULL;
-    if (!PyArg_ParseTuple(args, "OO:moose_Id_setField", &field, &value)) {
+    if(!PyArg_ParseTuple(args, "OO:moose_Id_setField", &field, &value)) {
         return NULL;
     }
-    if (moose_Id_setattro(self, field, value) == -1) {
+    if(moose_Id_setattro(self, field, value) == -1) {
         return NULL;
     }
     Py_RETURN_NONE;
@@ -819,28 +850,30 @@ PyObject *moose_Id_setField(_Id *self, PyObject *args)
 
 int moose_Id_setattro(_Id *self, PyObject *attr, PyObject *value)
 {
-    if (!Id::isValid(self->id_)) {
+    if(!Id::isValid(self->id_)) {
         RAISE_INVALID_ID(-1, "moose_Id_setattro");
     }
     char *fieldname = NULL;
     int ret = -1;
-    if (PyString_Check(attr)) {
+    if(PyString_Check(attr)) {
         fieldname = PyString_AsString(attr);
-    } else {
+    }
+    else {
         PyErr_SetString(PyExc_TypeError,
                         "moose_Id_setattro: Attribute name must be a string");
         return -1;
     }
     string moose_class = Field<string>::get(self->id_, "className");
     string fieldtype = getFieldType(moose_class, string(fieldname));
-    if (fieldtype.length() == 0) {
+    if(fieldtype.length() == 0) {
         // If it is instance of a MOOSE Id then throw
         // error (to avoid silently creating new attributes due to
         // typos). Otherwise, it must have been subclassed in
         // Python. Then we allow normal Pythonic behaviour and
         // consider such mistakes user's responsibility.
-        string className = ((PyTypeObject *)PyObject_Type((PyObject *)self))->tp_name;
-        if (className != "vec") {
+        string className =
+            ((PyTypeObject *)PyObject_Type((PyObject *)self))->tp_name;
+        if(className != "vec") {
             Py_INCREF(attr);
             ret = PyObject_GenericSetAttr((PyObject *)self, attr, value);
             Py_XDECREF(attr);
@@ -855,201 +888,218 @@ int moose_Id_setattro(_Id *self, PyObject *attr, PyObject *value)
     char ftype = shortType(fieldtype);
     Py_ssize_t length = moose_Id_getLength(self);
     bool is_seq = true;
-    if (!PySequence_Check(value)) {
+    if(!PySequence_Check(value)) {
         is_seq = false;
-    } else if (length != PySequence_Length(value)) {
+    }
+    else if(length != PySequence_Length(value)) {
         PyErr_SetString(PyExc_IndexError,
                         "moose_Id_setattro: length of the sequence on the "
                         "right hand side does not match Id size.");
         return -1;
     }
-    switch (ftype) {
-    case 'd': // SET_VECFIELD(double, d)
-    {
-        vector<double> _value;
-        if (is_seq) {
-            for (int ii = 0; ii < length; ++ii) {
-                PyObject *vo = PySequence_GetItem(value, ii);
-                double v = PyFloat_AsDouble(vo);
-                Py_XDECREF(vo);
-                _value.push_back(v);
+    switch(ftype) {
+        case 'd':  // SET_VECFIELD(double, d)
+        {
+            vector<double> _value;
+            if(is_seq) {
+                for(int ii = 0; ii < length; ++ii) {
+                    PyObject *vo = PySequence_GetItem(value, ii);
+                    double v = PyFloat_AsDouble(vo);
+                    Py_XDECREF(vo);
+                    _value.push_back(v);
+                }
             }
-        } else {
-            double v = PyFloat_AsDouble(value);
-            _value.assign(length, v);
-        }
-        ret = Field<double>::setVec(self->id_, string(fieldname), _value);
-        break;
-    }
-    case 's': {
-        vector<string> _value;
-        if (is_seq) {
-            for (int ii = 0; ii < length; ++ii) {
-                PyObject *vo = PySequence_GetItem(value, ii);
-                char *v = PyString_AsString(vo);
-                Py_XDECREF(v);
-                _value.push_back(string(v));
+            else {
+                double v = PyFloat_AsDouble(value);
+                _value.assign(length, v);
             }
-        } else {
-            char *v = PyString_AsString(value);
-            _value.assign(length, string(v));
+            ret = Field<double>::setVec(self->id_, string(fieldname), _value);
+            break;
         }
-        ret = Field<string>::setVec(self->id_, string(fieldname), _value);
-        break;
-    }
-    case 'i': {
-        vector<int> _value;
-        if (is_seq) {
-            for (int ii = 0; ii < length; ++ii) {
-                PyObject *vo = PySequence_GetItem(value, ii);
-                int v = PyInt_AsLong(vo);
-                Py_XDECREF(vo);
-                _value.push_back(v);
+        case 's': {
+            vector<string> _value;
+            if(is_seq) {
+                for(int ii = 0; ii < length; ++ii) {
+                    PyObject *vo = PySequence_GetItem(value, ii);
+                    char *v = PyString_AsString(vo);
+                    Py_XDECREF(v);
+                    _value.push_back(string(v));
+                }
             }
-        } else {
-            int v = PyInt_AsLong(value);
-            _value.assign(length, v);
-        }
-        ret = Field<int>::setVec(self->id_, string(fieldname), _value);
-        break;
-    }
-    case 'I': // SET_VECFIELD(unsigned int, I)
-    {
-        vector<unsigned int> _value;
-        if (is_seq) {
-            for (int ii = 0; ii < length; ++ii) {
-                PyObject *vo = PySequence_GetItem(value, ii);
-                unsigned int v = PyInt_AsUnsignedLongMask(vo);
-                Py_DECREF(vo);
-                _value.push_back(v);
+            else {
+                char *v = PyString_AsString(value);
+                _value.assign(length, string(v));
             }
-        } else {
-            unsigned int v = PyInt_AsUnsignedLongMask(value);
-            _value.assign(length, v);
+            ret = Field<string>::setVec(self->id_, string(fieldname), _value);
+            break;
         }
-        ret = Field<unsigned int>::setVec(self->id_, string(fieldname), _value);
-        break;
-    }
-    case 'l': // SET_VECFIELD(long, l)
-    {
-        vector<long> _value;
-        if (is_seq) {
-            for (int ii = 0; ii < length; ++ii) {
-                PyObject *vo = PySequence_GetItem(value, ii);
-                long v = PyInt_AsLong(vo);
-                Py_DECREF(vo);
-                _value.push_back(v);
+        case 'i': {
+            vector<int> _value;
+            if(is_seq) {
+                for(int ii = 0; ii < length; ++ii) {
+                    PyObject *vo = PySequence_GetItem(value, ii);
+                    int v = PyInt_AsLong(vo);
+                    Py_XDECREF(vo);
+                    _value.push_back(v);
+                }
             }
-        } else {
-            long v = PyInt_AsLong(value);
-            _value.assign(length, v);
-        }
-        ret = Field<long>::setVec(self->id_, string(fieldname), _value);
-        break;
-    }
-    case 'k': // SET_VECFIELD(unsigned long, k)
-    {
-        vector<unsigned long> _value;
-        if (is_seq) {
-            for (int ii = 0; ii < length; ++ii) {
-                PyObject *vo = PySequence_GetItem(value, ii);
-                unsigned long v = PyInt_AsUnsignedLongMask(vo);
-                Py_XDECREF(vo);
-                _value.push_back(v);
+            else {
+                int v = PyInt_AsLong(value);
+                _value.assign(length, v);
             }
-        } else {
-            unsigned long v = PyInt_AsUnsignedLongMask(value);
-            _value.assign(length, v);
+            ret = Field<int>::setVec(self->id_, string(fieldname), _value);
+            break;
         }
-        ret = Field<unsigned long>::setVec(self->id_, string(fieldname), _value);
-        break;
-    }
-    case 'b': {
-        vector<bool> _value;
-        if (is_seq) {
-            for (int ii = 0; ii < length; ++ii) {
-                PyObject *_v = PySequence_GetItem(value, ii);
-                bool v = (Py_True == _v) || (PyInt_AsLong(_v) != 0);
-                Py_XDECREF(_v);
-                _value.push_back(v);
+        case 'I':  // SET_VECFIELD(unsigned int, I)
+        {
+            vector<unsigned int> _value;
+            if(is_seq) {
+                for(int ii = 0; ii < length; ++ii) {
+                    PyObject *vo = PySequence_GetItem(value, ii);
+                    unsigned int v = PyInt_AsUnsignedLongMask(vo);
+                    Py_DECREF(vo);
+                    _value.push_back(v);
+                }
             }
-        } else {
-            bool v = (Py_True == value) || (PyInt_AsLong(value) != 0);
-            _value.assign(length, v);
+            else {
+                unsigned int v = PyInt_AsUnsignedLongMask(value);
+                _value.assign(length, v);
+            }
+            ret = Field<unsigned int>::setVec(self->id_, string(fieldname),
+                                              _value);
+            break;
         }
-        ret = Field<bool>::setVec(self->id_, string(fieldname), _value);
-        break;
-    }
-    case 'c': {
-        vector<char> _value;
-        if (is_seq) {
-            for (int ii = 0; ii < length; ++ii) {
-                PyObject *_v = PySequence_GetItem(value, ii);
-                char *v = PyString_AsString(_v);
-                Py_XDECREF(_v);
-                if (v && v[0]) {
-                    _value.push_back(v[0]);
-                } else {
-                    ostringstream err;
-                    err << "moose_Id_setattro:" << ii << "-th element is NUL";
-                    PyErr_SetString(PyExc_ValueError, err.str().c_str());
+        case 'l':  // SET_VECFIELD(long, l)
+        {
+            vector<long> _value;
+            if(is_seq) {
+                for(int ii = 0; ii < length; ++ii) {
+                    PyObject *vo = PySequence_GetItem(value, ii);
+                    long v = PyInt_AsLong(vo);
+                    Py_DECREF(vo);
+                    _value.push_back(v);
+                }
+            }
+            else {
+                long v = PyInt_AsLong(value);
+                _value.assign(length, v);
+            }
+            ret = Field<long>::setVec(self->id_, string(fieldname), _value);
+            break;
+        }
+        case 'k':  // SET_VECFIELD(unsigned long, k)
+        {
+            vector<unsigned long> _value;
+            if(is_seq) {
+                for(int ii = 0; ii < length; ++ii) {
+                    PyObject *vo = PySequence_GetItem(value, ii);
+                    unsigned long v = PyInt_AsUnsignedLongMask(vo);
+                    Py_XDECREF(vo);
+                    _value.push_back(v);
+                }
+            }
+            else {
+                unsigned long v = PyInt_AsUnsignedLongMask(value);
+                _value.assign(length, v);
+            }
+            ret = Field<unsigned long>::setVec(self->id_, string(fieldname),
+                                               _value);
+            break;
+        }
+        case 'b': {
+            vector<bool> _value;
+            if(is_seq) {
+                for(int ii = 0; ii < length; ++ii) {
+                    PyObject *_v = PySequence_GetItem(value, ii);
+                    bool v = (Py_True == _v) || (PyInt_AsLong(_v) != 0);
+                    Py_XDECREF(_v);
+                    _value.push_back(v);
+                }
+            }
+            else {
+                bool v = (Py_True == value) || (PyInt_AsLong(value) != 0);
+                _value.assign(length, v);
+            }
+            ret = Field<bool>::setVec(self->id_, string(fieldname), _value);
+            break;
+        }
+        case 'c': {
+            vector<char> _value;
+            if(is_seq) {
+                for(int ii = 0; ii < length; ++ii) {
+                    PyObject *_v = PySequence_GetItem(value, ii);
+                    char *v = PyString_AsString(_v);
+                    Py_XDECREF(_v);
+                    if(v && v[0]) {
+                        _value.push_back(v[0]);
+                    }
+                    else {
+                        ostringstream err;
+                        err << "moose_Id_setattro:" << ii
+                            << "-th element is NUL";
+                        PyErr_SetString(PyExc_ValueError, err.str().c_str());
+                        return -1;
+                    }
+                }
+            }
+            else {
+                char *v = PyString_AsString(value);
+                if(v && v[0]) {
+                    _value.assign(length, v[0]);
+                }
+                else {
+                    PyErr_SetString(
+                        PyExc_ValueError,
+                        "moose_Id_setattro: value is an empty string");
                     return -1;
                 }
             }
-        } else {
-            char *v = PyString_AsString(value);
-            if (v && v[0]) {
-                _value.assign(length, v[0]);
-            } else {
-                PyErr_SetString(PyExc_ValueError,
-                                "moose_Id_setattro: value is an empty string");
-                return -1;
-            }
+            ret = Field<char>::setVec(self->id_, string(fieldname), _value);
+            break;
         }
-        ret = Field<char>::setVec(self->id_, string(fieldname), _value);
-        break;
-    }
-    case 'h': {
-        vector<short> _value;
-        if (is_seq) {
-            for (int ii = 0; ii < length; ++ii) {
-                PyObject *vo = PySequence_GetItem(value, ii);
-                short v = PyInt_AsLong(vo);
-                Py_XDECREF(vo);
-                _value.push_back(v);
+        case 'h': {
+            vector<short> _value;
+            if(is_seq) {
+                for(int ii = 0; ii < length; ++ii) {
+                    PyObject *vo = PySequence_GetItem(value, ii);
+                    short v = PyInt_AsLong(vo);
+                    Py_XDECREF(vo);
+                    _value.push_back(v);
+                }
             }
-        } else {
-            short v = PyInt_AsLong(value);
-            _value.assign(length, v);
-        }
-        ret = Field<short>::setVec(self->id_, string(fieldname), _value);
-        break;
-    }
-    case 'f': // SET_VECFIELD(float, f)
-    {
-        vector<float> _value;
-        if (is_seq) {
-            for (int ii = 0; ii < length; ++ii) {
-                PyObject *vo = PySequence_GetItem(value, ii);
-                float v = PyFloat_AsDouble(vo);
-                Py_XDECREF(vo);
-                _value.push_back(v);
+            else {
+                short v = PyInt_AsLong(value);
+                _value.assign(length, v);
             }
-        } else {
-            float v = PyFloat_AsDouble(value);
-            _value.assign(length, v);
+            ret = Field<short>::setVec(self->id_, string(fieldname), _value);
+            break;
         }
-        ret = Field<float>::setVec(self->id_, string(fieldname), _value);
-        break;
-    }
-    default:
-        break;
+        case 'f':  // SET_VECFIELD(float, f)
+        {
+            vector<float> _value;
+            if(is_seq) {
+                for(int ii = 0; ii < length; ++ii) {
+                    PyObject *vo = PySequence_GetItem(value, ii);
+                    float v = PyFloat_AsDouble(vo);
+                    Py_XDECREF(vo);
+                    _value.push_back(v);
+                }
+            }
+            else {
+                float v = PyFloat_AsDouble(value);
+                _value.assign(length, v);
+            }
+            ret = Field<float>::setVec(self->id_, string(fieldname), _value);
+            break;
+        }
+        default:
+            break;
     }
 
     // MOOSE Field::set returns 1 for success 0 for
     // failure. Python treats return value 0 from setters as
     // success, anything else failure.
-    if (ret && (PyErr_Occurred() == NULL))
+    if(ret && (PyErr_Occurred() == NULL))
         return 0;
     else
         return -1;

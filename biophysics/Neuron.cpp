@@ -12,12 +12,15 @@
 #include "../basecode/LookupElementValueFinfo.h"
 #include "../shell/Shell.h"
 #include "../shell/Wildcard.h"
+
+#include "../randnum/randnum.h"
+
 #include "ReadCell.h"
 #include "../utility/Vec.h"
+
 #include "SwcSegment.h"
 #include "Spine.h"
 #include "Neuron.h"
-#include "../basecode/global.h"
 
 #include "../builtins/MooseParser.h"
 

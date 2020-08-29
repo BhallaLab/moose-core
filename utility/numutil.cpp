@@ -6,9 +6,9 @@
  * Created:         2007-11-02 11:46:40
  ********************************************************************/
 
-#include "numutil.h"
 #include <cmath>
-#include "../randnum/RNG.h"
+#include "../randnum/randnum.h"
+#include "numutil.h"
 
 bool almostEqual(float x, float y, float epsilon)
 {

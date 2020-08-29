@@ -12,7 +12,7 @@
 
 #include "OdeSystem.h"
 #include "VoxelPoolsBase.h"
-#include "external/libsoda/LSODA.h"
+#include "../external/libsoda/LSODA.h"
 
 #ifdef USE_BOOST_ODE
 #include "BoostSys.h"

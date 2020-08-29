@@ -108,7 +108,7 @@ bool findModelParent( Id cwe, const string& path,
     Id paId( fullPath );
     if ( paId == Id() )   // Path includes new model name
     {
-        string::size_type pos = fullPath.find_last_of( "/" );
+        auto pos = fullPath.find_last_of( "/" );
         assert( pos != string::npos );
         string head = fullPath.substr( 0, pos );
         Id ret( head );

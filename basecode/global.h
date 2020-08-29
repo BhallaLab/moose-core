@@ -16,7 +16,6 @@
 #include <sstream>
 #include <valarray>
 
-#include "../randnum/RNG.h" /* Use inbuilt rng */
 #include "../utility/print_function.hpp"
 
 using namespace std;
@@ -56,17 +55,8 @@ extern unsigned int totalTests;
 namespace moose
 {
 
-extern moose::RNG rng;
-
 extern map<string, valarray<double>> solverProfMap;
 
-/**
- * @brief A global seed for all RNGs in moose. When moose.seed( x ) is called,
- * this variable is set. Other's RNGs (except muparser) uses this seed to
- * initialize them. By default it is initialized by random_device (see
- * global.cpp).
- */
-extern unsigned long __rng_seed__;
 
 /**
  * @brief Fix a path. For testing purpose.
@@ -100,31 +90,7 @@ int checkPath(const string& path);
  */
 string joinPath(string pathA, string pathB);
 
-/**
- * @brief Seed seed for RNG.
- *
- * @param seed
- */
-void mtseed(unsigned int seed);
 
-/**
- * @brief Generate a random double between 0 and 1
- *
- * @return  A random number between 0 and 1.
- */
-double mtrand(void);
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis  Overloaded function. Random number between a and b
- *
- * @Param a lower limit.
- * @Param b Upper limit.
- *
- * @Returns
- */
-/* ----------------------------------------------------------------------------*/
-double mtrand(double a, double b);
 
 /**
  * @brief Create a POSIX compatible path from a given string.
@@ -144,6 +110,7 @@ string createMOOSEPath(const string& path);
  * @return  String representation
  */
 string toString(double x);
+
 
 /**
  * @brief Create directory, recursively.
@@ -200,24 +167,7 @@ string moosePathToUserPath(string path);
 string moosePathToColumnName(const string& path, char delim = '.',
                              size_t maxParents = 1);
 
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis  Get the global seed set by call of moose.seed( X )
- *
- * @Returns  seed (int).
- */
-/* ----------------------------------------------------------------------------*/
-int getGlobalSeed();
 
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis  Set the seed for all random generator. When seed of a RNG is
- * not set, this seed it used. It is set to -1 by default.
- *
- * @Param seed
- */
-/* ----------------------------------------------------------------------------*/
-void setGlobalSeed(int seed);
 
 /* --------------------------------------------------------------------------*/
 /**
@@ -230,6 +180,7 @@ void setGlobalSeed(int seed);
 /* ----------------------------------------------------------------------------*/
 void addSolverProf(const string& name, double time, size_t steps = 1);
 void printSolverProfMap();
+
 }
 
 #endif /* ----- #ifndef __MOOSE_GLOBAL_INC_  ----- */
