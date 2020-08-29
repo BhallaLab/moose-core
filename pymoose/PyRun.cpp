@@ -188,6 +188,7 @@ PyRun::PyRun():mode_(0), initstr_(""), runstr_(""),
         cerr << "Could not initialize locals dict" << endl;
         return;
     }
+
     PyObject * value = PyFloat_FromDouble(0.0);
     if (!value && PyErr_Occurred()){
         PyErr_Print();
@@ -200,11 +201,7 @@ PyRun::PyRun():mode_(0), initstr_(""), runstr_(""),
 
 PyRun::~PyRun()
 {
-#if 0
-    // Fixes to BhallaLab/moose-core#420
     Py_XDECREF(globals_);
-    Py_XDECREF(locals_);
-#endif
 }
 
 void PyRun::setRunString(string statement)
