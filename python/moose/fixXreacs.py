@@ -14,14 +14,15 @@ from __future__ import print_function, division, absolute_import
 ####################################################################
 
 import moose._moose as _moose
+import moose
 
 msgSeparator = "_xMsg_"
 
 def findCompt(elm):
-    elm = _moose.element(elm)
+    elm = moose.element(elm)
     pa = elm.parent
     while pa.path != '/':
-        if _moose.Neutral(pa).isA['ChemCompt']:
+        if moose.Neutral(pa).isA['ChemCompt']:
             return pa.path
         pa = pa.parent
     print('Error: No compartment parent found for ' + elm.path)
@@ -63,21 +64,21 @@ def removeEnzFromPool(pool):
 # If a pool is not in the same compt as reac, make a proxy in the reac
 # compt, connect it up, and disconnect the one in the old compt.
 def proxify(reac, reacc, direction, pool, poolc):
-    reacc_elm = _moose.element(reacc)
-    reac_elm = _moose.element(reac)
+    reacc_elm = moose.element(reacc)
+    reac_elm = moose.element(reac)
     # Preserve the rates which were set up for the x-compt reacn
     #_moose.showfield( reac )
-    dupname = pool.name + '_xfer_' + _moose.element(poolc).name
-    #print "#############", pool, dupname, poolc
+    dupname = pool.name + '_xfer_' + moose.element(poolc).name
+    #  print("#############", pool, dupname, poolc)
     if _moose.exists(reacc + '/' + dupname):
-        duppool = _moose.element(reacc + '/' + dupname)
+        duppool = moose.element(reacc + '/' + dupname)
     else:
         # This also deals with cases where the duppool is buffered.
         duppool = _moose.copy(pool, reacc_elm, dupname)
     duppool.diffConst = 0  # diffusion only happens in original compt
     removeEnzFromPool(duppool)
     disconnectReactant(reac, pool, duppool)
-    _moose.connect(reac, direction, duppool, 'reac')
+    moose.connect(reac, direction, duppool, 'reac')
     #_moose.showfield( reac )
     #_moose.showmsg( reac )
 
@@ -85,7 +86,7 @@ def proxify(reac, reacc, direction, pool, poolc):
 def enzProxify(enz, enzc, direction, pool, poolc):
     if enzc == poolc:
         return
-    enze = _moose.element(enz)
+    enze = moose.element(enz)
     # kcat and k2 are indept of volume, just time^-1
     km = enze.numKm
     proxify(enz, enzc, direction, pool, poolc)
@@ -95,7 +96,7 @@ def enzProxify(enz, enzc, direction, pool, poolc):
 def reacProxify(reac, reacc, direction, pool, poolc):
     if reacc == poolc:
         return
-    reac_elm = _moose.element(reac)
+    reac_elm = moose.element(reac)
     kf = reac_elm.numKf
     kb = reac_elm.numKb
     proxify(reac, reacc, direction, pool, poolc)
@@ -116,15 +117,17 @@ def disconnectReactant(reacOrEnz, reactant, duppool):
     outMsgs = reacOrEnz.msgOut
     infoPath = duppool.path + '/info'
     if _moose.exists(infoPath):
-        info = _moose.element(infoPath)
+        info = moose.element(infoPath)
     else:
-        info = _moose.Annotator(infoPath)
+        info = moose.Annotator(infoPath)
 
     #_moose.le( reactant )
     notes = ""
     #_moose.showmsg( reacOrEnz )
     for i in outMsgs:
-        #print "killing msg from {} to {}\nfor {} and {}".format( reacOrEnz.path, reactant.path, i.srcFieldsOnE1[0], i.srcFieldsOnE2[0] )
+        #print("killing msg from {} to {}\nfor {} and {}".format(
+        #    reacOrEnz.path, reactant.path, i.srcFieldsOnE1,
+        #    i.srcFieldsOnE2))
         if i.e1 == reactant:
             msgStr = identifyMsg(i.e2, i.e2.srcFieldsOnE2[0], i.e1)
             if len(msgStr) > 0:
@@ -135,9 +138,8 @@ def disconnectReactant(reacOrEnz, reactant, duppool):
             if len(msgStr) > 0:
                 notes += msgStr
                 _moose.delete(i)
-    #print "MSGS to rebuild:", notes
+    #  print("MSGS to rebuild:", notes)
     info.notes += notes
-
 
 def fixXreacs(basepath):
     xr = findXreacs(basepath, 'Reac')
@@ -164,7 +166,7 @@ def fixXreacs(basepath):
 def getOldRates(msgs):
     if len(msgs) > 1:
         m1 = msgs[1].split(msgSeparator)[0]
-        elm = _moose.element(m1.split(' ')[0])
+        elm = moose.element(m1.split(' ')[0])
         if elm.isA['ReacBase']:
             return [elm.numKf, elm.numKb]
         elif elm.isA['EnzBase']:
@@ -181,7 +183,7 @@ def restoreOldRates(oldRates, msgs):
     #print oldRates, msgs
     if len(msgs) > 1:
         m1 = msgs[1].split(msgSeparator)[0]
-        elm = _moose.element(m1.split(' ')[0])
+        elm = moose.element(m1.split(' ')[0])
         if elm.isA['ReacBase']:
             elm.numKf = oldRates[0]
             elm.numKb = oldRates[1]
@@ -195,7 +197,6 @@ def restoreXreacs(basepath):
         msgs = i.notes.split(msgSeparator)
         oldRates = getOldRates(msgs)
         #print( "Deleting {}".format( i.parent.path ) )
-        #print msgs
         _moose.delete(i.parent)
         for j in msgs[1:]:
             if len(j) > 0:
@@ -205,7 +206,7 @@ def restoreXreacs(basepath):
                 #check to see if object exist before moose.connect, cases where object is deleted but
                 #_xref_ annotation info field still holds the reference
                 if (_moose.exists(args[0]) and _moose.exists(args[2])):
-                    _moose.connect(args[0], args[1], args[2], args[3])
+                    moose.connect(args[0], args[1], args[2], args[3])
                 #print( "Reconnecting {}".format( args ) )
                 #_moose.showfield( args[0] )
         restoreOldRates(oldRates, msgs)

@@ -16,27 +16,25 @@
 //////////////////////////////////////////////////////////////
 
 Id::Id()
-// : id_( 0 ), index_( 0 )
-    : id_( 0 )
+    // : id_( 0 ), index_( 0 )
+    : id_(0)
 {
     ;
 }
 
-Id::Id( unsigned int id )
-    : id_( id )
+Id::Id(unsigned int id) : id_(id)
 {
     ;
 }
 
-Id::Id( const string& path, const string& separator )
+Id::Id(const string& path)
 {
-    Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-    assert( shell );
-    id_ = shell->doFind( path ).id.id_;
+    Shell* shell = reinterpret_cast<Shell*>(Id().eref().data());
+    assert(shell);
+    id_ = shell->doFind(path).id.id_;
 }
 
-Id::Id( const ObjId& oi )
-    : id_( oi.id.id_ )
+Id::Id(const ObjId& oi) : id_(oi.id.id_)
 {
     ;
 }
@@ -46,19 +44,19 @@ Id::Id( const ObjId& oi )
  * out of the existing range, but it would be nice to have a heuristic
  * on how outrageous the incoming value is.
  */
-Id Id::str2Id( const std::string& s )
+Id Id::str2Id(const std::string& s)
 {
     // unsigned int val = atoi( s.c_str() );
-    return Id( s );
+    return Id(s);
 }
 
 //////////////////////////////////////////////////////////////
 //	Element array static access function. Private.
 //////////////////////////////////////////////////////////////
 
-vector< Element* >& Id::elements()
+vector<Element*>& Id::elements()
 {
-    static vector< Element* > e;
+    static vector<Element*> e;
     return e;
 }
 
@@ -67,31 +65,29 @@ vector< Element* >& Id::elements()
 //////////////////////////////////////////////////////////////
 
 // static func to convert id into a string.
-string Id::id2str( Id id )
+string Id::id2str(Id id)
 {
     return id.path();
 }
 
 // Function to convert it into its fully separated path.
-string Id::path( const string& separator) const
+string Id::path() const
 {
-    string ret = Neutral::path( eref() );
+    string ret = Neutral::path(eref());
 
     // FIXME: Monday 09 March 2020 12:30:27 PM IST, Dilawar Singh
-    // This beaks the path comparison. Getting x.path from x returned in a 
+    // This beaks the path comparison. Getting x.path from x returned in a
     // list by moose.wildcardFind() and getting path from here doesn't math
     // when this is enabled.
     // If we want to remove [0] then it should be done globally and not just
     // here.
 
-    // Trim off trailing [] 
-    assert( ret.length() > 0 );
-    while ( ret.back() == ']' )
-    {
-        size_t pos = ret.find_last_of( '[' );
-        if ( pos != string::npos && pos > 0 )
-        {
-            ret = ret.substr( 0, pos );
+    // Trim off trailing []
+    assert(ret.length() > 0);
+    while (ret.back() == ']') {
+        size_t pos = ret.find_last_of('[');
+        if (pos != string::npos && pos > 0) {
+            ret = ret.substr(0, pos);
         }
     }
 
@@ -111,26 +107,26 @@ string Id::path( const string& separator) const
  * deprecated
 Element* Id::operator()() const
 {
-	return elements()[ id_ ];
+        return elements()[ id_ ];
 }
  */
 
 /// Synonym for Id::operator()()
 Element* Id::element() const
 {
-    return elements()[ id_ ];
+    return elements()[id_];
 }
 
 /*
 unsigned int Id::index() const
 {
-	return index_;
+        return index_;
 }
 */
 
 Eref Id::eref() const
 {
-    return Eref( elements()[ id_ ], 0 );
+    return Eref(elements()[id_], 0);
     // return Eref( elements()[ id_ ], index_ );
 }
 
@@ -140,8 +136,8 @@ Id Id::nextId()
     // Should really look up 'available' list.
     // Should really put the returned value onto the 'reserved' list
     // so they don't go dangling.
-    Id ret( elements().size() );
-    elements().push_back( 0 );
+    Id ret(elements().size());
+    elements().push_back(0);
     return ret;
 }
 
@@ -151,53 +147,49 @@ unsigned int Id::numIds()
     return elements().size();
 }
 
-void Id::bindIdToElement( Element* e )
+void Id::bindIdToElement(Element* e)
 {
-    if ( elements().size() <= id_ )
-    {
-        if ( elements().size() % 1000 == 0 )
-        {
-            elements().reserve( elements().size() + 1000 );
+    if (elements().size() <= id_) {
+        if (elements().size() % 1000 == 0) {
+            elements().reserve(elements().size() + 1000);
         }
-        elements().resize( id_ + 1, 0 );
+        elements().resize(id_ + 1, 0);
     }
-    assert( elements()[ id_ ] == 0 );
+    assert(elements()[id_] == 0);
     /*
     if ( elements()[ id_ ] != 0 )
-    	cout << "Warning: assigning Element to existing id " << id_ << "\n";
-    	*/
-    elements()[ id_ ] = e;
+        cout << "Warning: assigning Element to existing id " << id_ << "\n";
+        */
+    elements()[id_] = e;
     // cout << "Id::bindIdToElement '" << e->getName() << "' = " << id_ << endl;
 }
 
 /*
 Id Id::create( Element* e )
 {
-	Id ret( elements().size() );
-	elements().push_back( e );
-	return ret;
+        Id ret( elements().size() );
+        elements().push_back( e );
+        return ret;
 }
 */
 
 void Id::destroy() const
 {
-    if ( elements()[ id_ ] )
-    {
-        // cout << "Id::destroy '" << elements()[ id_ ]->getName() << "' = " << id_ << endl;
-        delete elements()[ id_ ];
-        elements()[ id_ ] = 0;
+    if (elements()[id_]) {
+        // cout << "Id::destroy '" << elements()[ id_ ]->getName() << "' = " <<
+        // id_ << endl;
+        delete elements()[id_];
+        elements()[id_] = 0;
         // Put id_ on 'available' list
-    }
-    else
-    {
+    } else {
         cout << "Warning: Id::destroy: " << id_ << " already zeroed\n";
     }
 }
 
 void Id::zeroOut() const
 {
-    assert ( id_ < elements().size() );
-    elements()[ id_ ] = 0;
+    assert(id_ < elements().size());
+    elements()[id_] = 0;
 }
 
 unsigned int Id::value() const
@@ -207,11 +199,9 @@ unsigned int Id::value() const
 
 void Id::clearAllElements()
 {
-    for ( vector< Element* >::iterator
-            i = elements().begin(); i != elements().end(); ++i )
-    {
-        if ( *i )
-        {
+    for (vector<Element*>::iterator i = elements().begin();
+         i != elements().end(); ++i) {
+        if (*i) {
             (*i)->clearAllMsgs();
             delete *i;
         }
@@ -222,19 +212,19 @@ void Id::clearAllElements()
 //	Id utility
 //////////////////////////////////////////////////////////////
 
-ostream& operator <<( ostream& s, const Id& i )
+ostream& operator<<(ostream& s, const Id& i)
 {
     s << i.id_;
     /*
     if ( i.index_ == 0 )
-    	s << i.id_;
+        s << i.id_;
     else
-    	s << i.id_ << "[" << i.index_ << "]";
+        s << i.id_ << "[" << i.index_ << "]";
     */
     return s;
 }
 
-istream& operator >>( istream& s, Id& i )
+istream& operator>>(istream& s, Id& i)
 {
     s >> i.id_;
     return s;
@@ -242,8 +232,8 @@ istream& operator >>( istream& s, Id& i )
 
 /*
 Id::Id( unsigned int id, unsigned int index )
-	: id_( id ), index_( index )
+        : id_( id ), index_( index )
 {
-	;
+        ;
 }
 */

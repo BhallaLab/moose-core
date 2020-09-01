@@ -19,7 +19,8 @@
  */
 
 #include "../basecode/header.h"
-#include "../basecode/global.h"
+
+#include "../randnum/randnum.h"
 
 #include "../basecode/SparseMatrix.h"
 #include "KinSparseMatrix.h"

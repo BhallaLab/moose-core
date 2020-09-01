@@ -25,6 +25,12 @@
 
 using namespace std;
 
+constexpr double PI = 3.141592653589793;
+constexpr double NA = 6.0221415e23;
+constexpr double FaradayConst =  96485.3415; // s A / mol
+constexpr double GasConst = 8.3144621; // R, units are J/(K.mol)
+
+typedef unsigned short BindIndex;
 
 /**
  * Looks up and uniquely identifies functions, on a per-Cinfo basis.
@@ -37,42 +43,20 @@ typedef unsigned int FuncId;
  */
 typedef unsigned int DataId;
 
-/**
- * Identifies data entry on an Element. This is a global index,
- * in that it does not refer to the array on any given node, but uniquely
- * identifies the entry over the entire multinode simulation.
- */
-extern const unsigned int ALLDATA; // Defined in consts.cpp
+/// Used by ObjId and Eref
+const unsigned int ALLDATA = ~0U;
 
-/// Identifies bad DataIndex or FieldIndex in ObjId.
-extern const unsigned int BADINDEX; // Defined in consts.cpp
-
-/**
- * Index into Element::vector< vector< MsgFuncBinding > > msgBinding_;
- */
-typedef unsigned short BindIndex;
-
-extern const double PI;	// Defined in consts.cpp
-extern const double NA; // Defined in consts.cpp
-extern const double FaradayConst; // Defined in consts.cpp
-extern const double GasConst; // Defined in consts.cpp
-
-class Element;
-class Eref;
-class OpFunc;
-class Cinfo;
-class SetGet;
-class FuncBarrier;
-class ObjId;
-class SrcFinfo;
+/// Used by ObjId and Eref
+const unsigned int BADINDEX = ~1U;
 
 #include "doubleEq.h"
 #include "Id.h"
 #include "ObjId.h"
+#include "Cinfo.h"
+
 #include "Finfo.h"
 #include "DestFinfo.h"
 #include "ProcInfo.h"
-#include "Cinfo.h"
 #include "MsgFuncBinding.h"
 #include "../msg/Msg.h"
 #include "Dinfo.h"
@@ -86,7 +70,6 @@ class SrcFinfo;
 #include "SrcFinfo.h"
 
 extern DestFinfo* receiveGet();
-class Neutral;
 #include "OpFuncBase.h"
 #include "HopFunc.h"
 #include "SetGet.h"

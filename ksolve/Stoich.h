@@ -26,7 +26,7 @@
  * 2. Compartment assigned to Stoich. Here it assigns unique vols.
  * 3. Dsolve and Ksolve assigned to Stoich using setKsolve and setDsolve.
  * 	 3.1 At this point the Stoich::useOneWay_ flag is set if it is a Gsolve.
- * 4. Call Stoich::setPath. All the rest happens internally, done by Stoich:
+ * 4. Call Stoich::setWildcard. All the rest happens internally, done by Stoich:
  * 		4.1 assign compartment to Dsolve and Ksolve.
  * 		4.2 assign numPools and compts to Dsolve and Ksolve.
  * 		4.3 During Zombification, zeroth vector< RateTerm* > is built.
@@ -48,8 +48,7 @@
 
 class FuncTerm;
 
-class Stoich
-{
+class Stoich {
 public:
     Stoich();
     ~Stoich();
@@ -58,11 +57,11 @@ public:
     // Field assignment stuff
     //////////////////////////////////////////////////////////////////
 
-    void setOneWay( bool v );
+    void setOneWay(bool v);
     bool getOneWay() const;
 
     // Flag that defines permission for pool values to go negative.
-    void setAllowNegative( bool v );
+    void setAllowNegative(bool v);
     bool getAllowNegative() const;
 
     /// Returns number of local pools that are updated by solver
@@ -91,27 +90,30 @@ public:
      * poolOffset is passed back as the last entry of this vector.
      * Any Ids that are not pools return EMPTY=~0.
      */
-    vector< unsigned int > getPoolIdMap() const;
+    vector<unsigned int> getPoolIdMap() const;
 
-    Id getPoolByIndex( unsigned int index ) const;
+    Id getPoolByIndex(unsigned int index) const;
 
     /**
      * Take the provided wildcard path to build the list of elements
      * managed by this solver.
      */
-    void setPath( const Eref& e, string path );
-    string getPath( const Eref& e ) const;
+    void setPath(const Eref& e, string path);
+    void setReacSystemPath(const Eref& e, string wildcard);
+
+    string getPath(const Eref& e) const;
+    string getReacSystemPath(const Eref& e) const;
 
     /// assigns kinetic solver: Ksovle or GSSAsolve.
-    void setKsolve( Id v );
+    void setKsolve(Id v);
     Id getKsolve() const;
 
     /// assigns diffusion solver: Dsovle or a Gillespie voxel stepper
-    void setDsolve( Id v );
+    void setDsolve(Id v);
     Id getDsolve() const;
 
     /// assigns compartment occupied by Stoich.
-    void setCompartment( Id v );
+    void setCompartment(Id v);
     Id getCompartment() const;
 
     /**
@@ -127,21 +129,21 @@ public:
     unsigned int getNumCoreRates() const;
 
     /// Utility function to return a rates_ entry
-    const RateTerm* rates( unsigned int i ) const;
+    const RateTerm* rates(unsigned int i) const;
 
     /// Returns a reference to the entire rates_ vector.
-    const vector< RateTerm* >& getRateTerms() const;
+    const vector<RateTerm*>& getRateTerms() const;
 
     unsigned int getNumFuncs() const;
-    const FuncTerm* funcs( unsigned int i ) const;
+    const FuncTerm* funcs(unsigned int i) const;
     /// Returns true if the specified pool is controlled by a func
-    bool isFuncTarget( unsigned int poolIndex ) const;
+    bool isFuncTarget(unsigned int poolIndex) const;
 
-    vector< int > getMatrixEntry() const;
-    vector< unsigned int > getColIndex() const;
-    vector< unsigned int > getRowStart() const;
+    vector<int> getMatrixEntry() const;
+    vector<unsigned int> getColIndex() const;
+    vector<unsigned int> getRowStart() const;
 
-    vector< Id > getProxyPools( Id i ) const;
+    vector<Id> getProxyPools(Id i) const;
 
     /**
      * getStatus(): Flag to track status of Stoich object.
@@ -162,7 +164,7 @@ public:
      * Internal function which sets up the model based on the provided
      * elist of all elements managed by this solver.
      */
-    void setElist( const Eref& e, const vector< ObjId >& elist );
+    void setElist(const Eref& e, const vector<ObjId>& elist);
 
     /**
      * Scans through elist to find any reactions that connect to
@@ -170,7 +172,7 @@ public:
      * elist and maintains Ids of the affected reactions, and their
      * off-solver pools, in offSolverReacs_ and offSolverPools_.
      */
-    void locateOffSolverReacs( Id myCompt, vector< Id >& elist );
+    void locateOffSolverReacs(Id myCompt, vector<Id>& elist);
 
     /**
      * Builds the objMap vector, which maps all Ids to
@@ -183,9 +185,9 @@ public:
     /// Using the computed array sizes, now allocate space for them.
     void resizeArrays();
     /// Identifies and allocates objects in the Stoich.
-    void allocateModelObject( Id id );
+    void allocateModelObject(Id id);
     /// Calculate sizes of all arrays, and allocate them.
-    void allocateModel( const vector< Id >& elist );
+    void allocateModel(const vector<Id>& elist);
 
     /// Functions to build the maps between Ids and internal indices
     void buildPoolLookup();
@@ -204,7 +206,7 @@ public:
     void convertRatesToStochasticForm();
 
     /// Used to handle run-time size updates for spines.
-    void scaleBufsAndRates( unsigned int index, double volScale );
+    void scaleBufsAndRates(unsigned int index, double volScale);
 
     //////////////////////////////////////////////////////////////////
     // Zombification functions.
@@ -215,7 +217,7 @@ public:
      * converts all entries into zombies. The first arg e is the
      * Eref of the Stoich itself.
      */
-    void zombifyModel( const Eref& e, const vector< Id >& elist );
+    void zombifyModel(const Eref& e, const vector<Id>& elist);
 
     /**
      * Converts back to ExpEuler type basic kinetic Elements.
@@ -225,22 +227,21 @@ public:
     /// unZombifies Pools. Helper for unZombifyModel.
     void unZombifyPools();
 
-    void zombifyChemCompt( Id compt );
+    void zombifyChemCompt(Id compt);
 
     /**
      * Utility function to find if incoming message assigns N or conc,
      * and to appropriately zombify the function and set up its
      * parameters including volume scaling.
      */
-    Id zombifyPoolFuncWithScaling( Id pool );
+    Id zombifyPoolFuncWithScaling(Id pool);
 
-    unsigned int convertIdToReacIndex( Id id ) const;
-    unsigned int convertIdToPoolIndex( Id id ) const;
-    unsigned int convertIdToFuncIndex( Id id ) const;
+    unsigned int convertIdToReacIndex(Id id) const;
+    unsigned int convertIdToPoolIndex(Id id) const;
+    unsigned int convertIdToFuncIndex(Id id) const;
 
     /// Utility function to make a half reac and return the rate term.
-    ZeroOrder* makeHalfReaction(
-        double rate, const vector< Id >& reactants );
+    ZeroOrder* makeHalfReaction(double rate, const vector<Id>& reactants);
 
     /*
      * This takes the specified Reac and its substrate and product
@@ -249,76 +250,76 @@ public:
      * belongs to, needed for cross-reaction computations.
      * This is the high-level interface function.
      */
-    void installReaction( Id reacId,
-                          const vector< Id >& subs, const vector< Id >& prds );
+    void installReaction(Id reacId, const vector<Id>& subs,
+                         const vector<Id>& prds);
     /*
      * This takes the specified subs and prds belonging
      * to the specified Reac, and builds them into the Stoich.
      * It is a low-level function used internally.
      */
-    unsigned int innerInstallReaction( Id reacId,
-                                       const vector< Id >& subs, const vector< Id >& prds );
+    unsigned int innerInstallReaction(Id reacId, const vector<Id>& subs,
+                                      const vector<Id>& prds);
 
     /**
      * This takes the baseclass for an MMEnzyme and builds the
      * MMenz into the Stoich.
      */
-    void installMMenz( Id enzId, const vector< Id >& enzMolId,
-                       const vector< Id >& subs, const vector< Id >& prds );
+    void installMMenz(Id enzId, const vector<Id>& enzMolId,
+                      const vector<Id>& subs, const vector<Id>& prds);
     /**
      * This is the inner function to do the installation.
      */
-    void installMMenz( MMEnzymeBase* meb, unsigned int rateIndex,
-                       const vector< Id >& subs, const vector< Id >& prds );
+    void installMMenz(MMEnzymeBase* meb, unsigned int rateIndex,
+                      const vector<Id>& subs, const vector<Id>& prds);
 
     /*
      * This takes the specified Reac and its substrate and product
      * list, and installs them into the Stoich. This is the high-level
      * interface function.
      */
-    void installEnzyme( Id enzId, Id enzMolId, Id cplxId,
-                        const vector< Id >& subs, const vector< Id >& prds );
+    void installEnzyme(Id enzId, Id enzMolId, Id cplxId, const vector<Id>& subs,
+                       const vector<Id>& prds);
     /**
      * This takes the forward, backward and product formation half-reacs
      * belonging to the specified Enzyme, and builds them into the
      * Stoich. This is the low-level function.
      */
-    void installEnzyme( ZeroOrder* r1, ZeroOrder* r2, ZeroOrder* r3,
-                        Id enzId, Id enzMolId, const vector< Id >& prds );
+    void installEnzyme(ZeroOrder* r1, ZeroOrder* r2, ZeroOrder* r3, Id enzId,
+                       Id enzMolId, const vector<Id>& prds);
 
     /// This is used when the enzyme lacks sub or prd.
-    void installDummyEnzyme( Id enzId, Id enzMolId);
+    void installDummyEnzyme(Id enzId, Id enzMolId);
 
     /**
      * This installs a FuncTerm, which evaluates a function to specify
      * the conc of the specific pool. The pool is a BufPool.
      */
-    void installAndUnschedFunc( Id func, Id pool, double volScale );
+    void installAndUnschedFunc(Id func, Id pool, double volScale);
 
     /**
      * This installs a FuncRate, which evaluates a function to specify
      * the rate of change of conc of the specific pool.
      * The pool is a Pool.
      */
-    void installAndUnschedFuncRate( Id func, Id pool );
+    void installAndUnschedFuncRate(Id func, Id pool);
 
     /**
      * This installs a FuncReac, which evaluates a function to specify
      * the rate (Kf) of the specified reaction.
      */
-    void installAndUnschedFuncReac( Id func, Id reac );
+    void installAndUnschedFuncReac(Id func, Id reac);
 
     //////////////////////////////////////////////////////////////////
 
     /**
      * Returns SpeciesId of specified pool
      */
-    unsigned int getSpecies( unsigned int poolIndex ) const;
+    unsigned int getSpecies(unsigned int poolIndex) const;
 
     /**
      * Assigns SpeciesId of specified pool
      */
-    void setSpecies( unsigned int poolIndex, unsigned int s );
+    void setSpecies(unsigned int poolIndex, unsigned int s);
 
     /**
      * Sets the forward rate v (given in millimoloar concentration units)
@@ -327,7 +328,7 @@ public:
      * involves querying the volume subsystem about volumes for each
      * voxel, and scaling accordingly.
      */
-    void setReacKf( const Eref& e, double v ) const;
+    void setReacKf(const Eref& e, double v) const;
 
     /**
      * Sets the reverse rate v (given in millimoloar concentration units)
@@ -336,7 +337,7 @@ public:
      * involves querying the volume subsystem about volumes for each
      * voxel, and scaling accordingly.
      */
-    void setReacKb( const Eref& e, double v ) const;
+    void setReacKb(const Eref& e, double v) const;
 
     /**
      * Sets the Km for MMenz, using appropriate volume conversion to
@@ -344,14 +345,14 @@ public:
      * This may do the assignment among many voxels containing the enz
      * in case there are different volumes.
      */
-    void setMMenzKm( const Eref& e, double v ) const;
-    double getMMenzNumKm( const Eref& e ) const;
+    void setMMenzKm(const Eref& e, double v) const;
+    double getMMenzNumKm(const Eref& e) const;
 
     /**
      * Sets the kcat for MMenz. No conversions needed.
      */
-    void setMMenzKcat( const Eref& e, double v ) const;
-    double getMMenzKcat( const Eref& e ) const;
+    void setMMenzKcat(const Eref& e, double v) const;
+    double getMMenzKcat(const Eref& e) const;
 
     /**
      * Sets the rate v (given in millimoloar concentration units)
@@ -361,50 +362,50 @@ public:
      * involves querying the volume subsystem about volumes for each
      * voxel, and scaling accordingly.
      */
-    void setEnzK1( const Eref& e, double v ) const;
-    double getEnzNumK1( const Eref& e ) const;
+    void setEnzK1(const Eref& e, double v) const;
+    double getEnzNumK1(const Eref& e) const;
 
     /// Set rate k2 (1/sec) for enzyme
-    void setEnzK2( const Eref& e, double v ) const;
+    void setEnzK2(const Eref& e, double v) const;
     /// Get rate k2 (1/sec) for enzyme
-    double getEnzK2( const Eref& e ) const;
+    double getEnzK2(const Eref& e) const;
 
     /// Set rate k3 (1/sec) for enzyme
-    void setEnzK3( const Eref& e, double v ) const;
+    void setEnzK3(const Eref& e, double v) const;
     /// Get rate k3, aka kcat, for enzyme
-    double getEnzK3( const Eref& e ) const;
+    double getEnzK3(const Eref& e) const;
 
     /**
      * Returns the internal rate in #/voxel, for R1, for the specified
      * Eref.
      */
-    double getR1( const Eref& e ) const;
+    double getR1(const Eref& e) const;
     /**
      * Returns internal rate R1 in #/voxel, for the rate term
      * following the one directly referred to by the Eref e. Enzymes
      * define multiple successive rate terms, so we look up the first,
      * and then select one after it.
      */
-    double getR1offset1( const Eref& e ) const;
+    double getR1offset1(const Eref& e) const;
     /**
      * Returns internal rate R1 in #/voxel, for the rate term
      * two after the one directly referred to by the Eref e. Enzymes
      * define multiple successive rate terms, so we look up the first,
      * and then select the second one after it.
      */
-    double getR1offset2( const Eref& e ) const;
+    double getR1offset2(const Eref& e) const;
 
     /**
      * Returns the internal rate in #/voxel, for R2, for the specified
      * reacIndex and voxel index. In some cases R2 is undefined, and it
      * then returns 0.
      */
-    double getR2( const Eref& e ) const;
+    double getR2(const Eref& e) const;
 
     /**
      * Sets the arithmetic expression used in a FuncRate or FuncReac
      */
-    void setFunctionExpr( const Eref& e, string expr );
+    void setFunctionExpr(const Eref& e, string expr);
 
     /**
      * This function scans all reacs and enzymes and recalculates the
@@ -428,7 +429,7 @@ public:
      * rates are volume dependent.
      * Moved to VoxelPools
     void updateRates( const double* s, double* yprime,
-    			   unsigned int volIndex ) const;
+                   unsigned int volIndex ) const;
      */
 
     /**
@@ -436,23 +437,23 @@ public:
      * The volIndex specifies which set of rates to use, since the
      * rates are volume dependent.
      */
-    void updateReacVelocities( const double* s, vector< double >& vel,
-                               unsigned int volIndex ) const;
+    void updateReacVelocities(const double* s, vector<double>& vel,
+                              unsigned int volIndex) const;
 
     /// Updates the function values, within s.
-    void updateFuncs( double* s, double t ) const;
+    void updateFuncs(double* s, double t) const;
 
     /// Updates the rates for cross-compartment reactions.
     /*
     void updateJunctionRates( const double* s,
-    	   const vector< unsigned int >& reacTerms, double* yprime );
-    	   */
+           const vector< unsigned int >& reacTerms, double* yprime );
+           */
 
     /**
      * Get the rate for a single reaction specified by r, as per all
      * the mol numbers in s.
     double getReacVelocity( unsigned int r, const double* s,
-    			   unsigned int volIndex ) const;
+                   unsigned int volIndex ) const;
      */
 
     /// Returns the stoich matrix. Used by gsolve.
@@ -460,19 +461,19 @@ public:
     //////////////////////////////////////////////////////////////////
     // Access functions for cross-node reactions.
     //////////////////////////////////////////////////////////////////
-    const vector< Id >& getOffSolverPools() const;
+    const vector<Id>& getOffSolverPools() const;
 
     /**
      * List all the compartments to which the current compt is coupled,
      * by cross-compartment reactions. Self not included.
      */
-    vector< Id > getOffSolverCompts() const;
+    vector<Id> getOffSolverCompts() const;
 
     /**
      * Looks up the vector of pool Ids originating from the specified
      * compartment, that are represented on this compartment as proxies.
      */
-    const vector< Id >& offSolverPoolMap( Id compt ) const;
+    const vector<Id>& offSolverPoolMap(Id compt) const;
 
     /**
      * Returns the index of the matching volume,
@@ -499,7 +500,7 @@ private:
      */
     bool allowNegative_;
 
-    string path_;
+    string wildcard_;
 
     /// This contains the Id of the Kinetic solver.
     Id ksolve_;
@@ -519,7 +520,7 @@ private:
      * Lookup from each molecule to its Species identifer
      * This will eventually be tied into an ontology reference.
      */
-    vector< unsigned int > species_;
+    vector<unsigned int> species_;
 
     /**
      * The RateTerms handle the update operations for reaction rate v_.
@@ -532,7 +533,7 @@ private:
      * off-compartment products. These need special volume scaling
      * involving all the interactiong compartments.
      */
-    vector< RateTerm* > rates_;
+    vector<RateTerm*> rates_;
 
     /**
      * This tracks the unique volumes handled by the reac system.
@@ -544,7 +545,7 @@ private:
     unsigned int numVoxels_;
 
     /// The FuncTerms handle mathematical ops on mol levels.
-    vector< FuncTerm* > funcs_;
+    vector<FuncTerm*> funcs_;
 
     /// N_ is the stoichiometry matrix. All pools * all reac terms.
     KinSparseMatrix N_;
@@ -574,68 +575,68 @@ private:
     /**
      * Vector of variablePool Ids.
      */
-    vector< Id > varPoolVec_;
+    vector<Id> varPoolVec_;
 
     /**
      * Vector of bufPool Ids.
      */
-    vector< Id > bufPoolVec_;
+    vector<Id> bufPoolVec_;
 
     /**
      * These are pools that were not in the original scope of the
      * solver, but have to be brought in because they are reactants
      * of one or more of the offSolverReacs.
      */
-    vector< Id > offSolverPoolVec_;
+    vector<Id> offSolverPoolVec_;
 
     /**
      * Vector of reaction ids.
      */
-    vector< Id > reacVec_;
-    vector< Id > offSolverReacVec_;
+    vector<Id> reacVec_;
+    vector<Id> offSolverReacVec_;
 
     /**
      * Map back from enz index to Id. Needed to unzombify
      */
-    vector< Id > enzVec_;
-    vector< Id > offSolverEnzVec_;
+    vector<Id> enzVec_;
+    vector<Id> offSolverEnzVec_;
 
     /**
      * Map back from enz index to Id. Needed to unzombify
      */
-    vector< Id > mmEnzVec_;
-    vector< Id > offSolverMMenzVec_;
+    vector<Id> mmEnzVec_;
+    vector<Id> offSolverMMenzVec_;
 
     /**
      * Vector of funcs controlling pool number, that is N.
      */
-    vector< Id > poolFuncVec_;
+    vector<Id> poolFuncVec_;
 
     /**
      * vector tracks which pool is controlled by which func.
      * Unused entries are flagged by ~0.
      * funcTarget_[ poolIndex ] == funcIndex
      */
-    vector< unsigned int > funcTarget_;
+    vector<unsigned int> funcTarget_;
 
     /**
      * Vector of funcs controlling pool increment, that is dN/dt
      * This is handled as a rateTerm.
      */
-    vector< Id > incrementFuncVec_;
+    vector<Id> incrementFuncVec_;
 
     /**
      * Vector of funcs controlling reac rate, that is numKf
      * This is handled as a rateTerm.
      */
-    vector< Id > reacFuncVec_;
+    vector<Id> reacFuncVec_;
 
     ///////////////////////////////////////////////////////////////
     // Here we have maps to look up objects from their ids.
     ///////////////////////////////////////////////////////////////
-    map< Id, unsigned int > poolLookup_;
-    map< Id, unsigned int > rateTermLookup_;
-    map< Id, unsigned int > funcLookup_;
+    map<Id, unsigned int> poolLookup_;
+    map<Id, unsigned int> rateTermLookup_;
+    map<Id, unsigned int> funcLookup_;
 
     /**
      * Number of variable molecules that the solver deals with,
@@ -698,7 +699,7 @@ private:
      * In use, the junction will copy the pool indices over for
      * data transfer.
      */
-    map< Id, vector< Id > > offSolverPoolMap_;
+    map<Id, vector<Id>> offSolverPoolMap_;
 
     /**
      * Tracks the reactions that go off the current solver.
@@ -709,23 +710,23 @@ private:
      * Which compartment(s) does the off solver reac connect to?
      * Usually it is just one, in which case the second id is Id()
      */
-    vector< pair< Id, Id > > offSolverReacCompts_;
-    vector< pair< Id, Id > > offSolverEnzCompts_;
-    vector< pair< Id, Id > > offSolverMMenzCompts_;
+    vector<pair<Id, Id>> offSolverReacCompts_;
+    vector<pair<Id, Id>> offSolverEnzCompts_;
+    vector<pair<Id, Id>> offSolverMMenzCompts_;
 
     /**
      * subComptVec_[rateTermIndex][substrate#]: Identifies compts
      * for each substrate for each cross-compartment RateTerm in
      * the rates_vector.
      */
-    vector< vector< Id > > subComptVec_;
+    vector<vector<Id>> subComptVec_;
 
     /**
      * prdComptVec_[rateTermIndex][product#]: Identifies compts
      * for each product for each cross-compartment RateTerm in
      * the rates_vector.
      */
-    vector< vector< Id > > prdComptVec_;
+    vector<vector<Id>> prdComptVec_;
 };
 
-#endif	// _STOICH_H
+#endif  // _STOICH_H

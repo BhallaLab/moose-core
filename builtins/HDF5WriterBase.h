@@ -41,7 +41,7 @@ hid_t require_group(hid_t file_id, string path);
 class HDF5WriterBase
 {
   public:
-    static const hssize_t CHUNK_SIZE;
+    static const hsunsigned int CHUNK_SIZE;
     HDF5WriterBase();
     virtual ~HDF5WriterBase();
     void setFilename(string filename);
@@ -80,8 +80,8 @@ class HDF5WriterBase
 
     herr_t openFile();
     // C++ sucks - does not allow template specialization inside class
-    hid_t createDoubleDataset(hid_t parent, std::string name, hsize_t size=0, hsize_t maxsize=H5S_UNLIMITED);
-    hid_t createStringDataset(hid_t parent, std::string name, hsize_t size=0, hsize_t maxsize=H5S_UNLIMITED);
+    hid_t createDoubleDataset(hid_t parent, std::string name, hunsigned int size=0, hunsigned int maxsize=H5S_UNLIMITED);
+    hid_t createStringDataset(hid_t parent, std::string name, hunsigned int size=0, hunsigned int maxsize=H5S_UNLIMITED);
 
     herr_t appendToDataset(hid_t dataset, const vector<double>& data);
     hid_t createDataset2D(hid_t parent, string name, unsigned int rows);

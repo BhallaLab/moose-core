@@ -23,7 +23,7 @@ def test_nml2( nogui = True ):
     global SCRIPT_DIR
     filename = os.path.join(SCRIPT_DIR, 'test_files/passiveCell.nml' )
     mu.info('Loading: %s' % filename )
-    nml = moose.mooseReadNML2( filename )
+    nml = moose.readNML2( filename )
     if not nml:
         mu.warn( "Failed to parse NML2 file" )
         return

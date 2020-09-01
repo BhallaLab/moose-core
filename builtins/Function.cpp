@@ -14,6 +14,7 @@
 #include "../utility/strutil.h"
 #include "../utility/numutil.h"
 #include "../utility/testing_macros.hpp"
+#include "../utility/print_function.hpp"
 
 #include "../builtins/MooseParser.h"
 
@@ -197,7 +198,7 @@ const Cinfo * Function::initCinfo()
         "x",
         "Input variables (indexed) to the function. These can be passed via messages.",
         Variable::initCinfo(),
-        &Function::getVar,
+        &Function::getX,
         &Function::setNumVar,
         &Function::getNumVar
     );
@@ -213,7 +214,9 @@ const Cinfo * Function::initCinfo()
 
     static LookupValueFinfo< Function, string, unsigned int > xindex(
         "xindex",
-        "Return the index of given variable. It can be used with field `x`",
+        "(developer only) Returns the index of a given variable which can be used with field `x`."
+        " Note that we have a mechanism to map string (variable name) to integer "
+        " (variable index).",
         &Function::setVarIndex,
         &Function::getVarIndex
     );
@@ -326,7 +329,7 @@ in the same order as the y indices.
 static const Cinfo * functionCinfo = Function::initCinfo();
 
 Function::Function():
-    valid_(false)
+    valid_(true)
     , numVar_(0)
     , lastValue_(0.0)
     , value_(0.0)
@@ -377,7 +380,7 @@ Function& Function::operator=(const Function& rhs)
             varIndex_[x->getName()] = xs_.size()-1;
         }
         // Add all the Ys now.
-        for(size_t i=0; i < rhs.ys_.size(); i++)
+        for(unsigned int i=0; i < rhs.ys_.size(); i++)
             ys_.push_back(shared_ptr<double>(new double(0.0)));
         parser_->LinkVariables(xs_, ys_, &t_);
         parser_->SetExpr(rhs.parser_->GetExpr());
@@ -408,7 +411,7 @@ void Function::addXByIndex(const unsigned int index)
 
     if(index >= xs_.size())
     {
-        for(size_t i = xs_.size(); i <= index; i++) 
+        for(unsigned int i = xs_.size(); i <= index; i++) 
         {
             xs_.push_back(shared_ptr<Variable>(new Variable('x'+to_string(i))));
             varIndex_[name] = xs_.size()-1;
@@ -531,10 +534,7 @@ void Function::setExpr(const Eref& eref, const string expression)
 {
     string expr = moose::trim(expression);
     if(expr.empty())
-    {
-        // MOOSE_WARN("Empty expression.");
         return;
-    }
 
     if(valid_ && expr == parser_->GetExpr())
     {
@@ -602,7 +602,7 @@ string Function::getExpr( const Eref& e ) const
 {
     if (!valid_)
     {
-        cout << "Error: " << e.objId().path() << "::getExpr() - invalid parser state" << endl;
+        cerr << __func__ << " Error: " << e.objId().path() << "::getExpr() - invalid parser state" << endl;
         cout << "\tExpression was : " << parser_->GetExpr() << endl;
         return "";
     }
@@ -659,9 +659,7 @@ double Function::getValue() const
 double Function::getRate() const
 {
     if (!valid_)
-    {
-        cout << "Error: Function::getValue() - invalid state" << endl;
-    }
+        cerr << __func__ << "Error: invalid state" << endl;
     return rate_;
 }
 
@@ -686,9 +684,8 @@ vector< double > Function::getY() const
 double Function::getDerivative() const
 {
     double value = 0.0;
-    if (!valid_)
-    {
-        cout << "Error: Function::getDerivative() - invalid state" << endl;
+    if (!valid_) {
+        cerr << __func__ << "Error:  invalid state" << endl;
         return value;
     }
     return parser_->Derivative(independent_);
@@ -716,7 +713,7 @@ void Function::setVar(unsigned int index, double value)
     MOOSE_WARN("Function: index " << index << " out of bounds.");
 }
 
-Variable* Function::getVar(unsigned int ii) 
+Variable* Function::getX(unsigned int ii) 
 {
     static Variable dummy("DUMMY");
     if(ii >= xs_.size())
@@ -766,10 +763,7 @@ bool Function::symbolExists(const string& name) const
 void Function::process(const Eref &e, ProcPtr p)
 {
     if(! valid_)
-    {
-        cerr << "Warn: Invalid parser state. " << endl;
         return;
-    }
 
     // Update values of incoming variables.
     vector<double> databuf;
@@ -779,7 +773,7 @@ void Function::process(const Eref &e, ProcPtr p)
     value_ = getValue();
     rate_ = (value_ - lastValue_) / p->dt;
 
-    for (size_t ii = 0; (ii < databuf.size()) && (ii < ys_.size()); ++ii)
+    for (unsigned int ii = 0; (ii < databuf.size()) && (ii < ys_.size()); ++ii)
         *ys_[ii] = databuf[ii];
 
     if ( useTrigger_ && value_ < TriggerThreshold )
@@ -820,8 +814,8 @@ void Function::reinit(const Eref &e, ProcPtr p)
 {
     if (! (valid_ || parser_->GetExpr().empty()))
     {
-        cout << "Error: " << e.objId().path() << "::reinit() - invalid parser state" << endl;
-        cout << " Expr: '" << parser_->GetExpr() << "'" << endl;
+        MOOSE_WARN("Error: " << e.objId().path() << "::reinit() - invalid parser state"
+                << endl << " Expr: '" << parser_->GetExpr() << "'.");
         return;
     }
 

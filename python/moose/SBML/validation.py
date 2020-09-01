@@ -107,9 +107,11 @@ def validateModel(sbmlDoc):
 
     if (numValidationErrors > 0):
         print("ERROR: encountered " + str(numValidationErrors) + " validation error in model " +sbmlDoc.getModel().getId() + "'.")
+        validationMessages = consistencyMessages
         if (numValidationWarnings > 0):
             print("Notice: encountered " +str(numValidationWarnings) +" validation warning in model " +sbmlDoc.getModel().getId() +"'.")
-
+            validationMessages = consistencyMessages
+            
     if validationMessages:
         print(validationMessages)
 

@@ -129,7 +129,7 @@ static ostringstream assertStream;
         throw std::runtime_error(assertStream.str()); \
     }
 
-#define ASSERT_EQ(a, b, token)  \
+#define ASSERT_DOUBLE_EQ(a, b, token)  \
     if( ! doubleEq((a), (b)) ) { \
         assertStream.str(""); \
         assertStream.precision( 12 ); \
@@ -139,8 +139,8 @@ static ostringstream assertStream;
         throw std::runtime_error(assertStream.str()); \
     }
 
-#define ASSERT_DOUBLE_EQ(token, a, b)  \
-    if(! doubleEq(a, b) ) { \
+#define ASSERT_DOUBLE_NEQ(a, b, token)  \
+    if( doubleEq(a, b) ) { \
         assertStream.str(""); \
         LOCATION(assertStream); \
         assertStream.precision( 12 ); \
@@ -158,5 +158,15 @@ static ostringstream assertStream;
         assertStream << token << endl; \
         throw std::runtime_error(assertStream.str()); \
     }
+
+#define ASSERT_EQ(a, b, token)  \
+    if( (a) != (b)) { \
+        assertStream.str(""); \
+        LOCATION(assertStream); \
+        assertStream << "Not expected " << a << endl; \
+        assertStream << token << endl; \
+        throw std::runtime_error(assertStream.str()); \
+    }
+
 
 #endif   /* ----- #ifndef TESTING_MACROS_INC  ----- */

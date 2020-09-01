@@ -48,14 +48,14 @@ public:
     string getFormat( void ) const;
     void setFormat( string format );
 
-    size_t getNumTables( void ) const;
-    size_t getNumWriteEvents( void ) const;
+    unsigned int getNumTables( void ) const;
+    unsigned int getNumWriteEvents( void ) const;
 
-    void addTable( Id table );
-    void addTables( vector<Id> tables);
+    void addTable( ObjId table );
+    void addTables( vector<ObjId> tables);
 
-    void removeTable( Id table );
-    void removeTables( vector<Id> table );
+    void removeTable( ObjId table );
+    void removeTables( vector<ObjId> table );
 
     void zipWithTime( );
 
@@ -76,7 +76,7 @@ private:
     string datafilePath_;
     string format_;
 
-    size_t numWriteEvents_;
+    unsigned int numWriteEvents_;
 
     bool isOutfilePathSet_;
 
@@ -89,7 +89,7 @@ private:
     double currTime_;
 
     // Used for adding or removing tables
-    vector<Id> tableIds_;
+    vector<ObjId> tableIds_;
     vector<Table*> tables_;
     vector<string> columns_;
 

@@ -88,6 +88,8 @@ template< class T > class Conv
                 return "short";
             if ( typeid( T ) == typeid( long ) )
                 return "long";
+            if ( typeid( T ) == typeid( size_t ) )
+                return "size_t";
             if ( typeid( T ) == typeid( unsigned int ) )
                 return "unsigned int";
             if ( typeid( T ) == typeid( unsigned long ) )
@@ -100,7 +102,56 @@ template< class T > class Conv
                 return "Id";
             if ( typeid( T ) == typeid( ObjId ) )
                 return "ObjId";
-            return typeid( T ).name(); // this is not portable but may be more useful than "bad"
+            if ( typeid( T ) == typeid( vector<ObjId>) )
+                return "vector<ObjId>";
+            if ( typeid( T ) == typeid( vector<ObjId>*) )
+                return "vector<ObjId>*";
+            if ( typeid( T ) == typeid( vector<Id>) )
+                return "vector<Id>";
+            if ( typeid( T ) == typeid( vector<Id>*) )
+                return "vector<Id>*";
+#if 0
+            // typeid of incomplete type Neutral (after forward declarting it)
+            // is not supported by c++ standard. Though following compiles with
+            // gcc (but not with clang).
+            if ( typeid( T ) == typeid( Neutral ) )
+                return "Neutral";
+            if ( typeid( T ) == typeid( vector<Neutral> ) )
+                return "vector<Neutral>";
+            if ( typeid( T ) == typeid( vector<Neutral>*) )
+                return "vector<Neutral>*";
+#endif
+            if ( typeid( T ) == typeid( vector<string>) )
+                return "vector<string>";
+            if ( typeid( T ) == typeid( vector<double>) )
+                return "vector<double>";
+            if ( typeid( T ) == typeid( vector<double>*) )
+                return "vector<double>*";
+            if ( typeid( T ) == typeid( vector<bool>) )
+                return "vector<bool>";
+            if ( typeid( T ) == typeid( vector<bool>*) )
+                return "vector<bool>*";
+            if ( typeid( T ) == typeid( vector<unsigned int>) )
+                return "vector<unsigned int>";
+            if ( typeid( T ) == typeid( vector<unsigned int>*) )
+                return "vector<unsigned int>*";
+            if ( typeid( T ) == typeid( vector<vector<double>>) )
+                return "vector<vector<double>>";
+            if ( typeid( T ) == typeid( vector<vector<double>>*) )
+                return "vector<vector<double>>*";
+            if ( typeid( T ) == typeid( vector<vector<ObjId>>) )
+                return "vector<vector<ObjId>>";
+            if ( typeid( T ) == typeid( vector<vector<ObjId>>*) )
+                return "vector<vector<ObjId>>*";
+            if ( typeid( T ) == typeid( vector<vector<Id>>) )
+                return "vector<vector<Id>>";
+            if ( typeid( T ) == typeid( vector<vector<Id>>*) )
+                return "vector<vector<Id>>*";
+            if ( typeid( T ) == typeid( vector<vector<string>>) )
+                return "vector<vector<string>>";
+            if ( typeid( T ) == typeid( vector<vector<string>>*) )
+                return "vector<vector<string>>*";
+            return typeid(T).name(); // this is not portable but may be more useful than "bad"
         }
 
     private:

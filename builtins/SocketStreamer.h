@@ -74,10 +74,10 @@ public:
     void configureSocketServer( void );
 
     // Make connection to client
-    void listenToClients(size_t numMaxClients);
+    void listenToClients(unsigned int numMaxClients);
 
     // Find minimum number of elements in tables.
-    pair<size_t, size_t> minMaxNumberOfElemementsInTables( );
+    pair<unsigned int, unsigned int> minMaxNumberOfElemementsInTables( );
 
     /* Cleaup before quitting */
     void cleanUp( void );
@@ -85,19 +85,19 @@ public:
     string getAddress( void ) const;
     void setAddress( const string addr );
 
-    size_t getPort( void ) const;
-    void setPort( const size_t port );
+    unsigned int getPort( void ) const;
+    void setPort( const unsigned int port );
 
     /*-----------------------------------------------------------------------------
      *  Streaming data.
      *-----------------------------------------------------------------------------*/
-    bool enoughDataToStream(size_t minsize=10);
+    bool enoughDataToStream(unsigned int minsize=10);
     int streamData();
     // connect is monitored in a thread.
     void connect( void );
     void stream(void);
 
-    size_t getNumTables( void ) const;
+    unsigned int getNumTables( void ) const;
 
     void addTable( ObjId table );
     void addTables( vector<ObjId> tables);
@@ -158,7 +158,7 @@ private:
     MooseSocketInfo sockInfo_;
 
     // How long it takes between process calls.
-    size_t processTickMicroSec;
+    unsigned int processTickMicroSec;
     std::chrono::high_resolution_clock::time_point timeStamp_;
 };
 

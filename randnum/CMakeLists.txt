@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-add_library(randnum RNG.cpp)
+add_library(randnum RNG.cpp randnum.cpp)
 
 add_executable(normal_dist ${CMAKE_CURRENT_SOURCE_DIR}/test_normal_dist.cpp)
 

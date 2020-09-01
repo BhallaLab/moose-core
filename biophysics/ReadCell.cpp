@@ -157,7 +157,7 @@ bool ReadCell::innerRead( ifstream& fin )
 	lineNum_ = 0;
 
 	ParseStage parseMode = DATA;
-	string::size_type pos;
+        std::string::size_type pos;
 
 	while ( getline( fin, line ) ) {
 		line = moose::trim( line );
@@ -419,7 +419,7 @@ Id ReadCell::buildCompartment(
 	//~ assert( ret );
 	//~ if ( !childId.bad() ) {
 		//~ if ( name[ name.length() - 1 ] == ']' ) {
-			//~ string::size_type pos = name.rfind( '[' );
+			//~ auto pos = name.rfind( '[' );
 			//~ if ( pos == string::npos ) {
 				//~ cerr << "Error: ReadCell: bad child name:" << name << endl;
 				//~ cerr << "File: " << fileName_ << " Line: " << lineNum_ << endl;
@@ -570,8 +570,8 @@ Id ReadCell::startGraftCell( const string& cellPath )
 
         ObjId parentObjId;
 	string cellName;
-	string::size_type pos_1 = cellPath.find_first_of( "/" );
-	string::size_type pos_2 = cellPath.find_last_of( "/" );
+	auto pos_1 = cellPath.find_first_of( "/" );
+	auto pos_2 = cellPath.find_last_of( "/" );
 
 	if ( pos_1 != 0 ) {
 		cerr << "Error: ReadCell: *start_cell should be given absolute path.\n";

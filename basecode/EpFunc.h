@@ -10,6 +10,8 @@
 #ifndef _EPFUNC_H
 #define _EPFUNC_H
 
+class Neutral;
+
 /**
  * Utility function to return a pointer of the desired type from the
  * Eref data. Mainly here because it lets us specialize for Neutrals,
