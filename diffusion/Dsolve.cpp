@@ -138,8 +138,8 @@ const Cinfo* Dsolve::initCinfo()
 
     static DestFinfo buildNeuroMeshJunctions( "buildNeuroMeshJunctions",
             "Builds junctions between NeuroMesh, SpineMesh and PsdMesh",
-            new EpFunc2< Dsolve, Id, Id >(&Dsolve::buildNeuroMeshJunctions )
-                                            );
+            new EpFunc2< Dsolve, ObjId, ObjId >(&Dsolve::buildNeuroMeshJunctions )
+            );
 
     ///////////////////////////////////////////////////////
     // Shared definitions
@@ -880,7 +880,7 @@ void Dsolve::build( double dt )
  * Should be called only from the Dsolve handling the NeuroMesh.
  */
 // Would like to permit vectors of spines and psd compartments.
-void Dsolve::buildNeuroMeshJunctions( const Eref& e, Id spineD, Id psdD )
+void Dsolve::buildNeuroMeshJunctions( const Eref& e, ObjId spineD, ObjId psdD )
 {
     if ( !compartment_.element()->cinfo()->isA( "NeuroMesh" ) )
     {
