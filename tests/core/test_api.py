@@ -203,6 +203,17 @@ def test_paths():
     x = moose.Neutral('///x')
     assert x.path == '/x', x.path
 
+def test_le():
+    # see issue BhallaLab/moose-core#423
+    x = moose.le('/')
+    assert len(x) > 5, x
+    try:
+        moose.le('/abrakadabra')
+    except ValueError:
+        pass
+    else:
+        raise RuntimeError("This should have raised ValueError")
+
 def main():
     test_paths()
     test_children()
@@ -216,6 +227,7 @@ def main():
     test_vec()
     test_typing()
     test_elements()
+    test_le()
 
 if __name__ == '__main__':
     main()
