@@ -1096,7 +1096,7 @@ def createRules(model, specInfoMap, globparameterIdValue):
                 poolsCompt = findCompartment(moose.element(poolList))
                 #If pool comes without a compartment which is not allowed moose
                 #then returning with -2
-                if not (moose.element(poolsCompt).isA("ChemCompt"):
+                if not (moose.element(poolsCompt).isA("ChemCompt")):
                     return -2
                 else:
                     if poolsCompt.name not in comptvolume:
