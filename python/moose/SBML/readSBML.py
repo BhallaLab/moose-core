@@ -440,7 +440,7 @@ def getModelAnnotation(obj, baseId):
                                     plots = plots.replace(" ", "")
                                     plotorg = plots
                                     if( moose.exists(baseId.path + plotorg) and
-                                            ( (moose.element(baseId.path+plotorg)).isA("PoolBase")) :
+                                            ( (moose.element(baseId.path+plotorg)).isA("PoolBase"))) :
                                         plotSId = moose.element(
                                             baseId.path + plotorg)
                                         # plotorg = convertSpecialChar(plotorg)
