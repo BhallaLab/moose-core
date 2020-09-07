@@ -458,14 +458,14 @@ const Cinfo* Neuron::initCinfo()
                                          "to build up a mapping from Spine entries on the Neuron to "
                                          "chem spines and PSDs, so that volume change operations from "
                                          "the Spine can propagate to the chem systems.",
-                                         new OpFunc2< Neuron, Id, Id >( &Neuron::setSpineAndPsdMesh )
+                                         new OpFunc2< Neuron, ObjId, ObjId >( &Neuron::setSpineAndPsdMesh )
                                        );
     static DestFinfo setSpineAndPsdDsolve( "setSpineAndPsdDsolve",
                                            "Assigns the Dsolves used by spine and PSD to the Neuron. "
                                            "This is used "
                                            "to handle the rescaling of diffusion rates when spines are "
                                            "resized. ",
-                                           new OpFunc2< Neuron, Id, Id >( &Neuron::setSpineAndPsdDsolve )
+                                           new OpFunc2< Neuron, ObjId, ObjId >( &Neuron::setSpineAndPsdDsolve )
                                          );
 
     /*
@@ -1437,7 +1437,7 @@ void Neuron::buildSegmentTree( const Eref& e )
 
 
 /// Fills up vector of segments. First entry is soma.
-void Neuron::setSpineAndPsdMesh( Id spineMesh, Id psdMesh )
+void Neuron::setSpineAndPsdMesh( ObjId spineMesh, ObjId psdMesh )
 {
     if ( !spineMesh.element()->cinfo()->isA( "SpineMesh" ) )
     {
@@ -1489,7 +1489,7 @@ void Neuron::setSpineAndPsdMesh( Id spineMesh, Id psdMesh )
     }
 }
 
-void Neuron::setSpineAndPsdDsolve( Id spineDsolve, Id psdDsolve )
+void Neuron::setSpineAndPsdDsolve( ObjId spineDsolve, ObjId psdDsolve )
 {
     headDsolve_ = spineDsolve;
     psdDsolve_ = psdDsolve;
