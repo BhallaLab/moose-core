@@ -143,7 +143,6 @@ PyRun::PyRun()
 PyRun::~PyRun()
 {
     Py_XDECREF(globals_);
-    Py_XDECREF(locals_);
 }
 
 void PyRun::setRunString(string statement)

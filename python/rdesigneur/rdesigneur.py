@@ -687,56 +687,6 @@ class rdesigneur:
         else:
             return comptList, kf[1]
 
-    # Returns vector of source objects, and the field to use. 
-    # Specifically for _buildMoogli() as there the coordinates of the compartments are needed.
-    # plotSpec is of the form
-    #   [ region_wildcard, region_expr, path, field, title]
-    def _MoogparseComptField( self, comptList, plotSpec, knownFields ):
-        # Put in stuff to go through fields if the target is a chem object
-        field = plotSpec.field
-        if not field in knownFields:
-            print("Warning: Rdesigneur::_parseComptField: Unknown field '{}'".format( field ) )
-            return (), ""
-
-        kf = knownFields[field] # Find the field to decide type.
-        # if kf[0] in ['CaConcBase', 'ChanBase', 'NMDAChan', 'VClamp']:
-        #     objList = self._collapseElistToPathAndClass( comptList, plotSpec.relpath, kf[0] )
-        #     return objList, kf[1]
-        if field in [ 'n', 'conc', 'volume']:
-            path = plotSpec.relpath
-            pos = path.find( '/' )
-            if pos == -1:   # Assume it is in the dend compartment.
-                path  = 'dend/' + path
-            pos = path.find( '/' )
-            chemCompt = path[:pos]
-            if chemCompt[-5:] == "_endo":
-                chemCompt = chemCompt[0:-5]
-            cc = moose.element( self.modelPath + '/chem/' + chemCompt)
-            voxelVec = []
-            temp = [ self._makeUniqueNameStr( i ) for i in comptList ]
-            #print( temp )
-            #print( "#####################" )
-            comptSet = set( temp )
-            #em = [ moose.element(i) for i in cc.elecComptMap ]
-            em = sorted( [ self._makeUniqueNameStr(i[0]) for i in cc.elecComptMap ] )
-            #print( em )
-            #print( "=================================================" )
-
-            voxelVec = [i for i in range(len( em ) ) if em[i] in comptSet ]
-            # Here we collapse the voxelVec into objects to plot.
-            allObj = moose.vec( self.modelPath + '/chem/' + plotSpec.relpath )
-            #print "####### allObj=", self.modelPath + '/chem/' + plotSpec[2]
-            if len( allObj ) >= len( voxelVec ):
-                objList = [ allObj[int(j)] for j in voxelVec]
-            else:
-                objList = []
-                print( "Warning: Rdesigneur::_parseComptField: unknown Object: '", plotSpec.relpath, "'" )
-            #print "############", chemCompt, len(objList), kf[1]
-            return objList, kf[1]
-
-        else:
-            return comptList, kf[1]
-
 
     def _buildPlots( self ):
         knownFields = {

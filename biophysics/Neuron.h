@@ -60,8 +60,8 @@ public:
     vector< string > getSpineDistribution( const Eref& e ) const;
 
     void buildSegmentTree( const Eref& e );
-    void setSpineAndPsdMesh( Id spineMesh, Id psdMesh );
-    void setSpineAndPsdDsolve( Id spineDsolve, Id psdDsolve );
+    void setSpineAndPsdMesh( ObjId spineMesh, ObjId psdMesh );
+    void setSpineAndPsdDsolve( ObjId spineDsolve, ObjId psdDsolve );
 
     ///////////////////////////////////////////////////////////////////
     // MechSpec set
