@@ -78,6 +78,7 @@ def version():
     """Reutrns moose version string."""
     return _moose.__version__
 
+__version__ = lambda: version()
 
 def version_info():
     """Return detailed version information.

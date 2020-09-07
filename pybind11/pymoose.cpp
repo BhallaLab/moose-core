@@ -281,10 +281,18 @@ PYBIND11_MODULE(_moose, m)
         .def_property_readonly("id", [](ObjId &oid) -> Id { return oid.id; })
         .def_property_readonly("dataIndex",
                                [](ObjId &oid) { return oid.dataIndex; })
+        .def("getDataIndex", [](const ObjId &oid) { return oid.dataIndex; })
+
         .def_property_readonly("fieldIndex",
                                [](ObjId &oid) { return oid.fieldIndex; })
+
+        .def("getFieldIndex", [](const ObjId &oid) { return oid.fieldIndex; })
+
         .def_property_readonly(
             "type", [](ObjId &oid) { return oid.element()->cinfo()->name(); })
+
+        .def("getType",
+             [](ObjId &oid) { return oid.element()->cinfo()->name(); })
 
         .def_property_readonly("path",
                                [](const ObjId &oid) { return oid.id.path(); })
@@ -335,14 +343,15 @@ PYBIND11_MODULE(_moose, m)
         .def("__ne__", [](const MooseVec &a,
                           const MooseVec &b) { return a.obj() != b.obj(); })
         .def("__len__", &MooseVec::len)
-        .def("__iter__",
-             [](MooseVec &v) {
-                 // Generate an iterator which is a vector<ObjId>. And then
-                 // pass the reference to the objects.
-                 v.generateIterator();
-                 return py::make_iterator(v.objref().begin(), v.objref().end());
-             },
-             py::keep_alive<0, 1>())
+        .def(
+            "__iter__",
+            [](MooseVec &v) {
+                // Generate an iterator which is a vector<ObjId>. And then
+                // pass the reference to the objects.
+                v.generateIterator();
+                return py::make_iterator(v.objref().begin(), v.objref().end());
+            },
+            py::keep_alive<0, 1>())
         .def("__getitem__", &MooseVec::getItem)
         .def("__getitem__", &MooseVec::getItemRange)
 
@@ -357,8 +366,9 @@ PYBIND11_MODULE(_moose, m)
              })
         // This is to provide old API support. Some scripts use .vec even on a
         // vec to get a vec. So silly or so Zen?!
-        .def_property_readonly("vec", [](const MooseVec &vec) { return &vec; },
-                               py::return_value_policy::reference_internal)
+        .def_property_readonly(
+            "vec", [](const MooseVec &vec) { return &vec; },
+            py::return_value_policy::reference_internal)
         .def_property_readonly("type",
                                [](const MooseVec &v) { return "moose.vec"; })
         .def("connect", &MooseVec::connectToSingle)
