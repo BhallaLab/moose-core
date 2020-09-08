@@ -550,6 +550,10 @@ vector<string> mooseLe(const ObjId& obj)
 {
     vector<Id> children;
     vector<string> chPaths;
+
+    if(obj.bad())
+        throw pybind11::value_error("no such element.");
+
     Neutral::children(obj.eref(), children);
     stringstream ss;
     ss << "Elements under " << obj.path() << endl;
