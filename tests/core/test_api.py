@@ -58,7 +58,7 @@ def test_vec():
     assert v[0] == v.vec[0], (v[0], v.vec[0])
     x = [random.random() for i in range(100)]
     v.conc = x
-    assert sum(v.conc) == sum(x)
+    assert np.isclose(np.sum(v.conc), sum(x))
     assert np.allclose(v.conc, x), (v.conc, x)
 
     # assign bool to double.
