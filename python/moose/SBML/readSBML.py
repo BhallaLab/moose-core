@@ -440,7 +440,7 @@ def getModelAnnotation(obj, baseId):
                                     plots = plots.replace(" ", "")
                                     plotorg = plots
                                     if( moose.exists(baseId.path + plotorg) and
-                                            isinstance(moose.element(baseId.path+plotorg),moose.PoolBase)) :
+                                            ( (moose.element(baseId.path+plotorg)).isA("PoolBase"))) :
                                         plotSId = moose.element(
                                             baseId.path + plotorg)
                                         # plotorg = convertSpecialChar(plotorg)
@@ -1096,7 +1096,7 @@ def createRules(model, specInfoMap, globparameterIdValue):
                 poolsCompt = findCompartment(moose.element(poolList))
                 #If pool comes without a compartment which is not allowed moose
                 #then returning with -2
-                if not isinstance(moose.element(poolsCompt), moose.ChemCompt):
+                if not (moose.element(poolsCompt).isA("ChemCompt")):
                     return -2
                 else:
                     if poolsCompt.name not in comptvolume:
@@ -1131,8 +1131,7 @@ def createRules(model, specInfoMap, globparameterIdValue):
                                     i = str(idBeginWith(i))
                                     specMapList = specInfoMap[i]["Mpath"]
                                     poolsCompt = findCompartment(moose.element(specMapList))
-                                    if not isinstance(moose.element(
-                                            poolsCompt), moose.ChemCompt):
+                                    if not (moose.element(poolsCompt).isA("ChemCompt")):
                                         return -2
                                     else:
                                         if poolsCompt.name not in comptvolume:
