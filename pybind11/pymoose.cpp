@@ -384,9 +384,8 @@ PYBIND11_MODULE(_moose, m)
      */
 
     m.def("seed", [](py::object &a) { moose::mtseed(a.cast<int>()); });
-    m.def(
-        "rand", [](double a, double b) { return moose::mtrand(a, b); },
-        "a"_a = 0, "b"_a = 1);
+    m.def("rand", [](double a, double b) { return moose::mtrand(a, b); },
+          "a"_a = 0, "b"_a = 1);
     // This is a wrapper to Shell::wildcardFind. The python interface must
     // override it.
     m.def("wildcardFind", &wildcardFind2);
