@@ -4,13 +4,10 @@ from __future__ import print_function
 # NOTE: This script is to be called by CMake. Not intended to be used standalone.
 
 __author__ = "Dilawar Singh"
-__copyright__ = "Copyright 2013, Dilawar Singh and NCBS Bangalore"
+__copyright__ = "Copyright 2013-2020, Dilawar Singh and NCBS Bangalore"
 __credits__ = ["NCBS Bangalore"]
-__license__ = "GNU GPL"
-__version__ = "1.0.0"
 __maintainer__ = "Dilawar Singh"
 __email__ = "dilawars@ncbs.res.in"
-__status__ = "Development"
 
 import os
 import sys
@@ -29,18 +26,6 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 with open(os.path.join(script_dir, 'VERSION'), 'r') as f:
     version = f.read()
 print('Got %s from VERSION file' % version)
-
-# importlib is available only for python3. Since we build wheels, prefer .so
-# extension. This way a wheel built by any python3.x will work with any python3.
-suffix = '.so'
-try:
-    import importlib.machinery
-    suffix = importlib.machinery.EXTENSION_SUFFIXES[-1]
-except Exception as e:
-    print('[WARN] Failed to determine importlib suffix')
-    suffix = '.so'
-assert (suffix)
-print('[INFO] Suffix for python SO: %s' % suffix)
 
 setup(
     name='pymoose',
@@ -61,5 +46,5 @@ setup(
         'moose': 'moose',
         'rdesigneur': 'rdesigneur'
     },
-    package_data={'moose': ['_moose' + suffix]},
+    package_data={'moose': ['_moose*.so']},
 )

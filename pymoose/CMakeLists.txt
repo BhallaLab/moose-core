@@ -31,6 +31,7 @@ add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
 target_include_directories(_moose 
   PRIVATE ${PYTHON_INCLUDE_DIRS} ${Python_NumPy_INCLUDE_DIRS})
 
+# Force .so extension on all platforms.
 set(PYTHON_SO_EXTENSION ".so")
 set_target_properties(_moose PROPERTIES 
     COMPILE_DEFINITIONS "PYMOOSE"
