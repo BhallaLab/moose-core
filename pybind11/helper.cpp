@@ -400,37 +400,41 @@ vector<string> mooseGetFieldNames(const string& className,
         return ret;
     }
 
-    if(finfoType == "valueFinfo" || finfoType == "value") {
+    if(finfoType == "valueFinfo" || finfoType == "value" || finfoType == "*") {
         for(unsigned int ii = 0; ii < cinfo->getNumValueFinfo(); ++ii) {
             Finfo* finfo = cinfo->getValueFinfo(ii);
             ret.push_back(finfo->name());
         }
     }
-    else if(finfoType == "srcFinfo" || finfoType == "src") {
+    else if(finfoType == "srcFinfo" || finfoType == "src" || finfoType == "*") {
         for(unsigned int ii = 0; ii < cinfo->getNumSrcFinfo(); ++ii) {
             Finfo* finfo = cinfo->getSrcFinfo(ii);
             ret.push_back(finfo->name());
         }
     }
-    else if(finfoType == "destFinfo" || finfoType == "dest") {
+    else if(finfoType == "destFinfo" || finfoType == "dest" ||
+            finfoType == "*") {
         for(unsigned int ii = 0; ii < cinfo->getNumDestFinfo(); ++ii) {
             Finfo* finfo = cinfo->getDestFinfo(ii);
             ret.push_back(finfo->name());
         }
     }
-    else if(finfoType == "lookupFinfo" || finfoType == "lookup") {
+    else if(finfoType == "lookupFinfo" || finfoType == "lookup" ||
+            finfoType == "*") {
         for(unsigned int ii = 0; ii < cinfo->getNumLookupFinfo(); ++ii) {
             Finfo* finfo = cinfo->getLookupFinfo(ii);
             ret.push_back(finfo->name());
         }
     }
-    else if(finfoType == "sharedFinfo" || finfoType == "shared") {
+    else if(finfoType == "sharedFinfo" || finfoType == "shared" ||
+            finfoType == "*") {
         for(unsigned int ii = 0; ii < cinfo->getNumSrcFinfo(); ++ii) {
             Finfo* finfo = cinfo->getSrcFinfo(ii);
             ret.push_back(finfo->name());
         }
     }
-    else if(finfoType == "fieldElementFinfo" || finfoType == "fieldElement") {
+    else if(finfoType == "fieldElementFinfo" || finfoType == "fieldElement" ||
+            finfoType == "*") {
         for(unsigned int ii = 0; ii < cinfo->getNumFieldElementFinfo(); ++ii) {
             Finfo* finfo = cinfo->getFieldElementFinfo(ii);
             ret.push_back(finfo->name());
@@ -545,7 +549,6 @@ string mooseDoc(const string& query)
     throw runtime_error(__func__ + string(":: Not supported '" + query + "'"));
 }
 
-
 vector<string> mooseLe(const ObjId& obj)
 {
     vector<Id> children;
@@ -557,7 +560,7 @@ vector<string> mooseLe(const ObjId& obj)
     Neutral::children(obj.eref(), children);
     stringstream ss;
     ss << "Elements under " << obj.path() << endl;
-    for(auto ch: children) {
+    for(auto ch : children) {
         ss << "    " + ch.path() << endl;
         chPaths.push_back(ch.path());
     }
@@ -571,7 +574,7 @@ vector<ObjId> mooseListMsg(const ObjId& obj)
     auto inmsgs = Field<vector<ObjId>>::get(obj, "msgIn");
     for(const auto inobj : inmsgs) {
         const Msg* msg = Msg::getMsg(inobj);
-        if(! msg) {
+        if(!msg) {
             cerr << "No Msg found on " << obj.path() << endl;
             continue;
         }
@@ -592,28 +595,28 @@ string mooseShowMsg(const ObjId& obj)
     auto inmsgs = Field<vector<ObjId>>::get(obj, "msgIn");
     for(const auto inobj : inmsgs) {
         const Msg* msg = Msg::getMsg(inobj);
-        if(! msg) {
+        if(!msg) {
             cerr << "No Msg found on " << obj.path() << endl;
             continue;
         }
-        ss << fmt::format("  {0}, [{1}] <-- {2}, [{3}]\n", msg->getE2().path() 
-                , moose::vectorToCSV<string>(msg->getDestFieldsOnE2())
-                , msg->getE1().path() 
-                , moose::vectorToCSV<string>(msg->getSrcFieldsOnE1()));
+        ss << fmt::format("  {0}, [{1}] <-- {2}, [{3}]\n", msg->getE2().path(),
+                          moose::vectorToCSV<string>(msg->getDestFieldsOnE2()),
+                          msg->getE1().path(),
+                          moose::vectorToCSV<string>(msg->getSrcFieldsOnE1()));
     }
     ss << endl;
     auto outmsgs = Field<vector<ObjId>>::get(obj, "msgOut");
     ss << "OUTGOING:" << endl;
     for(const auto outobj : outmsgs) {
         const Msg* msg = Msg::getMsg(outobj);
-        if(! msg) {
+        if(!msg) {
             cerr << "No Msg found on " << obj.path() << endl;
             continue;
         }
-        ss << fmt::format("  {0}, [{1}] <-- {2}, [{3}]\n", msg->getE1().path() 
-                , moose::vectorToCSV<string>(msg->getSrcFieldsOnE1())
-                , msg->getE2().path() 
-                , moose::vectorToCSV<string>(msg->getDestFieldsOnE2()));
+        ss << fmt::format("  {0}, [{1}] <-- {2}, [{3}]\n", msg->getE1().path(),
+                          moose::vectorToCSV<string>(msg->getSrcFieldsOnE1()),
+                          msg->getE2().path(),
+                          moose::vectorToCSV<string>(msg->getDestFieldsOnE2()));
     }
     return ss.str();
 }

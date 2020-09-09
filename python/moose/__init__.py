@@ -284,7 +284,7 @@ def getFieldDict(classname, finfoType=""):
     Returns
     -------
     dict
-        field names and their types.
+        field names and their respective types as key-value pair. 
 
     Notes
     -----
@@ -301,27 +301,29 @@ def getFieldDict(classname, finfoType=""):
     return _moose.getFieldDict(classname, finfoType)
 
 
-def getFieldNames(classname, fieldtype="*"):
-    """Get a tuple containing the name of all the fields of `finfoType` kind.
+def getFieldNames(elem, fieldtype="*"):
+    """Get a tuple containing name of fields of a given fieldtype. If
+    fieldtype is set to '*', all fields are returned.
 
     Parameters
     ----------
-    className : string
-        Name of the class to look up.
-    finfoType : string
-        The kind of field
-        -  valueFinfo
-        -  srcFinfo
-        -  destFinfo
-        -  lookupFinfo
-        -  fieldElementFinfo
+    elem : string, obj
+        Name of the class or a moose.element to look up.
+    fieldtype : string
+        The kind of field. Possible values are:
+        -  'valueFinfo' or 'value'
+        -  'srcFinfo' or 'src'
+        -  'destFinfo' or 'dest'
+        -  'lookupFinfo' or 'lookup'
+        -  'fieldElementFinfo' or 'fieldElement'
 
     Returns
     -------
     list
         Names of the fields of type `finfoType` in class `className`.
     """
-    return _moose.getFieldNames(classname, fieldtype)
+    clsname = elem if isinstance(elem, str) else elem.className
+    return _moose.getFieldNames(clsname, fieldtype)
 
 
 def isRunning():
