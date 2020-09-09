@@ -602,7 +602,6 @@ def le(el=None):
     el = _moose.getCwe() if el is None else el
     if isinstance(el, str):
         el = _moose.element(el)
-        print(el)
     elif isinstance(el, _moose.vec):
         el = el[0]
     return _moose.le(el)
