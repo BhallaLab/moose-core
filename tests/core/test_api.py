@@ -45,6 +45,13 @@ def test_other():
     p.delay[1] = 0.99
     assert p.delay[1] == 0.99, p.delay[1]
 
+    c = moose.Stoich('/dadaa')
+    v1 = moose.getFieldNames(c)
+    v2 = c.getFieldNames()
+    assert v1 == v2
+    assert len(v1) > 10, v1
+    
+
 
 def test_vec():
     a = moose.Pool('/p111', 100)
@@ -126,6 +133,7 @@ def test_inheritance():
     assert isinstance(aa, moose.CubeMesh), (a.__class__, aa.__class__)
 
     a = moose.CubeMesh('yapf')
+    assert a.isA('CubeMesh') == a.isA['CubeMesh']
     assert a.isA['CubeMesh']
     assert a.isA['ChemCompt']
 
