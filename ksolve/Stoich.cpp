@@ -278,7 +278,7 @@ bool Stoich::getAllowNegative() const
 
 void Stoich::setPath(const Eref& e, string v)
 {
-    cout << "DeprecationWarning:: Use Soitch::readSystemPath instead. In "
+    cout << "DeprecationWarning:: Use Soitch::reacSystemPath instead. In "
             "the future, it will be an error."
          << endl;
     setReacSystemPath(e, v);
