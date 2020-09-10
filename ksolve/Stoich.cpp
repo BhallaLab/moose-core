@@ -278,7 +278,7 @@ bool Stoich::getAllowNegative() const
 
 void Stoich::setPath(const Eref& e, string v)
 {
-    cout << "DeprecationWarning:: Use Soitch::readSystemPath instead. In "
+    cout << "DeprecationWarning:: Use Soitch::reacSystemPath instead. In "
             "the future, it will be an error."
          << endl;
     setReacSystemPath(e, v);
@@ -328,13 +328,15 @@ void Stoich::setElist(const Eref& e, const vector<ObjId>& elist)
 {
     if(compartment_ == Id()) {
         cerr << "Warning: Stoich::setElist/setReacSystemPath: Compartment not "
-                "set. Aborting." << endl;
+                "set. Aborting."
+             << endl;
         status_ = 4;
         return;
     }
     if(!(kinterface_ || dinterface_)) {
         cerr << "Warning: Stoich::setElist/setReacSystemPath: Neither solver "
-                "has been set. Aborting." << endl;
+                "has been set. Aborting."
+             << endl;
         status_ = 8;
         return;
     }
@@ -346,8 +348,10 @@ void Stoich::setElist(const Eref& e, const vector<ObjId>& elist)
     vector<Id> temp;
     filterWildcards(temp, elist);
     if(temp.size() == 0) {
-        cerr << "Warning: Stoich::setElist/setReacSystemPath: No kinetics objects "
-                "found on path. Aborting." << endl;
+        cerr << "Warning: Stoich::setElist/setReacSystemPath: No kinetics "
+                "objects "
+                "found on path. Aborting."
+             << endl;
         status_ = 16;
         return;
     }
