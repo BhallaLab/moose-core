@@ -13,10 +13,12 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Thu May 13 10:19:00 2016(+0530)
 Version
-Last-Updated: Fri Mar 20 1:30:00 2020(+0530)
+Last-Updated: Mon Sep 21 12:50:00 2020(+0530)
           By:HarshaRani
 **********************************************************************/
-2010:
+2020:
+Sep 21: - Complex pool which is created at species level is copied under enzyme,
+          ensuring the value set at species is retained.
 Mar 04: - Enzyme-cplx reactant/product's based on stoichiometry number of connection are made.
 Jan 09: - reading channel back from MMenz 
 2019:
