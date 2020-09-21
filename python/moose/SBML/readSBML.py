@@ -293,7 +293,11 @@ def setupEnzymaticReaction(enz, groupName, enzName, specInfoMap, modelAnnotaInfo
     cplx = str(idBeginWith(cplx))
     complx = moose.element(specInfoMap[cplx]["Mpath"].path)
     enzyme_ = moose.Enz(enzParent.path + '/' + enzName)
-    complx1 = moose.Pool(enzyme_.path+'/'+moose.element(complx).name)
+    #complx1 = moose.Pool(enzyme_.path+'/'+moose.element(complx).name)
+    if not moose.exists(enzyme_.path+'/'+complx.name):
+        complx1 = moose.copy(complx,enzyme_.path)
+    else:
+        complx1 = moose.element(enzyme_.path+'/'+complx.name)
     specInfoMap[cplx]["Mpath"] = complx1
     moose.connect(enzyme_, "cplx", complx1, "reac")
     moose.connect(enzyme_, "enz", enzParent, "reac")
