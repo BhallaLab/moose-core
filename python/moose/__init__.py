@@ -216,9 +216,7 @@ def connect(src, srcfield, dest, destfield, msgtype="Single"):
 
 
 def delete(arg):
-    """Delete the underlying moose object(s). This does not delete any of the
-    Python objects referring to this vec but does invalidate them. Any
-    attempt to access them will raise a ValueError.
+    """Delete the underlying moose object(s). 
 
     Parameters
     ----------
@@ -227,7 +225,7 @@ def delete(arg):
 
     Returns
     -------
-    None
+    None, Raises ValueError if given path/object does not exists.
     """
     _moose.delete(arg)
 
