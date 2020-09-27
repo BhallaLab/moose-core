@@ -1135,6 +1135,15 @@ const KinSparseMatrix& Stoich::getStoichiometryMatrix() const
 void Stoich::notifyRemoveReac( const Eref& e )
 {;} // To fill
 
+void Stoich::notifyRemoveEnz( const Eref& e )
+{;} // To fill
+
+void Stoich::notifyRemoveMMenz( const Eref& e )
+{;} // To fill
+
+void Stoich::notifyRemoveFunc( const Eref& e )
+{;} // To fill
+
 /// Returns Function, if any, acting as src of specified msg into pa.
 static Id findFuncMsgSrc(Id pa, const string& msg)
 {
@@ -1180,8 +1189,6 @@ void Stoich::zombifyModel(const Eref& e, const vector<Id>& elist)
     static const Cinfo* reacCinfo = Cinfo::find("Reac");
     static const Cinfo* enzCinfo = Cinfo::find("Enz");
     static const Cinfo* mmEnzCinfo = Cinfo::find("MMenz");
-    static const Cinfo* zombieMMenzCinfo = Cinfo::find("ZombieMMenz");
-    static const Cinfo* zombieEnzCinfo = Cinfo::find("ZombieEnz");
     static const Cinfo* zfCinfo = Cinfo::find("ZombieFunction");
     // static const Finfo* funcSrcFinfo = Cinfo::find(
     // "Function")->findFinfo( "valueOut" ); vector< Id > meshEntries;
@@ -1254,10 +1261,12 @@ void Stoich::zombifyModel(const Eref& e, const vector<Id>& elist)
             }
         }
         else if(ei->cinfo() == mmEnzCinfo) {
-            EnzBase::zombify(ei, zombieMMenzCinfo, e.id());
+			SetGet1< ObjId >::set( *i, "setSolver", e.id() );
+            // EnzBase::zombify(ei, zombieMMenzCinfo, e.id());
         }
         else if(ei->cinfo() == enzCinfo) {
-            CplxEnzBase::zombify(ei, zombieEnzCinfo, e.id());
+			SetGet1< ObjId >::set( *i, "setSolver", e.id() );
+            //CplxEnzBase::zombify(ei, zombieEnzCinfo, e.id());
         }
     }
 }
@@ -1286,8 +1295,6 @@ void Stoich::unZombifyModel()
     static const Cinfo* enzCinfo = Cinfo::find("Enz");
     static const Cinfo* mmEnzCinfo = Cinfo::find("MMenz");
     static const Cinfo* functionCinfo = Cinfo::find("Function");
-    static const Cinfo* zombieMMenzCinfo = Cinfo::find("ZombieMMenz");
-    static const Cinfo* zombieEnzCinfo = Cinfo::find("ZombieEnz");
     static const Cinfo* zombieFunctionCinfo = Cinfo::find("ZombieFunction");
 
     unZombifyPools();
@@ -1305,16 +1312,20 @@ void Stoich::unZombifyModel()
                 offSolverMMenzVec_.end());
     for(vector<Id>::iterator i = temp.begin(); i != temp.end(); ++i) {
         Element* e = i->element();
-        if(e != 0 && e->cinfo() == zombieMMenzCinfo)
-            EnzBase::zombify(e, mmEnzCinfo, Id());
+        if( e != 0 && e->cinfo()->isA( "EnzBase" ) ) {
+			SetGet1< ObjId >::set( *i, "setSolver", Id() ); // Clear stoich
+            // EnzBase::zombify(e, mmEnzCinfo, Id());
+		}
     }
 
     temp = enzVec_;
     temp.insert(temp.end(), offSolverEnzVec_.begin(), offSolverEnzVec_.end());
     for(vector<Id>::iterator i = temp.begin(); i != temp.end(); ++i) {
         Element* e = i->element();
-        if(e != 0 && e->cinfo() == zombieEnzCinfo)
-            CplxEnzBase::zombify(e, enzCinfo, Id());
+        if( e != 0 && e->cinfo()->isA( "EnzBase" ) ) {
+			SetGet1< ObjId >::set( *i, "setSolver", Id() ); // Clear stoich
+            // CplxEnzBase::zombify(e, enzCinfo, Id());
+		}
     }
 
     temp = poolFuncVec_;

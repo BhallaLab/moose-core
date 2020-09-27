@@ -4,7 +4,6 @@ add_library(kinetics
     PoolBase.cpp
     Reac.cpp
     EnzBase.cpp
-    CplxEnzBase.cpp
     Enz.cpp
     MMenz.cpp
     Species.cpp

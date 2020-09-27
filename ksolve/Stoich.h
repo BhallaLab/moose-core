@@ -209,6 +209,9 @@ public:
     void scaleBufsAndRates(unsigned int index, double volScale);
 
 	void notifyRemoveReac( const Eref& e );
+	void notifyRemoveEnz( const Eref& e );
+	void notifyRemoveMMenz( const Eref& e );
+	void notifyRemoveFunc( const Eref& e );
 
     //////////////////////////////////////////////////////////////////
     // Zombification functions.

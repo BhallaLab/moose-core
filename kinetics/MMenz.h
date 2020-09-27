@@ -26,29 +26,18 @@ class MMenz: public EnzBase
 		//////////////////////////////////////////////////////////////////
 
 		void vSetKm( const Eref& e, double v );
-		double vGetKm( const Eref& e ) const;
-		void vSetNumKm( const Eref& e, double v );
-		double vGetNumKm( const Eref& e ) const;
 		void vSetKcat( const Eref& e, double v );
-		double vGetKcat(const Eref& e ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
+		// sub, prd, enz, remesh are all defined in EnzBase as dummies.
 
-		void vProcess( const Eref& e, ProcPtr p );
-		void vReinit( const Eref& e, ProcPtr p );
-		void vSub( double n );
-		void vEnz( double n );
-		void vRemesh( const Eref& e );
-
+		void setSolver( const Eref& e, ObjId solver );
 		static const Cinfo* initCinfo();
 	private:
+		Stoich* stoich_;
 		double Km_; /// Km in Concentration units, millimolar.
-		double numKm_; /// Km in number units
-		double kcat_; /// kcat in 1/sec
-		double sub_;	/// State variable: substrate (in num units) * numKm
-		double enz_;	/// State variable: enz number.
 };
 
 #endif // MM_ENZ_H

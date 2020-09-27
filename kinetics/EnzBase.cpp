@@ -69,28 +69,6 @@ const Cinfo* EnzBase::initCinfo()
 			&EnzBase::getNumPrd
 		);
 
-
-		//////////////////////////////////////////////////////////////
-		// Shared Msg Definitions
-		//////////////////////////////////////////////////////////////
-		static DestFinfo process( "process",
-			"Handles process call",
-			new ProcOpFunc< EnzBase >( &EnzBase::process ) );
-
-		static DestFinfo reinit( "reinit",
-			"Handles reinit call",
-			new ProcOpFunc< EnzBase >( &EnzBase::reinit ) );
-
-		/*
-		static DestFinfo group( "group",
-			"Handle for group msgs. Doesn't do anything",
-			new OpFuncDummy() );
-			*/
-
-		static DestFinfo remesh( "remesh",
-			"Tells the MMEnz to recompute its numKm after remeshing",
-			new EpFunc0< EnzBase >( &EnzBase::remesh ) );
-
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -118,13 +96,6 @@ const Cinfo* EnzBase::initCinfo()
 			"Connects to product molecule",
 			prdShared, sizeof( prdShared ) / sizeof( const Finfo* )
 		);
-		static Finfo* procShared[] = {
-			&process, &reinit
-		};
-		static SharedFinfo proc( "proc",
-			"Shared message for process and reinit",
-			procShared, sizeof( procShared ) / sizeof( const Finfo* )
-		);
 
 	static Finfo* enzBaseFinfos[] = {
 		&Km,	// ElementValue
@@ -135,8 +106,6 @@ const Cinfo* EnzBase::initCinfo()
 		&enzDest,			// DestFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
-		&proc,				// SharedFinfo
-		&remesh,			// Destfinfo
 	};
 
 	static string doc[] =
@@ -166,7 +135,10 @@ const Cinfo* EnzBase::initCinfo()
 // EnzBase internal functions
 //////////////////////////////////////////////////////////////
 
-EnzBase::EnzBase( )
+EnzBase::EnzBase()
+	: 
+		Km_( 1.0e-3 ),
+		kcat_( 1.0 )
 {;}
 
 EnzBase::~EnzBase( )
@@ -177,50 +149,11 @@ EnzBase::~EnzBase( )
 //////////////////////////////////////////////////////////////
 
 void EnzBase::sub( double n )
-{
-	vSub( n );
-}
-
+{;}
 void EnzBase::prd( double n ) // dummy
 {;}
 
 void EnzBase::enz( double n )
-{
-	vEnz( n );
-}
-
-void EnzBase::process( const Eref& e, ProcPtr p )
-{
-	vProcess( e, p );
-}
-
-void EnzBase::reinit( const Eref& e, ProcPtr p )
-{
-	vReinit( e, p );
-}
-
-void EnzBase::remesh( const Eref& e )
-{
-	vRemesh( e );
-}
-
-//////////////////////////////////////////////////////////////
-// Virtual MsgDest Definitions. Mostly dummys, the derived classes don't
-// need to do anything here.
-//////////////////////////////////////////////////////////////
-void EnzBase::vSub( double n )
-{;}
-
-void EnzBase::vEnz( double n )
-{;}
-
-void EnzBase::vProcess( const Eref& e, ProcPtr p )
-{;}
-
-void EnzBase::vReinit( const Eref& e, ProcPtr p )
-{;}
-
-void EnzBase::vRemesh( const Eref& e )
 {;}
 
 //////////////////////////////////////////////////////////////
@@ -229,33 +162,42 @@ void EnzBase::vRemesh( const Eref& e )
 
 void EnzBase::setKm( const Eref& enz, double v )
 {
-		vSetKm( enz, v );
+	if ( v < EPSILON )
+		v = EPSILON;
+	vSetKm( enz, v );
 }
 
 double EnzBase::getKm( const Eref& enz ) const
 {
-		return vGetKm( enz );
+	return Km_;
 }
 
 void EnzBase::setNumKm( const Eref& enz, double v )
 {
-		vSetNumKm( enz, v );
+	double volScale = convertConcToNumRateUsingMesh( enz, subOut(), 1 );
+	Km_ = v / volScale;
+	vSetKm( enz, Km_ );
 }
 
 double EnzBase::getNumKm( const Eref& enz ) const
 {
-		return vGetNumKm( enz );
+	double volScale = convertConcToNumRateUsingMesh( enz, subOut(), 1 );
+	return Km_ * volScale;
 }
 
 
 void EnzBase::setKcat( const Eref& e, double v )
 {
-		vSetKcat( e, v );
+	// We don't set it here because we need the old value in the Enz
+	// function. 
+	if ( v < 0.0 )
+		v = 0.0;
+	vSetKcat( e, v );
 }
 
 double EnzBase::getKcat( const Eref& e ) const
 {
-		return vGetKcat( e );
+		return kcat_;
 }
 
 unsigned int EnzBase::getNumSub( const Eref& e ) const
@@ -272,51 +214,4 @@ unsigned int EnzBase::getNumPrd( const Eref& e ) const
 		e.element()->getMsgAndFunc( prdOut()->getBindIndex() );
 	assert( mfb );
 	return ( mfb->size() );
-}
-
-////////////////////////////////////////////////////////////////////////
-// Zombie conversion routine to convert between Enz subclasses.
-////////////////////////////////////////////////////////////////////////
-// static func
-
-/**
- * This function helps the conversion between Enzyme subclasses. Note that
- * we may need a second zombify function to convert to and from explicit enz
- * classes because there is information lost if we go right down to the
- * EnzBase. Specifically, EnzBase only knows about two parameters, the
- * Km and kcat. Explicit enzymes also need to know a k2, or equivalently
- * a ratio between kcat and k2. But in principle this function allows
- * conversion between the two cases.
- */
-void EnzBase::zombify( Element* orig, const Cinfo* zClass, Id solver )
-{
-	if ( orig->cinfo() == zClass )
-		return;
-	unsigned int start = orig->localDataStart();
-	unsigned int num = orig->numLocalData();
-	if ( num == 0 )
-			return;
-	vector< double > Km( num, 0.0 );
-	vector< double > kcat( num, 0.0 );
-	for ( unsigned int i = 0; i < num; ++i ) {
-		Eref er( orig, i + start );
-		const EnzBase* eb =
-			reinterpret_cast< const EnzBase* >( er.data() );
-		kcat[ i ] = eb->getKcat( er );
-		Km[ i ] = eb->getKm( er );
-	}
-	orig->zombieSwap( zClass );
-	for ( unsigned int i = 0; i < num; ++i ) {
-		Eref er( orig, i + start );
-		EnzBase* eb = reinterpret_cast< EnzBase* >( er.data() );
-		eb->setSolver( solver, orig->id() );
-		eb->setKcat( er, kcat[i] );
-		eb->setKm( er, Km[i] );
-	}
-}
-
-// Virtual func: default does nothing.
-void EnzBase::setSolver( Id solver, Id orig )
-{
-	;
 }
