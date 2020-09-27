@@ -12,7 +12,6 @@ class KsolveBase;
 #include "../basecode/ElementValueFinfo.h"
 #include "../kinetics/PoolBase.h"
 #include "../kinetics/EnzBase.h"
-#include "../kinetics/CplxEnzBase.h"
 #include "FuncTerm.h"
 #include "RateTerm.h"
 #include "FuncRateTerm.h"
