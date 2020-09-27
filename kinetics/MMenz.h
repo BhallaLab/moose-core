@@ -37,7 +37,6 @@ class MMenz: public EnzBase
 		static const Cinfo* initCinfo();
 	private:
 		Stoich* stoich_;
-		double Km_; /// Km in Concentration units, millimolar.
 };
 
 #endif // MM_ENZ_H

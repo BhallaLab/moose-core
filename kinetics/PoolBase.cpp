@@ -103,12 +103,6 @@ const Cinfo* PoolBase::initPoolBaseCinfo()
     //////////////////////////////////////////////////////////////
     // MsgDest Definitions
     //////////////////////////////////////////////////////////////
-    static DestFinfo process( "process",
-                              "Handles process call",
-                              new ProcOpFunc< PoolBase >( &PoolBase::process ) );
-    static DestFinfo reinit( "reinit",
-                             "Handles reinit call",
-                             new ProcOpFunc< PoolBase >( &PoolBase::reinit ) );
 
     static DestFinfo reacDest( "reacDest",
                                "Handles reaction input",
@@ -187,14 +181,6 @@ const Cinfo* PoolBase::initPoolBaseCinfo()
                              "Connects to reaction",
                              reacShared, sizeof( reacShared ) / sizeof( const Finfo* )
                            );
-    static Finfo* procShared[] =
-    {
-        &process, &reinit
-    };
-    static SharedFinfo proc( "proc",
-                             "Shared message for process and reinit",
-                             procShared, sizeof( procShared ) / sizeof( const Finfo* )
-                           );
 
     static Finfo* speciesShared[] =
     {
@@ -221,7 +207,6 @@ const Cinfo* PoolBase::initPoolBaseCinfo()
         &decrement,			// DestFinfo
         &nIn,				// DestFinfo
         &reac,				// SharedFinfo
-        &proc,				// SharedFinfo
         &species,			// SharedFinfo
 		&notifyCreate,		 // DestFinfo
 		&notifyCopy,		 // DestFinfo
@@ -302,29 +287,33 @@ static const Cinfo* poolCinfo = PoolBase::initPoolCinfo();
 static const Cinfo* bufPoolCinfo = PoolBase::initBufPoolCinfo();
 
 //////////////////////////////////////////////////////////////
+/*
 KsolveBase* defaultKsolve()
 {
 	static Ksolve defaultKsolve_;
 	return &defaultKsolve_;
 }
+*/
+
 PoolBase::PoolBase()
-{
-	ksolve_ = defaultKsolve();
-	dsolve_ = 0;
-}
+	:
+		dsolve_( 0 ),
+		ksolve_( 0 ),
+		concInit_( 0.0 ),
+		diffConst_( 0.0 ),
+		motorConst_( 0.0 )
+{;}
 
 PoolBase::~PoolBase()
-{;}
+{
+	// notify the ksolve and dsolve that we are going.
+	;
+}
+
 
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
-
-void PoolBase::process( const Eref& e, ProcPtr p )
-{;}
-
-void PoolBase::reinit( const Eref& e, ProcPtr p )
-{;}
 
 void PoolBase::increment( double val )
 {
@@ -352,7 +341,8 @@ void PoolBase::handleMolWt( const Eref& e, double v )
 
 void PoolBase::notifyDestroy(const Eref& e)
 {
-	ksolve_->notifyRemovePool( e );
+	if ( ksolve_ )
+		ksolve_->notifyRemovePool( e );
 	if ( dsolve_ )
 		dsolve_->notifyRemovePool( e );
 }
@@ -360,14 +350,16 @@ void PoolBase::notifyDestroy(const Eref& e)
 void PoolBase::notifyCreate(const Eref& e, ObjId parent)
 {
 	// cout << "Creating poolBase " << e.id().path() << endl;
-	ksolve_->notifyAddPool( e );
+	if ( ksolve_ )
+		ksolve_->notifyAddPool( e );
 	if ( dsolve_ )
 		dsolve_->notifyAddPool( e );
 }
 
 void PoolBase::notifyCopy(const Eref& e, ObjId old)
 {
-	ksolve_->notifyAddPool( e );
+	if ( ksolve_ )
+		ksolve_->notifyAddPool( e );
 	if ( dsolve_ )
 		dsolve_->notifyAddPool( e );
 
@@ -382,23 +374,25 @@ void PoolBase::notifyCopy(const Eref& e, ObjId old)
 void PoolBase::notifyMove(const Eref& e, ObjId newParent)
 {
 	// cout << "Moving poolBase " << e.id().path() << " onto " << newParent.path() << endl;
-	if ( defaultKsolve() != ksolve_ ) {
+	if ( ksolve_ ) {
 		ksolve_->notifyRemovePool( e );
-		defaultKsolve()->notifyAddPool( e );
 	}
 	if ( dsolve_ != 0 ) {
 		dsolve_->notifyRemovePool( e );
 	}
+	// Assign to new ksolve if newParent is a solver.
 }
 
 void PoolBase::notifyAddMsgSrc(const Eref& e, ObjId msgId)
 {
-	ksolve_->notifyAddMsgSrcPool( e, msgId );
+	if ( ksolve_ )
+		ksolve_->notifyAddMsgSrcPool( e, msgId );
 }
 
 void PoolBase::notifyAddMsgDest(const Eref& e, ObjId msgId)
 {
-	ksolve_->notifyAddMsgDestPool( e, msgId );
+	if ( ksolve_ )
+		ksolve_->notifyAddMsgDestPool( e, msgId );
 }
 
 //////////////////////////////////////////////////////////////
@@ -407,27 +401,35 @@ void PoolBase::notifyAddMsgDest(const Eref& e, ObjId msgId)
 
 void PoolBase::setN( const Eref& e, double v )
 {
-    ksolve_->setN(e, v);
+	if ( ksolve_ )
+    	ksolve_->setN(e, v);
 	if ( dsolve_ )
     	dsolve_->setN(e, v);
 }
 
 double PoolBase::getN( const Eref& e ) const
 {
-    return ksolve_->getN( e );
+	if ( ksolve_ )
+    	return ksolve_->getN( e );
+	else
+    	return ( NA * getVolume( e ) ) * concInit_;
 }
 
 void PoolBase::setNinit( const Eref& e, double v )
 {
+	if ( v < 0.0 )
+		v = 0.0;
     double c = v / ( NA * getVolume( e ) );
-    ksolve_->setConcInit( e, c );
+	concInit_ = c;
+	if ( ksolve_ )
+    	ksolve_->setConcInit( e, c );
 	if ( dsolve_ )
     	dsolve_->setConcInit( e, c );
 }
 
 double PoolBase::getNinit( const Eref& e ) const
 {
-	return ksolve_->getConcInit( e ) * NA * getVolume( e );
+	return concInit_ * NA * getVolume( e );
 }
 
 // Conc is given in millimolar. Volume is in m^3
@@ -445,40 +447,44 @@ double PoolBase::getConc( const Eref& e ) const
 
 void PoolBase::setConcInit( const Eref& e, double conc )
 {
-	ksolve_->setConcInit( e, conc );
+	if ( conc < 0.0 )
+		conc = 0.0;
+	concInit_ = conc;
+	if ( ksolve_ )
+		ksolve_->setConcInit( e, conc );
 	if ( dsolve_ )
     	dsolve_->setConcInit( e, conc );
 }
 
 double PoolBase::getConcInit( const Eref& e ) const
 {
-	return ksolve_->getConcInit( e );
+	return concInit_;
 }
 
 void PoolBase::setDiffConst( const Eref& e, double v )
 {
+	if ( v < 0.0 )
+		v = 0.0;
+	diffConst_ = v;
 	if ( dsolve_ )
     	dsolve_->setDiffConst( e, v );
 }
 
 double PoolBase::getDiffConst(const Eref& e ) const
 {
-	if ( dsolve_ )
-    	return dsolve_->getDiffConst( e );
-	return 0.0;
+	return diffConst_;
 }
 
 void PoolBase::setMotorConst( const Eref& e, double v )
 {
+	motorConst_ = v;
 	if ( dsolve_ )
     	dsolve_->setMotorConst( e, v );
 }
 
 double PoolBase::getMotorConst(const Eref& e ) const
 {
-	if ( dsolve_ )
-    	return dsolve_->getMotorConst( e );
-	return 0.0;
+	return motorConst_;
 }
 
 void PoolBase::setVolume( const Eref& e, double v )
@@ -488,8 +494,7 @@ void PoolBase::setVolume( const Eref& e, double v )
 
 double PoolBase::getVolume( const Eref& e ) const
 {
-	return ksolve_->getVolumeOfPool( e );
-    // return lookupVolumeFromMesh( e );
+    return lookupVolumeFromMesh( e );
 }
 
 void PoolBase::setSpecies( const Eref& e, unsigned int v )
@@ -549,7 +554,8 @@ void PoolBase::setIsBuffered( const Eref& e, bool v )
 		elm->replaceCinfo( bufPoolCinfo );
 	}
 	
-	ksolve_->setIsBuffered( e, isBuf );
+	if ( ksolve_ )
+		ksolve_->setIsBuffered( e, isBuf );
 	if ( dsolve_ )
 		dsolve_->setIsBuffered( e, isBuf );
 }

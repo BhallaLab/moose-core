@@ -82,8 +82,7 @@ static const SrcFinfo2< double, double >* prdOut =
 
 MMenz::MMenz( )
 	: 
-		stoich_( 0 ),
-		Km_( 0.005 )
+		stoich_( 0 )
 {;}
 
 MMenz::~MMenz( )
@@ -139,5 +138,7 @@ void MMenz::setSolver( const Eref& e, ObjId solver )
 	num = e.element()->getNeighbors( subvec, subFinfo );
 	num = e.element()->getNeighbors( prdvec, prdFinfo );
 	stoich_->installMMenz( e.id(), enzvec, subvec, prdvec );
+	stoich_->setMMenzKm( e, Km_ );
+	stoich_->setMMenzKcat( e, kcat_ );
 }
 

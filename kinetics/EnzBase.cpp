@@ -137,7 +137,7 @@ const Cinfo* EnzBase::initCinfo()
 
 EnzBase::EnzBase()
 	: 
-		Km_( 1.0e-3 ),
+		Km_( 5.0e-3 ),
 		kcat_( 1.0 )
 {;}
 

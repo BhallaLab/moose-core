@@ -963,7 +963,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
         mmEnzIds_[ mmEnzPath ] = enz;
 
         assert( k1 > EPSILON );
-        double Km = ( k2 + k3 ) / k1;
+        double Km = ( k2 + k3 ) / (1e6 * k1 / (KKIT_NA * vol) );
 
         Field< double >::set( enz, "Km", Km );
         Field< double >::set( enz, "kcat", k3 );
@@ -1072,7 +1072,8 @@ Id ReadKkit::buildPool( const vector< string >& args )
     Id pa = shell_->doFind( head ).id;
     assert( pa != Id() );
 
-    double nInit = atof( args[ poolMap_[ "nInit" ] ].c_str() );
+    // double nInit = atof( args[ poolMap_[ "nInit" ] ].c_str() );
+    double concInit = atof( args[ poolMap_[ "CoInit" ] ].c_str() );
     double vsf = atof( args[ poolMap_[ "vol" ] ].c_str() );
     /**
      * vsf is vol scale factor, which is what GENESIS stores in 'vol' field
@@ -1111,7 +1112,8 @@ Id ReadKkit::buildPool( const vector< string >& args )
     // skip the 10 chars of "/kinetics/"
     poolIds_[ clean.substr( 10 ) ] = pool;
 
-    Field< double >::set( pool, "nInit", nInit );
+    // Field< double >::set( pool, "nInit", nInit );
+    Field< double >::set( pool, "concInit", concInit / 1e3 ); // conv to mM
     Field< double >::set( pool, "diffConst", diffConst );
     // SetGet1< double >::set( pool, "setVolume", vol );
     separateVols( pool, vol );
@@ -1614,7 +1616,7 @@ void ReadKkit::convertParametersToConcUnits()
 {
     convertPoolAmountToConcUnits();
     convertReacRatesToConcUnits();
-    convertMMenzRatesToConcUnits();
+    // convertMMenzRatesToConcUnits();
     convertEnzRatesToConcUnits();
 }
 

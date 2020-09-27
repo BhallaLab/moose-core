@@ -334,6 +334,10 @@ void Enz::setSolver( const Eref& e, ObjId stoich )
 
 	if ( hasEnz && hasSubs && hasCplx && hasPrds ) {
 		stoich_->installEnzyme( e.id(), enzMols[0], cplxMols[0], subs, prds );
+		double concK1 = ( k2_ + kcat_ ) / Km_;
+		stoich_->setEnzK1( e, concK1 );
+		stoich_->setEnzK2( e, k2_ );
+		stoich_->setEnzK3( e, kcat_ );
 	} else {
 		stoich_->installDummyEnzyme( e.id(), Id() );
 		string msg = "";

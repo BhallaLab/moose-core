@@ -73,8 +73,6 @@ public:
     //////////////////////////////////////////////////////////////////
     // Dest funcs
     //////////////////////////////////////////////////////////////////
-    void process( const Eref& e, ProcPtr p );
-    void reinit( const Eref& e, ProcPtr p );
     void reac( double A, double B );
     void handleMolWt( const Eref& e, double v );
     void increment( double val );
@@ -110,6 +108,10 @@ protected:
      */
     KsolveBase* dsolve_;
     KsolveBase* ksolve_;
+
+	double concInit_;
+	double diffConst_;
+	double motorConst_;
 };
 
 #endif	// _POOL_BASE_H
