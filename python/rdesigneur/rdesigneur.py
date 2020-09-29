@@ -20,7 +20,6 @@ from __future__ import print_function, absolute_import, division
 
 # FIXME: Deprecated since 3.4
 import imp
-
 import os
 import moose
 import numpy as np
@@ -592,10 +591,6 @@ class rdesigneur:
             # Build the neuroMesh
             # Check if it is good. Need to catch the ValueError here.
             self._buildNeuroMesh()
-            a = moose.element( '/model/chem/dend/a' )
-            b = moose.element( '/model/chem/dend/b' )
-            c = moose.element( '/model/chem/dend/s' )
-            print( "After buildNeuromesh: a = {}, b ={}, c = {}".format( a.concInit, b.concInit, c.concInit ))
             # Assign the solvers
 
     ################################################################
@@ -837,7 +832,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             if len( vtab ) < 2:
                 print( "Warning: Waveplot {} abandoned, only {} points".format( i[1], len( vtab ) ) )
                 continue
-            dFrame = len( vtab[0].vector ) // self.numWaveFrames
+            dFrame = len( vtab[0].vector ) / self.numWaveFrames
             if dFrame < 1:
                 dFrame = 1
             vpts = np.array( [ [k.vector[j] for j in range( 0, len( k.vector ), dFrame ) ] for k in vtab] ).T * i[3]
@@ -1318,10 +1313,6 @@ rdesigneur.rmoogli.updateMoogliViewer()
             self.dendCompt.separateSpines = 0
 
             self._moveCompt( comptdict['dend'], self.dendCompt )
-            a = moose.element( '/model/chem/dend/a' )
-            b = moose.element( '/model/chem/dend/b' )
-            c = moose.element( '/model/chem/dend/s' )
-            print( "After Inside buildNeuromesh: a = {}, b ={}, c = {}".format( a.concInit, b.concInit, c.concInit ))
             comptdict['dend'] = self.dendCompt
 
         if 'dend' in comptdict and 'spine' in comptdict:
@@ -1339,12 +1330,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 comptdict['psd'] = self.psdCompt
 
         self.dendCompt.diffLength = self.diffusionLength
-        a = moose.element( '/model/chem/dend/a' )
-        b = moose.element( '/model/chem/dend/b' )
-        c = moose.element( '/model/chem/dend/s' )
-        print( "After Inside2 buildNeuromesh: a = {}, b ={}, c = {}".format( a.concInit, b.concInit, c.concInit ))
         self.dendCompt.subTree = self.cellPortionElist
-        print( "After Inside3 buildNeuromesh: a = {}, b ={}, c = {}".format( a.concInit, b.concInit, c.concInit ))
         for i in comptdict:
             if len(i) > 5:
                 if i[-5:] == '_endo':

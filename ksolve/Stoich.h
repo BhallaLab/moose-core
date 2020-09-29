@@ -239,7 +239,7 @@ public:
      * and to appropriately zombify the function and set up its
      * parameters including volume scaling.
      */
-    Id zombifyPoolFuncWithScaling(Id pool);
+    Id zombifyPoolFuncWithScaling( const Eref& e, Id pool );
 
     unsigned int convertIdToReacIndex(Id id) const;
     unsigned int convertIdToPoolIndex(Id id) const;

@@ -26,7 +26,6 @@ endif(WITH_BOOST_ODE)
 
 set(KSOLVE_SRCS
     KinSparseMatrix.cpp
-    ZombieFunction.cpp
     VoxelPoolsBase.cpp
     VoxelPools.cpp
     GssaVoxelPools.cpp
