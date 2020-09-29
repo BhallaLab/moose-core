@@ -73,12 +73,11 @@ for p in _moose.wildcardFind("/##[TYPE=Cinfo]"):
 # class types to _moose.
 from moose._moose import *
 
-
 def version():
     """Reutrns moose version string."""
     return _moose.__version__
 
-__version__ = lambda: version()
+__version__ = version()
 
 def version_info():
     """Return detailed version information.
