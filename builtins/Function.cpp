@@ -879,7 +879,7 @@ void Function::setSolver( const Eref& e, ObjId newStoich )
 				e.id().path() << endl;
 		return;
 	}
-	if ( newStoich == ObjId( '/' ) ) { // Unsetting stoich.
+	if ( newStoich == ObjId() ) { // Unsetting stoich.
 		if ( stoich_ != 0 ) {
 			auto x = reinterpret_cast< Stoich* >( stoich_ );
 			x->notifyRemoveFunc( e );

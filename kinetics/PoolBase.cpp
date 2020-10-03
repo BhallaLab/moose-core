@@ -507,12 +507,16 @@ unsigned int PoolBase::getSpecies( const Eref& e ) const
     return 0;
 }
 
-void PoolBase::setSolvers( const Eref& e, ObjId ksolve, ObjId dsolve )
+void PoolBase::setSolvers( const Eref& e, ObjId ks, ObjId ds )
 {
-	if ( ! ksolve.bad() ) {
-		string nm = ksolve.element()->cinfo()->name();
+	if ( ks == ObjId() ) {
+		if ( ksolve_ )
+			ksolve_->notifyRemovePool( e );
+		ksolve_ = 0;
+	} else if ( ! ks.bad() ) {
+		string nm = ks.element()->cinfo()->name();
 		if ( nm == "Ksolve" || nm == "Gsolve" ) {
-			KsolveBase* k = reinterpret_cast< KsolveBase *>(ksolve.data() );
+			KsolveBase* k = reinterpret_cast< KsolveBase *>(ks.data() );
 			if ( k && k != ksolve_ ) {
 				if ( ksolve_ )
 					ksolve_->notifyRemovePool( e );
@@ -521,10 +525,15 @@ void PoolBase::setSolvers( const Eref& e, ObjId ksolve, ObjId dsolve )
 			}
 		}
 	}
-	if ( ! dsolve.bad() ) {
-		string nm = dsolve.element()->cinfo()->name();
+	if ( ds == ObjId() ) {
+		if ( dsolve_ ) {
+			dsolve_->notifyRemovePool( e );
+		}
+		dsolve_ = 0;
+	} else if ( ! ds.bad() ) {
+		string nm = ds.element()->cinfo()->name();
 		if ( nm == "Dsolve" ) {
-			KsolveBase* d = reinterpret_cast< KsolveBase *>(dsolve.data() );
+			KsolveBase* d = reinterpret_cast< KsolveBase *>(ds.data() );
 			if ( d && d != dsolve_ ) {
 				if ( dsolve_ )
 					dsolve_->notifyRemovePool( e );

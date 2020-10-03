@@ -122,6 +122,13 @@ void MMenz::setSolver( const Eref& e, ObjId solver )
 	assert( subFinfo );
 	assert( prdFinfo );
 
+	if ( solver == ObjId() ) { // Clear solver
+		if ( stoich_ )
+			stoich_->notifyRemoveMMenz( e );
+		stoich_ = 0;
+		return;
+	}
+
 	assert( solver.element()->cinfo()->isA( "Stoich" ) );
 	Stoich* stoichPtr = reinterpret_cast< Stoich* >( solver.data() );
 	if ( stoich_ == stoichPtr )

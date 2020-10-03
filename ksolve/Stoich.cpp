@@ -1269,27 +1269,22 @@ void Stoich::zombifyModel(const Eref& e, const vector<Id>& elist)
 
 void Stoich::unZombifyPools()
 {
-    static const Cinfo* poolCinfo = Cinfo::find("Pool");
-    static const Cinfo* bufPoolCinfo = Cinfo::find("BufPool");
+	static ObjId root = ObjId();
     unsigned int i;
-    for(i = 0; i < varPoolVec_.size(); ++i) {
-        Element* e = varPoolVec_[i].element();
-        if(!e || e->isDoomed())
-            continue;
-    }
-
-    for(i = 0; i < bufPoolVec_.size(); ++i) {
-        Element* e = bufPoolVec_[i].element();
-        if(!e || e->isDoomed())
-            continue;
+    for(auto i = varPoolVec_.begin(); i != varPoolVec_.end(); ++i) {
+        Element* e = i->element();
+        if(e && !e->isDoomed())
+			SetGet2< ObjId, ObjId >::set( *i, "setSolvers", root, root );
+	}
+    for(auto i = bufPoolVec_.begin(); i != bufPoolVec_.end(); ++i) {
+        Element* e = i->element();
+        if(e && !e->isDoomed())
+			SetGet2< ObjId, ObjId >::set( *i, "setSolvers", root, root );
     }
 }
 
 void Stoich::unZombifyModel()
 {
-    static const Cinfo* reacCinfo = Cinfo::find("Reac");
-    static const Cinfo* enzCinfo = Cinfo::find("Enz");
-    static const Cinfo* mmEnzCinfo = Cinfo::find("MMenz");
     static const Cinfo* functionCinfo = Cinfo::find("Function");
 
     unZombifyPools();
@@ -1309,7 +1304,6 @@ void Stoich::unZombifyModel()
         Element* e = i->element();
         if( e != 0 && e->cinfo()->isA( "EnzBase" ) ) {
 			SetGet1< ObjId >::set( *i, "setSolver", Id() ); // Clear stoich
-            // EnzBase::zombify(e, mmEnzCinfo, Id());
 		}
     }
 
@@ -1319,7 +1313,6 @@ void Stoich::unZombifyModel()
         Element* e = i->element();
         if( e != 0 && e->cinfo()->isA( "EnzBase" ) ) {
 			SetGet1< ObjId >::set( *i, "setSolver", Id() ); // Clear stoich
-            // CplxEnzBase::zombify(e, enzCinfo, Id());
 		}
     }
 
@@ -1327,7 +1320,7 @@ void Stoich::unZombifyModel()
     temp.insert(temp.end(), incrementFuncVec_.begin(), incrementFuncVec_.end());
     for(vector<Id>::iterator i = temp.begin(); i != temp.end(); ++i) {
         Element* e = i->element();
-        if(e != 0 && e->cinfo() == functionCinfo) {
+        if(e != 0 && e->cinfo()->isA( "Function" ) ) {
 			SetGet1< ObjId >::set( *i, "setSolver", Id() );
         }
         if(e != 0 && e->getTick() == -2) {

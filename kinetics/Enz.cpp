@@ -317,6 +317,14 @@ void Enz::setSolver( const Eref& e, ObjId stoich )
 	assert( cplxFinfo );
 	vector< Id > enzMols;
 	vector< Id > cplxMols;
+
+	if ( stoich == ObjId() ) { // Clear solver
+		if ( stoich_ )
+			stoich_->notifyRemoveEnz( e );
+		stoich_ = 0;
+		return;
+	}
+
 	bool isOK = true;
 	unsigned int numReactants;
 	numReactants = e.element()->getNeighbors( enzMols, enzFinfo );

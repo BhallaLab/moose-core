@@ -283,7 +283,7 @@ void Reac::setSolver( const Eref& e, ObjId newStoich )
 				e.id().path() << endl;
 		return;
 	}
-	if ( newStoich == ObjId( '/' ) ) { // Unsetting stoich.
+	if ( newStoich == ObjId() ) { // Unsetting stoich.
 		if ( stoich_ != 0 )
 			stoich_->notifyRemoveReac( e );
 		stoich_ = 0;
