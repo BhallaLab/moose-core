@@ -42,6 +42,7 @@ public:
     //////////////////////////////////////////////////////////////////
     void setN( const Eref& e, double v );
     double getN( const Eref& e ) const;
+	void innerSetN( const Eref& e, double v );
     void setNinit( const Eref& e, double v );
     double getNinit( const Eref& e ) const;
     void setDiffConst( const Eref& e, double v );
@@ -53,6 +54,7 @@ public:
     double getConc( const Eref& e ) const;
     void setConcInit( const Eref& e, double v );
     double getConcInit( const Eref& e ) const;
+	void innerSetConcInit( const Eref& e, double conc );
 
     /**
      * Volume is usually volume, but we also permit areal density

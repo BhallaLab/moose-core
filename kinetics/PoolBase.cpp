@@ -399,12 +399,33 @@ void PoolBase::notifyAddMsgDest(const Eref& e, ObjId msgId)
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-void PoolBase::setN( const Eref& e, double v )
+void PoolBase::innerSetN( const Eref& e, double v ) 
 {
+	if ( v < 0.0 )
+		v = 0.0;
 	if ( ksolve_ )
     	ksolve_->setN(e, v);
 	if ( dsolve_ )
     	dsolve_->setN(e, v);
+}
+
+void PoolBase::innerSetConcInit( const Eref& e, double conc )
+{
+	if ( conc < 0.0 )
+		conc = 0.0;
+	concInit_ = conc;
+	if ( ksolve_ )
+		ksolve_->setConcInit( e, conc );
+	if ( dsolve_ )
+    	dsolve_->setConcInit( e, conc );
+}
+
+void PoolBase::setN( const Eref& e, double v )
+{
+	innerSetN( e, v );
+	if ( getIsBuffered( e ) ) {
+		innerSetConcInit( e, v / ( NA * getVolume( e ) ) );
+	}
 }
 
 double PoolBase::getN( const Eref& e ) const
@@ -417,14 +438,8 @@ double PoolBase::getN( const Eref& e ) const
 
 void PoolBase::setNinit( const Eref& e, double v )
 {
-	if ( v < 0.0 )
-		v = 0.0;
     double c = v / ( NA * getVolume( e ) );
-	concInit_ = c;
-	if ( ksolve_ )
-    	ksolve_->setConcInit( e, c );
-	if ( dsolve_ )
-    	dsolve_->setConcInit( e, c );
+	setConcInit( e, c );
 }
 
 double PoolBase::getNinit( const Eref& e ) const
@@ -447,13 +462,9 @@ double PoolBase::getConc( const Eref& e ) const
 
 void PoolBase::setConcInit( const Eref& e, double conc )
 {
-	if ( conc < 0.0 )
-		conc = 0.0;
-	concInit_ = conc;
-	if ( ksolve_ )
-		ksolve_->setConcInit( e, conc );
-	if ( dsolve_ )
-    	dsolve_->setConcInit( e, conc );
+	innerSetConcInit( e, conc );
+	if ( getIsBuffered( e ) )
+		innerSetN( e, NA * getVolume( e ) * conc );
 }
 
 double PoolBase::getConcInit( const Eref& e ) const
@@ -549,24 +560,20 @@ void PoolBase::setSolvers( const Eref& e, ObjId ks, ObjId ds )
  */
 void PoolBase::setIsBuffered( const Eref& e, bool v )
 {
-	// const Cinfo* poolCinfo = Cinfo::find( "Pool" );
-	// const Cinfo* bufPoolCinfo = Cinfo::find( "BufPool" );
-
 	Element* elm = e.element();
-	// bool isBuf = (elm->cinfo()->name() == "BufPool");
 	bool isBuf = ( elm->cinfo() == bufPoolCinfo );
 	if ( v == isBuf ) return;
 
-	if ( isBuf ) {
-		elm->replaceCinfo( poolCinfo );
-	} else {
+	if ( v ) {
 		elm->replaceCinfo( bufPoolCinfo );
+	} else {
+		elm->replaceCinfo( poolCinfo );
 	}
 	
 	if ( ksolve_ )
-		ksolve_->setIsBuffered( e, isBuf );
+		ksolve_->setIsBuffered( e, v );
 	if ( dsolve_ )
-		dsolve_->setIsBuffered( e, isBuf );
+		dsolve_->setIsBuffered( e, v );
 }
 
 bool PoolBase::getIsBuffered( const Eref& e ) const

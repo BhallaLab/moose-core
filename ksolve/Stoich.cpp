@@ -1158,22 +1158,23 @@ static Id findFuncMsgSrc(Id pa, const string& msg)
 
 Id Stoich::zombifyPoolFuncWithScaling(const Eref& e, Id pool)
 {
+	double scale = 1.0;
     Id funcId = findFuncMsgSrc(pool, "setN");
-    if(funcId != Id()) {
+    if ( funcId == Id() ) {
+    	funcId = findFuncMsgSrc(pool, "setNInit"); // Note funny caps
+		if ( funcId == Id() ) {
+			scale = NA * Field<double>::get(pool, "volume");
+    		funcId = findFuncMsgSrc(pool, "setConc");
+			if ( funcId == Id() ) {
+    			funcId = findFuncMsgSrc(pool, "setConcInit");
+			}
+		}
+	} 
+
+    if ( funcId != Id() ) {
         Element* fe = funcId.element();
-        installAndUnschedFunc(funcId, pool, 1.0);
+        installAndUnschedFunc(funcId, pool, scale );
 		SetGet1< ObjId >::set( funcId, "setSolver", e.id() );
-    }
-    else {
-        funcId = findFuncMsgSrc(pool, "setConc");
-        if(funcId != Id()) {
-            // cout << "Warning: Stoich::zombifyModel: Prefer to use setN
-            // rather than setConc:" << pool.path() << endl;
-            Element* fe = funcId.element();
-            double vol = Field<double>::get(pool, "volume");
-            installAndUnschedFunc(funcId, pool, vol * NA);
-			SetGet1< ObjId >::set( funcId, "setSolver", e.id() );
-        }
     }
     return funcId;
 }
@@ -1197,50 +1198,20 @@ void Stoich::zombifyModel(const Eref& e, const vector<Id>& elist)
 
     for(vector<Id>::const_iterator i = temp.begin(); i != temp.end(); ++i) {
         Element* ei = i->element();
-        if(ei->cinfo() == poolCinfo) {
+        if ( ei->cinfo() == poolCinfo || ei->cinfo() == bufPoolCinfo ) {
             // We need to check the increment message before we zombify the
             // pool, because ZombiePool doesn't have this message.
             Id funcId = findFuncMsgSrc(*i, "increment");
-            double concInit = Field<double>::get( *i, "concInit");
-            // Look for func setting rate of change of pool
-            // Id funcId = Neutral::child( i->eref(), "func" );
-            if(funcId != Id()) {
-                // cout << "Found Msg src for increment at " <<
-                // funcId.path() << endl;
+			if ( funcId != Id() ) {
                 Element* fe = funcId.element();
                 installAndUnschedFuncRate(funcId, (*i));
 				SetGet1< ObjId >::set( funcId, "setSolver", e.id() );
-            }
-            else {
+			} else { // Regular conc controller via func.
                 funcId = zombifyPoolFuncWithScaling(e, *i);
-            }
+			}
+            double concInit = Field<double>::get( *i, "concInit");
 			SetGet2< ObjId, ObjId >::set( *i, "setSolvers", ksolve_, dsolve_);
             Field<double>::set(*i, "concInit", concInit);
-            //PoolBase::zombify(ei, zombiePoolCinfo, ksolve_, dsolve_);
-            ei->resize(numVoxels_);
-            for(unsigned int j = 0; j < numVoxels_; ++j) {
-                ObjId oi(ei->id(), j);
-                Field<double>::set(oi, "concInit", concInit);
-            }
-        }
-        else if(ei->cinfo() == bufPoolCinfo) {
-            double concInit =
-                Field<double>::get(ObjId(ei->id(), 0), "concInit");
-            // Look for func setting conc of pool
-            // Id funcId = Neutral::child( i->eref(), "func" );
-            Id funcId = zombifyPoolFuncWithScaling(e, *i);
-            if(funcId == Id()) {
-                funcId = findFuncMsgSrc(*i, "increment");
-                if(funcId != Id()) {
-                    cout << "Warning: Stoich::zombifyModel: Probably you "
-                            "don't "
-                            "want to send increment to a BufPool:"
-                         << i->path() << endl;
-                    Element* fe = funcId.element();
-                    installAndUnschedFuncRate(funcId, (*i));
-					SetGet1< ObjId >::set( funcId, "setSolver", e.id() );
-                }
-            }
             ei->resize(numVoxels_);
             for(unsigned int j = 0; j < numVoxels_; ++j) {
                 ObjId oi(ei->id(), j);

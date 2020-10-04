@@ -1165,22 +1165,17 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 
     Id sumId;
     // Check if the pool has not yet been converted to handle SumTots.
-    if ( destId.element()->cinfo()->name() == "Pool" )
+    if ( destId.element()->cinfo()->isA( "PoolBase" ) )
     {
-        sumId = shell_->doCreate( "Function", destId, "func", 1 );
-        Field< bool >::set( sumId, "allowUnknownVariable", false );
-
-        // Turn dest into a FuncPool.
-        // destId.element()->zombieSwap( BufPool::initCinfo() );
-
-        ObjId ret = shell_->doAddMsg( "single",
+		sumId = Neutral::child( destId.eref(), "func" );
+		if ( sumId == Id() ) {
+        	sumId = shell_->doCreate( "Function", destId, "func", 1 );
+        	Field< bool >::set( sumId, "allowUnknownVariable", false );
+        	ObjId ret = shell_->doAddMsg( "single",
                                       ObjId( sumId, 0 ), "valueOut",
                                       ObjId( destId, 0 ), "setN" );
-        assert( ret != ObjId() );
-    }
-    else
-    {
-        sumId = Neutral::child( destId.eref(), "func" );
+        	assert( ret != ObjId() );
+		}
     }
 
     if ( sumId == Id() )

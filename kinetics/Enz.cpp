@@ -126,6 +126,10 @@ const Cinfo* Enz::initCinfo()
 				// Dummy
 				new OpFunc1< Enz, double >( &Enz::sub ) );
 
+		static DestFinfo setKmK1( "setKmK1",
+			"Assigns Km to enzyme. K1 arg is deprecated and ignored.",
+			new OpFunc2< Enz, double, double >( &Enz::setKmK1 ) );
+
 		//////////////////////////////////////////////////////////////
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
@@ -154,6 +158,7 @@ const Cinfo* Enz::initCinfo()
 		&enz,				// SharedFinfo
 		&cplx,				// SharedFinfo
 		&setSolver,				// DestFinfo
+		&setKmK1,			// DestFinfo
 	};
 
 	static string doc[] =
@@ -297,6 +302,12 @@ void Enz::setConcK1( const Eref& e, double v )
 double Enz::getConcK1( const Eref& e ) const
 {
 	return (k2_ + kcat_)/Km_;
+}
+
+void Enz::setKmK1( double Km, double k1 )
+{
+	Km_ = Km;
+	// We don't need to set k1, it is implicit in Km.
 }
 
 //////////////////////////////////////////////////////////////
