@@ -214,14 +214,20 @@ ObjId getElementFieldItem(const ObjId& objid, const string& fname,
 ObjId shellConnect(const ObjId& src, const string& srcField, const ObjId& tgt,
                    const string& tgtField, const string& msgType)
 {
-    return getShellPtr()->doAddMsg(msgType, src, srcField, tgt, tgtField);
+    auto o = getShellPtr()->doAddMsg(msgType, src, srcField, tgt, tgtField);
+    if(o.bad())
+        throw py::value_error("moose.connect failed");
+    return o;
 }
 
 ObjId shellConnectToVec(const ObjId& src, const string& srcField,
                         const MooseVec& tgt, const string& tgtField,
                         const string& msgType)
 {
-    return getShellPtr()->doAddMsg(msgType, src, srcField, tgt.obj(), tgtField);
+    auto o = getShellPtr()->doAddMsg(msgType, src, srcField, tgt.obj(), tgtField);
+    if(o.bad())
+        throw py::value_error("moose.connect failed");
+    return o;
 }
 
 #if 0

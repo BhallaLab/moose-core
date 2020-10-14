@@ -43,12 +43,11 @@ def create_table_path(model, graph, element, field):
         tablePathSuffix = tablePathSuffix[1:]
 
     tablePathSuffix = tablePathSuffix.replace("/", "_") + "." + field
-    tablePathSuffix = re.sub(
-        ".", lambda m: {"[": "_", "]": "_"}.get(m.group(), m.group()), tablePathSuffix
-    )
-
-    if tablePathSuffix.startswith("_0__"):
-        tablePathSuffix = tablePathSuffix[4:]
+    # tablePathSuffix = re.sub(
+    #     ".", lambda m: {"[": "_", "]": "_"}.get(m.group(), m.group()), tablePathSuffix
+    # )
+    #if tablePathSuffix.startswith("_0__"):
+    #    tablePathSuffix = tablePathSuffix[4:]
 
     # tablePath = dataroot + '/' +tablePath
     tablePath = graph.path + "/" + tablePathSuffix
@@ -678,7 +677,7 @@ def resetSim(simpaths, simdt, plotdt, simmethod="hsolve"):
             print("Using hsolve")
             element = moose.Neutral(simpath)
             for childid in element.children:
-                childobj = moose.Neutral(childid)
+                childobj = moose.element(childid)
                 classname = childobj.className
                 if classname in ["Neuron"]:
                     neuronpath = childobj.path
@@ -697,6 +696,7 @@ def setupTable(name, obj, qtyname, tables_path=None, threshold=None, spikegen=No
     ## in case tables_path does not exist, below wrapper will create it
     tables_path_obj = moose.Neutral(tables_path)
     qtyTable = moose.Table(tables_path_obj.path + "/" + name)
+    assert qtyTable, "%s not found" % qtyTable
     ## stepMode no longer supported, connect to 'input'/'spike' message dest to record Vm/spiktimes
     # qtyTable.stepMode = TAB_BUF
     if spikegen is None:
@@ -972,7 +972,11 @@ def underscorize(path):
     But async13 branch has indices in the path like [0],
     so just replacing / by _ is not enough,
     should replace [ and ] also by _ """
-    return path.replace("/", "_").replace("[", "-").replace("]", "-")
+    path = path.replace("/", "_")
+    # remove [0] from path.
+    path = path.replace('[0]', '')
+    # now remove [\d+] with -\d-'
+    return re.sub(r'\[(\d+)\]', '-\1-', path)
 
 
 def blockChannels(cell, channel_list):
@@ -995,7 +999,7 @@ def blockChannels(cell, channel_list):
 def get_child_Mstring(mooseobject, mstring):
     for child in mooseobject.children:
         if child.className == "Mstring" and child.name == mstring:
-            child = moose.Mstring(child)
+            child = moose.element(child)
             return child
     return None
 
@@ -1009,7 +1013,7 @@ def connect_CaConc(compartment_list, temperature=None):
         caconc = None
         for child in compartment.children:
             if child.className == "CaConc":
-                caconc = moose.CaConc(child)
+                caconc = moose.element(child)
                 break
         if caconc is not None:
             child = get_child_Mstring(caconc, "phi")
@@ -1043,6 +1047,7 @@ def connect_CaConc(compartment_list, temperature=None):
                             child = moose.element(childid)
                             if child.className == "Mstring":
                                 child = moose.Mstring(child)
+                                assert child
                                 if child.name == "ion":
                                     if child.value in ["Ca", "ca"]:
                                         moose.connect(

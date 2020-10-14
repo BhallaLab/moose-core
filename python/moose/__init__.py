@@ -244,6 +244,8 @@ def element(arg):
         MOOSE element (object) corresponding to the `arg` converted to write
         subclass.
     """
+    if isinstance(arg, str):
+        assert _moose.exists(arg), "Path '%s' does not exists." % arg
     return _moose.element(arg)
 
 
