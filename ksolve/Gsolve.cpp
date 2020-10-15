@@ -585,7 +585,7 @@ void Gsolve::reinit( const Eref& e, ProcPtr p )
     grainSize_ = (size_t) std::ceil((double)nvPools / (double)numThreads_);
     assert( grainSize_ * numThreads_ >= nvPools);
     numThreads_ = (size_t) std::ceil((double)nvPools / (double)grainSize_);
-    MOOSE_DEBUG( "Grain size is " << grainSize_ << ". Num threads " << numThreads_);
+    // MOOSE_DEBUG( "Grain size is " << grainSize_ << ". Num threads " << numThreads_);
 
     if(1 < numThreads_)
         cout << "Info: Setting up threaded gsolve with " << getNumThreads( )

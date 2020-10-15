@@ -188,6 +188,8 @@ public:
     void allocateModelObject(Id id);
     /// Calculate sizes of all arrays, and allocate them.
     void allocateModel(const vector<Id>& elist);
+	/// Clears out old model.
+    void deAllocateModel();
 
     /// Functions to build the maps between Ids and internal indices
     void buildPoolLookup();

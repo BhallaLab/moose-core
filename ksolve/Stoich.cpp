@@ -354,6 +354,7 @@ void Stoich::setElist(const Eref& e, const vector<ObjId>& elist)
     }
 
     // allocateObjMap( temp );
+	deAllocateModel();
     allocateModel(temp);
     if(kinterface_) {
         // kinterface_->setNumPools( n );
@@ -662,15 +663,9 @@ pair<Id, Id> extractCompts(const vector<Id>& compts)
     return ret;
 }
 
+////// Is this used at all?
 void Stoich::locateOffSolverReacs(Id myCompt, vector<Id>& elist)
 {
-    offSolverPoolVec_.clear();
-    offSolverReacVec_.clear();
-    offSolverEnzVec_.clear();
-    offSolverMMenzVec_.clear();
-    offSolverReacCompts_.clear();
-    offSolverEnzCompts_.clear();
-    offSolverMMenzCompts_.clear();
     map<Id, Id> poolComptMap;  // < pool, compt >
 
     vector<Id> temp;
@@ -725,47 +720,6 @@ void Stoich::locateOffSolverReacs(Id myCompt, vector<Id>& elist)
 ///////////////////////////////////////////////////////////////////
 // Model allocation stuff here
 ///////////////////////////////////////////////////////////////////
-
-/*
-void Stoich::allocateObjMap( const vector< Id >& elist )
-{
-    vector< Id > temp( elist );
-    temp.insert( temp.end(), offSolverPoolVec_.begin(),
-                    offSolverPoolVec_.end() );
-    temp.insert( temp.end(), offSolverReacs_.begin(),
-                    offSolverReacs_.end() );
-    if ( temp.size() == 0 )
-        return;
-    objMapStart_ = ~0;
-    unsigned int maxId = 0;
-    for ( vector< Id >::const_iterator
-                    i = temp.begin(); i != temp.end(); ++i ) {
-        if ( objMapStart_ > i->value() )
-            objMapStart_ = i->value();
-        if ( maxId < i->value() )
-            maxId = i->value();
-    }
-    objMap_.clear();
-    objMap_.resize( 1 + maxId - objMapStart_, 0 );
-    */
-/**
- * If this assertion fails it usually means that the elist passed to
- * the solver is not properly restricted to objects located on the
- * current compartment. As a result of this, traversal for finding
- * off-compartment pools generates repeats with the ones in the elist.
- * Note that pool compartment assignment is determined by following
- * the mesh message, and thus a tree-based elist construction for
- * compartments may be incompatible with the generation of the lists
- * of off-compartment pools. It is up to the upstream code to
- * ensure that this is done properly.
- *
- * This assertion also fails if the Ids concerned had a dimension
- * greater than 1.
- */
-/*
-    assert( objMap_.size() >= temp.size() );
-}
-*/
 
 /// Identifies and allocates objects in the Stoich.
 void Stoich::allocateModelObject(Id id)
@@ -882,16 +836,11 @@ void Stoich::resizeArrays()
         dinterface_->setNumVarTotPools(varPoolVec_.size(), totNumPools);
 }
 
-/// Calculate sizes of all arrays, and allocate them.
-void Stoich::allocateModel(const vector<Id>& elist)
+/// Clear out any existing model data
+void Stoich::deAllocateModel()
 {
-    // numVarPools_ = 0;
-    // numReac_ = 0;
-    // numFunctions_ = 0;
-    // vector< Id > bufPools;
     varPoolVec_.clear();
     bufPoolVec_.clear();
-    // offSolverPoolVec is filled up by the locateOffSolverReacs function
     reacVec_.clear();
     enzVec_.clear();
     mmEnzVec_.clear();
@@ -899,8 +848,36 @@ void Stoich::allocateModel(const vector<Id>& elist)
     incrementFuncVec_.clear();
     reacFuncVec_.clear();
 
-    for(vector<Id>::const_iterator i = elist.begin(); i != elist.end(); ++i)
+	// Unclear where these are set up and used. The locateOffSolverReacs
+	// function doesn't seem to be called anywhere.
+    offSolverPoolVec_.clear();
+    offSolverReacVec_.clear();
+    offSolverEnzVec_.clear();
+    offSolverMMenzVec_.clear();
+    offSolverReacCompts_.clear();
+    offSolverEnzCompts_.clear();
+    offSolverMMenzCompts_.clear();
+    offSolverPoolMap_.clear();
+
+	// Clear out the rate terms
+    for ( auto j = rates_.begin(); j != rates_.end(); ++j ) {
+        delete *j;
+	}
+	rates_.clear();
+
+	// Clear out the funcs
+    for ( auto j = funcs_.begin(); j != funcs_.end(); ++j) {
+        delete *j;
+	}
+	funcs_.clear();
+}
+
+/// Calculate sizes of all arrays, and allocate them.
+void Stoich::allocateModel(const vector<Id>& elist)
+{
+    for ( auto i = elist.begin(); i != elist.end(); ++i ) {
         allocateModelObject(*i);
+	}
     resizeArrays();
 
     buildPoolLookup();

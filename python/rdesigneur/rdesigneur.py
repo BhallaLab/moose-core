@@ -832,7 +832,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             if len( vtab ) < 2:
                 print( "Warning: Waveplot {} abandoned, only {} points".format( i[1], len( vtab ) ) )
                 continue
-            dFrame = len( vtab[0].vector ) / self.numWaveFrames
+            dFrame = int( len( vtab[0].vector ) / self.numWaveFrames )
             if dFrame < 1:
                 dFrame = 1
             vpts = np.array( [ [k.vector[j] for j in range( 0, len( k.vector ), dFrame ) ] for k in vtab] ).T * i[3]
