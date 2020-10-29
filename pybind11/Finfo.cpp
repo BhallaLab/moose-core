@@ -182,6 +182,12 @@ py::cpp_function __Finfo__::getDestFinfoSetterFunc2(const ObjId& oid,
             return func;
         }
     }
+    if(ftype1 == "ObjId" && ftype2 == "ObjId") {
+        std::function<bool(ObjId, ObjId)> func = [oid, fname](ObjId a, ObjId b) {
+            return SetGet2<ObjId, ObjId>::set(oid, fname, a, b);
+        };
+        return func;
+    }
     throw runtime_error("getFieldPropertyDestFinfo2::NotImplemented " + fname +
                         " for rttType " + finfo->rttiType() + " for oid " +
                         oid.path());

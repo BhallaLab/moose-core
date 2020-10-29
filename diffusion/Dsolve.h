@@ -82,7 +82,7 @@ public:
      * there may be many molecules which diffuse across each diffusion
      * junction.
      */
-    void buildNeuroMeshJunctions( const Eref& e, Id spineD, Id psdD );
+    void buildNeuroMeshJunctions( const Eref& e, ObjId spineD, ObjId psdD );
 
     /**
      * Builds junctions between current Dsolve and another. For this
@@ -96,7 +96,7 @@ public:
      * the junction between any specified pair of Dsolves.
      * Note that it builds the junction on the 'self' Dsolve.
      */
-    static void innerBuildMeshJunctions( Id self, Id other,
+    static void innerBuildMeshJunctions( ObjId self, ObjId other,
                                          bool isMembraneBound );
 
     /// Sets up map of matching pools for diffusion.

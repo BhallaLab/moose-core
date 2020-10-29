@@ -134,7 +134,7 @@ const Cinfo* Dsolve::initCinfo()
 
     static DestFinfo buildNeuroMeshJunctions( "buildNeuroMeshJunctions",
             "Builds junctions between NeuroMesh, SpineMesh and PsdMesh",
-            new EpFunc2< Dsolve, Id, Id >(&Dsolve::buildNeuroMeshJunctions )
+            new EpFunc2< Dsolve, ObjId, ObjId >(&Dsolve::buildNeuroMeshJunctions )
                                             );
 
     ///////////////////////////////////////////////////////
@@ -620,7 +620,7 @@ void Dsolve::setStoich( Id id )
                     */
         }
     }
-    string chanpath = path_ + "[ISA=ConcChan]";
+	string chanpath = path_.substr( 0, path_.rfind( '/' ) ) + "/##[ISA=ConcChan]";
     vector< ObjId > chans;
     wildcardFind( chanpath, chans );
     fillConcChans( chans );
@@ -861,7 +861,7 @@ void Dsolve::build( double dt, const MeshCompt *m )
  * Should be called only from the Dsolve handling the NeuroMesh.
  */
 // Would like to permit vectors of spines and psd compartments.
-void Dsolve::buildNeuroMeshJunctions( const Eref& e, Id spineD, Id psdD )
+void Dsolve::buildNeuroMeshJunctions( const Eref& e, ObjId spineD, ObjId psdD )
 {
     if ( !compartment_.element()->cinfo()->isA( "NeuroMesh" ) )
     {
@@ -884,7 +884,7 @@ void Dsolve::buildNeuroMeshJunctions( const Eref& e, Id spineD, Id psdD )
         return;
     }
 
-    innerBuildMeshJunctions( spineD, e.id(), false );
+    innerBuildMeshJunctions( spineD, e.objId(), false );
     innerBuildMeshJunctions( psdD, spineD, false );
 }
 
@@ -1062,11 +1062,11 @@ static void mapVoxelsBetweenMeshes( DiffJunction& jn, Id self, Id other)
 }
 
 // Static utility func for building junctions
-void Dsolve::innerBuildMeshJunctions( Id self, Id other, bool selfIsMembraneBound )
+void Dsolve::innerBuildMeshJunctions( ObjId self, ObjId other, bool selfIsMembraneBound )
 {
     DiffJunction jn; // This is based on the Spine Dsolver.
-    jn.otherDsolve = other.value();
-    Dsolve* dself = reinterpret_cast< Dsolve* >( self.eref().data() );
+    jn.otherDsolve = other.id.value();
+    Dsolve* dself = reinterpret_cast< Dsolve* >( self.data() );
     if ( selfIsMembraneBound )
     {
         mapChansBetweenDsolves( jn, self, other );
