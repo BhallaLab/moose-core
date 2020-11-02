@@ -45,6 +45,13 @@ def test_other():
     p.delay[1] = 0.99
     assert p.delay[1] == 0.99, p.delay[1]
 
+    c = moose.Stoich('/dadaa')
+    v1 = moose.getFieldNames(c)
+    v2 = c.getFieldNames()
+    assert v1 == v2
+    assert len(v1) > 10, v1
+    
+
 
 def test_vec():
     a = moose.Pool('/p111', 100)
@@ -58,7 +65,7 @@ def test_vec():
     assert v[0] == v.vec[0], (v[0], v.vec[0])
     x = [random.random() for i in range(100)]
     v.conc = x
-    assert sum(v.conc) == sum(x)
+    assert np.isclose(np.sum(v.conc), sum(x))
     assert np.allclose(v.conc, x), (v.conc, x)
 
     # assign bool to double.
@@ -126,6 +133,7 @@ def test_inheritance():
     assert isinstance(aa, moose.CubeMesh), (a.__class__, aa.__class__)
 
     a = moose.CubeMesh('yapf')
+    assert a.isA('CubeMesh') == a.isA['CubeMesh']
     assert a.isA['CubeMesh']
     assert a.isA['ChemCompt']
 
@@ -203,6 +211,17 @@ def test_paths():
     x = moose.Neutral('///x')
     assert x.path == '/x', x.path
 
+def test_le():
+    # see issue BhallaLab/moose-core#423
+    x = moose.le('/')
+    assert len(x) > 5, x
+    try:
+        moose.le('/abrakadabra')
+    except ValueError:
+        pass
+    else:
+        raise RuntimeError("This should have raised ValueError")
+
 def main():
     test_paths()
     test_children()
@@ -216,6 +235,7 @@ def main():
     test_vec()
     test_typing()
     test_elements()
+    test_le()
 
 if __name__ == '__main__':
     main()

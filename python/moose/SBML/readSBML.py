@@ -13,10 +13,12 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Thu May 13 10:19:00 2016(+0530)
 Version
-Last-Updated: Fri Mar 20 1:30:00 2020(+0530)
+Last-Updated: Mon Sep 21 12:50:00 2020(+0530)
           By:HarshaRani
 **********************************************************************/
-2010:
+2020:
+Sep 21: - Complex pool which is created at species level is copied under enzyme,
+          ensuring the value set at species is retained.
 Mar 04: - Enzyme-cplx reactant/product's based on stoichiometry number of connection are made.
 Jan 09: - reading channel back from MMenz 
 2019:
@@ -293,7 +295,11 @@ def setupEnzymaticReaction(enz, groupName, enzName, specInfoMap, modelAnnotaInfo
     cplx = str(idBeginWith(cplx))
     complx = moose.element(specInfoMap[cplx]["Mpath"].path)
     enzyme_ = moose.Enz(enzParent.path + '/' + enzName)
-    complx1 = moose.Pool(enzyme_.path+'/'+moose.element(complx).name)
+    #complx1 = moose.Pool(enzyme_.path+'/'+moose.element(complx).name)
+    if not moose.exists(enzyme_.path+'/'+complx.name):
+        complx1 = moose.copy(complx,enzyme_.path)
+    else:
+        complx1 = moose.element(enzyme_.path+'/'+complx.name)
     specInfoMap[cplx]["Mpath"] = complx1
     moose.connect(enzyme_, "cplx", complx1, "reac")
     moose.connect(enzyme_, "enz", enzParent, "reac")
@@ -440,7 +446,7 @@ def getModelAnnotation(obj, baseId):
                                     plots = plots.replace(" ", "")
                                     plotorg = plots
                                     if( moose.exists(baseId.path + plotorg) and
-                                            isinstance(moose.element(baseId.path+plotorg),moose.PoolBase)) :
+                                            ( (moose.element(baseId.path+plotorg)).isA("PoolBase"))) :
                                         plotSId = moose.element(
                                             baseId.path + plotorg)
                                         # plotorg = convertSpecialChar(plotorg)
@@ -1096,7 +1102,7 @@ def createRules(model, specInfoMap, globparameterIdValue):
                 poolsCompt = findCompartment(moose.element(poolList))
                 #If pool comes without a compartment which is not allowed moose
                 #then returning with -2
-                if not isinstance(moose.element(poolsCompt), moose.ChemCompt):
+                if not (moose.element(poolsCompt).isA("ChemCompt")):
                     return -2
                 else:
                     if poolsCompt.name not in comptvolume:
@@ -1131,8 +1137,7 @@ def createRules(model, specInfoMap, globparameterIdValue):
                                     i = str(idBeginWith(i))
                                     specMapList = specInfoMap[i]["Mpath"]
                                     poolsCompt = findCompartment(moose.element(specMapList))
-                                    if not isinstance(moose.element(
-                                            poolsCompt), moose.ChemCompt):
+                                    if not (moose.element(poolsCompt).isA("ChemCompt")):
                                         return -2
                                     else:
                                         if poolsCompt.name not in comptvolume:

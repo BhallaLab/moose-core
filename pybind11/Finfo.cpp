@@ -188,6 +188,7 @@ py::cpp_function __Finfo__::getDestFinfoSetterFunc2(const ObjId& oid,
         };
         return func;
     }
+
     throw runtime_error("getFieldPropertyDestFinfo2::NotImplemented " + fname +
                         " for rttType " + finfo->rttiType() + " for oid " +
                         oid.path());

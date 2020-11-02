@@ -209,7 +209,6 @@ public:
 
     /// Used to handle run-time size updates for spines.
     void scaleBufsAndRates(unsigned int index, double volScale);
-
 	void notifyRemoveReac( const Eref& e );
 	void notifyRemoveEnz( const Eref& e );
 	void notifyRemoveMMenz( const Eref& e );

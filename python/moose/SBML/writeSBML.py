@@ -13,11 +13,13 @@ r'''
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Friday May 27 12:19:00 2016(+0530)
 Version
-Last-Updated: Fri 20 Mar 13:15:10 2020(+0530)
+Last-Updated: Tue 08 Sep 02:22:10 2020(+0530)
           By: HarshaRani
 **********************************************************************/
 /****************************
 2020
+Sep 08: replaced getId->id, getId().value-> idValue,getDataIndex-dataIndex, isinstance is replaced with isA these changes are with respect to
+        new python-binding c38580789d8fb65
 Mar 20: Channel Annotation is cleaned up
 Jan 08: added function to write Concchannel in form of MMenz
         Km in the kinetic law for MMenz is written to the power based on the number of substrate
@@ -121,7 +123,7 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
                                   moose.element(modelpath).path+'/##[0][ISA=EnzBase]'+','+
                                   moose.element(modelpath).path+'/##[0][ISA=StimulusTable]')
         for p in mObj:
-            if not isinstance(moose.element(p.parent),moose.CplxEnzBase):
+            if not moose.element(p.parent).isA("CplxEnzBase"):
                 if moose.exists(p.path+'/info'):
                     xcord.append(moose.element(p.path+'/info').x)
                     ycord.append(moose.element(p.path+'/info').y)
@@ -188,7 +190,7 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
                 mplugin = cremodel_.getPlugin("groups")
                 group = mplugin.createGroup()
                 name = str(idBeginWith(moose.element(key).name))
-                moosegrpId = name +"_" + str(moose.element(key).getId().value) + "_" + str(moose.element(key).getDataIndex())+"_"
+                moosegrpId = name +"_" + str(moose.element(key).idValue) + "_" + str(moose.element(key).dataIndex)+"_"
                 group.setId(moosegrpId) 
                 group.setName(name)
 
@@ -201,15 +203,15 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
                 groupCompartment = findCompartment(key)
                 
                 grpAnno = "<moose:GroupAnnotation>"
-                grpAnno = grpAnno + "<moose:Compartment>" + groupCompartment.name +"_"+ str(moose.element(groupCompartment).getId().value) +"_"+ str(moose.element(groupCompartment).getDataIndex())+"_"+"</moose:Compartment>\n"
-                #grpAnno = grpAnno + "<moose:Compartment>" + groupCompartment.name + "_" + str(moose.element(groupCompartment).getId().value) + "_" + str(moose.element(groupCompartment).getDataIndex()) + "_"+ "</moose:Compartment>\n"
+                grpAnno = grpAnno + "<moose:Compartment>" + groupCompartment.name +"_"+ str(moose.element(groupCompartment).idValue) +"_"+ str(moose.element(groupCompartment).dataIndex)+"_"+"</moose:Compartment>\n"
+                #grpAnno = grpAnno + "<moose:Compartment>" + groupCompartment.name + "_" + str(moose.element(groupCompartment).idValue) + "_" + str(moose.element(groupCompartment).dataIndex) + "_"+ "</moose:Compartment>\n"
                 if moose.element(key.parent).className == "Neutral":
 
                     grpAnno = grpAnno + "<moose:Group>" + key.parent.name + "</moose:Group>\n"
-                    grpparent = key.parent.name + "_" + str(moose.element(key.parent).getId().value) + "_" + str(moose.element(key.parent).getDataIndex()) + "_"
+                    grpparent = key.parent.name + "_" + str(moose.element(key.parent).idValue) + "_" + str(moose.element(key.parent).dataIndex) + "_"
                     grpAnno = grpAnno + "<moose:Parent>" + grpparent + "</moose:Parent>\n"
                 else:
-                    grpparent = groupCompartment.name + "_" + str(moose.element(groupCompartment).getId().value) + "_" + str(moose.element(groupCompartment).getDataIndex()) + "_"
+                    grpparent = groupCompartment.name + "_" + str(moose.element(groupCompartment).idValue) + "_" + str(moose.element(groupCompartment).dataIndex) + "_"
                     grpAnno = grpAnno + "<moose:Parent>" + grpparent + "</moose:Parent>\n"
                 
                 if moose.exists(key.path+'/info'):
@@ -295,12 +297,12 @@ def writeChannel(modelpath, cremodel_, sceneitems,groupInfo):
         chanPrd = chan.neighbors["out"]
         if (len(chanSub) != 0 and len(chanPrd) != 0):
             chanCompt = findCompartment(chan)
-            if not isinstance(moose.element(chanCompt), moose.ChemCompt):
+            if not moose.element(chanCompt).isA("ChemCompt"):
                 return -2
             else:
                 compt = chanCompt.name + "_" + \
-                    str(chanCompt.getId().value) + "_" + \
-                    str(chanCompt.getDataIndex()) + "_"
+                    str(chanCompt.idValue) + "_" + \
+                    str(chanCompt.dataIndex) + "_"
   
             channel = cremodel_.createReaction()
             if notesE != "":
@@ -311,9 +313,9 @@ def writeChannel(modelpath, cremodel_, sceneitems,groupInfo):
 
             chansetId = str(idBeginWith(cleanChanname +
                                          "_" +
-                                         str(chan.getId().value) +
+                                         str(chan.idValue) +
                                          "_" +
-                                         str(chan.getDataIndex()) +
+                                         str(chan.dataIndex) +
                                          "_"))
             channel.setId(chansetId)
             if groupName != moose.element('/'):
@@ -398,16 +400,16 @@ def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
             # Enz cplx is written into 2 reaction S+E-> SE*, SE* -> E+P
             foundEnzymeComplex = False
             comptVec = findCompartment(moose.element(enz))
-            if not isinstance(moose.element(comptVec), moose.ChemCompt):
+            if not moose.element(comptVec).isA("ChemCompt"):
                 return -2
             else:
                 compt = comptVec.name + "_" + \
-                    str(comptVec.getId().value) + "_" + \
-                    str(comptVec.getDataIndex()) + "_"
+                    str(comptVec.idValue) + "_" + \
+                    str(comptVec.dataIndex) + "_"
             #Writting out S+E -> SE*
             enzsetId = str(idBeginWith(cleanEnzname +
-                                         "_" + str(enz.getId().value) +
-                                         "_" + str(enz.getDataIndex()) +
+                                         "_" + str(enz.idValue) +
+                                         "_" + str(enz.dataIndex) +
                                          "_" + "Complex_formation_"))
             #Finding Enzyme parent (E), each enzyme should just have one parent, multiple parent not right!
             secplxerror = ""
@@ -466,8 +468,8 @@ def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
                 k3 = enz.k3
                 
                 enzAnno = enzAnno + "<moose:groupName>" + cleanEnzname + "_" + \
-                str(enz.getId().value) + "_" + \
-                str(enz.getDataIndex()) + "_" + "</moose:groupName>\n"
+                str(enz.idValue) + "_" + \
+                str(enz.dataIndex) + "_" + "</moose:groupName>\n"
                 enzAnno = enzAnno + "<moose:stage>1</moose:stage>\n"
                 if enzannoexist:
                     enzAnno = enzAnno + enzGpnCorCol
@@ -502,8 +504,8 @@ def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
             #Here SE* -> E+ P
             foundEnzymeEP = False
             enzsetIdP = str(idBeginWith(cleanEnzname +
-                                        "_" + str(enz.getId().value) +
-                                        "_" + str(enz.getDataIndex()) +
+                                        "_" + str(enz.idValue) +
+                                        "_" + str(enz.dataIndex) +
                                         "_" + "Product_formation_"))
             cplxeperror = ""
             enzAnno2 = ""
@@ -548,8 +550,8 @@ def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
                                 enzAnno2 = enzAnno2 + "<moose:product>" + \
                                             nameList_[i] + "</moose:product>\n"
                         enzAnno2 += "<moose:groupName>" + cleanEnzname + "_" + \
-                            str(enz.getId().value) + "_" + \
-                            str(enz.getDataIndex()) + "_" + "</moose:groupName>\n"
+                            str(enz.idValue) + "_" + \
+                            str(enz.dataIndex) + "_" + "</moose:groupName>\n"
                         enzAnno2 += "<moose:stage>2</moose:stage> \n"
                         if enzannoexist:
                             enzAnno2 = enzAnno2 + enzGpnCorCol
@@ -591,12 +593,12 @@ def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
             enzPrd = enz.neighbors["prd"]
             if (len(enzSub) != 0 and len(enzPrd) != 0):
                 enzCompt = findCompartment(enz)
-                if not isinstance(moose.element(enzCompt), moose.ChemCompt):
+                if not moose.element(enzCompt).isA("ChemCompt"):
                     return -2
                 else:
                     compt = enzCompt.name + "_" + \
-                        str(enzCompt.getId().value) + "_" + \
-                        str(enzCompt.getDataIndex()) + "_"
+                        str(enzCompt.idValue) + "_" + \
+                        str(enzCompt.dataIndex) + "_"
                 enzyme = cremodel_.createReaction()
                 enzAnno = " "
                 if notesE != "":
@@ -606,9 +608,9 @@ def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
                     enzyme.setNotes(notesStringE)
                 mmenzsetId = str(idBeginWith(cleanEnzname +
                                              "_" +
-                                             str(enz.getId().value) +
+                                             str(enz.idValue) +
                                              "_" +
-                                             str(enz.getDataIndex()) +
+                                             str(enz.dataIndex) +
                                              "_"))
                 enzyme.setId(mmenzsetId)
                 if groupName != moose.element('/'):
@@ -797,7 +799,7 @@ def getSubprd(cremodel_, mobjEnz, type, neighborslist):
             return len(enzModifier), rate_law
 
 
-def processRateLaw(objectCount, cremodel, noofObj, type, mobjEnz):
+def processRateLaw(objectCount, cremodel, noofObj, typesp, mobjEnz):
     rate_law = ""
     nameList_[:] = []
     for value, count in objectCount.items():
@@ -812,20 +814,20 @@ def processRateLaw(objectCount, cremodel, noofObj, type, mobjEnz):
             value = orgPool
         '''
         nameIndex = value.name + "_" + \
-            str(value.getId().value) + "_" + str(value.getDataIndex()) + "_"
+            str(value.idValue) + "_" + str(value.dataIndex) + "_"
         clean_name = (str(idBeginWith(convertSpecialChar(nameIndex))))
         if mobjEnz == True:
             nameList_.append(clean_name)
 
-        if type == "sub":
+        if typesp == "sub":
             sbmlRef = cremodel.createReactant()
-        elif type == "prd":
+        elif typesp == "prd":
             sbmlRef = cremodel.createProduct()
-        elif type == "Modifier":
+        elif typesp == "Modifier":
             sbmlRef = cremodel.createModifier()
             sbmlRef.setSpecies(clean_name)
 
-        if type == "sub" or type == "prd":
+        if typesp == "sub" or typesp == "prd":
             sbmlRef.setSpecies(clean_name)
             sbmlRef.setStoichiometry(count)
             if clean_name in spe_constTrue:
@@ -851,7 +853,7 @@ def listofname(reacSub, mobjEnz):
     for value, count in objectCount.items():
         value = moose.element(value)
         nameIndex = value.name + "_" + \
-            str(value.getId().value) + "_" + str(value.getDataIndex()) + "_"
+            str(value.idValue) + "_" + str(value.dataIndex) + "_"
         clean_name = convertSpecialChar(nameIndex)
         if mobjEnz == True:
             nameList_.append(clean_name)
@@ -869,9 +871,9 @@ def writeReac(modelpath, cremodel_, sceneitems,reacGroup):
             cleanReacname = convertSpecialChar(reac.name)
             setId = str(idBeginWith(cleanReacname +
                                            "_" +
-                                           str(reac.getId().value) +
+                                           str(reac.idValue) +
                                            "_" +
-                                           str(reac.getDataIndex()) +
+                                           str(reac.dataIndex) +
                                            "_"))
             reaction.setId(setId)
             reaction.setName(str(idBeginWith(convertSpecialCharshot(reac.name))))
@@ -938,16 +940,16 @@ def writeReac(modelpath, cremodel_, sceneitems,reacGroup):
                         cremodel_, False, "sub", reacSub)
                     if noofSub:
                         comptVec = findCompartment(moose.element(reacSub[0]))
-                        if not isinstance(moose.element(
-                                comptVec), moose.ChemCompt):
+                        if not moose.element(comptVec).isA("ChemCompt"):
+                            print(comptVec.name+ " is not instance of ChemCompt") 
                             return -2
                         else:
                             compt = comptVec.name + "_" + \
-                                str(comptVec.getId().value) + "_" + \
-                                str(comptVec.getDataIndex()) + "_"
+                                str(comptVec.idValue) + "_" + \
+                                str(comptVec.dataIndex) + "_"
                         cleanReacname = cleanReacname + "_" + \
-                            str(reac.getId().value) + "_" + \
-                            str(reac.getDataIndex()) + "_"
+                            str(reac.idValue) + "_" + \
+                            str(reac.dataIndex) + "_"
                         kfparm = idBeginWith(cleanReacname) + "_" + "Kf"
                         sRL = compt + " * " + \
                             idBeginWith(cleanReacname) + "_Kf * " + sRateLaw
@@ -1003,7 +1005,7 @@ def writeFunc(modelpath, cremodel_):
                         moose.element(func).neighbors["valueOut"][0])
                     funcEle1 = moose.element(funcEle)
                     fName = idBeginWith(convertSpecialChar(
-                    funcEle.name + "_" + str(funcEle.getId().value) + "_" + str(funcEle.getDataIndex()) + "_"))
+                    funcEle.name + "_" + str(funcEle.idValue) + "_" + str(funcEle.dataIndex) + "_"))
                     expr = " "
                     expr = str(moose.element(func).expr)
                     if expr:
@@ -1014,13 +1016,13 @@ def writeFunc(modelpath, cremodel_):
                             v = "x" + str(i)
                             if v in expr:
                                 z = str(idBeginWith(str(convertSpecialChar(sumtot[i].name + "_" + str(moose.element(
-                                    sumtot[i]).getId().value) + "_" + str(moose.element(sumtot[i]).getDataIndex())) + "_")))
+                                    sumtot[i]).idValue) + "_" + str(moose.element(sumtot[i]).dataIndex)) + "_")))
                                 expr = expr.replace(v, z)
             else:
                 foundFunc = True
                 fName = idBeginWith(convertSpecialChar(func.parent.name +
-                                                       "_" + str(func.parent.getId().value) +
-                                                       "_" + str(func.parent.getDataIndex()) +
+                                                       "_" + str(func.parent.idValue) +
+                                                       "_" + str(func.parent.dataIndex) +
                                                        "_"))
                 item = func.path + '/x[0]'
                 sumtot = moose.element(item).neighbors["input"]
@@ -1029,7 +1031,7 @@ def writeFunc(modelpath, cremodel_):
                     v = "x" + str(i)
                     if v in expr:
                         z = str(idBeginWith(str(convertSpecialChar(sumtot[i].name + "_" + str(moose.element(
-                            sumtot[i]).getId().value) + "_" + str(moose.element(sumtot[i]).getDataIndex())) + "_")))
+                            sumtot[i]).idValue) + "_" + str(moose.element(sumtot[i]).dataIndex)) + "_")))
                         expr = expr.replace(v, z)
             if foundFunc:
                 rule = cremodel_.createAssignmentRule()
@@ -1101,20 +1103,20 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
             comptVec = findCompartment(spe)
             speciannoexist = False
             
-            if not isinstance(moose.element(comptVec), moose.ChemCompt):
+            if not comptVec.isA("ChemCompt"):
                 return -2
             else:
                 compt = comptVec.name + "_" + \
-                    str(comptVec.getId().value) + "_" + \
-                    str(comptVec.getDataIndex()) + "_"
+                    str(comptVec.idValue) + "_" + \
+                    str(comptVec.dataIndex) + "_"
                 s1 = cremodel_.createSpecies()
                 spename = sName + "_" + \
-                    str(spe.getId().value) + "_" + str(spe.getDataIndex()) + "_"
+                    str(spe.idValue) + "_" + str(spe.dataIndex) + "_"
                 spename = str(idBeginWith(spename))
                 s1.setId(spename)
 
                 if spename.find(
-                        "cplx") != -1 and isinstance(moose.element(spe.parent), moose.EnzBase):
+                        "cplx") != -1 and spe.parent.isA("EnzBase"):
                     enz = spe.parent
                     if not moose.exists(spe.path+'/info'):
                         cplxinfo = moose.Annotator(spe.path+'/info')
@@ -1234,12 +1236,12 @@ def writeCompt(modelpath, cremodel_):
         ndim = compt.numDimensions
         csetId = (str(idBeginWith(comptName +
                                 "_" +
-                                str(compt.getId().value) +
+                                str(compt.idValue) +
                                 "_" +
-                                str(compt.getDataIndex()) +
+                                str(compt.dataIndex) +
                                 "_")))
         comptID_sbml[compt] = csetId
-        if isinstance(compt,moose.EndoMesh):
+        if compt.isA("EndoMesh"):
             if comptID_sbml.get(compt.surround) == None:
                 createCompt = False
                 return False,groupInfo,"Outer compartment need to be specified for EndoMesh "
@@ -1256,7 +1258,7 @@ def writeCompt(modelpath, cremodel_):
                         comptAnno = comptAnno + "<moose:Notes>" \
                         + moose.element(compt.path+'/info').notes + "</moose:Notes>"
                 comptAnno = comptAnno+ "</moose:CompartmentAnnotation>"
-        elif isinstance (compt,moose.CylMesh) :
+        elif compt.isA("CylMesh") :
             size = (compt.volume/compt.numDiffCompts)*pow(10,3)
             comptAnno = "<moose:CompartmentAnnotation><moose:Mesh>" + \
                                 str(compt.className) + "</moose:Mesh>\n" + \
@@ -1288,7 +1290,7 @@ def writeCompt(modelpath, cremodel_):
             c1.setConstant(True)
             c1.setSize(compt.volume*pow(10,3))
             #c1.setSize(size)
-            if isinstance(compts,moose.EndoMesh):
+            if compt.isA("EndoMesh"):
                 c1.outside = comptID_sbml[compt.surround]
                 
             if comptAnno:
@@ -1343,10 +1345,10 @@ def writeSimulationAnnotation(modelpath):
                 name = convertSpecialChar(q.name)
                 graphSpefound = False
                 
-                while not(isinstance(moose.element(q), moose.CubeMesh) or isinstance(moose.element(q),moose.CylMesh) \
-                    or    isinstance(moose.element(q), moose.EndoMesh) or isinstance(moose.element(q),moose.NeuroMesh)):
-                    q = q.parent
-                    graphSpefound = True
+                #while not(isinstance(moose.element(q), moose.CubeMesh) or isinstance(moose.element(q),moose.CylMesh) \
+                #    or    isinstance(moose.element(q), moose.EndoMesh) or isinstance(moose.element(q),moose.NeuroMesh)):
+                #    q = q.parent
+                #    graphSpefound = True
                 if graphSpefound:
                     if not plots:
                         plots = ori[ori.find(q.name)-1:len(ori)]

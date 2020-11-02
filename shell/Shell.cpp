@@ -627,7 +627,8 @@ void Shell::innerCreate(string type, ObjId parent, Id newElm, string name,
                         const NodeBalance& nb, unsigned int msgIndex)
 {
     const Cinfo* c = Cinfo::find(type);
-    if (c) {
+    if (c) 
+    {
         Element* ret = 0;
         switch (nb.policy) {
             case MooseGlobal:
@@ -645,8 +646,9 @@ void Shell::innerCreate(string type, ObjId parent, Id newElm, string name,
         assert(ret);
         adopt(parent, newElm, msgIndex);
         ret->setTick(Clock::lookupDefaultTick(c->name()));
-		SetGet1< ObjId >::set( newElm, "notifyCreate", parent ); 
-    } else
+		SetGet1< ObjId >::set( newElm, "notifyCreate", parent );
+    } 
+    else
         assert(0);
 }
 
