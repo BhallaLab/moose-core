@@ -90,7 +90,7 @@ file(GLOB_RECURSE PYTEST_TEST_SCRIPTS ${PYTEST_TEST_DIRECTORY}/test_*.py)
 foreach(_test_script ${PYTEST_TEST_SCRIPTS})
     file(MD5 ${_test_script} _test_hash)
     set(_test_name "coverage_${_test_hash}")
-    # message(STATUS "Adding test ${_test_name} ${_test_hash}")
+    message(STATUS "Adding test ${_test_name} ${_test_script}")
     add_custom_target(${_test_name}
         # We collect coverage data but do not show report during each test.
         # We show report at the end of all tests. Set `--cov-report=` 
