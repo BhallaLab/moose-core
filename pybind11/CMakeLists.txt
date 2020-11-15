@@ -11,6 +11,8 @@ pybind11_add_module(_moose
     MooseVec.cpp 
     PyRun.cpp)
 
+target_include_directories(_moose PRIVATE 
+    ${CMAKE_SOURCE_DIR}/external/pybind11-2.6.1/include)
 add_dependencies(_moose libmoose)
 
 # Use in version_info dict.

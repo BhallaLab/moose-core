@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.2.3 FATAL_ERROR)
 # Project to build MOOSE's python module.
 project(PyMOOSE)
 
+# minimum cxx standard required is 14
+set(CMAKE_CXX_STANDARD 14)
+
 # cmake related macros.
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(CheckCXXCompiler.cmake)
@@ -299,7 +302,7 @@ endif( WITH_BOOST )
 ######################### BUILD PYMOOSE ########################################
 
 if(NOT WITH_LEGACY_BINDING)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/pybind11)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/pybind11-2.6.1)
     add_subdirectory(pybind11)
 else()
     message(STATUS "Building legacy python binding.")

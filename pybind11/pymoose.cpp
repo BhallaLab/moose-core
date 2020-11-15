@@ -15,9 +15,9 @@
 #include <functional>
 #include <chrono>
 
-#include "../external/pybind11/include/pybind11/pybind11.h"
-#include "../external/pybind11/include/pybind11/stl.h"
-#include "../external/pybind11/include/pybind11/numpy.h"
+#include "pybind11/pybind11.h"
+#include "pybind11/stl.h"
+#include "pybind11/numpy.h"
 
 namespace py = pybind11;
 using namespace std;
