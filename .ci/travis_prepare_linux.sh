@@ -10,9 +10,8 @@ set -e -x
 apt update
 apt-get install -qq libxml2-dev libbz2-dev
 apt-get install -qq make cmake
-apt-get install -qq python-numpy python-matplotlib python-networkx python-pip
 apt-get install -qq python3-numpy python3-matplotlib python3-networkx python3-pip
-apt-get install -qq python-tk python3-tk
+apt-get install -qq python3-tk
 apt-get install -qq valgrind
 
 # Gsl
@@ -23,9 +22,9 @@ apt-get install -qq liblapack-dev
 apt-get install -qq libboost-all-dev
 
 # Dependencies for NML2
-apt-get install -qq python-scipy python3-scipy
-apt-get install -qq python-lxml python3-lxml
-apt-get install -qq python-setuptools python3-setuptools
+apt-get install -qq python3-scipy
+apt-get install -qq python3-lxml
+apt-get install -qq python3-setuptools
 
 # Install twine
 python3 -m pip install twine
