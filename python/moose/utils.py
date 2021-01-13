@@ -388,7 +388,7 @@ def autoposition(root):
 
 def loadModel(filename, target, method="ee"):
     moose.loadModel(filename, target)
-    moose.mooseAddChemSolver(target, method)
+    moose.addChemSolver(target, method)
     if moose.exists(target + "/kinetics/info"):
         moose.element(target + "/kinetics/info").solver = method
 
