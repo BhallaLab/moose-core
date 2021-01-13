@@ -250,11 +250,10 @@ def checkGroup(basePath,model,comptSbmlidMooseIdMap):
             grpName = ""
             groupAnnoInfo = {}
             groupAnnoInfo = getObjAnnotation(p, modelAnnotaInfo)
-            
             if groupAnnoInfo != {}:
                 if moose.exists(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name):
                     groupName = p.getName()
-                    if groupName == " ":
+                    if groupName == "":
                         groupName = p.getId()
                     if "Group" in groupAnnoInfo:
                         if moose.exists(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name+'/'+groupAnnoInfo["Group"]):
