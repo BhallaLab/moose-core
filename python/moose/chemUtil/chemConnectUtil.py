@@ -9,11 +9,12 @@ __version__          = "1.0.0"
 __maintainer__       = "Harsha Rani"
 __email__            = "hrani@ncbs.res.in"
 __status__           = "Development"
-__updated__          = "Jan 11 2021"
+__updated__          = "Jan 18 2021"
 
 '''
 2021
-Jan 11: mooseIsInstance need to return className and not true or false
+Jan 18 : randomize the color if not valid color or if background color is dark blue
+Jan 11 : mooseIsInstance need to return className and not true or false
 '''
 import moose
 import numpy as np
@@ -56,7 +57,7 @@ def getColor(iteminfo):
 	# bgcolor   = moose.element(iteminfo).color
 	if(textcolor == ''): textcolor = 'green'
 	
-	if(bgcolor == ''): bgcolor = 'orange'
+	if(bgcolor == ''): bgcolor = getRandColor()
 
 	if(textcolor == bgcolor):
 		textcolor = getRandColor()
@@ -81,9 +82,9 @@ def colorCheck(fc_bgcolor):
 			tc = (int(fc_bgcolor))*2
 			if tc < len(colorMap):
 				pickledColor = colorMap[tc]
+				fc_bgcolor = '#%02x%02x%02x' % (pickledColor)
 			else:
-				pickledColor = (255, 0, 0)
-			fc_bgcolor = '#%02x%02x%02x' % (pickledColor)
+				fc_bgcolor = getRandColor()
 
 		elif fc_bgcolor.isalpha() or fc_bgcolor.isalnum():
 			fc_bgcolor = validColorcheck(fc_bgcolor)
@@ -104,17 +105,22 @@ def colorCheck(fc_bgcolor):
 def validColorcheck(color):
 	''' 
 		Both in Qt4.7 and 4.8 if not a valid color it makes it as back but in 4.7 there will be a warning mssg which is taken here
-		checking if textcolor or backgroundcolor is valid color, if 'No' making white color as default
-		where I have not taken care for checking what will be backgroundcolor for textcolor or textcolor for backgroundcolor 
+		checking if textcolor or backgroundcolor is valid color, if 'Not' choosing randon color as default
+		here I have not taken care for checking what will be backgroundcolor for textcolor or textcolor for backgroundcolor
+		as textcolor is always black and I have avoided background color as black 
 	'''
 	#if QColor(color).isValid():
 	if matplotlib.colors.is_color_like(color):
+		color = color.strip()
 		if color == "blue":
-			color = "orange"
+			c = getRandColor()
+			color = [name for name,hexno in matplotlib.colors.cnames.items() if hexno == c][0]
 		color =  matplotlib.colors.cnames[color.lower()]
 		return color
 	else:
-		return(matplotlib.colors.cnames["orange"])
+		c = getRandColor()
+		color = [name for name,hexno in matplotlib.colors.cnames.items() if hexno == c][0]
+		return(matplotlib.colors.cnames[color.lower()])
 
 def xyPosition(objInfo,xory):
 	if objInfo is None or not moose.exists(objInfo):
@@ -307,4 +313,4 @@ def findCompartment(elem):
 	return findCompartment(element.parent)
 
 def mooseIsInstance(elem, classes):
-    return moose.element(elem).className in classes
+	return moose.element(elem).className in classes
