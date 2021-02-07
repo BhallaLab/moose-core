@@ -11,12 +11,6 @@
 #include "../basecode/global.h"
 #include "../utility/utility.h"
 
-#ifdef USE_GSL
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_odeiv2.h>
-#endif
-
 #include "OdeSystem.h"
 #include "VoxelPoolsBase.h"
 #include "VoxelPools.h"
@@ -53,9 +47,9 @@ const Cinfo* Ksolve::initCinfo()
     ///////////////////////////////////////////////////////
     static ValueFinfo< Ksolve, string > method (
         "method",
-        "Integration method, using GSL. So far only explict. Options are:"
+        "Integration method, using odeint. So far only explict. Options are:"
         "rk5: The default Runge-Kutta-Fehlberg 5th order adaptive dt method"
-        "gsl: alias for the above"
+        "gsl: alias for the above (legacy)"
         "rk4: The Runge-Kutta 4th order fixed dt method"
         "rk2: The Runge-Kutta 2,3 embedded fixed dt method"
         "rkck: The Runge-Kutta Cash-Karp (4,5) method"
@@ -271,26 +265,7 @@ void Ksolve::setMethod( string method )
         return;
     }
 
-#if USE_GSL
-    if ( method == "rk5" || method == "gsl" )
-    {
-        method_ = "rk5";
-    }
-    else if ( method == "rk4"  || method == "rk2" ||
-              method == "rk8" || method == "rkck" || method == "lsoda" )
-    {
-        method_ = method;
-    }
-    else
-    {
-        cout << "Warning: Ksolve::setMethod: '" << method <<
-             "' is not known, using default rk5\n";
-        method_ = "rk5";
-    }
-#elif USE_BOOST_ODE
-    // TODO: Check for boost related methods.
     method_ = method;
-#endif
 }
 
 double Ksolve::getEpsAbs() const
@@ -339,37 +314,6 @@ Id Ksolve::getStoich() const
     return stoich_;
 }
 
-#ifdef USE_GSL
-void innerSetMethod( OdeSystem& ode, const string& method )
-{
-    ode.method = method;
-    if ( method == "rk5" )
-    {
-        ode.gslStep = gsl_odeiv2_step_rkf45;
-    }
-    else if ( method == "rk4" )
-    {
-        ode.gslStep = gsl_odeiv2_step_rk4;
-    }
-    else if ( method == "rk2" )
-    {
-        ode.gslStep = gsl_odeiv2_step_rk2;
-    }
-    else if ( method == "rkck" )
-    {
-        ode.gslStep = gsl_odeiv2_step_rkck;
-    }
-    else if ( method == "rk8" )
-    {
-        ode.gslStep = gsl_odeiv2_step_rk8pd;
-    }
-    else
-    {
-        ode.gslStep = gsl_odeiv2_step_rkf45;
-    }
-}
-#endif
-
 void Ksolve::setStoich( Id stoich )
 {
     assert( stoich.element()->cinfo()->isA( "Stoich" ) );
@@ -385,25 +329,6 @@ void Ksolve::setStoich( Id stoich )
         ode.initStepSize = 0.01; // This will be overridden at reinit.
         ode.method = method_;
 
-#ifdef USE_GSL
-        ode.gslSys.dimension = stoichPtr_->getNumAllPools();
-        if ( ode.gslSys.dimension == 0 )
-        {
-            stoichPtr_ = 0;
-            return; // No pools, so don't bother.
-        }
-        innerSetMethod( ode, method_ );
-        ode.gslSys.function = &VoxelPools::gslFunc;
-        ode.gslSys.jacobian = 0;
-        innerSetMethod( ode, method_ );
-        unsigned int numVoxels = pools_.size();
-        for ( unsigned int i = 0 ; i < numVoxels; ++i )
-        {
-            ode.gslSys.params = &pools_[i];
-            pools_[i].setStoich( stoichPtr_, &ode );
-            // pools_[i].setIntDt( ode.initStepSize ); // We're setting it up anyway
-        }
-#elif USE_BOOST_ODE
         ode.dimension = stoichPtr_->getNumAllPools();
         if ( ode.dimension == 0 )
             return; // No pools, so don't bother.
@@ -412,7 +337,6 @@ void Ksolve::setStoich( Id stoich )
         {
             pools_[i].setStoich( stoichPtr_, &ode );
         }
-#endif
         isBuilt_ = true;
     }
 

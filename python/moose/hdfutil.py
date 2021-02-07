@@ -83,12 +83,8 @@
 #
 #
 
-# Code:
-from __future__ import print_function, division, absolute_import
-try:
-    from future_builtins import zip
-except ImportError:
-    pass
+
+import typing as T
 import moose
 import numpy as np
 import h5py as h5
@@ -112,7 +108,7 @@ cpptonp = {
     'ObjId': 'S1024',
     }
 
-dtype_table = {}
+dtype_table : T.Dict[str, np.dtype ] = {}
 # dims allows only 3 dims for the time being
 em_dtype = np.dtype([('path', 'S1024'), ('class', 'S64'), ('dims', 'i4', (3,))])
 

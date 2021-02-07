@@ -17,11 +17,12 @@ References:
 import sys
 import pydoc
 import os
+import typing as T
 
 import moose._moose as _moose
 from moose import model_utils
 
-__moose_classes__ = {}
+__moose_classes__ : T.Dict[str, T.Any] = {}
 
 
 class melement(_moose.ObjId):

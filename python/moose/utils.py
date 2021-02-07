@@ -1,12 +1,7 @@
 # -* coding: utf-8 -*-
 # Utility functions for moose.
 
-from __future__ import print_function, division, absolute_import
-from __future__ import print_function, division
-from __future__ import absolute_import
-
 import types
-import parser
 import token
 import symbol
 import math
@@ -223,49 +218,6 @@ def apply_to_tree(moose_wildcard, python_filter=None, value=None):
                 "Second argument must be a string specifying a field to assign to when third argument is a value"
             )
 
-
-def tweak_field(moose_wildcard, field, assignment_string):
-    """Tweak a specified field of all objects that match the
-    moose_wildcard using assignment string. All identifiers in
-    assignment string must be fields of the target object.
-
-    Example:
-
-    tweak_field('/mycell/##[Class=Compartment]', 'Rm', '1.5 / (3.1416 * diameter * length')
-
-    will assign Rm to every compartment in mycell such that the
-    specific membrane resistance is 1.5 Ohm-m2.
-    """
-    if not isinstance(moose_wildcard, str):
-        raise TypeError("moose_wildcard must be a string.")
-    id_list = moose.getWildcardList(moose_wildcard, True)
-    expression = parser.expr(assignment_string)
-    expr_list = expression.tolist()
-    # This is a hack: I just tried out some possible syntax trees and
-    # hand coded the replacement such that any identifier is replaced
-    # by moose_obj.identifier
-    def replace_fields_with_value(x):
-        if len(x) > 1:
-            if (
-                x[0] == symbol.power
-                and x[1][0] == symbol.atom
-                and x[1][1][0] == token.NAME
-            ):
-                field = x[1][1][1]
-                x[1] = [symbol.atom, [token.NAME, "moose_obj"]]
-                x.append([symbol.trailer, [token.DOT, "."], [token.NAME, field]])
-            for item in x:
-                if isinstance(item, list):
-                    replace_fields_with_value(item)
-        return x
-
-    tmp = replace_fields_with_value(expr_list)
-    new_expr = parser.sequence2st(tmp)
-    code = new_expr.compile()
-    for moose_id in id_list:
-        moose_obj = eval("moose.%s(moose_id)" % (moose.Neutral(moose_id).className))
-        value = eval(code)
-        moose.setField(moose_id, field, str(value))
 
 
 # 2012-01-11 19:20:39 (+0530) Subha: checked for compatibility with dh_branch

@@ -1,13 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
-include(${CMAKE_CURRENT_SOURCE_DIR}/../CheckCXXCompiler.cmake)
-
-if(WITH_GSL)
-    find_package(GSL 1.16)
-    include_directories(${GSL_INCLUDE_DIRS})
-elseif(WITH_BOOST_ODE)
-    find_package(Boost)
-    include_directories(${Boost_INCLUDE_DIRS})
-endif(WITH_GSL)
+cmake_minimum_required(VERSION 3.12)
 
 set(BIOPHYSICS_SRCS
     IntFire.cpp
@@ -56,4 +47,7 @@ set(BIOPHYSICS_SRCS
     )
 
 add_library(biophysics ${BIOPHYSICS_SRCS})
+
+target_include_directories(biophysics PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../external/odeint-v2/include)
 

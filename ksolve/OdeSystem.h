@@ -10,36 +10,21 @@
 #ifndef _ODE_SYSTEM_H
 #define _ODE_SYSTEM_H
 
-#if  USE_BOOST_ODE
-#include "BoostSys.h"
-#elif USE_GSL
-#include <gsl/gsl_odeiv2.h>
-#endif     /* -----  not USE_BOOST_ODE  ----- */
+#include "../utility/boost_ode.h"
 
 class OdeSystem {
-    public:
-        OdeSystem()
-            : method( "rk5" ),
-            initStepSize( 0.001 ),
-            epsAbs( 1e-6 ),
-            epsRel( 1e-6 )
-    {;}
+public:
+    OdeSystem() : method("rk5"), initStepSize(0.001), epsAbs(1e-6), epsRel(1e-6)
+    {
+        ;
+    }
 
-        std::string method;
+    std::string method;
 
-        double initStepSize;
-        double epsAbs; // Absolute error
-        double epsRel; // Relative error
-
-#ifdef USE_GSL
-        // GSL stuff
-        gsl_odeiv2_system gslSys;
-        const gsl_odeiv2_step_type* gslStep;
-#endif
-
-#if  USE_BOOST_ODE
-        size_t dimension;
-#endif     /* -----  USE_BOOST_ODE  ----- */
+    double initStepSize;
+    double epsAbs;  // Absolute error
+    double epsRel;  // Relative error
+    size_t dimension;
 };
 
-#endif // _ODE_SYSTEM_H
+#endif  // _ODE_SYSTEM_H

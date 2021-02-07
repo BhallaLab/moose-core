@@ -14,10 +14,6 @@
 #include "VoxelPoolsBase.h"
 #include "../external/libsoda/LSODA.h"
 
-#ifdef USE_BOOST_ODE
-#include "BoostSys.h"
-#endif
-
 class Stoich;
 class ProcInfo;
 
@@ -53,11 +49,7 @@ public:
     /// Set initial timestep to use by the solver.
     void setInitDt( double dt );
 
-#ifdef USE_GSL      /* -----  not USE_BOOST  ----- */
-    static int gslFunc( double t, const double* y, double *dydt, void* params);
-#elif  USE_BOOST_ODE
     static void evalRates( VoxelPools* vp, const vector_type_& y, vector_type_& dydt );
-#endif     /* -----  not USE_BOOST_ODE  ----- */
 
     // System of LSODA.
     static void lsodaSys( double t, double* y, double* dydt, void* params);
@@ -102,11 +94,6 @@ private:
     std::shared_ptr<LSODA> pLSODA;
     LSODA_ODE_SYSTEM_TYPE lsodaSystem;
     int lsodaState = 1;
-
-#ifdef USE_GSL
-    gsl_odeiv2_driver* driver_;
-    gsl_odeiv2_system sys_;
-#endif
 
     double epsAbs_;
     double epsRel_;

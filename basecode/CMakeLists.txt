@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
-include( ${CMAKE_CURRENT_SOURCE_DIR}/../CheckCXXCompiler.cmake )
+cmake_minimum_required(VERSION 3.12)
 add_library(basecode
 	Element.cpp
 	DataElement.cpp
@@ -30,4 +29,3 @@ add_executable(test_globals testGlobals.cpp global.cpp)
 
 enable_testing()
 add_test(NAME cpp_test_globals  COMMAND $<TARGET_FILE:test_globals>)
-

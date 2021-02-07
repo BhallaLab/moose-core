@@ -1,23 +1,17 @@
-cmake_minimum_required(VERSION 3.2.3 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 # Project to build MOOSE's python module.
-project(PyMOOSE)
+project(PyMOOSE LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # cmake related macros.
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-include(CheckCXXCompiler.cmake)
-include(CheckIncludeFileCXX)
 
 # We find python executable here. Though mainly used inside pymoose. 
-# FIXME: When cmake 3.12 is widely available use the following:
-#   find_package(Python3 COMPONENTS Interpreter Numpy)
-#   set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
-set(Python_ADDITIONAL_VERSIONS 2.7)
-find_package(PythonInterp 3.5)
-if(NOT PYTHONINTERP_FOUND)
-  find_package(PythonInterp 2.7)
-endif()
-
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
 set(CMAKE_MACOSX_RPATH OFF)
 
 # NOTE: version should be changed in setup.py file.
@@ -55,18 +49,15 @@ option(DEBUG                "Build with debug support" OFF)
 option(GPROF                "Build for profiling using gprof" OFF)
 option(ENABLE_UNIT_TESTS    "Enable unit tests (DEBUG should also be ON)" OFF)
 option(WITH_MPI             "Enable Openmpi support" OFF)
-
-option(WITH_BOOST           "Enable boost. Prefer boost over stl" OFF)
-option(WITH_BOOST_ODE       "Use boost library ode2 library instead of GSL" OFF)
-option(WITH_GSL             "Use gsl-library. Alternative is WITH_BOOST" ON)
-
 option(WITH_ASAN            "Use AddressSanitizer in DEBUG mode." OFF)
-
 option(WITH_NSDF            "Enable NSDF support. Requires hdf5" OFF )
-
 option(WITH_LEGACY_BINDING  "Use legacy python-bindings" OFF)
 
 ############################ BUILD CONFIGURATION #################################
+
+# At least version 1.53 (odeint is part of this version)
+find_package(Boost 1.53 REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
 
 # Default definitions.
 add_definitions(-DUSE_GENESIS_PARSER)
@@ -99,12 +90,6 @@ if(WITH_ASAN AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address")
 endif()
 
-# Override default GSL solvers when BOOST is enabled.
-if(WITH_BOOST OR WITH_BOOST_ODE)
-    set(WITH_BOOST_ODE ON)
-    set(WITH_GSL OFF)
-endif()
-
 ################################### TARGETS ####################################
 
 link_directories(${CMAKE_BINARY_DIR})
@@ -119,35 +104,6 @@ add_executable(moose.bin basecode/main.cpp)
 set(STATIC_LIBRARIES "" )
 # Collect all shared libraries here.
 set(SYSTEM_SHARED_LIBS "")
-
-# BOOST ode library performs better than GSL and ideally should be made default.
-# Unfortunately Boost does not have a very good matrix library; it has ublas
-# which is not well maintained and emit a lot
-# of warning during compilation. Nonetheless, WITH_BOOST_ODE works fine and
-# produce results quicker than GSL. 
-if(WITH_GSL)
-    find_package(GSL 1.16 REQUIRED)
-    if(NOT GSL_FOUND)
-        message(FATAL_ERROR
-            "=====================================================================\n"
-            " FATAL gsl(>=1.16) not found.\n\n"
-            " MOOSE requires Gnu Scientific Library (GSL) 1.16 or higher. \n"
-            " Please install the `dev` or `devel` package e.g. \n"
-            "     $ sudo apt-get install libgsl0-dev \n"
-            "     $ sudo yum install libgsl-devel \n"
-            "     $ brew install gsl \n\n"
-            " Or build and install gsl from source code \n"
-            "     https://www.gnu.org/software/gsl/ \n"
-            " After installing gsl, rerun cmake.\n\n"
-            " If you install gsl in non-standard place, set the GSL_ROOT_DIR environment \n"
-            " variable. CMAKE use this to search for required files. \n"
-            "====================================================================\n"
-            )
-    endif(NOT GSL_FOUND)
-elseif(WITH_BOOST_ODE)
-    find_package(Boost 1.53 REQUIRED)
-    find_package(LAPACK REQUIRED)
-endif()
 
 
 # Openmpi
@@ -177,26 +133,6 @@ list(APPEND SYSTEM_SHARED_LIBS ${CMAKE_THREAD_LIBS_INIT})
 # These libraries could be static of dynamic. We need to discrimate between
 # these two types because of --whole-archive option. See
 # BhallaLab/moose-core#66,
-if(WITH_GSL)
-    if(GSL_STATIC_LIBRARIES)
-       message( STATUS "Using static libraries ${GSL_STATIC_LIBRARIES}" )
-       list(APPEND STATIC_LIBRARIES ${GSL_STATIC_LIBRARIES})
-    else( )
-       # message(DEBUG "Using gsl libraries: ${GSL_LIBRARIES}")
-       foreach(GSL_LIB ${GSL_LIBRARIES} )
-           if(GSL_LIB)
-               get_filename_component( GSL_LIB_EXT ${GSL_LIB} EXT )
-               if(GSL_LIB_EXT)
-                   if(GSL_LIB_EXT STREQUAL ".a" )
-                       list(APPEND STATIC_LIBRARIES ${GSL_LIB})
-                   else()
-                       list(APPEND SYSTEM_SHARED_LIBS ${GSL_LIB})
-                   endif( )
-               endif( )
-           endif( )
-       endforeach( )
-   endif( )
-endif()
 
 if(WITH_MPI)
     if(MPI_CXX_FOUND)

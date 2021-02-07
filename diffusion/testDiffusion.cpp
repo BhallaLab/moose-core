@@ -16,9 +16,6 @@
 //#include "/usr/include/gsl/gsl_linalg.h"
 using namespace std;
 */
-#ifdef USE_GSL
-#include <gsl/gsl_linalg.h>
-#endif
 #include "../basecode/header.h"
 #include "../basecode/SparseMatrix.h"
 #include "FastMatrixElim.h"
@@ -229,32 +226,6 @@ void testFastMatrixElim()
     // cout << "myCode: " << checkAns( alle.data(), numCompts, y.data(), ones.data() ) << endl;
 
     assert(checkAns( &alle[0], numCompts, &y[0], &ones[0] ) < 1e-25);
-
-#if USE_GSL
-    /////////////////////////////////////////////////////////////////////
-    // Here we do the gsl test.
-    vector< double > temp( &test[0], &test[numCompts*numCompts] );
-    gsl_matrix_view m = gsl_matrix_view_array( &temp[0], numCompts, numCompts );
-
-    vector< double > z( numCompts, 1.0 );
-    gsl_vector_view b = gsl_vector_view_array( &z[0], numCompts );
-    gsl_vector* x = gsl_vector_alloc( numCompts );
-    int s;
-    gsl_permutation* p = gsl_permutation_alloc( numCompts );
-    gsl_linalg_LU_decomp( &m.matrix, p, &s );
-    gsl_linalg_LU_solve( &m.matrix, p, &b.vector, x);
-    vector< double > gslAns( numCompts );
-    for ( unsigned int i = 0; i < numCompts; ++i )
-    {
-        gslAns[i] = gsl_vector_get( x, i );
-        // cout << "x[" << i << "]=	" << gslAns[i] << endl;
-    }
-    // cout << "GSL: " << checkAns( test, numCompts, &gslAns[0], &ones[0] ) << endl;
-    assert( checkAns( test, numCompts, &gslAns[0], &ones[0] ) < 1e-25 );
-    gsl_permutation_free( p );
-    gsl_vector_free( x );
-    cout << "." << flush;
-#endif
 }
 
 void testSorting()
@@ -723,7 +694,7 @@ void testCylDiffnWithStoich()
     Field< Id >::set( stoich, "compartment", cyl );
     Field< Id >::set( stoich, "ksolve", ksolve );
     Field< Id >::set( stoich, "dsolve", dsolve );
-    Field< string >::set( stoich, "path", "/model/cyl/#" );
+    Field< string >::set( stoich, "reacSystemPath", "/model/cyl/#" );
     assert( pool1.element()->numData() == ndc );
 
     // Then find a way to test it.

@@ -202,7 +202,7 @@ void testBuildStoich()
     Stoich* stoichPtr = reinterpret_cast< Stoich* >( stoich.eref().data() );
 #endif
 
-    Field< string >::set( stoich, "path", "/kinetics/##" );
+    Field< string >::set( stoich, "reacSystemPath", "/kinetics/##" );
 
     unsigned int n = Field< unsigned int >::get( stoich, "numAllPools" );
     assert( n == 10 );
@@ -247,7 +247,7 @@ void testRunKsolve()
     Id stoich = s->doCreate( "Stoich", ksolve, "stoich", 1 );
     Field< Id >::set( stoich, "compartment", kin );
     Field< Id >::set( stoich, "ksolve", ksolve );
-    Field< string >::set( stoich, "path", "/kinetics/##" );
+    Field< string >::set( stoich, "reacSystemPath", "/kinetics/##" );
     s->doUseClock( "/kinetics/ksolve", "process", 4 );
     s->doSetClock( 4, simDt );
 
@@ -278,7 +278,7 @@ void testRunKsolveWithLSODA()
     Id stoich = s->doCreate( "Stoich", ksolve, "stoich", 1 );
     Field< Id >::set( stoich, "compartment", kin );
     Field< Id >::set( stoich, "ksolve", ksolve );
-    Field< string >::set( stoich, "path", "/kinetics/##" );
+    Field< string >::set( stoich, "reacSystemPath", "/kinetics/##" );
     s->doUseClock( "/kinetics/ksolve", "process", 4 );
     s->doSetClock( 4, simDt );
 
@@ -325,7 +325,7 @@ void testRunGsolve()
     Field< Id >::set( stoich, "compartment", kin );
     Field< Id >::set( stoich, "ksolve", gsolve );
 
-    Field< string >::set( stoich, "path", "/kinetics/##" );
+    Field< string >::set( stoich, "reacSystemPath", "/kinetics/##" );
     s->doUseClock( "/kinetics/gsolve", "process", 4 );
     s->doSetClock( 4, simDt );
 

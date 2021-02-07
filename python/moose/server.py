@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division, absolute_import
 
 # This is moose.server.
 # It accepts simulation request on a specified TCP port (default 31417).
@@ -26,6 +25,7 @@ import tarfile
 import tempfile 
 import threading 
 import subprocess
+import typing as T
 
 import logging
 logger_ = logging.getLogger('moose.server')
@@ -35,7 +35,7 @@ __all__ = [ 'serve' ]
 # Global variable to stop all running threads.
 stop_all_ = False
 sock_     = None
-stop_streamer_ = {}
+stop_streamer_ : T.Dict[str, bool] = {}
 
 # Use prefixL_ bytes to encode the size of stream. One can probably use just one
 # byte to do. Lets go with the inefficient one for now.

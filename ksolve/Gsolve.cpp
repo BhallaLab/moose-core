@@ -30,12 +30,6 @@
 #include <chrono>
 #include <algorithm>
 
-#ifdef USE_BOOST_ASYNC
-#define BOOST_THREAD_PROVIDES_FUTURE
-#include <boost/thread.hpp>
-#include <boost/thread/future.hpp>
-#endif
-
 #include <future>
 #include <atomic>
 #include <thread>

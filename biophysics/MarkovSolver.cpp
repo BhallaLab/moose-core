@@ -20,46 +20,33 @@
 const Cinfo* MarkovSolver::initCinfo()
 {
     //////////////////////
-    //DestFinfos
+    // DestFinfos
     //////////////////////
 
-    static DestFinfo process(	"process",
-                                "Handles process call",
-                                new ProcOpFunc< MarkovSolver >( &MarkovSolver::process ) );
+    static DestFinfo process("process", "Handles process call",
+        new ProcOpFunc<MarkovSolver>(&MarkovSolver::process));
 
-    static DestFinfo reinit( "reinit",
-                             "Handles reinit call",
-                             new ProcOpFunc< MarkovSolver >( &MarkovSolver::reinit ) );
+    static DestFinfo reinit("reinit", "Handles reinit call",
+        new ProcOpFunc<MarkovSolver>(&MarkovSolver::reinit));
 
-    static Finfo* processShared[] =
-    {
-        &process, &reinit
+    static Finfo* processShared[] = {&process, &reinit};
+
+    static SharedFinfo proc("proc",
+        "This is a shared message to receive Process message from the"
+        "scheduler. The first entry is a MsgDest for the Process "
+        "operation. It has a single argument, ProcInfo, which "
+        "holds lots of information about current time, thread, dt and"
+        "so on. The second entry is a MsgDest for the Reinit "
+        "operation. It also uses ProcInfo.",
+        processShared, sizeof(processShared) / sizeof(Finfo*));
+
+    static Finfo* markovSolverFinfos[] = {
+        &proc,  // SharedFinfo
     };
 
-    static SharedFinfo proc( "proc",
-                             "This is a shared message to receive Process message from the"
-                             "scheduler. The first entry is a MsgDest for the Process "
-                             "operation. It has a single argument, ProcInfo, which "
-                             "holds lots of information about current time, thread, dt and"
-                             "so on. The second entry is a MsgDest for the Reinit "
-                             "operation. It also uses ProcInfo.",
-                             processShared, sizeof( processShared ) / sizeof( Finfo* )
-                           );
-
-
-    static Finfo* markovSolverFinfos[] =
-    {
-        &proc,							//SharedFinfo
-    };
-
-    static Dinfo < MarkovSolver > dinfo;
-    static Cinfo markovSolverCinfo(
-        "MarkovSolver",
-        MarkovSolverBase::initCinfo(),
-        markovSolverFinfos,
-        sizeof( markovSolverFinfos ) / sizeof( Finfo* ),
-        &dinfo
-    );
+    static Dinfo<MarkovSolver> dinfo;
+    static Cinfo markovSolverCinfo("MarkovSolver", MarkovSolverBase::initCinfo(),
+        markovSolverFinfos, sizeof(markovSolverFinfos) / sizeof(Finfo*), &dinfo);
 
     return &markovSolverCinfo;
 }
@@ -76,146 +63,139 @@ MarkovSolver::~MarkovSolver()
     ;
 }
 
-Matrix* MarkovSolver::computePadeApproximant( Matrix* Q1,
-        unsigned int degreeIndex )
+Matrix* MarkovSolver::computePadeApproximant(Matrix* Q1, unsigned int degreeIndex)
 {
-    Matrix *expQ;
+    Matrix* expQ;
     Matrix *U, *VplusU, *VminusU, *invVminusU, *Qpower;
-    vector< unsigned int >* swaps = new vector< unsigned int >;
-    unsigned int n = Q1->size();
-    unsigned int degree = mCandidates[degreeIndex];
-    double *padeCoeffs = NULL;
-    Matrix *V = matAlloc(n);
+    vector<unsigned int>* swaps = new vector<unsigned int>;
+    unsigned int n              = Q1->size();
+    unsigned int degree         = mCandidates[degreeIndex];
+    double* padeCoeffs          = NULL;
+    Matrix* V                   = matAlloc(n);
 
-    //Vector of Matrix pointers. Each entry is an even power of Q.
-    vector< Matrix* > QevenPowers;
+    // Vector of Matrix pointers. Each entry is an even power of Q.
+    vector<Matrix*> QevenPowers;
 
-    //Selecting the right coefficient array.
-    switch (degree)
-    {
-    case 13:
-        padeCoeffs = b13;
-        break;
+    // Selecting the right coefficient array.
+    switch(degree) {
+        case 13:
+            padeCoeffs = b13;
+            break;
 
-    case 9:
-        padeCoeffs = b9;
-        break;
+        case 9:
+            padeCoeffs = b9;
+            break;
 
-    case 7:
-        padeCoeffs = b7;
-        break;
+        case 7:
+            padeCoeffs = b7;
+            break;
 
-    case 5:
-        padeCoeffs = b5;
-        break;
+        case 5:
+            padeCoeffs = b5;
+            break;
 
-    case 3:
-        padeCoeffs = b3;
-        break;
+        case 3:
+            padeCoeffs = b3;
+            break;
     }
-
 
     /////////
-    //Q2 = Q^2 is computed for all degrees.
-    //Q4 = Q^4 = Q^2 * Q^2 is computed when degree = 5,7,9,13.
-    //Q6 = Q^6 = Q^4 * Q^2 is computed when degree = 7,9,13.
-    //Q8 = Q^8 = Q^4 * Q^4 is computed when degree = 7,9.
-    //Note that the formula for the 13th degree approximant used here
-    //is different from the one used for smaller degrees.
+    // Q2 = Q^2 is computed for all degrees.
+    // Q4 = Q^4 = Q^2 * Q^2 is computed when degree = 5,7,9,13.
+    // Q6 = Q^6 = Q^4 * Q^2 is computed when degree = 7,9,13.
+    // Q8 = Q^8 = Q^4 * Q^4 is computed when degree = 7,9.
+    // Note that the formula for the 13th degree approximant used here
+    // is different from the one used for smaller degrees.
     ////////
-    switch( degree )
-    {
-    case 3 :
-    case 5 :
-    case 7 :
-    case 9 :
-        U = matAlloc( n );
+    switch(degree) {
+        case 3:
+        case 5:
+        case 7:
+        case 9:
+            U = matAlloc(n);
 
-        QevenPowers.push_back( Q1 );
+            QevenPowers.push_back(Q1);
 
-        for( unsigned int i = 1; i < (degree + 1)/2 ; ++i )
-        {
-            Qpower = QevenPowers.back();
-            QevenPowers.push_back( matMatMul( Qpower, Qpower ) );
-        }
+            for(unsigned int i = 1; i < (degree + 1) / 2; ++i) {
+                Qpower = QevenPowers.back();
+                QevenPowers.push_back(matMatMul(Qpower, Qpower));
+            }
 
-        //Computation of U.
-        for ( int i = degree; i > 1; i -= 2 )
-            matMatAdd( U, QevenPowers[i/2], 1.0, padeCoeffs[i], FIRST );
+            // Computation of U.
+            for(int i = degree; i > 1; i -= 2)
+                matMatAdd(U, QevenPowers[i / 2], 1.0, padeCoeffs[i], FIRST);
 
-        //Adding b0 * I .
-        matEyeAdd( U, padeCoeffs[1], 0 );
-        matMatMul( Q1, U, SECOND );
+            // Adding b0 * I .
+            matEyeAdd(U, padeCoeffs[1], 0);
+            matMatMul(Q1, U, SECOND);
 
-        //Computation of V.
-        for ( int i = degree - 1; i > 0; i -= 2 )
-            matMatAdd( V, QevenPowers[i/2], 1.0, padeCoeffs[i], FIRST );
+            // Computation of V.
+            for(int i = degree - 1; i > 0; i -= 2)
+                matMatAdd(V, QevenPowers[i / 2], 1.0, padeCoeffs[i], FIRST);
 
-        //Adding b1 * I
-        matEyeAdd( V, padeCoeffs[0], DUMMY );
+            // Adding b1 * I
+            matEyeAdd(V, padeCoeffs[0], DUMMY);
 
-        while (!QevenPowers.empty())
-        {
-            delete QevenPowers.back();
-            QevenPowers.pop_back();
-        }
-        break;
+            while(!QevenPowers.empty()) {
+                delete QevenPowers.back();
+                QevenPowers.pop_back();
+            }
+            break;
 
-    case 13:
-        Matrix *Q2, *Q4, *Q6;
-        Matrix *temp;
+        case 13:
+            Matrix *Q2, *Q4, *Q6;
+            Matrix* temp;
 
-        Q2 = matMatMul( Q1, Q1 );
-        Q4 = matMatMul( Q2, Q2 );
-        Q6 = matMatMul( Q4, Q2 );
+            Q2 = matMatMul(Q1, Q1);
+            Q4 = matMatMul(Q2, Q2);
+            Q6 = matMatMul(Q4, Q2);
 
-        //Long and rather messy expression for U and V.
-        //Refer paper mentioned in header for more details.
-        //Storing the result in temporaries is a better idea as it gives us
-        //control on how many temporaries are being created and also to
-        //help in memory deallocation.
+            // Long and rather messy expression for U and V.
+            // Refer paper mentioned in header for more details.
+            // Storing the result in temporaries is a better idea as it gives us
+            // control on how many temporaries are being created and also to
+            // help in memory deallocation.
 
-        //Computation of U.
-        temp = matScalShift( Q6, b13[13], 0.0 );
-        matMatAdd( temp, Q4, 1.0, b13[11], FIRST );
-        matMatAdd( temp, Q2, 1.0, b13[9], FIRST );
+            // Computation of U.
+            temp = matScalShift(Q6, b13[13], 0.0);
+            matMatAdd(temp, Q4, 1.0, b13[11], FIRST);
+            matMatAdd(temp, Q2, 1.0, b13[9], FIRST);
 
-        matMatMul( Q6, temp, SECOND );
+            matMatMul(Q6, temp, SECOND);
 
-        matMatAdd( temp, Q6, 1.0, b13[7], FIRST );
-        matMatAdd( temp, Q4, 1.0, b13[5], FIRST );
-        matMatAdd( temp, Q2, 1.0, b13[3], FIRST );
-        matEyeAdd( temp, b13[1], DUMMY );
-        U = matMatMul( Q1, temp );
-        delete temp;
+            matMatAdd(temp, Q6, 1.0, b13[7], FIRST);
+            matMatAdd(temp, Q4, 1.0, b13[5], FIRST);
+            matMatAdd(temp, Q2, 1.0, b13[3], FIRST);
+            matEyeAdd(temp, b13[1], DUMMY);
+            U = matMatMul(Q1, temp);
+            delete temp;
 
-        //Computation of V
-        temp = matScalShift( Q6, b13[12], 0.0 );
-        matMatAdd( temp, Q4, 1.0, b13[10], FIRST );
-        matMatAdd( temp, Q2, 1.0, b13[8], FIRST );
-        matMatMul( Q6, temp, SECOND );
-        matMatAdd( temp, Q6, 1.0, b13[6], FIRST );
-        matMatAdd( temp, Q4, 1.0, b13[4], FIRST );
-        matMatAdd( temp, Q2, 1.0, b13[2], FIRST );
-        delete( V );
-        V = matEyeAdd( temp, b13[0] );
-        delete temp;
+            // Computation of V
+            temp = matScalShift(Q6, b13[12], 0.0);
+            matMatAdd(temp, Q4, 1.0, b13[10], FIRST);
+            matMatAdd(temp, Q2, 1.0, b13[8], FIRST);
+            matMatMul(Q6, temp, SECOND);
+            matMatAdd(temp, Q6, 1.0, b13[6], FIRST);
+            matMatAdd(temp, Q4, 1.0, b13[4], FIRST);
+            matMatAdd(temp, Q2, 1.0, b13[2], FIRST);
+            delete(V);
+            V = matEyeAdd(temp, b13[0]);
+            delete temp;
 
-        delete Q2;
-        delete Q4;
-        delete Q6;
-        break;
+            delete Q2;
+            delete Q4;
+            delete Q6;
+            break;
     }
 
-    VplusU = matMatAdd( U, V, 1.0, 1.0 );
-    VminusU = matMatAdd( U, V, -1.0, 1.0 );
+    VplusU  = matMatAdd(U, V, 1.0, 1.0);
+    VminusU = matMatAdd(U, V, -1.0, 1.0);
 
-    invVminusU = matAlloc( n );
-    matInv( VminusU, swaps, invVminusU );
-    expQ = matMatMul( invVminusU, VplusU );
+    invVminusU = matAlloc(n);
+    matInv(VminusU, swaps, invVminusU);
+    expQ = matMatMul(invVminusU, VplusU);
 
-
-    //Memory cleanup.
+    // Memory cleanup.
     delete U;
     delete V;
     delete VplusU;
@@ -232,72 +212,68 @@ Matrix* MarkovSolver::computeMatrixExponential()
     unsigned int n = Q_->size();
     Matrix *expQ, *Q1;
 
-    mu = matTrace( Q_ )/n;
+    mu = matTrace(Q_) / n;
 
-    //Q1 <- Q - mu*I
-    //This reduces the norm of the matrix. The idea is that a lower
-    //order approximant will suffice if the norm is smaller.
-    Q1 = matEyeAdd( Q_, -mu );
+    // Q1 <- Q - mu*I
+    // This reduces the norm of the matrix. The idea is that a lower
+    // order approximant will suffice if the norm is smaller.
+    Q1 = matEyeAdd(Q_, -mu);
 
-    //We cycle through the first four candidate values of m. The moment the norm
-    //satisfies the theta_M bound, we choose that m and compute the Pade'
-    //approximant to the exponential. We can then directly return the exponential.
-    norm = matColNorm( Q1 );
-    for ( unsigned int i = 0; i < 4; ++i )
-    {
-        if ( norm < thetaM[i] )
-        {
-            expQ = computePadeApproximant( Q1, i );
-            matScalShift( expQ, exp( mu ), 0, DUMMY );
+    // We cycle through the first four candidate values of m. The moment the norm
+    // satisfies the theta_M bound, we choose that m and compute the Pade'
+    // approximant to the exponential. We can then directly return the exponential.
+    norm = matColNorm(Q1);
+    for(unsigned int i = 0; i < 4; ++i) {
+        if(norm < thetaM[i]) {
+            expQ = computePadeApproximant(Q1, i);
+            matScalShift(expQ, exp(mu), 0, DUMMY);
             return expQ;
         }
     }
 
-    //In case none of the candidates were satisfactory, we scale down the norm
-    //by dividing A by 2^s until ||A|| < 1. We then use a 13th degree
-    //Pade approximant.
-    double sf = ceil( log( norm / thetaM[4] ) / log( (double)2 ) );
+    // In case none of the candidates were satisfactory, we scale down the norm
+    // by dividing A by 2^s until ||A|| < 1. We then use a 13th degree
+    // Pade approximant.
+    double sf      = ceil(log(norm / thetaM[4]) / log((double)2));
     unsigned int s = 0;
 
-    if ( sf > 0 )
-    {
-        s = static_cast< unsigned int >( sf );
-        matScalShift( Q1, 1.0/(2 << (s - 1)), 0, DUMMY );
+    if(sf > 0) {
+        s = static_cast<unsigned int>(sf);
+        matScalShift(Q1, 1.0 / (2 << (s - 1)), 0, DUMMY);
     }
-    expQ = computePadeApproximant( Q1, 4 );
+    expQ = computePadeApproximant(Q1, 4);
 
-    //Upto this point, the matrix stored in expQ is r13, the 13th degree
-    //Pade approximant corresponding to A/2^s, not A.
-    //Now we repeatedly square r13 's' times to get the exponential
-    //of A.
-    for ( unsigned int i = 0; i < s; ++i )
-        matMatMul( expQ, expQ, FIRST );
+    // Upto this point, the matrix stored in expQ is r13, the 13th degree
+    // Pade approximant corresponding to A/2^s, not A.
+    // Now we repeatedly square r13 's' times to get the exponential
+    // of A.
+    for(unsigned int i = 0; i < s; ++i)
+        matMatMul(expQ, expQ, FIRST);
 
-    matScalShift( expQ, exp( mu ), 0, DUMMY );
+    matScalShift(expQ, exp(mu), 0, DUMMY);
 
     delete Q1;
     return expQ;
 }
 
 ///////////////
-//MsgDest functions
+// MsgDest functions
 //////////////
-void MarkovSolver::reinit( const Eref& e, ProcPtr p )
+void MarkovSolver::reinit(const Eref& e, ProcPtr p)
 {
-    MarkovSolverBase::reinit( e, p );
+    MarkovSolverBase::reinit(e, p);
 }
 
-void MarkovSolver::process( const Eref& e, ProcPtr p )
+void MarkovSolver::process(const Eref& e, ProcPtr p)
 {
-    MarkovSolverBase::process( e, p );
+    MarkovSolverBase::process(e, p);
 }
 
 #ifdef DO_UNIT_TESTS
-void assignMat( Matrix* A, double testMat[3][3] )
+void assignMat(Matrix* A, double testMat[3][3])
 {
-    for ( unsigned int i = 0; i < 3; ++i )
-    {
-        for ( unsigned int j = 0; j < 3; ++j )
+    for(unsigned int i = 0; i < 3; ++i) {
+        for(unsigned int j = 0; j < 3; ++j)
             (*A)[i][j] = testMat[i][j];
     }
 }
@@ -530,5 +506,5 @@ void testMarkovSolver()
     cout << "." << flush;
 
 }
-#endif // #if 0
+#endif  // #if 0
 #endif

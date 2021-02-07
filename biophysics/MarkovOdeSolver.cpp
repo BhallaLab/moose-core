@@ -8,20 +8,10 @@
 **********************************************************************/
 
 #include "../basecode/header.h"
-#if USE_BOOSE_ODE
 #include "../utility/boost_ode.h"
-#endif
 #include "MarkovOdeSolver.h"
-
-#ifdef  USE_GSL
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_odeiv.h>
-#endif     /* -----  not USE_GSL  ----- */
-
-#ifdef  USE_BOOST_ODE
-#include <boost/numeric/odeint.hpp>
+#include "boost/numeric/odeint.hpp"
 using namespace boost::numeric;
-#endif     /* -----  not USE_BOOST_ODE  ----- */
 
 static SrcFinfo1< vector<double> >* stateOut()
 {
@@ -140,12 +130,6 @@ MarkovOdeSolver::MarkovOdeSolver()
 {
     isInitialized_ = 0;
     method_ = "rk5";
-#ifdef  USE_GSL
-    gslStepType_ = gsl_odeiv_step_rkf45;
-    gslEvolve_ = NULL;
-    gslControl_ = NULL;
-    gslStep_ = 0;
-#endif     /* -----  not USE_GSL  ----- */
     nVars_ = 0;
     absAccuracy_ = 1e-8;
     relAccuracy_ = 1e-8;
@@ -154,35 +138,8 @@ MarkovOdeSolver::MarkovOdeSolver()
 
 MarkovOdeSolver::~MarkovOdeSolver()
 {
-#ifdef  USE_GSL
-    if ( gslEvolve_ )
-        gsl_odeiv_evolve_free( gslEvolve_ );
-    if ( gslControl_ )
-        gsl_odeiv_control_free( gslControl_ );
-    if ( gslStep_ )
-        gsl_odeiv_step_free( gslStep_ );
-#endif     /* -----  not USE_GSL  ----- */
 }
 
-#ifdef  USE_GSL
-int MarkovOdeSolver::evalSystem( double t, const double* state, double* f, void *params)
-{
-    vector< vector< double > >* Q = static_cast< vector< vector< double > >* >( params );
-    unsigned int nVars = Q->size();
-
-    //Matrix being accessed along columns, which is a very bad thing in terms of
-    //cache optimality. Transposing the matrix during reinit() would be a good idea.
-    for ( unsigned int i = 0; i < nVars; ++i)
-    {
-        f[i] = 0;
-        for ( unsigned int j = 0; j < nVars; ++j)
-            f[i] += state[j] * ((*Q)[j][i]);
-    }
-    return 0;
-}
-#endif     /* -----  not USE_GSL  ----- */
-
-#ifdef USE_BOOST_ODE
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis  OdeSystem. Similar to MarkovOdeSolver::evalSystem
@@ -203,7 +160,6 @@ void MarkovOdeSolver::OdeSystem( const vector<double>& y, vector<double>& dydt )
             dydt[i] += y[j] * Q_[j][i];
     }
 }
-#endif
 
 ///////////////////////////////////////////////////
 // Field function definitions
@@ -222,57 +178,6 @@ string MarkovOdeSolver::getMethod() const
 void MarkovOdeSolver::setMethod( string method )
 {
     method_ = method;
-#ifdef USE_GSL
-    gslStepType_ = 0;
-
-    if ( method == "rk2" )
-    {
-        gslStepType_ = gsl_odeiv_step_rk2;
-    }
-    else if ( method == "rk4" )
-    {
-        gslStepType_ = gsl_odeiv_step_rk4;
-    }
-    else if ( method == "rk5" )
-    {
-        gslStepType_ = gsl_odeiv_step_rkf45;
-    }
-    else if ( method == "rkck" )
-    {
-        gslStepType_ = gsl_odeiv_step_rkck;
-    }
-    else if ( method == "rk8pd" )
-    {
-        gslStepType_ = gsl_odeiv_step_rk8pd;
-    }
-    else if ( method == "rk2imp" )
-    {
-        gslStepType_ = gsl_odeiv_step_rk2imp;
-    }
-    else if ( method == "rk4imp" )
-    {
-        gslStepType_ = gsl_odeiv_step_rk4imp;
-    }
-    else if ( method == "bsimp" )
-    {
-        gslStepType_ = gsl_odeiv_step_rk4imp;
-        cout << "Warning: implicit Bulirsch-Stoer method not yet implemented: needs Jacobian\n";
-    }
-    else if ( method == "gear1" )
-    {
-        gslStepType_ = gsl_odeiv_step_gear1;
-    }
-    else if ( method == "gear2" )
-    {
-        gslStepType_ = gsl_odeiv_step_gear2;
-    }
-    else
-    {
-        cout << "Warning: MarkovOdeSolver::innerSetMethod: method '" <<
-             method << "' not known, using rk5\n";
-        gslStepType_ = gsl_odeiv_step_rkf45;
-    }
-#endif
 }
 
 double MarkovOdeSolver::getRelativeAccuracy() const
@@ -322,27 +227,6 @@ void MarkovOdeSolver::init( vector< double > initialState )
     stateOde_.resize( nVars_ );
     isInitialized_ = 1;
 
-#ifdef  USE_GSL
-    assert( gslStepType_ != 0 );
-    if ( gslStep_ )
-        gsl_odeiv_step_free(gslStep_);
-    gslStep_ = gsl_odeiv_step_alloc( gslStepType_, nVars_ );
-    assert( gslStep_ != 0 );
-    if ( !gslEvolve_ )
-        gslEvolve_ = gsl_odeiv_evolve_alloc(nVars_);
-    else
-        gsl_odeiv_evolve_reset(gslEvolve_);
-    assert(gslEvolve_ != 0);
-    if ( !gslControl_ )
-        gslControl_ = gsl_odeiv_control_y_new( absAccuracy_, relAccuracy_ );
-    else
-        gsl_odeiv_control_init(gslControl_,absAccuracy_, relAccuracy_, 1, 0);
-    assert(gslControl_!= 0);
-    gslSys_.function = &MarkovOdeSolver::evalSystem;
-    gslSys_.jacobian = 0;
-    gslSys_.dimension = nVars_;
-    gslSys_.params = static_cast< void * >( &Q_ );
-#endif     /* -----  not USE_GSL  ----- */
 
 }
 
@@ -358,28 +242,6 @@ void MarkovOdeSolver::process( const Eref& e, ProcPtr p )
     for ( unsigned int i = 0; i < nVars_; ++i )
         stateOde_[i] = state_[i];
 
-
-#ifdef  USE_GSL
-    while( t < nextt )
-    {
-        int status = gsl_odeiv_evolve_apply ( gslEvolve_, gslControl_, gslStep_, &gslSys_,
-                &t, nextt, &internalStepSize_, &stateOde_[0]
-                );
-        //Simple idea borrowed from Dieter Jaeger's implementation of a Markov
-        //channel to deal with potential round-off error.
-        sum = 0;
-        for ( unsigned int i = 0; i < nVars_; i++ )
-            sum += stateOde_[i];
-
-        for ( unsigned int i = 0; i < nVars_; i++ )
-            stateOde_[i] /= sum;
-
-        if( status != GSL_SUCCESS )
-            break;
-    }
-#endif
-
-#if USE_BOOST_ODE
     auto sys = [this](const vector<double>& dy, vector<double>& dydt, const double t)
     { 
         this->OdeSystem(dy, dydt); 
@@ -412,7 +274,6 @@ void MarkovOdeSolver::process( const Eref& e, ProcPtr p )
                 );
     else
         odeint::integrate( sys, stateOde_, t, nextt, p->dt );
-#endif     /* -----  not USE_GSL  ----- */
 
 
     for ( unsigned int i = 0; i < nVars_; ++i )

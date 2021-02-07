@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [2.7, 3.7, 3.8]
+        python-version: [3.9]
 
     steps:
     - uses: actions/checkout@v2
@@ -19,8 +19,8 @@ jobs:
     - name: Install dependencies
       run: |
         export DEBIAN_FRONTEND=noninteractive
-        sudo -E apt install -y cmake libgsl-dev g++ gcc git 
-        sudo -E apt install python3-tk python-tk
+        sudo -E apt install -y cmake libboost-dev g++ gcc git 
+        sudo -E apt install python3-tk 
         python -m pip install numpy matplotlib --user
     - name: Build
       run: |

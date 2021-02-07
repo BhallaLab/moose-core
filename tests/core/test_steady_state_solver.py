@@ -21,7 +21,7 @@ def test_SS_solver():
     stoich = moose.Stoich( '/model/compartment/stoich' )
     stoich.compartment = compartment
     stoich.ksolve = ksolve
-    stoich.path = "/model/compartment/##"
+    stoich.reacSystemPath = "/model/compartment/##"
     state = moose.SteadyState( '/model/compartment/state' )
 
     moose.reinit()
@@ -39,6 +39,8 @@ def test_SS_solver():
     bvec = []
     moose.reinit()
 
+    print(state.showMatrices())
+
     # Now go up.
     for i in range( 0, num ):
         moose.start( 1.0 ) # Run the model for 1 seconds.
@@ -51,6 +53,7 @@ def test_SS_solver():
     got = np.mean(aa), np.std(aa)
     expected = 0.24899, 0.08660
     assert np.isclose(got, expected, atol = 1e-4).all(), "Got %s, expected %s" % (got, expected)
+    print(got, expected)
     print( "[INFO ] Test 1 PASSED" )
     
 

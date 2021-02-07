@@ -111,12 +111,6 @@ class build_ext(_build_ext):
         _build_ext.finalize_options(self)
         self.cmake_options["PYTHON_EXECUTABLE"] = os.path.realpath(sys.executable)
         self.cmake_options["VERSION_MOOSE"] = version_
-        if self.with_boost:
-            self.cmake_options["WITH_BOOST"] = "ON"
-            self.cmake_options["WITH_GSL"] = "OFF"
-        else:
-            if self.with_gsl_static:
-                self.cmake_options["GSL_USE_STATIC_LIBRARIES"] = "ON"
         if self.debug:
             self.cmake_options["CMAKE_BUILD_TYPE"] = "Debug"
         else:

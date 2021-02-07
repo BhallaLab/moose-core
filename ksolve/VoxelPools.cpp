@@ -11,14 +11,8 @@
 #include "../basecode/header.h"
 #include "../basecode/SparseMatrix.h"
 
-#ifdef USE_GSL
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_odeiv2.h>
-#elif USE_BOOST_ODE
 #include <boost/numeric/odeint.hpp>
 using namespace boost::numeric;
-#endif
 
 #include "OdeSystem.h"
 #include "VoxelPoolsBase.h"
@@ -36,19 +30,12 @@ using namespace boost::numeric;
 
 VoxelPools::VoxelPools() : pLSODA(nullptr)
 {
-#ifdef USE_GSL
-    driver_ = 0;
-#endif
 }
 
 VoxelPools::~VoxelPools()
 {
     for ( unsigned int i = 0; i < rates_.size(); ++i )
         delete( rates_[i] );
-#ifdef USE_GSL
-    if ( driver_ )
-        gsl_odeiv2_driver_free( driver_ );
-#endif
 }
 
 //////////////////////////////////////////////////////////////
@@ -57,12 +44,6 @@ VoxelPools::~VoxelPools()
 void VoxelPools::reinit( double dt )
 {
     VoxelPoolsBase::reinit();
-#ifdef USE_GSL
-    if ( !driver_ )
-        return;
-    gsl_odeiv2_driver_reset( driver_ );
-    gsl_odeiv2_driver_reset_hstart( driver_, dt / 10.0 );
-#endif
 
     // If method is LDODA create lSODA object and save the address of this as
     // param (void*).
@@ -83,23 +64,13 @@ void VoxelPools::setStoich( Stoich* s, const OdeSystem* ode )
         method_ = ode->method;
     }
 
-#ifdef USE_GSL
-    if ( ode )
-    {
-        sys_ = ode->gslSys;
-        if ( driver_ )
-            gsl_odeiv2_driver_free( driver_ );
-
-        driver_ = gsl_odeiv2_driver_alloc_y_new( &sys_, ode->gslStep
-                  , ode->initStepSize, ode->epsAbs, ode->epsRel);
-    }
-#endif
     VoxelPoolsBase::reinit();
 }
 
 const string VoxelPools::getMethod( )
 {
     Ksolve* k = reinterpret_cast<Ksolve*>( stoichPtr_->getKsolve().eref().data() );
+    assert(k);
     return k->getMethod( );
 }
 
@@ -131,24 +102,6 @@ void VoxelPools::advance( const ProcInfo* p )
     else
     {
 
-#ifdef USE_GSL
-        int status = gsl_odeiv2_driver_apply( driver_, &t, p->currTime, varS());
-        if ( status != GSL_SUCCESS )
-        {
-            cerr << "Error: VoxelPools::advance: GSL integration error at time "
-                << t << "\n";
-            cerr << "Error info: " << status << ", " <<
-                gsl_strerror( status ) << endl;
-            if ( status == GSL_EMAXITER )
-                cerr << "Max number of steps exceeded\n";
-            else if ( status == GSL_ENOPROG )
-                cerr << "Timestep has gotten too small\n";
-            else if ( status == GSL_EBADFUNC )
-                cerr << "Internal error\n";
-            assert( 0 );
-        }
-
-#elif USE_BOOST_ODE
         // NOTE: Make sure to assing vp to BoostSys vp. In next call, it will be used by
         // updateRates func. Unlike gsl call, we can't pass extra void*  to gslFunc.
         VoxelPools* vp = reinterpret_cast< VoxelPools* >( this );
@@ -287,7 +240,6 @@ cleaner.
                     , p->currTime
                     , p->dt
                     );
-#endif   // USE_GSL
     }
 
     if ( !stoichPtr_->getAllowNegative() )   // clean out negatives
@@ -304,30 +256,12 @@ cleaner.
 
 void VoxelPools::setInitDt( double dt )
 {
-#ifdef USE_GSL
-    gsl_odeiv2_driver_reset_hstart( driver_, dt );
-#endif
 }
-
-#ifdef USE_GSL
-// static func. This is the function that goes into the Gsl solver.
-int VoxelPools::gslFunc( double t, const double* y, double *dydt, void* params )
-{
-    VoxelPools* vp = reinterpret_cast< VoxelPools* >( params );
-    double* q = const_cast< double* >( y ); // Assign the func portion.
-    vp->stoichPtr_->updateFuncs( q, t );
-    vp->updateRates( y, dydt );
-    return GSL_SUCCESS;
-}
-
-#elif USE_BOOST_ODE   // NOT GSL
 
 void VoxelPools::evalRates( VoxelPools* vp, const vector_type_& y,  vector_type_& dydt )
 {
     vp->updateRates( &y[0], &dydt[0] );
 }
-
-#endif // USE_BOOST_ODE
 
 /* --------------------------------------------------------------------------*/
 /**

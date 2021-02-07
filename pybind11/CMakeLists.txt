@@ -1,9 +1,5 @@
 # Add pybind11 module.
 
-execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version
-    OUTPUT_VARIABLE COMPILER_STRING
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
 pybind11_add_module(_moose 
     pymoose.cpp 
     helper.cpp 
