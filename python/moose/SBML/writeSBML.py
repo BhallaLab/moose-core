@@ -17,6 +17,8 @@ Last-Updated: Tue 08 Sep 02:22:10 2020(+0530)
           By: HarshaRani
 **********************************************************************/
 /****************************
+2021
+Apr 16: replace ReacBase to Reac and EnzBase to Enz as API can has changed
 2020
 Sep 08: replaced getId->id, getId().value-> idValue,getDataIndex-dataIndex, isinstance is replaced with isA these changes are with respect to
         new python-binding c38580789d8fb65
@@ -119,8 +121,8 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
         checkCompt = moose.wildcardFind(modelpath+'/##[0][ISA=ChemCompt]')
         
         mObj = moose.wildcardFind(moose.element(modelpath).path+'/##[0][ISA=PoolBase]'+','+
-                                  moose.element(modelpath).path+'/##[0][ISA=ReacBase]'+','+
-                                  moose.element(modelpath).path+'/##[0][ISA=EnzBase]'+','+
+                                  moose.element(modelpath).path+'/##[0][ISA=Reac]'+','+
+                                  moose.element(modelpath).path+'/##[0][ISA=Enz]'+','+
                                   moose.element(modelpath).path+'/##[0][ISA=StimulusTable]')
         for p in mObj:
             if not moose.element(p.parent).isA("CplxEnzBase"):
@@ -350,7 +352,7 @@ def writeChannel(modelpath, cremodel_, sceneitems,groupInfo):
             channelUnit = permeablUnit(cremodel_)
             printParameters(kl, "Permeability", chan.permeability, channelUnit)    
 def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
-    for enz in moose.wildcardFind(modelpath + '/##[0][ISA=EnzBase]'):
+    for enz in moose.wildcardFind(modelpath + '/##[0][ISA=Enz]'):
         enzannoexist = False
         enzGpnCorCol = " "
         cleanEnzname = convertSpecialChar(enz.name)
@@ -860,7 +862,7 @@ def listofname(reacSub, mobjEnz):
 
 
 def writeReac(modelpath, cremodel_, sceneitems,reacGroup):
-    for reac in moose.wildcardFind(modelpath + '/##[0][ISA=ReacBase]'):
+    for reac in moose.wildcardFind(modelpath + '/##[0][ISA=Reac]'):
         reacSub = reac.neighbors["sub"]
         reacPrd = reac.neighbors["prd"]
         if (len(reacSub) != 0 and len(reacPrd) != 0):
@@ -1116,7 +1118,7 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
                 s1.setId(spename)
 
                 if spename.find(
-                        "cplx") != -1 and spe.parent.isA("EnzBase"):
+                        "cplx") != -1 and spe.parent.isA("Enz"):
                     enz = spe.parent
                     if not moose.exists(spe.path+'/info'):
                         cplxinfo = moose.Annotator(spe.path+'/info')
