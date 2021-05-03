@@ -20,7 +20,7 @@ class MoogulError( Exception ):
 
 class MooView:
     ''' The MooView class is a window in which to display one or more 
-    moose cells, using the MooCell class.'''
+    moose cells, using the MooNeuron class.'''
     def __init__( self, swx = 10, swy = 12, hideAxis = True
     ):
         plt.ion()
@@ -132,6 +132,14 @@ class MooView:
             self.ax.azim += self.sensitivity
         if event.key == "Y":
             self.ax.azim -= self.sensitivity
+        if event.key == "d": # yaw
+            for d in self.drawables_:
+                d.diaScale *= 0.9
+                d.updateCoords()
+        if event.key == "D":
+            for d in self.drawables_:
+                d.diaScale *= 1.1
+                d.updateCoords()
         # Don't have anything for roll
         if event.key == "g":
             self.hideAxis = not self.hideAxis
@@ -160,6 +168,8 @@ class MooView:
             P:          Pitch up
             y:          Yaw counterclockwise
             Y:          Yaw counterclockwise
+            d:          diminish diameter
+            D:          Distend diameter.
             g:          Toggle visibility of grid
             t:          Toggle turn (rotation along long axis of cell)
             ?:          Print this help page.
@@ -186,6 +196,7 @@ class MooDrawable:
         self.valMax = valMax
         self.fieldInfo = fieldInfo
         self.fieldScale = fieldInfo[2]
+        self.segments = 0
         #FieldInfo = [baseclass, fieldGetFunc, scale, axisText, min, max]
 
     def updateValues( self ):
@@ -202,6 +213,10 @@ class MooDrawable:
         self.rgba = [ cmap(i) for i in scaleVal ]
         self.segments.set_color( self.rgba )
         return
+
+    def updateLines( self ):
+        if self.segments:
+            self.segments.set_linewidth( self.linewidth )
 
     def drawForTheFirstTime( self, ax ):
         self.segments = Line3DCollection( self.activeCoords, 
@@ -268,6 +283,7 @@ class MooNeuron( MooDrawable ):
         self.coordMax = np.amax( self.activeCoords )
         self.coordMin = np.amin( self.activeCoords )
         self.linewidth = np.array( [ min(self.maxLineWidth, 1 + int(i * self.diaScale )) for i in self.activeDia ] )
+        super().updateLines()
 
         return
 

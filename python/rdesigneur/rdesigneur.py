@@ -398,6 +398,8 @@ class rdesigneur:
                 self._buildElecSoma( i )
             elif i[0] == 'ballAndStick':
                 self._buildElecBallAndStick( i )
+            elif i[0] == 'branchedCell':
+                self._buildElecBranchedCell( i )
             elif self.checkAndBuildProto( "cell", i, \
                 ["Compartment", "SymCompartment"], ["swc", "p", "nml", "xml"] ):
                 self.elecid = moose.element( '/library/' + i[1] )
@@ -468,6 +470,50 @@ class rdesigneur:
             moose.connect( prev, 'axial', compt, 'raxial' )
             prev = compt
             x += dx
+        self.elecid = cell
+        return cell
+
+    ################################################################
+    def _buildElecBranchedCell( self, args ):
+        parms = [ 'branchedCell', 'cell', 10e-6, 10e-6, 4e-6, 200e-6, 1, 2.5e-6, 200e-6, 1 ] # somaDia, somaLen, dendDia, dendLen, dendNumSeg, branchDia, branchLen, branchNumSeg
+        for i in range( len(args) ):
+            parms[i] = args[i]
+        if parms[9] <= 0:
+            return self.buildElecSoma( parms[:4] )
+        cell = moose.Neuron( '/library/' + parms[1] )
+        prev = buildCompt( cell, 'soma', dia = args[2], dx = args[3] )
+        dx = parms[5]/parms[6]
+        x = prev.x
+        for i in range( parms[6] ):
+            compt = buildCompt( cell, 'dend' + str(i), x = x, dx = dx, dia = args[4] )
+            moose.connect( prev, 'axial', compt, 'raxial' )
+            prev = compt
+            x += dx
+        primaryBranchEnd = prev
+        x = prev.x
+        y = prev.y
+        dxy = (parms[8]/float(parms[9])) * np.sqrt( 1.0/2.0 )
+        for i in range( parms[9] ):
+            compt = buildCompt( cell, 'branch1_' + str(i), 
+                    x = x, dx = dxy, y = y, dy = dxy, 
+                    dia = args[7] )
+            moose.connect( prev, 'axial', compt, 'raxial' )
+            prev = compt
+            x += dxy
+            x += dxy
+
+        x = primaryBranchEnd.x
+        y = primaryBranchEnd.y
+        prev = primaryBranchEnd
+        for i in range( parms[9] ):
+            compt = buildCompt( cell, 'branch2_' + str(i), 
+                    x = x, dx = dxy, y = y, dy = -dxy, 
+                    dia = args[7] )
+            moose.connect( prev, 'axial', compt, 'raxial' )
+            prev = compt
+            x += dxy
+            y -= dxy
+
         self.elecid = cell
         return cell
 
@@ -863,7 +909,8 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 if len( wp[2] ) > f:
                     wp[1].set_ydata( wp[2][f] )
                     wp[3].set_text( "time = {:.1f}".format(f*self.frameDt) )
-                    wp[0].canvas.draw()
+                    #wp[0].canvas.draw()
+                    wp[0].canvas.flush_events()
             #plt.pause(0.001)
         
         #This calls the _save function which saves only if the filenames have been specified

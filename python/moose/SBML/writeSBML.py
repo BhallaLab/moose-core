@@ -1375,6 +1375,11 @@ def recalculatecoordinates(modelpath, mObjlist,xcord,ycord):
         xmax = max(xcord)
         ymin = min(ycord)
         ymax = max(ycord)
+        if xmax == xmin:
+            xmax = xmin + 1
+        if ymax == ymin:
+            ymax = ymin + 1
+
         for merts in mObjlist:
             objInfo = merts.path+'/info'
             if moose.exists(objInfo):
