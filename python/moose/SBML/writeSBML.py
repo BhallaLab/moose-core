@@ -125,7 +125,7 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
                                   moose.element(modelpath).path+'/##[0][ISA=Enz]'+','+
                                   moose.element(modelpath).path+'/##[0][ISA=StimulusTable]')
         for p in mObj:
-            if not moose.element(p.parent).isA("CplxEnzBase"):
+            if not moose.element(p.parent).isA("Enz"):
                 if moose.exists(p.path+'/info'):
                     xcord.append(moose.element(p.path+'/info').x)
                     ycord.append(moose.element(p.path+'/info').y)

@@ -339,7 +339,7 @@ void VoxelPoolsBase::filterCrossRateTerms(
                         delete rates_[k];
                     rates_[k] = new ExternReac;
                 }
-                if ( reacCinfo->isA( "CplxEnzBase" ) )   // Delete next two.
+                if ( reacCinfo->isA( "Enz" ) )   // Delete next two.
                 {
                     if ( rates_[k] )
                         delete rates_[k];
@@ -353,7 +353,7 @@ void VoxelPoolsBase::filterCrossRateTerms(
             }
             else
             {
-                if ( reacCinfo->isA( "CplxEnzBase" ) )   // Delete next one.
+                if ( reacCinfo->isA( "Enz" ) )   // Delete next one.
                 {
                     k++;
                     assert( k < rates_.size() );

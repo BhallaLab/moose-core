@@ -679,11 +679,11 @@ void Stoich::locateOffSolverReacs(Id myCompt, vector<Id>& elist)
                     offSolverReacVec_.push_back(*i);
                     offSolverReacCompts_.push_back(extractCompts(compts));
                 }
-                else if(e->cinfo()->isA("CplxEnzBase")) {
+                else if(e->cinfo()->isA("Enz")) {
                     offSolverEnzVec_.push_back(*i);
                     offSolverEnzCompts_.push_back(extractCompts(compts));
                 }
-                else if(e->cinfo()->isA("EnzBase")) {
+                else if(e->cinfo()->isA("MMEnz")) {
                     offSolverMMenzVec_.push_back(*i);
                     offSolverMMenzCompts_.push_back(extractCompts(compts));
                 }
@@ -1210,7 +1210,6 @@ void Stoich::zombifyModel(const Eref& e, const vector<Id>& elist)
         }
         else if(ei->cinfo() == enzCinfo) {
 			SetGet1< ObjId >::set( *i, "setSolver", e.id() );
-            //CplxEnzBase::zombify(ei, zombieEnzCinfo, e.id());
         }
     }
 }
@@ -1916,7 +1915,7 @@ void Stoich::updateRatesAfterRemesh()
         setReacKb(i->eref(), Kb);
     }
     for(i = offSolverEnzVec_.begin(); i != offSolverEnzVec_.end(); ++i) {
-        assert(i->element()->cinfo()->isA("CplxEnzBase"));
+        assert(i->element()->cinfo()->isA("Enz"));
         double concK1 = Field<double>::get(*i, "concK1");
         double k3 = Field<double>::get(*i, "k3");
         double k2 = Field<double>::get(*i, "k2");
@@ -1925,7 +1924,7 @@ void Stoich::updateRatesAfterRemesh()
         setEnzK1(i->eref(), concK1);
     }
     for(i = offSolverMMenzVec_.begin(); i != offSolverMMenzVec_.end(); ++i) {
-        assert(i->element()->cinfo()->isA("MMEnzBase"));
+        assert(i->element()->cinfo()->isA("MMEnz"));
         double Km = Field<double>::get(*i, "Km");
         double kcat = Field<double>::get(*i, "kcat");
         setMMenzKm(i->eref(), Km);

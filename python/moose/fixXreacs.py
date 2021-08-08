@@ -35,7 +35,7 @@ def checkEqual(lst):
 
 
 def findXreacs(basepath, reacType):
-    reacs = _moose.wildcardFind(basepath + '/##[ISA=' + reacType + 'Base]')
+    reacs = _moose.wildcardFind(basepath + '/##[ISA=' + reacType+ ']')
     ret = []
     for i in reacs:
         reacc = findCompt(i)
@@ -105,7 +105,7 @@ def reacProxify(reac, reacc, direction, pool, poolc):
 
 
 def identifyMsg(src, srcOut, dest):
-    if src.isA['ReacBase'] or src.isA['EnzBase']:
+    if src.isA['Reac'] or src.isA['EnzBase']:
         if srcOut == 'subOut':
             return msgSeparator + src.path + ' sub ' + dest.path + ' reac'
         if srcOut == 'prdOut':
@@ -167,7 +167,7 @@ def getOldRates(msgs):
     if len(msgs) > 1:
         m1 = msgs[1].split(msgSeparator)[0]
         elm = moose.element(m1.split(' ')[0])
-        if elm.isA['ReacBase']:
+        if elm.isA['Reac']:
             return [elm.numKf, elm.numKb]
         elif elm.isA['EnzBase']:
             return [
@@ -184,7 +184,7 @@ def restoreOldRates(oldRates, msgs):
     if len(msgs) > 1:
         m1 = msgs[1].split(msgSeparator)[0]
         elm = moose.element(m1.split(' ')[0])
-        if elm.isA['ReacBase']:
+        if elm.isA['Reac']:
             elm.numKf = oldRates[0]
             elm.numKb = oldRates[1]
         elif elm.isA['enzBase']:
