@@ -811,9 +811,14 @@ def writeNotes(modelpath,f):
             notes = moose.Annotator(info).getField('notes')
             if not notes:
                 continue
-            m = r'call /kinetics/{0}/notes LOAD \ \n"{1}"\n'.format(
-                    trimPath(item), moose.Annotator(info).getField('notes')
-                    )
+            # The below form fails in python3 because the \n gets 
+            # printed as regular text rather than a carriage return.
+            #m = r'call /kinetics/{0}/notes LOAD \ \n"{1}"\n'.format(
+                    #trimPath(item), moose.Annotator(info).getField('notes')
+                    #)
+            m = 'call /kinetics/{0}/notes LOAD \\\n'.format(trimPath(item) )
+            f.write(m)
+            m = '"{}"\n'.format(moose.Annotator(info).getField('notes'))
             f.write(m)
             #  f.write("call /kinetics/"+trimPath(item)+"/notes LOAD \ \n\""+moose.Annotator(info).getField('notes')+"\"\n")
 
