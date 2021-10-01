@@ -1078,7 +1078,7 @@ Id ReadKkit::buildPool( const vector< string >& args )
     double nInit = atof( args[ poolMap_[ "nInit" ] ].c_str() );
     // double concInit = atof( args[ poolMap_[ "CoInit" ] ].c_str() );
     double vsf = atof( args[ poolMap_[ "vol" ] ].c_str() );
-	double concInit = nInit / vsf;
+	double concInit = nInit * KKIT_NA / (vsf * NA);
     /**
      * vsf is vol scale factor, which is what GENESIS stores in 'vol' field
      * n = vsf * conc( uM )
