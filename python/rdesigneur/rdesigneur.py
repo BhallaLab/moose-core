@@ -1288,13 +1288,13 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
     #################################################################
 
-    def _isModelFromKkit( self ):
+    def _isModelFromKkit_SBML( self ):
         for i in self.chemProtoList:
-            if i[0][-2:] == ".g":
+            if i[0][-2:] == ".g" or i[0][-4:] == ".xml":
                 return True
         return False
 
-    def _assignComptNamesFromKkit( self ):
+    def _assignComptNamesFromKkit_SBML( self ):
         '''
         Algorithm: Identify compts by volume. Assume a couple of standard
         orders depending on the addSomaChemCompt and addEndoChemCompt
@@ -1315,7 +1315,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             if comptList[0].name != 'dend':
                 comptList[0].name = 'dend'
             return comptList
-        if not self._isModelFromKkit():
+        if not self._isModelFromKkit_SBML():
             return comptList
         sortedComptList = sorted( comptList, key=lambda x: -x.volume )
         if self.addSomaChemCompt:
@@ -1352,7 +1352,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
         self.chemid.name = 'temp_chem'
         newChemid = moose.Neutral( self.model.path + '/chem' )
-        comptlist = self._assignComptNamesFromKkit()
+        comptlist = self._assignComptNamesFromKkit_SBML()
         comptdict = { i.name:i for i in comptlist }
         if len(comptdict) == 1 or 'dend' in comptdict:
             self.dendCompt = moose.NeuroMesh( newChemid.path + '/dend' )
@@ -1466,7 +1466,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
         chem = moose.Neutral( '/library/' + chemName )
         pre, ext = os.path.splitext( fname )
         if ext == '.xml' or ext == '.sbml':
-            modelId = moose.mooseReadSBML( fname, chem.path )
+            modelId = moose.readSBML( fname, chem.path )
         else:
             modelId = moose.loadModel( fname, chem.path, 'ee' )
         comptlist = moose.wildcardFind( chem.path + '/#[ISA=ChemCompt]' )
