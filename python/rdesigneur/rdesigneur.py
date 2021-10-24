@@ -697,7 +697,7 @@ class rdesigneur:
         if kf[0] in ['CaConcBase', 'ChanBase', 'NMDAChan', 'VClamp']:
             objList = self._collapseElistToPathAndClass( comptList, plotSpec.relpath, kf[0] )
             return objList, kf[1]
-        elif field in [ 'n', 'conc', 'volume']:
+        elif field in [ 'n', 'conc', 'volume', 'increment']:
             path = plotSpec.relpath
             pos = path.find( '/' )
             if pos == -1:   # Assume it is in the dend compartment.
@@ -1009,6 +1009,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 'conc':('PoolBase', 'setConc'),
                 'nInit':('PoolBase', 'setNinit'),
                 'concInit':('PoolBase', 'setConcInit'),
+                'increment':('PoolBase', 'increment'),
                 'vclamp':('CompartmentBase', 'setInject'),
                 'randsyn':('SynChan', 'addSpike'),
                 'periodicsyn':('SynChan', 'addSpike')
@@ -1045,6 +1046,8 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 func.doEvalAtReinit = 1
                 for q in stimObj3:
                     moose.connect( func, 'valueOut', q, stimField )
+                if stimField == "increment": # Has to be under Ksolve
+                    moose.move( func, q )
 
     ################################################################
     def _configureHSolve( self ):
@@ -1561,10 +1564,14 @@ rdesigneur.rmoogli.updateMoogliViewer()
                     moose.connect( i[3], 'output', chemVec[j],chemFieldDest)
             else:
                 chemFieldSrc = 'get' + capChemField
-                elecFieldDest = 'set' + capField
+                if capField == 'Activation':
+                    elecFieldDest = 'activation'
+                else:
+                    elecFieldDest = 'set' + capField
                 for j in range( i[1], i[2] ):
                     moose.connect( i[3], 'requestOut', chemVec[j], chemFieldSrc)
                 msg = moose.connect( i[3], 'output', elObj, elecFieldDest )
+                print( "Connecting {} to {} and {}.{}".format( i[3], chemVec[0], elObj, elecFieldDest ) )
 
 
 #######################################################################
