@@ -170,7 +170,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
                             if errorFlag:
                                 errorFlag, msgReac = createReaction(
                                     model, specInfoMap, modelAnnotaInfo, globparameterIdValue,funcDef,groupInfo)
-                                if len(moose.wildcardFind(moose.element(loadpath).path+"/##[ISA=Reac],/##[ISA=Enz]")) == 0:
+                                if len(moose.wildcardFind(moose.element(loadpath).path+"/##[ISA=Reac],/##[ISA=EnzBase]")) == 0:
                                     errorFlag = False
                                     noRE = ("Atleast one reaction should be present to display in the widget ")
                         getModelAnnotation(model, baseId)
@@ -254,7 +254,7 @@ def checkGroup(basePath,model,comptSbmlidMooseIdMap):
             if groupAnnoInfo != {}:
                 if moose.exists(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name):
                     groupName = p.getName()
-                    if groupName == " ":
+                    if groupName == "":
                         groupName = p.getId()
                     if "Group" in groupAnnoInfo:
                         if moose.exists(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name+'/'+groupAnnoInfo["Group"]):

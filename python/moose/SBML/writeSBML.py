@@ -122,7 +122,7 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
         
         mObj = moose.wildcardFind(moose.element(modelpath).path+'/##[0][ISA=PoolBase]'+','+
                                   moose.element(modelpath).path+'/##[0][ISA=Reac]'+','+
-                                  moose.element(modelpath).path+'/##[0][ISA=Enz]'+','+
+                                  moose.element(modelpath).path+'/##[0][ISA=EnzBase]'+','+
                                   moose.element(modelpath).path+'/##[0][ISA=StimulusTable]')
         for p in mObj:
             if not moose.element(p.parent).isA("Enz"):
@@ -352,7 +352,7 @@ def writeChannel(modelpath, cremodel_, sceneitems,groupInfo):
             channelUnit = permeablUnit(cremodel_)
             printParameters(kl, "Permeability", chan.permeability, channelUnit)    
 def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
-    for enz in moose.wildcardFind(modelpath + '/##[0][ISA=Enz]'):
+    for enz in moose.wildcardFind(modelpath + '/##[0][ISA=EnzBase]'):
         enzannoexist = False
         enzGpnCorCol = " "
         cleanEnzname = convertSpecialChar(enz.name)
@@ -1099,6 +1099,7 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
     # getting all the species
     for spe in moose.wildcardFind(modelpath + '/##[0][ISA=PoolBase]'):
         #Eliminating xfer molecules writting
+        
         if not re.search("_xfer_",spe.name):
             
             sName = convertSpecialChar(spe.name)
@@ -1116,9 +1117,7 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
                     str(spe.idValue) + "_" + str(spe.dataIndex) + "_"
                 spename = str(idBeginWith(spename))
                 s1.setId(spename)
-
-                if spename.find(
-                        "cplx") != -1 and spe.parent.isA("Enz"):
+                if spename.find("cplx") != -1 and spe.parent.isA("Enz"):
                     enz = spe.parent
                     if not moose.exists(spe.path+'/info'):
                         cplxinfo = moose.Annotator(spe.path+'/info')
@@ -1179,8 +1178,8 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
 
 
                     element = moose.element(spe)
-                    ele = getGroupinfo(element)
-                    
+                    #ele = getGroupinfo(element)
+                    ele =  findGroup_compt(element)
                     speciAnno = "<moose:ModelAnnotation>\n"
                     if ele.className == "Neutral":
                         #speciAnno = speciAnno + "<moose:Group>" + ele.name + "</moose:Group>\n"
