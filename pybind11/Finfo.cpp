@@ -183,6 +183,7 @@ py::cpp_function __Finfo__::getDestFinfoSetterFunc2(const ObjId& oid,
         }
     }
 
+
     if(ftype1 == "Id") {
         if(ftype2 == "Id") {
             std::function<bool(Id, Id)> func = [oid, fname](Id a, Id b) {

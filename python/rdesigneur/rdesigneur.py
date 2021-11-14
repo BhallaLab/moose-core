@@ -769,8 +769,8 @@ class rdesigneur:
             pair = i.elecpath + " " + i.geom_expr
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
             spineCompts = self.elecid.spinesFromExpression[ pair ]
-            dendObj, mooField = self._parseComptField( dendCompts, i, knownFields )
-            spineObj, mooField2 = self._parseComptField( spineCompts, i, knownFields )
+            dendObj, mooField = self._MoogparseComptField( dendCompts, i, knownFields )
+            spineObj, mooField2 = self._MoogparseComptField( spineCompts, i, knownFields )
             assert( mooField == mooField2 )
             mooObj3 = dendObj + spineObj
             numMoogli = len( mooObj3 )

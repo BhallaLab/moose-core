@@ -218,7 +218,7 @@ class MooDrawable:
 class MooNeuron( MooDrawable ):
     ''' Draws collection of line segments of defined dia and color'''
     def __init__( self,
-        neuronId,
+        mooObj,
         fieldInfo,
         field = 'Vm', 
         relativeObj = '.', 
@@ -235,12 +235,12 @@ class MooNeuron( MooDrawable ):
                 colormap = colormap, lenScale = lenScale, 
                 diaScale = diaScale, autoscale = autoscale, 
                 valMin = valMin, valMax = valMax )
-        self.neuronId = neuronId
+        self.mooObj = mooObj
         self.updateCoords()
 
     def updateCoords( self ):
         ''' Obtains coords from the associated cell'''
-        self.compts_ = moose.wildcardFind( self.neuronId.path + "/#[ISA=CompartmentBase]" )
+        self.compts_ = self.mooObj
         # Matplotlib3d isn't able to do full rotations about an y axis,
         # which is what the NeuroMorpho models use, so
         # here we shuffle the axes around. Should be an option.
