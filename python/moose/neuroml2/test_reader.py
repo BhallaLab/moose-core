@@ -78,8 +78,8 @@ class TestFullCell(unittest.TestCase):
         self.assertIsNotNone(self.reader.doc, 'doc is None')
 
     def test_createCellPrototype(self):
-        self.assertIsInstance(self.mcell, moose.Neuron)
-        self.assertEqual(self.mcell.name, self.ncell.id)
+        self.assertEqual(moose.element(self.mcell).className, 'Neuron')
+        self.assertEqual(moose.element(self.mcell).name, self.ncell.name)
 
     def test_createMorphology(self):
         for comp_id in moose.wildcardFind(self.mcell.path + '/##[ISA=Compartment]'):

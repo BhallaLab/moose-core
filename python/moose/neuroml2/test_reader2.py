@@ -70,7 +70,7 @@ class TestPassiveCell(unittest.TestCase):
         self.assertIsNotNone(self.reader.doc, 'doc is None')
     
     def test_createCellPrototype(self):
-        self.assertIsInstance(moose.element(self.mcell).className, moose.Neuron)
+        self.assertEqual(moose.element(self.mcell).className, 'Neuron')
         self.assertEqual(moose.element(self.mcell).name, self.ncell.name)
         
     def test_createMorphology(self):
