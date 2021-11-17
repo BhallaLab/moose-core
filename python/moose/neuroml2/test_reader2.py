@@ -50,6 +50,8 @@ import neuroml as nml
 
 class TestPassiveCell(unittest.TestCase):
     def setUp(self):
+        if '/library' in moose.le():
+            moose.delete('/library')
         self.reader = NML2Reader(verbose=True)
         self.lib = moose.Neutral('/library')
         self.filename = 'test_files/passiveCell.nml'
@@ -67,7 +69,6 @@ class TestPassiveCell(unittest.TestCase):
         self.assertIsNotNone(self.reader.doc, 'doc is None')
     
     def test_createCellPrototype(self):
-        
         #self.assertIsInstance(moose.element(self.mcell).className, moose.Neuron)
         self.assertEqual(moose.element(self.mcell).name, self.ncell.name)
         
