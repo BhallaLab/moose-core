@@ -47,6 +47,7 @@ import unittest
 import moose
 from reader import NML2Reader
 import neuroml as nml
+import os
 
 class TestPassiveCell(unittest.TestCase):
     def setUp(self):
@@ -54,7 +55,7 @@ class TestPassiveCell(unittest.TestCase):
             moose.delete('/library')
         self.reader = NML2Reader(verbose=True)
         self.lib = moose.Neutral('/library')
-        self.filename = 'test_files/passiveCell.nml'
+        self.filename = os.path.realpath('test_files/passiveCell.nml')
         self.reader.read(self.filename)
         for ncell in self.reader.nml_cells_to_moose:
             #if isinstance((self.reader.nml_cells_to_moose[ncell]).type,moose.Neuron):
@@ -65,11 +66,11 @@ class TestPassiveCell(unittest.TestCase):
         self.soma = moose.element(self.mcell.path + '/soma')
                 
     def test_basicLoading(self):
-        #self.assertEqual(self.reader.filename, self.filename, 'filename was not set')
+        self.assertEqual(self.reader.filename, self.filename, 'filename was not set')
         self.assertIsNotNone(self.reader.doc, 'doc is None')
     
     def test_createCellPrototype(self):
-        #self.assertIsInstance(moose.element(self.mcell).className, moose.Neuron)
+        self.assertIsInstance(moose.element(self.mcell).className, moose.Neuron)
         self.assertEqual(moose.element(self.mcell).name, self.ncell.name)
         
     def test_createMorphology(self):
