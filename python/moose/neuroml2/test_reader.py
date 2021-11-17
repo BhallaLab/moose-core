@@ -60,9 +60,9 @@ class TestFullCell(unittest.TestCase):
         self.lib = moose.Neutral('/library')
         self.filename = 'test_files/NML2_FullCell.nml'
         self.reader.read(self.filename)
-        for ncell in self.reader.nml_to_moose:
-            if isinstance(ncell, nml.Cell):
-                self.ncell = ncell
+        for ncell in self.reader.nml_cells_to_moose:
+            if self.reader.nml_cells_to_moose[ncell].isA("Neuron"):
+                self.ncell = self.reader.nml_cells_to_moose[ncell]
                 break
         self.mcell = moose.element('/library/SpikingCell')
         self.soma = moose.element(self.mcell.path + '/Soma')
