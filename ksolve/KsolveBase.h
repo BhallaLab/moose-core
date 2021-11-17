@@ -1,35 +1,37 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment.
-**           Copyright (C) 2003-2014 Upinder S. Bhalla. and NCBS
+**           Copyright (C) 2003-2020 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _ZOMBIE_POOL_INTERFACE_H
-#define _ZOMBIE_POOL_INTERFACE_H
+#ifndef _KSOLVE_BASE_H
+#define _KSOLVE_BASE_H
 
 /**
- * This pure virtual base class is for solvers that want to talk to
- * the zombie pool.
+ * This pure virtual base class is for solvers that want to talk to pools.
  * The Eref specifies both the pool identity and the voxel number within
  * the pool.
  */
-class ZombiePoolInterface
+class KsolveBase
 {
 public:
-    ZombiePoolInterface();
+    KsolveBase();
 
-    /// Set initial # of molecules in given pool and voxel. Bdry cond.
-    virtual void setNinit( const Eref& e, double val ) = 0;
-    /// get initial # of molecules in given pool and voxel. Bdry cond.
-    virtual double getNinit( const Eref& e ) const = 0;
+    /// Set initial conc of molecules in given pool and voxel. Bdry cond.
+    virtual void setConcInit( const Eref& e, double val ) = 0;
+    /// get initial conc of molecules in given pool and voxel. Bdry cond.
+    virtual double getConcInit( const Eref& e ) const = 0;
 
     /// Set # of molecules in given pool and voxel. Varies with time.
     virtual void setN( const Eref& e, double val ) = 0;
     /// Get # of molecules in given pool and voxel. Varies with time.
     virtual double getN( const Eref& e ) const = 0;
+
+    /// Set buffer status of pool. Changes class between Pool and BufPool
+    virtual void setIsBuffered( const Eref& e, bool val ) {;}
 
     /// Diffusion constant: Only one per pool, voxel number is ignored.
     virtual void setDiffConst( const Eref& e, double val ) = 0;
@@ -38,6 +40,8 @@ public:
 
     /// Motor constant: Only one per pool, voxel number is ignored.
     /// Used only in Dsolves, so here I put in a dummy.
+    virtual double getMotorConst( const Eref& e )
+    { return 0.0;}
     virtual void setMotorConst( const Eref& e, double val )
     {;}
 
@@ -59,6 +63,19 @@ public:
     /// Return volume of voxel i.
     virtual double volume( unsigned int i ) const = 0;
 
+	/// Return volume of pool e.
+    virtual double getVolumeOfPool( const Eref& e ) const = 0;
+
+	///////////////////////////////////////////////////////////////////
+	// Here is a block of notify events
+	///////////////////////////////////////////////////////////////////
+	
+	virtual void notifyDestroyPool( const Eref& e );
+	virtual void notifyAddPool( const Eref& e );
+	virtual void notifyRemovePool( const Eref& e );
+	virtual void notifyAddMsgSrcPool( const Eref& e, ObjId msgId );
+	virtual void notifyAddMsgDestPool( const Eref& e, ObjId msgId );
+
     /**
      * Gets block of data. The first 4 entries are passed in
      * on the 'values' vector: the start voxel, numVoxels,
@@ -66,7 +83,7 @@ public:
      * These are followed by numVoxels * numPools of data values
      * which are filled in by the function.
      * We assert that the entire requested block is present in
-     * this ZombiePoolInterface.
+     * this KsolveBase.
      * The block is organized as an array of arrays of voxels;
      * values[pool#][voxel#]
      *
@@ -130,4 +147,4 @@ protected:
     bool isBuilt_;
 };
 
-#endif    // _ZOMBIE_POOL_INTERFACE_H
+#endif    // _KSOLVE_BASE_H

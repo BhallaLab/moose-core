@@ -26,7 +26,7 @@
  * Some DiffPoolVecs are for molecules that don't diffuse. These
  * simply have an empty opvec.
  */
-class Dsolve: public ZombiePoolInterface
+class Dsolve: public KsolveBase
 {
 public:
     Dsolve();
@@ -96,7 +96,7 @@ public:
      * the junction between any specified pair of Dsolves.
      * Note that it builds the junction on the 'self' Dsolve.
      */
-    static void innerBuildMeshJunctions( Id self, Id other,
+    static void innerBuildMeshJunctions( ObjId self, ObjId other,
                                          bool isMembraneBound );
 
     /// Sets up map of matching pools for diffusion.
@@ -124,12 +124,13 @@ public:
     void calcJunction_chunk( const size_t begin, const size_t end, double dt );
 
     //////////////////////////////////////////////////////////////////
-    // Inherited virtual funcs from ZombiePoolInterface
+    // Inherited virtual funcs from KsolveBase
     //////////////////////////////////////////////////////////////////
-    double getNinit( const Eref& e ) const;
-    void setNinit( const Eref& e, double value );
+    double getConcInit( const Eref& e ) const;
+    void setConcInit( const Eref& e, double value );
     double getN( const Eref& e ) const;
     void setN( const Eref& e, double value );
+	double getVolumeOfPool( const Eref& e ) const;
     double getDiffConst( const Eref& e ) const;
     void setDiffConst( const Eref& e, double value );
     void setMotorConst( const Eref& e, double value );
@@ -177,7 +178,7 @@ public:
      * the Dsolve, and the stoich is assigned.
      * Called during the setStoich function.
      */
-    void build( double dt );
+    void build( double dt, const MeshCompt* m );
     void rebuildPools();
     void calcJnDiff( const DiffJunction& jn, Dsolve* other, double dt );
     void calcJnXfer( const DiffJunction& jn,

@@ -12,10 +12,8 @@
 #include <iomanip>
 #include <fstream>
 #include "../basecode/header.h"
-#include "PoolBase.h"
-#include "Pool.h"
-#include "BufPool.h"
-#include "ReacBase.h"
+class Stoich;
+#include "Reac.h"
 #include "EnzBase.h"
 #include "lookupVolumeFromMesh.h"
 
@@ -838,7 +836,7 @@ void ReadKkit::assignPoolCompartments()
 Id findParentComptOfReac( Id reac )
 {
     static const Finfo* subFinfo =
-        ReacBase::initCinfo()->findFinfo( "subOut" );
+        Reac::initCinfo()->findFinfo( "subOut" );
     assert( subFinfo );
 
     vector< Id > subVec;
@@ -965,7 +963,9 @@ Id ReadKkit::buildEnz( const vector< string >& args )
         mmEnzIds_[ mmEnzPath ] = enz;
 
         assert( k1 > EPSILON );
-        double Km = ( k2 + k3 ) / k1;
+        // double Km = ( k2 + k3 ) / k1;
+        // double Km = ( k2 + k3 ) / (1e6 * k1 / (KKIT_NA * vol) );
+        double Km = ( k2 + k3 ) / (k1 * KKIT_NA * vol);
 
         Field< double >::set( enz, "Km", Km );
         Field< double >::set( enz, "kcat", k3 );
@@ -1074,8 +1074,11 @@ Id ReadKkit::buildPool( const vector< string >& args )
     Id pa = shell_->doFind( head ).id;
     assert( pa != Id() );
 
+    // double nInit = atof( args[ poolMap_[ "nInit" ] ].c_str() );
     double nInit = atof( args[ poolMap_[ "nInit" ] ].c_str() );
+    // double concInit = atof( args[ poolMap_[ "CoInit" ] ].c_str() );
     double vsf = atof( args[ poolMap_[ "vol" ] ].c_str() );
+	double concInit = nInit * KKIT_NA / (vsf * NA);
     /**
      * vsf is vol scale factor, which is what GENESIS stores in 'vol' field
      * n = vsf * conc( uM )
@@ -1113,7 +1116,9 @@ Id ReadKkit::buildPool( const vector< string >& args )
     // skip the 10 chars of "/kinetics/"
     poolIds_[ clean.substr( 10 ) ] = pool;
 
+    // Field< double >::set( pool, "nInit", nInit );
     Field< double >::set( pool, "nInit", nInit );
+    Field< double >::set( pool, "concInit", concInit / 1e3 ); // conv to mM
     Field< double >::set( pool, "diffConst", diffConst );
     // SetGet1< double >::set( pool, "setVolume", vol );
     separateVols( pool, vol );
@@ -1165,22 +1170,17 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 
     Id sumId;
     // Check if the pool has not yet been converted to handle SumTots.
-    if ( destId.element()->cinfo()->name() == "Pool" )
+    if ( destId.element()->cinfo()->isA( "PoolBase" ) )
     {
-        sumId = shell_->doCreate( "Function", destId, "func", 1 );
-        Field< bool >::set( sumId, "allowUnknownVariable", false );
-
-        // Turn dest into a FuncPool.
-        destId.element()->zombieSwap( BufPool::initCinfo() );
-
-        ObjId ret = shell_->doAddMsg( "single",
+		sumId = Neutral::child( destId.eref(), "func" );
+		if ( sumId == Id() ) {
+        	sumId = shell_->doCreate( "Function", destId, "func", 1 );
+        	Field< bool >::set( sumId, "allowUnknownVariable", false );
+        	ObjId ret = shell_->doAddMsg( "single",
                                       ObjId( sumId, 0 ), "valueOut",
                                       ObjId( destId, 0 ), "setN" );
-        assert( ret != ObjId() );
-    }
-    else
-    {
-        sumId = Neutral::child( destId.eref(), "func" );
+        	assert( ret != ObjId() );
+		}
     }
 
     if ( sumId == Id() )
@@ -1550,11 +1550,7 @@ void ReadKkit::setupSlaveMsg( const string& src, const string& dest )
     // Convert the pool to a BufPool, if it isn't one already
     Id destId( basePath_ + "/kinetics/" + dest );
     assert( destId != Id() );
-
-    if( !destId.element()->cinfo()->isA( "BufPool" ))
-    {
-        destId.element()->zombieSwap( BufPool::initCinfo() );
-    }
+	Field< bool >::set( destId, "isBuffered", true );
 
     map< string, Id >* nameMap;
     // Check if the src is a table or a stim
@@ -1620,7 +1616,7 @@ void ReadKkit::convertParametersToConcUnits()
 {
     convertPoolAmountToConcUnits();
     convertReacRatesToConcUnits();
-    convertMMenzRatesToConcUnits();
+    // convertMMenzRatesToConcUnits();
     convertEnzRatesToConcUnits();
 }
 

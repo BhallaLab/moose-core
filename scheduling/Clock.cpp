@@ -409,15 +409,6 @@ const Cinfo* Clock::initCinfo()
         "    Func                 12     0.1\n"
         "    Function             12     0.1\n"
         "    Arith                12     0.1\n"
-        "    BufPool              13     0.1\n"
-        "    Pool                 13     0.1\n"
-        "    PoolBase             13     0.1\n"
-        "    CplxEnzBase          14     0.1\n"
-        "    Enz                  14     0.1\n"
-        "    EnzBase              14     0.1\n"
-        "    MMenz                14     0.1\n"
-        "    Reac                 14     0.1\n"
-        "    ReacBase             14     0.1\n"
         "    Gsolve (init)        15     0.1\n"
         "    Ksolve (init)        15     0.1\n"
         "    Gsolve               16     0.1\n"
@@ -926,21 +917,6 @@ void Clock::buildDefaultTick()
     defaultTick_["Func"] = 12;
     defaultTick_["Function"] = 12;
     defaultTick_["Arith"] = 12;
-    /*
-    defaultTick_["FuncBase"] = 12;
-    defaultTick_["FuncPool"] = 12;
-    defaultTick_["MathFunc"] = 12;
-    defaultTick_["SumFunc"] = 12;
-    */
-    defaultTick_["BufPool"] = 13;
-    defaultTick_["Pool"] = 13;
-    defaultTick_["PoolBase"] = 13;
-    defaultTick_["CplxEnzBase"] = 14;
-    defaultTick_["Enz"] = 14;
-    defaultTick_["EnzBase"] = 14;
-    defaultTick_["MMenz"] = 14;
-    defaultTick_["Reac"] = 14;
-    defaultTick_["ReacBase"] = 14;
     defaultTick_["Gsolve"] = 16; // Note this uses an 'init' at t-1
     defaultTick_["Ksolve"] = 16; // Note this uses an 'init' at t-1
     defaultTick_["Stats"] = 17;
@@ -967,12 +943,14 @@ void Clock::buildDefaultTick()
     defaultTick_["DiagonalMsg"] = ~0U;
     defaultTick_["Double"] = ~0U;
     defaultTick_["EndoMesh"] = ~0U;
+    defaultTick_["Enz"] = ~0U;
     defaultTick_["Finfo"] = ~0U;
     defaultTick_["Group"] = ~0U;
     defaultTick_["HHGate"] = ~0U;
     defaultTick_["HHGate2D"] = ~0U;
     defaultTick_["Interpol2D"] = ~0U;
     defaultTick_["Long"] = ~0U;
+    defaultTick_["MMenz"] = ~0U;
     defaultTick_["MeshEntry"] = ~0U;
     defaultTick_["Msg"] = ~0U;
     defaultTick_["Mstring"] = ~0U;
@@ -982,7 +960,11 @@ void Clock::buildDefaultTick()
     defaultTick_["OneToAllMsg"] = ~0U;
     defaultTick_["OneToOneDataIndexMsg"] = ~0U;
     defaultTick_["OneToOneMsg"] = ~0U;
+    defaultTick_["PoolBase"] = ~0U;
+    defaultTick_["Pool"] = ~0U;
+    defaultTick_["BufPool"] = ~0U;
     defaultTick_["PsdMesh"] = ~0U;
+    defaultTick_["Reac"] = ~0U;
     defaultTick_["Shell"] = ~0U;
     defaultTick_["SingleMsg"] = ~0U;
     defaultTick_["SparseMsg"] = ~0U;
@@ -996,16 +978,10 @@ void Clock::buildDefaultTick()
     defaultTick_["Unsigned"] = ~0U;
     defaultTick_["Variable"] = ~0U;
     defaultTick_["VectorTable"] = ~0U;
-    defaultTick_["ZombieBufPool"] = ~0U;
     defaultTick_["ZombieCaConc"] = ~0U;
     defaultTick_["ZombieCompartment"] = ~0U;
-    defaultTick_["ZombieEnz"] = ~0U;
-    // defaultTick_["ZombieFuncPool"] = ~0U;
     defaultTick_["ZombieFunction"] = ~0U;
     defaultTick_["ZombieHHChannel"] = ~0U;
-    defaultTick_["ZombieMMenz"] = ~0U;
-    defaultTick_["ZombiePool"] = ~0U;
-    defaultTick_["ZombieReac"] = ~0U;
 
     defaultDt_.assign( Clock::numTicks, 0.0 );
     defaultDt_[0] = 50.0e-6;

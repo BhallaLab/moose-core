@@ -61,7 +61,7 @@ public:
 
     /**
      * Assign the volume, and handle the cascading effects by scaling
-     * all the dependent values of nInit and rates if applicable.
+     * all the dependent values of concInit and rates if applicable.
      */
     void setVolumeAndDependencies( double vol );
 

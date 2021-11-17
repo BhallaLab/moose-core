@@ -73,6 +73,7 @@ for p in _moose.wildcardFind("/##[TYPE=Cinfo]"):
 # class types to _moose.
 from moose._moose import *
 
+
 def version():
     """Reutrns moose version string."""
     return _moose.__version__
@@ -102,7 +103,7 @@ def about():
     Example
     -------
     >>> moose.about()
-    {'path': '/home/dilawars/Work/GITLAB/moose-core/_build/python/moose',
+    {'path': '~/moose-core/_build/python/moose',
      'version': '4.0.0.dev20200417',
      'docs': 'https://moose.readthedocs.io/en/latest/',
      'development': 'https://github.com/BhallaLab/moose-core'}
@@ -215,7 +216,9 @@ def connect(src, srcfield, dest, destfield, msgtype="Single"):
 
 
 def delete(arg):
-    """Delete the underlying moose object(s). 
+    """Delete the underlying moose object(s). This does not delete any of the
+    Python objects referring to this vec but does invalidate them. Any
+    attempt to access them will raise a ValueError.
 
     Parameters
     ----------
@@ -304,8 +307,8 @@ def getFieldNames(elem, fieldtype="*"):
 
     Parameters
     ----------
-    elem : string, obj
-        Name of the class or a moose.element to look up.
+    elem : string,obj
+        Name of the class or a moose element to look up.
     fieldtype : string
         The kind of field. Possible values are:
         -  'valueFinfo' or 'value'
@@ -313,6 +316,7 @@ def getFieldNames(elem, fieldtype="*"):
         -  'destFinfo' or 'dest'
         -  'lookupFinfo' or 'lookup'
         -  'fieldElementFinfo' or 'fieldElement'
+
 
     Returns
     -------

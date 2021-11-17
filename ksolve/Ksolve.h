@@ -16,7 +16,7 @@ using namespace std::chrono;
 
 class Stoich;
 
-class Ksolve: public ZombiePoolInterface
+class Ksolve: public KsolveBase
 {
 public:
     Ksolve();
@@ -43,11 +43,11 @@ public:
 
     /// Assigns Stoich object to Ksolve.
     Id getStoich() const;
-    void setStoich( Id stoich ); /// Inherited from ZombiePoolInterface.
+    void setStoich( Id stoich ); /// Inherited from KsolveBase.
 
     /// Assigns Dsolve object to Ksolve.
     Id getDsolve() const;
-    void setDsolve( Id dsolve ); /// Inherited from ZombiePoolInterface.
+    void setDsolve( Id dsolve ); /// Inherited from KsolveBase.
 
     unsigned int getNumLocalVoxels() const;
     unsigned int getNumAllVoxels() const;
@@ -94,12 +94,13 @@ public:
     unsigned int getPoolIndex( const Eref& e ) const;
     unsigned int getVoxelIndex( const Eref& e ) const;
 
-    // ZombiePoolInterface inherited functions
+    // KsolveBase inherited functions
     void setN( const Eref& e, double v );
     double getN( const Eref& e ) const;
 
-    void setNinit( const Eref& e, double v );
-    double getNinit( const Eref& e ) const;
+    void setConcInit( const Eref& e, double v );
+    double getConcInit( const Eref& e ) const;
+    double getVolumeOfPool( const Eref& e ) const;
 
     void setDiffConst( const Eref& e, double v );
     double getDiffConst( const Eref& e ) const;
@@ -127,6 +128,15 @@ public:
      * or volume change. If index == ~0U then does all terms.
      */
     void updateRateTerms( unsigned int index );
+
+	///////////////////////////////////////////////////////////////////
+	// Here is a block of notify events
+	///////////////////////////////////////////////////////////////////
+	void notifyDestroyPool( const Eref& e );
+	void notifyAddPool( const Eref& e );
+	void notifyRemovePool( const Eref& e );
+	void notifyAddMsgSrcPool( const Eref& e, ObjId msgId );
+	void notifyAddMsgDestPool( const Eref& e, ObjId msgId );
 
     //////////////////////////////////////////////////////////////////
     // for debugging
@@ -168,7 +178,7 @@ private:
     Id dsolve_;
 
     /// Pointer to diffusion solver
-    ZombiePoolInterface* dsolvePtr_;
+    KsolveBase* dsolvePtr_;
 
     // Timing and benchmarking related variables.
     size_t numSteps_  = 0;
@@ -179,6 +189,8 @@ private:
     vector<std::pair<size_t, size_t>> intervals_;
 
     //high_resolution_clock::time_point t0_, t1_;
+	
+	static map< Id, unsigned int > defaultPoolLookup_;
 
 };
 

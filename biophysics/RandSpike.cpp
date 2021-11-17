@@ -64,6 +64,11 @@ const Cinfo* RandSpike::initCinfo()
             &RandSpike::setRefractT,
             &RandSpike::getRefractT
                                                    );
+    static ValueFinfo< RandSpike, double > lastEventT( "lastEventT",
+            "Time of last event. Set this if you want to phase-shift periodic activity.",
+            &RandSpike::setLastEvent,
+            &RandSpike::getLastEvent
+                                                   );
     static ValueFinfo< RandSpike, double > absRefract( "abs_refract",
             "Absolute refractory time. Synonym for refractT.",
             &RandSpike::setRefractT,
@@ -88,6 +93,7 @@ const Cinfo* RandSpike::initCinfo()
         &proc,		// Shared
         &rate,		// Value
         &refractT,	// Value
+        &lastEventT,	// Value
         &absRefract,	// Value
         &doPeriodic,	// Value
         &hasFired,	// ReadOnlyValue
@@ -165,6 +171,15 @@ void RandSpike::setRefractT( double val )
 double RandSpike::getRefractT() const
 {
     return refractT_;
+}
+
+void RandSpike::setLastEvent( double val )
+{
+    lastEvent_ = val;
+}
+double RandSpike::getLastEvent() const
+{
+    return lastEvent_;
 }
 
 bool RandSpike::getFired() const

@@ -17,6 +17,8 @@ Last-Updated: Tue 08 Sep 02:22:10 2020(+0530)
           By: HarshaRani
 **********************************************************************/
 /****************************
+2021
+Apr 16: replace ReacBase to Reac and EnzBase to Enz as API can has changed
 2020
 Sep 08: replaced getId->id, getId().value-> idValue,getDataIndex-dataIndex, isinstance is replaced with isA these changes are with respect to
         new python-binding c38580789d8fb65
@@ -119,11 +121,11 @@ def mooseWriteSBML(modelpath, filename, sceneitems={}):
         checkCompt = moose.wildcardFind(modelpath+'/##[0][ISA=ChemCompt]')
         
         mObj = moose.wildcardFind(moose.element(modelpath).path+'/##[0][ISA=PoolBase]'+','+
-                                  moose.element(modelpath).path+'/##[0][ISA=ReacBase]'+','+
+                                  moose.element(modelpath).path+'/##[0][ISA=Reac]'+','+
                                   moose.element(modelpath).path+'/##[0][ISA=EnzBase]'+','+
                                   moose.element(modelpath).path+'/##[0][ISA=StimulusTable]')
         for p in mObj:
-            if not moose.element(p.parent).isA("CplxEnzBase"):
+            if not moose.element(p.parent).isA("Enz"):
                 if moose.exists(p.path+'/info'):
                     xcord.append(moose.element(p.path+'/info').x)
                     ycord.append(moose.element(p.path+'/info').y)
@@ -860,7 +862,7 @@ def listofname(reacSub, mobjEnz):
 
 
 def writeReac(modelpath, cremodel_, sceneitems,reacGroup):
-    for reac in moose.wildcardFind(modelpath + '/##[0][ISA=ReacBase]'):
+    for reac in moose.wildcardFind(modelpath + '/##[0][ISA=Reac]'):
         reacSub = reac.neighbors["sub"]
         reacPrd = reac.neighbors["prd"]
         if (len(reacSub) != 0 and len(reacPrd) != 0):
@@ -1097,6 +1099,7 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
     # getting all the species
     for spe in moose.wildcardFind(modelpath + '/##[0][ISA=PoolBase]'):
         #Eliminating xfer molecules writting
+        
         if not re.search("_xfer_",spe.name):
             
             sName = convertSpecialChar(spe.name)
@@ -1114,9 +1117,7 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
                     str(spe.idValue) + "_" + str(spe.dataIndex) + "_"
                 spename = str(idBeginWith(spename))
                 s1.setId(spename)
-
-                if spename.find(
-                        "cplx") != -1 and spe.parent.isA("EnzBase"):
+                if spename.find("cplx") != -1 and spe.parent.isA("Enz"):
                     enz = spe.parent
                     if not moose.exists(spe.path+'/info'):
                         cplxinfo = moose.Annotator(spe.path+'/info')
@@ -1177,8 +1178,8 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
 
 
                     element = moose.element(spe)
-                    ele = getGroupinfo(element)
-                    
+                    #ele = getGroupinfo(element)
+                    ele =  findGroup_compt(element)
                     speciAnno = "<moose:ModelAnnotation>\n"
                     if ele.className == "Neutral":
                         #speciAnno = speciAnno + "<moose:Group>" + ele.name + "</moose:Group>\n"
@@ -1375,6 +1376,11 @@ def recalculatecoordinates(modelpath, mObjlist,xcord,ycord):
         xmax = max(xcord)
         ymin = min(ycord)
         ymax = max(ycord)
+        if xmax == xmin:
+            xmax = xmin + 1
+        if ymax == ymin:
+            ymax = ymin + 1
+
         for merts in mObjlist:
             objInfo = merts.path+'/info'
             if moose.exists(objInfo):

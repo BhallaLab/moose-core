@@ -10,7 +10,7 @@
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
 #include "XferInfo.h"
-#include "ZombiePoolInterface.h"
+#include "KsolveBase.h"
 #include "RateTerm.h"
 #include "FuncTerm.h"
 #include "../basecode/SparseMatrix.h"
@@ -24,7 +24,7 @@
 VoxelPoolsBase::VoxelPoolsBase() :
     stoichPtr_( 0 ),
     S_(1),
-    Sinit_(1),
+    Cinit_(1),
     volume_(1.0)
 {
     ;
@@ -40,12 +40,15 @@ VoxelPoolsBase::~VoxelPoolsBase()
 void VoxelPoolsBase::resizeArrays( unsigned int totNumPools )
 {
     S_.resize( totNumPools, 0.0 );
-    Sinit_.resize( totNumPools, 0.0);
+    Cinit_.resize( totNumPools, 0.0);
 }
 
 void VoxelPoolsBase::reinit()
 {
-    S_ = Sinit_;
+	S_.resize( Cinit_.size() );
+	for( size_t i = 0; i < S_.size(); ++ i ) {
+		S_[i] = Cinit_[i] * NA * volume_;
+	}
 }
 
 //////////////////////////////////////////////////////////////
@@ -66,19 +69,19 @@ double* VoxelPoolsBase::varS()
     return &S_[0];
 }
 
-const double* VoxelPoolsBase::Sinit() const
+const double* VoxelPoolsBase::Cinit() const
 {
-    return &Sinit_[0];
+    return &Cinit_[0];
 }
 
-double* VoxelPoolsBase::varSinit()
+double* VoxelPoolsBase::varCinit()
 {
-    return &Sinit_[0];
+    return &Cinit_[0];
 }
 
 unsigned int VoxelPoolsBase::size() const
 {
-    return Sinit_.size();
+    return Cinit_.size();
 }
 
 void VoxelPoolsBase::setVolume( double vol )
@@ -95,10 +98,6 @@ void VoxelPoolsBase::setVolumeAndDependencies( double vol )
 {
     double ratio = vol / volume_;
     volume_ = vol;
-    for ( vector< double >::iterator
-            i = Sinit_.begin(); i != Sinit_.end(); ++i )
-        *i *= ratio;
-
     for ( vector< double >::iterator i = S_.begin(); i != S_.end(); ++i )
         *i *= ratio;
 
@@ -110,18 +109,15 @@ void VoxelPoolsBase::setVolumeAndDependencies( double vol )
 void VoxelPoolsBase::scaleVolsBufsRates(double ratio, const Stoich* stoichPtr)
 {
     volume_ *= ratio; // Scale vol
-    for ( vector< double >::iterator
-            i = Sinit_.begin(); i != Sinit_.end(); ++i )
-        *i *= ratio; // Scale Bufs
     // Here we also need to set the Ns for the buffered pools.
     unsigned int start = stoichPtr_->getNumVarPools();
     unsigned int end = start + stoichPtr_->getNumBufPools();
-    assert( end == Sinit_.size() );
+    assert( end == Cinit_.size() );
     for ( unsigned int i = start; i < end; ++i )
     {
         // Must not reassign pools that are controlled by functions.
         if ( !stoichPtr->isFuncTarget(i) )
-            S_[i] = Sinit_[i];
+            S_[i] = Cinit_[i] * NA * volume_;
     }
 
     // Scale rates. Start by clearing out old rates if any
@@ -159,16 +155,16 @@ double VoxelPoolsBase::getN( unsigned int i ) const
     return S_[i];
 }
 
-void VoxelPoolsBase::setNinit( unsigned int i, double v )
+void VoxelPoolsBase::setConcInit( unsigned int i, double v )
 {
-    Sinit_[i] = v;
-    if ( Sinit_[i] < 0.0 )
-        Sinit_[i] = 0.0;
+    Cinit_[i] = v;
+    if ( Cinit_[i] < 0.0 )
+        Cinit_[i] = 0.0;
 }
 
-double VoxelPoolsBase::getNinit( unsigned int i ) const
+double VoxelPoolsBase::getConcInit( unsigned int i ) const
 {
-    return Sinit_[i];
+    return Cinit_[i];
 }
 
 void VoxelPoolsBase::setDiffConst( unsigned int i, double v )
@@ -213,11 +209,9 @@ void VoxelPoolsBase::xferInOnlyProxies(
     for ( vector< unsigned int >::const_iterator
             k = poolIndex.begin(); k != poolIndex.end(); ++k )
     {
-        // if ( *k >= S_.size() - numProxyPools )
         if ( *k >= stoichPtr_->getNumVarPools() && *k < proxyEndIndex )
         {
-            // cout << S_[*k] << ", " << Sinit_[*k] << ", " << *i <<  endl;
-            Sinit_[*k] = *i;
+            Cinit_[*k] = *i / ( NA * volume_ );
             S_[*k] = *i;
         }
         i++;
@@ -339,13 +333,13 @@ void VoxelPoolsBase::filterCrossRateTerms(
             {
                 k++; // Delete the next entry too, it is the reverse reacn.
                 assert( k < rates_.size() );
-                if ( reacCinfo->isA( "ReacBase" ) )
+                if ( reacCinfo->isA( "Reac" ) )
                 {
                     if ( rates_[k] )
                         delete rates_[k];
                     rates_[k] = new ExternReac;
                 }
-                if ( reacCinfo->isA( "CplxEnzBase" ) )   // Delete next two.
+                if ( reacCinfo->isA( "Enz" ) )   // Delete next two.
                 {
                     if ( rates_[k] )
                         delete rates_[k];
@@ -359,7 +353,7 @@ void VoxelPoolsBase::filterCrossRateTerms(
             }
             else
             {
-                if ( reacCinfo->isA( "CplxEnzBase" ) )   // Delete next one.
+                if ( reacCinfo->isA( "Enz" ) )   // Delete next one.
                 {
                     k++;
                     assert( k < rates_.size() );

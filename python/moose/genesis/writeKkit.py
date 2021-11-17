@@ -328,7 +328,7 @@ def writeEnz( modelpath,f,sceneitems):
                     k3 = enz.k3
                     if enz.neighbors['cplx']:
                         cplx = enz.neighbors['cplx'][0]
-                        nInit = cplx.nInit[0];
+                        nInit = cplx.nInit;
                     else:
                         cplx = moose.Pool(enz.path+"/cplx")
                         moose.Annotator(cplx.path+'/info')
@@ -394,7 +394,7 @@ def storeReacMsg(reacList,f):
 
 def writeReac(modelpath,f,sceneitems):
     error = ""
-    reacList = moose.wildcardFind(modelpath+'/##[0][ISA=ReacBase]')
+    reacList = moose.wildcardFind(modelpath+'/##[0][ISA=Reac]')
     for reac in reacList:
         if findCompartment(reac) == moose.element('/'):
             error = error + " \n "+reac.path+ " doesn't have compartment ignored to write to genesis"
@@ -795,11 +795,11 @@ def estimateDefaultVol(compts):
 
 def writeNotes(modelpath,f):
     notes = ""
-    #items = moose.wildcardFind(modelpath+"/##[ISA=ChemCompt],/##[ISA=ReacBase],/##[ISA=PoolBase],/##[ISA=EnzBase],/##[ISA=Function],/##[ISA=StimulusTable]")
+    #items = moose.wildcardFind(modelpath+"/##[ISA=ChemCompt],/##[ISA=Reac],/##[ISA=PoolBase],/##[ISA=EnzBase],/##[ISA=Function],/##[ISA=StimulusTable]")
     items = []
     items = moose.wildcardFind(modelpath+"/##[0][ISA=ChemCompt]") +\
             moose.wildcardFind(modelpath+"/##[0][ISA=PoolBase]") +\
-            moose.wildcardFind(modelpath+"/##[0][ISA=ReacBase]") +\
+            moose.wildcardFind(modelpath+"/##[0][ISA=Reac]") +\
             moose.wildcardFind(modelpath+"/##[0][ISA=EnzBase]") +\
             moose.wildcardFind(modelpath+"/##[0][ISA=Function]") +\
             moose.wildcardFind(modelpath+"/##[0][ISA=StimulusTable]")
@@ -811,9 +811,14 @@ def writeNotes(modelpath,f):
             notes = moose.Annotator(info).getField('notes')
             if not notes:
                 continue
-            m = r'call /kinetics/{0}/notes LOAD \ \n"{1}"\n'.format(
-                    trimPath(item), moose.Annotator(info).getField('notes')
-                    )
+            # The below form fails in python3 because the \n gets 
+            # printed as regular text rather than a carriage return.
+            #m = r'call /kinetics/{0}/notes LOAD \ \n"{1}"\n'.format(
+                    #trimPath(item), moose.Annotator(info).getField('notes')
+                    #)
+            m = 'call /kinetics/{0}/notes LOAD \\\n'.format(trimPath(item) )
+            f.write(m)
+            m = '"{}"\n'.format(moose.Annotator(info).getField('notes'))
             f.write(m)
             #  f.write("call /kinetics/"+trimPath(item)+"/notes LOAD \ \n\""+moose.Annotator(info).getField('notes')+"\"\n")
 

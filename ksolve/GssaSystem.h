@@ -32,11 +32,12 @@ public:
 
     /**
      * Flag: True when using probabilistic (random) rounding.
-     * When initializing the mol# from floating-point Sinit values,
-     * we have two options. One is to look at each Sinit, and round
-     * to the nearest integer. The other is to look at each Sinit,
+     * When initializing the mol# from floating-point Cinit values,
+     * we have two options. One is to look at each Cinit, and round
+     * resulting nInit to the nearest integer. The other is to look at 
+	 * each Cinit,
      * and probabilistically round up or down depending on the
-     * value. For example, if we had a Sinit value of 1.49,
+     * value. For example, if we had a Cinit -> nInit value of 1.49,
      * this would always be rounded to 1.0 if the flag is false,
      * and would be rounded to 1.0 and 2.0 in the ratio 51:49 if
      * the flag is true.

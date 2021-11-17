@@ -703,7 +703,7 @@ bool Element::isDoomed() const
     return isDoomed_;
 }
 
-void Element::markRewired()
+void Element::markRewired( )
 {
     isRewired_ = true;
 }

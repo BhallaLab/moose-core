@@ -94,10 +94,10 @@ char* DataElement::data( unsigned int rawIndex, unsigned int fieldIndex ) const
  */
 void DataElement::resize( unsigned int newNumLocalData )
 {
-	numLocalData_ = newNumLocalData;
 	char* temp = data_;
 	data_ = cinfo()->dinfo()->copyData(
 					temp, numLocalData_, newNumLocalData, 0 );
+	numLocalData_ = newNumLocalData;
 	cinfo()->dinfo()->destroyData( temp );
 	numLocalData_ = newNumLocalData;
 }

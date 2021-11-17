@@ -24,6 +24,9 @@ public:
     void setRefractT( double val );
     double getRefractT() const;
 
+    void setLastEvent( double val );
+    double getLastEvent() const;
+
     void setDoPeriodic( bool val );
     bool getDoPeriodic() const;
 

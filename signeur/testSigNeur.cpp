@@ -609,7 +609,7 @@ void testChemInCubeMesh()
 				<< endl;
 	}
 	ids.clear();
-	simpleWildcardFind( "/n/##[ISA=ReacBase]", ids );
+	simpleWildcardFind( "/n/##[ISA=Reac]", ids );
 	for( vector< Id >::iterator i = ids.begin(); i != ids.end(); ++i ) {
 		cout << i->element()->getName() <<
 			":	Kf = " << Field< double >::get( *i, "Kf" ) <<

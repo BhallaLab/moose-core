@@ -170,7 +170,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
                             if errorFlag:
                                 errorFlag, msgReac = createReaction(
                                     model, specInfoMap, modelAnnotaInfo, globparameterIdValue,funcDef,groupInfo)
-                                if len(moose.wildcardFind(moose.element(loadpath).path+"/##[ISA=ReacBase],/##[ISA=EnzBase]")) == 0:
+                                if len(moose.wildcardFind(moose.element(loadpath).path+"/##[ISA=Reac],/##[ISA=EnzBase]")) == 0:
                                     errorFlag = False
                                     noRE = ("Atleast one reaction should be present to display in the widget ")
                         getModelAnnotation(model, baseId)
@@ -254,7 +254,7 @@ def checkGroup(basePath,model,comptSbmlidMooseIdMap):
             if groupAnnoInfo != {}:
                 if moose.exists(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name):
                     groupName = p.getName()
-                    if groupName == " ":
+                    if groupName == "":
                         groupName = p.getId()
                     if "Group" in groupAnnoInfo:
                         if moose.exists(basePath.path+'/'+comptSbmlidMooseIdMap[groupAnnoInfo["Compartment"]]["MooseId"].name+'/'+groupAnnoInfo["Group"]):
@@ -388,7 +388,7 @@ def addSubPrd(reac, reName, type, reactSBMLIdMooseId, specInfoMap):
             noplusStoichprd = noplusStoichprd + rct.getStoichiometry()
 
         for key, values in list(rctMapIter.items()):
-            # src ReacBase
+            # src Reac
             src = reactSBMLIdMooseId[reName]["MooseId"]
             key = parentSp = str(idBeginWith(key))
             des = specInfoMap[key]["Mpath"]
@@ -658,7 +658,6 @@ def createReaction(model, specInfoMap, modelAnnotaInfo, globparameterIdValue,fun
     reactSBMLIdMooseId = {}
     msg = ""
     reaction_ = None
-
     for ritem in range(0, model.getNumReactions()):
         reactionCreated = False
         channelCreated = False
