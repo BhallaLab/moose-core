@@ -1453,7 +1453,7 @@ void Neuron::setSpineAndPsdMesh( ObjId spineMesh, ObjId psdMesh )
     }
     Id spineStoich = Neutral::child( spineMesh.eref(), "stoich" );
     Id psdStoich = Neutral::child( psdMesh.eref(), "stoich" );
-    if ( spineStoich == Id() || psdStoich == Id() )
+    if ( spineStoich == ObjId() || psdStoich == ObjId() )
     {
         cout << "Error: Neuron::setSpineAndPsdMesh: Stoich child not found\n";
         return;

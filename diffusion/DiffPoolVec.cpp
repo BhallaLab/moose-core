@@ -23,22 +23,22 @@ using namespace std;
  * work on in single-compartment models.
  */
 DiffPoolVec::DiffPoolVec()
-    : id_( 0 ), n_( 1, 0.0 ), nInit_( 1, 0.0 ),
+    : id_( 0 ), n_( 1, 0.0 ), concInit_( 1, 0.0 ),
       diffConst_( 1.0e-12 ), motorConst_( 0.0 )
 {
     ;
 }
 
-double DiffPoolVec::getNinit( unsigned int voxel ) const
+double DiffPoolVec::getConcInit( unsigned int voxel ) const
 {
-    assert( voxel < nInit_.size() );
-    return nInit_[ voxel ];
+    assert( voxel < concInit_.size() );
+    return concInit_[ voxel ];
 }
 
-void DiffPoolVec::setNinit( unsigned int voxel, double v )
+void DiffPoolVec::setConcInit( unsigned int voxel, double v )
 {
-    assert( voxel < nInit_.size() );
-    nInit_[ voxel ] = v;
+    assert( voxel < concInit_.size() );
+    concInit_[ voxel ] = v;
 }
 
 double DiffPoolVec::getN( unsigned int voxel ) const
@@ -106,7 +106,7 @@ void DiffPoolVec::setMotorConst( double v )
 
 void DiffPoolVec::setNumVoxels( unsigned int num )
 {
-    nInit_.resize( num, 0.0 );
+    concInit_.resize( num, 0.0 );
     n_.resize( num, 0.0 );
 }
 
@@ -155,8 +155,14 @@ void DiffPoolVec::advance( double dt )
         *iy++ *= *i;
 }
 
-void DiffPoolVec::reinit() // Not called by the clock, but by parent.
+void DiffPoolVec::reinit( const vector< double >& vols ) // Not called by the clock, but by parent.
 {
-    assert( n_.size() == nInit_.size() );
-    prev_ = n_ = nInit_;
+	const double NA_ = 6.0221415e23;
+    assert( n_.size() == concInit_.size() );
+	// vector< double > vols( concInit_.size(), 1.0 );
+	vector< double > nInit( concInit_.size(), 0.0 );
+	for ( size_t i = 0; i < concInit_.size(); ++i )
+		nInit[i] = concInit_[i] * NA_ * vols[i];
+
+    prev_ = n_ = nInit;
 }

@@ -15,7 +15,7 @@
 
 #include "VoxelPoolsBase.h"
 #include "XferInfo.h"
-#include "ZombiePoolInterface.h"
+#include "KsolveBase.h"
 
 #include "RateTerm.h"
 #include "FuncTerm.h"
@@ -114,11 +114,12 @@ const Cinfo* Gsolve::initCinfo()
         "useRandInit",
         "Flag: True when using probabilistic (random) rounding.\n "
         "Default: True.\n "
-        "When initializing the mol# from floating-point Sinit values, "
-        "we have two options. One is to look at each Sinit, and round "
-        "to the nearest integer. The other is to look at each Sinit, "
+        "When initializing the mol# from floating-point concInit values, "
+        "we have two options. One is to look at each concInit, obtain "
+		"nInit, and round to the nearest integer. The other is to look "
+		"at each nInit (coming from concInit), "
         "and probabilistically round up or down depending on the  "
-        "value. For example, if we had a Sinit value of 1.49,  "
+        "value. For example, if we had a nInit value of 1.49,  "
         "this would always be rounded to 1.0 if the flag is false, "
         "and would be rounded to 1.0 and 2.0 in the ratio 51:49 if "
         "the flag is true. ",
@@ -584,7 +585,7 @@ void Gsolve::reinit( const Eref& e, ProcPtr p )
     grainSize_ = (size_t) std::ceil((double)nvPools / (double)numThreads_);
     assert( grainSize_ * numThreads_ >= nvPools);
     numThreads_ = (size_t) std::ceil((double)nvPools / (double)grainSize_);
-    MOOSE_DEBUG( "Grain size is " << grainSize_ << ". Num threads " << numThreads_);
+    // MOOSE_DEBUG( "Grain size is " << grainSize_ << ". Num threads " << numThreads_);
 
     if(1 < numThreads_)
         cout << "Info: Setting up threaded gsolve with " << getNumThreads( )
@@ -925,7 +926,7 @@ void Gsolve::setDsolve( Id dsolve )
     else if ( dsolve.element()->cinfo()->isA( "Dsolve" ) )
     {
         dsolve_ = dsolve;
-        dsolvePtr_ = reinterpret_cast<ZombiePoolInterface*>(dsolve.eref().data());
+        dsolvePtr_ = reinterpret_cast<KsolveBase*>(dsolve.eref().data());
     }
     else
     {
@@ -949,7 +950,7 @@ void Gsolve::setN( const Eref& e, double v )
         {
             // Do NOT round it here, it is folded into rate term.
             pools_[vox].setN( getPoolIndex( e ), v );
-            // refresh rates because nInit controls ongoing value of n.
+            // refresh rates because concInit controls ongoing value of n.
             if ( sys_.isReady )
                 pools_[vox].refreshAtot( &sys_ );
         }
@@ -968,36 +969,33 @@ double Gsolve::getN( const Eref& e ) const
     return 0.0;
 }
 
-void Gsolve::setNinit( const Eref& e, double v )
+void Gsolve::setConcInit( const Eref& e, double v )
 {
     unsigned int vox = getVoxelIndex( e );
     if ( vox != OFFNODE )
     {
-        if ( e.element()->cinfo()->isA( "ZombieBufPool" ) )
+        pools_[vox].setConcInit( getPoolIndex( e ), v );
+        if ( e.element()->cinfo()->isA( "BufPool" ) )
         {
-            // Do NOT round it here, it is folded into rate term.
-            pools_[vox].setNinit( getPoolIndex( e ), v );
-            // refresh rates because nInit controls ongoing value of n.
+            // refresh rates because concInit controls ongoing value of n.
             if ( sys_.isReady )
                 pools_[vox].refreshAtot( &sys_ );
-        }
-        else
-        {
-            // I now do the rounding at reinit time. It is better there as
-            // it can give a distinct value each cycle. It is also better
-            // to keep the full resolution of Ninit for volume scaling.
-            // pools_[vox].setNinit( getPoolIndex( e ), round( v ) );
-            pools_[vox].setNinit( getPoolIndex( e ), v );
         }
     }
 }
 
-double Gsolve::getNinit( const Eref& e ) const
+double Gsolve::getConcInit( const Eref& e ) const
 {
     unsigned int vox = getVoxelIndex( e );
     if ( vox != OFFNODE )
-        return pools_[vox].getNinit( getPoolIndex( e ) );
+        return pools_[vox].getConcInit( getPoolIndex( e ) );
     return 0.0;
+}
+
+ double Gsolve::getVolumeOfPool( const Eref& e ) const
+{
+	unsigned int vox = getVoxelIndex( e );
+	return pools_[vox].getVolume();
 }
 
 void Gsolve::setDiffConst( const Eref& e, double v )

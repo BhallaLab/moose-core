@@ -139,4 +139,4 @@ def setCompartmentSolver(modelRoot, solver):
             i += 1
     if not modelRoot[:1].startswith('/'):
         modelRoot ='/'+modelRoot
-    print( " Solver is added to model path `%s` with `%s` solver" % (modelRoot,solver) )
+    #print( " Solver is added to model path `%s` with `%s` solver" % (modelRoot,solver) )

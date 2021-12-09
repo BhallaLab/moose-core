@@ -188,6 +188,8 @@ public:
     void allocateModelObject(Id id);
     /// Calculate sizes of all arrays, and allocate them.
     void allocateModel(const vector<Id>& elist);
+	/// Clears out old model.
+    void deAllocateModel();
 
     /// Functions to build the maps between Ids and internal indices
     void buildPoolLookup();
@@ -207,6 +209,10 @@ public:
 
     /// Used to handle run-time size updates for spines.
     void scaleBufsAndRates(unsigned int index, double volScale);
+	void notifyRemoveReac( const Eref& e );
+	void notifyRemoveEnz( const Eref& e );
+	void notifyRemoveMMenz( const Eref& e );
+	void notifyRemoveFunc( const Eref& e );
 
     //////////////////////////////////////////////////////////////////
     // Zombification functions.
@@ -234,7 +240,7 @@ public:
      * and to appropriately zombify the function and set up its
      * parameters including volume scaling.
      */
-    Id zombifyPoolFuncWithScaling(Id pool);
+    Id zombifyPoolFuncWithScaling( const Eref& e, Id pool );
 
     unsigned int convertIdToReacIndex(Id id) const;
     unsigned int convertIdToPoolIndex(Id id) const;
@@ -512,9 +518,9 @@ private:
     Id compartment_;
 
     /// Pointer for ksolve
-    ZombiePoolInterface* kinterface_;
+    KsolveBase* kinterface_;
     /// Pointer for dsolve
-    ZombiePoolInterface* dinterface_;
+    KsolveBase* dinterface_;
 
     /**
      * Lookup from each molecule to its Species identifer

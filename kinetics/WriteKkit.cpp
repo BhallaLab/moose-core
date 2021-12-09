@@ -15,10 +15,8 @@
 #include "../basecode/header.h"
 #include "../utility/utility.h"
 
-#include "PoolBase.h"
-#include "Pool.h"
-#include "BufPool.h"
-#include "ReacBase.h"
+class Stoich;
+#include "Reac.h"
 #include "EnzBase.h"
 #include "lookupVolumeFromMesh.h"
 #include <sstream>
@@ -206,9 +204,9 @@ void writeReac( ofstream& fout, Id id,
 unsigned int getSlaveEnable( Id id )
 {
     static const Finfo* setNinitFinfo =
-        PoolBase::initCinfo()->findFinfo( "set_nInit" );
+        Cinfo::find("PoolBase")->findFinfo( "set_nInit" );
     static const Finfo* setConcInitFinfo =
-        PoolBase::initCinfo()->findFinfo( "set_concInit" );
+        Cinfo::find("PoolBase")->findFinfo( "set_concInit" );
     unsigned int ret = 0;
     vector< Id > src;
     if ( id.element()->cinfo()->isA( "BufPool" ) )
@@ -608,7 +606,7 @@ void writeKkit( Id model, const string& fname )
         }
         // Reaction
         vector< ObjId > Compt_Reac;
-        wildcardFind(comptPath+"/##[ISA=ReacBase]",Compt_Reac);
+        wildcardFind(comptPath+"/##[ISA=Reac]",Compt_Reac);
         for (vector <ObjId> :: iterator itrR= Compt_Reac.begin(); itrR != Compt_Reac.end(); itrR++)
         {
             string path = Field<string> :: get(*itrR,"path");

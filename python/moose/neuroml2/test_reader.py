@@ -52,17 +52,20 @@ import numpy as np
 import moose
 import neuroml as nml
 from reader import NML2Reader
+import os
 
 class TestFullCell(unittest.TestCase):
     def setUp(self):
+        if '/library' in moose.le():
+            moose.delete('/library')
         self.reader = NML2Reader(verbose=True)
 
         self.lib = moose.Neutral('/library')
-        self.filename = 'test_files/NML2_FullCell.nml'
+        self.filename = os.path.realpath('test_files/NML2_FullCell.nml')
         self.reader.read(self.filename)
-        for ncell in self.reader.nml_to_moose:
-            if isinstance(ncell, nml.Cell):
-                self.ncell = ncell
+        for ncell in self.reader.nml_cells_to_moose:
+            if self.reader.nml_cells_to_moose[ncell].isA("Neuron"):
+                self.ncell = self.reader.nml_cells_to_moose[ncell]
                 break
         self.mcell = moose.element('/library/SpikingCell')
         self.soma = moose.element(self.mcell.path + '/Soma')
@@ -75,8 +78,8 @@ class TestFullCell(unittest.TestCase):
         self.assertIsNotNone(self.reader.doc, 'doc is None')
 
     def test_createCellPrototype(self):
-        self.assertIsInstance(self.mcell, moose.Neuron)
-        self.assertEqual(self.mcell.name, self.ncell.id)
+        self.assertEqual(moose.element(self.mcell).className, 'Neuron')
+        self.assertEqual(moose.element(self.mcell).name, self.ncell.name)
 
     def test_createMorphology(self):
         for comp_id in moose.wildcardFind(self.mcell.path + '/##[ISA=Compartment]'):

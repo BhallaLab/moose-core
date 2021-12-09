@@ -14,7 +14,7 @@
 
 class Stoich;
 
-class Gsolve: public ZombiePoolInterface
+class Gsolve: public KsolveBase
 {
 public:
     Gsolve();
@@ -27,7 +27,7 @@ public:
     // Field assignment stuff
     //////////////////////////////////////////////////////////////////
     Id getStoich() const;
-    void setStoich( Id stoich ); /// Inherited from ZombiePoolInterface.
+    void setStoich( Id stoich ); /// Inherited from KsolveBase.
     Id getCompartment() const;
     void setCompartment( Id compt );
 
@@ -93,13 +93,14 @@ public:
     void setDsolve( Id dsolve );
 
     //////////////////////////////////////////////////////////////////
-    // ZombiePoolInterface inherited functions
+    // KsolveBase inherited functions
     //////////////////////////////////////////////////////////////////
 
     void setN( const Eref& e, double v );
     double getN( const Eref& e ) const;
-    void setNinit( const Eref& e, double v );
-    double getNinit( const Eref& e ) const;
+    void setConcInit( const Eref& e, double v );
+    double getConcInit( const Eref& e ) const;
+    double getVolumeOfPool( const Eref& e ) const;
     void setDiffConst( const Eref& e, double v );
     double getDiffConst( const Eref& e ) const;
 
@@ -164,7 +165,7 @@ private:
     Id dsolve_;
 
     /// Pointer to diffusion solver
-    ZombiePoolInterface* dsolvePtr_;
+    KsolveBase* dsolvePtr_;
 
     /// Flag: True if atot should be updated every clock tick
     bool useClockedUpdate_;

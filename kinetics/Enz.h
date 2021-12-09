@@ -10,7 +10,7 @@
 #ifndef _ENZ_H
 #define _ENZ_H
 
-class Enz: public CplxEnzBase
+class Enz: public EnzBase
 {
 	public:
 		Enz();
@@ -20,23 +20,19 @@ class Enz: public CplxEnzBase
 		// Virtual field stuff to overwrite EnzBase
 		//////////////////////////////////////////////////////////////////
 		void vSetKm( const Eref& e, double v );
-		double vGetKm( const Eref& e ) const;
-		void vSetNumKm( const Eref& e, double v );
-		double vGetNumKm( const Eref& e ) const;
 		void vSetKcat( const Eref& e, double v );
-		double vGetKcat( const Eref& e ) const;
 
 		//////////////////////////////////////////////////////////////////
-		// Virtual field stuff to override CplxEnzBase
+		// functions for setting rates specific to mass-action enz.
 		//////////////////////////////////////////////////////////////////
-		void vSetK1( const Eref& e, double v );
-		double vGetK1( const Eref& e ) const;
-		void vSetK2( const Eref& e, double v );
-		double vGetK2( const Eref& e ) const;
-		void vSetRatio( const Eref& e, double v );
-		double vGetRatio( const Eref& e ) const;
-		void vSetConcK1( const Eref& e, double v );
-		double vGetConcK1( const Eref& e ) const;
+		void setK1( const Eref& e, double v );
+		double getK1( const Eref& e ) const;
+		void setK2( const Eref& e, double v );
+		double getK2( const Eref& e ) const;
+		void setRatio( const Eref& e, double v );
+		double getRatio( const Eref& e ) const;
+		void setConcK1( const Eref& e, double v );
+		double getConcK1( const Eref& e ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs, not virtual
@@ -44,28 +40,13 @@ class Enz: public CplxEnzBase
 		void setKmK1( double Km, double k1 );
 
 		//////////////////////////////////////////////////////////////////
-		// Dest funcs, all virtual
-		//////////////////////////////////////////////////////////////////
-
-		void vProcess( const Eref& e, ProcPtr p );
-		void vReinit( const Eref& e, ProcPtr p );
-		void vSub( double n );
-		void vEnz( double n );
-		void vPrd( double n );
-		void vCplx( double n );
-		void vRemesh( const Eref& e );
-
-		//////////////////////////////////////////////////////////////////
+		
+		void setSolver( const Eref& e, ObjId solver );
 
 		static const Cinfo* initCinfo();
 	private:
-		double Km_;	/// Km in concentration units: millimolar.
-		double k1_;	/// in # and time units
-		double k2_;	/// in time
-		double k3_;	/// in time
-		double r1_;
-		double r2_;
-		double r3_;
+		Stoich* stoich_;
+		double k2_;
 };
 
 #endif // ENZ_H

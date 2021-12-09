@@ -6,13 +6,12 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+class KsolveBase;
 
 #include "../basecode/header.h"
 #include "../basecode/ElementValueFinfo.h"
 #include "../kinetics/PoolBase.h"
-#include "../kinetics/ReacBase.h"
 #include "../kinetics/EnzBase.h"
-#include "../kinetics/CplxEnzBase.h"
 #include "FuncTerm.h"
 #include "RateTerm.h"
 #include "FuncRateTerm.h"
@@ -21,11 +20,11 @@
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
 #include "XferInfo.h"
-#include "ZombiePoolInterface.h"
+#include "KsolveBase.h"
 #include "../builtins/Variable.h"
 #include "../builtins/Function.h"
-#include "ZombieFunction.h"
 #include "Stoich.h"
+#include "../kinetics/Reac.h"
 #include "../kinetics/lookupVolumeFromMesh.h"
 #include "../scheduling/Clock.h"
 #include "../shell/Shell.h"
@@ -37,9 +36,11 @@ const Cinfo* Stoich::initCinfo()
     //////////////////////////////////////////////////////////////
     // Field Definitions
     //////////////////////////////////////////////////////////////
+		/*
     static ElementValueFinfo<Stoich, string> path(
         "path", "Wildcard path for reaction system handled by Stoich",
         &Stoich::setPath, &Stoich::getPath);
+		*/
 
     static ElementValueFinfo<Stoich, string> reacSystemPath(
         "reacSystemPath", "Wildcard path for reaction system handled by Stoich",
@@ -186,7 +187,7 @@ const Cinfo* Stoich::initCinfo()
     //////////////////////////////////////////////////////////////
 
     static Finfo* stoichFinfos[] = {
-        &path,               // ElementValue, deprecated.
+        // &path,               // ElementValue, deprecated.
         &reacSystemPath,     // ElementValue
         &ksolve,             // Value
         &dsolve,             // Value
@@ -278,7 +279,7 @@ bool Stoich::getAllowNegative() const
 
 void Stoich::setPath(const Eref& e, string v)
 {
-    cout << "DeprecationWarning:: Use Soitch::reacSystemPath instead. In "
+    cout << "DeprecationWarning:: Use Soitch::readSystemPath instead. In "
             "the future, it will be an error."
          << endl;
     setReacSystemPath(e, v);
@@ -317,7 +318,7 @@ void filterWildcards(vector<Id>& ret, const vector<ObjId>& elist)
     for(vector<ObjId>::const_iterator i = elist.begin(); i != elist.end();
         ++i) {
         if(i->element()->cinfo()->isA("PoolBase") ||
-           i->element()->cinfo()->isA("ReacBase") ||
+           i->element()->cinfo()->isA("Reac") ||
            i->element()->cinfo()->isA("EnzBase") ||
            i->element()->cinfo()->isA("Function"))
             ret.push_back(i->id);
@@ -328,15 +329,13 @@ void Stoich::setElist(const Eref& e, const vector<ObjId>& elist)
 {
     if(compartment_ == Id()) {
         cerr << "Warning: Stoich::setElist/setReacSystemPath: Compartment not "
-                "set. Aborting."
-             << endl;
+                "set. Aborting." << endl;
         status_ = 4;
         return;
     }
     if(!(kinterface_ || dinterface_)) {
         cerr << "Warning: Stoich::setElist/setReacSystemPath: Neither solver "
-                "has been set. Aborting."
-             << endl;
+                "has been set. Aborting." << endl;
         status_ = 8;
         return;
     }
@@ -348,15 +347,14 @@ void Stoich::setElist(const Eref& e, const vector<ObjId>& elist)
     vector<Id> temp;
     filterWildcards(temp, elist);
     if(temp.size() == 0) {
-        cerr << "Warning: Stoich::setElist/setReacSystemPath: No kinetics "
-                "objects "
-                "found on path. Aborting."
-             << endl;
+        cerr << "Warning: Stoich::setElist/setReacSystemPath: No kinetics objects "
+                "found on path. Aborting." << endl;
         status_ = 16;
         return;
     }
 
     // allocateObjMap( temp );
+	deAllocateModel();
     allocateModel(temp);
     if(kinterface_) {
         // kinterface_->setNumPools( n );
@@ -403,7 +401,7 @@ void Stoich::setKsolve(Id ksolve)
     }
 
     ksolve_ = ksolve;
-    kinterface_ = reinterpret_cast<ZombiePoolInterface*>(ksolve.eref().data());
+    kinterface_ = reinterpret_cast<KsolveBase*>(ksolve.eref().data());
 
     if(ksolve.element()->cinfo()->isA("Gsolve"))
         setOneWay(true);
@@ -426,7 +424,7 @@ void Stoich::setDsolve(Id dsolve)
         return;
     }
     dsolve_ = dsolve;
-    dinterface_ = reinterpret_cast<ZombiePoolInterface*>(dsolve.eref().data());
+    dinterface_ = reinterpret_cast<KsolveBase*>(dsolve.eref().data());
 }
 
 Id Stoich::getDsolve() const
@@ -665,33 +663,27 @@ pair<Id, Id> extractCompts(const vector<Id>& compts)
     return ret;
 }
 
+////// Is this used at all?
 void Stoich::locateOffSolverReacs(Id myCompt, vector<Id>& elist)
 {
-    offSolverPoolVec_.clear();
-    offSolverReacVec_.clear();
-    offSolverEnzVec_.clear();
-    offSolverMMenzVec_.clear();
-    offSolverReacCompts_.clear();
-    offSolverEnzCompts_.clear();
-    offSolverMMenzCompts_.clear();
     map<Id, Id> poolComptMap;  // < pool, compt >
 
     vector<Id> temp;
     temp.reserve(elist.size());
     for(vector<Id>::const_iterator i = elist.begin(); i != elist.end(); ++i) {
         const Element* e = i->element();
-        if(e->cinfo()->isA("ReacBase") || e->cinfo()->isA("EnzBase")) {
+        if(e->cinfo()->isA("Reac") || e->cinfo()->isA("EnzBase")) {
             vector<Id> compts;
             if(isOffSolverReac(e, myCompt, compts, poolComptMap)) {
-                if(e->cinfo()->isA("ReacBase")) {
+                if(e->cinfo()->isA("Reac")) {
                     offSolverReacVec_.push_back(*i);
                     offSolverReacCompts_.push_back(extractCompts(compts));
                 }
-                else if(e->cinfo()->isA("CplxEnzBase")) {
+                else if(e->cinfo()->isA("Enz")) {
                     offSolverEnzVec_.push_back(*i);
                     offSolverEnzCompts_.push_back(extractCompts(compts));
                 }
-                else if(e->cinfo()->isA("EnzBase")) {
+                else if(e->cinfo()->isA("MMEnz")) {
                     offSolverMMenzVec_.push_back(*i);
                     offSolverMMenzCompts_.push_back(extractCompts(compts));
                 }
@@ -728,47 +720,6 @@ void Stoich::locateOffSolverReacs(Id myCompt, vector<Id>& elist)
 ///////////////////////////////////////////////////////////////////
 // Model allocation stuff here
 ///////////////////////////////////////////////////////////////////
-
-/*
-void Stoich::allocateObjMap( const vector< Id >& elist )
-{
-    vector< Id > temp( elist );
-    temp.insert( temp.end(), offSolverPoolVec_.begin(),
-                    offSolverPoolVec_.end() );
-    temp.insert( temp.end(), offSolverReacs_.begin(),
-                    offSolverReacs_.end() );
-    if ( temp.size() == 0 )
-        return;
-    objMapStart_ = ~0;
-    unsigned int maxId = 0;
-    for ( vector< Id >::const_iterator
-                    i = temp.begin(); i != temp.end(); ++i ) {
-        if ( objMapStart_ > i->value() )
-            objMapStart_ = i->value();
-        if ( maxId < i->value() )
-            maxId = i->value();
-    }
-    objMap_.clear();
-    objMap_.resize( 1 + maxId - objMapStart_, 0 );
-    */
-/**
- * If this assertion fails it usually means that the elist passed to
- * the solver is not properly restricted to objects located on the
- * current compartment. As a result of this, traversal for finding
- * off-compartment pools generates repeats with the ones in the elist.
- * Note that pool compartment assignment is determined by following
- * the mesh message, and thus a tree-based elist construction for
- * compartments may be incompatible with the generation of the lists
- * of off-compartment pools. It is up to the upstream code to
- * ensure that this is done properly.
- *
- * This assertion also fails if the Ids concerned had a dimension
- * greater than 1.
- */
-/*
-    assert( objMap_.size() >= temp.size() );
-}
-*/
 
 /// Identifies and allocates objects in the Stoich.
 void Stoich::allocateModelObject(Id id)
@@ -885,16 +836,11 @@ void Stoich::resizeArrays()
         dinterface_->setNumVarTotPools(varPoolVec_.size(), totNumPools);
 }
 
-/// Calculate sizes of all arrays, and allocate them.
-void Stoich::allocateModel(const vector<Id>& elist)
+/// Clear out any existing model data
+void Stoich::deAllocateModel()
 {
-    // numVarPools_ = 0;
-    // numReac_ = 0;
-    // numFunctions_ = 0;
-    // vector< Id > bufPools;
     varPoolVec_.clear();
     bufPoolVec_.clear();
-    // offSolverPoolVec is filled up by the locateOffSolverReacs function
     reacVec_.clear();
     enzVec_.clear();
     mmEnzVec_.clear();
@@ -902,8 +848,36 @@ void Stoich::allocateModel(const vector<Id>& elist)
     incrementFuncVec_.clear();
     reacFuncVec_.clear();
 
-    for(vector<Id>::const_iterator i = elist.begin(); i != elist.end(); ++i)
+	// Unclear where these are set up and used. The locateOffSolverReacs
+	// function doesn't seem to be called anywhere.
+    offSolverPoolVec_.clear();
+    offSolverReacVec_.clear();
+    offSolverEnzVec_.clear();
+    offSolverMMenzVec_.clear();
+    offSolverReacCompts_.clear();
+    offSolverEnzCompts_.clear();
+    offSolverMMenzCompts_.clear();
+    offSolverPoolMap_.clear();
+
+	// Clear out the rate terms
+    for ( auto j = rates_.begin(); j != rates_.end(); ++j ) {
+        delete *j;
+	}
+	rates_.clear();
+
+	// Clear out the funcs
+    for ( auto j = funcs_.begin(); j != funcs_.end(); ++j) {
+        delete *j;
+	}
+	funcs_.clear();
+}
+
+/// Calculate sizes of all arrays, and allocate them.
+void Stoich::allocateModel(const vector<Id>& elist)
+{
+    for ( auto i = elist.begin(); i != elist.end(); ++i ) {
         allocateModelObject(*i);
+	}
     resizeArrays();
 
     buildPoolLookup();
@@ -1133,6 +1107,18 @@ const KinSparseMatrix& Stoich::getStoichiometryMatrix() const
 // Model zombification functions
 //////////////////////////////////////////////////////////////
 
+void Stoich::notifyRemoveReac( const Eref& e )
+{;} // To fill
+
+void Stoich::notifyRemoveEnz( const Eref& e )
+{;} // To fill
+
+void Stoich::notifyRemoveMMenz( const Eref& e )
+{;} // To fill
+
+void Stoich::notifyRemoveFunc( const Eref& e )
+{;} // To fill
+
 /// Returns Function, if any, acting as src of specified msg into pa.
 static Id findFuncMsgSrc(Id pa, const string& msg)
 {
@@ -1147,25 +1133,25 @@ static Id findFuncMsgSrc(Id pa, const string& msg)
     return Id();  // failure
 }
 
-Id Stoich::zombifyPoolFuncWithScaling(Id pool)
+Id Stoich::zombifyPoolFuncWithScaling(const Eref& e, Id pool)
 {
-    static const Cinfo* zfCinfo = Cinfo::find("ZombieFunction");
+	double scale = 1.0;
     Id funcId = findFuncMsgSrc(pool, "setN");
-    if(funcId != Id()) {
+    if ( funcId == Id() ) {
+    	funcId = findFuncMsgSrc(pool, "setNInit"); // Note funny caps
+		if ( funcId == Id() ) {
+			scale = NA * Field<double>::get(pool, "volume");
+    		funcId = findFuncMsgSrc(pool, "setConc");
+			if ( funcId == Id() ) {
+    			funcId = findFuncMsgSrc(pool, "setConcInit");
+			}
+		}
+	} 
+
+    if ( funcId != Id() ) {
         Element* fe = funcId.element();
-        installAndUnschedFunc(funcId, pool, 1.0);
-        ZombieFunction::zombify(fe, zfCinfo, ksolve_, dsolve_);
-    }
-    else {
-        funcId = findFuncMsgSrc(pool, "setConc");
-        if(funcId != Id()) {
-            // cout << "Warning: Stoich::zombifyModel: Prefer to use setN
-            // rather than setConc:" << pool.path() << endl;
-            Element* fe = funcId.element();
-            double vol = Field<double>::get(pool, "volume");
-            installAndUnschedFunc(funcId, pool, vol * NA);
-            ZombieFunction::zombify(fe, zfCinfo, ksolve_, dsolve_);
-        }
+        installAndUnschedFunc(funcId, pool, scale );
+		SetGet1< ObjId >::set( funcId, "setSolver", e.id() );
     }
     return funcId;
 }
@@ -1178,12 +1164,6 @@ void Stoich::zombifyModel(const Eref& e, const vector<Id>& elist)
     static const Cinfo* reacCinfo = Cinfo::find("Reac");
     static const Cinfo* enzCinfo = Cinfo::find("Enz");
     static const Cinfo* mmEnzCinfo = Cinfo::find("MMenz");
-    static const Cinfo* zombiePoolCinfo = Cinfo::find("ZombiePool");
-    static const Cinfo* zombieBufPoolCinfo = Cinfo::find("ZombieBufPool");
-    static const Cinfo* zombieReacCinfo = Cinfo::find("ZombieReac");
-    static const Cinfo* zombieMMenzCinfo = Cinfo::find("ZombieMMenz");
-    static const Cinfo* zombieEnzCinfo = Cinfo::find("ZombieEnz");
-    static const Cinfo* zfCinfo = Cinfo::find("ZombieFunction");
     // static const Finfo* funcSrcFinfo = Cinfo::find(
     // "Function")->findFinfo( "valueOut" ); vector< Id > meshEntries;
     vector<Id> temp = elist;
@@ -1195,50 +1175,20 @@ void Stoich::zombifyModel(const Eref& e, const vector<Id>& elist)
 
     for(vector<Id>::const_iterator i = temp.begin(); i != temp.end(); ++i) {
         Element* ei = i->element();
-        if(ei->cinfo() == poolCinfo) {
+        if ( ei->cinfo() == poolCinfo || ei->cinfo() == bufPoolCinfo ) {
             // We need to check the increment message before we zombify the
             // pool, because ZombiePool doesn't have this message.
             Id funcId = findFuncMsgSrc(*i, "increment");
-            double concInit =
-                Field<double>::get(ObjId(ei->id(), 0), "concInit");
-            // Look for func setting rate of change of pool
-            // Id funcId = Neutral::child( i->eref(), "func" );
-            if(funcId != Id()) {
-                // cout << "Found Msg src for increment at " <<
-                // funcId.path() << endl;
+			if ( funcId != Id() ) {
                 Element* fe = funcId.element();
                 installAndUnschedFuncRate(funcId, (*i));
-                ZombieFunction::zombify(fe, zfCinfo, ksolve_, dsolve_);
-            }
-            else {
-                funcId = zombifyPoolFuncWithScaling(*i);
-            }
-            PoolBase::zombify(ei, zombiePoolCinfo, ksolve_, dsolve_);
-            ei->resize(numVoxels_);
-            for(unsigned int j = 0; j < numVoxels_; ++j) {
-                ObjId oi(ei->id(), j);
-                Field<double>::set(oi, "concInit", concInit);
-            }
-        }
-        else if(ei->cinfo() == bufPoolCinfo) {
-            double concInit =
-                Field<double>::get(ObjId(ei->id(), 0), "concInit");
-            // Look for func setting conc of pool
-            // Id funcId = Neutral::child( i->eref(), "func" );
-            Id funcId = zombifyPoolFuncWithScaling(*i);
-            if(funcId == Id()) {
-                funcId = findFuncMsgSrc(*i, "increment");
-                if(funcId != Id()) {
-                    cout << "Warning: Stoich::zombifyModel: Probably you "
-                            "don't "
-                            "want to send increment to a BufPool:"
-                         << i->path() << endl;
-                    Element* fe = funcId.element();
-                    installAndUnschedFuncRate(funcId, (*i));
-                    ZombieFunction::zombify(fe, zfCinfo, ksolve_, dsolve_);
-                }
-            }
-            PoolBase::zombify(ei, zombieBufPoolCinfo, ksolve_, dsolve_);
+				SetGet1< ObjId >::set( funcId, "setSolver", e.id() );
+			} else { // Regular conc controller via func.
+                funcId = zombifyPoolFuncWithScaling(e, *i);
+			}
+            double concInit = Field<double>::get( *i, "concInit");
+			SetGet2< ObjId, ObjId >::set( *i, "setSolvers", ksolve_, dsolve_);
+            Field<double>::set(*i, "concInit", concInit);
             ei->resize(numVoxels_);
             for(unsigned int j = 0; j < numVoxels_; ++j) {
                 ObjId oi(ei->id(), j);
@@ -1246,63 +1196,43 @@ void Stoich::zombifyModel(const Eref& e, const vector<Id>& elist)
             }
         }
         else if(ei->cinfo() == reacCinfo) {
-            ReacBase::zombify(ei, zombieReacCinfo, e.id());
-            // Id funcId = Neutral::child( i->eref(), "func" );
+			SetGet1< ObjId >::set( *i, "setSolver", e.id() );
             Id funcId = findFuncMsgSrc(*i, "setNumKf");
             if(funcId != Id()) {
                 Element* fe = funcId.element();
                 installAndUnschedFuncReac(funcId, (*i));
-                ZombieFunction::zombify(fe, zfCinfo, ksolve_, dsolve_);
-                /*
-                } else {
-                cout << "Warning: Stoich::zombifyModel: Failed to connect
-                Func to Reac :" << i->path() << endl; return;
-                */
+				SetGet1< ObjId >::set( funcId, "setSolver", e.id() );
             }
         }
         else if(ei->cinfo() == mmEnzCinfo) {
-            EnzBase::zombify(ei, zombieMMenzCinfo, e.id());
+			SetGet1< ObjId >::set( *i, "setSolver", e.id() );
+            // EnzBase::zombify(ei, zombieMMenzCinfo, e.id());
         }
         else if(ei->cinfo() == enzCinfo) {
-            CplxEnzBase::zombify(ei, zombieEnzCinfo, e.id());
+			SetGet1< ObjId >::set( *i, "setSolver", e.id() );
         }
     }
 }
 
 void Stoich::unZombifyPools()
 {
-    static const Cinfo* poolCinfo = Cinfo::find("Pool");
-    static const Cinfo* bufPoolCinfo = Cinfo::find("BufPool");
-    static const Cinfo* zombiePoolCinfo = Cinfo::find("ZombiePool");
-    static const Cinfo* zombieBufPoolCinfo = Cinfo::find("ZombieBufPool");
+	static ObjId root = ObjId();
     unsigned int i;
-    for(i = 0; i < varPoolVec_.size(); ++i) {
-        Element* e = varPoolVec_[i].element();
-        if(!e || e->isDoomed())
-            continue;
-        if(e != 0 && e->cinfo() == zombiePoolCinfo)
-            PoolBase::zombify(e, poolCinfo, Id(), Id());
-    }
-
-    for(i = 0; i < bufPoolVec_.size(); ++i) {
-        Element* e = bufPoolVec_[i].element();
-        if(!e || e->isDoomed())
-            continue;
-        if(e != 0 && e->cinfo() == zombieBufPoolCinfo)
-            PoolBase::zombify(e, bufPoolCinfo, Id(), Id());
+    for(auto i = varPoolVec_.begin(); i != varPoolVec_.end(); ++i) {
+        Element* e = i->element();
+        if(e && !e->isDoomed())
+			SetGet2< ObjId, ObjId >::set( *i, "setSolvers", root, root );
+	}
+    for(auto i = bufPoolVec_.begin(); i != bufPoolVec_.end(); ++i) {
+        Element* e = i->element();
+        if(e && !e->isDoomed())
+			SetGet2< ObjId, ObjId >::set( *i, "setSolvers", root, root );
     }
 }
 
 void Stoich::unZombifyModel()
 {
-    static const Cinfo* reacCinfo = Cinfo::find("Reac");
-    static const Cinfo* enzCinfo = Cinfo::find("Enz");
-    static const Cinfo* mmEnzCinfo = Cinfo::find("MMenz");
     static const Cinfo* functionCinfo = Cinfo::find("Function");
-    static const Cinfo* zombieReacCinfo = Cinfo::find("ZombieReac");
-    static const Cinfo* zombieMMenzCinfo = Cinfo::find("ZombieMMenz");
-    static const Cinfo* zombieEnzCinfo = Cinfo::find("ZombieEnz");
-    static const Cinfo* zombieFunctionCinfo = Cinfo::find("ZombieFunction");
 
     unZombifyPools();
 
@@ -1310,8 +1240,8 @@ void Stoich::unZombifyModel()
     temp.insert(temp.end(), offSolverReacVec_.begin(), offSolverReacVec_.end());
     for(vector<Id>::iterator i = temp.begin(); i != temp.end(); ++i) {
         Element* e = i->element();
-        if(e != 0 && e->cinfo() == zombieReacCinfo)
-            ReacBase::zombify(e, reacCinfo, Id());
+        if(e != 0 && e->cinfo()->isA( "Reac" ) )
+			SetGet1< ObjId >::set( *i, "setSolver", Id() ); // Clear stoich
     }
 
     temp = mmEnzVec_;
@@ -1319,25 +1249,26 @@ void Stoich::unZombifyModel()
                 offSolverMMenzVec_.end());
     for(vector<Id>::iterator i = temp.begin(); i != temp.end(); ++i) {
         Element* e = i->element();
-        if(e != 0 && e->cinfo() == zombieMMenzCinfo)
-            EnzBase::zombify(e, mmEnzCinfo, Id());
+        if( e != 0 && e->cinfo()->isA( "EnzBase" ) ) {
+			SetGet1< ObjId >::set( *i, "setSolver", Id() ); // Clear stoich
+		}
     }
 
     temp = enzVec_;
     temp.insert(temp.end(), offSolverEnzVec_.begin(), offSolverEnzVec_.end());
     for(vector<Id>::iterator i = temp.begin(); i != temp.end(); ++i) {
         Element* e = i->element();
-        if(e != 0 && e->cinfo() == zombieEnzCinfo)
-            CplxEnzBase::zombify(e, enzCinfo, Id());
+        if( e != 0 && e->cinfo()->isA( "EnzBase" ) ) {
+			SetGet1< ObjId >::set( *i, "setSolver", Id() ); // Clear stoich
+		}
     }
 
     temp = poolFuncVec_;
     temp.insert(temp.end(), incrementFuncVec_.begin(), incrementFuncVec_.end());
     for(vector<Id>::iterator i = temp.begin(); i != temp.end(); ++i) {
         Element* e = i->element();
-        if(e != 0 && e->cinfo() == zombieFunctionCinfo) {
-            ZombieFunction::zombify(e, functionCinfo, Id(), Id());
-            // cout << "ZombieFunction unzombify: " << e->getTick() << endl;
+        if(e != 0 && e->cinfo()->isA( "Function" ) ) {
+			SetGet1< ObjId >::set( *i, "setSolver", Id() );
         }
         if(e != 0 && e->getTick() == -2) {
             int t = Clock::lookupDefaultTick(e->cinfo()->name());
@@ -1977,14 +1908,14 @@ void Stoich::updateRatesAfterRemesh()
     }
     vector<Id>::iterator i;
     for(i = offSolverReacVec_.begin(); i != offSolverReacVec_.end(); ++i) {
-        assert(i->element()->cinfo()->isA("ReacBase"));
+        assert(i->element()->cinfo()->isA("Reac"));
         double Kf = Field<double>::get(*i, "Kf");
         double Kb = Field<double>::get(*i, "Kb");
         setReacKf(i->eref(), Kf);
         setReacKb(i->eref(), Kb);
     }
     for(i = offSolverEnzVec_.begin(); i != offSolverEnzVec_.end(); ++i) {
-        assert(i->element()->cinfo()->isA("CplxEnzBase"));
+        assert(i->element()->cinfo()->isA("Enz"));
         double concK1 = Field<double>::get(*i, "concK1");
         double k3 = Field<double>::get(*i, "k3");
         double k2 = Field<double>::get(*i, "k2");
@@ -1993,7 +1924,7 @@ void Stoich::updateRatesAfterRemesh()
         setEnzK1(i->eref(), concK1);
     }
     for(i = offSolverMMenzVec_.begin(); i != offSolverMMenzVec_.end(); ++i) {
-        assert(i->element()->cinfo()->isA("MMEnzBase"));
+        assert(i->element()->cinfo()->isA("MMEnz"));
         double Km = Field<double>::get(*i, "Km");
         double kcat = Field<double>::get(*i, "kcat");
         setMMenzKm(i->eref(), Km);

@@ -29,7 +29,7 @@
 #include "VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
 #include "XferInfo.h"
-#include "ZombiePoolInterface.h"
+#include "KsolveBase.h"
 #include "Stoich.h"
 
 #ifdef USE_GSL
@@ -634,15 +634,6 @@ void SteadyState::setupSSmatrix()
     total_.resize( nConsv );
     total_.assign( nConsv, 0.0 );
 
-    /*
-    cout << "S = (";
-    for ( unsigned int j = 0; j < numVarPools_; ++j )
-        cout << s_->S()[ j ] << ", ";
-    cout << "), Sinit = ( ";
-    for ( unsigned int j = 0; j < numVarPools_; ++j )
-        cout << s_->Sinit()[ j ] << ", ";
-    cout << ")\n";
-    */
     Id ksolve = Field< Id >::get( stoich_, "ksolve" );
     vector< double > nVec =
         LookupField< unsigned int, vector< double > >::get(

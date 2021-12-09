@@ -20,7 +20,6 @@ from __future__ import print_function, absolute_import, division
 
 # FIXME: Deprecated since 3.4
 import imp
-
 import os
 import moose
 import numpy as np
@@ -399,6 +398,8 @@ class rdesigneur:
                 self._buildElecSoma( i )
             elif i[0] == 'ballAndStick':
                 self._buildElecBallAndStick( i )
+            elif i[0] == 'branchedCell':
+                self._buildElecBranchedCell( i )
             elif self.checkAndBuildProto( "cell", i, \
                 ["Compartment", "SymCompartment"], ["swc", "p", "nml", "xml"] ):
                 self.elecid = moose.element( '/library/' + i[1] )
@@ -469,6 +470,50 @@ class rdesigneur:
             moose.connect( prev, 'axial', compt, 'raxial' )
             prev = compt
             x += dx
+        self.elecid = cell
+        return cell
+
+    ################################################################
+    def _buildElecBranchedCell( self, args ):
+        parms = [ 'branchedCell', 'cell', 10e-6, 10e-6, 4e-6, 200e-6, 1, 2.5e-6, 200e-6, 1 ] # somaDia, somaLen, dendDia, dendLen, dendNumSeg, branchDia, branchLen, branchNumSeg
+        for i in range( len(args) ):
+            parms[i] = args[i]
+        if parms[9] <= 0:
+            return self.buildElecSoma( parms[:4] )
+        cell = moose.Neuron( '/library/' + parms[1] )
+        prev = buildCompt( cell, 'soma', dia = args[2], dx = args[3] )
+        dx = parms[5]/parms[6]
+        x = prev.x
+        for i in range( parms[6] ):
+            compt = buildCompt( cell, 'dend' + str(i), x = x, dx = dx, dia = args[4] )
+            moose.connect( prev, 'axial', compt, 'raxial' )
+            prev = compt
+            x += dx
+        primaryBranchEnd = prev
+        x = prev.x
+        y = prev.y
+        dxy = (parms[8]/float(parms[9])) * np.sqrt( 1.0/2.0 )
+        for i in range( parms[9] ):
+            compt = buildCompt( cell, 'branch1_' + str(i), 
+                    x = x, dx = dxy, y = y, dy = dxy, 
+                    dia = args[7] )
+            moose.connect( prev, 'axial', compt, 'raxial' )
+            prev = compt
+            x += dxy
+            x += dxy
+
+        x = primaryBranchEnd.x
+        y = primaryBranchEnd.y
+        prev = primaryBranchEnd
+        for i in range( parms[9] ):
+            compt = buildCompt( cell, 'branch2_' + str(i), 
+                    x = x, dx = dxy, y = y, dy = -dxy, 
+                    dia = args[7] )
+            moose.connect( prev, 'axial', compt, 'raxial' )
+            prev = compt
+            x += dxy
+            y -= dxy
+
         self.elecid = cell
         return cell
 
@@ -652,7 +697,7 @@ class rdesigneur:
         if kf[0] in ['CaConcBase', 'ChanBase', 'NMDAChan', 'VClamp']:
             objList = self._collapseElistToPathAndClass( comptList, plotSpec.relpath, kf[0] )
             return objList, kf[1]
-        elif field in [ 'n', 'conc', 'volume']:
+        elif field in [ 'n', 'conc', 'volume', 'increment']:
             path = plotSpec.relpath
             pos = path.find( '/' )
             if pos == -1:   # Assume it is in the dend compartment.
@@ -833,7 +878,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             if len( vtab ) < 2:
                 print( "Warning: Waveplot {} abandoned, only {} points".format( i[1], len( vtab ) ) )
                 continue
-            dFrame = len( vtab[0].vector ) // self.numWaveFrames
+            dFrame = int( len( vtab[0].vector ) / self.numWaveFrames )
             if dFrame < 1:
                 dFrame = 1
             vpts = np.array( [ [k.vector[j] for j in range( 0, len( k.vector ), dFrame ) ] for k in vtab] ).T * i[3]
@@ -864,7 +909,8 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 if len( wp[2] ) > f:
                     wp[1].set_ydata( wp[2][f] )
                     wp[3].set_text( "time = {:.1f}".format(f*self.frameDt) )
-                    wp[0].canvas.draw()
+                    #wp[0].canvas.draw()
+                    wp[0].canvas.flush_events()
             #plt.pause(0.001)
         
         #This calls the _save function which saves only if the filenames have been specified
@@ -963,6 +1009,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 'conc':('PoolBase', 'setConc'),
                 'nInit':('PoolBase', 'setNinit'),
                 'concInit':('PoolBase', 'setConcInit'),
+                'increment':('PoolBase', 'increment'),
                 'vclamp':('CompartmentBase', 'setInject'),
                 'randsyn':('SynChan', 'addSpike'),
                 'periodicsyn':('SynChan', 'addSpike')
@@ -999,6 +1046,8 @@ rdesigneur.rmoogli.updateMoogliViewer()
                 func.doEvalAtReinit = 1
                 for q in stimObj3:
                     moose.connect( func, 'valueOut', q, stimField )
+                if stimField == "increment": # Has to be under Ksolve
+                    moose.move( func, q )
 
     ################################################################
     def _configureHSolve( self ):
@@ -1242,13 +1291,13 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
     #################################################################
 
-    def _isModelFromKkit( self ):
+    def _isModelFromKkit_SBML( self ):
         for i in self.chemProtoList:
-            if i[0][-2:] == ".g":
+            if i[0][-2:] == ".g" or i[0][-4:] == ".xml":
                 return True
         return False
 
-    def _assignComptNamesFromKkit( self ):
+    def _assignComptNamesFromKkit_SBML( self ):
         '''
         Algorithm: Identify compts by volume. Assume a couple of standard
         orders depending on the addSomaChemCompt and addEndoChemCompt
@@ -1269,7 +1318,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             if comptList[0].name != 'dend':
                 comptList[0].name = 'dend'
             return comptList
-        if not self._isModelFromKkit():
+        if not self._isModelFromKkit_SBML():
             return comptList
         sortedComptList = sorted( comptList, key=lambda x: -x.volume )
         if self.addSomaChemCompt:
@@ -1306,12 +1355,13 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
         self.chemid.name = 'temp_chem'
         newChemid = moose.Neutral( self.model.path + '/chem' )
-        comptlist = self._assignComptNamesFromKkit()
+        comptlist = self._assignComptNamesFromKkit_SBML()
         comptdict = { i.name:i for i in comptlist }
         if len(comptdict) == 1 or 'dend' in comptdict:
             self.dendCompt = moose.NeuroMesh( newChemid.path + '/dend' )
             self.dendCompt.geometryPolicy = 'cylinder'
             self.dendCompt.separateSpines = 0
+
             self._moveCompt( comptdict['dend'], self.dendCompt )
             comptdict['dend'] = self.dendCompt
 
@@ -1419,7 +1469,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
         chem = moose.Neutral( '/library/' + chemName )
         pre, ext = os.path.splitext( fname )
         if ext == '.xml' or ext == '.sbml':
-            modelId = moose.mooseReadSBML( fname, chem.path )
+            modelId = moose.readSBML( fname, chem.path )
         else:
             modelId = moose.loadModel( fname, chem.path, 'ee' )
         comptlist = moose.wildcardFind( chem.path + '/#[ISA=ChemCompt]' )
@@ -1514,10 +1564,14 @@ rdesigneur.rmoogli.updateMoogliViewer()
                     moose.connect( i[3], 'output', chemVec[j],chemFieldDest)
             else:
                 chemFieldSrc = 'get' + capChemField
-                elecFieldDest = 'set' + capField
+                if capField == 'Activation':
+                    elecFieldDest = 'activation'
+                else:
+                    elecFieldDest = 'set' + capField
                 for j in range( i[1], i[2] ):
                     moose.connect( i[3], 'requestOut', chemVec[j], chemFieldSrc)
                 msg = moose.connect( i[3], 'output', elObj, elecFieldDest )
+                print( "Connecting {} to {} and {}.{}".format( i[3], chemVec[0], elObj, elecFieldDest ) )
 
 
 #######################################################################

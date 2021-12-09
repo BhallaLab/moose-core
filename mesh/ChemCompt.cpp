@@ -279,7 +279,7 @@ void ChemCompt::getChildConcs( const Eref& e, vector< double >& childConcs ) con
             childConcs.push_back( Field< double >::get( *i, "conc" ) );
             childConcs.push_back( Field< double >::get( *i, "concInit" ) );
         }
-        else if ( i->element()->cinfo()->isA( "ReacBase" ) )
+        else if ( i->element()->cinfo()->isA( "Reac" ) )
         {
             childConcs.push_back( Field< double >::get( *i, "Kf" ) );
             childConcs.push_back( Field< double >::get( *i, "Kb" ) );
@@ -310,7 +310,7 @@ unsigned int ChemCompt::setChildConcs( const Eref& e,
             Field< double >::set( *i, "conc", conc[ start++ ] );
             Field< double >::set( *i, "concInit", conc[start++] );
         }
-        else if ( i->element()->cinfo()->isA( "ReacBase" ) )
+        else if ( i->element()->cinfo()->isA( "Reac" ) )
         {
             Field< double >::set( *i, "Kf", conc[ start++ ] );
             Field< double >::set( *i, "Kb", conc[ start++ ] );

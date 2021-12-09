@@ -22,8 +22,8 @@ class Id;
 /**
  * This is the base class for voxels used in reac-diffusion systems.
  * Each voxel manages all the molecular pools that live in it. This
- * is the S_ and Sinit_ vectors.
- * Additionally, the last set of entries in S_ and Sinit_ refer to the
+ * is the S_ and Cinit_ vectors.
+ * Additionally, the last set of entries in S_ and Cinit_ refer to the
  * proxy pools that participate in cross-node reactions, but are really
  * located on other compartments.
  */
@@ -64,16 +64,16 @@ public:
      * Returns the array of doubles of initial mol #s at the specified
      * mesh index
      */
-    const double* Sinit() const;
+    const double* Cinit() const;
 
     /**
      * Returns the array of doubles of initial mol #s at the specified
      * mesh index, as a writable array.
      */
-    double* varSinit();
+    double* varCinit();
 
     /**
-     * Assigns S = Sinit and sets up initial dt.
+     * Assigns S = NA * vol * Cinit and sets up initial dt.
      */
     void reinit();
 
@@ -84,7 +84,7 @@ public:
 
     /**
      * Assign the volume, and handle the cascading effects by scaling
-     * all the dependent values of nInit and rates if applicable.
+     * all the dependent values of n.
      */
     virtual void setVolumeAndDependencies( double vol );
 
@@ -94,8 +94,8 @@ public:
 
     void setN( unsigned int i, double v );
     double getN( unsigned int ) const;
-    void setNinit( unsigned int, double v );
-    double getNinit( unsigned int ) const;
+    void setConcInit( unsigned int, double v );
+    double getConcInit( unsigned int ) const;
     void setDiffConst( unsigned int, double v );
     double getDiffConst( unsigned int ) const;
     //////////////////////////////////////////////////////////////////
@@ -229,19 +229,13 @@ private:
     vector< double > S_;
 
     /**
-     * Sinit_ specifies initial conditions at t = 0. Whenever the reac
-     * system is rebuilt or reinited, all S_ values become set to Sinit.
+     * Cinit_ specifies initial conc at t = 0. Whenever the reac
+     * system is rebuilt or reinited, all S_ values become set to Cinit.
+	 * scaled for volume and NA.
      * Also used for buffered molecules as the fixed values of these
      * molecules.
      */
-    vector< double > Sinit_;
-
-    /**
-     * The number of pools (at the end of S and Sinit) that are here
-     * just as proxies for some off-compartment pools that participate
-     * in cross-compartment reactions.
-    unsigned int numProxyPools_;
-     */
+    vector< double > Cinit_;
 
     /**
      * proxyPoolVoxels_[comptIndex][#]

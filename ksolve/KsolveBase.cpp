@@ -17,7 +17,7 @@
 // #include "VoxelPools.h"
 #include "../mesh/VoxelJunction.h"
 #include "XferInfo.h"
-#include "ZombiePoolInterface.h"
+#include "KsolveBase.h"
 
 #include "RateTerm.h"
 #include "FuncTerm.h"
@@ -29,24 +29,24 @@
 #include "../mesh/Boundary.h"
 #include "../mesh/ChemCompt.h"
 
-ZombiePoolInterface::ZombiePoolInterface()
+KsolveBase::KsolveBase()
     : stoich_(), compartment_(), isBuilt_(false)
 {;}
 
-void ZombiePoolInterface::updateJunctions( double dt )
+void KsolveBase::updateJunctions( double dt )
 {;}
 
-void ZombiePoolInterface::setPrev()
+void KsolveBase::setPrev()
 {;}
 
 /////////////////////////////////////////////////////////////////////
 
-Id ZombiePoolInterface::getCompartment() const
+Id KsolveBase::getCompartment() const
 {
     return compartment_;
 }
 
-void ZombiePoolInterface::setCompartment( Id compt )
+void KsolveBase::setCompartment( Id compt )
 {
     isBuilt_ = false; // We will have to now rebuild the whole thing.
     if ( compt.element()->cinfo()->isA( "ChemCompt" ) )
@@ -62,3 +62,19 @@ void ZombiePoolInterface::setCompartment( Id compt )
         }
     }
 }
+	
+void KsolveBase::notifyDestroyPool( const Eref& e )
+{;}
+
+void KsolveBase::notifyAddPool( const Eref& e )
+{;}
+
+void KsolveBase::notifyRemovePool( const Eref& e )
+{;}
+
+void KsolveBase::notifyAddMsgSrcPool( const Eref& e, ObjId msgId )
+{;}
+
+void KsolveBase::notifyAddMsgDestPool( const Eref& e, ObjId msgId )
+{;}
+

@@ -11,10 +11,11 @@
 #include "../shell/Shell.h"
 #include "ReadKkit.h"
 #include "ReadCspace.h"
+class Stoich;
+#include "Reac.h"
 #include "EnzBase.h"
 #include "MMenz.h"
-#include "ReacBase.h"
-#include "Reac.h"
+#include "Enz.h"
 
 void testReadKkit()
 {
@@ -204,12 +205,12 @@ void testMMenz()
 
 	m.vSetKm( mmid.eref(), 5.0 );
 	m.vSetKcat( mmid.eref(), 4.0 );
-	m.vReinit( mmid.eref(), &p );
-	m.vSub( 2 );
-	m.vEnz( 3 );
-	assert( doubleEq( m.vGetKm( mmid.eref() ), 5.0 ) );
-	assert( doubleEq( m.vGetKcat( mmid.eref() ), 4.0 ) );
-	m.vProcess( mmid.eref(), &p );
+	// m.vReinit( mmid.eref(), &p );
+	m.sub( 2 );
+	m.enz( 3 );
+	assert( doubleEq( m.getKm( mmid.eref() ), 5.0 ) );
+	assert( doubleEq( m.getKcat( mmid.eref() ), 4.0 ) );
+	// m.vProcess( mmid.eref(), &p );
 
 	shell->doDelete( mmid );
 	cout << "." << flush;
