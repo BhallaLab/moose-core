@@ -41,6 +41,9 @@ class Reac
 		/// Get number of products
 		unsigned int getNumPrd( const Eref& e ) const;
 
+		/// Look up the ObjId of the parent compartment of the reac.
+		ObjId getCompartment( const Eref& e ) const;
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////

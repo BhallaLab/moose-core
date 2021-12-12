@@ -45,7 +45,7 @@ def findXreacs(basepath, reacType):
         prdc = [findCompt(j) for j in prds]
 
         enzc = []
-        if reacType == 'Enz':
+        if reacType == 'EnzBase':
             enzc = [reacc]
         if not checkEqual(subc + prdc + enzc):
             ret.append([i, reacc, subs, subc, prds, prdc])
@@ -79,8 +79,8 @@ def proxify(reac, reacc, direction, pool, poolc):
     removeEnzFromPool(duppool)
     disconnectReactant(reac, pool, duppool)
     moose.connect(reac, direction, duppool, 'reac')
-    #_moose.showfield( reac )
-    #_moose.showmsg( reac )
+    #moose.showfield( reac )
+    #moose.showmsg( duppool )
 
 
 def enzProxify(enz, enzc, direction, pool, poolc):
@@ -143,7 +143,7 @@ def disconnectReactant(reacOrEnz, reactant, duppool):
 
 def fixXreacs(basepath):
     xr = findXreacs(basepath, 'Reac')
-    xe = findXreacs(basepath, 'Enz')
+    xe = findXreacs(basepath, 'EnzBase')
 
     for i in (xr):
         reac, reacc, subs, subc, prds, prdc = i
@@ -153,11 +153,11 @@ def fixXreacs(basepath):
             reacProxify(reac, reacc, 'prd', prds[j], prdc[j])
 
     for i in (xe):
-        reac, reacc, subs, subc, prds, prdc = i
+        enz, enzc, subs, subc, prds, prdc = i
         for j in range(len(subs)):
-            enzProxify(reac, reacc, 'sub', subs[j], subc[j])
+            enzProxify(enz, enzc, 'sub', subs[j], subc[j])
         for j in range(len(prds)):
-            enzProxify(reac, reacc, 'prd', prds[j], prdc[j])
+            enzProxify(enz, enzc, 'prd', prds[j], prdc[j])
 
 
 #####################################################################

@@ -964,6 +964,7 @@ void Clock::buildDefaultTick()
     defaultTick_["Pool"] = ~0U;
     defaultTick_["BufPool"] = ~0U;
     defaultTick_["PsdMesh"] = ~0U;
+    defaultTick_["PresynMesh"] = ~0U;
     defaultTick_["Reac"] = ~0U;
     defaultTick_["Shell"] = ~0U;
     defaultTick_["SingleMsg"] = ~0U;

@@ -431,6 +431,7 @@ const Cinfo* Neuron::initCinfo()
         &Neuron::getParentCompartmentOfSpine
     );
 
+	/*
     static ReadOnlyLookupElementValueFinfo< Neuron, vector< ObjId >, vector< ObjId > >
     spineIdsFromCompartmentIds(
         "spineIdsFromCompartmentIds",
@@ -439,6 +440,17 @@ const Cinfo* Neuron::initCinfo()
         "electrical compartments. If a bad compartment Id is given, the"
         "corresponding spine entry is the root Id.",
         &Neuron::getSpineIdsFromCompartmentIds
+    );
+	*/
+
+    static ReadOnlyLookupElementValueFinfo< Neuron, ObjId, ObjId >
+    spineFromCompartment(
+        "spineFromCompartment",
+        "Returns ObjIds of spine entries (FieldElements on this Neuron, "
+        "used for scaling) that map to the the specified "
+        "electrical compartment. If a bad compartment Id is given, "
+        "returns the root ObjId.",
+        &Neuron::getSpineFromCompartment
     );
 
     /////////////////////////////////////////////////////////////////////
@@ -519,7 +531,7 @@ const Cinfo* Neuron::initCinfo()
         &spinesFromExpression,  	// ReadOnlyLookupValueFinfo
         &spinesOnCompartment,	  	// ReadOnlyLookupValueFinfo
         &parentCompartmentOfSpine, 	// ReadOnlyLookupValueFinfo
-        &spineIdsFromCompartmentIds, 	// ReadOnlyLookupValueFinfo
+        &spineFromCompartment, 		// ReadOnlyLookupValueFinfo
         &buildSegmentTree,			// DestFinfo
         &setSpineAndPsdMesh,		// DestFinfo
         &setSpineAndPsdDsolve,		// DestFinfo
@@ -1087,6 +1099,21 @@ ObjId Neuron::getParentCompartmentOfSpine(
     return ObjId();
 }
 
+ObjId Neuron::getSpineFromCompartment( const Eref& e, ObjId compt ) const
+{
+    for ( unsigned int i = 0; i < spines_.size(); ++i )
+    {
+        for ( auto j = spines_[i].begin(); j != spines_[i].end(); ++j ) {
+			if ( *j == compt.id ) {
+    			Id spineBase = Id( e.id().value() + 1 );
+            	return ObjId( spineBase, e.dataIndex(), i );
+			}
+		}
+	}
+	return ObjId();
+}
+
+/*
 vector< ObjId > Neuron::getSpineIdsFromCompartmentIds(
     const Eref& e, vector< ObjId > compt ) const
 {
@@ -1101,12 +1128,6 @@ vector< ObjId > Neuron::getSpineIdsFromCompartmentIds(
         }
     }
     // cout << "################## " << lookupSpine.size() << endl;
-    for ( map< Id, unsigned int >::const_iterator k = lookupSpine.begin(); k != lookupSpine.end(); ++k )
-    {
-        // cout << "spine[" << k->second << "] has " << k->first.element()->getName() << endl;
-        // cout << "spine[" << k->second << "] has " << k->first << endl;
-
-    }
     for ( vector< ObjId >::const_iterator j = compt.begin(); j != compt.end(); ++j )
     {
         // cout << "compt: " << *j << "	" << j->element()->getName() << endl;
@@ -1123,6 +1144,7 @@ vector< ObjId > Neuron::getSpineIdsFromCompartmentIds(
     }
     return ret;
 }
+*/
 
 void Neuron::buildElist( const Eref& e,
                          const vector< string >& line,
@@ -1432,6 +1454,9 @@ void Neuron::buildSegmentTree( const Eref& e )
         assert( i->second < segId_.size() );
         segId_[ i->second ] = i->first;
     }
+	// Allocate vector allSpinesPerCompt_ to use all entries of segId_
+    allSpinesPerCompt_.clear();
+    allSpinesPerCompt_.resize(segId_.size() );
     updateSegmentLengths();
 }
 
@@ -2010,11 +2035,12 @@ static void makeSizeDistrib ( const vector< ObjId >& elist,
 void Neuron::installSpines( const vector< ObjId >& elist,
                             const vector< double >& val, const vector< string >& line )
 {
-    Id spineProto( "/library/spine" );
+    Id spineProto( "/library/" + line[0] );
+    // Id spineProto( "/library/spine" );
 
     if ( spineProto == Id() )
     {
-        cout << "Warning: Neuron::installSpines: Unable to find prototype spine: /library/spine\n";
+        cout << "Warning: Neuron::installSpines: Unable to find prototype spine: /library/" << line[0] << endl;
         return;
     }
     // Look up elist index from pos index, since there may be many
@@ -2025,14 +2051,16 @@ void Neuron::installSpines( const vector< ObjId >& elist,
     vector< double > size; // Size scaling of spines
     pos.reserve( elist.size() );
     elistIndex.reserve( elist.size() );
+    vector< unsigned int > localSpineParentSegIndex;
 
     makeSpacingDistrib( elist, val,
-                        spineParentSegIndex_, elistIndex, pos, line);
+                        localSpineParentSegIndex, elistIndex, pos, line);
     makeAngleDistrib( elist, val, elistIndex, theta, line );
     makeSizeDistrib( elist, val, elistIndex, size, line );
-    for ( unsigned int k = 0; k < spineParentSegIndex_.size(); ++k )
+	unsigned int startNumSpines = spines_.size();
+    for ( unsigned int k = 0; k < localSpineParentSegIndex.size(); ++k )
     {
-        unsigned int i = spineParentSegIndex_[k];
+        unsigned int i = localSpineParentSegIndex[k];
         Vec x, y, z;
         coordSystem( soma_, segId_[i], x, y, z );
         spines_.push_back(
@@ -2040,21 +2068,20 @@ void Neuron::installSpines( const vector< ObjId >& elist,
                       x, y, z, size[k], k )
         );
     }
-    spineToMeshOrdering_.clear();
+    // spineToMeshOrdering_.clear();
     spineToMeshOrdering_.resize( spines_.size(), 0 );
-    spineStoich_.clear();
+    // spineStoich_.clear();
     spineStoich_.resize( spines_.size() );
-    psdStoich_.clear();
+    // psdStoich_.clear();
     psdStoich_.resize( spines_.size() );
 
-    /// Now fill in allSpinesPerCompt_ vector. First clear it out.
-    allSpinesPerCompt_.clear();
-    allSpinesPerCompt_.resize(segId_.size() );
-    for ( unsigned int i = 0; i < spines_.size(); ++i )
+    /// Now fill in allSpinesPerCompt_ vector. It was allocated in buildSegmentTree, right after segId_ was filled.
+    for ( unsigned int i = 0; i < localSpineParentSegIndex.size(); ++i )
     {
-        assert( allSpinesPerCompt_.size() > spineParentSegIndex_[i] );
-        vector< Id >& s = allSpinesPerCompt_[ spineParentSegIndex_[i] ];
-        s.insert( s.end(), spines_[i].begin(), spines_[i].end() );
+        assert( allSpinesPerCompt_.size() > localSpineParentSegIndex[i] );
+        vector< Id >& s = allSpinesPerCompt_[ localSpineParentSegIndex[i]];
+		unsigned int j = startNumSpines + i;
+        s.insert( s.end(), spines_[j].begin(), spines_[j].end() );
     }
 }
 ////////////////////////////////////////////////////////////////////////

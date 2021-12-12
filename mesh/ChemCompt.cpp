@@ -56,6 +56,14 @@ const Cinfo* ChemCompt::initCinfo()
         "The first N entries are for x, next N for y, last N are z. ",
         &ChemCompt::getVoxelMidpoint
     );
+	
+    static ReadOnlyLookupValueFinfo< 
+			ChemCompt, unsigned int, vector< double > >
+   	oneVoxelMidpoint(
+        "oneVoxelMidpoint",
+        "Vector of midpoint coordinates of specified voxel.",
+        &ChemCompt::getOneVoxelMidpoint
+    );
 
     static LookupElementValueFinfo<
     ChemCompt, unsigned int, double >
@@ -157,7 +165,8 @@ const Cinfo* ChemCompt::initCinfo()
     {
         &volume,			// Value
         &voxelVolume,		// ReadOnlyLookupValue
-        &voxelMidpoint,		// ReadOnlyLookupValue
+        &voxelMidpoint,		// ReadOnlyValue
+        &oneVoxelMidpoint,		// ReadOnlyLookupValue
         &oneVoxelVolume,	// ReadOnlyLookupValue
         &numDimensions,	// ReadOnlyValue
         &stencilRate,	// ReadOnlyLookupValue
@@ -338,6 +347,19 @@ vector< double > ChemCompt::getVoxelVolume() const
 vector< double > ChemCompt::getVoxelMidpoint() const
 {
     return this->vGetVoxelMidpoint();
+}
+
+vector< double > ChemCompt::getOneVoxelMidpoint( unsigned int vox ) const
+{
+	const vector< double >& v = vGetVoxelMidpoint();
+	vector< double > ret = { 0.0, 0.0, 0.0 };
+	unsigned int numVoxels = v.size() / 3;
+	if ( vox < numVoxels ) {
+		ret[0] = v[vox];
+		ret[1] = v[vox + numVoxels];
+		ret[2] = v[vox + numVoxels * 2];
+	}
+	return ret;
 }
 
 double ChemCompt::getOneVoxelVolume( const Eref& e, unsigned int dataIndex ) const

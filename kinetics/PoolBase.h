@@ -65,6 +65,12 @@ public:
     void setVolume( const Eref& e, double v );
     double getVolume( const Eref& e ) const;
 
+	/// Lookup up parent compartment of pool, return '/' if not found
+	ObjId getCompartment( const Eref& e ) const;
+
+	/// Return x,y,z coords of current pool from parent compt.voxel
+	vector< double > getCoords( const Eref& e ) const;
+
     void setSpecies( const Eref& e, SpeciesId v );
     SpeciesId getSpecies( const Eref& e ) const;
     /**

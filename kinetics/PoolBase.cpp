@@ -81,6 +81,22 @@ const Cinfo* PoolBase::initPoolBaseCinfo()
         &PoolBase::getVolume
     );
 
+    static ReadOnlyElementValueFinfo< PoolBase, ObjId > compartment(
+        "compartment",
+        "ObjId of parent compartment of pool. "
+        "If the compartment isn't"
+        "available this returns the root ObjId.",
+        &PoolBase::getCompartment
+    );
+
+    static ReadOnlyElementValueFinfo< PoolBase, vector< double > > coords(
+        "coords",
+        "coordinates of pool, based on mid-point of voxel in which it is "
+        "situated. If the parent compartment isn't"
+        "available this returns [0, 0, 0].",
+        &PoolBase::getCoords
+    );
+
     static ElementValueFinfo< PoolBase, unsigned int > speciesId(
         "speciesId",
         "Species identifier for this mol pool. Eventually link to ontology.",
@@ -200,7 +216,9 @@ const Cinfo* PoolBase::initPoolBaseCinfo()
         &motorConst,	// Value
         &conc,		// Value
         &concInit,	// Value
-        &volume,	// Readonly Value
+        &volume,	// ReadOnlyElementValue
+		&compartment,	// ReadOnlyElementValue
+		&coords,	// ReadOnlyElementValue
         &speciesId,	// Value
         &isBuffered,	// Value
         &increment,			// DestFinfo
@@ -433,7 +451,7 @@ double PoolBase::getN( const Eref& e ) const
 	if ( ksolve_ )
     	return ksolve_->getN( e );
 	else
-    	return ( NA * getVolume( e ) ) * concInit_;
+    	return NA * getVolume( e ) * concInit_;
 }
 
 void PoolBase::setNinit( const Eref& e, double v )
@@ -506,6 +524,17 @@ void PoolBase::setVolume( const Eref& e, double v )
 double PoolBase::getVolume( const Eref& e ) const
 {
     return lookupVolumeFromMesh( e );
+}
+
+ObjId PoolBase::getCompartment( const Eref& e ) const
+{
+    return getCompt( e.id() );
+}
+
+vector< double > PoolBase::getCoords( const Eref& e ) const
+{
+    ObjId compt = getCompt( e.id() );
+	return LookupField< unsigned int, vector< double > >::get( compt, "oneVoxelMidpoint", e.dataIndex() );
 }
 
 void PoolBase::setSpecies( const Eref& e, unsigned int v )

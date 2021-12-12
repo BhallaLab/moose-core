@@ -171,6 +171,13 @@ py::cpp_function __Finfo__::getDestFinfoSetterFunc2(const ObjId& oid,
                 };
             return func;
         }
+        if(ftype2 == "double") {
+            std::function<bool(double, double)> func =
+                [oid, fname](const double a, const double b) {
+                    return SetGet2<double, double>::set(oid, fname, a, b);
+                };
+            return func;
+        }
     }
 
     if(ftype1 == "string") {
@@ -185,6 +192,12 @@ py::cpp_function __Finfo__::getDestFinfoSetterFunc2(const ObjId& oid,
     if(ftype1 == "ObjId" && ftype2 == "ObjId") {
         std::function<bool(ObjId, ObjId)> func = [oid, fname](ObjId a, ObjId b) {
             return SetGet2<ObjId, ObjId>::set(oid, fname, a, b);
+        };
+        return func;
+    }
+    if(ftype1 == "vector<ObjId>" && ftype2 == "double") {
+        std::function<bool(vector<ObjId>, double)> func = [oid, fname](vector<ObjId> a, double b) {
+            return SetGet2<vector<ObjId>, double>::set(oid, fname, a, b);
         };
         return func;
     }

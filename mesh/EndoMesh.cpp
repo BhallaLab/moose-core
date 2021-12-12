@@ -97,6 +97,13 @@ const Cinfo* EndoMesh::initCinfo()
 			&EndoMesh::getDoAxialDiffusion
 		);
 
+    	static ReadOnlyValueFinfo< EndoMesh, vector< Id > > elecComptMap(
+        	"elecComptMap",
+        	"Vector of Ids of electrical compartments that map to each "
+        	"voxel. This function simply asks the surround mesh for this.",
+        	&EndoMesh::getElecComptMap
+    	);
+	
 
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
@@ -115,6 +122,7 @@ const Cinfo* EndoMesh::initCinfo()
 		&vScale,			// Value
 		&surround,			// Value
 		&doAxialDiffusion,	// Value
+        &elecComptMap,		// ReadOnlyValue
 	};
 
 	static Dinfo< EndoMesh > dinfo;
@@ -245,6 +253,11 @@ void EndoMesh::setDoAxialDiffusion( const Eref& e, bool v )
 bool EndoMesh::getDoAxialDiffusion( const Eref& e ) const
 {
 	return doAxialDiffusion_;
+}
+
+vector< Id > EndoMesh::getElecComptMap() const
+{
+	return Field< vector < Id > >::get( surround_, "elecComptMap" );
 }
 
 //////////////////////////////////////////////////////////////////

@@ -19,6 +19,16 @@ const Cinfo* Spine::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
+		static ReadOnlyElementValueFinfo< Spine, Id > shaft (
+			"shaft",
+			"Id of spine shaft.",
+			&Spine::getShaft
+		);
+		static ReadOnlyElementValueFinfo< Spine, Id > head (
+			"head",
+			"Id of spine head.",
+			&Spine::getHead
+		);
 		static ElementValueFinfo< Spine, double > shaftLength (
 			"shaftLength",
 			"Length of spine shaft.",
@@ -119,6 +129,8 @@ const Cinfo* Spine::initCinfo()
 		//////////////////////////////////////////////////////////////
 
 	static Finfo* spineFinfos[] = {
+		&shaft,				// ReadOnlyValue
+		&head,				// ReadOnlyValue
 		&shaftLength,		// Value
 		&shaftDiameter,		// Value
 		&headLength,		// Value
@@ -172,6 +184,24 @@ Spine::Spine( const Neuron* parent )
 //////////////////////////////////////////////////////////////
 // Field Definitions
 //////////////////////////////////////////////////////////////
+
+Id Spine::getShaft( const Eref& e ) const
+{
+	const vector< Id >& sl = parent_->spineIds( e.fieldIndex() );
+	if ( sl.size() > 0 &&
+					sl[0].element()->cinfo()->isA( "CompartmentBase" ) )
+		return sl[0];
+	return Id();
+}
+
+Id Spine::getHead( const Eref& e ) const
+{
+	vector< Id > sl = parent_->spineIds( e.fieldIndex() );
+	if ( sl.size() > 1 &&
+					sl[1].element()->cinfo()->isA( "CompartmentBase" ) )
+		return sl[1];
+	return Id();
+}
 
 double Spine::getShaftLength( const Eref& e ) const
 {
