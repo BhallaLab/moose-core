@@ -26,3 +26,4 @@ jobs:
       run: |
         python setup.py install
         pip list
+        python -c "import moose; print(moose.__version__)"
