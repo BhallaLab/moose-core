@@ -262,7 +262,7 @@ class NML2Reader(object):
             for ii in il.input:
                 input = self.getInput(il.component)
                 moose.connect(input, 'output'
-                        , self.getComp(il.populations,ii.get_target_cell__hash(),ii.get_segment__hash())
+                        , self.getComp(il.populations,ii.get_target_cell_id(),ii.get_segment_id())
                         , 'injectMsg')
 
 
