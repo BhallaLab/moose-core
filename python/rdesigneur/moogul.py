@@ -9,7 +9,9 @@
 
 import moose
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
+from packaging import version
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
 
 class MoogulError( Exception ):
@@ -34,7 +36,8 @@ class MooView:
         plt.rcParams['keymap.back'] = ''
         plt.rcParams['keymap.home'] = ''
         plt.rcParams['keymap.forward'] = ''
-        plt.rcParams['keymap.all_axes'] = ''
+        if version.parse( matplotlib.__version__ ) < version.parse( '3,3' ):
+            plt.rcParams['keymap.all_axes'] = ''
         self.hideAxis = hideAxis
         if self.hideAxis:
             self.ax.set_axis_off()
