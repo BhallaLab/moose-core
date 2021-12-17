@@ -171,7 +171,7 @@ setup(
         ]
     },
     # python2 specific version here as well.
-    install_requires=['numpy', 'matplotlib'],
+    install_requires=['numpy', 'scipy', 'matplotlib'],
     extra_requires={'dev' : [ 'coverage', 'pytest', 'pytest-cov' ]},
     ext_modules=[CMakeExtension('dummy', optional=True)],
     cmdclass={'build_ext': build_ext, 'test': TestCommand},
