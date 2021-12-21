@@ -1606,8 +1606,11 @@ rdesigneur.rmoogli.updateMoogliViewer()
         if not hasattr( self, 'dendCompt' ):
             raise BuildError( "configureSolvers: no chem meshes defined." )
         fixXreacs.fixXreacs( self.chemid.path )
-        dmksolve = moose.Ksolve( self.dendCompt.path + '/ksolve' )
-        dmksolve.method = self.ode_method
+        if self.useGssa:
+            dmksolve = moose.Gsolve( self.dendCompt.path + '/ksolve' )
+        else:
+            dmksolve = moose.Ksolve( self.dendCompt.path + '/ksolve' )
+            dmksolve.method = self.ode_method
         dmdsolve = moose.Dsolve( self.dendCompt.path + '/dsolve' )
         dmstoich = moose.Stoich( self.dendCompt.path + '/stoich' )
         dmstoich.compartment = self.dendCompt
