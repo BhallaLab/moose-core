@@ -289,17 +289,18 @@ double EndoMesh::getMeshEntryVolume( unsigned int fid ) const
 }
 
 /// Virtual function to return coords of mesh Entry.
-/// For Endo mesh, coords are just middle of parent.
+/// For Endo mesh, coords are middle of parent followed by radius.
 vector< double > EndoMesh::getCoordinates( unsigned int fid ) const
 {
 	vector< double > temp = parent_->getCoordinates( fid );
 	vector< double > ret;
+	double vol = getMeshEntryVolume( fid );
 	if ( temp.size() > 6 ) {
 		ret.resize( 4 );
 		ret[0] = 0.5 * (temp[0] + temp[3] );
 		ret[1] = 0.5 * (temp[1] + temp[4] );
 		ret[2] = 0.5 * (temp[2] + temp[5] );
-		ret[3] = 0;
+		ret[3] = 2.0 * pow( vol*3.0/(4.0 * PI), 1.0/3.0 ); // Assume sphere
 	}
 	return ret;
 }

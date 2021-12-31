@@ -97,6 +97,14 @@ const Cinfo* PoolBase::initPoolBaseCinfo()
         &PoolBase::getCoords
     );
 
+    static ReadOnlyElementValueFinfo< PoolBase, vector< double > > midPoint(
+        "midPoint",
+        "mid-point of voxel in which Pool is "
+        "situated. If the parent compartment isn't"
+        "available this returns [0, 0, 0].",
+        &PoolBase::getMidPoint
+    );
+
     static ElementValueFinfo< PoolBase, unsigned int > speciesId(
         "speciesId",
         "Species identifier for this mol pool. Eventually link to ontology.",
@@ -218,6 +226,7 @@ const Cinfo* PoolBase::initPoolBaseCinfo()
         &concInit,	// Value
         &volume,	// ReadOnlyElementValue
 		&compartment,	// ReadOnlyElementValue
+		&midPoint,	// ReadOnlyElementValue
 		&coords,	// ReadOnlyElementValue
         &speciesId,	// Value
         &isBuffered,	// Value
@@ -531,10 +540,17 @@ ObjId PoolBase::getCompartment( const Eref& e ) const
     return getCompt( e.id() );
 }
 
-vector< double > PoolBase::getCoords( const Eref& e ) const
+vector< double > PoolBase::getMidPoint( const Eref& e ) const
 {
     ObjId compt = getCompt( e.id() );
 	return LookupField< unsigned int, vector< double > >::get( compt, "oneVoxelMidpoint", e.dataIndex() );
+}
+
+
+vector< double > PoolBase::getCoords( const Eref& e ) const
+{
+    ObjId compt = getCompt( e.id() );
+	return LookupField< unsigned int, vector< double > >::get( compt, "voxelCoords", e.dataIndex() );
 }
 
 void PoolBase::setSpecies( const Eref& e, unsigned int v )

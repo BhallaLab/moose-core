@@ -85,7 +85,7 @@ class rdesigneur:
     def __init__(self,
             modelPath = '/model',
             turnOffElec = False,
-            useGssa = True,
+            useGssa = False,
             combineSegments = True,
             stealCellFromLibrary = False,
             verbose = True,

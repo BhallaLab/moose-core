@@ -917,7 +917,7 @@ double NeuroMesh::getMeshEntryVolume( unsigned int fid ) const
 }
 
 /// Virtual function to return coords of mesh Entry.
-/// For Cylindrical mesh, coords are x1y1z1 x2y2z2 r0 r1 phi0 phi1
+/// For Cylindrical mesh, coords are x1y1z1 x2y2z2 dia0 dia1 diffLength
 vector< double > NeuroMesh::getCoordinates( unsigned int fid ) const
 {
     assert( fid < nodeIndex_.size() );

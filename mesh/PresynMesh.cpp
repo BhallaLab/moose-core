@@ -317,14 +317,21 @@ double PresynMesh::getMeshEntryVolume( unsigned int fid ) const
 }
 
 /// Virtual function to return coords of mesh Entry.
+/// Assume that it is a hemisphere with the flat face toward postsyn.
+/// midpoint, direction, diameter.
 vector< double > PresynMesh::getCoordinates( unsigned int fid ) const
 {
 	assert( fid < boutons_.size() );
 	const Bouton& b = boutons_[fid];
-	vector< double > ret(3);
-	ret[0] = b.x_;
+	vector< double > ret(7);
+	ret[0] = b.x_;	// Midpoint
 	ret[1] = b.y_;
 	ret[2] = b.z_;
+	ret[3] = b.vx_; // direction
+	ret[4] = b.vy_;
+	ret[5] = b.vz_;
+	ret[6] = 2.0 * pow( b.volume_ * 1.5 / PI, 1.0/3.0 );
+
 	return ret;
 }
 

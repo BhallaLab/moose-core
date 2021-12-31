@@ -68,8 +68,11 @@ public:
 	/// Lookup up parent compartment of pool, return '/' if not found
 	ObjId getCompartment( const Eref& e ) const;
 
-	/// Return x,y,z coords of current pool from parent compt.voxel
+	/// Return coords of current pool from parent compt.voxel. The
+	/// entries differ depending on the kind of voxel.
 	vector< double > getCoords( const Eref& e ) const;
+	/// Return [x,y,z] of midpoint of current pool from parent compt.voxel
+	vector< double > getMidPoint( const Eref& e ) const;
 
     void setSpecies( const Eref& e, SpeciesId v );
     SpeciesId getSpecies( const Eref& e ) const;
