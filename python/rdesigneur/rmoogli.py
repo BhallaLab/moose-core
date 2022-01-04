@@ -31,7 +31,7 @@ def makeMoogli( rd, mooObj, args, fieldInfo ):
         ymax = fieldInfo[5]
     #print( "fieldinfo = {}, ymin = {}, ymax = {}".format( fieldInfo, ymin, ymax ))
 
-    viewer = moogul.MooView()
+    viewer = moogul.MooView( title = fieldInfo[3] )
     if mooField == 'n' or mooField == 'conc':
         #moogul.updateDiffCoords( mooObj )
         reacSystem = moogul.MooReacSystem( mooObj, fieldInfo, 
@@ -42,7 +42,7 @@ def makeMoogli( rd, mooObj, args, fieldInfo ):
         neuron = moogul.MooNeuron( rd.elecid, fieldInfo,
                 field = mooField, relativeObj = relObjPath,
                 valMin = ymin, valMax = ymax )
-        print( "min = {}, max = {}".format(ymin, ymax) )
+        #print( "min = {}, max = {}".format(ymin, ymax) )
         viewer.addDrawable( neuron )
 
     return viewer
@@ -52,10 +52,15 @@ def updateMoogliViewer():
         i.updateValues()
     
 
-def displayMoogli( rd, _dt, _runtime, rotation = 0.0, fullscreen = False, azim = 0.0, elev = 0.0 ):
+def displayMoogli( rd, _dt, _runtime, rotation = 0.0, fullscreen = False, azim = 0.0, elev = 0.0, mergeDisplays = False ):
     global mooViews
     mooViews = rd.moogNames
+    firstScene = mooViews[0].scene
     for i in rd.moogNames:
-        i.firstDraw( rotation = rotation, azim = azim, elev = elev ) 
+        if mergeDisplays:
+            sc = firstScene
+        else:
+            sc = i.scene
+        i.firstDraw( sc, rotation = rotation, azim = azim, elev = elev )
         # rotation in radians/frame, azim, elev in radians.
 

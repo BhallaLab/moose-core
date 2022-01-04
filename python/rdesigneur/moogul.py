@@ -26,9 +26,18 @@ class MoogulError( Exception ):
 class MooView:
     ''' The MooView class is a window in which to display one or more 
     moose cells, using the MooNeuron class.'''
+    counter = 0
+    scene = None
     def __init__( self, swx = 10, swy = 12, hideAxis = True, title = "view", showColorbar = True
     ):
-        self.scene = vp.canvas( title = title, width = swx * 50, height = swy * 50, background = vp.color.white )
+        MooView.counter += 1
+        self.colorbar = vp.canvas( width = 20, height = swy * 50, background = vp.color.blue, align = 'left', range = 10, autoscale = False )
+        self.colorbar.userzoom = False
+        self.colorbar.userspin = False
+        self.colorbar.userpan = False
+        self.cbox = vp.box( canvas = self.colorbar, width = 100, height = swy * 100, color = vp.color.yellow )
+        
+        self.scene = vp.canvas( title = title + '\n', width = swx * 50, height = swy * 50, background = vp.color.cyan, align = 'left' )
         #        b = vp.box(pos=vp.vector( 3.0, 0, 0), size=vp.vector(0.3, 3, 4),  color = vp.color.red)
         self.drawables_ = []
         #self.ax.margins( tight = True )
@@ -36,6 +45,10 @@ class MooView:
         self.sleep = 0.005  # Seconds to sleep per frame
         self.showColorbar = showColorbar
         self.scene.bind( 'keydown', self.moveView )
+        #self.flatbox = vp.box( width = 10, height = 6 )
+        self.timeLabel = vp.wtext( text = "Time = 0.0 sec\n", pos = self.scene.title_anchor )
+        self.foo = vp.wtext( text = " wtext ", pos = self.scene.title_anchor, background = vp.color.red, color = vp.color.blue )
+        self.scene.append_to_title("\n")
         self.axisButton = vp.button( text = "Show Axis", pos = self.scene.title_anchor, bind=self.toggleAxis )
         self.colorbarButton = vp.button( text = "Show Color Scale", pos = self.scene.title_anchor, bind=self.toggleColorbar )
         self.hideAxis = hideAxis
@@ -69,7 +82,7 @@ class MooView:
             self.colorbarButton.background = vp.color.white
 
 
-    def firstDraw( self, rotation = 0.0, elev = 0.0, azim = 0.0 ):
+    def firstDraw( self, _scene, rotation = 0.0, elev = 0.0, azim = 0.0 ):
         if rotation == 0.0:
             self.doRotation = False
             self.rotation = 7 # default rotation per frame, in degrees.
@@ -78,8 +91,7 @@ class MooView:
             self.rotation = rotation * 180/np.pi # arg units: radians/frame
         
         for i in self.drawables_:
-            i.drawForTheFirstTime()
-        print( "Exiting MooView::firstDraw" )
+            i.drawForTheFirstTime( _scene )
 
 
         #self.ax.view_init( elev = -80.0, azim = 90.0 )
@@ -97,7 +109,8 @@ class MooView:
             oldCenter = self.scene.center
             oldAxis = self.scene.camera.axis
         simTime = moose.element( '/clock' ).currentTime
-        self.scene.caption = "Time = {:.3f} sec".format( simTime )
+        #self.scene.caption = "Time = {:.3f} sec".format( simTime )
+        self.timeLabel.text = "Time = {:.3f} sec\n".format( simTime )
         vp.sleep( self.sleep )
 
     def moveView(self, event):
@@ -112,10 +125,10 @@ class MooView:
         if event.key in ["down", "j", "J"]:
             self.scene.camera.pos += up.norm() * dtheta * camDist 
             return
-        if event.key in ["left", "l", "L"]:
+        if event.key in ["right", "l", "L"]:
             self.scene.camera.pos += vp.norm(up.cross(camAxis)) * dtheta * camDist 
             return
-        if event.key in ["right", "h", "H"]:
+        if event.key in ["left", "h", "H"]:
             self.scene.camera.pos -= vp.norm(up.cross(camAxis)) * dtheta * camDist 
             return
         if event.key in [".", ">"]: # Get closer, by ratio
@@ -202,7 +215,6 @@ class MooDrawable:
         lenScale, diaScale, autoscale,
         valMin, valMax
     ):
-        print( "INITING MOO DRAWABLE" )
         self.field = field
         self.relativeObj = relativeObj
         self.lenScale = lenScale
@@ -237,11 +249,10 @@ class MooDrawable:
         return
 
     def updateDiameter( self ):
-        print( "IN UPDATE Diameter", len( self.segments), self.diaScale)
         for s, w in zip( self.segments, self.activeDia ):
             s.radius = self.diaScale * w / 2.0
 
-    def drawForTheFirstTime( self ):
+    def drawForTheFirstTime( self, _scene ):
         #print( "Coords = ",  self.activeCoords)
         #print( "Dia = ",  self.activeDia)
         for idx, coord in enumerate( self.activeCoords ):
@@ -249,7 +260,7 @@ class MooDrawable:
             v1 = list2vec( coord[1] )
             radius = self.diaScale * self.activeDia[idx] / 2.0
             opacity = self.opacity[idx]
-            rod = vp.cylinder( pos = v0, axis = v1 - v0, radius = radius, opacity = opacity )
+            rod = vp.cylinder( canvas = _scene, pos = v0, axis = v1 - v0, radius = radius, opacity = opacity )
             #print( "ROD = ", rod.pos, rod.axis, rod.radius )
             self.segments.append( rod )
 
@@ -321,7 +332,6 @@ class MooReacSystem( MooDrawable ):
         lenScale = 1e0, diaScale = 1.0, autoscale = False, 
         valMin = 0.0, valMax = 1.0
     ):
-        print( "GING REAC SYSTEM", lenScale, diaScale )
         
         MooDrawable.__init__( self, fieldInfo, field = field, 
                 relativeObj = relativeObj,
@@ -342,12 +352,12 @@ class MooReacSystem( MooDrawable ):
                 # diameter in argument 6. To fix.
                 # Make a cylinder
                 activeCoords.append( [coords[0:3], coords[3:6]] )
-                self.activeDia.append( coords[6] * 2 )
+                self.activeDia.append( coords[6] * 2 * 0.5 )
             elif meshType == "PresynMesh":
-                # This returns diameter in argumetn 6.
-                # Hack: make each voxel as a cylinder with length == dia.
+                # This returns diameter in argument 6.
+                # Hack: make each bouton as a cylinder with length == dia.
                 activeCoords.append( [coords[0:3], coords[6]*coords[3:6] + coords[0:3]] )
-                self.activeDia.append( coords[6] * 0.8 )
+                self.activeDia.append( coords[6] )
                 # Returns centre as args 0,1,2, diameter as argument 3.
                 # Make a hemisphere
             elif meshType == "EndoMesh":
