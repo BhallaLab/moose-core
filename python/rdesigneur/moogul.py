@@ -102,14 +102,14 @@ class MooView:
 
     def makeScene( self, mergeDisplays ):
         if self.viewIdx == 0:
-            MooView.origScene = vp.canvas( width = self.swx * 50, height = self.swy * 50, background = vp.color.cyan, align = 'left' )
+            MooView.origScene = vp.canvas( width = self.swx * 50, height = self.swy * 50, background = vp.vector( 0.7, 0.8, 0.9), align = 'left', autoscale = True )
             self.scene = MooView.origScene
             self.scene.bind( 'keydown', self.moveView )
             #self.flatbox = vp.box( width = 10, height = 6 )
         elif mergeDisplays:
             self.scene = MooView.origScene
         else: 
-            self.scene = vp.canvas( width = self.swx * 50, height = self.swy * 50, background = vp.vector( 0.7, 0.8, 0.9 ), align = 'left' )
+            self.scene = vp.canvas( width = self.swx * 50, height = self.swy * 50, background = vp.vector( 0.7, 0.8, 0.9 ), align = 'left', autoscale = True )
             self.scene.bind( 'keydown', self.moveView )
             '''
             self.scene.append_to_title("\n")
@@ -207,12 +207,17 @@ class MooView:
             self.scene.camera.axis = ctr - self.scene.camera.pos
             return
         if event.key == "p": # pitch: Rotate camera around ctr-horiz axis
+            self.scene.forward = vp.rotate( self.scene.forward, angle = dtheta, axis = vp.cross( self.scene.forward, self.scene.up ) )
             return
         if event.key == "P":
+            self.scene.forward = vp.rotate( self.scene.forward, angle = -dtheta, axis = vp.cross( self.scene.forward, self.scene.up ) )
             return
         if event.key == "y": # yaw: Rotate camera around ctr - up axis.
+            self.scene.forward = vp.rotate( self.scene.forward, angle = dtheta, axis = self.scene.up )
+            return
             return
         if event.key == "Y":
+            self.scene.forward = vp.rotate( self.scene.forward, angle = -dtheta, axis = self.scene.up )
             return
         if event.key == "r": # Roll, that is, change the 'up' vector
             self.scene.camera.rotate( angle = dtheta, axis = camAxis, origin = self.scene.camera.pos )
@@ -237,6 +242,12 @@ class MooView:
             self.sleep *= 1 + self.sensitivity
             return
         if event.key == "a": # autoscale to fill view.
+            cmin = self.drawables_[0].coordMin
+            cmax = self.drawables_[0].coordMax
+            v0 = vp.vector( cmin[0], cmin[1], cmin[2] )
+            v1 = vp.vector( cmax[0], cmax[1], cmax[2] )
+            self.scene.center = (v0 + v1 ) / 2.0
+            self.scene.range = vp.mag(v0 - v1 ) / 2.0
             return
         if event.key == "g":
             self.hideAxis = not self.hideAxis
@@ -291,6 +302,8 @@ class MooDrawable:
         self.fieldInfo = fieldInfo
         self.fieldScale = fieldInfo[2]
         self.segments = []
+        self.coordMin = np.zeros( 3 )
+        self.coordMax = np.zeros( 3 )
         cmap = plt.get_cmap( self.colormap, lut = NUM_CMAP )
         self.rgb = [ list2vec(cmap(i)[0:3]) for i in range( NUM_CMAP ) ]
         #FieldInfo = [baseclass, fieldGetFunc, scale, axisText, min, max]
@@ -323,12 +336,15 @@ class MooDrawable:
         for idx, coord in enumerate( self.activeCoords ):
             v0 = list2vec( coord[0] )
             v1 = list2vec( coord[1] )
+            self.coordMin = np.minimum( self.coordMin, coord[0][0:3] )
+            self.coordMin = np.minimum( self.coordMin, coord[1][0:3] )
+            self.coordMax = np.maximum( self.coordMax, coord[0][0:3] )
+            self.coordMax = np.maximum( self.coordMax, coord[1][0:3] )
             radius = self.diaScale * self.activeDia[idx] / 2.0
             opacity = self.opacity[idx]
             rod = vp.cylinder( canvas = _scene, pos = v0, axis = v1 - v0, radius = radius, opacity = opacity )
             #print( "ROD = ", rod.pos, rod.axis, rod.radius )
             self.segments.append( rod )
-
 
 #####################################################################
 

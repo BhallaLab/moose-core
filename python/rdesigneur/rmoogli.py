@@ -31,7 +31,7 @@ def makeMoogli( rd, mooObj, args, fieldInfo ):
         ymax = fieldInfo[5]
     #print( "fieldinfo = {}, ymin = {}, ymax = {}".format( fieldInfo, ymin, ymax ))
 
-    viewer = moogul.MooView( title = fieldInfo[3] )
+    viewer = moogul.MooView( title = args.title )
     if mooField == 'n' or mooField == 'conc':
         #moogul.updateDiffCoords( mooObj )
         reacSystem = moogul.MooReacSystem( mooObj, fieldInfo, 
