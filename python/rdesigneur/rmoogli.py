@@ -55,12 +55,6 @@ def updateMoogliViewer():
 def displayMoogli( rd, _dt, _runtime, rotation = 0.0, fullscreen = False, azim = 0.0, elev = 0.0, mergeDisplays = False ):
     global mooViews
     mooViews = rd.moogNames
-    firstScene = mooViews[0].scene
-    for i in rd.moogNames:
-        if mergeDisplays:
-            sc = firstScene
-        else:
-            sc = i.scene
-        i.firstDraw( sc, rotation = rotation, azim = azim, elev = elev )
+    for view in rd.moogNames:
+        view.firstDraw( mergeDisplays, rotation = rotation, azim = azim, elev = elev )
         # rotation in radians/frame, azim, elev in radians.
-

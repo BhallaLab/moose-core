@@ -26,38 +26,32 @@ class MoogulError( Exception ):
 class MooView:
     ''' The MooView class is a window in which to display one or more 
     moose cells, using the MooNeuron class.'''
-    counter = 0
-    scene = None
-    def __init__( self, swx = 10, swy = 12, hideAxis = True, title = "view", showColorbar = True
+    viewIdx = 0
+    origScene = None
+    rgb = []
+    def __init__( self, swx = 10, swy = 10, hideAxis = True, title = "view", showColorbar = True, colormap = 'jet'
     ):
-        MooView.counter += 1
-        self.colorbar = vp.canvas( width = 20, height = swy * 50, background = vp.color.blue, align = 'left', range = 10, autoscale = False )
-        self.colorbar.userzoom = False
-        self.colorbar.userspin = False
-        self.colorbar.userpan = False
-        self.cbox = vp.box( canvas = self.colorbar, width = 100, height = swy * 100, color = vp.color.yellow )
-        
-        self.scene = vp.canvas( title = title + '\n', width = swx * 50, height = swy * 50, background = vp.color.cyan, align = 'left' )
-        #        b = vp.box(pos=vp.vector( 3.0, 0, 0), size=vp.vector(0.3, 3, 4),  color = vp.color.red)
+        self.viewIdx = MooView.viewIdx
+        MooView.viewIdx += 1
+        self.title = title
+        self.swx = swx
+        self.swy = swy
         self.drawables_ = []
-        #self.ax.margins( tight = True )
         self.sensitivity = 0.05 # radians rotation, and other adjustments
         self.sleep = 0.005  # Seconds to sleep per frame
         self.showColorbar = showColorbar
-        self.scene.bind( 'keydown', self.moveView )
-        #self.flatbox = vp.box( width = 10, height = 6 )
-        self.timeLabel = vp.wtext( text = "Time = 0.0 sec\n", pos = self.scene.title_anchor )
-        self.foo = vp.wtext( text = " wtext ", pos = self.scene.title_anchor, background = vp.color.red, color = vp.color.blue )
-        self.scene.append_to_title("\n")
-        self.axisButton = vp.button( text = "Show Axis", pos = self.scene.title_anchor, bind=self.toggleAxis )
-        self.colorbarButton = vp.button( text = "Show Color Scale", pos = self.scene.title_anchor, bind=self.toggleColorbar )
+        self.colormap = colormap
         self.hideAxis = hideAxis
-        if self.hideAxis:
-            self.axisButton.text = "Hide Axis"
-            self.toggleAxis()
+        self.valMin = 0.0
+        self.valMmax = 1.0
+        cmap = plt.get_cmap( self.colormap, lut = NUM_CMAP )
+        self.rgb = [ list2vec(cmap(i)[0:3]) for i in range( NUM_CMAP ) ]
 
     def addDrawable( self, n ):
         self.drawables_.append( n )
+        if len( self.drawables_ ) == 1:
+            self.valMin = n.valMin
+            self.valMax = n.valMax
         # self.scene.objects also maintains list.
 
     def toggleAxis( self ):
@@ -82,7 +76,77 @@ class MooView:
             self.colorbarButton.background = vp.color.white
 
 
-    def firstDraw( self, _scene, rotation = 0.0, elev = 0.0, azim = 0.0 ):
+    def makeColorbar( self, doOrnaments = True ):
+        title = None
+        if doOrnaments:
+            title = self.title + "\n"
+        barWidth = 50
+        self.colorbar = vp.canvas( title = title, width = barWidth, height = self.swy * 50, background = vp.color.white, align = 'left', range = 1, autoscale = False )
+        self.colorbar.userzoom = False
+        self.colorbar.userspin = False
+        self.colorbar.userpan = False
+        height = 0.2
+        for idx, rgb in enumerate( self.rgb ):
+            cbox = vp.box( canvas = self.colorbar, pos = vp.vector( 0, height * (idx - 38), 0), width = 5, height = height, color = rgb )
+        barName = self.title.replace( ' ', '\n' )
+        self.barName = vp.label( canvas = self.colorbar, align = 'left', pixel_pos = True, pos = vp.vector( 2, self.swy * 48, 0), text = barName, height = 15, color = vp.color.black, box = False, opacity = 0 )
+        self.barMin = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, 8, 0), text = "{:.3f}".format(self.valMin), height = 12, color = vp.color.black, box = False, opacity = 0 )
+        self.barMax = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, self.swy * 41, 0), text = "{:.3f}".format(self.valMax), height = 12, color = vp.color.black, box = False, opacity = 0 )
+        if doOrnaments:
+            self.timeLabel = vp.wtext( text = "Time = 0.0 sec\n", pos = self.colorbar.title_anchor )
+            self.colorbar.append_to_title("\n")
+            self.axisButton = vp.button( text = "Show Axis", pos = self.colorbar.title_anchor, bind=self.toggleAxis )
+            if self.hideAxis:
+                self.axisButton.text = "Hide Axis"
+                self.toggleAxis()
+
+    def makeScene( self, mergeDisplays ):
+        if self.viewIdx == 0:
+            MooView.origScene = vp.canvas( width = self.swx * 50, height = self.swy * 50, background = vp.color.cyan, align = 'left' )
+            self.scene = MooView.origScene
+            self.scene.bind( 'keydown', self.moveView )
+            #self.flatbox = vp.box( width = 10, height = 6 )
+        elif mergeDisplays:
+            self.scene = MooView.origScene
+        else: 
+            self.scene = vp.canvas( width = self.swx * 50, height = self.swy * 50, background = vp.vector( 0.7, 0.8, 0.9 ), align = 'left' )
+            self.scene.bind( 'keydown', self.moveView )
+            '''
+            self.scene.append_to_title("\n")
+            self.axisButton = vp.button( text = "Show Axis", pos = self.scene.title_anchor, bind=self.toggleAxis )
+            if self.hideAxis:
+                self.axisButton.text = "Hide Axis"
+                self.toggleAxis()
+            '''
+
+    def makeScene2( self, mergeDisplays ):
+        if self.viewIdx == 0:
+            MooView.origScene = vp.canvas( caption = self.title + '\n', width = self.swx * 50, height = self.swy * 50, background = vp.color.cyan, align = 'left' )
+            self.scene = MooView.origScene
+            self.scene.bind( 'keydown', self.moveView )
+            #self.flatbox = vp.box( width = 10, height = 6 )
+            self.timeLabel = vp.wtext( text = "Time = 0.0 sec\n", pos = self.scene.caption_anchor )
+            self.scene.append_to_caption("\n")
+            self.axisButton = vp.button( text = "Show Axis", pos = self.scene.caption_anchor, bind=self.toggleAxis )
+            if self.hideAxis:
+                self.axisButton.text = "Hide Axis"
+                self.toggleAxis()
+        elif mergeDisplays:
+            self.scene = MooView.origScene
+        else: 
+            self.scene = vp.canvas( caption = self.title + '\n', width = self.swx * 50, height = self.swy * 50, background = vp.vector( 0.7, 0.8, 0.9 ), align = 'left' )
+            self.scene.bind( 'keydown', self.moveView )
+            self.scene.append_to_caption("\n")
+            self.axisButton = vp.button( text = "Show Axis", pos = self.scene.caption_anchor, bind=self.toggleAxis )
+            if self.hideAxis:
+                self.axisButton.text = "Hide Axis"
+                self.toggleAxis()
+
+    def firstDraw( self, mergeDisplays, rotation=0.0, elev=0.0, azim=0.0 ):
+        doOrnaments = (self.viewIdx == 0)
+        if doOrnaments or not mergeDisplays:
+            self.makeColorbar( doOrnaments = doOrnaments )
+        self.makeScene( mergeDisplays )
         if rotation == 0.0:
             self.doRotation = False
             self.rotation = 7 # default rotation per frame, in degrees.
@@ -91,7 +155,7 @@ class MooView:
             self.rotation = rotation * 180/np.pi # arg units: radians/frame
         
         for i in self.drawables_:
-            i.drawForTheFirstTime( _scene )
+            i.drawForTheFirstTime( self.scene )
 
 
         #self.ax.view_init( elev = -80.0, azim = 90.0 )
@@ -110,8 +174,9 @@ class MooView:
             oldAxis = self.scene.camera.axis
         simTime = moose.element( '/clock' ).currentTime
         #self.scene.caption = "Time = {:.3f} sec".format( simTime )
-        self.timeLabel.text = "Time = {:.3f} sec\n".format( simTime )
-        vp.sleep( self.sleep )
+        if self.viewIdx == 0:
+            self.timeLabel.text = "Time = {:.3f} sec\n".format( simTime )
+            vp.sleep( self.sleep )
 
     def moveView(self, event):
         camAxis = self.scene.camera.axis
