@@ -16,6 +16,7 @@ import time
 from packaging import version
 #from mpl_toolkits.mplot3d.art3d import Line3DCollection
 NUM_CMAP = 64
+SCALE_SCENE = 64
 
 class MoogulError( Exception ):
     def __init__( self, value ):
@@ -64,34 +65,22 @@ class MooView:
             self.axisButton.text = "Show Axis"
             self.axisButton.background = vp.color.white
 
-
-    def toggleColorbar( self ):
-        if self.colorbarButton.text == "Show Color Scale":
-            # show colorbar here
-            self.colorbarButton.text = "Hide Color Scale"
-            self.colorbarButton.background = vp.color.cyan
-        else:
-            # hide colorbar here
-            self.colorbarButton.text = "Show Color Scale"
-            self.colorbarButton.background = vp.color.white
-
-
     def makeColorbar( self, doOrnaments = True ):
         title = None
         if doOrnaments:
             title = self.title + "\n"
-        barWidth = 50
-        self.colorbar = vp.canvas( title = title, width = barWidth, height = self.swy * 50, background = vp.color.white, align = 'left', range = 1, autoscale = False )
+        barWidth = SCALE_SCENE
+        self.colorbar = vp.canvas( title = title, width = barWidth, height = self.swy * SCALE_SCENE, background = vp.color.white, align = 'left', range = 1, autoscale = False )
         self.colorbar.userzoom = False
         self.colorbar.userspin = False
         self.colorbar.userpan = False
-        height = 0.2
+        height = 0.22
         for idx, rgb in enumerate( self.rgb ):
-            cbox = vp.box( canvas = self.colorbar, pos = vp.vector( 0, height * (idx - 38), 0), width = 5, height = height, color = rgb )
+            cbox = vp.box( canvas = self.colorbar, pos = vp.vector( 0, height * (idx - 36), 0), width = 5, height = height, color = rgb )
         barName = self.title.replace( ' ', '\n' )
-        self.barName = vp.label( canvas = self.colorbar, align = 'left', pixel_pos = True, pos = vp.vector( 2, self.swy * 48, 0), text = barName, height = 15, color = vp.color.black, box = False, opacity = 0 )
+        self.barName = vp.label( canvas = self.colorbar, align = 'left', pixel_pos = True, pos = vp.vector( 2, (self.swy - 0.32) * SCALE_SCENE, 0), text = barName, height = 15, color = vp.color.black, box = False, opacity = 0 )
         self.barMin = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, 8, 0), text = "{:.3f}".format(self.valMin), height = 12, color = vp.color.black, box = False, opacity = 0 )
-        self.barMax = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, self.swy * 41, 0), text = "{:.3f}".format(self.valMax), height = 12, color = vp.color.black, box = False, opacity = 0 )
+        self.barMax = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, (self.swy - 1.2) * SCALE_SCENE, 0), text = "{:.3f}".format(self.valMax), height = 12, color = vp.color.black, box = False, opacity = 0 )
         if doOrnaments:
             self.timeLabel = vp.wtext( text = "Time = 0.0 sec\n", pos = self.colorbar.title_anchor )
             self.colorbar.append_to_title("\n")
@@ -102,14 +91,14 @@ class MooView:
 
     def makeScene( self, mergeDisplays ):
         if self.viewIdx == 0:
-            MooView.origScene = vp.canvas( width = self.swx * 50, height = self.swy * 50, background = vp.vector( 0.7, 0.8, 0.9), align = 'left', autoscale = True )
+            MooView.origScene = vp.canvas( width = self.swx * SCALE_SCENE, height = self.swy * SCALE_SCENE, background = vp.vector( 0.7, 0.8, 0.9), align = 'left', autoscale = True )
             self.scene = MooView.origScene
             self.scene.bind( 'keydown', self.moveView )
             #self.flatbox = vp.box( width = 10, height = 6 )
         elif mergeDisplays:
             self.scene = MooView.origScene
         else: 
-            self.scene = vp.canvas( width = self.swx * 50, height = self.swy * 50, background = vp.vector( 0.7, 0.8, 0.9 ), align = 'left', autoscale = True )
+            self.scene = vp.canvas( width = self.swx * SCALE_SCENE, height = self.swy * SCALE_SCENE, background = vp.vector( 0.7, 0.8, 0.9 ), align = 'left', autoscale = True )
             self.scene.bind( 'keydown', self.moveView )
             '''
             self.scene.append_to_title("\n")
@@ -121,7 +110,7 @@ class MooView:
 
     def makeScene2( self, mergeDisplays ):
         if self.viewIdx == 0:
-            MooView.origScene = vp.canvas( caption = self.title + '\n', width = self.swx * 50, height = self.swy * 50, background = vp.color.cyan, align = 'left' )
+            MooView.origScene = vp.canvas( caption = self.title + '\n', width = self.swx * SCALE_SCENE, height = self.swy * SCALE_SCENE, background = vp.color.cyan, align = 'left' )
             self.scene = MooView.origScene
             self.scene.bind( 'keydown', self.moveView )
             #self.flatbox = vp.box( width = 10, height = 6 )
@@ -134,7 +123,7 @@ class MooView:
         elif mergeDisplays:
             self.scene = MooView.origScene
         else: 
-            self.scene = vp.canvas( caption = self.title + '\n', width = self.swx * 50, height = self.swy * 50, background = vp.vector( 0.7, 0.8, 0.9 ), align = 'left' )
+            self.scene = vp.canvas( caption = self.title + '\n', width = self.swx * SCALE_SCENE, height = self.swy * SCALE_SCENE, background = vp.vector( 0.7, 0.8, 0.9 ), align = 'left' )
             self.scene.bind( 'keydown', self.moveView )
             self.scene.append_to_caption("\n")
             self.axisButton = vp.button( text = "Show Axis", pos = self.scene.caption_anchor, bind=self.toggleAxis )
@@ -149,29 +138,21 @@ class MooView:
         self.makeScene( mergeDisplays )
         if rotation == 0.0:
             self.doRotation = False
-            self.rotation = 7 # default rotation per frame, in degrees.
+            self.rotation = 0.1 # default rotation per frame, in radians.
         else:
             self.doRotation = True
-            self.rotation = rotation * 180/np.pi # arg units: radians/frame
+            self.rotation = rotation # arg units: radians/frame
         
         for i in self.drawables_:
             i.drawForTheFirstTime( self.scene )
-
-
-        #self.ax.view_init( elev = -80.0, azim = 90.0 )
-        #self.colorbar = plt.colorbar( self.drawables_[0].segments )
-        #self.colorbar = self.fig_.colorbar( self.drawables_[0].segments )
-        #self.colorbar.set_label( self.drawables_[0].fieldInfo[3])
-        #self.timeStr = self.ax.text2D( 0.05, 0.05, "Time= 0.0", transform=self.ax.transAxes)
 
     def updateValues( self ):
         time = moose.element( '/clock' ).currentTime
         #self.timeStr.set_text( "Time= {:.3f}".format( time ) )
         for i in self.drawables_:
             i.updateValues()
-        if self.doRotation and abs( self.rotation ) < 120:
-            oldCenter = self.scene.center
-            oldAxis = self.scene.camera.axis
+        if self.doRotation and abs( self.rotation ) < 2.0 * 3.14 / 3.0:
+            self.scene.forward = vp.rotate( self.scene.forward, angle = self.rotation, axis = self.scene.up )
         simTime = moose.element( '/clock' ).currentTime
         #self.scene.caption = "Time = {:.3f} sec".format( simTime )
         if self.viewIdx == 0:
