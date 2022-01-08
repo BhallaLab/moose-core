@@ -17,6 +17,7 @@ from packaging import version
 #from mpl_toolkits.mplot3d.art3d import Line3DCollection
 NUM_CMAP = 64
 SCALE_SCENE = 64
+bgvector = vp.vector(0.7, 0.8, 0.9)  # RGB
 
 class MoogulError( Exception ):
     def __init__( self, value ):
@@ -47,7 +48,7 @@ class MooView:
         self.sensitivity = 0.05 # radians rotation, and other adjustments
         self.sleep = 0.005  # Seconds to sleep per frame
         self.colormap = colormap
-        self.hideAxis = hideAxis
+        self.colorbar = None
         self.valMin = 0.0
         self.valMmax = 1.0
 
@@ -79,16 +80,6 @@ class MooView:
             self.valMax = n.valMax
         # self.scene.objects also maintains list.
 
-    def toggleAxis( self ):
-        if self.axisButton.text == "Show Axis":
-            # show axis here
-            self.axisButton.text = "Hide Axis"
-            self.axisButton.background = vp.color.yellow
-        else:
-            # hide axis here
-            self.axisButton.text = "Show Axis"
-            self.axisButton.background = vp.color.white
-
     def toggleReplay( self ):
         if self.replayButton.text == "Start Replay":
             self.replayButton.text = "Stop Replay"
@@ -102,45 +93,75 @@ class MooView:
         self.sleep = self.sleepSlider.value
         self.sleepLabel.text = "    Frame dt = {:1.3f} sec".format( self.sleep )
 
+    def updateAxis( self ):
+        if not self.colorbar:
+            return
+        forward = vp.norm( self.scene.forward )
+        screenUp = vp.norm( self.scene.up )
+        right = vp.norm( vp.cross( forward, screenUp ) )
+        up = vp.norm( vp.cross( right, forward ) )
+
+        dx = 0.8
+
+        x = vp.vector( dx, 0.0, 0.0 )
+        y = vp.vector( 0.0, dx, 0.0 )
+        z = vp.vector( 0.0, 0.0, dx )
+
+        self.xAx.axis = vp.vector( x.dot( right ), x.dot( up ), 0.0 )
+        self.yAx.axis = vp.vector( y.dot( right ), y.dot( up ), 0.0 )
+        self.zAx.axis = vp.vector( z.dot( right ), z.dot( up ), 0.0 )
+        self.axisLength.text = "{:.2f} <i>u</i>m".format( dx * 1e6*self.scene.range * self.colorbar.width / self.scene.width )
+        #print( self.scene.range, "      ", self.scene.width, "     ", self.colorbar.width )
+
     def makeColorbar( self, doOrnaments = True, colorscale = 'jet' ):
         title = None
         if doOrnaments:
             title = MooView.consolidatedTitle + "\n"
-        barWidth = SCALE_SCENE
-        self.colorbar = vp.canvas( title = title, width = barWidth, height = self.swy * SCALE_SCENE, background = vp.color.white, align = 'left', range = 1, autoscale = False )
+        barWidth = SCALE_SCENE * 1.5
+        self.colorbar = vp.canvas( title = title, width = barWidth, height = self.swy * SCALE_SCENE, background = bgvector, align = 'left', range = 1, autoscale = False )
+        #self.colorbar = vp.canvas( title = title, width = barWidth, height = self.swy * SCALE_SCENE, background = vp.color.cyan, align = 'left', range = 1, autoscale = False )
         self.colorbar.userzoom = False
         self.colorbar.userspin = False
         self.colorbar.userpan = False
-        height = 0.22
+        height = 0.10
+        width = 5
+        axOrigin = vp.vector( 0, -5.5, 0 )
         for idx, rgb in enumerate( self.rgb ):
-            cbox = vp.box( canvas = self.colorbar, pos = vp.vector( 0, height * (idx - 36), 0), width = 5, height = height, color = rgb )
+            cbox = vp.box( canvas = self.colorbar, pos = vp.vector( 0, height * (idx - 26), 0), width = width, height = height, color = rgb )
         barName = self.title.replace( ' ', '\n' )
         self.barName = vp.label( canvas = self.colorbar, align = 'left', pixel_pos = True, pos = vp.vector( 2, (self.swy - 0.32) * SCALE_SCENE, 0), text = barName, height = 15, color = vp.color.black, box = False, opacity = 0 )
-        self.barMin = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, 8, 0), text = "{:.3f}".format(self.valMin), height = 12, color = vp.color.black, box = False, opacity = 0 )
+        self.barMin = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, self.swy * SCALE_SCENE * 0.22, 0), text = "{:.3f}".format(self.valMin), height = 12, color = vp.color.black, box = False, opacity = 0 )
         self.barMax = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, (self.swy - 1.2) * SCALE_SCENE, 0), text = "{:.3f}".format(self.valMax), height = 12, color = vp.color.black, box = False, opacity = 0 )
+        self.xAx = vp.cylinder( canvas = self.colorbar, pos = axOrigin, axis = vp.vector( 0.8, 0, 0 ), radius = 0.04, color = vp.color.red )
+        self.yAx = vp.cylinder( canvas = self.colorbar, pos = axOrigin, axis = vp.vector( 0, 0.8, 0 ), radius = 0.04, color = vp.color.green )
+        self.zAx = vp.cylinder( canvas = self.colorbar, pos = axOrigin, axis = vp.vector( 0, 0, 0 ), radius = 0.04, color = vp.color.blue )
+        self.axisLength = vp.label( pos = axOrigin + vp.vector(0, 1, 0), text = "1.00 <i>u</i>m", color = vp.color.black, box = False )
         if doOrnaments:
             self.timeLabel = vp.wtext( text = "Time =  0.000 sec", pos = self.colorbar.title_anchor )
             self.sleepLabel = vp.wtext( text = "    Frame dt = 0.005 sec", pos = self.colorbar.title_anchor )
             self.sleepSlider = vp.slider( pos = self.colorbar.title_anchor, length = 200, bind = self.setSleepTime, min = 0.0, max = 0.2, value = self.sleep )
             self.replayButton = vp.button( text = "Start Replay", pos = self.colorbar.title_anchor, bind=self.toggleReplay, disabled = True )
             self.colorbar.append_to_title("\n")
-            self.axisButton = vp.button( text = "Show Axis", pos = self.colorbar.title_anchor, bind=self.toggleAxis )
-            if self.hideAxis:
-                self.axisButton.text = "Hide Axis"
-                self.toggleAxis()
 
-    def makeScene( self, mergeDisplays, center = [0.0, 0.0, 0.0] ):
+    def makeScene( self, mergeDisplays ):
         if self.viewIdx == 0:
-            MooView.origScene = vp.canvas( width = self.swx * SCALE_SCENE, height = self.swy * SCALE_SCENE, background = vp.vector( 0.7, 0.8, 0.9), align = 'left', autoscale = True )
+            MooView.origScene = vp.canvas( width = self.swx * SCALE_SCENE, height = self.swy * SCALE_SCENE, background = bgvector, align = 'left', autoscale = True )
             self.scene = MooView.origScene
             self.scene.bind( 'keydown', self.moveView )
+            self.scene.bind( 'keydown', self.updateAxis )
             #self.flatbox = vp.box( width = 10, height = 6 )
         elif mergeDisplays:
             self.scene = MooView.origScene
         else: 
-            self.scene = vp.canvas( width = self.swx * SCALE_SCENE, height = self.swy * SCALE_SCENE, background = vp.vector( 0.7, 0.8, 0.9 ), align = 'left', autoscale = True )
+            self.scene = vp.canvas( width = self.swx * SCALE_SCENE, height = self.swy * SCALE_SCENE, background = bgvector, align = 'left', autoscale = True )
             self.scene.bind( 'keydown', self.moveView )
-        self.scene.center = list2vec( center )
+            self.scene.bind( 'keydown', self.updateAxis )
+        '''
+        self.xAx2 = vp.cylinder( canvas = self.scene, pos = vp.vector( 0, 0, 0), axis = vp.vector( 1e-5, 0, 0 ), radius = 0.2e-6, color = vp.color.red )
+        self.yAx2 = vp.cylinder( canvas = self.scene, pos = vp.vector( 0, 0, 0), axis = vp.vector( 0, 1e-5, 0 ), radius = 0.2e-6, color = vp.color.green )
+        self.zAx2 = vp.cylinder( canvas = self.scene, pos = vp.vector( 0, 0, 0), axis = vp.vector( 0, 0, 1e-5 ), radius = 0.2e-6, color = vp.color.blue )
+        '''
+        self.scene.bind( 'mousedown mousemove mouseup', self.updateAxis )
 
     def firstDraw( self, mergeDisplays, rotation=0.0, elev=0.0, azim=0.0, center = [0.0, 0,0, 0.0], colormap = 'jet' ):
         self.colormap = colormap
@@ -149,7 +170,7 @@ class MooView:
         doOrnaments = (self.viewIdx == 0)
         if doOrnaments or not mergeDisplays:
             self.makeColorbar( doOrnaments = doOrnaments )
-        self.makeScene( mergeDisplays, center )
+        self.makeScene( mergeDisplays )
         if rotation == 0.0:
             self.doRotation = False
             self.rotation = 0.1 # default rotation per frame, in radians.
@@ -160,6 +181,12 @@ class MooView:
         for i in self.drawables_:
             i.rgb = self.rgb
             i.drawForTheFirstTime( self.scene )
+        if doOrnaments or not mergeDisplays:
+            if len( center ) == 3:
+                self.scene.center = list2vec( center )
+            else:
+                self.doAutoscale()
+            self.updateAxis()
 
     def updateValues( self ):
         simTime = moose.element( '/clock' ).currentTime
@@ -168,6 +195,7 @@ class MooView:
             i.updateValues( simTime )
         if self.doRotation and abs( self.rotation ) < 2.0 * 3.14 / 3.0:
             self.scene.forward = vp.rotate( self.scene.forward, angle = self.rotation, axis = self.scene.up )
+            self.updateAxis()
         if self.viewIdx == 0:
             self.timeLabel.text = "Time = {:2.3f} sec".format( simTime )
             vp.sleep( self.sleep )
@@ -176,7 +204,21 @@ class MooView:
         for i in self.drawables_:
             simTime = i.replaySnapshot( idx )
         if self.viewIdx == 0:
-            self.timeLabel.text = "Time = {:.3f} sec".format( simTime )
+            self.timeLabel.text = "Time = {:2.3f} sec".format( simTime )
+            self.updateAxis()
+
+    def doAutoscale( self ):
+        cmin = self.drawables_[0].coordMin
+        cmax = self.drawables_[0].coordMax
+        diamax = max( self.drawables_[0].activeDia )
+        v0 = vp.vector( cmin[0], cmin[1], cmin[2] )
+        v1 = vp.vector( cmax[0], cmax[1], cmax[2] )
+        #self.scene.camera.axis = self.scene.forward * vp.mag(v1 - v0) * 4
+        self.scene.center = (v0 + v1 ) / 2.0
+        #self.scene.camera.pos = self.scene.center - self.scene.forward * (vp.mag(v1 - v0) + diamax ) * 2
+        #self.scene.center = (v0 + v1 ) / 2.0
+        #self.scene.range = vp.mag(v0 - v1 ) / 1.5
+        self.scene.range = (diamax + vp.mag(v0 - v1 ) ) / 1.5
 
     def moveView(self, event):
         camAxis = self.scene.camera.axis
@@ -242,12 +284,7 @@ class MooView:
             self.sleep *= 1 + self.sensitivity
             return
         if event.key == "a": # autoscale to fill view.
-            cmin = self.drawables_[0].coordMin
-            cmax = self.drawables_[0].coordMax
-            v0 = vp.vector( cmin[0], cmin[1], cmin[2] )
-            v1 = vp.vector( cmax[0], cmax[1], cmax[2] )
-            self.scene.center = (v0 + v1 ) / 2.0
-            self.scene.range = vp.mag(v0 - v1 ) / 2.0
+            self.doAutoscale()
             return
         if event.key == "g":
             self.hideAxis = not self.hideAxis
@@ -440,11 +477,11 @@ class MooReacSystem( MooDrawable ):
                 # diameter in argument 6. To fix.
                 # Make a cylinder
                 activeCoords.append( [coords[0:3], coords[3:6]] )
-                self.activeDia.append( coords[6] * 2 * 0.5 )
+                self.activeDia.append( coords[6] * 2 )
             if meshType == "SpineMesh":
                 # Spine entry has head[3], shaft[3], root[3], dia.
                 activeCoords.append( [coords[0:3], coords[3:6]] )
-                self.activeDia.append( coords[9] * 2 * 0.5 )
+                self.activeDia.append( coords[9] * 2 )
             elif meshType == "PresynMesh":
                 # This returns diameter in argument 6.
                 # first vec is centre of base, second axis pointing 

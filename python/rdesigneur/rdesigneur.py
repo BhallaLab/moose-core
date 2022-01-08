@@ -599,7 +599,6 @@ class rdesigneur:
         defaults = ['spine', '#dend#,#apical#', '10e-6', '1e-6', '1', '0.5', '0', '6.2831853' ]
         argKeys = ['spacing', 'spacingDistrib', 'size', 'sizeDistrib', 'angle', 'angleDistrib' ]
         for i in self.spineDistrib:
-            print( "SPINE DISTRIB = ", i )
             if len(i) >= 2 :
                 arg = i[:2]
                 # Backward compat hack here
@@ -994,7 +993,8 @@ class rdesigneur:
     # Here we display the plots and moogli
     ################################################################
 
-    def displayMoogli( self, moogliDt, runtime, rotation = math.pi/500.0, fullscreen = False, block = True, azim = 0.0, elev = 0.0, mergeDisplays = False, colormap = 'jet', center = [0.0, 0.0, 0.0] ):
+    def displayMoogli( self, moogliDt, runtime, rotation = math.pi/500.0, fullscreen = False, block = True, azim = 0.0, elev = 0.0, mergeDisplays = False, colormap = 'jet', center = [] ):
+        # If center is empty then use autoscaling.
         rmoogli.displayMoogli( self, moogliDt, runtime, rotation = rotation, fullscreen = fullscreen, azim = azim, elev = elev, mergeDisplays = mergeDisplays, colormap = colormap, center = center )
         pr = moose.PyRun( '/model/updateMoogli' )
 
