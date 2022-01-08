@@ -24,16 +24,19 @@ class MoogulError( Exception ):
     def __str__( self ):
         return repr( self.value )
 
+
 class MooView:
     ''' The MooView class is a window in which to display one or more 
     moose cells, using the MooNeuron class.'''
     viewIdx = 0
     origScene = None
     rgb = []
+    viewList = []
     def __init__( self, swx = 10, swy = 10, hideAxis = True, title = "view", colormap = 'jet'
     ):
         self.viewIdx = MooView.viewIdx
         MooView.viewIdx += 1
+        MooView.viewList.append( self )
         self.title = title
         self.swx = swx
         self.swy = swy
@@ -44,6 +47,27 @@ class MooView:
         self.hideAxis = hideAxis
         self.valMin = 0.0
         self.valMmax = 1.0
+
+    @staticmethod
+    def replayLoop():
+        if len( MooView.viewList ) == 0:
+            return
+        numFrames = MooView.viewList[0].numFrames()
+        while MooView.viewList[0].replayButton.text == "Stop Replay":
+            for idx in range( numFrames ):
+                for view in MooView.viewList:
+                    view.replaySnapshot( idx )
+                vp.sleep( MooView.viewList[0].sleep )
+            vp.sleep( 0.5 ) # Pause 0.5 sec between replays
+
+    def notifySimulationEnd( self ):
+        if self.viewIdx == 0:
+            self.replayButton.disabled = False
+    
+    def numFrames( self ):
+        if len( self.drawables_ ) == 0:
+            return 0
+        return len( self.drawables_[0].snapshot )
 
     def addDrawable( self, n ):
         self.drawables_.append( n )
@@ -61,6 +85,15 @@ class MooView:
             # hide axis here
             self.axisButton.text = "Show Axis"
             self.axisButton.background = vp.color.white
+
+    def toggleReplay( self ):
+        if self.replayButton.text == "Start Replay":
+            self.replayButton.text = "Stop Replay"
+            self.replayButton.background = vp.color.red
+            MooView.replayLoop()
+        else:
+            self.replayButton.text = "Start Replay"
+            self.replayButton.background = vp.color.white
 
     def makeColorbar( self, doOrnaments = True, colorscale = 'jet' ):
         title = None
@@ -80,6 +113,7 @@ class MooView:
         self.barMax = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, (self.swy - 1.2) * SCALE_SCENE, 0), text = "{:.3f}".format(self.valMax), height = 12, color = vp.color.black, box = False, opacity = 0 )
         if doOrnaments:
             self.timeLabel = vp.wtext( text = "Time = 0.0 sec\n", pos = self.colorbar.title_anchor )
+            self.replayButton = vp.button( text = "Start Replay", pos = self.colorbar.title_anchor, bind=self.toggleReplay, disabled = True )
             self.colorbar.append_to_title("\n")
             self.axisButton = vp.button( text = "Show Axis", pos = self.colorbar.title_anchor, bind=self.toggleAxis )
             if self.hideAxis:
@@ -119,17 +153,21 @@ class MooView:
             i.drawForTheFirstTime( self.scene )
 
     def updateValues( self ):
-        time = moose.element( '/clock' ).currentTime
+        simTime = moose.element( '/clock' ).currentTime
         #self.timeStr.set_text( "Time= {:.3f}".format( time ) )
         for i in self.drawables_:
-            i.updateValues()
+            i.updateValues( simTime )
         if self.doRotation and abs( self.rotation ) < 2.0 * 3.14 / 3.0:
             self.scene.forward = vp.rotate( self.scene.forward, angle = self.rotation, axis = self.scene.up )
-        simTime = moose.element( '/clock' ).currentTime
-        #self.scene.caption = "Time = {:.3f} sec".format( simTime )
         if self.viewIdx == 0:
             self.timeLabel.text = "Time = {:.3f} sec\n".format( simTime )
             vp.sleep( self.sleep )
+
+    def replaySnapshot( self, idx ):
+        for i in self.drawables_:
+            simTime = i.replaySnapshot( idx )
+        if self.viewIdx == 0:
+            self.timeLabel.text = "Time = {:.3f} sec\n".format( simTime )
 
     def moveView(self, event):
         camAxis = self.scene.camera.axis
@@ -255,12 +293,13 @@ class MooDrawable:
         self.fieldInfo = fieldInfo
         self.fieldScale = fieldInfo[2]
         self.segments = []
+        self.snapshot = []
         self.coordMin = np.zeros( 3 )
         self.coordMax = np.zeros( 3 )
         #cmap = plt.get_cmap( self.colormap, lut = NUM_CMAP )
         #self.rgb = [ list2vec(cmap(i)[0:3]) for i in range( NUM_CMAP ) ]
 
-    def updateValues( self ):
+    def updateValues( self, simTime ):
         ''' Obtains values from the associated cell'''
         self.val = np.array([moose.getField(i, self.field) for i in self.activeObjs]) * self.fieldScale
         if self.autoscale:
@@ -272,11 +311,20 @@ class MooDrawable:
         scaleVal = NUM_CMAP * (self.val - valMin) / (valMax - valMin)
         #indices = scaleVal.ndarray.astype( int )
         indices = np.maximum( np.minimum( scaleVal, NUM_CMAP-0.5), 0.0).astype(int)
+        self.snapshot.append( [simTime, indices] )
+        self.displayValues( indices )
+
+    def displayValues( self, indices ):
         for idx, seg in zip( indices, self.segments ): 
             #print( "IN segments, ", idx, scaleVal[idx], len( self.rgb ) )
             seg.color = self.rgb[ idx]
             #seg.radius = self.diaScale  * self.activeDia[idx]
-        return
+
+    def replaySnapshot( self, idx ):
+        if idx >= len( self.snapshot ):
+            return 0.0
+        self.displayValues( self.snapshot[idx][1] )
+        return self.snapshot[idx][0]    # return frame time
 
     def updateDiameter( self ):
         for s, w in zip( self.segments, self.activeDia ):

@@ -1005,6 +1005,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
         moose.setClock( pr.tick, moogliDt )
         moose.reinit()
         moose.start( runtime )
+        rmoogli.notifySimulationEnd()
         if block:
             self.display( len( self.moogNames ) + 1)
 

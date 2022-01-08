@@ -51,6 +51,9 @@ def updateMoogliViewer():
     for i in mooViews:
         i.updateValues()
     
+def notifySimulationEnd():
+    if len( mooViews ) > 0:
+        mooViews[0].notifySimulationEnd()
 
 def displayMoogli( rd, _dt, _runtime, rotation = 0.0, fullscreen = False, azim = 0.0, elev = 0.0, mergeDisplays = False, center = [0.0, 0.0, 0.0], colormap = 'jet' ):
     global mooViews
