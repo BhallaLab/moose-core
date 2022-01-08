@@ -215,9 +215,6 @@ class MooView:
         v1 = vp.vector( cmax[0], cmax[1], cmax[2] )
         #self.scene.camera.axis = self.scene.forward * vp.mag(v1 - v0) * 4
         self.scene.center = (v0 + v1 ) / 2.0
-        #self.scene.camera.pos = self.scene.center - self.scene.forward * (vp.mag(v1 - v0) + diamax ) * 2
-        #self.scene.center = (v0 + v1 ) / 2.0
-        #self.scene.range = vp.mag(v0 - v1 ) / 1.5
         self.scene.range = (diamax + vp.mag(v0 - v1 ) ) / 1.5
 
     def moveView(self, event):
