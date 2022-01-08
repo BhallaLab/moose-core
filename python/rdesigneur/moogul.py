@@ -32,11 +32,14 @@ class MooView:
     origScene = None
     rgb = []
     viewList = []
+    consolidatedTitle = ""
+
     def __init__( self, swx = 10, swy = 10, hideAxis = True, title = "view", colormap = 'jet'
     ):
         self.viewIdx = MooView.viewIdx
         MooView.viewIdx += 1
         MooView.viewList.append( self )
+        MooView.consolidatedTitle += title + "      "
         self.title = title
         self.swx = swx
         self.swy = swy
@@ -95,10 +98,14 @@ class MooView:
             self.replayButton.text = "Start Replay"
             self.replayButton.background = vp.color.white
 
+    def setSleepTime( self ):
+        self.sleep = self.sleepSlider.value
+        self.sleepLabel.text = "    Frame dt = {:1.3f} sec".format( self.sleep )
+
     def makeColorbar( self, doOrnaments = True, colorscale = 'jet' ):
         title = None
         if doOrnaments:
-            title = self.title + "\n"
+            title = MooView.consolidatedTitle + "\n"
         barWidth = SCALE_SCENE
         self.colorbar = vp.canvas( title = title, width = barWidth, height = self.swy * SCALE_SCENE, background = vp.color.white, align = 'left', range = 1, autoscale = False )
         self.colorbar.userzoom = False
@@ -112,7 +119,9 @@ class MooView:
         self.barMin = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, 8, 0), text = "{:.3f}".format(self.valMin), height = 12, color = vp.color.black, box = False, opacity = 0 )
         self.barMax = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, (self.swy - 1.2) * SCALE_SCENE, 0), text = "{:.3f}".format(self.valMax), height = 12, color = vp.color.black, box = False, opacity = 0 )
         if doOrnaments:
-            self.timeLabel = vp.wtext( text = "Time = 0.0 sec\n", pos = self.colorbar.title_anchor )
+            self.timeLabel = vp.wtext( text = "Time =  0.000 sec", pos = self.colorbar.title_anchor )
+            self.sleepLabel = vp.wtext( text = "    Frame dt = 0.005 sec", pos = self.colorbar.title_anchor )
+            self.sleepSlider = vp.slider( pos = self.colorbar.title_anchor, length = 200, bind = self.setSleepTime, min = 0.0, max = 0.2, value = self.sleep )
             self.replayButton = vp.button( text = "Start Replay", pos = self.colorbar.title_anchor, bind=self.toggleReplay, disabled = True )
             self.colorbar.append_to_title("\n")
             self.axisButton = vp.button( text = "Show Axis", pos = self.colorbar.title_anchor, bind=self.toggleAxis )
@@ -160,14 +169,14 @@ class MooView:
         if self.doRotation and abs( self.rotation ) < 2.0 * 3.14 / 3.0:
             self.scene.forward = vp.rotate( self.scene.forward, angle = self.rotation, axis = self.scene.up )
         if self.viewIdx == 0:
-            self.timeLabel.text = "Time = {:.3f} sec\n".format( simTime )
+            self.timeLabel.text = "Time = {:2.3f} sec".format( simTime )
             vp.sleep( self.sleep )
 
     def replaySnapshot( self, idx ):
         for i in self.drawables_:
             simTime = i.replaySnapshot( idx )
         if self.viewIdx == 0:
-            self.timeLabel.text = "Time = {:.3f} sec\n".format( simTime )
+            self.timeLabel.text = "Time = {:.3f} sec".format( simTime )
 
     def moveView(self, event):
         camAxis = self.scene.camera.axis
