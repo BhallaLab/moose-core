@@ -30,7 +30,7 @@ class MooView:
     viewIdx = 0
     origScene = None
     rgb = []
-    def __init__( self, swx = 10, swy = 10, hideAxis = True, title = "view", showColorbar = True, colormap = 'jet'
+    def __init__( self, swx = 10, swy = 10, hideAxis = True, title = "view", colormap = 'jet'
     ):
         self.viewIdx = MooView.viewIdx
         MooView.viewIdx += 1
@@ -40,13 +40,10 @@ class MooView:
         self.drawables_ = []
         self.sensitivity = 0.05 # radians rotation, and other adjustments
         self.sleep = 0.005  # Seconds to sleep per frame
-        self.showColorbar = showColorbar
         self.colormap = colormap
         self.hideAxis = hideAxis
         self.valMin = 0.0
         self.valMmax = 1.0
-        cmap = plt.get_cmap( self.colormap, lut = NUM_CMAP )
-        self.rgb = [ list2vec(cmap(i)[0:3]) for i in range( NUM_CMAP ) ]
 
     def addDrawable( self, n ):
         self.drawables_.append( n )
@@ -65,7 +62,7 @@ class MooView:
             self.axisButton.text = "Show Axis"
             self.axisButton.background = vp.color.white
 
-    def makeColorbar( self, doOrnaments = True ):
+    def makeColorbar( self, doOrnaments = True, colorscale = 'jet' ):
         title = None
         if doOrnaments:
             title = self.title + "\n"
@@ -89,7 +86,7 @@ class MooView:
                 self.axisButton.text = "Hide Axis"
                 self.toggleAxis()
 
-    def makeScene( self, mergeDisplays ):
+    def makeScene( self, mergeDisplays, center = [0.0, 0.0, 0.0] ):
         if self.viewIdx == 0:
             MooView.origScene = vp.canvas( width = self.swx * SCALE_SCENE, height = self.swy * SCALE_SCENE, background = vp.vector( 0.7, 0.8, 0.9), align = 'left', autoscale = True )
             self.scene = MooView.origScene
@@ -100,42 +97,16 @@ class MooView:
         else: 
             self.scene = vp.canvas( width = self.swx * SCALE_SCENE, height = self.swy * SCALE_SCENE, background = vp.vector( 0.7, 0.8, 0.9 ), align = 'left', autoscale = True )
             self.scene.bind( 'keydown', self.moveView )
-            '''
-            self.scene.append_to_title("\n")
-            self.axisButton = vp.button( text = "Show Axis", pos = self.scene.title_anchor, bind=self.toggleAxis )
-            if self.hideAxis:
-                self.axisButton.text = "Hide Axis"
-                self.toggleAxis()
-            '''
+        self.scene.center = list2vec( center )
 
-    def makeScene2( self, mergeDisplays ):
-        if self.viewIdx == 0:
-            MooView.origScene = vp.canvas( caption = self.title + '\n', width = self.swx * SCALE_SCENE, height = self.swy * SCALE_SCENE, background = vp.color.cyan, align = 'left' )
-            self.scene = MooView.origScene
-            self.scene.bind( 'keydown', self.moveView )
-            #self.flatbox = vp.box( width = 10, height = 6 )
-            self.timeLabel = vp.wtext( text = "Time = 0.0 sec\n", pos = self.scene.caption_anchor )
-            self.scene.append_to_caption("\n")
-            self.axisButton = vp.button( text = "Show Axis", pos = self.scene.caption_anchor, bind=self.toggleAxis )
-            if self.hideAxis:
-                self.axisButton.text = "Hide Axis"
-                self.toggleAxis()
-        elif mergeDisplays:
-            self.scene = MooView.origScene
-        else: 
-            self.scene = vp.canvas( caption = self.title + '\n', width = self.swx * SCALE_SCENE, height = self.swy * SCALE_SCENE, background = vp.vector( 0.7, 0.8, 0.9 ), align = 'left' )
-            self.scene.bind( 'keydown', self.moveView )
-            self.scene.append_to_caption("\n")
-            self.axisButton = vp.button( text = "Show Axis", pos = self.scene.caption_anchor, bind=self.toggleAxis )
-            if self.hideAxis:
-                self.axisButton.text = "Hide Axis"
-                self.toggleAxis()
-
-    def firstDraw( self, mergeDisplays, rotation=0.0, elev=0.0, azim=0.0 ):
+    def firstDraw( self, mergeDisplays, rotation=0.0, elev=0.0, azim=0.0, center = [0.0, 0,0, 0.0], colormap = 'jet' ):
+        self.colormap = colormap
+        cmap = plt.get_cmap( self.colormap, lut = NUM_CMAP )
+        self.rgb = [ list2vec(cmap(i)[0:3]) for i in range( NUM_CMAP ) ]
         doOrnaments = (self.viewIdx == 0)
         if doOrnaments or not mergeDisplays:
             self.makeColorbar( doOrnaments = doOrnaments )
-        self.makeScene( mergeDisplays )
+        self.makeScene( mergeDisplays, center )
         if rotation == 0.0:
             self.doRotation = False
             self.rotation = 0.1 # default rotation per frame, in radians.
@@ -144,6 +115,7 @@ class MooView:
             self.rotation = rotation # arg units: radians/frame
         
         for i in self.drawables_:
+            i.rgb = self.rgb
             i.drawForTheFirstTime( self.scene )
 
     def updateValues( self ):
@@ -285,9 +257,8 @@ class MooDrawable:
         self.segments = []
         self.coordMin = np.zeros( 3 )
         self.coordMax = np.zeros( 3 )
-        cmap = plt.get_cmap( self.colormap, lut = NUM_CMAP )
-        self.rgb = [ list2vec(cmap(i)[0:3]) for i in range( NUM_CMAP ) ]
-        #FieldInfo = [baseclass, fieldGetFunc, scale, axisText, min, max]
+        #cmap = plt.get_cmap( self.colormap, lut = NUM_CMAP )
+        #self.rgb = [ list2vec(cmap(i)[0:3]) for i in range( NUM_CMAP ) ]
 
     def updateValues( self ):
         ''' Obtains values from the associated cell'''
@@ -311,7 +282,7 @@ class MooDrawable:
         for s, w in zip( self.segments, self.activeDia ):
             s.radius = self.diaScale * w / 2.0
 
-    def drawForTheFirstTime( self, _scene ):
+    def cylinderDraw( self, _scene ):
         #print( "Coords = ",  self.activeCoords)
         #print( "Dia = ",  self.activeDia)
         for idx, coord in enumerate( self.activeCoords ):
@@ -354,11 +325,6 @@ class MooNeuron( MooDrawable ):
     def updateCoords( self ):
         ''' Obtains coords from the associated cell'''
         self.compts_ = moose.wildcardFind( self.neuronId.path + "/#[ISA=CompartmentBase]" )
-        # Matplotlib3d isn't able to do full rotations about an y axis,
-        # which is what the NeuroMorpho models use, so
-        # here we shuffle the axes around. Should be an option.
-        #coords = np.array([[[i.x0,i.y0,i.z0],[i.x,i.y,i.z]] 
-            #for i in self.compts_])
         coords = np.array([[[i.x0,i.y0,i.z0],[i.x,i.y,i.z]] 
             for i in self.compts_])
         dia = np.array([i.diameter for i in self.compts_])
@@ -382,6 +348,9 @@ class MooNeuron( MooDrawable ):
         super().updateDiameter()
 
         return
+
+    def drawForTheFirstTime( self, _scene ):
+        self.cylinderDraw( _scene )
 
 #####################################################################
 class MooReacSystem( MooDrawable ):
@@ -409,24 +378,89 @@ class MooReacSystem( MooDrawable ):
         for pool in self.mooObj:
             coords = pool.coords
             meshType = pool.compartment.className
-            if meshType in ["NeuroMesh", "CylMesh", "SpineMesh", "PsdMesh"]:
+            if meshType in ["NeuroMesh", "CylMesh", "PsdMesh"]:
                 # Unfortunately at present these return radius rather than
                 # diameter in argument 6. To fix.
                 # Make a cylinder
                 activeCoords.append( [coords[0:3], coords[3:6]] )
                 self.activeDia.append( coords[6] * 2 * 0.5 )
+            if meshType == "SpineMesh":
+                # Spine entry has head[3], shaft[3], root[3], dia.
+                activeCoords.append( [coords[0:3], coords[3:6]] )
+                self.activeDia.append( coords[9] * 2 * 0.5 )
             elif meshType == "PresynMesh":
                 # This returns diameter in argument 6.
-                # Hack: make each bouton as a cylinder with length == dia.
+                # first vec is centre of base, second axis pointing 
+                # toward postsyn
+                # Hack: make each bouton as a cone with length == dia.
                 activeCoords.append( [coords[0:3], coords[6]*coords[3:6] + coords[0:3]] )
                 self.activeDia.append( coords[6] )
                 # Returns centre as args 0,1,2, diameter as argument 3.
                 # Make a hemisphere
             elif meshType == "EndoMesh":
-                print( "Don't yet know EndoMesh" )
                 # Make a sphere.
+                activeCoords.append( [ coords[0:3], coords[0:3] ] )
+                self.activeDia.append( coords[3] )
         self.activeCoords = np.array( activeCoords ) * self.lenScale
         self.activeDia = np.array( self.activeDia ) * self.diaScale
         self.opacity = np.ones( len( self.activeDia ) )
         self.activeObjs = self.mooObj
         return
+
+    def drawForTheFirstTime( self, _scene ):
+        #print( "Coords = ",  self.activeCoords)
+        #print( "Dia = ",  self.activeDia)
+        if len( self.mooObj ) == 0:
+            return
+        meshType = self.mooObj[0].compartment.className
+        if meshType in ["NeuroMesh", "CylMesh", "SpineMesh", "PsdMesh"]:
+            self.cylinderDraw( _scene )
+        elif meshType == "SpineMesh":
+            self.spineDraw( _scene )
+        elif meshType == "PresynMesh":
+            self.presynDraw( _scene )
+        elif meshType == "EndoMesh":
+            self.endoDraw( _scene )
+
+    def spineDraw( self, _scene ):
+        #print( "Coords = ",  self.activeCoords)
+        #print( "Dia = ",  self.activeDia)
+        # Spine entry has head[3], shaft[3], root[3], dia.
+        for idx, coord in enumerate( self.activeCoords ):
+            v0 = list2vec( coord[0] )
+            v1 = list2vec( coord[1] )
+            self.coordMin = np.minimum( self.coordMin, coord[0][0:3] )
+            self.coordMin = np.minimum( self.coordMin, coord[1][0:3] )
+            self.coordMax = np.maximum( self.coordMax, coord[0][0:3] )
+            self.coordMax = np.maximum( self.coordMax, coord[1][0:3] )
+            radius = self.diaScale * self.activeDia[idx] / 2.0
+            opacity = self.opacity[idx]
+            rod = vp.cylinder( canvas = _scene, pos = v0, axis = v1 - v0, radius = radius, opacity = opacity )
+            #print( "ROD = ", rod.pos, rod.axis, rod.radius )
+            self.segments.append( rod )
+
+    def presynDraw( self, _scene ):
+        for idx, coord in enumerate( self.activeCoords ):
+            v0 = list2vec( coord[0] )
+            v1 = list2vec( coord[1] )
+            self.coordMin = np.minimum( self.coordMin, coord[0][0:3] )
+            self.coordMin = np.minimum( self.coordMin, coord[1][0:3] )
+            self.coordMax = np.maximum( self.coordMax, coord[0][0:3] )
+            self.coordMax = np.maximum( self.coordMax, coord[1][0:3] )
+            radius = self.diaScale * self.activeDia[idx] / 2.0
+            opacity = self.opacity[idx]
+            cone = vp.cone( canvas = _scene, pos = v0, axis = v0 - v1, radius = radius, opacity = opacity )
+            #print( "ROD = ", rod.pos, rod.axis, rod.radius )
+            self.segments.append( cone )
+
+    def endoDraw( self, _scene ):
+        for idx, coord in enumerate( self.activeCoords ):
+            v0 = list2vec( coord[0] )
+            v1 = list2vec( coord[1] )
+            self.coordMin = np.minimum( self.coordMin, coord[0][0:3] )
+            self.coordMax = np.maximum( self.coordMax, coord[0][0:3] )
+            radius = self.diaScale * self.activeDia[idx] / 2.0
+            opacity = self.opacity[idx]
+            sphere = vp.sphere( canvas = _scene, pos = (v0 + v1)/2.0, radius = radius, opacity = opacity )
+            #print( "ROD = ", rod.pos, rod.axis, rod.radius )
+            self.segments.append( sphere )
