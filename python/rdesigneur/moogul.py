@@ -111,7 +111,6 @@ class MooView:
         self.yAx.axis = vp.vector( y.dot( right ), y.dot( up ), 0.0 )
         self.zAx.axis = vp.vector( z.dot( right ), z.dot( up ), 0.0 )
         self.axisLength.text = "{:.2f} <i>u</i>m".format( dx * 1e6*self.scene.range * self.colorbar.width / self.scene.width )
-        #print( self.scene.range, "      ", self.scene.width, "     ", self.colorbar.width )
 
     def makeColorbar( self, doOrnaments = True, colorscale = 'jet' ):
         title = None
@@ -143,12 +142,39 @@ class MooView:
             self.replayButton = vp.button( text = "Start Replay", pos = self.colorbar.title_anchor, bind=self.toggleReplay, disabled = True )
             self.colorbar.append_to_title("\n")
 
+    def pickObj( self ):
+        obj = self.scene.mouse.pick
+        if obj == None:
+            return
+        elm = self.innerPickObj( obj )
+        if elm:
+            print( elm.path, elm.dataIndex )
+            return
+        elif self.viewIdx == 0: 
+            for view in MooView.viewList[1:]:
+                if view.colorbar == None:
+                    elm = view.innerPickObj( obj )
+                    if elm:
+                        print( elm.path, elm.dataIndex )
+                        return
+        print( "Object {} not found on view {}".format( obj, self.title ) )
+
+    def innerPickObj( self, obj ):
+        for dr in self.drawables_:
+            elm = dr.findDisplayObject( obj )
+            if elm:
+                return elm
+        return None
+
+
+
     def makeScene( self, mergeDisplays ):
         if self.viewIdx == 0:
             MooView.origScene = vp.canvas( width = self.swx * SCALE_SCENE, height = self.swy * SCALE_SCENE, background = bgvector, align = 'left', autoscale = True )
             self.scene = MooView.origScene
             self.scene.bind( 'keydown', self.moveView )
             self.scene.bind( 'keydown', self.updateAxis )
+            self.scene.bind( 'mousedown', self.pickObj )
             #self.flatbox = vp.box( width = 10, height = 6 )
         elif mergeDisplays:
             self.scene = MooView.origScene
@@ -156,6 +182,7 @@ class MooView:
             self.scene = vp.canvas( width = self.swx * SCALE_SCENE, height = self.swy * SCALE_SCENE, background = bgvector, align = 'left', autoscale = True )
             self.scene.bind( 'keydown', self.moveView )
             self.scene.bind( 'keydown', self.updateAxis )
+            self.scene.bind( 'mousedown', self.pickObj )
         '''
         self.xAx2 = vp.cylinder( canvas = self.scene, pos = vp.vector( 0, 0, 0), axis = vp.vector( 1e-5, 0, 0 ), radius = 0.2e-6, color = vp.color.red )
         self.yAx2 = vp.cylinder( canvas = self.scene, pos = vp.vector( 0, 0, 0), axis = vp.vector( 0, 1e-5, 0 ), radius = 0.2e-6, color = vp.color.green )
@@ -359,7 +386,6 @@ class MooDrawable:
 
     def displayValues( self, indices ):
         for idx, seg in zip( indices, self.segments ): 
-            #print( "IN segments, ", idx, scaleVal[idx], len( self.rgb ) )
             seg.color = self.rgb[ idx]
             #seg.radius = self.diaScale  * self.activeDia[idx]
 
@@ -374,8 +400,6 @@ class MooDrawable:
             s.radius = self.diaScale * w / 2.0
 
     def cylinderDraw( self, _scene ):
-        #print( "Coords = ",  self.activeCoords)
-        #print( "Dia = ",  self.activeDia)
         for idx, coord in enumerate( self.activeCoords ):
             v0 = list2vec( coord[0] )
             v1 = list2vec( coord[1] )
@@ -386,8 +410,16 @@ class MooDrawable:
             radius = self.diaScale * self.activeDia[idx] / 2.0
             opacity = self.opacity[idx]
             rod = vp.cylinder( canvas = _scene, pos = v0, axis = v1 - v0, radius = radius, opacity = opacity )
-            #print( "ROD = ", rod.pos, rod.axis, rod.radius )
             self.segments.append( rod )
+
+    def findDisplayObject( self, obj ):
+        try:
+            idx = self.segments.index( obj )
+        except ValueError:
+            return None
+        if idx >= len( self.activeObjs ):
+            return None
+        return self.activeObjs[idx]
 
 #####################################################################
 
@@ -475,10 +507,10 @@ class MooReacSystem( MooDrawable ):
                 # Make a cylinder
                 activeCoords.append( [coords[0:3], coords[3:6]] )
                 self.activeDia.append( coords[6] * 2 )
-            if meshType == "SpineMesh":
+            elif meshType == "SpineMesh":
                 # Spine entry has head[3], shaft[3], root[3], dia.
                 activeCoords.append( [coords[0:3], coords[3:6]] )
-                self.activeDia.append( coords[9] * 2 )
+                self.activeDia.append( coords[9] )
             elif meshType == "PresynMesh":
                 # This returns diameter in argument 6.
                 # first vec is centre of base, second axis pointing 
@@ -499,8 +531,6 @@ class MooReacSystem( MooDrawable ):
         return
 
     def drawForTheFirstTime( self, _scene ):
-        #print( "Coords = ",  self.activeCoords)
-        #print( "Dia = ",  self.activeDia)
         if len( self.mooObj ) == 0:
             return
         meshType = self.mooObj[0].compartment.className
@@ -514,8 +544,6 @@ class MooReacSystem( MooDrawable ):
             self.endoDraw( _scene )
 
     def spineDraw( self, _scene ):
-        #print( "Coords = ",  self.activeCoords)
-        #print( "Dia = ",  self.activeDia)
         # Spine entry has head[3], shaft[3], root[3], dia.
         for idx, coord in enumerate( self.activeCoords ):
             v0 = list2vec( coord[0] )
@@ -527,7 +555,6 @@ class MooReacSystem( MooDrawable ):
             radius = self.diaScale * self.activeDia[idx] / 2.0
             opacity = self.opacity[idx]
             rod = vp.cylinder( canvas = _scene, pos = v0, axis = v1 - v0, radius = radius, opacity = opacity )
-            #print( "ROD = ", rod.pos, rod.axis, rod.radius )
             self.segments.append( rod )
 
     def presynDraw( self, _scene ):
@@ -541,7 +568,6 @@ class MooReacSystem( MooDrawable ):
             radius = self.diaScale * self.activeDia[idx] / 2.0
             opacity = self.opacity[idx]
             cone = vp.cone( canvas = _scene, pos = v0, axis = v0 - v1, radius = radius, opacity = opacity )
-            #print( "ROD = ", rod.pos, rod.axis, rod.radius )
             self.segments.append( cone )
 
     def endoDraw( self, _scene ):
@@ -553,5 +579,4 @@ class MooReacSystem( MooDrawable ):
             radius = self.diaScale * self.activeDia[idx] / 2.0
             opacity = self.opacity[idx]
             sphere = vp.sphere( canvas = _scene, pos = (v0 + v1)/2.0, radius = radius, opacity = opacity )
-            #print( "ROD = ", rod.pos, rod.axis, rod.radius )
             self.segments.append( sphere )
