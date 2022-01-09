@@ -421,7 +421,7 @@ void PresynMesh::buildOnDendrites( vector< ObjId > compts, double spacing )
 			assert( 0 );
 		}
 		double length = Field< double >::get( v, "length" );
-		double diameter = Field< double >::get( v, "diameter" );
+		double radius = Field< double >::get( v, "diameter" ) / 2.0;
 		double x = Field< double >::get( v, "x" );
 		double y = Field< double >::get( v, "y" );
 		double z = Field< double >::get( v, "z" );
@@ -442,9 +442,9 @@ void PresynMesh::buildOnDendrites( vector< ObjId > compts, double spacing )
 			b.vx_ = -vRadial1.a0();	// Components of the radial unit vector
 			b.vy_ = -vRadial1.a1();
 			b.vz_ = -vRadial1.a2();
-			b.x_ = x0 + (r/length) * (x - x0) - (diameter + 20e-9) * b.vx_;
-			b.y_ = y0 + (r/length) * (y - y0) - (diameter + 20e-9) * b.vy_;
-			b.z_ = z0 + (r/length) * (z - z0) - (diameter + 20e-9) * b.vz_;
+			b.x_ = x0 + (r/length) * (x - x0) - (radius + 20e-9) * b.vx_;
+			b.y_ = y0 + (r/length) * (y - y0) - (radius + 20e-9) * b.vy_;
+			b.z_ = z0 + (r/length) * (z - z0) - (radius + 20e-9) * b.vz_;
 			b.volume_ = DEFAULT_BOUTON_VOLUME;
 			boutons_.push_back( b );
 		}
