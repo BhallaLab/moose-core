@@ -993,9 +993,9 @@ class rdesigneur:
     # Here we display the plots and moogli
     ################################################################
 
-    def displayMoogli( self, moogliDt, runtime, rotation = math.pi/500.0, fullscreen = False, block = True, azim = 0.0, elev = 0.0, mergeDisplays = False, colormap = 'jet', center = [] ):
+    def displayMoogli( self, moogliDt, runtime, rotation = math.pi/500.0, fullscreen = False, block = True, azim = 0.0, elev = 0.0, mergeDisplays = False, colormap = 'jet', center = [], bg = 'default' ):
         # If center is empty then use autoscaling.
-        rmoogli.displayMoogli( self, moogliDt, runtime, rotation = rotation, fullscreen = fullscreen, azim = azim, elev = elev, mergeDisplays = mergeDisplays, colormap = colormap, center = center )
+        rmoogli.displayMoogli( self, moogliDt, runtime, rotation = rotation, fullscreen = fullscreen, azim = azim, elev = elev, mergeDisplays = mergeDisplays, colormap = colormap, center = center, bg = bg )
         pr = moose.PyRun( '/model/updateMoogli' )
 
         pr.runString = '''

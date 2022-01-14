@@ -18,6 +18,13 @@ from packaging import version
 NUM_CMAP = 64
 SCALE_SCENE = 64
 bgvector = vp.vector(0.7, 0.8, 0.9)  # RGB
+bgDict = {'default': bgvector, 'black': vp.color.black, 'white': vp.color.white, 'cyan': vp.color.cyan, 'grey': vp.vector( 0.5, 0.5, 0.5 ) }
+
+def bgLookup( bg ):
+    col = bgDict.get( bg )
+    if not col:
+        return bgvector
+    return col
 
 class MoogulError( Exception ):
     def __init__( self, value ):
@@ -112,12 +119,12 @@ class MooView:
         self.zAx.axis = vp.vector( z.dot( right ), z.dot( up ), 0.0 )
         self.axisLength.text = "{:.2f} <i>u</i>m".format( dx * 1e6*self.scene.range * self.colorbar.width / self.scene.width )
 
-    def makeColorbar( self, doOrnaments = True, colorscale = 'jet' ):
+    def makeColorbar( self, doOrnaments = True, colorscale = 'jet', bg = 'default' ):
         title = None
         if doOrnaments:
             title = MooView.consolidatedTitle + "\n"
         barWidth = SCALE_SCENE * 1.5
-        self.colorbar = vp.canvas( title = title, width = barWidth, height = self.swy * SCALE_SCENE, background = bgvector, align = 'left', range = 1, autoscale = False )
+        self.colorbar = vp.canvas( title = title, width = barWidth, height = self.swy * SCALE_SCENE, background = bgLookup(bg), align = 'left', range = 1, autoscale = False )
         #self.colorbar = vp.canvas( title = title, width = barWidth, height = self.swy * SCALE_SCENE, background = vp.color.cyan, align = 'left', range = 1, autoscale = False )
         self.colorbar.userzoom = False
         self.colorbar.userspin = False
@@ -168,9 +175,9 @@ class MooView:
 
 
 
-    def makeScene( self, mergeDisplays ):
+    def makeScene( self, mergeDisplays, bg = 'default' ):
         if self.viewIdx == 0:
-            MooView.origScene = vp.canvas( width = self.swx * SCALE_SCENE, height = self.swy * SCALE_SCENE, background = bgvector, align = 'left', autoscale = True )
+            MooView.origScene = vp.canvas( width = self.swx * SCALE_SCENE, height = self.swy * SCALE_SCENE, background = bgLookup( bg ), align = 'left', autoscale = True )
             self.scene = MooView.origScene
             self.scene.bind( 'keydown', self.moveView )
             self.scene.bind( 'keydown', self.updateAxis )
@@ -190,14 +197,14 @@ class MooView:
         '''
         self.scene.bind( 'mousedown mousemove mouseup', self.updateAxis )
 
-    def firstDraw( self, mergeDisplays, rotation=0.0, elev=0.0, azim=0.0, center = [0.0, 0,0, 0.0], colormap = 'jet' ):
+    def firstDraw( self, mergeDisplays, rotation=0.0, elev=0.0, azim=0.0, center = [0.0, 0,0, 0.0], colormap = 'jet', bg = 'default' ):
         self.colormap = colormap
         cmap = plt.get_cmap( self.colormap, lut = NUM_CMAP )
         self.rgb = [ list2vec(cmap(i)[0:3]) for i in range( NUM_CMAP ) ]
         doOrnaments = (self.viewIdx == 0)
         if doOrnaments or not mergeDisplays:
-            self.makeColorbar( doOrnaments = doOrnaments )
-        self.makeScene( mergeDisplays )
+            self.makeColorbar( doOrnaments = doOrnaments, bg = bg )
+        self.makeScene( mergeDisplays, bg = bg )
         if rotation == 0.0:
             self.doRotation = False
             self.rotation = 0.1 # default rotation per frame, in radians.
@@ -235,6 +242,9 @@ class MooView:
             self.updateAxis()
 
     def doAutoscale( self ):
+        if len( self.drawables_[0].activeDia ) == 0:
+            print( "Warning: No values to display in Moogli view ", self.title )
+            return
         cmin = self.drawables_[0].coordMin
         cmax = self.drawables_[0].coordMax
         diamax = max( self.drawables_[0].activeDia )
