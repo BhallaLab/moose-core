@@ -332,10 +332,13 @@ double ReadKkit::childPoolVol( Id gid ) const
 {
 	vector< ObjId > pools;
 	simpleWildcardFind( gid.path() + "/##[ISA=PoolBase]", pools );
-	if ( pools.size() == 0 )
-		return 1e-18;
-	return poolVols_.at(pools[0].id);
-	// return Field< double >::get( pools[0], "volume" );
+	for ( unsigned int i = 0; i < pools.size(); i++ ) {
+		auto pv = poolVols_.find( pools[i].id );
+		if ( pv != poolVols_.end() )
+			return pv->second;
+	}
+	cout << "Warning: of " << pools.size() << " children of group " << gid.path() << ", none found in map poolVols_ of size " << pools.size() << ".\n Using default vol of 1e-18\n";
+	return 1e-18;
 }
 
 int ReadKkit::findCompartmentsFromAnnotation()

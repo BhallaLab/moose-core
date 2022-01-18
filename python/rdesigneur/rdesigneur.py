@@ -233,7 +233,7 @@ class rdesigneur:
             t = time.time() - t0
             if self.benchmark:
                 msg = r'    ... DONE'
-                if t > 0.1:
+                if t > 0.01:
                     msg += ' %.3f sec' % t
                 print(msg)
             sys.stdout.flush()
@@ -712,12 +712,12 @@ class rdesigneur:
     def buildEndoMesh( self, argList, newChemId ):
         chemSrc, elecPath, meshType, geom = argList[:4]
         mesh = moose.EndoMesh( newChemId.path + '/' + chemSrc )
-        surroundName = arglist[4]
-        radiusRatio = float( arglist[5] )
-        surroundMesh = self.comptDict.get[ surroundName ]
+        surroundName = argList[4]
+        radiusRatio = float( argList[5] )
+        surroundMesh = self.comptDict.get( surroundName )
         if not surroundMesh:
             raise( "Error: newChemDistrib: Could not find surround '{}' for endo '{}'".format( surroundName, chemSrc ) )
-        mesh.surround = surroundName
+        mesh.surround = moose.element( newChemId.path+'/'+surroundName )
         mesh.isMembraneBound = True
         mesh.rScale = radiusRatio
         if meshType == 'endo_axial':
@@ -725,7 +725,7 @@ class rdesigneur:
             mesh.rPower = 0.5
             mesh.aPower = 0.5
             mesh.aScale = radiusRatio * radiusRatio
-        self._endos.append( [endo, surround] )
+        self._endos.append( [mesh, surroundMesh] )
         return mesh
 
 
@@ -741,6 +741,7 @@ class rdesigneur:
         # As a backward compatibility hack, if the meshType == 'install'
         # we use the default naming.
         # The meshes are created in the order below due to dependencies.
+        # meshOrder = ['soma', 'dend', 'spine', 'psd', 'psd_dend', 'presyn_dend', 'presyn_spine', 'endo', 'endo_axial']
         # Of these, the 'soma', endo_soma', and 'psd_dend' are not yet 
         # implemented.
 
@@ -1190,7 +1191,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
             pair = i.elecpath + " " + i.geom_expr
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
             spineCompts = self.elecid.spinesFromExpression[ pair ]
-            #print( "STIMS: pair = {}, numcompts = {},{} ".format( pair, len( dendCompts), len( spineCompts ) ) )
+            print( "STIMS: pair = {}, numcompts = {},{} ".format( pair, len( dendCompts), len( spineCompts ) ) )
             #print( [j.name for j in dendCompts] )
             if i.field == 'vclamp':
                 stimObj3 = self._buildVclampOnCompt( dendCompts, spineCompts, i )
@@ -1584,6 +1585,9 @@ rdesigneur.rmoogli.updateMoogliViewer()
             return
         fixXreacs.fixXreacs( self.chemid.path )
         sortedChemDistrib = sorted( self.chemDistrib, key = lambda c: meshOrder.index( c[2] ) )
+        spineMeshJunctionList = []
+        psdMeshJunctionList = []
+        endoMeshJunctionList = []
         for line in sortedChemDistrib:
             chemSrc, elecPath, meshType, geom = line[:4]
             mesh = self.comptDict[ chemSrc ]
@@ -1598,9 +1602,27 @@ rdesigneur.rmoogli.updateMoogliViewer()
             stoich.ksolve = ksolve
             stoich.dsolve = dsolve
             stoich.reacSystemPath = mesh.path + "/##"
-            
 
+            if meshType == 'spine':
+                spineMeshJunctionList.extend( [mesh.path, line[4], dsolve])
+            if meshType == 'psd':
+                psdMeshJunctionList.extend( [mesh.path, line[4], dsolve] )
+            elif meshType == 'endo':
+                # Endo mesh is easy as it explicitly defines surround.
+                endoMeshJunctionList.append( [mesh.path, line[4], dsolve] )
+        
+        for sm, pm in zip( spineMeshJunctionList, psdMeshJunctionList ):
+            # Locate associated NeuroMesh and PSD mesh
+            if sm[1] == pm[1]:
+                nmesh = self.comptDict[ sm[1] ]
+                dmdsolve = moose.element( nmesh.path + "/dsolve" )
+                dmdsolve.buildNeuroMeshJunctions( sm[2], pm[2] )
 
+        for em in endoMeshJunctionList:
+            emdsolve = em[2]
+            surroundMesh = self.comptDict[ em[1] ]
+            surroundDsolve = moose.element( surroundMesh.path + "/dsolve" )
+            surroundDsolve.buildMeshJunctions( emdsolve )
 
     def _oldConfigureSolvers( self ) :
         if not hasattr( self, 'chemid' ) or len( self.chemDistrib ) == 0:

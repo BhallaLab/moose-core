@@ -182,6 +182,7 @@ double EndoMesh::getRpower( const Eref& e ) const
 void EndoMesh::setRscale( const Eref& e, double v )
 {
 	rScale_ = v;
+	vScale_ = pow( rScale_, 1.0/rPower_ );
 }
 
 double EndoMesh::getRscale( const Eref& e ) const
