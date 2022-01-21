@@ -44,8 +44,7 @@ public:
     vector< ObjId > getCompartments() const;
     vector< ObjId > getExprElist( const Eref& e, string line ) const;
     vector< double > getExprVal( const Eref& e, string line ) const;
-    vector< ObjId > getSpinesFromExpression(
-        const Eref& e, string line ) const;
+    // vector< ObjId > getSpinesFromExpression( const Eref& e, string line ) const;
     vector< ObjId > getSpinesOnCompartment(
         const Eref& e, ObjId compt ) const;
     ObjId getParentCompartmentOfSpine( const Eref& e, ObjId compt )

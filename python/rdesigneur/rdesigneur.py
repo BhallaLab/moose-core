@@ -750,6 +750,7 @@ class rdesigneur:
 
         if  self.chemDistrib[0][2] == 'install':
             # Legacy version, deprecated.
+            print( "Warning: the 'install' keyword in chemDistrib is deprecated. Move to new format for specification of target compartment by name." )
             self.isLegacyMethod = True
             for i in self.chemDistrib:
                 self.oldChemDistrib(i)
@@ -762,7 +763,7 @@ class rdesigneur:
             # print( "COMPTDICT =================\n", self.comptDict )
             for i in sortedChemDistrib:
                 self.newChemDistrib( i, newChemId )
-            # We have to assign the comptartments to neuromesh and
+            # We have to assign the compartments to neuromesh and
             # spine mesh only after they have all been connected up.
             for i in sortedChemDistrib:
                 chemSrc, elecPath, meshType, geom = i[:4]
