@@ -625,10 +625,10 @@ class rdesigneur:
         pair = i[1] + " " + i[3]
         # Assign any other params. Possibly the first param should
         # be a global scaling factor.
-        self.spineComptElist = self.elecid.spinesFromExpression[ pair ]
+        #self.spineComptElist = self.elecid.spinesFromExpression[ pair ]
         self.cellPortionElist = self.elecid.compartmentsFromExpression[ pair ]
         #moose.le( "/model/chem/kinetics" )
-        if len( self.spineComptElist ) + len( self.cellPortionElist ) == 0:
+        if len( self.cellPortionElist ) == 0:
             raise BuildError( \
                 "buildChemDistrib: No elec compartments found in path: '" \
                     + pair + "'" )
@@ -704,7 +704,8 @@ class rdesigneur:
             elecList = self.elecid.compartmentsFromExpression[ pair ]
             mesh.buildOnDendrites( elecList, presynSpacing )
         else:
-            elecList = self.elecid.spinesFromExpression[ pair ]
+            #elecList = self.elecid.spinesFromExpression[ pair ]
+            elecList = self.elecid.compartmentsFromExpression[ pair ]
             mesh.buildOnSpineHeads( elecList )
         mesh.setRadiusStats( presynRadius, presynRadiusSdev )
         return mesh
@@ -926,13 +927,13 @@ class rdesigneur:
         for i in self.plotList:
             pair = i.elecpath + ' ' + i.geom_expr
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
-            spineCompts = self.elecid.spinesFromExpression[ pair ]
+            #spineCompts = self.elecid.spinesFromExpression[ pair ]
             plotObj, plotField = self._parseComptField( dendCompts, i, knownFields )
-            plotObj2, plotField2 = self._parseComptField( spineCompts, i, knownFields )
-            assert( plotField == plotField2 )
-            plotObj3 = plotObj + plotObj2
+            #plotObj2, plotField2 = self._parseComptField( spineCompts, i, knownFields )
+            #assert( plotField == plotField2 )
+            #plotObj3 = plotObj + plotObj2
             #print ( "LEEEENS = {}, {}, {}".format( len( plotObj ), len( plotObj2), len( plotObj3 ) ) )
-            numPlots = sum( q != dummy for q in plotObj3 )
+            numPlots = sum( q != dummy for q in plotObj )
             #print( "PlotList: {0}: numobj={1}, field ={2}, nd={3}, ns={4}".format( pair, numPlots, plotField, len( dendCompts ), len( spineCompts ) ) )
             if numPlots > 0:
                 tabname = graphs.path + '/plot' + str(k)
@@ -956,7 +957,7 @@ class rdesigneur:
 
             vtabs = moose.vec( tabs )
             q = 0
-            for p in [ x for x in plotObj3 if x != dummy ]:
+            for p in [ x for x in plotObj if x != dummy ]:
                 #print( p.path, plotField, q )
                 moose.connect( vtabs[q], 'requestOut', p, plotField )
                 q += 1
@@ -982,13 +983,13 @@ class rdesigneur:
             kf = knownFields[i.field]
             pair = i.elecpath + " " + i.geom_expr
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
-            spineCompts = self.elecid.spinesFromExpression[ pair ]
+            #spineCompts = self.elecid.spinesFromExpression[ pair ]
             dendObj, mooField = self._parseComptField( dendCompts, i, knownFields )
-            spineObj, mooField2 = self._parseComptField( spineCompts, i, knownFields )
-            assert( mooField == mooField2 )
-            mooObj3 = dendObj + spineObj
-            numMoogli = len( mooObj3 )
-            self.moogNames.append( rmoogli.makeMoogli( self, mooObj3, i, kf ) )
+            #spineObj, mooField2 = self._parseComptField( spineCompts, i, knownFields )
+            #assert( mooField == mooField2 )
+            #mooObj3 = dendObj + spineObj
+            numMoogli = len( dendObj )
+            self.moogNames.append( rmoogli.makeMoogli( self, dendObj, i, kf ) )
 
 
     ################################################################
@@ -1191,34 +1192,27 @@ rdesigneur.rmoogli.updateMoogliViewer()
         for i in self.stimList:
             pair = i.elecpath + " " + i.geom_expr
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
-            spineCompts = self.elecid.spinesFromExpression[ pair ]
-            print( "STIMS: pair = {}, numcompts = {},{} ".format( pair, len( dendCompts), len( spineCompts ) ) )
-            #print( [j.name for j in dendCompts] )
             if i.field == 'vclamp':
-                stimObj3 = self._buildVclampOnCompt( dendCompts, spineCompts, i )
+                stimObj = self._buildVclampOnCompt( dendCompts, [], i )
                 stimField = 'commandIn'
             elif i.field == 'randsyn':
-                stimObj3 = self._buildSynInputOnCompt( dendCompts, spineCompts, i )
+                stimObj = self._buildSynInputOnCompt( dendCompts, [], i )
                 stimField = 'setRate'
             elif i.field == 'periodicsyn':
-                stimObj3 = self._buildSynInputOnCompt( dendCompts, spineCompts, i, doPeriodic = True )
+                stimObj = self._buildSynInputOnCompt( dendCompts, [], i, doPeriodic = True )
                 stimField = 'setRate'
             else:
                 stimObj, stimField = self._parseComptField( dendCompts, i, knownFields )
-                stimObj2, stimField2 = self._parseComptField( spineCompts, i, knownFields )
-                assert( stimField == stimField2 )
-                stimObj3 = stimObj + stimObj2
                 #print( "STIM OBJ: ", [k.dataIndex for k in stimObj] )
                 #print( "STIM OBJ: ", [k.coords[0] for k in stimObj] )
-            numStim = len( stimObj3 )
+            numStim = len( stimObj )
             if numStim > 0:
                 funcname = stims.path + '/stim' + str(k)
                 k += 1
                 func = moose.Function( funcname )
                 func.expr = i.expr
-                #if i[3] == 'vclamp': # Hack to clean up initial condition
                 func.doEvalAtReinit = 1
-                for q in stimObj3:
+                for q in stimObj:
                     moose.connect( func, 'valueOut', q, stimField )
                 if stimField == "increment": # Has to be under Ksolve
                     moose.move( func, q )
