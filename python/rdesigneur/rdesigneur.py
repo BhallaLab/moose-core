@@ -382,9 +382,10 @@ class rdesigneur:
         # Option 7: [libraryName, cellname]: Renames library entry as proto
         # Below two options only need the first two args, rest are optional
         # Defailt values are given.
-        # Option 8: [somaProto,name, somaDia=5e-4, somaLen=5e-4]
-        # Option 9: [ballAndStick,name, somaDia=10e-6, somaLen=10e-6, 
+        # Option 8: [somaProto, name, somaDia=5e-4, somaLen=5e-4]
+        # Option 9: [ballAndStick, name, somaDia=10e-6, somaLen=10e-6, 
         #       dendDia=4e-6, dendLen=200e-6, numDendSeg=1]
+        # Option 10: [ 'branchedCell', name, somaDia=10e-6, somaLen=10e-6, dendDia=4e-6, dendLen=200e-6, dendNumSeg = 1, branchDia=2.5e-6, branchLen=200e-6, branchNumSeg=1 ]
         if len( self.cellProtoList ) == 0:
             ''' Make HH squid model sized compartment:
             len and dia 500 microns. CM = 0.01 F/m^2, RA =
@@ -510,7 +511,7 @@ class rdesigneur:
             moose.connect( prev, 'axial', compt, 'raxial' )
             prev = compt
             x += dxy
-            x += dxy
+            y += dxy
 
         x = primaryBranchEnd.x
         y = primaryBranchEnd.y
