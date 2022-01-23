@@ -231,14 +231,14 @@ class MooView:
             self.scene.forward = vp.rotate( self.scene.forward, angle = self.rotation, axis = self.scene.up )
             self.updateAxis()
         if self.viewIdx == 0:
-            self.timeLabel.text = "Time = {:2.3f} sec".format( simTime )
+            self.timeLabel.text = "Time = {:7.3f} sec".format( simTime )
             vp.sleep( self.sleep )
 
     def replaySnapshot( self, idx ):
         for i in self.drawables_:
             simTime = i.replaySnapshot( idx )
         if self.viewIdx == 0:
-            self.timeLabel.text = "Time = {:2.3f} sec".format( simTime )
+            self.timeLabel.text = "Time = {:7.3f} sec".format( simTime )
             self.updateAxis()
 
     def doAutoscale( self ):

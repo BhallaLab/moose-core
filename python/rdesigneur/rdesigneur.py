@@ -358,7 +358,6 @@ class rdesigneur:
                 if self.verbose:
                     print('renaming /library/' + protoVec[0] + ' to ' + protoVec[1])
                 moose.element( '/library/' + protoVec[0]).name = protoVec[1]
-                #moose.le( '/library' )
                 return True
         # Check if there is a matching suffix for file type.
         if self.isKnownClassOrFile( protoVec[0], knownFileTypes ):
@@ -617,8 +616,6 @@ class rdesigneur:
                         arg.extend( [j[0], j[1]] )
                     temp.extend( arg + [''] )
 
-        #print( "TEMP = ", temp )
-        #moose.le( '/library' )
         self.elecid.spineDistribution = temp
 
     def oldChemDistrib( self, i ):
@@ -627,7 +624,6 @@ class rdesigneur:
         # be a global scaling factor.
         #self.spineComptElist = self.elecid.spinesFromExpression[ pair ]
         self.cellPortionElist = self.elecid.compartmentsFromExpression[ pair ]
-        #moose.le( "/model/chem/kinetics" )
         if len( self.cellPortionElist ) == 0:
             raise BuildError( \
                 "buildChemDistrib: No elec compartments found in path: '" \
@@ -674,6 +670,7 @@ class rdesigneur:
         self.comptDict[chemSrc] = mesh
 
     def buildSpineMesh( self, argList, newChemId ):
+        chemSrc, elecPath, meshType, geom = argList[:4]
         dendMeshName = argList[4]
         dendMesh = self.comptDict.get( dendMeshName )
         if not dendMesh:
@@ -1599,9 +1596,9 @@ rdesigneur.rmoogli.updateMoogliViewer()
             stoich.reacSystemPath = mesh.path + "/##"
 
             if meshType == 'spine':
-                spineMeshJunctionList.extend( [mesh.path, line[4], dsolve])
+                spineMeshJunctionList.append( [mesh.path, line[4], dsolve])
             if meshType == 'psd':
-                psdMeshJunctionList.extend( [mesh.path, line[4], dsolve] )
+                psdMeshJunctionList.append( [mesh.path, line[4], dsolve] )
             elif meshType == 'endo':
                 # Endo mesh is easy as it explicitly defines surround.
                 endoMeshJunctionList.append( [mesh.path, line[4], dsolve] )
@@ -1862,15 +1859,21 @@ class rplot( baseplot ):
 
 class rmoog( baseplot ):
     def __init__( self,
-        elecpath = 'soma', geom_expr = '1', relpath = '.', field = 'Vm', 
+        elecpath = 'soma', 
+        geom_expr = '1', 
+        relpath = '.', 
+        field = 'Vm', 
         title = 'Membrane potential', 
         ymin = 0.0, ymax = 0.0, 
-        show = True ): # Could put in other display options.
+        show = True ,
+        diaScale = 1.0
+    ): # Could put in other display options.
         baseplot.__init__( self, elecpath, geom_expr, relpath, field )
         self.title = title
         self.ymin = ymin # If ymin == ymax, it autoscales.
         self.ymax = ymax
         self.show = show
+        self.diaScale = diaScale
 
     @staticmethod
     def convertArg( arg ):

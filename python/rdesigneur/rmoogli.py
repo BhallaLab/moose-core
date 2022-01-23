@@ -36,12 +36,12 @@ def makeMoogli( rd, mooObj, args, fieldInfo ):
         #moogul.updateDiffCoords( mooObj )
         reacSystem = moogul.MooReacSystem( mooObj, fieldInfo, 
                 field = mooField, relativeObj = relObjPath, 
-                valMin = ymin, valMax = ymax )
+                valMin = ymin, valMax = ymax, diaScale = args.diaScale )
         viewer.addDrawable( reacSystem )
     else:
         neuron = moogul.MooNeuron( rd.elecid, fieldInfo,
                 field = mooField, relativeObj = relObjPath,
-                valMin = ymin, valMax = ymax )
+                valMin = ymin, valMax = ymax, diaScale = args.diaScale )
         #print( "min = {}, max = {}".format(ymin, ymax) )
         viewer.addDrawable( neuron )
 
