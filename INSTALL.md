@@ -53,6 +53,8 @@ To make in debug mode with optimization turned off, use:
 To make with profiling:
     $ cmake -DGPROF=ON -DCMAKE_BUILD_TYPE=Debug ..
 
+To make with NSDF support (requires installation of libhdf5-dev):
+    $ cmake -DWITH_NSDF=ON ..
 
 To install MOOSE into non-standard directory, pass additional argument
 `-DCMAKE_INSTALL_PREFIX=path/to/install/dir` to during configuration. E.g.,

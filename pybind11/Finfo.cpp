@@ -81,6 +81,31 @@ bool __Finfo__::setLookupValueFinfoItem(const ObjId& oid, const py::object& key,
             return LookupField<string, double>::set(
                 oid, fieldName, py::cast<string>(key), py::cast<double>(val));
     }
+    if(srcType == "string") {
+        if(destType == "vector<double>")
+            return LookupField<string, vector<double>>::set(
+                oid, fieldName, py::cast<string>(key), py::cast<vector<double>>(val));
+    }
+    if(srcType == "string") {
+        if(destType == "long")
+            return LookupField<string, long>::set(
+                oid, fieldName, py::cast<string>(key), py::cast<long>(val));
+    }
+    if(srcType == "string") {
+        if(destType == "vector<long>")
+            return LookupField<string, vector<long>>::set(
+                oid, fieldName, py::cast<string>(key), py::cast<vector<long>>(val));
+    }
+    if(srcType == "string") {
+        if(destType == "string")
+            return LookupField<string, string>::set(
+                oid, fieldName, py::cast<string>(key), py::cast<string>(val));
+    }
+    if(srcType == "string") {
+        if(destType == "vector<string>")
+            return LookupField<string, vector<string>>::set(
+                oid, fieldName, py::cast<string>(key), py::cast<vector<string>>(val));
+    }
 
     py::print("NotImplemented::setLookupValueFinfoItem:", key, "to value", val,
               "for object", oid.path(), "and fieldName=", fieldName,
