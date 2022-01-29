@@ -67,8 +67,10 @@ extern template herr_t writeScalarAttr(hid_t file_id, string path, double value)
 
 const char* const EVENTPATH = "/data/event";
 const char* const UNIFORMPATH = "/data/uniform";
+const char* const STATICPATH = "/data/static";
 const char* const MODELTREEPATH = "/model/modeltree";
 const char* const MAPUNIFORMSRC = "/map/uniform";
+const char* const MAPSTATICSRC = "/map/static";
 const char* const MAPEVENTSRC = "/map/event";
 
 string iso_time(time_t * t)
@@ -268,11 +270,27 @@ void NSDFWriter::openUniformData(const Eref &eref)
  */
 void NSDFWriter::createUniformMap()
 {
+	innerCreateMaps( MAPUNIFORMSRC );
+}
+
+/**
+   create the DS for static data.
+ */
+void NSDFWriter::createStaticMap()
+{
+	innerCreateMaps( MAPSTATICSRC );
+}
+
+
+/**
+   Generic call for create the DS for static/uniform data
+ */
+void NSDFWriter::innerCreateMaps( const char* const mapSrcStr )
+{
     // Create the container for all the DS
-    // TODO: make a common function like `mkdir -p` to avoid repeating this
     htri_t exists;
     herr_t status;
-    hid_t uniformMapContainer = require_group(filehandle_, MAPUNIFORMSRC);
+    hid_t uniformMapContainer = require_group(filehandle_, mapSrcStr );
     // Create the DS themselves
     for (map< string, vector < unsigned int > >::iterator ii = classFieldToSrcIndex_.begin();
          ii != classFieldToSrcIndex_.end(); ++ii){
@@ -280,6 +298,8 @@ void NSDFWriter::createUniformMap()
         moose::tokenize(ii->first, "/", pathTokens);
         string className = pathTokens[0];
         string fieldName = pathTokens[1];
+		if (mapSrcStr == MAPSTATICSRC ) //Hack. for now only static field is coords
+			fieldName = "coords";
         hid_t container = require_group(uniformMapContainer, className);
         char ** sources = (char **)calloc(ii->second.size(), sizeof(char*));
         for (unsigned int jj = 0; jj < ii->second.size(); ++jj){
@@ -292,7 +312,7 @@ void NSDFWriter::createUniformMap()
         assert(status >= 0);
         status = H5Dwrite(ds, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, sources);
 #ifndef NDEBUG
-        cout << "Write dataset: status=" << status << endl;
+        cout << "Write map for " << mapSrcStr << " dataset: status=" << status << endl;
 #endif
         assert(status >= 0);
         for (unsigned int jj = 0; jj < ii->second.size(); ++jj){
@@ -536,7 +556,9 @@ void NSDFWriter::reinit(const Eref& eref, const ProcPtr proc)
     openEventData(eref);
     writeModelTree();
     createUniformMap();
+    createStaticMap();
     createEventMap();
+	writeStaticCoords();
     steps_ = 0;
 }
 
@@ -627,6 +649,45 @@ string NSDFWriter::getModelRoot() const
     return modelRoot_;
 }
 
+void NSDFWriter::writeStaticCoords()
+{
+    hid_t staticObjContainer = require_group(filehandle_, STATICPATH );
+    for (map< string, vector < unsigned int > >::iterator ii = classFieldToSrcIndex_.begin(); ii != classFieldToSrcIndex_.end(); ++ii){
+        vector < string > pathTokens;
+        moose::tokenize(ii->first, "/", pathTokens);
+        string className = pathTokens[0];
+		string fieldName = "coords"; // pathTokens[1] is not relevant.
+        hid_t container = require_group(staticObjContainer, className);
+        double * buffer = (double*)calloc(ii->second.size() * 7, sizeof(double));
+		// Ugly class checking stuff here: Both have a coord field
+		if ( className.find( "Pool" ) != string::npos || 
+			 className.find( "Compartment" ) != string::npos ) {
+        	for (unsigned int jj = 0; jj < ii->second.size(); ++jj) {
+            	vector< double > coords = Field< vector< double > >::get( src_[ii->second[jj]], fieldName.c_str() );
+				for ( unsigned int kk = 0; kk < 7; ++kk) {
+					buffer[jj * 7 + kk] = coords[kk];
+				}
+			}
+		} else { // Want to check for things like Ca in an elec compt...
+        	for (unsigned int jj = 0; jj < ii->second.size(); ++jj) {
+				for ( unsigned int kk = 0; kk < 7; ++kk) {
+					buffer[jj * 7 + kk] = 0.0;
+				}
+			}
+		}
+        hsize_t dims[2];
+		dims[0] = ii->second.size();
+		dims[1] = 7;
+        hid_t memspace = H5Screate_simple(2, dims, NULL);
+        hid_t dataspace = H5Screate_simple(2, dims, NULL);
+    	hid_t dataset = H5Dcreate2(container, fieldName.c_str(), H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        hid_t filespace = H5Dget_space(dataset);
+        herr_t status = H5Dwrite(dataset, H5T_NATIVE_DOUBLE,  memspace, filespace, H5P_DEFAULT, buffer);
+		if ( status < 0 ) {
+			cout << "Error: Failed to write coords as static entry\n";
+		}
+	}
+}
 
 void NSDFWriter::writeModelTree()
 {

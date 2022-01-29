@@ -267,6 +267,11 @@ const Cinfo* CompartmentBase::initCinfo()
 			&CompartmentBase::setZ,
 			&CompartmentBase::getZ
 		);
+		static ValueFinfo< CompartmentBase, vector< double > > coords( "coords",
+			"Vector with all coords: [x0 y0 z0 x y z dia]",
+			&CompartmentBase::setCoords,
+			&CompartmentBase::getCoords
+		);
 
 	//////////////////////////////////////////////////////////////////
 	// DestFinfo definitions
@@ -322,6 +327,7 @@ const Cinfo* CompartmentBase::initCinfo()
 		&x,					// Value
 		&y,					// Value
 		&z,					// Value
+		&coords,			// Value
 		&injectMsg,			// DestFinfo
 		&randInject,		// DestFinfo
 		&injectMsg,			// DestFinfo
@@ -569,6 +575,28 @@ void CompartmentBase::setZ( double value )
 double CompartmentBase::getZ() const
 {
 	return z_;
+}
+
+void CompartmentBase::setCoords( vector< double > value )
+{
+	if (value.size() < 7 ) {
+		cout << "Warning: CompartmentBase:setCoords. Vector size = " << value.size() << ", require 7 = [ x0 y0 z0 x y z dia ] \n";
+		return;
+	}
+	x0_ = value[0];
+	y0_ = value[1];
+	z0_ = value[2];
+	x_ = value[3];
+	y_ = value[4];
+	z_ = value[5];
+	diameter_ = value[6];
+	updateLength();
+}
+
+vector< double > CompartmentBase::getCoords() const
+{
+	vector< double > ret = { x0_, y0_, z0_, x_, y_, z_, diameter_ };
+	return ret;
 }
 
 //////////////////////////////////////////////////////////////////
