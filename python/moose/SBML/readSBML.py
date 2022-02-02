@@ -102,6 +102,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
             '\nThis module can be installed by using `pip` in terminal:'
             '\n\t $ pip install python-libsbml --user'
             )
+        exit()
         return moose.element('/')
 
     if not os.path.isfile(filepath):
