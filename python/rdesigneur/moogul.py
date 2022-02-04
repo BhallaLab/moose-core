@@ -1,9 +1,5 @@
-# Moogul.py: MOOSE Graphics Using Lines
-# This is a fallback graphics interface for displaying neurons using
-# regular matplotlib routines.
-# Put in because the GL versions like moogli need all sorts of difficult 
-# libraries and dependencies.
-# Copyright (C) Upinder S. Bhalla NCBS 2018
+# Moogul.py: MOOSE Graphics 3D. 
+# Copyright (C) Upinder S. Bhalla NCBS 2022
 # This program is licensed under the GNU Public License version 3.
 #
 
@@ -35,7 +31,7 @@ class MoogulError( Exception ):
 
 class MooView:
     ''' The MooView class is a window in which to display one or more 
-    moose cells, using the MooNeuron class.'''
+    neurons, using the MooNeuron and MooReacSystemclass.'''
     viewIdx = 0
     origScene = None
     rgb = []
@@ -222,9 +218,7 @@ class MooView:
                 self.doAutoscale()
             self.updateAxis()
 
-    def updateValues( self ):
-        simTime = moose.element( '/clock' ).currentTime
-        #self.timeStr.set_text( "Time= {:.3f}".format( time ) )
+    def updateValues( self, simTime ):
         for i in self.drawables_:
             i.updateValues( simTime )
         if self.doRotation and abs( self.rotation ) < 2.0 * 3.14 / 3.0:
@@ -242,12 +236,12 @@ class MooView:
             self.updateAxis()
 
     def doAutoscale( self ):
-        if len( self.drawables_[0].activeDia ) == 0:
+        if self.drawables_[0].dataWrapper_.numObj() == 0:
             print( "Warning: No values to display in Moogli view ", self.title )
             return
-        cmin = self.drawables_[0].coordMin
-        cmax = self.drawables_[0].coordMax
-        diamax = max( self.drawables_[0].activeDia )
+        cmin = self.drawables_[0].dataWrapper_.coordMin_
+        cmax = self.drawables_[0].dataWrapper_.coordMax_
+        diamax = max( self.drawables_[0].dataWrapper_.getCoords()[:,6] )
         v0 = vp.vector( cmin[0], cmin[1], cmin[2] )
         v1 = vp.vector( cmax[0], cmax[1], cmax[2] )
         #self.scene.camera.axis = self.scene.forward * vp.mag(v1 - v0) * 4
@@ -354,34 +348,69 @@ class MooView:
 def list2vec( arg ):
     return vp.vector( arg[0], arg[1], arg[2] )
 
+class DataWrapper:
+    ''' Class for interfacing between moogli and the data source. Currently
+    implemented for MOOSE and for nsdf reader.
+    '''
+    def __init__( self, field ):
+        self.coordMin_ = np.zeros( 3 )
+        self.coordMax_ = np.ones( 3 )
+        self.field_ = field
+        self.objList_ = []
+
+    def getValues( self ):
+        return np.zeros( 1 )
+
+    def numObj( self ):
+        return len( self.objList_ )
+
+    def getCoords( self ):
+        return np.array( [] )
+
+    def getMinMax( self ):
+        nmin = np.amin(self.coords_, axis = 0)
+        self.coordMin_ = np.amin( np.array( [nmin[0:3], nmin[3:6]] ), axis = 0 )
+        nmax = np.amax(self.coords_, axis = 0)
+        self.coordMax_ = np.amax( np.array( [nmax[0:3], nmax[3:6]] ), axis = 0 )
+    def objPathFromIndex( self, idx ):
+        if idx < len( self.objList_ ):
+            return self.objList_[idx].path
+        return None
+
+    def advance( self, simTime ):
+        # Checks that the simTime has crossed upcomingTime
+        return True # used for multi timestep cases.
+
 class MooDrawable:
     ''' Base class for drawing things'''
     def __init__( self,
-        fieldInfo, field, relativeObj,
+        dataWrapper,
         colormap,
-        lenScale, diaScale, autoscale,
+        lenScale, 
+        diaScale, 
+        fieldScale, 
+        autoscale,
         valMin, valMax
     ):
-        self.field = field
-        self.relativeObj = relativeObj
+        self.dataWrapper_ = dataWrapper
         self.lenScale = lenScale
         self.diaScale = diaScale
+        self.fieldScale = fieldScale
         self.colormap = colormap
         self.autoscale = autoscale
         self.valMin = valMin
         self.valMax = valMax
-        self.fieldInfo = fieldInfo
-        self.fieldScale = fieldInfo[2]
         self.segments = []
         self.snapshot = []
-        self.coordMin = np.zeros( 3 )
-        self.coordMax = np.zeros( 3 )
         #cmap = plt.get_cmap( self.colormap, lut = NUM_CMAP )
         #self.rgb = [ list2vec(cmap(i)[0:3]) for i in range( NUM_CMAP ) ]
 
     def updateValues( self, simTime ):
-        ''' Obtains values from the associated cell'''
-        self.val = np.array([moose.getField(i, self.field) for i in self.activeObjs]) * self.fieldScale
+        if self.dataWrapper_.advance( simTime ):
+            self.val = self.dataWrapper_.getValues() * self.fieldScale
+        else:
+            return
+
         if self.autoscale:
             valMin = min( self.val )
             valMax = max( self.val )
@@ -391,7 +420,10 @@ class MooDrawable:
         scaleVal = NUM_CMAP * (self.val - valMin) / (valMax - valMin)
         #indices = scaleVal.ndarray.astype( int )
         indices = np.maximum( np.minimum( scaleVal, NUM_CMAP-0.5), 0.0).astype(int)
+
+        # Have to figure how this will work with multiple update rates.
         self.snapshot.append( [simTime, indices] )
+
         self.displayValues( indices )
 
     def displayValues( self, indices ):
@@ -406,18 +438,15 @@ class MooDrawable:
         return self.snapshot[idx][0]    # return frame time
 
     def updateDiameter( self ):
-        for s, w in zip( self.segments, self.activeDia ):
+        dia = self.dataWrapper_.getCoords()[:,6]
+        for s, w in zip( self.segments, dia ):
             s.radius = self.diaScale * w / 2.0
 
     def cylinderDraw( self, _scene ):
-        for idx, coord in enumerate( self.activeCoords ):
-            v0 = list2vec( coord[0] )
-            v1 = list2vec( coord[1] )
-            self.coordMin = np.minimum( self.coordMin, coord[0][0:3] )
-            self.coordMin = np.minimum( self.coordMin, coord[1][0:3] )
-            self.coordMax = np.maximum( self.coordMax, coord[0][0:3] )
-            self.coordMax = np.maximum( self.coordMax, coord[1][0:3] )
-            radius = self.diaScale * self.activeDia[idx] / 2.0
+        for idx, coord in enumerate( self.dataWrapper_.getCoords() ):
+            v0 = list2vec( coord[0:3] )
+            v1 = list2vec( coord[3:6] )
+            radius = self.diaScale * coord[6] / 2.0
             opacity = self.opacity[idx]
             rod = vp.cylinder( canvas = _scene, pos = v0, axis = v1 - v0, radius = radius, opacity = opacity )
             self.segments.append( rod )
@@ -425,62 +454,31 @@ class MooDrawable:
     def findDisplayObject( self, obj ):
         try:
             idx = self.segments.index( obj )
+            return self.dataWrapper_.objPathFromIndex( idx )
         except ValueError:
             return None
-        if idx >= len( self.activeObjs ):
-            return None
-        return self.activeObjs[idx]
 
 #####################################################################
 
 class MooNeuron( MooDrawable ):
     ''' Draws collection of line segments of defined dia and color'''
-    def __init__( self,
-        neuronId,
-        fieldInfo,
+    def __init__( self, 
+        dataWrapper,
         field = 'Vm', 
-        relativeObj = '.', 
         colormap = 'jet', 
-        lenScale = 1.0, diaScale = 1.0, autoscale = False, 
+        lenScale = 1.0, diaScale = 1.0, fieldScale = 1.0,
+        autoscale = False, 
         valMin = -0.1, valMax = 0.05,
     ):
         #self.isFieldOnCompt = 
             #field in ( 'Vm', 'Im', 'Rm', 'Cm', 'Ra', 'inject', 'diameter' )
         
-        MooDrawable.__init__( self, fieldInfo, field = field, 
-                relativeObj = relativeObj,
+        MooDrawable.__init__( self, dataWrapper,
                 colormap = colormap, lenScale = lenScale, 
-                diaScale = diaScale, autoscale = autoscale, 
+                diaScale = diaScale, fieldScale = fieldScale,
+                autoscale = autoscale, 
                 valMin = valMin, valMax = valMax )
-        self.neuronId = neuronId
-        self.updateCoords()
-
-    def updateCoords( self ):
-        ''' Obtains coords from the associated cell'''
-        self.compts_ = moose.wildcardFind( self.neuronId.path + "/#[ISA=CompartmentBase]" )
-        coords = np.array([[[i.x0,i.y0,i.z0],[i.x,i.y,i.z]] 
-            for i in self.compts_])
-        dia = np.array([i.diameter for i in self.compts_])
-        if self.relativeObj == '.':
-            self.activeCoords = coords
-            self.activeDia = dia
-            self.activeObjs = self.compts_
-        else:
-            self.activeObjs = []
-            self.activeCoords = []
-            self.activeDia = []
-            for i,j,k in zip( self.compts_, coords, dia ):
-                if moose.exists( i.path + '/' + self.relativeObj ):
-                    elm = moose.element( i.path + '/' + self.relativeObj )
-                    self.activeObjs.append( elm )
-                    self.activeCoords.append( j )
-                    self.activeDia.append( k )
-
-        self.activeCoords = np.array( self.activeCoords ) * self.lenScale
-        self.opacity = np.ones( len( self.activeDia ) ) * 0.5
-        super().updateDiameter()
-
-        return
+        self.opacity = np.ones( dataWrapper.numObj() ) * 0.5
 
     def drawForTheFirstTime( self, _scene ):
         self.cylinderDraw( _scene )
@@ -489,104 +487,58 @@ class MooNeuron( MooDrawable ):
 class MooReacSystem( MooDrawable ):
     ''' Draws collection of line segments of defined dia and color'''
     def __init__( self,
-        mooObj, fieldInfo,
-        field = 'conc', 
-        relativeObj = '.', 
+        dataWrapper,
         colormap = 'jet', 
-        lenScale = 1e0, diaScale = 1.0, autoscale = False, 
+        lenScale = 1e0, diaScale = 1.0, fieldScale = 1.0, 
+        autoscale = False, 
         valMin = 0.0, valMax = 1.0
     ):
         
-        MooDrawable.__init__( self, fieldInfo, field = field, 
-                relativeObj = relativeObj,
+        MooDrawable.__init__( self, dataWrapper,
                 colormap = colormap, lenScale = lenScale, 
-                diaScale = diaScale, autoscale = autoscale, 
+                diaScale = diaScale, fieldScale = fieldScale, 
+                autoscale = autoscale, 
                 valMin = valMin, valMax = valMax )
-        self.mooObj = mooObj
-        self.updateCoords()
+        self.opacity = np.ones( dataWrapper.numObj() )
 
-    def updateCoords( self ):
-        activeCoords = []
-        self.activeDia = []
-        for pool in self.mooObj:
-            coords = pool.coords
-            meshType = pool.compartment.className
-            if meshType in ["NeuroMesh", "CylMesh", "PsdMesh"]:
-                # Unfortunately at present these return radius rather than
-                # diameter in argument 6. To fix.
-                # Make a cylinder
-                activeCoords.append( [coords[0:3], coords[3:6]] )
-                self.activeDia.append( coords[6] * 2 )
-            elif meshType == "SpineMesh":
-                # Spine entry has head[3], shaft[3], root[3], dia.
-                activeCoords.append( [coords[0:3], coords[3:6]] )
-                self.activeDia.append( coords[9] )
-            elif meshType == "PresynMesh":
-                # This returns diameter in argument 6.
-                # first vec is centre of base, second axis pointing 
-                # toward postsyn
-                # Hack: make each bouton as a cone with length == dia.
-                activeCoords.append( [coords[0:3], coords[6]*coords[3:6] + coords[0:3]] )
-                self.activeDia.append( coords[6] )
-                # Returns centre as args 0,1,2, diameter as argument 3.
-                # Make a hemisphere
-            elif meshType == "EndoMesh":
-                # Make a sphere.
-                activeCoords.append( [ coords[0:3], coords[0:3] ] )
-                self.activeDia.append( coords[3] )
-        self.activeCoords = np.array( activeCoords ) * self.lenScale
-        self.activeDia = np.array( self.activeDia ) * self.diaScale
-        self.opacity = np.ones( len( self.activeDia ) )
-        self.activeObjs = self.mooObj
-        return
 
     def drawForTheFirstTime( self, _scene ):
-        if len( self.mooObj ) == 0:
+        if self.dataWrapper_.numObj() == 0:
             return
-        meshType = self.mooObj[0].compartment.className
-        if meshType in ["NeuroMesh", "CylMesh", "SpineMesh", "PsdMesh"]:
+        mt = self.dataWrapper_.meshType()
+        if mt in ["NeuroMesh", "CylMesh", "SpineMesh", "PsdMesh"]:
             self.cylinderDraw( _scene )
-        elif meshType == "SpineMesh":
+        elif mt == "SpineMesh":
             self.spineDraw( _scene )
-        elif meshType == "PresynMesh":
+        elif mt == "PresynMesh":
             self.presynDraw( _scene )
-        elif meshType == "EndoMesh":
+        elif mt == "EndoMesh":
             self.endoDraw( _scene )
 
     def spineDraw( self, _scene ):
         # Spine entry has head[3], shaft[3], root[3], dia.
-        for idx, coord in enumerate( self.activeCoords ):
-            v0 = list2vec( coord[0] )
-            v1 = list2vec( coord[1] )
-            self.coordMin = np.minimum( self.coordMin, coord[0][0:3] )
-            self.coordMin = np.minimum( self.coordMin, coord[1][0:3] )
-            self.coordMax = np.maximum( self.coordMax, coord[0][0:3] )
-            self.coordMax = np.maximum( self.coordMax, coord[1][0:3] )
-            radius = self.diaScale * self.activeDia[idx] / 2.0
+        for idx, coord in enumerate( self.dataWrapper_.getCoords() ):
+            v0 = list2vec( coord[0:3] )
+            v1 = list2vec( coord[3:6] )
+            radius = self.diaScale * coord[6] / 2.0
             opacity = self.opacity[idx]
             rod = vp.cylinder( canvas = _scene, pos = v0, axis = v1 - v0, radius = radius, opacity = opacity )
             self.segments.append( rod )
 
     def presynDraw( self, _scene ):
-        for idx, coord in enumerate( self.activeCoords ):
-            v0 = list2vec( coord[0] )
-            v1 = list2vec( coord[1] )
-            self.coordMin = np.minimum( self.coordMin, coord[0][0:3] )
-            self.coordMin = np.minimum( self.coordMin, coord[1][0:3] )
-            self.coordMax = np.maximum( self.coordMax, coord[0][0:3] )
-            self.coordMax = np.maximum( self.coordMax, coord[1][0:3] )
-            radius = self.diaScale * self.activeDia[idx] / 2.0
+        for idx, coord in enumerate( self.dataWrapper_.getCoords() ):
+            v0 = list2vec( coord[0:3] )
+            v1 = list2vec( coord[3:6] )
+            radius = self.diaScale * coord[6] / 2.0
             opacity = self.opacity[idx]
             cone = vp.cone( canvas = _scene, pos = v0, axis = v0 - v1, radius = radius, opacity = opacity )
             self.segments.append( cone )
 
     def endoDraw( self, _scene ):
-        for idx, coord in enumerate( self.activeCoords ):
-            v0 = list2vec( coord[0] )
-            v1 = list2vec( coord[1] )
-            self.coordMin = np.minimum( self.coordMin, coord[0][0:3] )
-            self.coordMax = np.maximum( self.coordMax, coord[0][0:3] )
-            radius = self.diaScale * self.activeDia[idx] / 2.0
+        for idx, coord in enumerate( self.dataWrapper_.getCoords() ):
+            v0 = list2vec( coord[0:3] )
+            v1 = list2vec( coord[3:6] )
+            radius = self.diaScale * coord[6] / 2.0
             opacity = self.opacity[idx]
             sphere = vp.sphere( canvas = _scene, pos = (v0 + v1)/2.0, radius = radius, opacity = opacity )
             self.segments.append( sphere )

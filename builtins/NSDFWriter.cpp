@@ -664,8 +664,21 @@ void NSDFWriter::writeStaticCoords()
 			 className.find( "Compartment" ) != string::npos ) {
         	for (unsigned int jj = 0; jj < ii->second.size(); ++jj) {
             	vector< double > coords = Field< vector< double > >::get( src_[ii->second[jj]], fieldName.c_str() );
-				for ( unsigned int kk = 0; kk < 7; ++kk) {
-					buffer[jj * 7 + kk] = coords[kk];
+				if ( coords.size() == 11 ) { // For SpineMesh
+					for ( unsigned int kk = 0; kk < 6; ++kk) {
+						buffer[jj * 7 + kk] = coords[kk];
+					}
+					buffer[jj * 7 + 6] = coords[9]; // head Dia 
+				} else if ( coords.size() == 4 ) { // for EndoMesh
+					for ( unsigned int kk = 0; kk < 3; ++kk) {
+						buffer[jj * 7 + kk] = coords[kk];
+						buffer[jj * 7 + kk+3] = coords[kk];
+					}
+					buffer[jj * 7 + 6] = coords[3];
+				} else if ( coords.size() >= 7 ) { // For NeuroMesh
+					for ( unsigned int kk = 0; kk < 7; ++kk) {
+						buffer[jj * 7 + kk] = coords[kk];
+					}
 				}
 			}
 		} else { // Want to check for things like Ca in an elec compt...
