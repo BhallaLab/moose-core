@@ -46,6 +46,21 @@ import csv
 
 meshOrder = ['soma', 'dend', 'spine', 'psd', 'psd_dend', 'presyn_dend', 'presyn_spine', 'endo']
 
+knownFieldsDefault = {
+    'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)', -80.0, 40.0 ),
+    'initVm':('CompartmentBase', 'getInitVm', 1000, 'Init. Memb. Potl (mV)', -80.0, 40.0 ),
+    'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)', -10.0, 10.0 ),
+    'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)', -10.0, 10.0 ),
+    'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)', 0.0, 1.0 ),
+    'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)', 0.0, 1.0 ),
+    'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)', -10.0, 10.0 ),
+    'ICa':('NMDAChan', 'getICa', 1e9, 'Ca current (nA)', -10.0, 10.0 ),
+    'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)', 0.0, 10.0 ),
+    'n':('PoolBase', 'getN', 1, '# of molecules', 0.0, 200.0 ),
+    'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)', 0.0, 2.0 ),
+    'volume':('PoolBase', 'getVolume', 1e18, 'Volume (um^3)' )
+}
+
 #EREST_ACT = -70e-3
 
 def _profile(func):
@@ -115,6 +130,8 @@ class rdesigneur:
             stimList = [],
             plotList = [],  # elecpath, geom_expr, object, field, title ['wave' [min max]]
             moogList = [], 
+            fileList = [], # List of all file save specifications.
+            modelFileNameList = [], # List of any files used to build.
             ode_method = "gsl",  # gsl, lsoda, gssa, gillespie
             isLegacyMethod = False,
             params = None
@@ -166,6 +183,8 @@ class rdesigneur:
             self.stimList = [ rstim.convertArg(i) for i in stimList ]
             self.plotList = [ rplot.convertArg(i) for i in plotList ]
             self.moogList = [ rmoog.convertArg(i) for i in moogList ]
+            self.fileList = [ rfile.convertArg(i) for i in fileList ]
+            self.modelFileNameList = [ rfile.convertArg(i) for i in modelFileNameList ]
         except BuildError as msg:
             print("Error: rdesigneur: " + msg)
             quit()
@@ -175,6 +194,7 @@ class rdesigneur:
         self.wavePlotNames = []
         self.saveNames = []
         self.moogNames = []
+        self.fileDumpNames = []
         self.cellPortionElist = []
         self.spineComptElist = []
         self.tabForXML = []
@@ -217,7 +237,7 @@ class rdesigneur:
         funcs = [self.installCellFromProtos, self.buildPassiveDistrib
             , self.buildChanDistrib, self.buildSpineDistrib, self.buildChemDistrib
             , self._configureSolvers, self.buildAdaptors, self._buildStims
-            , self._buildPlots, self._buildMoogli, self._configureHSolve
+            , self._buildPlots, self._buildMoogli, self._buildFileOutput, self._configureHSolve
             , self._configureClocks, self._printModelStats]
 
         for i, _func in enumerate(funcs):
@@ -961,22 +981,8 @@ class rdesigneur:
                 q += 1
 
     def _buildMoogli( self ):
-        knownFields = {
-            'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)', -80.0, 40.0 ),
-            'initVm':('CompartmentBase', 'getInitVm', 1000, 'Init. Memb. Potl (mV)', -80.0, 40.0 ),
-            'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)', -10.0, 10.0 ),
-            'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)', -10.0, 10.0 ),
-            'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)', 0.0, 1.0 ),
-            'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)', 0.0, 1.0 ),
-            'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)', -10.0, 10.0 ),
-            'ICa':('NMDAChan', 'getICa', 1e9, 'Ca current (nA)', -10.0, 10.0 ),
-            'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)', 0.0, 10.0 ),
-            'n':('PoolBase', 'getN', 1, '# of molecules', 0.0, 200.0 ),
-            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)', 0.0, 2.0 ),
-            'volume':('PoolBase', 'getVolume', 1e18, 'Volume (um^3)' )
-        }
+        knownFields = knownFieldsDefault
         moogliBase = moose.Neutral( self.modelPath + '/moogli' )
-        k = 0
         for i in self.moogList:
             kf = knownFields[i.field]
             pair = i.elecpath + " " + i.geom_expr
@@ -988,6 +994,22 @@ class rdesigneur:
             #mooObj3 = dendObj + spineObj
             numMoogli = len( dendObj )
             self.moogNames.append( rmoogli.makeMoogli( self, dendObj, i, kf ) )
+
+    def _buildFileOutput( self ):
+        fileBase = moose.Neutral( self.modelPath + "/file" )
+        knownFields = knownFieldsDefault
+        for i in self.fileList:
+            kf = knownFields[i.field]
+            oname = self.fname.split( "." )[0]
+            if ftype in ["h5", "nsdf"]:
+                # Should check for duplication.
+                nsdf = moose.NSDFWriter( fileBase.path + "/" + oname )
+                nsdf.filename = self.fname
+                nsdf.mode = 2
+                nsdf.flushLimit = 1000
+                nsdf.modelFileNames = __file__ + [","+ii for ii in self.modelFileNamesList]
+                moose.connect( nsdf, 'requestOut', src, i.field )
+
 
 
     ################################################################
@@ -1393,9 +1415,9 @@ rdesigneur.rmoogli.updateMoogliViewer()
     ################################################################
 
     def _loadElec( self, efile, elecname ):
+        self.modelFileNameList.append( efile )
         if ( efile[ len( efile ) - 2:] == ".p" ):
             self.elecid = moose.loadModel( efile, '/library/' + elecname)
-            print(self.elecid)
         elif ( efile[ len( efile ) - 4:] == ".swc" ):
             self.elecid = moose.loadModel( efile, '/library/' + elecname)
         else:
@@ -1429,7 +1451,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
     # with those names and volumes in decreasing order.
     def validateChem( self  ):
         cpath = self.chemid.path
-        comptlist = moose.wildcardFind( cpath + '/#[ISA=ChemCompt]' )
+        comptlist = moose.wildcardFind( cpath + '/##[ISA=ChemCompt],' )
         if len( comptlist ) == 0:
             raise BuildError( "validateChem: no compartment on: " + cpath )
 
@@ -1691,13 +1713,14 @@ rdesigneur.rmoogli.updateMoogliViewer()
     ################################################################
 
     def _loadChem( self, fname, chemName ):
+        self.modelFileNameList.append( fname )
         chem = moose.Neutral( '/library/' + chemName )
         pre, ext = os.path.splitext( fname )
         if ext == '.xml' or ext == '.sbml':
             modelId = moose.readSBML( fname, chem.path )
         else:
             modelId = moose.loadModel( fname, chem.path, 'ee' )
-        comptlist = moose.wildcardFind( chem.path + '/#[ISA=ChemCompt]' )
+        comptlist = moose.wildcardFind( chem.path + '/##[ISA=ChemCompt]' )
         if len( comptlist ) == 0:
             print("loadChem: No compartment found in file: ", fname)
             return
@@ -1904,4 +1927,33 @@ class rstim( baseplot ):
             return rstim( *arg )
         else:
             raise BuildError( "rstim initialization failed" )
+
+
+class rfile:
+    def __init__( self,
+            fname = 'output.h5', basepath = 'cell', relpath = '.', field = 'Vm', dt = 1e-4, start = 0.0, stop = -1.0, ftype = 'nsdf' ):
+        self.fname = fname
+        self.basepath = basepath
+        self.relpath = relpath
+        self.field = field
+        self.dt = dt
+        self.start = start
+        self.stop = stop
+        self.ftype = self.fname.split(".")[-1]
+        if not self.ftype in ["txt", "csv", "h5", "nsdf"]:
+            print( "Error: output file format for ", fname , " not known")
+        self.fname = self.fname.split("/")[-1]
+
+    def printme( self ):
+        print( "{0}, {1}, {2}, {3}, {4}".format( 
+            self.fname, self.basepath, self.relpath, self.field, self.dt) )
+
+    @staticmethod
+    def convertArg( arg ):
+        if isinstance( arg, rfile ):
+            return arg
+        elif isinstance( arg, list ):
+            return rfile( *arg )
+        else:
+            raise BuildError( "rfile initialization failed" )
 

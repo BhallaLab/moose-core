@@ -80,6 +80,8 @@ class NSDFWriter: public HDF5DataWriter
     NSDFWriter();
     ~NSDFWriter();
     virtual void flush();
+	void setModelFiles(string value);
+	string getModelFiles() const;
     // set the environment specs like title, author, tstart etc.
     void setEnvironment(string key, string value);
     // the model tree rooted here is to be copied to NSDF file
@@ -98,6 +100,7 @@ class NSDFWriter: public HDF5DataWriter
     void createStaticMap();
     void createEventMap();
     void writeModelTree();
+    void writeModelFiles();
     void writeStaticCoords();
 	void innerCreateMaps( const char* const mapSrcStr );
     // Sort the incoming data lines according to source object/field.
@@ -119,6 +122,7 @@ class NSDFWriter: public HDF5DataWriter
     vector < InputVariable > eventInputs_;
     vector < string > eventSrcFields_;
     vector < string > eventSrc_;
+    vector < string > modelFileNames_;
     map < string, hid_t > eventSrcDataset_;
     hid_t eventGroup_; // handle for event container
     hid_t uniformGroup_; // handle for uniform container

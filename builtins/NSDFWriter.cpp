@@ -49,9 +49,9 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
+#include <fstream>
 #include <ctime>
 #include <deque>
-
 #include "../basecode/header.h"
 #include "../utility/utility.h"
 #include "../utility/strutil.h"
@@ -69,6 +69,7 @@ const char* const EVENTPATH = "/data/event";
 const char* const UNIFORMPATH = "/data/uniform";
 const char* const STATICPATH = "/data/static";
 const char* const MODELTREEPATH = "/model/modeltree";
+const char* const MODELFILEPATH = "/model/modelfile";
 const char* const MAPUNIFORMSRC = "/map/uniform";
 const char* const MAPSTATICSRC = "/map/static";
 const char* const MAPEVENTSRC = "/map/event";
@@ -101,9 +102,15 @@ const Cinfo * NSDFWriter::initCinfo()
 
     static ValueFinfo <NSDFWriter, string > modelRoot(
       "modelRoot",
-      "The moose element tree root to be saved under /model/modeltree",
+      "The moose element tree root to be saved under /model/modeltree. If blank, nothing is saved. Default: root object, '/'", 
       &NSDFWriter::setModelRoot,
       &NSDFWriter::getModelRoot);
+
+    static ValueFinfo <NSDFWriter, string > modelFileNames(
+      "modelFileNames",
+      "Comma separated list of model files to save into the NSDF file.",
+      &NSDFWriter::setModelFiles,
+      &NSDFWriter::getModelFiles);
 
     static DestFinfo process(
         "process",
@@ -127,7 +134,8 @@ const Cinfo * NSDFWriter::initCinfo()
         processShared, sizeof( processShared ) / sizeof( Finfo* ));
 
     static Finfo * finfos[] = {
-        &eventInputFinfo,
+        &eventInputFinfo,	// FieldElementFinfo
+		&modelFileNames,	// ValueFinfo
         &proc,
     };
 
@@ -311,9 +319,6 @@ void NSDFWriter::innerCreateMaps( const char* const mapSrcStr )
         status = H5Tset_size(memtype, H5T_VARIABLE);
         assert(status >= 0);
         status = H5Dwrite(ds, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, sources);
-#ifndef NDEBUG
-        cout << "Write map for " << mapSrcStr << " dataset: status=" << status << endl;
-#endif
         assert(status >= 0);
         for (unsigned int jj = 0; jj < ii->second.size(); ++jj){
             free(sources[jj]);
@@ -554,6 +559,7 @@ void NSDFWriter::reinit(const Eref& eref, const ProcPtr proc)
         writeScalarAttr< double >(it->second, "dt", proc->dt);
     }
     openEventData(eref);
+    writeModelFiles();
     writeModelTree();
     createUniformMap();
     createStaticMap();
@@ -649,6 +655,23 @@ string NSDFWriter::getModelRoot() const
     return modelRoot_;
 }
 
+void NSDFWriter::setModelFiles(string value)
+{
+	modelFileNames_.clear();	
+    moose::tokenize( value, ", ", modelFileNames_);
+}
+
+string NSDFWriter::getModelFiles() const
+{
+	string ret = "";
+	string spacer = "";
+	for( auto s = modelFileNames_.begin(); s!= modelFileNames_.end(); ++s) {
+		ret += spacer + *s;
+		spacer = ",";
+	}
+    return ret;
+}
+
 void NSDFWriter::writeStaticCoords()
 {
     hid_t staticObjContainer = require_group(filehandle_, STATICPATH );
@@ -702,8 +725,27 @@ void NSDFWriter::writeStaticCoords()
 	}
 }
 
+void NSDFWriter::writeModelFiles()
+{
+	for ( const string& fName : modelFileNames_ ) {
+    	// string fPath = MODELFILEPATH + string("/") + fName;
+    	string fPath = MODELFILEPATH;
+		std::ifstream f( fName );
+		auto ss = ostringstream{};
+		if ( f.is_open() ) {
+			ss << f.rdbuf();
+    		hid_t fGroup = require_group(filehandle_, fPath);
+    		writeScalarAttr<string>(fGroup, fName, ss.str());
+		} else {
+			cout << "Warning: NSDFWriter::writeModelFiles Could not open file '" << fName << "'/n";
+		}
+	}
+}
+
 void NSDFWriter::writeModelTree()
 {
+	if (modelRoot_ == "")
+		return;
     vector< string > tokens;
     ObjId mRoot(modelRoot_);
     string rootPath = MODELTREEPATH + string("/") + mRoot.element()->getName();

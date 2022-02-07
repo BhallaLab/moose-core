@@ -225,6 +225,9 @@ void setMethod( Shell* s, Id mgr, double simdt, double plotdt,
 {
     vector< ObjId > ret;
     simpleWildcardFind( mgr.path() + "/#[ISA=ChemCompt]", ret );
+	if ( ret.size() == 0 ) { // We may have converted /kinetics to a group
+    	simpleWildcardFind( mgr.path() + "/#/#[ISA=ChemCompt]", ret );
+	}
     assert( ret.size() > 0 );
 
     Id compt( mgr.path() + "/kinetics" );
@@ -271,6 +274,49 @@ void setMethod( Shell* s, Id mgr, double simdt, double plotdt,
     s->doSetClock( 17, plotdt );	// Stats objects
     s->doSetClock( 18, plotdt );	// Table2 objects.
 }
+
+
+bool kineticsHasReactions( Id mgr ) {
+	static const string choices[] = { "Pool", "PoolBase", "Reac", "Enz", "MMEnz", "Neutral" };
+	Id kinId = Neutral::child( mgr.eref(), "kinetics" );
+	assert( kinId != Id() );
+	vector< Id > kids;
+	Neutral::children( kinId.eref(), kids );
+	for( vector< Id >::iterator k = kids.begin(); k != kids.end(); ++k ) {
+		string childClass = Field< string >::get( *k, "className" );
+		auto const last = std::end( choices );
+		auto const pos = std::find( std::begin(choices), std::end(choices), childClass );
+		// cout << k->path() << "	" << childClass << endl;
+		if ( pos!= last) 
+			return true;
+	}
+	return false;
+}
+
+Id ReadKkit::convertKineticsToGroup( Id mgr ) {
+	Id kinId = Neutral::child( mgr.eref(), "kinetics" );
+	kinId.element()->setName( "kinetics_conv_to_group");
+    Id newKin = shell_->doCreate( "Neutral", mgr, "kinetics", 1 );
+	// Move all child objects onto newKin.
+	vector< Id > kids;
+	Neutral::children( kinId.eref(), kids );
+	for ( auto k:  kids )
+		if ( k.element()->getName() == "mesh" ) {
+			shell_->doDelete( k );
+		} else {
+    		shell_->doMove( k, newKin );
+		}
+	auto oldCompt = compartments_;
+	compartments_.clear();
+	for ( auto ii = oldCompt.begin(); ii != oldCompt.end(); ++ii ) {
+		if ( *ii != kinId ) {
+			compartments_.push_back( *ii );
+		}
+	}
+	shell_->doDelete( kinId );
+	return newKin;
+}
+
 /**
  * The readcell function implements the old GENESIS cellreader
  * functionality. Although it is really a parser operation, I
@@ -311,6 +357,8 @@ Id ReadKkit::read(
     	assignReacCompartments();
     	assignEnzCompartments();
     	assignMMenzCompartments();
+	} else if ( !kineticsHasReactions( mgr ) ) {
+		Id newKinetics = convertKineticsToGroup( mgr );
 	}
 
     convertParametersToConcUnits();
@@ -327,7 +375,6 @@ Id ReadKkit::read(
     s->doReinit();
     return mgr;
 }
-
 double ReadKkit::childPoolVol( Id gid ) const
 {
 	vector< ObjId > pools;
@@ -370,6 +417,7 @@ int ReadKkit::findCompartmentsFromAnnotation()
         	// SetGet1< double >::set( comptId, "setVolumeNotRates", vol );
 			// Now tell the mesh to resize.
         	Field< double >::set( comptId, "volume", vol );
+			shell_->doDelete( gid );
 		}
 	}
 	return ret;

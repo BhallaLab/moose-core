@@ -97,6 +97,9 @@ public:
     */
     Id findSumTotSrc( const string& src );
 
+	/// If kinetics has no reacs, we convert it into a group
+	Id convertKineticsToGroup( Id mgr );
+
     //////////////////////////////////////////////////////////////////
     // Special ops in the model definition
     //////////////////////////////////////////////////////////////////
