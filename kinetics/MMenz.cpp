@@ -1,3 +1,5 @@
+
+
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment.
@@ -6,139 +8,144 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-
 #include "../basecode/header.h"
-#include "../basecode/ElementValueFinfo.h"
 #include "lookupVolumeFromMesh.h"
+// #include "FuncTerm.h"
+#include "../basecode/SparseMatrix.h"
+#include "../ksolve/KinSparseMatrix.h"
+// #include "VoxelPoolsBase.h"
+// #include "../mesh/VoxelJunction.h"
+// #include "XferInfo.h"
+// #include "KsolveBase.h"
+// #include "Stoich.h"
+
+#include "../ksolve/RateTerm.h"
+class KsolveBase;
+#include "../ksolve/Stoich.h"
 #include "EnzBase.h"
 #include "MMenz.h"
-
 #define EPSILON 1e-15
 
 const Cinfo* MMenz::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
-		// Field Definitions: Inherited from base class.
+		// Field Definitions
 		//////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////
-		// Shared Msg Definitions: Inherited from base class.
+		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
+		static DestFinfo setSolver( "setSolver",
+			"Assigns solver to this MMEnz.",
+			new EpFunc1< MMenz, ObjId >( &MMenz::setSolver ) );
 		//////////////////////////////////////////////////////////////
-		// MsgDest Definitions: inherited
+		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
+	static Finfo* mmEnzFinfos[] = {
+		&setSolver,		// DestFinfo
+	};
 
+    static string doc[] = {
+        "Name", "MMenz",
+        "Author", "Upi Bhalla",
+        "Description", "Class for MM (Michaelis-Menten) enzyme."
+	};
 	static Dinfo< MMenz > dinfo;
-	static Cinfo mmEnzCinfo (
+	static Cinfo MMenzCinfo (
 		"MMenz",
 		EnzBase::initCinfo(),
-		0,
-		0,
-		&dinfo
+		mmEnzFinfos,
+		sizeof( mmEnzFinfos ) / sizeof ( Finfo* ),
+		&dinfo,
+        doc,
+        sizeof(doc)/sizeof(string)
 	);
 
-	return &mmEnzCinfo;
+	return &MMenzCinfo;
 }
+
 //////////////////////////////////////////////////////////////
 
-static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
+static const Cinfo* MMenzCinfo = MMenz::initCinfo();
 
 static const SrcFinfo2< double, double >* subOut =
     dynamic_cast< const SrcFinfo2< double, double >* >(
-	mmEnzCinfo->findFinfo( "subOut" ) );
+	MMenzCinfo->findFinfo( "subOut" ) );
 
 static const SrcFinfo2< double, double >* prdOut =
 	dynamic_cast< const SrcFinfo2< double, double >* >(
-	mmEnzCinfo->findFinfo( "prdOut" ) );
-
+	MMenzCinfo->findFinfo( "prdOut" ) );
 
 //////////////////////////////////////////////////////////////
 // MMenz internal functions
 //////////////////////////////////////////////////////////////
 
-MMenz::MMenz( )
-	: Km_( 0.005 ), kcat_( 0.1 ), sub_( 0.0 ), enz_( 0.0 )
-{
-	;
-}
 
-MMenz::~MMenz()
+MMenz::MMenz( )
+	: 
+		stoich_( 0 )
 {;}
 
-//////////////////////////////////////////////////////////////
-// MsgDest Definitions
-//////////////////////////////////////////////////////////////
-
-
-void MMenz::vSub( double n )
-{
-	sub_ *= n;
-}
-
-void MMenz::vEnz( double n )
-{
-	enz_ = n;
-}
-
-void MMenz::vProcess( const Eref& e, ProcPtr p )
-{
-	double rate = kcat_ * enz_ * sub_ / ( numKm_ + sub_ );
-	subOut->send( e, 0, rate );
-	prdOut->send( e, rate, 0 );
-
-	sub_ = 1.0;
-}
-
-void MMenz::vReinit( const Eref& e, ProcPtr p )
-{
-	sub_ = 1.0;
-	enz_ = 0.0;
-}
-
-void MMenz::vRemesh( const Eref& e )
-{
-//	cout << "MMenz::remesh for " << e << endl;
-	double volScale = convertConcToNumRateUsingMesh( e, subOut, 1 );
-	numKm_ = Km_ * volScale;
-}
+MMenz::~MMenz( )
+{;}
 
 //////////////////////////////////////////////////////////////
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-void MMenz::vSetKm( const Eref& enz, double v )
+void MMenz::vSetKm( const Eref& e, double v )
 {
 	Km_ = v;
-	double volScale = convertConcToNumRateUsingMesh( enz, subOut, 1 );
-	numKm_ = v * volScale;
+	if ( stoich_ )
+		stoich_->setMMenzKm( e, v );
 }
-
-double MMenz::vGetKm( const Eref& enz ) const
-{
-	return Km_;
-}
-
-void MMenz::vSetNumKm( const Eref& enz, double v )
-{
-	double volScale = convertConcToNumRateUsingMesh( enz, subOut, 1 );
-	numKm_ = v;
-	Km_ = v / volScale;
-}
-
-double MMenz::vGetNumKm( const Eref& enz ) const
-{
-	double volScale = convertConcToNumRateUsingMesh( enz, subOut, 1 );
-	return Km_ * volScale;
-}
-
 
 void MMenz::vSetKcat( const Eref& e, double v )
 {
-	if ( v < EPSILON )
-		v = EPSILON;
 	kcat_ = v;
+	if ( stoich_ )
+		stoich_->setMMenzKcat( e, v );
 }
 
-double MMenz::vGetKcat( const Eref& e ) const
+//////////////////////////////////////////////////////////////
+// Utility function
+//////////////////////////////////////////////////////////////
+
+void MMenz::setSolver( const Eref& e, ObjId solver )
 {
-	return kcat_;
+	static const DestFinfo* enzFinfo = dynamic_cast< const DestFinfo* >(
+		EnzBase::initCinfo()->findFinfo( "enzDest" ) );
+	static const SrcFinfo* subFinfo = dynamic_cast< const SrcFinfo* >(
+		EnzBase::initCinfo()->findFinfo( "subOut" ) );
+	static const SrcFinfo* prdFinfo = dynamic_cast< const SrcFinfo* >(
+		EnzBase::initCinfo()->findFinfo( "prdOut" ) );
+	assert( enzFinfo );
+	assert( subFinfo );
+	assert( prdFinfo );
+
+	if ( solver == ObjId() ) { // Clear solver
+		if ( stoich_ )
+			stoich_->notifyRemoveMMenz( e );
+		stoich_ = 0;
+		return;
+	}
+
+	assert( solver.element()->cinfo()->isA( "Stoich" ) );
+	Stoich* stoichPtr = reinterpret_cast< Stoich* >( solver.data() );
+	if ( stoich_ == stoichPtr )
+		return;
+	if (stoich_)
+		stoich_->notifyRemoveMMenz( e );
+	stoich_ = stoichPtr;
+
+	/// Now set up the RateTerm
+	vector< Id > enzvec;
+	vector< Id > subvec;
+	vector< Id > prdvec;
+	unsigned int num = e.element()->getNeighbors( enzvec, enzFinfo );
+	num = e.element()->getNeighbors( subvec, subFinfo );
+	num = e.element()->getNeighbors( prdvec, prdFinfo );
+	stoich_->installMMenz( e.id(), enzvec, subvec, prdvec );
+	stoich_->setMMenzKm( e, Km_ );
+	stoich_->setMMenzKcat( e, kcat_ );
 }
+

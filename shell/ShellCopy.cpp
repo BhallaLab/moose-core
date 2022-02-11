@@ -70,6 +70,7 @@ Element* innerCopyElements(Id orig, ObjId newParent, Id newId, unsigned int n,
     assert(e);
     Shell::adopt(newParent, newId, 0);
     e->setTick(Clock::lookupDefaultTick(e->cinfo()->name()));
+	SetGet1< ObjId >::set( newId, "notifyCopy", orig );
 
     // cout << Shell::myNode() << ": Copy: orig= " << orig << ", newParent = "
     // << newParent << ", newId = " << newId << endl;
@@ -133,8 +134,11 @@ void innerCopyMsgs(map<Id, Id>& tree, unsigned int n, bool copyExtMsgs)
                     } else {
                         assert(0);
                     }
-                    if (tgt != tree.end())
+                    if (tgt != tree.end()) {
                         m->copy(e->id(), i->second, tgt->second, k->fid, j, n);
+						SetGet1< ObjId >::set( i->second, "notifyAddMsgSrc", m->mid() );
+						SetGet1< ObjId >::set( tgt->second, "notifyAddMsgDest", m->mid() );
+					}
                 }
             }
             b = e->getMsgAndFunc(++j);

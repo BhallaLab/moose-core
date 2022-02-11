@@ -81,6 +81,31 @@ bool __Finfo__::setLookupValueFinfoItem(const ObjId& oid, const py::object& key,
             return LookupField<string, double>::set(
                 oid, fieldName, py::cast<string>(key), py::cast<double>(val));
     }
+    if(srcType == "string") {
+        if(destType == "vector<double>")
+            return LookupField<string, vector<double>>::set(
+                oid, fieldName, py::cast<string>(key), py::cast<vector<double>>(val));
+    }
+    if(srcType == "string") {
+        if(destType == "long")
+            return LookupField<string, long>::set(
+                oid, fieldName, py::cast<string>(key), py::cast<long>(val));
+    }
+    if(srcType == "string") {
+        if(destType == "vector<long>")
+            return LookupField<string, vector<long>>::set(
+                oid, fieldName, py::cast<string>(key), py::cast<vector<long>>(val));
+    }
+    if(srcType == "string") {
+        if(destType == "string")
+            return LookupField<string, string>::set(
+                oid, fieldName, py::cast<string>(key), py::cast<string>(val));
+    }
+    if(srcType == "string") {
+        if(destType == "vector<string>")
+            return LookupField<string, vector<string>>::set(
+                oid, fieldName, py::cast<string>(key), py::cast<vector<string>>(val));
+    }
 
     py::print("NotImplemented::setLookupValueFinfoItem:", key, "to value", val,
               "for object", oid.path(), "and fieldName=", fieldName,
@@ -171,6 +196,13 @@ py::cpp_function __Finfo__::getDestFinfoSetterFunc2(const ObjId& oid,
                 };
             return func;
         }
+        if(ftype2 == "double") {
+            std::function<bool(double, double)> func =
+                [oid, fname](const double a, const double b) {
+                    return SetGet2<double, double>::set(oid, fname, a, b);
+                };
+            return func;
+        }
     }
 
     if(ftype1 == "string") {
@@ -182,24 +214,17 @@ py::cpp_function __Finfo__::getDestFinfoSetterFunc2(const ObjId& oid,
             return func;
         }
     }
-
-    if(ftype1 == "Id") {
-        if(ftype2 == "Id") {
-            std::function<bool(Id, Id)> func = [oid, fname](Id a, Id b) {
-                return SetGet2<Id, Id>::set(oid, fname, a, b);
-            };
-            return func;
-        }
+    if(ftype1 == "ObjId" && ftype2 == "ObjId") {
+        std::function<bool(ObjId, ObjId)> func = [oid, fname](ObjId a, ObjId b) {
+            return SetGet2<ObjId, ObjId>::set(oid, fname, a, b);
+        };
+        return func;
     }
-
-    if(ftype1 == "ObjId") {
-        if(ftype2 == "ObjId") {
-            std::function<bool(ObjId, ObjId)> func = [oid, fname](ObjId a,
-                                                                  ObjId b) {
-                return SetGet2<ObjId, ObjId>::set(oid, fname, a, b);
-            };
-            return func;
-        }
+    if(ftype1 == "vector<ObjId>" && ftype2 == "double") {
+        std::function<bool(vector<ObjId>, double)> func = [oid, fname](vector<ObjId> a, double b) {
+            return SetGet2<vector<ObjId>, double>::set(oid, fname, a, b);
+        };
+        return func;
     }
 
     throw runtime_error("getFieldPropertyDestFinfo2::NotImplemented " + fname +

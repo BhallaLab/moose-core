@@ -27,7 +27,7 @@ using namespace boost::numeric;
 #include "FuncTerm.h"
 #include "KinSparseMatrix.h"
 #include "XferInfo.h"
-#include "ZombiePoolInterface.h"
+#include "KsolveBase.h"
 #include "Ksolve.h"
 #include "Stoich.h"
 

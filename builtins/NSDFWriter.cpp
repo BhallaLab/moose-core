@@ -54,6 +54,7 @@
 
 #include "../basecode/header.h"
 #include "../utility/utility.h"
+#include "../utility/strutil.h"
 
 #include "HDF5WriterBase.h"
 #include "HDF5DataWriter.h"
@@ -285,7 +286,7 @@ void NSDFWriter::createUniformMap()
             sources[jj] = (char*)calloc(src_[ii->second[jj]].path().length()+1, sizeof(char));
             strcpy(sources[jj],src_[ii->second[jj]].path().c_str());
         }
-        hid_t ds = createStringDataset(container, fieldName, (hunsigned int)ii->second.size(), (hunsigned int)ii->second.size());
+        hid_t ds = createStringDataset(container, fieldName, (hsize_t)ii->second.size(), (hsize_t)ii->second.size());
         hid_t memtype = H5Tcopy(H5T_C_S1);
         status = H5Tset_size(memtype, H5T_VARIABLE);
         assert(status >= 0);
@@ -376,7 +377,7 @@ void NSDFWriter::createEventMap()
         hid_t ftype = H5Tcreate(H5T_COMPOUND, sizeof(hvl_t) +sizeof(hobj_ref_t));
         status = H5Tinsert(ftype, "source", 0, strtype);
         status = H5Tinsert(ftype, "data", sizeof(hvl_t), H5T_STD_REF_OBJ);
-        hunsigned int dims[1] = {ii->second.size()};
+        hsize_t dims[1] = {ii->second.size()};
         hid_t space = H5Screate_simple(1, dims, NULL);
         // The dataset for mapping is named after the field
         hid_t ds = H5Dcreate2(classGroup, fieldName.c_str(), ftype, space,
@@ -388,7 +389,7 @@ void NSDFWriter::createEventMap()
         for (unsigned int jj = 0; jj < ii->second.size(); ++jj){
             buf->source = ii->second[jj].c_str();
             char * dsname = (char*)calloc(256, sizeof(char));
-            sunsigned int size = H5Iget_name(classFieldToEvent_[ii->first][jj], dsname, 255);
+            hsize_t size = H5Iget_name(classFieldToEvent_[ii->first][jj], dsname, 255);
             if (size > 255){
                 free(dsname);
                 dsname = (char*)calloc(size, sizeof(char));
@@ -477,15 +478,15 @@ void NSDFWriter::flush()
         if (filespace < 0){
             break;
         }
-        hunsigned int dims[2];
-        hunsigned int maxdims[2];
+        hsize_t dims[2];
+        hsize_t maxdims[2];
         // retrieve current datset dimensions
         herr_t status = H5Sget_simple_extent_dims(filespace, dims, maxdims);
-        hunsigned int newdims[] = {dims[0], dims[1] + steps_}; // new column count
+        hsize_t newdims[] = {dims[0], dims[1] + steps_}; // new column count
         status = H5Dset_extent(it->second, newdims); // extend dataset to new column count
         H5Sclose(filespace);
         filespace = H5Dget_space(it->second); // get the updated filespace
-        hunsigned int start[2] = {0, dims[1]};
+        hsize_t start[2] = {0, dims[1]};
         dims[1] = steps_; // change dims for memspace & hyperslab
         hid_t memspace = H5Screate_simple(2, dims, NULL);
         H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, NULL, dims, NULL);

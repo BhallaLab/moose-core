@@ -59,6 +59,7 @@ public:
              Id parent, const string& solverClass = "Stoich" );
     void readData( const string& line );
     void undump( const vector< string >& args );
+	int findCompartmentsFromAnnotation();
 
     /**
      * This function sets up the kkit model for a run using the GSL,
@@ -177,6 +178,12 @@ public:
      */
     string cleanPath( const string& path ) const;
 
+	/**
+	 * Returns volume of group based on volume of first pool found in it.
+	 * Uses the pool's saved volume info rather than vol of parent mesh.
+	 */
+	double childPoolVol( Id gid ) const;
+
 private:
     string basePath_; /// Base path into which entire kkit model will go
     Id baseId_; /// Base Id onto which entire kkit model will go.
@@ -227,6 +234,7 @@ private:
     map< string, Id > tabIds_;
     map< string, Id > stimIds_;
     map< string, Id > chanIds_;
+	vector< string > groupPaths_;
 
     /*
     vector< Id > pools_;

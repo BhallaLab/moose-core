@@ -17,7 +17,7 @@
 #include "../mesh/VoxelJunction.h"
 #include "../builtins/MooseParser.h"
 #include "XferInfo.h"
-#include "ZombiePoolInterface.h"
+#include "KsolveBase.h"
 #include "Stoich.h"
 #include "../mesh/VoxelJunction.h"
 

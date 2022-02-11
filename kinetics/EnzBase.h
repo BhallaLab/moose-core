@@ -34,47 +34,27 @@ class EnzBase
 		// This doesn't need a virtual form, depends on standard msgs.
 		unsigned int getNumSub( const Eref& e ) const;
 		unsigned int getNumPrd( const Eref& e ) const;
+		ObjId getCompartment( const Eref& e ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Virtual funcs for field assignment stuff
 		//////////////////////////////////////////////////////////////////
 		virtual void vSetKm( const Eref& e, double v ) = 0;
-		virtual double vGetKm( const Eref& e ) const = 0;
-		virtual void vSetNumKm( const Eref& e, double v ) = 0;
-		virtual double vGetNumKm( const Eref& e ) const = 0;
 		virtual void vSetKcat( const Eref& e, double v ) = 0;
-		virtual double vGetKcat( const Eref& e ) const = 0;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
-		void process( const Eref& e, ProcPtr p );
-		void reinit( const Eref& e, ProcPtr p );
-		void sub( double n );
+		void sub( double n );	// Now these are all empty functions.
 		void enz( double n );
 		void prd( double n );
-		void remesh( const Eref& e );
-		//////////////////////////////////////////////////////////////////
-		// Virtual dest funcs
-		//////////////////////////////////////////////////////////////////
-		virtual void vProcess( const Eref& e, ProcPtr p );
-		virtual void vReinit( const Eref& e, ProcPtr p );
-		virtual void vSub( double n );
-		virtual void vEnz( double n );
-		virtual void vRemesh( const Eref& e );
-
-		//////////////////////////////////////////////////////////////////
-		// Zombification functions.
-		//////////////////////////////////////////////////////////////////
-		static void zombify( Element* original, const Cinfo* zClass,
-						Id solver );
-		/// Assign solver info
-		virtual void setSolver( Id solver, Id orig );
-
+		
 		//////////////////////////////////////////////////////////////////
 
 		static const Cinfo* initCinfo();
-	private:
+	protected:
+		double Km_;
+		double kcat_;
 };
 
 #endif // ENZ_BASE_H

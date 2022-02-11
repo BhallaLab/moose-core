@@ -20,10 +20,10 @@ class DiffPoolVec
 public:
     DiffPoolVec();
     void process();
-    void reinit();
+    void reinit( const vector< double >& vols );
     void advance( double dt );
-    double getNinit( unsigned int vox ) const;
-    void setNinit( unsigned int vox, double value );
+    double getConcInit( unsigned int vox ) const;
+    void setConcInit( unsigned int vox, double value );
     double getN( unsigned int vox ) const;
     void setN( unsigned int vox, double value );
     double getPrev( unsigned int vox ) const;
@@ -56,7 +56,7 @@ private:
     unsigned int id_; /// Integer conversion of Id of pool handled.
     vector< double > n_; /// Number of molecules of pool in each voxel
     vector< double > prev_; /// # molecules of pool on previous timestep
-    vector< double > nInit_; /// Boundary condition: Initial 'n'.
+    vector< double > concInit_; /// Boundary condition: Initial 'n'.
     double diffConst_; /// Diffusion const, assumed uniform
     double motorConst_; /// Motor const, ie, transport rate.
     vector< Triplet< double > > ops_;

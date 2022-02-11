@@ -26,12 +26,6 @@ endif(WITH_BOOST_ODE)
 
 set(KSOLVE_SRCS
     KinSparseMatrix.cpp
-    ZombiePool.cpp
-    ZombieFunction.cpp
-    ZombieBufPool.cpp
-    ZombieReac.cpp
-    ZombieEnz.cpp
-    ZombieMMenz.cpp
     VoxelPoolsBase.cpp
     VoxelPools.cpp
     GssaVoxelPools.cpp
@@ -40,7 +34,7 @@ set(KSOLVE_SRCS
     Stoich.cpp
     Ksolve.cpp
     Gsolve.cpp
-    ZombiePoolInterface.cpp
+    KsolveBase.cpp
     testKsolve.cpp
     )
 

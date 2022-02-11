@@ -383,6 +383,7 @@ void CylMesh::setCoords( const Eref& e, vector< double > v )
     transmitChange( e );
 }
 
+/// x0,y0,z0, x1,y1,z1, dia0, dia1. Note use of diamter, not radius.
 vector< double > CylMesh::getCoords( const Eref& e ) const
 {
     vector< double > ret( 9 );
@@ -395,8 +396,8 @@ vector< double > CylMesh::getCoords( const Eref& e ) const
     ret[4] = y1_;
     ret[5] = z1_;
 
-    ret[6] = r0_;
-    ret[7] = r1_;
+    ret[6] = r0_ * 2.0;
+    ret[7] = r1_ * 2.0;
 
     ret[8] = diffLength_;
     return ret;

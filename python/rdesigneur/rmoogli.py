@@ -31,18 +31,18 @@ def makeMoogli( rd, mooObj, args, fieldInfo ):
         ymax = fieldInfo[5]
     #print( "fieldinfo = {}, ymin = {}, ymax = {}".format( fieldInfo, ymin, ymax ))
 
-    viewer = moogul.MooView()
+    viewer = moogul.MooView( title = args.title )
     if mooField == 'n' or mooField == 'conc':
         #moogul.updateDiffCoords( mooObj )
         reacSystem = moogul.MooReacSystem( mooObj, fieldInfo, 
                 field = mooField, relativeObj = relObjPath, 
-                valMin = ymin, valMax = ymax )
+                valMin = ymin, valMax = ymax, diaScale = args.diaScale )
         viewer.addDrawable( reacSystem )
     else:
         neuron = moogul.MooNeuron( rd.elecid, fieldInfo,
                 field = mooField, relativeObj = relObjPath,
-                valMin = ymin, valMax = ymax )
-        print( "min = {}, max = {}".format(ymin, ymax) )
+                valMin = ymin, valMax = ymax, diaScale = args.diaScale )
+        #print( "min = {}, max = {}".format(ymin, ymax) )
         viewer.addDrawable( neuron )
 
     return viewer
@@ -51,11 +51,13 @@ def updateMoogliViewer():
     for i in mooViews:
         i.updateValues()
     
+def notifySimulationEnd():
+    if len( mooViews ) > 0:
+        mooViews[0].notifySimulationEnd()
 
-def displayMoogli( rd, _dt, _runtime, rotation = 0.0, fullscreen = False, azim = 0.0, elev = 0.0 ):
+def displayMoogli( rd, _dt, _runtime, rotation = 0.0, fullscreen = False, azim = 0.0, elev = 0.0, mergeDisplays = False, center = [0.0, 0.0, 0.0], colormap = 'jet', bg = 'default' ):
     global mooViews
     mooViews = rd.moogNames
-    for i in rd.moogNames:
-        i.firstDraw( rotation = rotation, azim = azim, elev = elev ) 
+    for view in rd.moogNames:
+        view.firstDraw( mergeDisplays, rotation = rotation, azim = azim, elev = elev, center = center, colormap = colormap, bg = bg )
         # rotation in radians/frame, azim, elev in radians.
-

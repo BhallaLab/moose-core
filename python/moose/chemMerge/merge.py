@@ -563,8 +563,8 @@ def reacMerge(comptS,comptD,key,poolListina):
     objS = moose.element(comptSpath).parent.name
     objD = moose.element(comptDpath).parent.name
     
-    reacListins = moose.wildcardFind(comptSpath+'/##[ISA=ReacBase]')
-    reacListind = moose.wildcardFind(comptDpath+'/##[ISA=ReacBase]')
+    reacListins = moose.wildcardFind(comptSpath+'/##[ISA=Reac]')
+    reacListind = moose.wildcardFind(comptDpath+'/##[ISA=Reac]')
     
     for rs in reacListins:
         rSsubname, rSprdname = [],[]

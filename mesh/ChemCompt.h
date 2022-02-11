@@ -97,6 +97,9 @@ public:
     /// Virtual func so that derived classes can return voxel midpoint
     virtual const vector<double>& vGetVoxelMidpoint() const = 0;
 
+	/// Looks up specified voxel midpoint, from vGetVoxelMidpoint.
+	vector< double > getOneVoxelMidpoint( unsigned int vox ) const;
+
     //////////////////////////////////////////////////////////////////
     // Dest Finfo
     //////////////////////////////////////////////////////////////////

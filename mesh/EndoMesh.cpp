@@ -97,6 +97,13 @@ const Cinfo* EndoMesh::initCinfo()
 			&EndoMesh::getDoAxialDiffusion
 		);
 
+    	static ReadOnlyValueFinfo< EndoMesh, vector< Id > > elecComptMap(
+        	"elecComptMap",
+        	"Vector of Ids of electrical compartments that map to each "
+        	"voxel. This function simply asks the surround mesh for this.",
+        	&EndoMesh::getElecComptMap
+    	);
+	
 
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
@@ -115,6 +122,7 @@ const Cinfo* EndoMesh::initCinfo()
 		&vScale,			// Value
 		&surround,			// Value
 		&doAxialDiffusion,	// Value
+        &elecComptMap,		// ReadOnlyValue
 	};
 
 	static Dinfo< EndoMesh > dinfo;
@@ -174,6 +182,7 @@ double EndoMesh::getRpower( const Eref& e ) const
 void EndoMesh::setRscale( const Eref& e, double v )
 {
 	rScale_ = v;
+	vScale_ = pow( rScale_, 1.0/rPower_ );
 }
 
 double EndoMesh::getRscale( const Eref& e ) const
@@ -247,6 +256,11 @@ bool EndoMesh::getDoAxialDiffusion( const Eref& e ) const
 	return doAxialDiffusion_;
 }
 
+vector< Id > EndoMesh::getElecComptMap() const
+{
+	return Field< vector < Id > >::get( surround_, "elecComptMap" );
+}
+
 //////////////////////////////////////////////////////////////////
 // FieldElement assignment stuff for MeshEntries
 //////////////////////////////////////////////////////////////////
@@ -276,17 +290,18 @@ double EndoMesh::getMeshEntryVolume( unsigned int fid ) const
 }
 
 /// Virtual function to return coords of mesh Entry.
-/// For Endo mesh, coords are just middle of parent.
+/// For Endo mesh, coords are middle of parent followed by radius.
 vector< double > EndoMesh::getCoordinates( unsigned int fid ) const
 {
 	vector< double > temp = parent_->getCoordinates( fid );
 	vector< double > ret;
+	double vol = getMeshEntryVolume( fid );
 	if ( temp.size() > 6 ) {
 		ret.resize( 4 );
 		ret[0] = 0.5 * (temp[0] + temp[3] );
 		ret[1] = 0.5 * (temp[1] + temp[4] );
 		ret[2] = 0.5 * (temp[2] + temp[5] );
-		ret[3] = 0;
+		ret[3] = 2.0 * pow( vol*3.0/(4.0 * PI), 1.0/3.0 ); // Assume sphere
 	}
 	return ret;
 }

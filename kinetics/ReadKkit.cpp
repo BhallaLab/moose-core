@@ -12,10 +12,8 @@
 #include <iomanip>
 #include <fstream>
 #include "../basecode/header.h"
-#include "PoolBase.h"
-#include "Pool.h"
-#include "BufPool.h"
-#include "ReacBase.h"
+class Stoich;
+#include "Reac.h"
 #include "EnzBase.h"
 #include "lookupVolumeFromMesh.h"
 
@@ -306,10 +304,14 @@ Id ReadKkit::read(
     enzCplxMols_.resize( 0 );
 
     innerRead( fin );
-    assignPoolCompartments();
-    assignReacCompartments();
-    assignEnzCompartments();
-    assignMMenzCompartments();
+
+	int movedCompts = findCompartmentsFromAnnotation();
+	if ( movedCompts == 0) {
+    	assignPoolCompartments();
+    	assignReacCompartments();
+    	assignEnzCompartments();
+    	assignMMenzCompartments();
+	}
 
     convertParametersToConcUnits();
 
@@ -324,6 +326,53 @@ Id ReadKkit::read(
     Field< double > ::set(cInfo, "runtime", maxtime_);
     s->doReinit();
     return mgr;
+}
+
+double ReadKkit::childPoolVol( Id gid ) const
+{
+	vector< ObjId > pools;
+	simpleWildcardFind( gid.path() + "/##[ISA=PoolBase]", pools );
+	for ( unsigned int i = 0; i < pools.size(); i++ ) {
+		auto pv = poolVols_.find( pools[i].id );
+		if ( pv != poolVols_.end() )
+			return pv->second;
+	}
+	cout << "Warning: of " << pools.size() << " children of group " << gid.path() << ", none found in map poolVols_ of size " << pools.size() << ".\n Using default vol of 1e-18\n";
+	return 1e-18;
+}
+
+int ReadKkit::findCompartmentsFromAnnotation()
+{
+	int ret = 0;
+	// This will go ill with nested compartments. But start with this.
+	for ( auto g : groupPaths_ ) {
+		Id gid( g );
+		Id noteId = Neutral::child( gid.eref(), "info" );
+		string note = Field< string >::get( noteId, "notes" );
+		// If it is a compartment, then the note should say "Compt" or
+		// "Compartment".
+		if ( note.find( "Compartment") == 0 ) {
+			ret++;
+			Id parent = Neutral::parent( gid );
+			// Get the vol from the first pool.
+			double vol = childPoolVol( gid );
+			string name = gid.element()->getName();
+			gid.element()->setName( "group_conv_to_compt_" + name);
+            Id comptId = shell_->doCreate( "CubeMesh", parent, name, 1 );
+			// Assign volume and numEntries in the mesh.
+        	SetGet2< double, unsigned int >::set( comptId, "buildDefaultMesh", 1e-15, 1 );
+			compartments_.push_back( comptId );
+			vector< Id > kids;
+			// Move all child objects onto comptId. Volumes should be fine.
+			Neutral::children( gid.eref(), kids );
+			for ( auto k:  kids )
+                shell_->doMove( k, comptId );
+        	// SetGet1< double >::set( comptId, "setVolumeNotRates", vol );
+			// Now tell the mesh to resize.
+        	Field< double >::set( comptId, "volume", vol );
+		}
+	}
+	return ret;
 }
 
 void ReadKkit::run()
@@ -783,8 +832,8 @@ vector< unsigned int > findVolOrder( const vector< double >& vols )
 // This is not true in synapses, where they are adjacent.
 void ReadKkit::assignPoolCompartments()
 {
-    Id kinetics = Neutral::child( baseId_.eref(), "kinetics" );
-    assert( kinetics != Id() );
+    Id kinId = Neutral::child( baseId_.eref(), "kinetics" );
+    assert( kinId != Id() );
     vector< unsigned int > volOrder = findVolOrder( vols_ );
     assert( volCategories_.size() == vols_.size() );
     assert( volCategories_.size() == volOrder.size() );
@@ -795,8 +844,6 @@ void ReadKkit::assignPoolCompartments()
         if ( vols_[i] < 0 ) // Special case for enz complexes: vol == -1.
             continue;
         string name;
-        Id kinId = Neutral::child( baseId_.eref(), "kinetics" );
-        assert( kinId != Id() );
         Id comptId;
         // if ( i == maxi )
         if ( j == 0 )
@@ -813,17 +860,7 @@ void ReadKkit::assignPoolCompartments()
                 comptId = shell_->doCreate( "CubeMesh", baseId_, name, 1 );
         }
         SetGet1< double >::set( comptId, "setVolumeNotRates",vols_[i]);
-        /*
-        if ( comptId.element()->cinfo()->isA( "CubeMesh" ) ) {
-        	double side = pow( vols_[i], 1.0 / 3.0 );
-        	vector< double > coords( 9, side );
-        	coords[0] = coords[1] = coords[2] = 0;
-        	// Field< double >::set( comptId, "volume", vols_[i] );
-        	Field< vector< double > >::set( comptId, "coords", coords );
-        } else {
-        }
-        */
-        // compartments_.push_back( comptId );
+        compartments_.push_back( comptId );
         for ( vector< Id >::iterator k = volCategories_[i].begin();
                 k != volCategories_[i].end(); ++k )
         {
@@ -838,7 +875,7 @@ void ReadKkit::assignPoolCompartments()
 Id findParentComptOfReac( Id reac )
 {
     static const Finfo* subFinfo =
-        ReacBase::initCinfo()->findFinfo( "subOut" );
+        Reac::initCinfo()->findFinfo( "subOut" );
     assert( subFinfo );
 
     vector< Id > subVec;
@@ -965,7 +1002,9 @@ Id ReadKkit::buildEnz( const vector< string >& args )
         mmEnzIds_[ mmEnzPath ] = enz;
 
         assert( k1 > EPSILON );
-        double Km = ( k2 + k3 ) / k1;
+        // double Km = ( k2 + k3 ) / k1;
+        // double Km = ( k2 + k3 ) / (1e6 * k1 / (KKIT_NA * vol) );
+        double Km = ( k2 + k3 ) / (k1 * KKIT_NA * vol);
 
         Field< double >::set( enz, "Km", Km );
         Field< double >::set( enz, "kcat", k3 );
@@ -1052,6 +1091,7 @@ Id ReadKkit::buildGroup( const vector< string >& args )
     Id group = shell_->doCreate( "Neutral", pa, tail, 1 );
     assert( group != Id() );
     Id info = buildInfo( group, groupMap_, args );
+	groupPaths_.push_back( head + "/" + tail );
 
     numOthers_++;
     return group;
@@ -1074,8 +1114,11 @@ Id ReadKkit::buildPool( const vector< string >& args )
     Id pa = shell_->doFind( head ).id;
     assert( pa != Id() );
 
+    // double nInit = atof( args[ poolMap_[ "nInit" ] ].c_str() );
     double nInit = atof( args[ poolMap_[ "nInit" ] ].c_str() );
+    // double concInit = atof( args[ poolMap_[ "CoInit" ] ].c_str() );
     double vsf = atof( args[ poolMap_[ "vol" ] ].c_str() );
+	double concInit = nInit * KKIT_NA / (vsf * NA);
     /**
      * vsf is vol scale factor, which is what GENESIS stores in 'vol' field
      * n = vsf * conc( uM )
@@ -1113,7 +1156,9 @@ Id ReadKkit::buildPool( const vector< string >& args )
     // skip the 10 chars of "/kinetics/"
     poolIds_[ clean.substr( 10 ) ] = pool;
 
+    // Field< double >::set( pool, "nInit", nInit );
     Field< double >::set( pool, "nInit", nInit );
+    Field< double >::set( pool, "concInit", concInit / 1e3 ); // conv to mM
     Field< double >::set( pool, "diffConst", diffConst );
     // SetGet1< double >::set( pool, "setVolume", vol );
     separateVols( pool, vol );
@@ -1165,22 +1210,17 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 
     Id sumId;
     // Check if the pool has not yet been converted to handle SumTots.
-    if ( destId.element()->cinfo()->name() == "Pool" )
+    if ( destId.element()->cinfo()->isA( "PoolBase" ) )
     {
-        sumId = shell_->doCreate( "Function", destId, "func", 1 );
-        Field< bool >::set( sumId, "allowUnknownVariable", false );
-
-        // Turn dest into a FuncPool.
-        destId.element()->zombieSwap( BufPool::initCinfo() );
-
-        ObjId ret = shell_->doAddMsg( "single",
+		sumId = Neutral::child( destId.eref(), "func" );
+		if ( sumId == Id() ) {
+        	sumId = shell_->doCreate( "Function", destId, "func", 1 );
+        	Field< bool >::set( sumId, "allowUnknownVariable", false );
+        	ObjId ret = shell_->doAddMsg( "single",
                                       ObjId( sumId, 0 ), "valueOut",
                                       ObjId( destId, 0 ), "setN" );
-        assert( ret != ObjId() );
-    }
-    else
-    {
-        sumId = Neutral::child( destId.eref(), "func" );
+        	assert( ret != ObjId() );
+		}
     }
 
     if ( sumId == Id() )
@@ -1550,11 +1590,7 @@ void ReadKkit::setupSlaveMsg( const string& src, const string& dest )
     // Convert the pool to a BufPool, if it isn't one already
     Id destId( basePath_ + "/kinetics/" + dest );
     assert( destId != Id() );
-
-    if( !destId.element()->cinfo()->isA( "BufPool" ))
-    {
-        destId.element()->zombieSwap( BufPool::initCinfo() );
-    }
+	Field< bool >::set( destId, "isBuffered", true );
 
     map< string, Id >* nameMap;
     // Check if the src is a table or a stim
@@ -1620,7 +1656,7 @@ void ReadKkit::convertParametersToConcUnits()
 {
     convertPoolAmountToConcUnits();
     convertReacRatesToConcUnits();
-    convertMMenzRatesToConcUnits();
+    // convertMMenzRatesToConcUnits();
     convertEnzRatesToConcUnits();
 }
 

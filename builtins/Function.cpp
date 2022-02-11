@@ -21,6 +21,12 @@
 #include "Variable.h"
 #include "Function.h"
 
+#include "../ksolve/RateTerm.h"
+#include "../basecode/SparseMatrix.h"
+#include "../ksolve/KinSparseMatrix.h"
+class KsolveBase;
+#include "../ksolve/Stoich.h"
+
 
 static const double TriggerThreshold = 0.0;
 
@@ -235,6 +241,10 @@ const Cinfo * Function::initCinfo()
         &Function::getIndependent
     );
 
+	static DestFinfo setSolver( "setSolver",
+		"Assigns solver to this Function.",
+		new EpFunc1< Function, ObjId >( &Function::setSolver ) );
+
     ///////////////////////////////////////////////////////////////////
     // Shared messages
     ///////////////////////////////////////////////////////////////////
@@ -277,6 +287,7 @@ const Cinfo * Function::initCinfo()
         &xindex,
         &constants,
         &independent,
+		&setSolver,			// DestFinfo
         &proc,
         requestOut(),
         valueOut(),
@@ -718,7 +729,7 @@ Variable* Function::getX(unsigned int ii)
     static Variable dummy("DUMMY");
     if(ii >= xs_.size())
     {
-        MOOSE_WARN("No active variable for index " << ii);
+        //MOOSE_WARN("No active variable for index " << ii);
         return &dummy;
     }
     return xs_[ii].get();
@@ -858,4 +869,39 @@ void Function::clearAll()
     xs_.clear();
     ys_.clear();
     varIndex_.clear();
+}
+
+void Function::setSolver( const Eref& e, ObjId newStoich )
+{
+	
+	if ( newStoich.bad() ) {
+		cout << "Warning: Function::setSolver: Bad Stoich " << 
+				e.id().path() << endl;
+		return;
+	}
+	if ( newStoich == ObjId() ) { // Unsetting stoich.
+		if ( stoich_ != 0 ) {
+			auto x = reinterpret_cast< Stoich* >( stoich_ );
+			x->notifyRemoveFunc( e );
+		}
+		stoich_ = 0;
+		return;
+	}
+	if ( !newStoich.element()->cinfo()->isA( "Stoich" ) ) {
+		cout << "Warning: Function::setSolver: object " << newStoich.path() << "is not a Stoich for " << e.id().path() << endl;
+		return;
+	}
+	void* stoichPtr = reinterpret_cast< void* >( newStoich.eref().data( ) );
+	if ( stoich_ == stoichPtr )
+		return;
+
+	if ( stoich_ != 0 ) {
+		auto x = reinterpret_cast< Stoich* >( stoich_ );
+		x->notifyRemoveFunc( e );
+	}
+	
+	stoich_ = stoichPtr;
+	// stoich_->installFunction(;) This is done within the stoich because
+	// there are multiple options for where a function may be placed.
+	
 }

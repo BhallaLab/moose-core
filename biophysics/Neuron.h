@@ -44,14 +44,16 @@ public:
     vector< ObjId > getCompartments() const;
     vector< ObjId > getExprElist( const Eref& e, string line ) const;
     vector< double > getExprVal( const Eref& e, string line ) const;
-    vector< ObjId > getSpinesFromExpression(
-        const Eref& e, string line ) const;
+    // vector< ObjId > getSpinesFromExpression( const Eref& e, string line ) const;
     vector< ObjId > getSpinesOnCompartment(
         const Eref& e, ObjId compt ) const;
     ObjId getParentCompartmentOfSpine( const Eref& e, ObjId compt )
     const;
+	/*
     vector< ObjId > getSpineIdsFromCompartmentIds(
         const Eref& e, vector< ObjId > compt ) const;
+		*/
+	ObjId getSpineFromCompartment( const Eref& e, ObjId compt ) const;
     void setChannelDistribution( const Eref& e, vector< string > v );
     vector< string > getChannelDistribution( const Eref& e ) const;
     void setPassiveDistribution( const Eref& e, vector< string > v );

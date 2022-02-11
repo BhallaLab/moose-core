@@ -176,9 +176,6 @@ inline bool mooseDeleteObj(const ObjId& oid)
 
 inline bool mooseDeleteStr(const string& path)
 {
-    auto o = ObjId(path);
-    if(o.bad())
-        throw pybind11::value_error("Path '" + path + "' does not exists.");
     return getShellPtr()->doDelete(ObjId(path));
 }
 

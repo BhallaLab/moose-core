@@ -10,47 +10,59 @@
 #ifndef _REAC_H
 #define _REAC_H
 
-class Reac: public ReacBase
+class Reac
 {
 	public:
 		Reac();
-		// Reac( double kf, double kb );
+		virtual ~Reac();
+
 
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
-		void vSetNumKf( const Eref&e, double v );
-		double vGetNumKf( const Eref& e ) const;
-		void vSetNumKb( const Eref&e, double v );
-		double vGetNumKb( const Eref& e ) const;
+		void setNumKf( const Eref&e, double v );
+		double getNumKf( const Eref& e ) const;
+		void setNumKb( const Eref&e, double v );
+		double getNumKb( const Eref& e ) const;
 
 		/// set Kf in concentration units
-		void vSetConcKf( const Eref& e, double v );
-		/// vGet Kf in concentration units
-		double vGetConcKf( const Eref& e ) const;
+		void setConcKf( const Eref& e, double v );
+		/// get Kf in concentration units
+		double getConcKf( const Eref& e ) const;
 
 		/// set Kb in concentration units
-		void vSetConcKb( const Eref& e, double v );
+		void setConcKb( const Eref& e, double v );
 		/// get Kb in concentration units
-		double vGetConcKb( const Eref& e ) const;
+		double getConcKb( const Eref& e ) const;
+
+		/// Get number of substrates
+		unsigned int getNumSub( const Eref& e ) const;
+		/// Get number of products
+		unsigned int getNumPrd( const Eref& e ) const;
+
+		/// Look up the ObjId of the parent compartment of the reac.
+		ObjId getCompartment( const Eref& e ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		void vProcess( const Eref& e, ProcPtr p );
-		void vReinit( const Eref& e, ProcPtr p );
-		void vSub( double v );
-		void vPrd( double v );
-		void vRemesh( const Eref& e );
+		/*
+		void process( const Eref& e, ProcPtr p );
+		void reinit( const Eref& e, ProcPtr p );
+		void remesh( const Eref& e );
+		*/
+		void sub( double v );
+		void prd( double v );
+		void setSolver( const Eref& e, ObjId stoich );
+		//////////////////////////////////////////////////////////////////
 
 		static const Cinfo* initCinfo();
 	private:
-		double kf_;	// Used for EE method, but secondary to the ConcKf
-		double kb_;	// Used for EE method, but secondary to the ConcKf
-		double sub_;	// State variable
-		double prd_;	// State variable
+		double concKf_;	// Kf in concentration and time units
+		double concKb_;	// Kb in concentration and time units
+		Stoich* stoich_; // Stoich ptr defaults to 0.
 };
 
 #endif // REAC_H

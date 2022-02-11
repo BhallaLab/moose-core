@@ -35,7 +35,7 @@ def checkEqual(lst):
 
 
 def findXreacs(basepath, reacType):
-    reacs = _moose.wildcardFind(basepath + '/##[ISA=' + reacType + 'Base]')
+    reacs = _moose.wildcardFind(basepath + '/##[ISA=' + reacType+ ']')
     ret = []
     for i in reacs:
         reacc = findCompt(i)
@@ -45,7 +45,7 @@ def findXreacs(basepath, reacType):
         prdc = [findCompt(j) for j in prds]
 
         enzc = []
-        if reacType == 'Enz':
+        if reacType == 'EnzBase':
             enzc = [reacc]
         if not checkEqual(subc + prdc + enzc):
             ret.append([i, reacc, subs, subc, prds, prdc])
@@ -79,8 +79,8 @@ def proxify(reac, reacc, direction, pool, poolc):
     removeEnzFromPool(duppool)
     disconnectReactant(reac, pool, duppool)
     moose.connect(reac, direction, duppool, 'reac')
-    #_moose.showfield( reac )
-    #_moose.showmsg( reac )
+    #moose.showfield( reac )
+    #moose.showmsg( duppool )
 
 
 def enzProxify(enz, enzc, direction, pool, poolc):
@@ -105,7 +105,7 @@ def reacProxify(reac, reacc, direction, pool, poolc):
 
 
 def identifyMsg(src, srcOut, dest):
-    if src.isA['ReacBase'] or src.isA['EnzBase']:
+    if src.isA['Reac'] or src.isA['EnzBase']:
         if srcOut == 'subOut':
             return msgSeparator + src.path + ' sub ' + dest.path + ' reac'
         if srcOut == 'prdOut':
@@ -143,7 +143,7 @@ def disconnectReactant(reacOrEnz, reactant, duppool):
 
 def fixXreacs(basepath):
     xr = findXreacs(basepath, 'Reac')
-    xe = findXreacs(basepath, 'Enz')
+    xe = findXreacs(basepath, 'EnzBase')
 
     for i in (xr):
         reac, reacc, subs, subc, prds, prdc = i
@@ -153,11 +153,11 @@ def fixXreacs(basepath):
             reacProxify(reac, reacc, 'prd', prds[j], prdc[j])
 
     for i in (xe):
-        reac, reacc, subs, subc, prds, prdc = i
+        enz, enzc, subs, subc, prds, prdc = i
         for j in range(len(subs)):
-            enzProxify(reac, reacc, 'sub', subs[j], subc[j])
+            enzProxify(enz, enzc, 'sub', subs[j], subc[j])
         for j in range(len(prds)):
-            enzProxify(reac, reacc, 'prd', prds[j], prdc[j])
+            enzProxify(enz, enzc, 'prd', prds[j], prdc[j])
 
 
 #####################################################################
@@ -167,7 +167,7 @@ def getOldRates(msgs):
     if len(msgs) > 1:
         m1 = msgs[1].split(msgSeparator)[0]
         elm = moose.element(m1.split(' ')[0])
-        if elm.isA['ReacBase']:
+        if elm.isA['Reac']:
             return [elm.numKf, elm.numKb]
         elif elm.isA['EnzBase']:
             return [
@@ -184,7 +184,7 @@ def restoreOldRates(oldRates, msgs):
     if len(msgs) > 1:
         m1 = msgs[1].split(msgSeparator)[0]
         elm = moose.element(m1.split(' ')[0])
-        if elm.isA['ReacBase']:
+        if elm.isA['Reac']:
             elm.numKf = oldRates[0]
             elm.numKb = oldRates[1]
         elif elm.isA['enzBase']:

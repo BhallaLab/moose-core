@@ -107,6 +107,7 @@ public:
     VarType getVarType(const string& name) const;
 
     void clearAll();
+	void setSolver( const Eref& e, ObjId stoich );
 
 protected:
 

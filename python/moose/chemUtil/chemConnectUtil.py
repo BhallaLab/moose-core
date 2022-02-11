@@ -150,13 +150,12 @@ def setupMeshObj(modelRoot):
         mol_cpl  = moose.wildcardFind(meshEnt.path+'/##[ISA=PoolBase]')
         funclist = moose.wildcardFind(meshEnt.path+'/##[ISA=Function]')
         enzlist  = moose.wildcardFind(meshEnt.path+'/##[ISA=EnzBase]')
-        realist  = moose.wildcardFind(meshEnt.path+'/##[ISA=ReacBase]')
+        realist  = moose.wildcardFind(meshEnt.path+'/##[ISA=Reac]')
         tablist  = moose.wildcardFind(meshEnt.path+'/##[ISA=StimulusTable]')
         if mol_cpl or funclist or enzlist or realist or tablist:
             for m in mol_cpl:
                 objInfo = None
-                # if m.parent.isA['CplxEnzBase']: # New bindings
-                if moose.element(m.parent).isA['CplxEnzBase']:
+                if moose.element(m.parent).isA['Enz']:
                     cplxlist.append(m)
                     objInfo = m.parent.path+'/info'
                 elif m.isA['PoolBase']:
@@ -210,12 +209,12 @@ def setupItem(modelPath,cntDict):
     #print " setupItem"
     sublist = []
     prdlist = []
-    zombieType = ['ReacBase','EnzBase','Function','StimulusTable']
+    zombieType = ['Reac','EnzBase','Function','StimulusTable']
     for baseObj in zombieType:
         path = '/##[ISA='+baseObj+']'
         if modelPath != '/':
             path = modelPath+path
-        if ( (baseObj == 'ReacBase') or (baseObj == 'EnzBase')):
+        if ( (baseObj == 'Reac') or (baseObj == 'EnzBase')):
             for items in moose.wildcardFind(path):
                 sublist = []
                 prdlist = []
@@ -232,7 +231,7 @@ def setupItem(modelPath,cntDict):
                 for prd in uniqItem:
                     prdlist.append((moose.element(prd),'p',countuniqItem[prd]))
 
-                if (baseObj == 'CplxEnzBase') :
+                if (baseObj == 'Enz') :
                     uniqItem,countuniqItem = countitems(items,'toEnz')
                     for enzpar in uniqItem:
                         sublist.append((moose.element(enzpar),'t',countuniqItem[enzpar]))
@@ -299,7 +298,8 @@ def findCompartment(elem):
     return findCompartment(element.parent)
 
 def mooseIsInstance(elem, classes):
-    for cl in classes:
-        if elem.isA[cl]:
-            return True
-    return False
+    # for cl in classes:
+    #     if elem.isA[cl]:
+    #         return True
+    # return False
+    return moose.element(elem).className in classes 

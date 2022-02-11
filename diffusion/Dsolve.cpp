@@ -14,24 +14,20 @@
 #include "../ksolve/VoxelPoolsBase.h"
 #include "../mesh/VoxelJunction.h"
 #include "../ksolve/XferInfo.h"
-#include "../ksolve/ZombiePoolInterface.h"
+#include "../ksolve/KsolveBase.h"
 #include "../kinetics/ConcChan.h"
 #include "DiffPoolVec.h"
 #include "ConcChanInfo.h"
 #include "FastMatrixElim.h"
 #include "../mesh/VoxelJunction.h"
 #include "DiffJunction.h"
-#include "Dsolve.h"
 #include "../mesh/Boundary.h"
 #include "../mesh/MeshEntry.h"
 #include "../mesh/ChemCompt.h"
 #include "../mesh/MeshCompt.h"
 #include "../shell/Wildcard.h"
 #include "../kinetics/PoolBase.h"
-#include "../kinetics/Pool.h"
-#include "../kinetics/BufPool.h"
-#include "../ksolve/ZombiePool.h"
-#include "../ksolve/ZombieBufPool.h"
+#include "Dsolve.h"
 
 #include <thread>
 
@@ -139,7 +135,7 @@ const Cinfo* Dsolve::initCinfo()
     static DestFinfo buildNeuroMeshJunctions( "buildNeuroMeshJunctions",
             "Builds junctions between NeuroMesh, SpineMesh and PsdMesh",
             new EpFunc2< Dsolve, ObjId, ObjId >(&Dsolve::buildNeuroMeshJunctions )
-            );
+                                            );
 
     ///////////////////////////////////////////////////////
     // Shared definitions
@@ -560,9 +556,11 @@ void Dsolve::process( const Eref& e, ProcPtr p )
 
 void Dsolve::reinit( const Eref& e, ProcPtr p )
 {
-    build( p->dt );
+	const MeshCompt* m = reinterpret_cast< const MeshCompt* >(
+                              compartment_.eref().data() );
+    build( p->dt, m );
     for (auto i = pools_.begin(); i != pools_.end(); ++i )
-        i->reinit();
+		i->reinit( m->vGetVoxelVolume() );
 }
 
 void Dsolve::updateJunctions( double dt )
@@ -622,7 +620,7 @@ void Dsolve::setStoich( Id id )
                     */
         }
     }
-    string chanpath = path_ + "[ISA=ConcChan]";
+	string chanpath = path_.substr( 0, path_.rfind( '/' ) ) + "/##[ISA=ConcChan]";
     vector< ObjId > chans;
     wildcardFind( chanpath, chans );
     fillConcChans( chans );
@@ -782,21 +780,6 @@ void Dsolve::setPath( const Eref& e, string path )
         double diffConst = Field< double >::get( id, "diffConst" );
         double motorConst = Field< double >::get( id, "motorConst" );
         const Cinfo* c = id.element()->cinfo();
-        if ( c == Pool::initCinfo() )
-        {
-            PoolBase::zombify( id.element(), ZombiePool::initCinfo(), Id(), e.id() );
-        }
-        else if ( c == BufPool::initCinfo() )
-        {
-            PoolBase::zombify( id.element(), ZombieBufPool::initCinfo(), Id(), e.id() );
-            // Any Functions will have to continue to manage the BufPools.
-            // This needs them to be replicated, and for their messages
-            // to be copied over. Not really set up here.
-        }
-        else
-        {
-            cout << "Error: Dsolve::setPath( " << path << " ): unknown pool class:" << c->name() << endl;
-        }
         id.element()->resize( numVoxels_ );
 
         unsigned int j = temp[i].value() - poolMapStart_;
@@ -833,7 +816,7 @@ string Dsolve::getPath( const Eref& e ) const
  * each reinit.
  */
 
-void Dsolve::build( double dt )
+void Dsolve::build( double dt, const MeshCompt *m )
 {
     if ( doubleEq( dt, dt_ ) )
         return;
@@ -844,8 +827,6 @@ void Dsolve::build( double dt )
         return;
     }
     dt_ = dt;
-    const MeshCompt* m = reinterpret_cast< const MeshCompt* >(
-                             compartment_.eref().data() );
     unsigned int numVoxels = m->getNumEntries();
 
     for ( unsigned int i = 0; i < numLocalPools_; ++i )
@@ -903,7 +884,7 @@ void Dsolve::buildNeuroMeshJunctions( const Eref& e, ObjId spineD, ObjId psdD )
         return;
     }
 
-    innerBuildMeshJunctions( spineD, e.id(), false );
+    innerBuildMeshJunctions( spineD, e.objId(), false );
     innerBuildMeshJunctions( psdD, spineD, false );
 }
 
@@ -1081,11 +1062,11 @@ static void mapVoxelsBetweenMeshes( DiffJunction& jn, Id self, Id other)
 }
 
 // Static utility func for building junctions
-void Dsolve::innerBuildMeshJunctions( Id self, Id other, bool selfIsMembraneBound )
+void Dsolve::innerBuildMeshJunctions( ObjId self, ObjId other, bool selfIsMembraneBound )
 {
     DiffJunction jn; // This is based on the Spine Dsolver.
-    jn.otherDsolve = other.value();
-    Dsolve* dself = reinterpret_cast< Dsolve* >( self.eref().data() );
+    jn.otherDsolve = other.id.value();
+    Dsolve* dself = reinterpret_cast< Dsolve* >( self.data() );
     if ( selfIsMembraneBound )
     {
         mapChansBetweenDsolves( jn, self, other );
@@ -1177,7 +1158,7 @@ double Dsolve::getN( const Eref& e ) const
     return 0.0;
 }
 
-void Dsolve::setNinit( const Eref& e, double v )
+void Dsolve::setConcInit( const Eref& e, double v )
 {
     unsigned int pid = convertIdToPoolIndex( e );
     if ( pid == ~0U || pid >= pools_.size() )  // Ignore silently
@@ -1185,25 +1166,31 @@ void Dsolve::setNinit( const Eref& e, double v )
     unsigned int vox = e.dataIndex();
     if ( vox < numVoxels_ )
     {
-        pools_[ pid ].setNinit( vox, v );
+        pools_[ pid ].setConcInit( vox, v );
         return;
     }
-    cout << "Warning: Dsolve::setNinit: Eref " << e << " out of range " <<
+    cout << "Warning: Dsolve::setConcInit: Eref " << e << " out of range " <<
          pools_.size() << ", " << numVoxels_ << "\n";
 }
 
-double Dsolve::getNinit( const Eref& e ) const
+double Dsolve::getConcInit( const Eref& e ) const
 {
     unsigned int pid = convertIdToPoolIndex( e );
     if ( pid == ~0U || pid >= pools_.size() ) return 0.0; //ignore silently
     unsigned int vox = e.dataIndex();
     if ( vox < numVoxels_ )
     {
-        return pools_[ pid ].getNinit( vox );
+        return pools_[ pid ].getConcInit( vox );
     }
-    cout << "Warning: Dsolve::getNinit: Eref " << e << " out of range " <<
+    cout << "Warning: Dsolve::getConcInit: Eref " << e << " out of range " <<
          pools_.size() << ", " << numVoxels_ << "\n";
     return 0.0;
+}
+
+double Dsolve::getVolumeOfPool( const Eref& e ) const
+{
+	unsigned int vox = e.dataIndex();
+	return volume( vox ); // This is a dummy function, below.
 }
 
 void Dsolve::setDiffConst( const Eref& e, double v )

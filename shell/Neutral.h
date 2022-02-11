@@ -163,6 +163,17 @@ public:
     ////////////////////////////////////////////////////////////
     // DestFinfo functions
     ////////////////////////////////////////////////////////////
+	
+	/** 
+	 * Called before object is destroyed, to set its affairs in order.
+	 * Notably, if it is under a solver, it tells solver goodbye.
+	 */
+	void notifyDestroy( const Eref& e );
+	void notifyCreate( const Eref& e, ObjId parent );
+	void notifyCopy( const Eref& e, ObjId orig ); // Copies values over.
+	void notifyMove( const Eref& e, ObjId newParent );
+	void notifyAddMsgSrc( const Eref& e, ObjId msgId );
+	void notifyAddMsgDest( const Eref& e, ObjId msgId );
 
     /**
      * Destroys Element and all children
