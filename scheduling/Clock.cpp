@@ -421,6 +421,7 @@ const Cinfo* Clock::initCinfo()
         "    HDF5DataWriter        30    1\n"
         "    HDF5WriterBase        30    1\n"
         "    NSDFWriter            30    1\n"
+        "    NSDFWriter2           30    1\n"
         "    PyRun                 30    1\n"
         "    PostMaster            31    0.01\n"
         "    \n"
@@ -929,6 +930,7 @@ void Clock::buildDefaultTick()
     defaultTick_["HDF5DataWriter"] = 30;
     defaultTick_["HDF5WriterBase"] = 30;
     defaultTick_["NSDFWriter"] = 30;
+    defaultTick_["NSDFWriter2"] = 30;
     defaultTick_["PyRun"] = 30;
 
     defaultTick_["PostMaster"] = 31;

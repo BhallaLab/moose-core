@@ -130,7 +130,7 @@ class rdesigneur:
             stimList = [],
             plotList = [],  # elecpath, geom_expr, object, field, title ['wave' [min max]]
             moogList = [], 
-            fileList = [], # List of all file save specifications.
+            outputFileList = [], # List of all file save specifications.
             modelFileNameList = [], # List of any files used to build.
             ode_method = "gsl",  # gsl, lsoda, gssa, gillespie
             isLegacyMethod = False,
@@ -175,6 +175,7 @@ class rdesigneur:
         self.spineDistrib = spineDistrib
         self.chanDistrib = chanDistrib
         self.chemDistrib = chemDistrib
+        self.modelFileNameList = modelFileNameList
 
         self.params = params
 
@@ -183,8 +184,7 @@ class rdesigneur:
             self.stimList = [ rstim.convertArg(i) for i in stimList ]
             self.plotList = [ rplot.convertArg(i) for i in plotList ]
             self.moogList = [ rmoog.convertArg(i) for i in moogList ]
-            self.fileList = [ rfile.convertArg(i) for i in fileList ]
-            self.modelFileNameList = [ rfile.convertArg(i) for i in modelFileNameList ]
+            self.outputFileList = [ rfile.convertArg(i) for i in outputFileList ]
         except BuildError as msg:
             print("Error: rdesigneur: " + msg)
             quit()
@@ -998,8 +998,7 @@ class rdesigneur:
     def _buildFileOutput( self ):
         fileBase = moose.Neutral( self.modelPath + "/file" )
         knownFields = knownFieldsDefault
-        for i in self.fileList:
-            kf = knownFields[i.field]
+        for idx, fentry in enumerate( self.outputFileList ):
             oname = self.fname.split( "." )[0]
             if ftype in ["h5", "nsdf"]:
                 # Should check for duplication.
@@ -1007,8 +1006,17 @@ class rdesigneur:
                 nsdf.filename = self.fname
                 nsdf.mode = 2
                 nsdf.flushLimit = 1000
+                nsdf.tick = 20 + idx
+                moose.setclock( nsdf.tick, fentry.dt )
                 nsdf.modelFileNames = __file__ + [","+ii for ii in self.modelFileNamesList]
-                moose.connect( nsdf, 'requestOut', src, i.field )
+                if fentry.field in ["n", "conc"]:
+                    modelPath = self.modelPath + "/chem" # Need something more up-to-date here.
+                    baseList = moose.wildcardFind( modelPath + "/" + fentry.basepath )
+                    for bp in moose.wildcardFind( fentry.basepath ):
+                        bpath = bp.path
+                        for pp in moose.wildcardFind( bpath + "/" + fentry.relpath ):
+                            # something better here.
+                            moose.connect( nsdf, 'requestOut', src, fentry.field )
 
 
 
