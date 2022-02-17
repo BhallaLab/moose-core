@@ -13,12 +13,8 @@
 // Keywords:
 // Compatibility:
 //
-//
 
 // Commentary:
-//
-//
-//
 //
 
 // Change log:
@@ -221,6 +217,29 @@ void NSDFWriter2::closeUniformData()
 
 }
 
+void NSDFWriter2::sortMsgs(const Eref& eref)
+{
+    const Finfo* tmp = eref.element()->cinfo()->findFinfo("requestOut");
+    const SrcFinfo1< vector < double > *>* requestOut = static_cast<const SrcFinfo1< vector < double > * > * >(tmp);
+	vector< ObjId > tgts = eref.element()->getMsgTargets( eref.dataIndex(), requestOut );
+	// Make a map from ObjId to index of obj in objVec.
+	map< ObjId, unsigned int > mapMsgs;
+	for (unsigned int tgtIdx = 0; tgtIdx < tgts.size(); ++tgtIdx)
+		mapMsgs[ tgts[ tgtIdx ] ] = tgtIdx;
+
+	mapMsgIdx_.resize( tgts.size() );
+	unsigned int consolidatedBlockMsgIdx = 0;
+	for (unsigned int blockIdx = 0; blockIdx < blocks_.size(); ++blockIdx) {
+		vector< ObjId >&  objVec = blocks_[blockIdx].objVec;
+		for ( auto obj = objVec.begin(); obj != objVec.end(); ++obj ) {
+			mapMsgIdx_[consolidatedBlockMsgIdx] = mapMsgs[*obj];
+			consolidatedBlockMsgIdx++;
+		}
+	}
+	assert( tgts.size() == consolidatedBlockMsgIdx );
+	// make a vector where tgtMsgIdx = mapMsgIdx_[consolidatedBlockMsgIdx]
+}
+
 void NSDFWriter2::buildUniformSources(const Eref& eref)
 {
 	Shell* shell = reinterpret_cast<Shell*>(Id().eref().data());
@@ -228,59 +247,19 @@ void NSDFWriter2::buildUniformSources(const Eref& eref)
 		if ( bb->hasMsg )
 			continue;
 		const vector< ObjId >& objVec = bb->objVec;
-		for( auto obj = objVec.begin(); obj != objVec.end(); ++obj ) {
+		for( vector< ObjId >::const_iterator obj = objVec.begin(); obj != objVec.end(); ++obj ) {
 
-			ObjId ret = shell->doAddMsg( "oneToOne", eref.objId(), "requestOut", *obj, bb->getField ); 
+			ObjId ret = shell->doAddMsg( "single", eref.objId(), "requestOut", *obj, bb->getField ); 
 			if (ret == ObjId() ) {
 				cout << "Error: NSDFWriter2::buildUniformSources: Failed to build msg from '" << eref.id().path() << "' to '" << bb->containerPath << "/" << bb->relPath << "." << bb->field << endl;
 				return;
 			}
 		}
+
 		bb->hasMsg = true;
 	}
+	sortMsgs( eref );
 }
-
-
-/*
-// Below func is no nonger used, here for reference for now. Replaced
-// by buildUniformSources.
-void NSDFWriter2::sortOutUniformSources(const Eref& eref)
-{
-    vars_.clear();
-    classFieldToSrcIndex_.clear();
-    objectField_.clear();
-    objectFieldToIndex_.clear();
-    const SrcFinfo * requestOut = (SrcFinfo*)eref.element()->cinfo()->findFinfo("requestOut");
-    unsigned int numTgt = eref.element()->getMsgTargetAndFunctions(eref.dataIndex(),
-                                                                requestOut,
-                                                                src_,
-                                                                func_);
-    assert(numTgt ==  src_.size());
-    /////////////////////////////////////////////////////////////
-    // Go through all the sources and determine the index of the
-    // source message in the dataset
-    /////////////////////////////////////////////////////////////
-
-    for (unsigned int ii = 0; ii < func_.size(); ++ii){
-        string varname = func_[ii];
-        unsigned int found = varname.find("get");
-        if (found == 0){
-            varname = varname.substr(3);
-            if (varname.length() == 0){
-                varname = func_[ii];
-            } else {
-                varname[0] = tolower(varname[0]);
-            }
-        }
-        assert(varname.length() > 0);
-        string className = Field<string>::get(src_[ii], "className");
-        string datasetPath = className + "/"+ varname;
-        classFieldToSrcIndex_[datasetPath].push_back(ii);
-        vars_.push_back(varname);
-    }
-    data_.resize(numTgt);
-}
-*/
 
 /**
    Handle the datasets for the requested fields (connected to
@@ -311,33 +290,6 @@ void NSDFWriter2::openUniformData(const Eref &eref)
 		bb->hasContainer = true;
 	}
 }
-/*
-void NSDFWriter2::openUniformData(const Eref &eref)
-{
-    sortOutUniformSources(eref);
-    htri_t exists;
-    herr_t status;
-    if (uniformGroup_ < 0){
-        uniformGroup_ = require_group(filehandle_, UNIFORMPATH);
-    }
-
-    // create the datasets and map them to className/field
-    for (map< string, vector< unsigned int > >::iterator it = classFieldToSrcIndex_.begin();
-         it != classFieldToSrcIndex_.end();
-         ++it){
-        vector< string > tokens;
-        moose::tokenize(it->first, "/", tokens);
-        string className = tokens[0];
-        string fieldName = tokens[1];
-        hid_t container = require_group(uniformGroup_, className);
-        vector < string > srclist;
-        hid_t dataset = createDataset2D(container, fieldName.c_str(), it->second.size());
-        classFieldToUniform_[it->first] = dataset;
-        writeScalarAttr<string>(dataset, "field", fieldName);
-        H5Gclose(container);
-    }
-}
-*/
 
 /**
    create the DS for uniform data.
@@ -547,18 +499,17 @@ void NSDFWriter2::flush()
 
     // append all uniform data
 	for ( vector< Block >::iterator bit = blocks_.begin(); (steps_ > 0) && (bit != blocks_.end()); bit++ ) {
-		cout << "STEPS = " << steps_ << "		" << bit->data[0].size() << endl;
 		assert( steps_ == bit->data[0].size() );
         double* buffer = (double*)calloc(bit->data.size() * steps_, sizeof(double));
-		double* bufiter = buffer;
-		for ( auto ii = bit->data.begin(); ii != bit->data.end(); ++ii ) {
-			for ( auto jj = ii->begin(); jj != ii->end(); ++jj ) {
-				*bufiter++ = *jj;
-			}
-			ii->clear();
-		}
+        for (unsigned int ii = 0; ii < bit->data.size(); ++ii){
+            for (unsigned int jj = 0; jj < steps_; ++jj){
+                buffer[ii * steps_ + jj] = bit->data[ii][jj];
+            }
+            bit->data[ii].clear();
+        }
         hid_t filespace = H5Dget_space(bit->dataset);
         if (filespace < 0){
+			cout << "Error: NSDFWriter2::flush(): Failed to open filespace\n";
             break;
         }
         hsize_t dims[2];
@@ -633,13 +584,15 @@ void NSDFWriter2::process(const Eref& eref, ProcPtr proc)
     const Finfo* tmp = eref.element()->cinfo()->findFinfo("requestOut");
     const SrcFinfo1< vector < double > *>* requestOut = static_cast<const SrcFinfo1< vector < double > * > * >(tmp);
     requestOut->send(eref, &uniformData);
+	assert( uniformData.size() == mapMsgIdx_.size() );
+	// Note that uniformData is ordered by msg tgt order. We want to store
+	// data in block_->objVec order.
 	unsigned int ii = 0;
 	for (unsigned int blockIdx = 0; blockIdx < blocks_.size(); ++blockIdx) {
 		vector< vector< double > >&  bjd = blocks_[blockIdx].data;
 		for ( auto jj = bjd.begin(); jj != bjd.end(); ++jj ) {
-			jj->push_back( uniformData[ii] );
+			jj->push_back( uniformData[ mapMsgIdx_[ii] ] );
 			ii++;
-			assert( ii <= uniformData.size() );
 		}
 	}
     ++steps_;

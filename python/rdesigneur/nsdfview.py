@@ -6,24 +6,31 @@
 import argparse
 import numpy as np
 import h5py
+import time
 #import rdesigneur.moogul as moogul
 import moogul
 mooViews = []
 
 class NsdfNeuronDataWrapper( moogul.DataWrapper ):
     def __init__( self, nsdf, neuronName, field ):
+        if len( neuronName.split('/' ) ) != 2:
+            print( "Error: neuronName needs '/' between base and rel parts: ", objname )
+            assert( 0 )
         moogul.DataWrapper.__init__( self, field )
         self.nsdf_ = nsdf
         self.neuronName_ = neuronName
+        self.objBase_ = neuronName.split( '/' )[0]
+        self.objRel_ = neuronNme.split( '/' )[1]
         self.field_ = field
         self.simTime_ = 0.0
         self.idx_ = 0
-        self.dt_= nsdf["/data/uniform/{}/{}".format( neuronName, field)].attrs['dt']
-        self.coords_ = np.array( nsdf['/data/static/{}/coords'.format(neuronName) ] )
+        self.dt_= nsdf["/data/uniform/{}/{}/{}".format( self.objBase_, self.objRel_, field)].attrs['dt']
+        self.coords_ = np.array( nsdf['/data/static/{}/{}/coords'.format(self.objBase_, self.objRel_) ] )
         self.getMinMax()
 
     def getValues( self ):
-        ret=np.array( self.nsdf_["/data/uniform/ZombieCompartment/"+self.field_][self.idx_] )
+        npath = "/data/uniform/{}/{}/{}".format( self.objBase_, self.objRel_, self.field_ )
+        ret=np.array( self.nsdf_[npath][:,self.idx_] )
         #ret = np.array( nsdf["/data/uniform/{}/{}".format( neuronName, field)][self.idx_] )
         self.idx_ += 1
         self.simTime_ = self.idx_ * self.dt_
@@ -37,7 +44,8 @@ class NsdfNeuronDataWrapper( moogul.DataWrapper ):
         return self.coords_
 
     def getShape( self ):
-        return nsdf["/data/uniform/ZombieCompartment/"+self.field_].shape
+        npath = "/data/uniform/{}/{}/{}".format( self.objBase_, self.objRel_, self.field_ )
+        return nsdf[npath].shape
 
     def numObj( self ):
         return int( len( self.coords_ ) > 0 )
@@ -45,28 +53,28 @@ class NsdfNeuronDataWrapper( moogul.DataWrapper ):
 #####################################################################
 
 class NsdfChemDataWrapper( moogul.DataWrapper ):
-    def __init__( self, nsdf,  field ):
+    def __init__( self, nsdf, objname,  field ):
+        if len( objname.split('/' ) ) != 2:
+            print( "Error: objname needs '/' between base and rel parts: ", objname )
+            assert( 0 )
         moogul.DataWrapper.__init__( self, field )
         self.nsdf_ = nsdf
+        self.objBase_ = objname.split( '/' )[0]
+        self.objRel_ = objname.split( '/' )[1]
+        
         self.field_ = field
         self.simTime_ = 0.0
         self.idx_ = 0
-        self.dt_= nsdf["/data/uniform/{}/{}".format( "Pool", field)].attrs['dt']
-        self.coords_ = np.array( nsdf['/data/static/{}/coords'.format("Pool") ] )
-        print( self.coords_[0:10,] )
-        print()
-        print( self.coords_[300:310,] )
-        print()
-        print( self.coords_[600:610,] )
+        self.dt_= nsdf["/data/uniform/{}/{}/{}".format( self.objBase_, self.objRel_, field)].attrs['dt']
+        self.coords_ = np.array( nsdf['/data/static/{}/{}/coords'.format(self.objBase_, self.objRel_) ] )
         if self.coords_.shape[1] == 10:
             self.coords_[:,6] = self.coords_[:,9] # Temp hack to get radius correctly
-        print("COORDS SHAPE = ", self.coords_.shape )
 
         self.getMinMax()
 
     def getValues( self ):
-        ret=np.array( self.nsdf_["/data/uniform/Pool/"+self.field_][self.idx_] )
-        #ret = np.array( nsdf["/data/uniform/{}/{}".format( neuronName, field)][self.idx_] )
+        npath = "/data/uniform/{}/{}/{}".format( self.objBase_, self.objRel_, self.field_ )
+        ret=np.array( self.nsdf_[npath][:,self.idx_] )
         self.idx_ += 1
         self.simTime_ = self.idx_ * self.dt_
         return ret
@@ -83,7 +91,8 @@ class NsdfChemDataWrapper( moogul.DataWrapper ):
         return "NeuroMesh"
 
     def getShape( self ):
-        return self.nsdf_["/data/uniform/Pool/"+self.field_].shape
+        npath = "/data/uniform/{}/{}/{}".format( self.objBase_, self.objRel_, self.field_ )
+        return self.nsdf_[npath].shape
 
     def numObj( self ):
         return len( self.coords_ )
@@ -127,7 +136,7 @@ def main():
             simTime += dt
 
     while True:
-        sleep(1)
+        time.sleep(1)
 
 
 def makeMoogli( nsdf, args ):
@@ -139,7 +148,7 @@ def makeMoogli( nsdf, args ):
 
     viewer = moogul.MooView( title = objname + "." + field )
     if field == 'n' or field == 'conc':
-        dw = NsdfChemDataWrapper( nsdf, field )
+        dw = NsdfChemDataWrapper( nsdf, objname, field )
         if field == 'conc':
             fieldScale = 1.0e3
         reacSystem = moogul.MooReacSystem( dw,

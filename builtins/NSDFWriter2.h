@@ -147,6 +147,7 @@ class NSDFWriter2: public HDF5DataWriter
     hid_t getEventDataset(string srcPath, string srcField);
     // void sortOutUniformSources(const Eref& eref);
 	void buildUniformSources(const Eref& eref);
+	void sortMsgs(const Eref& eref);
     /* hid_t getUniformDataset(string srcPath, string srcField); */
     map <string, string> env_; // environment attributes
     vector < hid_t > eventDatasets_;
@@ -165,6 +166,8 @@ class NSDFWriter2: public HDF5DataWriter
     hid_t mapGroup_; // handle for map container
 	vector< string > blockStrVec_;
 	vector< Block > blocks_;
+	vector< unsigned int > mapMsgIdx_; // Look up tgt idx from consolidated block idx.
+
     map< string, vector< hid_t > > classFieldToEvent_;
     map< string, vector< string > > classFieldToEventSrc_;
     map< string, hid_t > classFieldToUniform_;
