@@ -51,7 +51,7 @@ except Exception as e:
     mergechemError_ = str(e)
 
 # SBML related functions.
-def mooseReadSBML(filepath, loadpath, solver="ee", validate=True):
+def mooseReadSBML(filepath, loadpath, solver="ee", validate="on"):
     """Load SBML model (inner helper function for readSBML)."""
     global sbmlImport_, sbmlError_
     if not sbmlImport_:
