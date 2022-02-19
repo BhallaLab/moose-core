@@ -117,6 +117,7 @@ class rdesigneur:
             elecPlotDt = 0.1e-3,    # Same default as from MOOSE
             funcDt = 0.1e-3,        # Used when turnOffElec is False.
                                     # Otherwise system uses chemDt.
+            statusDt = 0.0,         # Dt to print out status. 0 = no print
             numWaveFrames = 100,    # Number of frames to use for waveplots
             cellProto = [],
             spineProto = [],
@@ -162,6 +163,7 @@ class rdesigneur:
         self.elecDt= elecDt
         self.elecPlotDt= elecPlotDt
         self.funcDt= funcDt
+        self.statusDt= statusDt
         self.chemPlotDt= chemPlotDt
         self.numWaveFrames = numWaveFrames
         self.isLegacyMethod = isLegacyMethod
@@ -199,6 +201,8 @@ class rdesigneur:
         self.spineComptElist = []
         self.tabForXML = []
         self._endos = []
+        self.nsdfPathList = [] # List of paths of nsdf objects.
+        self._finishedSaving = False
 
         if not moose.exists( '/library' ):
             library = moose.Neutral( '/library' )
@@ -235,9 +239,11 @@ class rdesigneur:
         self.model = moose.Neutral( modelPath )
         self.modelPath = modelPath
         funcs = [self.installCellFromProtos, self.buildPassiveDistrib
-            , self.buildChanDistrib, self.buildSpineDistrib, self.buildChemDistrib
+            , self.buildChanDistrib, self.buildSpineDistrib
+            , self.buildChemDistrib
             , self._configureSolvers, self.buildAdaptors, self._buildStims
-            , self._buildPlots, self._buildMoogli, self._buildFileOutput, self._configureHSolve
+            , self._buildPlots, self._buildMoogli, self._buildFileOutput
+            , self._configureHSolve
             , self._configureClocks, self._printModelStats]
 
         for i, _func in enumerate(funcs):
@@ -257,6 +263,13 @@ class rdesigneur:
                     msg += ' %.3f sec' % t
                 print(msg)
             sys.stdout.flush()
+        if self.statusDt > min( self.elecDt, self.chemDt, self.diffDt ):
+            pr = moose.PyRun( modelPath + '/updateStatus' )
+            pr.initString = "_status_t0 = time.time()"
+            pr.runString = '''
+print( "Wall Clock Time = {:8.2f}, simtime = {:8.3f}".format( time.time() - _status_t0, moose.element( '/clock' ).currentTime ) )
+'''
+            moose.setClock( pr.tick, self.statusDt )
 
     def installCellFromProtos( self ):
         if self.stealCellFromLibrary:
@@ -998,26 +1011,54 @@ class rdesigneur:
     def _buildFileOutput( self ):
         fileBase = moose.Neutral( self.modelPath + "/file" )
         knownFields = knownFieldsDefault
-        for idx, fentry in enumerate( self.outputFileList ):
-            oname = self.fname.split( "." )[0]
-            if ftype in ["h5", "nsdf"]:
-                # Should check for duplication.
-                nsdf = moose.NSDFWriter( fileBase.path + "/" + oname )
-                nsdf.filename = self.fname
-                nsdf.mode = 2
-                nsdf.flushLimit = 1000
-                nsdf.tick = 20 + idx
-                moose.setclock( nsdf.tick, fentry.dt )
-                nsdf.modelFileNames = __file__ + [","+ii for ii in self.modelFileNamesList]
-                if fentry.field in ["n", "conc"]:
-                    modelPath = self.modelPath + "/chem" # Need something more up-to-date here.
-                    baseList = moose.wildcardFind( modelPath + "/" + fentry.basepath )
-                    for bp in moose.wildcardFind( fentry.basepath ):
-                        bpath = bp.path
-                        for pp in moose.wildcardFind( bpath + "/" + fentry.relpath ):
-                            # something better here.
-                            moose.connect( nsdf, 'requestOut', src, fentry.field )
 
+        nsdfBlocks = {}
+        nsdf = None
+        
+        for idx, fentry in enumerate( self.outputFileList ):
+            oname = fentry.fname.split( "." )[0]
+            if fentry.ftype in ["h5", "nsdf"]:
+                # Should check for duplication.
+                nsdfPath = fileBase.path + '/' + oname
+                if fentry.field in ["n", "conc"]:
+                    if fentry.basepath[:4] == 'chem': #chem itself as compt
+                        modelPath = self.modelPath
+                    else:
+                        modelPath = self.modelPath + "/chem" 
+                    basePath = modelPath + "/" + fentry.basepath
+                    pathStr = basePath + '/' + fentry.relpath + "[]." + fentry.field
+                else:
+                    modelPath = self.modelPath + "/elec" 
+                    if fentry.basepath in ["elec", "#", "."]:
+                        fentry.basepath = "##[ISA=CompartmentBase]"
+                    elif fentry.basepath in ["spine", "SPINE", "head", "HEAD"]:
+                        fentry.basepath = "#head#[ISA=CompartmentBase]"
+                    # Otherwise we use basepath as is.
+                    basePath = modelPath + "/" + fentry.basepath
+                    if fentry.relpath in [".", "/", "./"]:
+                        pathStr = basePath + "." + fentry.field
+                    else:
+                        pathStr = basePath + '/' + fentry.relpath + "." + fentry.field
+                if not nsdfPath in nsdfBlocks:
+                    self.nsdfPathList.append( nsdfPath )
+                    nsdfBlocks[nsdfPath] = [pathStr]
+                    nsdf = moose.NSDFWriter2( nsdfPath )
+                    nsdf.modelRoot = "" # Blank means don't save tree.
+                    nsdf.filename = fentry.fname
+                    # Insert the model setup files here.
+                    nsdf.mode = 2
+                    nsdf.flushLimit = fentry.flushSteps   # Number of timesteps between flush
+                    nsdf.tick = 20 + len( nsdfBlocks )
+                    moose.setClock( nsdf.tick, fentry.dt )
+                    mfns = sys.argv[0]
+                    for ii in self.modelFileNameList:
+                        mfns += "," + ii
+                    nsdf.modelFileNames = mfns 
+                else:
+                    nsdfBlocks[nsdfPath].append( pathStr )
+        for nsdfPath in self.nsdfPathList:
+            nsdf = moose.element( nsdfPath )
+            nsdf.blocks = nsdfBlocks[nsdfPath]
 
 
     ################################################################
@@ -1036,11 +1077,13 @@ rdesigneur.rmoogli.updateMoogliViewer()
         moose.setClock( pr.tick, moogliDt )
         moose.reinit()
         moose.start( runtime )
+        self._save()                                            
         rmoogli.notifySimulationEnd()
         if block:
             self.display( len( self.moogNames ) + 1)
 
     def display( self, startIndex = 0, block=True ):
+        self._save()                                            
         for i in self.plotNames:
             plt.figure( i[2] + startIndex )
             plt.title( i[1] )
@@ -1067,7 +1110,6 @@ rdesigneur.rmoogli.updateMoogliViewer()
             for i in range( 3 ):
                 self.displayWavePlots()
         plt.show( block=block )
-        self._save()                                            
         
 
     def initWavePlots( self, startIndex ):
@@ -1181,6 +1223,10 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
 
     def _save( self ):
+        self._finishedSaving = true
+        for nsdfPath in self.nsdfPathList:
+            nsdf = moose.element( nsdfPath )
+            nsdf.close()
         for i in self.saveNames:
             tabname = i[0]
             idx = i[1]
@@ -1464,26 +1510,6 @@ rdesigneur.rmoogli.updateMoogliViewer()
             raise BuildError( "validateChem: no compartment on: " + cpath )
 
         return True
-
-        '''
-        if len( comptlist ) == 1:
-            return;
-
-        # Sort comptlist in decreasing order of volume
-        sortedComptlist = sorted( comptlist, key=lambda x: -x.volume )
-        if ( len( sortedComptlist ) != 3 ):
-            print(cpath, sortedComptlist)
-            raise BuildError( "validateChem: Require 3 chem compartments, have: " + str( len( sortedComptlist ) ) )
-        '''
-        '''
-        if not( sortedComptlist[0].name.lower() == 'dend' and \
-            sortedComptlist[1].name.lower() == 'spine' and \
-            sortedComptlist[2].name.lower() == 'psd' ):
-            raise BuildError( "validateChem: Invalid compt names: require dend, spine and PSD.\nActual names = " \
-                    + sortedComptList[0].name + ", " \
-                    + sortedComptList[1].name + ", " \
-                    + sortedComptList[2].name )
-        '''
 
     #################################################################
 
@@ -1939,12 +1965,13 @@ class rstim( baseplot ):
 
 class rfile:
     def __init__( self,
-            fname = 'output.h5', basepath = 'cell', relpath = '.', field = 'Vm', dt = 1e-4, start = 0.0, stop = -1.0, ftype = 'nsdf' ):
+            fname = 'output.h5', basepath = 'elec', relpath = '.', field = 'Vm', dt = 1e-4, flushSteps = 200, start = 0.0, stop = -1.0, ftype = 'nsdf'):
         self.fname = fname
         self.basepath = basepath
         self.relpath = relpath
         self.field = field
         self.dt = dt
+        self.flushSteps = flushSteps
         self.start = start
         self.stop = stop
         self.ftype = self.fname.split(".")[-1]

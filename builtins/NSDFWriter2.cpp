@@ -147,6 +147,7 @@ const Cinfo * NSDFWriter2::initCinfo()
 
     static Finfo * finfos[] = {
         &eventInputFinfo,	// FieldElementFinfo
+		&modelRoot,	// ValueFinfo
 		&modelFileNames,	// ValueFinfo
 		&blocks,	// ValueFinfo
         &proc,

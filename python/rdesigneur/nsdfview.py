@@ -20,12 +20,13 @@ class NsdfNeuronDataWrapper( moogul.DataWrapper ):
         self.nsdf_ = nsdf
         self.neuronName_ = neuronName
         self.objBase_ = neuronName.split( '/' )[0]
-        self.objRel_ = neuronNme.split( '/' )[1]
+        self.objRel_ = neuronName.split( '/' )[1]
         self.field_ = field
         self.simTime_ = 0.0
         self.idx_ = 0
         self.dt_= nsdf["/data/uniform/{}/{}/{}".format( self.objBase_, self.objRel_, field)].attrs['dt']
         self.coords_ = np.array( nsdf['/data/static/{}/{}/coords'.format(self.objBase_, self.objRel_) ] )
+        #print( "COORDS SHAPE for ", neuronName, " = ", self.coords_.shape )
         self.getMinMax()
 
     def getValues( self ):
@@ -45,10 +46,10 @@ class NsdfNeuronDataWrapper( moogul.DataWrapper ):
 
     def getShape( self ):
         npath = "/data/uniform/{}/{}/{}".format( self.objBase_, self.objRel_, self.field_ )
-        return nsdf[npath].shape
+        return self.nsdf_[npath].shape
 
     def numObj( self ):
-        return int( len( self.coords_ ) > 0 )
+        return len( self.coords_ )
 
 #####################################################################
 
@@ -134,6 +135,7 @@ def main():
         for idx in range( 0, len( args.viewspec ), 4):
             viewer[idx].updateValues( simTime )
             simTime += dt
+    viewer[0].notifySimulationEnd()
 
     while True:
         time.sleep(1)
