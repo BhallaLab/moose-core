@@ -842,6 +842,8 @@ void NSDFWriter2::writeStaticCoords()
 
 void NSDFWriter2::writeModelFiles()
 {
+	// These can be large, exceed 64K limit of attributes. So write as 
+	// datasets, not attributes.
 	for ( const string& fName : modelFileNames_ ) {
     	// string fPath = MODELFILEPATH + string("/") + fName;
     	string fPath = MODELFILEPATH;
@@ -849,8 +851,21 @@ void NSDFWriter2::writeModelFiles()
 		auto ss = ostringstream{};
 		if ( f.is_open() ) {
 			ss << f.rdbuf();
+			string fstr = ss.str();
+			char* filebuf = (char*)calloc( ss.str().length()+1, sizeof(char)  );
+			char** sources = (char**) calloc( 1, sizeof(char* ) );
+			sources[0] = filebuf;
+			strcpy( filebuf, fstr.c_str() );
     		hid_t fGroup = require_group(filehandle_, fPath);
-    		writeScalarAttr<string>(fGroup, fName, ss.str());
+			hid_t ds = createStringDataset(fGroup, fName, (hsize_t)1, (hsize_t)1 );
+			hid_t memtype = H5Tcopy(H5T_C_S1);
+			int status = H5Tset_size(memtype, H5T_VARIABLE );
+			assert(status >= 0);
+			// status = H5Tclose(memtype);
+			status = H5Dwrite(ds, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, sources );
+			assert(status >= 0);
+			free( filebuf );
+			free( sources );
 		} else {
 			cout << "Warning: NSDFWriter2::writeModelFiles Could not open file '" << fName << "'/n";
 		}
