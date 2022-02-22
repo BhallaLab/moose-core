@@ -1223,7 +1223,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
 
     def _save( self ):
-        self._finishedSaving = true
+        self._finishedSaving = True
         for nsdfPath in self.nsdfPathList:
             nsdf = moose.element( nsdfPath )
             nsdf.close()

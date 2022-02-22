@@ -155,7 +155,7 @@ const Cinfo * NSDFWriter2::initCinfo()
 
     static string doc[] = {
         "Name", "NSDFWriter2",
-        "Author", "Subhasis Ray",
+        "Author", "Upi Bhalla",
         "Description", "NSDF file writer for saving data."
     };
 
@@ -192,15 +192,21 @@ void NSDFWriter2::close()
     closeUniformData();
     if (uniformGroup_ >= 0){
         H5Gclose(uniformGroup_);
+		uniformGroup_ = -1;
     }
     closeEventData();
     if (eventGroup_ >= 0){
         H5Gclose(eventGroup_);
+		eventGroup_ = -1;
     }
     if (dataGroup_ >= 0){
         H5Gclose(dataGroup_);
+		dataGroup_ = -1;
     }
     HDF5DataWriter::close();
+	for ( auto bb = blocks_.begin(); bb != blocks_.end(); ++bb ) {
+		bb->hasContainer = false;
+	}
 }
 
 void NSDFWriter2::closeUniformData()
@@ -209,6 +215,16 @@ void NSDFWriter2::closeUniformData()
 		if ( ii->dataset >= 0 ) {
 			H5Dclose( ii->dataset );
 		}
+		/**
+		ii->hasMsg = false;
+		ii->hasContainer = false;
+		ii->objVec.clear();
+		ii->objPathList.clear();
+		for ( auto jj = ii->data.begin(); jj != ii->data.end(); jj++ ) {
+			jj.clear();
+		}
+		ii->data.clear();
+		*/
 	}
     vars_.clear();
     data_.clear();
@@ -283,11 +299,11 @@ void NSDFWriter2::openUniformData(const Eref &eref)
 		// So I need to replace path with a string with the slashes
         bb->container = require_group(uniformGroup_, bb->nsdfContainerPath);
         bb->relPathContainer = require_group(bb->container,bb->nsdfRelPath);
-        hid_t dataset = createDataset2D(bb->relPathContainer, bb->field.c_str(), bb->data.size());
+       	hid_t dataset = createDataset2D(bb->relPathContainer, bb->field.c_str(), bb->data.size());
 		bb->dataset = dataset;
-        writeScalarAttr<string>(dataset, "field", bb->field);
-        H5Gclose(bb->container);
-        H5Gclose(bb->relPathContainer);
+       	writeScalarAttr<string>(dataset, "field", bb->field);
+       	H5Gclose(bb->container);
+       	H5Gclose(bb->relPathContainer);
 		bb->hasContainer = true;
 	}
 }
@@ -519,6 +535,10 @@ void NSDFWriter2::flush()
         herr_t status = H5Sget_simple_extent_dims(filespace, dims, maxdims);
         hsize_t newdims[] = {dims[0], dims[1] + steps_}; // new column count
         status = H5Dset_extent(bit->dataset, newdims); // extend dataset to new column count
+		if ( status < 0 ) {
+			cout << "Error: NSDFWriter2::flush(): Fail to extend dataset\n";
+            break;
+		}
         H5Sclose(filespace);
         filespace = H5Dget_space(bit->dataset); // get the updated filespace
         hsize_t start[2] = {0, dims[1]};
@@ -526,6 +546,10 @@ void NSDFWriter2::flush()
         hid_t memspace = H5Screate_simple(2, dims, NULL);
         H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, NULL, dims, NULL);
         status = H5Dwrite(bit->dataset, H5T_NATIVE_DOUBLE,  memspace, filespace, H5P_DEFAULT, buffer);
+		if ( status < 0 ) {
+			cout << "Error: NSDFWriter2::flush(): Failed to write data\n";
+            break;
+		}
         H5Sclose(memspace);
         H5Sclose(filespace);
         free(buffer);
@@ -686,6 +710,7 @@ bool parseBlockString( const string& val, Block& block )
 		return false;
 	block.hasMsg = false;
 	block.hasContainer = false;
+	block.dataset = -1;
 	block.field = s.substr( ff + 1 );
 	string temp = block.field;
 	temp[0] = toupper( temp[0] );
@@ -700,7 +725,6 @@ bool parseBlockString( const string& val, Block& block )
 	string pct = "";
 	for ( unsigned int ii = 0; ii < svec.size(); ii++ ) {
 		path += "/" + svec[ii];
-		pct = "%";
 		Id id( path );
 		if ( id != Id() ) {
 			if ( id.element()->cinfo()->isA( "Neuron" ) ||
@@ -710,6 +734,9 @@ bool parseBlockString( const string& val, Block& block )
 				block.containerPath = path;
 				block.nsdfContainerPath += pct + svec[ii];
 			}
+			pct = "%";
+		} else {
+			cout << "Error: NSDFWriter2: parseBlockString: No object found on '" << path << "'. Ignoring block.\n";
 		}
 	}
 	if( block.containerPath == "" )
