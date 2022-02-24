@@ -16,6 +16,8 @@ SCALE_SCENE = 64
 bgvector = vp.vector(0.7, 0.8, 0.9)  # RGB
 bgDict = {'default': bgvector, 'black': vp.color.black, 'white': vp.color.white, 'cyan': vp.color.cyan, 'grey': vp.vector( 0.5, 0.5, 0.5 ) }
 
+sleepTimes = [0.0, 0.0005, 0.001, 0.002, 0.003, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1]
+
 def bgLookup( bg ):
     col = bgDict.get( bg )
     if not col:
@@ -93,7 +95,8 @@ class MooView:
             self.replayButton.background = vp.color.white
 
     def setSleepTime( self ):
-        self.sleep = self.sleepSlider.value
+        idx = int( round( self.sleepSlider.value ) )
+        self.sleep = sleepTimes[idx]
         self.sleepLabel.text = "    Frame dt = {:1.3f} sec".format( self.sleep )
 
     def updateAxis( self ):
@@ -120,6 +123,10 @@ class MooView:
         if doOrnaments:
             title = MooView.consolidatedTitle + "\n"
         barWidth = SCALE_SCENE * 1.5
+        if ( bgLookup(bg).mag < 1 ):
+            barTextColor = vp.color.white
+        else:
+            barTextColor = vp.color.black
         self.colorbar = vp.canvas( title = title, width = barWidth, height = self.swy * SCALE_SCENE, background = bgLookup(bg), align = 'left', range = 1, autoscale = False )
         #self.colorbar = vp.canvas( title = title, width = barWidth, height = self.swy * SCALE_SCENE, background = vp.color.cyan, align = 'left', range = 1, autoscale = False )
         self.colorbar.userzoom = False
@@ -131,17 +138,17 @@ class MooView:
         for idx, rgb in enumerate( self.rgb ):
             cbox = vp.box( canvas = self.colorbar, pos = vp.vector( 0, height * (idx - 26), 0), width = width, height = height, color = rgb )
         barName = self.title.replace( ' ', '\n' )
-        self.barName = vp.label( canvas = self.colorbar, align = 'left', pixel_pos = True, pos = vp.vector( 2, (self.swy - 0.32) * SCALE_SCENE, 0), text = barName, height = 15, color = vp.color.black, box = False, opacity = 0 )
-        self.barMin = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, self.swy * SCALE_SCENE * 0.22, 0), text = "{:.3f}".format(self.valMin), height = 12, color = vp.color.black, box = False, opacity = 0 )
-        self.barMax = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, (self.swy - 1.2) * SCALE_SCENE, 0), text = "{:.3f}".format(self.valMax), height = 12, color = vp.color.black, box = False, opacity = 0 )
+        self.barName = vp.label( canvas = self.colorbar, align = 'left', pixel_pos = True, pos = vp.vector( 2, (self.swy - 0.32) * SCALE_SCENE, 0), text = barName, height = 15, color = barTextColor, box = False, opacity = 0 )
+        self.barMin = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, self.swy * SCALE_SCENE * 0.22, 0), text = "{:.3f}".format(self.valMin), height = 12, color = barTextColor, box = False, opacity = 0 )
+        self.barMax = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, (self.swy - 1.2) * SCALE_SCENE, 0), text = "{:.3f}".format(self.valMax), height = 12, color = barTextColor, box = False, opacity = 0 )
         self.xAx = vp.cylinder( canvas = self.colorbar, pos = axOrigin, axis = vp.vector( 0.8, 0, 0 ), radius = 0.04, color = vp.color.red )
         self.yAx = vp.cylinder( canvas = self.colorbar, pos = axOrigin, axis = vp.vector( 0, 0.8, 0 ), radius = 0.04, color = vp.color.green )
         self.zAx = vp.cylinder( canvas = self.colorbar, pos = axOrigin, axis = vp.vector( 0, 0, 0 ), radius = 0.04, color = vp.color.blue )
-        self.axisLength = vp.label( pos = axOrigin + vp.vector(0, 1, 0), text = "1.00 <i>u</i>m", color = vp.color.black, box = False )
+        self.axisLength = vp.label( pos = axOrigin + vp.vector(0, 1, 0), text = "1.00 <i>u</i>m", color = barTextColor, box = False )
         if doOrnaments:
             self.timeLabel = vp.wtext( text = "Time =  0.000 sec", pos = self.colorbar.title_anchor )
             self.sleepLabel = vp.wtext( text = "    Frame dt = 0.005 sec", pos = self.colorbar.title_anchor )
-            self.sleepSlider = vp.slider( pos = self.colorbar.title_anchor, length = 200, bind = self.setSleepTime, min = 0.0, max = 0.2, value = self.sleep )
+            self.sleepSlider = vp.slider( pos = self.colorbar.title_anchor, length = 200, bind = self.setSleepTime, min = 0, max = len( sleepTimes ) -1, value = min( len( sleepTimes ), 2  ) )
             self.replayButton = vp.button( text = "Start Replay", pos = self.colorbar.title_anchor, bind=self.toggleReplay, disabled = True )
             self.colorbar.append_to_title("\n")
 
