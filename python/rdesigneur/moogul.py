@@ -149,24 +149,24 @@ class MooView:
         obj = self.scene.mouse.pick
         if obj == None:
             return
-        elm = self.innerPickObj( obj )
-        if elm:
-            print( elm.path, elm.dataIndex )
+        elmPath = self.innerPickObj( obj )
+        if elmPath:
+            print( elmPath )
             return
         elif self.viewIdx == 0: 
             for view in MooView.viewList[1:]:
                 if view.colorbar == None:
-                    elm = view.innerPickObj( obj )
-                    if elm:
-                        print( elm.path, elm.dataIndex )
+                    elmPath = view.innerPickObj( obj )
+                    if elmPath:
+                        print( elmPath )
                         return
         print( "Object {} not found on view {}".format( obj, self.title ) )
 
     def innerPickObj( self, obj ):
         for dr in self.drawables_:
-            elm = dr.findDisplayObject( obj )
-            if elm:
-                return elm
+            elmPath = dr.findDisplayObject( obj )
+            if elmPath:
+                return elmPath
         return None
 
 

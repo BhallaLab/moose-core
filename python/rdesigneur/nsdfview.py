@@ -102,7 +102,7 @@ class NsdfChemDataWrapper( moogul.DataWrapper ):
 def main():
     parser = argparse.ArgumentParser( description = "NSDF Moogli viewer." )
     parser.add_argument( "NSDF_filename", type = str, help = "Required: name of NSDF format File record of simulation" )
-    parser.add_argument( "-v", "--viewspec", nargs = 4, default=[], help="Specification for each view: [objname, field, min, max]" )
+    parser.add_argument( "-v", "--viewspec", nargs = '+', default=[], action='append',  help="Specification for each view: [objname, field, min, max]. Any number of views may be specified, each indicated by -v or --viewspec." )
     parser.add_argument( "-r", "--rotation", type = float, default=0.0, help="Rotate display around vertical axis by this angle in radians every step. Default 0.0")
     parser.add_argument( "-c", "--colormap", type = str, default="plasma", help="Name of matplotlib colormap to use. Default is 'plasma'")
     parser.add_argument( "-bg", "--background", type = str, default="default", help="Name of matplotlib color to use for background. Default is a light blue-gray.")
@@ -110,31 +110,26 @@ def main():
     parser.add_argument( '-l', '--list_datasets', action="store_true", help="List possible datasets available to view." )
     args = parser.parse_args()
 
+    if len( args.viewspec ) == 0:
+        print( "warning: No viewpsec defined in command line" )
+        quit()
+
     nsdf = h5py.File( args.NSDF_filename, 'r' )
 
     viewer = []
-    for idx in range( 0, len( args.viewspec ), 4):
-        viewer.append( makeMoogli( nsdf, args.viewspec[idx:idx+4] ) )
-
-    if len( args.viewspec ) == 0:
-        # Check if the nsdf file has a ZombieCompt or a Pool entry and 
-        # try to display it.
-        print( "warning: No viewpsec defined in command line" )
-        #viewer.append( makeMoogli( nsdf, args.viewspec[idx:idx+4] ) )
-        quit()
-
+    for vs in args.viewspec:
+        viewer.append( makeMoogli( nsdf, vs ) )
+    dt = viewer[0].drawables_[0].dataWrapper_.dt_
     shape = viewer[0].drawables_[0].dataWrapper_.getShape()
     numSteps = shape[1]
-    dt = viewer[0].drawables_[0].dataWrapper_.dt_
+    for v in viewer:
+        v.firstDraw( args.merge_displays, rotation = args.rotation, colormap = args.colormap, bg = args.background )
 
-    for idx in range( 0, len( args.viewspec ), 4):
-        viewer[idx].firstDraw( args.merge_displays, rotation = args.rotation, colormap = args.colormap, bg = args.background )
-
+    simTime = 0.0
     for step in range( numSteps ):
-        simTime = 0.0
-        for idx in range( 0, len( args.viewspec ), 4):
-            viewer[idx].updateValues( simTime )
-            simTime += dt
+        for v in viewer:
+            v.updateValues( simTime )
+        simTime += dt
     viewer[0].notifySimulationEnd()
 
     while True:

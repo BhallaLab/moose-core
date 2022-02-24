@@ -267,7 +267,7 @@ class rdesigneur:
             pr = moose.PyRun( modelPath + '/updateStatus' )
             pr.initString = "_status_t0 = time.time()"
             pr.runString = '''
-print( "Wall Clock Time = {:8.2f}, simtime = {:8.3f}".format( time.time() - _status_t0, moose.element( '/clock' ).currentTime ) )
+print( "Wall Clock Time = {:8.2f}, simtime = {:8.3f}".format( time.time() - _status_t0, moose.element( '/clock' ).currentTime ), flush=True )
 '''
             moose.setClock( pr.tick, self.statusDt )
 
