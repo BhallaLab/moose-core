@@ -11,6 +11,10 @@ import time
 import moogul
 mooViews = []
 
+class ObjHandle:
+    def __init__( self, path ):
+        self.path = str( path, "utf-8" )
+
 class NsdfNeuronDataWrapper( moogul.DataWrapper ):
     def __init__( self, nsdf, neuronName, field ):
         if len( neuronName.split('/' ) ) != 2:
@@ -26,6 +30,8 @@ class NsdfNeuronDataWrapper( moogul.DataWrapper ):
         self.idx_ = 0
         self.dt_= nsdf["/data/uniform/{}/{}/{}".format( self.objBase_, self.objRel_, field)].attrs['dt']
         self.coords_ = np.array( nsdf['/data/static/{}/{}/coords'.format(self.objBase_, self.objRel_) ] )
+        objPaths = nsdf["/map/static/{}/{}/coords".format( self.objBase_, self.objRel_)]
+        self.objList_ = [ ObjHandle( path ) for path in objPaths ]
         #print( "COORDS SHAPE for ", neuronName, " = ", self.coords_.shape )
         self.getMinMax()
 
@@ -51,6 +57,20 @@ class NsdfNeuronDataWrapper( moogul.DataWrapper ):
     def numObj( self ):
         return len( self.coords_ )
 
+    def getHistory( self, path, field ):
+        if field != self.field_:
+            print( "NsdfNeuronDataWrapper:getHistory Error: field name does not match: ", field, self.field_ )
+            return
+        objIdx = [ idx for idx, val in enumerate( self.objList_ ) if val.path == path ]
+        if len( objIdx ) == 0:
+            print( "NsdfNeuronDataWrapper:getHistory Error: path not found: ",  path )
+            return
+
+        npath = "/data/uniform/{}/{}/{}".format( self.objBase_, self.objRel_, self.field_ )
+        val = self.nsdf_[npath][objIdx[0],:]
+        t = np.arange( 0.0, len( val ), 1.0 ) * self.dt_
+        return t, val
+
 #####################################################################
 
 class NsdfChemDataWrapper( moogul.DataWrapper ):
@@ -70,6 +90,8 @@ class NsdfChemDataWrapper( moogul.DataWrapper ):
         self.coords_ = np.array( nsdf['/data/static/{}/{}/coords'.format(self.objBase_, self.objRel_) ] )
         if self.coords_.shape[1] == 10:
             self.coords_[:,6] = self.coords_[:,9] # Temp hack to get radius correctly
+        objPaths = nsdf["/map/static/{}/{}/coords".format( self.objBase_, self.objRel_)]
+        self.objList_ = [ ObjHandle( path ) for path in objPaths ]
 
         self.getMinMax()
 
@@ -97,6 +119,21 @@ class NsdfChemDataWrapper( moogul.DataWrapper ):
 
     def numObj( self ):
         return len( self.coords_ )
+
+    def getHistory( self, path, field ):
+        if field != self.field_:
+            print( "NsdfChemDataWrapper:getHistory Error: field name does not match: ", field, self.field_ )
+            return
+        objIdx = [ idx for idx, val in enumerate( self.objList_ ) if val.path == path ]
+        if len( objIdx ) == 0:
+            print( "NsdfChemDataWrapper:getHistory Error: path not found: ",  path )
+            return
+
+        npath = "/data/uniform/{}/{}/{}".format( self.objBase_, self.objRel_, self.field_ )
+        val = self.nsdf_[npath][objIdx[0],:]
+        t = np.arange( 0, len( val ), 1 ) * self.dt_
+        return t, val
+
 
 #####################################################################
 def main():

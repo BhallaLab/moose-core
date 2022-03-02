@@ -335,33 +335,39 @@ void NSDFWriter2::innerCreateMaps( const char* const mapSrcStr )
     herr_t status;
     hid_t uniformMapContainer = require_group(filehandle_, mapSrcStr );
     // Create the DS themselves
-    for (map< string, vector < unsigned int > >::iterator ii = classFieldToSrcIndex_.begin();
-         ii != classFieldToSrcIndex_.end(); ++ii){
+	for( auto bit = blocks_.begin(); bit != blocks_.end(); bit++ ) {
+    //for (map< string, vector < unsigned int > >::iterator ii = classFieldToSrcIndex_.begin(); ii != classFieldToSrcIndex_.end(); ++ii){
+		/*
         vector < string > pathTokens;
         moose::tokenize(ii->first, "/", pathTokens);
         string className = pathTokens[0];
         string fieldName = pathTokens[1];
+		*/
+        string className = bit->nsdfContainerPath + "/" + bit->nsdfRelPath;
+        string fieldName = bit->field;
 		if (mapSrcStr == MAPSTATICSRC ) //Hack. for now only static field is coords
 			fieldName = "coords";
         hid_t container = require_group(uniformMapContainer, className);
-        char ** sources = (char **)calloc(ii->second.size(), sizeof(char*));
-        for (unsigned int jj = 0; jj < ii->second.size(); ++jj){
-            sources[jj] = (char*)calloc(src_[ii->second[jj]].path().length()+1, sizeof(char));
-            strcpy(sources[jj],src_[ii->second[jj]].path().c_str());
+        char ** sources = (char **)calloc(bit->objVec.size(), sizeof(char*));
+        for (unsigned int jj = 0; jj < bit->objVec.size(); ++jj){
+            sources[jj] = (char*)calloc(bit->objVec[jj].path().length()+1, sizeof(char));
+            strcpy(sources[jj],bit->objVec[jj].path().c_str());
         }
-        hid_t ds = createStringDataset(container, fieldName, (hsize_t)ii->second.size(), (hsize_t)ii->second.size());
+        hid_t ds = createStringDataset(container, fieldName, (hsize_t)bit->objVec.size(), (hsize_t)bit->objVec.size());
         hid_t memtype = H5Tcopy(H5T_C_S1);
         status = H5Tset_size(memtype, H5T_VARIABLE);
         assert(status >= 0);
         status = H5Dwrite(ds, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, sources);
         assert(status >= 0);
-        for (unsigned int jj = 0; jj < ii->second.size(); ++jj){
+        for (unsigned int jj = 0; jj < bit->objVec.size(); ++jj){
             free(sources[jj]);
         }
         free(sources);
+		/*
         status = H5DSset_scale(ds, "source");
         status = H5DSattach_scale(classFieldToUniform_[ii->first], ds, 0);
         status = H5DSset_label(classFieldToUniform_[ii->first], 0, "source");
+		*/
         status = H5Dclose(ds);
         status = H5Tclose(memtype);
     }

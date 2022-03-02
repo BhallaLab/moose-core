@@ -56,6 +56,7 @@ class MooView:
         self.colorbar = None
         self.valMin = 0.0
         self.valMmax = 1.0
+        self.plotFlag_ = True
 
     @staticmethod
     def replayLoop():
@@ -118,10 +119,7 @@ class MooView:
         self.zAx.axis = vp.vector( z.dot( right ), z.dot( up ), 0.0 )
         self.axisLength.text = "{:.2f} <i>u</i>m".format( dx * 1e6*self.scene.range * self.colorbar.width / self.scene.width )
 
-    def makeColorbar( self, doOrnaments = True, colorscale = 'jet', bg = 'default' ):
-        title = None
-        if doOrnaments:
-            title = MooView.consolidatedTitle + "\n"
+    def innerColorbar( self, title, bg ):
         barWidth = SCALE_SCENE * 1.5
         if ( bgLookup(bg).mag < 1 ):
             barTextColor = vp.color.white
@@ -145,6 +143,12 @@ class MooView:
         self.yAx = vp.cylinder( canvas = self.colorbar, pos = axOrigin, axis = vp.vector( 0, 0.8, 0 ), radius = 0.04, color = vp.color.green )
         self.zAx = vp.cylinder( canvas = self.colorbar, pos = axOrigin, axis = vp.vector( 0, 0, 0 ), radius = 0.04, color = vp.color.blue )
         self.axisLength = vp.label( pos = axOrigin + vp.vector(0, 1, 0), text = "1.00 <i>u</i>m", color = barTextColor, box = False )
+
+    def makeColorbar( self, doOrnaments = True, colorscale = 'jet', bg = 'default' ):
+        title = None
+        if doOrnaments:
+            title = MooView.consolidatedTitle + "\n"
+        self.innerColorbar( title, bg )
         if doOrnaments:
             self.timeLabel = vp.wtext( text = "Time =  0.000 sec", pos = self.colorbar.title_anchor )
             self.sleepLabel = vp.wtext( text = "    Frame dt = 0.005 sec", pos = self.colorbar.title_anchor )
@@ -158,14 +162,14 @@ class MooView:
             return
         elmPath = self.innerPickObj( obj )
         if elmPath:
-            print( elmPath )
+            self.handlePick( elmPath )
             return
         elif self.viewIdx == 0: 
             for view in MooView.viewList[1:]:
                 if view.colorbar == None:
                     elmPath = view.innerPickObj( obj )
                     if elmPath:
-                        print( elmPath )
+                        self.handlePick( elmPath )
                         return
         print( "Object {} not found on view {}".format( obj, self.title ) )
 
@@ -173,8 +177,15 @@ class MooView:
         for dr in self.drawables_:
             elmPath = dr.findDisplayObject( obj )
             if elmPath:
-                return elmPath
+                return (elmPath[0], elmPath[1], dr)
         return None
+
+    def handlePick( self, elmPath ):
+        path, field, drawable = elmPath
+        if self.plotFlag_:
+            drawable.plotHistory( path, field, self.graph, self.graphPlot1 )
+        else:
+            print( path, field )
 
 
 
@@ -224,6 +235,13 @@ class MooView:
             else:
                 self.doAutoscale()
             self.updateAxis()
+        if self.viewIdx == (MooView.viewIdx-1):
+            print( "last View", self.viewIdx)
+            self.graph = vp.graph( title = "Graph", xtitle = "Time (s)", ytitle = " Units here", width = 700, fast=True, align = "left" )
+            self.graphPlot1 = vp.gcurve( color = vp.color.blue, interval=-1)
+            #self.graphPlot1.data =  [[0,0], [1,1],[2,0],[3,4],[4,0], [5,1]]
+            #self.graphPlot1.plot( [[0,0], [1,1],[2,0],[3,4],[4,0]] )
+            
 
     def updateValues( self, simTime ):
         for i in self.drawables_:
@@ -388,6 +406,10 @@ class DataWrapper:
         # Checks that the simTime has crossed upcomingTime
         return True # used for multi timestep cases.
 
+    def getHistory( self, path, field ):
+        # stub function. Derived classes fill it in and return useful values
+        return [0, 1, 2, 3], [ 1, 4, 9, 16]
+
 class MooDrawable:
     ''' Base class for drawing things'''
     def __init__( self,
@@ -461,9 +483,34 @@ class MooDrawable:
     def findDisplayObject( self, obj ):
         try:
             idx = self.segments.index( obj )
-            return self.dataWrapper_.objPathFromIndex( idx )
+            return self.dataWrapper_.objPathFromIndex( idx ), self.dataWrapper_.field_
         except ValueError:
             return None
+
+    def plotHistory( self, path, field, graph, plot ):
+        t, v = self.dataWrapper_.getHistory( path, field )
+        if len( t ) == 0:
+            print( "No data history for '", path, ".", field )
+            return
+        #self.graph = vp.graph( title = path + "." + field, xtitle = "Time (s)", ytitle = field + " Units here", width = 800, fast=False, pos=self.colorbar.caption_anchor )
+        graph.title = path + "." + field
+        dat = [[x,y] for x, y in zip( t, v ) ]
+        plot.data = dat
+        #print (dat)
+        #print( "IN plotHistory, ", len( dat), len( v ) )
+        #plot.data = [[x,y] for x, y in zip( t, v ) ]
+        #plot.data = [[x,sin(x)] for x in range( 0.0, 10.0, 0.1 ) ]
+        '''
+        fig = plt.figure( 1 )
+        plt.ion()
+        plt.title( path + "." + field )
+        plt.xlabel( "Time (s)" )
+        plt.ylabel( field + " um, units?" )
+        plt.plot( t, v )
+        plt.show( block = False )
+        fig.canvas.draw()
+        '''
+
 
 #####################################################################
 
