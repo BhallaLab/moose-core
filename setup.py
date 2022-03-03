@@ -15,8 +15,8 @@
 __author__     = "Dilawar Singh"
 
 __copyright__  = "Copyright 2019-, Dilawar Singh"
-__maintainer__ = "Dilawar Singh"
-__email__      = "dilawar.s.rajput@gmail.com"
+__maintainer__ = ""
+__email__      = ""
 
 import os
 import sys
@@ -49,7 +49,7 @@ if not os.path.exists(builddir_):
 
 numCores_ = multiprocessing.cpu_count()
 
-version_ = '3.2.0.dev%s' % stamp
+version_ = '3.3.0.dev%s' % stamp
 
 # importlib is available only for python3. Since we build wheels, prefer .so
 # extension. This way a wheel built by any python3.x will work with any python3.
@@ -153,7 +153,7 @@ setup(
     author='MOOSERes',
     author_email='bhalla@ncbs.res.in',
     maintainer='Dilawar Singh',
-    maintainer_email='dilawars@ncbs.res.in',
+    maintainer_email='',
     url='http://moose.ncbs.res.in',
     packages=[
         'rdesigneur', 'moose', 'moose.SBML', 'moose.genesis', 'moose.neuroml',
@@ -171,7 +171,7 @@ setup(
         ]
     },
     # python2 specific version here as well.
-    install_requires=['numpy', 'matplotlib'],
+    install_requires=['numpy', 'matplotlib','vpython'],
     extra_requires={'dev' : [ 'coverage', 'pytest', 'pytest-cov' ]},
     ext_modules=[CMakeExtension('dummy', optional=True)],
     cmdclass={'build_ext': build_ext, 'test': TestCommand},
