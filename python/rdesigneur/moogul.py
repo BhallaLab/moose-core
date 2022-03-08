@@ -236,7 +236,6 @@ class MooView:
                 self.doAutoscale()
             self.updateAxis()
         if self.viewIdx == (MooView.viewIdx-1):
-            print( "last View", self.viewIdx)
             self.graph = vp.graph( title = "Graph", xtitle = "Time (s)", ytitle = " Units here", width = 700, fast=False, align = "left" )
             self.graphPlot1 = vp.gcurve( color = vp.color.blue, interval=-1)
             #self.graphPlot1.data =  [[0,0], [1,1],[2,0],[3,4],[4,0], [5,1]]

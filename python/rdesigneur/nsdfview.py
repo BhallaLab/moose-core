@@ -16,15 +16,22 @@ class ObjHandle:
         self.path = str( path, "utf-8" )
 
 class NsdfNeuronDataWrapper( moogul.DataWrapper ):
-    def __init__( self, nsdf, neuronName, field ):
-        if len( neuronName.split('/' ) ) != 2:
-            print( "Error: neuronName needs '/' between base and rel parts: ", objname )
-            assert( 0 )
+    def __init__( self, nsdf, path, field ):
         moogul.DataWrapper.__init__( self, field )
         self.nsdf_ = nsdf
-        self.neuronName_ = neuronName
-        self.objBase_ = neuronName.split( '/' )[0]
-        self.objRel_ = neuronName.split( '/' )[1]
+        self.path_ = path
+        spl = path.split( '/', 1 )
+        self.objBase_ = "%elec"
+        if len( spl ) > 1:  # Some relative path tree.
+            if spl[0] == "#":
+                self.objRel_ = "##[ISA=CompartmentBase]%" + spl[1].replace( '/', '%' )
+            else:
+                self.objRel_ = spl[0] + "%" + spl[1].replace( '/', '%' )
+        else:
+            if spl[0] == "#":
+                self.objRel_ = "##[ISA=CompartmentBase]"
+            else:
+                self.objRel_ = path   # No slashes in the string.
         self.field_ = field
         self.simTime_ = 0.0
         self.idx_ = 0
@@ -80,9 +87,18 @@ class NsdfChemDataWrapper( moogul.DataWrapper ):
             assert( 0 )
         moogul.DataWrapper.__init__( self, field )
         self.nsdf_ = nsdf
-        self.objBase_ = objname.split( '/' )[0]
-        self.objRel_ = objname.split( '/' )[1]
-        
+        spl = objname.split( '/', 1 )
+        if len( spl ) > 1:  # Can't deal with case where we have /chem as base but multiple levels below it.
+            self.objBase_ = '%' + spl[0]
+            self.objRel_ = spl[1].replace( '/', '%' )
+            if self.objRel_[-1] != ']':  # put in wildcard, if none provided
+                self.objRel_ += '[]'
+        else:   # obj is direct child of /chem.
+            self.objBase_ = "%chem"
+            self.objRel_ = objname  # doesn't have any slashes either.
+            if self.objRel_[-1] != ']':  # put in wildcard, if none provided
+                self.objRel_ += '[]'
+
         self.field_ = field
         self.simTime_ = 0.0
         self.idx_ = 0

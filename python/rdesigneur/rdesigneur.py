@@ -1021,24 +1021,23 @@ print( "Wall Clock Time = {:8.2f}, simtime = {:8.3f}".format( time.time() - _sta
                 # Should check for duplication.
                 nsdfPath = fileBase.path + '/' + oname
                 if fentry.field in ["n", "conc"]:
-                    if fentry.basepath[:4] == 'chem': #chem itself as compt
-                        modelPath = self.modelPath
-                    else:
-                        modelPath = self.modelPath + "/chem" 
-                    basePath = modelPath + "/" + fentry.basepath
-                    pathStr = basePath + '/' + fentry.relpath + "[]." + fentry.field
-                else:
-                    modelPath = self.modelPath + "/elec" 
-                    if fentry.basepath in ["elec", "#", "."]:
-                        fentry.basepath = "##[ISA=CompartmentBase]"
-                    elif fentry.basepath in ["spine", "SPINE", "head", "HEAD"]:
-                        fentry.basepath = "#head#[ISA=CompartmentBase]"
-                    # Otherwise we use basepath as is.
-                    basePath = modelPath + "/" + fentry.basepath
-                    if fentry.relpath in [".", "/", "./"]:
+                    modelPath = self.modelPath + "/chem" 
+                    basePath = modelPath + "/" + fentry.path
+                    if fentry.path[-1] in [']', '#']: # explicit index
                         pathStr = basePath + "." + fentry.field
                     else:
-                        pathStr = basePath + '/' + fentry.relpath + "." + fentry.field
+                        pathStr = basePath + "[]." + fentry.field
+                else:
+                    modelPath = self.modelPath + "/elec" 
+                    spl = fentry.path.split('/')
+                    if spl[0] == "#":
+                        if len( spl ) == 1:
+                            fentry.path = "##[ISA=CompartmentBase]"
+                        else:
+                            fentry.path = "##[ISA=CompartmentBase]" + fentry.path[1:]
+                    # Otherwise we use basepath as is.
+                    basePath = modelPath + "/" + fentry.path
+                    pathStr = basePath + "." + fentry.field
                 if not nsdfPath in nsdfBlocks:
                     self.nsdfPathList.append( nsdfPath )
                     nsdfBlocks[nsdfPath] = [pathStr]
@@ -1262,7 +1261,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
         }
         stims = moose.Neutral( self.modelPath + '/stims' )
         k = 0
-        # rstim class has {elecpath, geom_expr, relpath, field, expr}
+        # rstim class has {fname, path, field, dt, flush_steps }
         for i in self.stimList:
             pair = i.elecpath + " " + i.geom_expr
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
@@ -1965,10 +1964,12 @@ class rstim( baseplot ):
 
 class rfile:
     def __init__( self,
-            fname = 'output.h5', basepath = 'elec', relpath = '.', field = 'Vm', dt = 1e-4, flushSteps = 200, start = 0.0, stop = -1.0, ftype = 'nsdf'):
+            fname = 'output.h5', path = 'soma', field = 'Vm', dt = 1e-4, flushSteps = 200, start = 0.0, stop = -1.0, ftype = 'nsdf'):
         self.fname = fname
-        self.basepath = basepath
-        self.relpath = relpath
+        self.path = path
+        if not field in knownFieldsDefault:
+            print( "Error: Field '{}' not known.".format( field ) )
+            assert( 0 )
         self.field = field
         self.dt = dt
         self.flushSteps = flushSteps
@@ -1977,11 +1978,12 @@ class rfile:
         self.ftype = self.fname.split(".")[-1]
         if not self.ftype in ["txt", "csv", "h5", "nsdf"]:
             print( "Error: output file format for ", fname , " not known")
+            assert( 0 )
         self.fname = self.fname.split("/")[-1]
 
     def printme( self ):
-        print( "{0}, {1}, {2}, {3}, {4}".format( 
-            self.fname, self.basepath, self.relpath, self.field, self.dt) )
+        print( "{0}, {1}, {2}, {3}".format( 
+            self.fname, self.path, self.field, self.dt) )
 
     @staticmethod
     def convertArg( arg ):
