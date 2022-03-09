@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2.3 FATAL_ERROR)
+cmake_minimum_required(VERSION 4.9.3 FATAL_ERROR)
 
 # Project to build MOOSE's python module.
 project(PyMOOSE)
@@ -103,6 +103,25 @@ endif()
 if(WITH_BOOST OR WITH_BOOST_ODE)
     set(WITH_BOOST_ODE ON)
     set(WITH_GSL OFF)
+endif()
+
+find_package(HDF5 COMPONENTS CXX HL)
+
+if (NOT HDF5_FOUND)
+        message("==================================================================\n"
+            " HDF5 not found. Disabling NSDF support.\n\n"
+            " If you need NSDF support, please install hdf5-dev or hdf5-devel\n"
+            " package or equivalent.\n\n"
+            "     $ sudo apt-get install libhdf5-dev \n"
+            "     $ sudo yum install libhdf5-devel \n"
+            "     $ brew install hdf5 \n\n"
+            " Otherwise, continue with 'make' and 'make install' \n"
+            " If you install hdf5 to non-standard path, export environment \n"
+            " variable HDF5_ROOT to the location. Rerun cmake \n"
+            "================================================================ \n"
+	)
+elseif(HDF5_FOUND)
+	set(WITH_NSDF ON)
 endif()
 
 ################################### TARGETS ####################################
