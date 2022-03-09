@@ -150,6 +150,42 @@ class NsdfChemDataWrapper( moogul.DataWrapper ):
         t = np.arange( 0, len( val ), 1 ) * self.dt_
         return t, val
 
+#####################################################################
+def listElecDatasets( nsdf ):
+    elec = nsdf["/data/uniform/%elec"]
+    for ee in elec:
+        path = ""
+        spl = ee.split( '%', 1 )
+        if spl[0] == "##[ISA=CompartmentBase]":
+            path += "#"
+        else:
+            path = spl[0]
+        if len( spl ) > 1:
+            path += '/' + spl[1].replace( '%', '/' )
+        for datasetName in elec[ee]:
+            path += '.' + datasetName
+            dataset = elec[ee + '/' + datasetName]
+            dt = dataset.attrs['dt']
+            shape = dataset.shape
+            print( "Elec: {:<36} shape=({}),  dt={}".format( path, shape, dt ) )
+
+def listDatasets( nsdf ):
+    uniform = nsdf["/data/uniform"]
+    for uu in uniform:
+        if uu == "%elec":
+            listElecDatasets( nsdf )
+        else:
+            group = uniform[uu]
+            path = uu[1:]
+            for ch in group:
+                path += '/' + ch.replace( '%', '/' )
+                for datasetName in group[ch]:
+                    dataset = group[ ch + '/' + datasetName]
+                    #print( "ATTR NAMES = ", dataset.keys() )
+                    dt = dataset.attrs['dt']
+                    shape = dataset.shape
+                    print( "Chem: {:<36} shape=({}),  dt={}".format( path + '.' + datasetName, shape, dt ) )
+
 
 #####################################################################
 def main():
@@ -163,11 +199,14 @@ def main():
     parser.add_argument( '-l', '--list_datasets', action="store_true", help="List possible datasets available to view." )
     args = parser.parse_args()
 
-    if len( args.viewspec ) == 0:
+    if (not args.list_datasets) and len( args.viewspec ) == 0:
         print( "warning: No viewpsec defined in command line" )
         quit()
 
     nsdf = h5py.File( args.NSDF_filename, 'r' )
+    if args.list_datasets:
+        listDatasets( nsdf )
+        quit()
 
     viewer = []
     for vs in args.viewspec:
