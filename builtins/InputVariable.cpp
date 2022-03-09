@@ -50,6 +50,7 @@
 #include "hdf5.h"
 
 #include "NSDFWriter.h"
+#include "NSDFWriter2.h"
 #include "InputVariable.h"
 
 
@@ -81,7 +82,7 @@ const Cinfo * InputVariable::initCinfo()
 
 static const Cinfo *InputVariableCinfo = InputVariable::initCinfo();
 
-InputVariable::InputVariable(): owner_(0)
+InputVariable::InputVariable(): owner_(0), owner2_(0)
 {
     ;
 }
@@ -96,12 +97,18 @@ void InputVariable::setOwner( NSDFWriter * owner)
     owner_ = owner;
 }
 
+void InputVariable::setOwner( NSDFWriter2 * owner)
+{
+    owner2_ = owner;
+}
+
 void InputVariable::epSetValue( const Eref& eref, double value)
 {
-    if (owner_)
-    {
+    if (owner_) {
         owner_->setInput(eref.fieldIndex(), value);
-    }
+    } else if ( owner2_ ) {
+        owner2_->setInput(eref.fieldIndex(), value);
+	}
 }
 #endif
 

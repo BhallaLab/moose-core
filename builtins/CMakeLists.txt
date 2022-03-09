@@ -74,6 +74,7 @@ if(WITH_NSDF AND HDF5_FOUND)
     list(APPEND SRCS
     HDF5WriterBase.cpp
     NSDFWriter.cpp
+    NSDFWriter2.cpp
     HDF5DataWriter.cpp
     SpikeStats.cpp
     testBuiltins.cpp

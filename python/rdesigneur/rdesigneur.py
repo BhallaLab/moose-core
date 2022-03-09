@@ -46,6 +46,21 @@ import csv
 
 meshOrder = ['soma', 'dend', 'spine', 'psd', 'psd_dend', 'presyn_dend', 'presyn_spine', 'endo']
 
+knownFieldsDefault = {
+    'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)', -80.0, 40.0 ),
+    'initVm':('CompartmentBase', 'getInitVm', 1000, 'Init. Memb. Potl (mV)', -80.0, 40.0 ),
+    'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)', -10.0, 10.0 ),
+    'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)', -10.0, 10.0 ),
+    'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)', 0.0, 1.0 ),
+    'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)', 0.0, 1.0 ),
+    'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)', -10.0, 10.0 ),
+    'ICa':('NMDAChan', 'getICa', 1e9, 'Ca current (nA)', -10.0, 10.0 ),
+    'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)', 0.0, 10.0 ),
+    'n':('PoolBase', 'getN', 1, '# of molecules', 0.0, 200.0 ),
+    'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)', 0.0, 2.0 ),
+    'volume':('PoolBase', 'getVolume', 1e18, 'Volume (um^3)' )
+}
+
 #EREST_ACT = -70e-3
 
 def _profile(func):
@@ -102,6 +117,7 @@ class rdesigneur:
             elecPlotDt = 0.1e-3,    # Same default as from MOOSE
             funcDt = 0.1e-3,        # Used when turnOffElec is False.
                                     # Otherwise system uses chemDt.
+            statusDt = 0.0,         # Dt to print out status. 0 = no print
             numWaveFrames = 100,    # Number of frames to use for waveplots
             cellProto = [],
             spineProto = [],
@@ -115,6 +131,8 @@ class rdesigneur:
             stimList = [],
             plotList = [],  # elecpath, geom_expr, object, field, title ['wave' [min max]]
             moogList = [], 
+            outputFileList = [], # List of all file save specifications.
+            modelFileNameList = [], # List of any files used to build.
             ode_method = "gsl",  # gsl, lsoda, gssa, gillespie
             isLegacyMethod = False,
             params = None
@@ -145,6 +163,7 @@ class rdesigneur:
         self.elecDt= elecDt
         self.elecPlotDt= elecPlotDt
         self.funcDt= funcDt
+        self.statusDt= statusDt
         self.chemPlotDt= chemPlotDt
         self.numWaveFrames = numWaveFrames
         self.isLegacyMethod = isLegacyMethod
@@ -158,6 +177,7 @@ class rdesigneur:
         self.spineDistrib = spineDistrib
         self.chanDistrib = chanDistrib
         self.chemDistrib = chemDistrib
+        self.modelFileNameList = modelFileNameList
 
         self.params = params
 
@@ -166,6 +186,7 @@ class rdesigneur:
             self.stimList = [ rstim.convertArg(i) for i in stimList ]
             self.plotList = [ rplot.convertArg(i) for i in plotList ]
             self.moogList = [ rmoog.convertArg(i) for i in moogList ]
+            self.outputFileList = [ rfile.convertArg(i) for i in outputFileList ]
         except BuildError as msg:
             print("Error: rdesigneur: " + msg)
             quit()
@@ -175,10 +196,13 @@ class rdesigneur:
         self.wavePlotNames = []
         self.saveNames = []
         self.moogNames = []
+        self.fileDumpNames = []
         self.cellPortionElist = []
         self.spineComptElist = []
         self.tabForXML = []
         self._endos = []
+        self.nsdfPathList = [] # List of paths of nsdf objects.
+        self._finishedSaving = False
 
         if not moose.exists( '/library' ):
             library = moose.Neutral( '/library' )
@@ -215,9 +239,11 @@ class rdesigneur:
         self.model = moose.Neutral( modelPath )
         self.modelPath = modelPath
         funcs = [self.installCellFromProtos, self.buildPassiveDistrib
-            , self.buildChanDistrib, self.buildSpineDistrib, self.buildChemDistrib
+            , self.buildChanDistrib, self.buildSpineDistrib
+            , self.buildChemDistrib
             , self._configureSolvers, self.buildAdaptors, self._buildStims
-            , self._buildPlots, self._buildMoogli, self._configureHSolve
+            , self._buildPlots, self._buildMoogli, self._buildFileOutput
+            , self._configureHSolve
             , self._configureClocks, self._printModelStats]
 
         for i, _func in enumerate(funcs):
@@ -237,6 +263,13 @@ class rdesigneur:
                     msg += ' %.3f sec' % t
                 print(msg)
             sys.stdout.flush()
+        if self.statusDt > min( self.elecDt, self.chemDt, self.diffDt ):
+            pr = moose.PyRun( modelPath + '/updateStatus' )
+            pr.initString = "_status_t0 = time.time()"
+            pr.runString = '''
+print( "Wall Clock Time = {:8.2f}, simtime = {:8.3f}".format( time.time() - _status_t0, moose.element( '/clock' ).currentTime ), flush=True )
+'''
+            moose.setClock( pr.tick, self.statusDt )
 
     def installCellFromProtos( self ):
         if self.stealCellFromLibrary:
@@ -961,22 +994,8 @@ class rdesigneur:
                 q += 1
 
     def _buildMoogli( self ):
-        knownFields = {
-            'Vm':('CompartmentBase', 'getVm', 1000, 'Memb. Potential (mV)', -80.0, 40.0 ),
-            'initVm':('CompartmentBase', 'getInitVm', 1000, 'Init. Memb. Potl (mV)', -80.0, 40.0 ),
-            'Im':('CompartmentBase', 'getIm', 1e9, 'Memb. current (nA)', -10.0, 10.0 ),
-            'inject':('CompartmentBase', 'getInject', 1e9, 'inject current (nA)', -10.0, 10.0 ),
-            'Gbar':('ChanBase', 'getGbar', 1e9, 'chan max conductance (nS)', 0.0, 1.0 ),
-            'Gk':('ChanBase', 'getGk', 1e9, 'chan conductance (nS)', 0.0, 1.0 ),
-            'Ik':('ChanBase', 'getIk', 1e9, 'chan current (nA)', -10.0, 10.0 ),
-            'ICa':('NMDAChan', 'getICa', 1e9, 'Ca current (nA)', -10.0, 10.0 ),
-            'Ca':('CaConcBase', 'getCa', 1e3, 'Ca conc (uM)', 0.0, 10.0 ),
-            'n':('PoolBase', 'getN', 1, '# of molecules', 0.0, 200.0 ),
-            'conc':('PoolBase', 'getConc', 1000, 'Concentration (uM)', 0.0, 2.0 ),
-            'volume':('PoolBase', 'getVolume', 1e18, 'Volume (um^3)' )
-        }
+        knownFields = knownFieldsDefault
         moogliBase = moose.Neutral( self.modelPath + '/moogli' )
-        k = 0
         for i in self.moogList:
             kf = knownFields[i.field]
             pair = i.elecpath + " " + i.geom_expr
@@ -988,6 +1007,57 @@ class rdesigneur:
             #mooObj3 = dendObj + spineObj
             numMoogli = len( dendObj )
             self.moogNames.append( rmoogli.makeMoogli( self, dendObj, i, kf ) )
+
+    def _buildFileOutput( self ):
+        fileBase = moose.Neutral( self.modelPath + "/file" )
+        knownFields = knownFieldsDefault
+
+        nsdfBlocks = {}
+        nsdf = None
+        
+        for idx, fentry in enumerate( self.outputFileList ):
+            oname = fentry.fname.split( "." )[0]
+            if fentry.ftype in ["h5", "nsdf"]:
+                # Should check for duplication.
+                nsdfPath = fileBase.path + '/' + oname
+                if fentry.field in ["n", "conc"]:
+                    modelPath = self.modelPath + "/chem" 
+                    basePath = modelPath + "/" + fentry.path
+                    if fentry.path[-1] in [']', '#']: # explicit index
+                        pathStr = basePath + "." + fentry.field
+                    else:
+                        pathStr = basePath + "[]." + fentry.field
+                else:
+                    modelPath = self.modelPath + "/elec" 
+                    spl = fentry.path.split('/')
+                    if spl[0] == "#":
+                        if len( spl ) == 1:
+                            fentry.path = "##[ISA=CompartmentBase]"
+                        else:
+                            fentry.path = "##[ISA=CompartmentBase]" + fentry.path[1:]
+                    # Otherwise we use basepath as is.
+                    basePath = modelPath + "/" + fentry.path
+                    pathStr = basePath + "." + fentry.field
+                if not nsdfPath in nsdfBlocks:
+                    self.nsdfPathList.append( nsdfPath )
+                    nsdfBlocks[nsdfPath] = [pathStr]
+                    nsdf = moose.NSDFWriter2( nsdfPath )
+                    nsdf.modelRoot = "" # Blank means don't save tree.
+                    nsdf.filename = fentry.fname
+                    # Insert the model setup files here.
+                    nsdf.mode = 2
+                    nsdf.flushLimit = fentry.flushSteps   # Number of timesteps between flush
+                    nsdf.tick = 20 + len( nsdfBlocks )
+                    moose.setClock( nsdf.tick, fentry.dt )
+                    mfns = sys.argv[0]
+                    for ii in self.modelFileNameList:
+                        mfns += "," + ii
+                    nsdf.modelFileNames = mfns 
+                else:
+                    nsdfBlocks[nsdfPath].append( pathStr )
+        for nsdfPath in self.nsdfPathList:
+            nsdf = moose.element( nsdfPath )
+            nsdf.blocks = nsdfBlocks[nsdfPath]
 
 
     ################################################################
@@ -1006,11 +1076,13 @@ rdesigneur.rmoogli.updateMoogliViewer()
         moose.setClock( pr.tick, moogliDt )
         moose.reinit()
         moose.start( runtime )
+        self._save()                                            
         rmoogli.notifySimulationEnd()
         if block:
             self.display( len( self.moogNames ) + 1)
 
     def display( self, startIndex = 0, block=True ):
+        self._save()                                            
         for i in self.plotNames:
             plt.figure( i[2] + startIndex )
             plt.title( i[1] )
@@ -1037,7 +1109,6 @@ rdesigneur.rmoogli.updateMoogliViewer()
             for i in range( 3 ):
                 self.displayWavePlots()
         plt.show( block=block )
-        self._save()                                            
         
 
     def initWavePlots( self, startIndex ):
@@ -1151,6 +1222,10 @@ rdesigneur.rmoogli.updateMoogliViewer()
 
 
     def _save( self ):
+        self._finishedSaving = True
+        for nsdfPath in self.nsdfPathList:
+            nsdf = moose.element( nsdfPath )
+            nsdf.close()
         for i in self.saveNames:
             tabname = i[0]
             idx = i[1]
@@ -1186,7 +1261,7 @@ rdesigneur.rmoogli.updateMoogliViewer()
         }
         stims = moose.Neutral( self.modelPath + '/stims' )
         k = 0
-        # rstim class has {elecpath, geom_expr, relpath, field, expr}
+        # rstim class has {fname, path, field, dt, flush_steps }
         for i in self.stimList:
             pair = i.elecpath + " " + i.geom_expr
             dendCompts = self.elecid.compartmentsFromExpression[ pair ]
@@ -1393,9 +1468,9 @@ rdesigneur.rmoogli.updateMoogliViewer()
     ################################################################
 
     def _loadElec( self, efile, elecname ):
+        self.modelFileNameList.append( efile )
         if ( efile[ len( efile ) - 2:] == ".p" ):
             self.elecid = moose.loadModel( efile, '/library/' + elecname)
-            print(self.elecid)
         elif ( efile[ len( efile ) - 4:] == ".swc" ):
             self.elecid = moose.loadModel( efile, '/library/' + elecname)
         else:
@@ -1429,31 +1504,11 @@ rdesigneur.rmoogli.updateMoogliViewer()
     # with those names and volumes in decreasing order.
     def validateChem( self  ):
         cpath = self.chemid.path
-        comptlist = moose.wildcardFind( cpath + '/#[ISA=ChemCompt]' )
+        comptlist = moose.wildcardFind( cpath + '/##[ISA=ChemCompt],' )
         if len( comptlist ) == 0:
             raise BuildError( "validateChem: no compartment on: " + cpath )
 
         return True
-
-        '''
-        if len( comptlist ) == 1:
-            return;
-
-        # Sort comptlist in decreasing order of volume
-        sortedComptlist = sorted( comptlist, key=lambda x: -x.volume )
-        if ( len( sortedComptlist ) != 3 ):
-            print(cpath, sortedComptlist)
-            raise BuildError( "validateChem: Require 3 chem compartments, have: " + str( len( sortedComptlist ) ) )
-        '''
-        '''
-        if not( sortedComptlist[0].name.lower() == 'dend' and \
-            sortedComptlist[1].name.lower() == 'spine' and \
-            sortedComptlist[2].name.lower() == 'psd' ):
-            raise BuildError( "validateChem: Invalid compt names: require dend, spine and PSD.\nActual names = " \
-                    + sortedComptList[0].name + ", " \
-                    + sortedComptList[1].name + ", " \
-                    + sortedComptList[2].name )
-        '''
 
     #################################################################
 
@@ -1691,13 +1746,14 @@ rdesigneur.rmoogli.updateMoogliViewer()
     ################################################################
 
     def _loadChem( self, fname, chemName ):
+        self.modelFileNameList.append( fname )
         chem = moose.Neutral( '/library/' + chemName )
         pre, ext = os.path.splitext( fname )
         if ext == '.xml' or ext == '.sbml':
             modelId = moose.readSBML( fname, chem.path )
         else:
             modelId = moose.loadModel( fname, chem.path, 'ee' )
-        comptlist = moose.wildcardFind( chem.path + '/#[ISA=ChemCompt]' )
+        comptlist = moose.wildcardFind( chem.path + '/##[ISA=ChemCompt]' )
         if len( comptlist ) == 0:
             print("loadChem: No compartment found in file: ", fname)
             return
@@ -1904,4 +1960,37 @@ class rstim( baseplot ):
             return rstim( *arg )
         else:
             raise BuildError( "rstim initialization failed" )
+
+
+class rfile:
+    def __init__( self,
+            fname = 'output.h5', path = 'soma', field = 'Vm', dt = 1e-4, flushSteps = 200, start = 0.0, stop = -1.0, ftype = 'nsdf'):
+        self.fname = fname
+        self.path = path
+        if not field in knownFieldsDefault:
+            print( "Error: Field '{}' not known.".format( field ) )
+            assert( 0 )
+        self.field = field
+        self.dt = dt
+        self.flushSteps = flushSteps
+        self.start = start
+        self.stop = stop
+        self.ftype = self.fname.split(".")[-1]
+        if not self.ftype in ["txt", "csv", "h5", "nsdf"]:
+            print( "Error: output file format for ", fname , " not known")
+            assert( 0 )
+        self.fname = self.fname.split("/")[-1]
+
+    def printme( self ):
+        print( "{0}, {1}, {2}, {3}".format( 
+            self.fname, self.path, self.field, self.dt) )
+
+    @staticmethod
+    def convertArg( arg ):
+        if isinstance( arg, rfile ):
+            return arg
+        elif isinstance( arg, list ):
+            return rfile( *arg )
+        else:
+            raise BuildError( "rfile initialization failed" )
 

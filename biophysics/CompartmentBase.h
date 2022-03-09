@@ -57,6 +57,8 @@ class CompartmentBase
 			double getY() const;
 			void setZ( double value );
 			double getZ() const;
+			void setCoords( vector< double > value );
+			vector< double > getCoords() const;
 
 			// Dest function definitions.
 			/**
