@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.9.3 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.2.3 FATAL_ERROR)
 
 # Project to build MOOSE's python module.
 project(PyMOOSE)
