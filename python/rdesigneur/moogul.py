@@ -56,6 +56,7 @@ class MooView:
         self.colorbar = None
         self.valMin = 0.0
         self.valMmax = 1.0
+        self.simTime = 0.0
         self.plotFlag_ = True
 
     @staticmethod
@@ -119,6 +120,53 @@ class MooView:
         self.zAx.axis = vp.vector( z.dot( right ), z.dot( up ), 0.0 )
         self.axisLength.text = "{:.2f} <i>u</i>m".format( dx * 1e6*self.scene.range * self.colorbar.width / self.scene.width )
 
+    def raiseMax( self, isDouble = False ):
+        valRange = self.valMax - self.valMin
+        if isDouble:
+            self.valMax = self.valMin + 2 * valRange
+        else:
+            self.valMax = self.valMin + valRange * 1.1111111111111111111111
+
+    def lowerMax( self, isDouble = False ):
+        valRange = self.valMax - self.valMin
+        if isDouble:
+            self.valMax = self.valMin + 0.5 * valRange
+        else:
+            self.valMax = self.valMin + valRange * 0.9
+
+    def raiseMin( self, isDouble = False ):
+        valRange = self.valMax - self.valMin
+        if isDouble:
+            self.valMin = self.valMmax - 0.5 * valRange
+        else:
+            self.valMin = self.valMax - valRange * 0.9
+
+    def lowerMin( self, isDouble = False ):
+        valRange = self.valMax - self.valMin
+        if isDouble:
+            self.valMin = self.valMax - 2 * valRange
+        else:
+            self.valMin = self.valMax - valRange * 1.1111111111111111111111
+
+
+
+    def scaleColorbar( self, event ):
+        loc = event.pos
+        #print( loc.y )
+        if loc.y > 4 and loc.y < 4.7:
+            self.lowerMax( self.scene.mouse.shift )
+            self.barMax.text = "{:.3f}".format(self.valMax)
+        elif loc.y > 4.85 and loc.y < 5.5:
+            self.raiseMax( self.scene.mouse.shift )
+            self.barMax.text = "{:.3f}".format(self.valMax)
+        elif loc.y > -3.25 and loc.y < -2.6:
+            self.raiseMin( self.scene.mouse.shift )
+            self.barMin.text = "{:.3f}".format(self.valMin)
+        elif loc.y > -3.95 and loc.y < -3.45:
+            self.lowerMin( self.scene.mouse.shift )
+            self.barMin.text = "{:.3f}".format(self.valMin)
+        self.drawables_[0].updateLimits( self.valMin, self.valMax )
+
     def innerColorbar( self, title, bg ):
         barWidth = SCALE_SCENE * 1.5
         if ( bgLookup(bg).mag < 1 ):
@@ -130,6 +178,8 @@ class MooView:
         self.colorbar.userzoom = False
         self.colorbar.userspin = False
         self.colorbar.userpan = False
+        #self.colorbar.bind( 'keydown', self.scaleColorbar )
+        self.colorbar.bind( 'click', self.scaleColorbar )
         height = 0.10
         width = 5
         axOrigin = vp.vector( 0, -5.5, 0 )
@@ -235,14 +285,14 @@ class MooView:
             else:
                 self.doAutoscale()
             self.updateAxis()
+        print( "Self.viewIDX = ", self.viewIdx, ", MOOView.viewIdx = ", MooView.viewIdx )
         if self.viewIdx == (MooView.viewIdx-1):
-            self.graph = vp.graph( title = "Graph", xtitle = "Time (s)", ytitle = " Units here", width = 700, fast=False, align = "left" )
-            self.graphPlot1 = vp.gcurve( color = vp.color.blue, interval=-1)
-            #self.graphPlot1.data =  [[0,0], [1,1],[2,0],[3,4],[4,0], [5,1]]
-            #self.graphPlot1.plot( [[0,0], [1,1],[2,0],[3,4],[4,0]] )
+            MooView.viewList[0].graph = vp.graph( title = "Graph", xtitle = "Time (s)", ytitle = " Units here", width = 700, fast=False, align = "left" )
+            MooView.viewList[0].graphPlot1 = vp.gcurve( color = vp.color.blue, interval=-1)
             
 
     def updateValues( self, simTime ):
+        self.simTime = simTime
         for i in self.drawables_:
             i.updateValues( simTime )
         if self.doRotation and abs( self.rotation ) < 2.0 * 3.14 / 3.0:
@@ -454,6 +504,19 @@ class MooDrawable:
 
         self.displayValues( indices )
 
+    def updateLimits( self, vmin, vmax ):
+        if self.autoscale:
+            valMin = min( self.val )
+            valMax = max( self.val )
+        else:
+            valMin = self.valMin = vmin
+            valMax = self.valMax = vmax
+        scaleVal = NUM_CMAP * (self.val - valMin) / (valMax - valMin)
+        #indices = scaleVal.ndarray.astype( int )
+        indices = np.maximum( np.minimum( scaleVal, NUM_CMAP-0.5), 0.0).astype(int)
+        self.displayValues( indices )
+
+
     def displayValues( self, indices ):
         for idx, seg in zip( indices, self.segments ): 
             seg.color = self.rgb[ idx]
@@ -495,20 +558,6 @@ class MooDrawable:
         graph.title = path + "." + field
         dat = [[x,y] for x, y in zip( t, v ) ]
         plot.data = dat
-        #print (dat)
-        #print( "IN plotHistory, ", len( dat), len( v ) )
-        #plot.data = [[x,y] for x, y in zip( t, v ) ]
-        #plot.data = [[x,sin(x)] for x in range( 0.0, 10.0, 0.1 ) ]
-        '''
-        fig = plt.figure( 1 )
-        plt.ion()
-        plt.title( path + "." + field )
-        plt.xlabel( "Time (s)" )
-        plt.ylabel( field + " um, units?" )
-        plt.plot( t, v )
-        plt.show( block = False )
-        fig.canvas.draw()
-        '''
 
 
 #####################################################################
