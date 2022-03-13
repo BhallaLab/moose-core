@@ -39,6 +39,7 @@ class MooView:
     rgb = []
     viewList = []
     consolidatedTitle = ""
+    colorbarViewIdx = 0    # Which View does the colorbar serve?
 
     def __init__( self, swx = 10, swy = 10, hideAxis = True, title = "view", colormap = 'jet'
     ):
@@ -58,6 +59,7 @@ class MooView:
         self.valMmax = 1.0
         self.simTime = 0.0
         self.plotFlag_ = True
+        self.cbox = []
 
     @staticmethod
     def replayLoop():
@@ -121,51 +123,63 @@ class MooView:
         self.axisLength.text = "{:.2f} <i>u</i>m".format( dx * 1e6*self.scene.range * self.colorbar.width / self.scene.width )
 
     def raiseMax( self, isDouble = False ):
-        valRange = self.valMax - self.valMin
+        moov = MooView.viewList[MooView.colorbarViewIdx]
+        valRange = moov.valMax - moov.valMin
         if isDouble:
-            self.valMax = self.valMin + 2 * valRange
+            moov.valMax = moov.valMin + 2 * valRange
         else:
-            self.valMax = self.valMin + valRange * 1.1111111111111111111111
+            moov.valMax = moov.valMin + valRange * 1.1111111111111111111111
+        return moov.valMax
 
     def lowerMax( self, isDouble = False ):
-        valRange = self.valMax - self.valMin
+        moov = MooView.viewList[MooView.colorbarViewIdx]
+        valRange = moov.valMax - moov.valMin
         if isDouble:
-            self.valMax = self.valMin + 0.5 * valRange
+            moov.valMax = moov.valMin + 0.5 * valRange
         else:
-            self.valMax = self.valMin + valRange * 0.9
+            moov.valMax = moov.valMin + 0.9 * valRange
+        return moov.valMax
 
     def raiseMin( self, isDouble = False ):
-        valRange = self.valMax - self.valMin
+        moov = MooView.viewList[MooView.colorbarViewIdx]
+        valRange = moov.valMax - moov.valMin
         if isDouble:
-            self.valMin = self.valMmax - 0.5 * valRange
+            moov.valMin = moov.valMmax - 0.5 * valRange
         else:
-            self.valMin = self.valMax - valRange * 0.9
+            moov.valMin = moov.valMax - valRange * 0.9
+        return moov.valMin
 
     def lowerMin( self, isDouble = False ):
-        valRange = self.valMax - self.valMin
+        moov = MooView.viewList[MooView.colorbarViewIdx]
+        valRange = moov.valMax - moov.valMin
         if isDouble:
-            self.valMin = self.valMax - 2 * valRange
+            moov.valMin = moov.valMax - 2 * valRange
         else:
-            self.valMin = self.valMax - valRange * 1.1111111111111111111111
-
-
+            moov.valMin = moov.valMax - valRange * 1.1111111111111111111111
+        return moov.valMin
 
     def scaleColorbar( self, event ):
         loc = event.pos
-        #print( loc.y )
+        if loc.y > 6:
+            idx = MooView.colorbarViewIdx + 1
+            if idx >= len( MooView.viewList ):
+                idx = 0
+            self.selectCbar( idx )
+            return
         if loc.y > 4 and loc.y < 4.7:
-            self.lowerMax( self.scene.mouse.shift )
-            self.barMax.text = "{:.3f}".format(self.valMax)
+            ret = self.lowerMax( self.scene.mouse.shift )
+            self.barMax.text = "{:.3e}".format(ret)
         elif loc.y > 4.85 and loc.y < 5.5:
-            self.raiseMax( self.scene.mouse.shift )
-            self.barMax.text = "{:.3f}".format(self.valMax)
+            ret = self.raiseMax( self.scene.mouse.shift )
+            self.barMax.text = "{:.3e}".format(ret)
         elif loc.y > -3.25 and loc.y < -2.6:
-            self.raiseMin( self.scene.mouse.shift )
-            self.barMin.text = "{:.3f}".format(self.valMin)
+            ret = self.raiseMin( self.scene.mouse.shift )
+            self.barMin.text = "{:.3e}".format(ret)
         elif loc.y > -3.95 and loc.y < -3.45:
-            self.lowerMin( self.scene.mouse.shift )
-            self.barMin.text = "{:.3f}".format(self.valMin)
-        self.drawables_[0].updateLimits( self.valMin, self.valMax )
+            ret = self.lowerMin( self.scene.mouse.shift )
+            self.barMin.text = "{:.3e}".format(ret)
+        for moov in MooView.viewList:
+            moov.drawables_[0].updateLimits( moov.valMin, moov.valMax )
 
     def innerColorbar( self, title, bg ):
         barWidth = SCALE_SCENE * 1.5
@@ -173,8 +187,7 @@ class MooView:
             barTextColor = vp.color.white
         else:
             barTextColor = vp.color.black
-        self.colorbar = vp.canvas( title = title, width = barWidth, height = self.swy * SCALE_SCENE, background = bgLookup(bg), align = 'left', range = 1, autoscale = False )
-        #self.colorbar = vp.canvas( title = title, width = barWidth, height = self.swy * SCALE_SCENE, background = vp.color.cyan, align = 'left', range = 1, autoscale = False )
+        self.colorbar = vp.canvas( title = "Datasets =  ", width = barWidth, height = self.swy * SCALE_SCENE, background = bgLookup(bg), align = 'left', range = 1, autoscale = False )
         self.colorbar.userzoom = False
         self.colorbar.userspin = False
         self.colorbar.userpan = False
@@ -185,10 +198,11 @@ class MooView:
         axOrigin = vp.vector( 0, -5.5, 0 )
         for idx, rgb in enumerate( self.rgb ):
             cbox = vp.box( canvas = self.colorbar, pos = vp.vector( 0, height * (idx - 26), 0), width = width, height = height, color = rgb )
-        barName = self.title.replace( ' ', '\n' )
+        barName = self.title.replace( '.', '\n' )
+        barName = barName.replace( '/', '\n', 1 )
         self.barName = vp.label( canvas = self.colorbar, align = 'left', pixel_pos = True, pos = vp.vector( 2, (self.swy - 0.32) * SCALE_SCENE, 0), text = barName, height = 15, color = barTextColor, box = False, opacity = 0 )
-        self.barMin = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, self.swy * SCALE_SCENE * 0.22, 0), text = "{:.3f}".format(self.valMin), height = 12, color = barTextColor, box = False, opacity = 0 )
-        self.barMax = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, (self.swy - 1.2) * SCALE_SCENE, 0), text = "{:.3f}".format(self.valMax), height = 12, color = barTextColor, box = False, opacity = 0 )
+        self.barMin = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, self.swy * SCALE_SCENE * 0.22, 0), text = "{:.3e}".format(self.valMin), height = 12, color = barTextColor, box = False, opacity = 0 )
+        self.barMax = vp.label( canvas = self.colorbar, align = 'center', pixel_pos = True, pos = vp.vector( barWidth/2, (self.swy - 1.2) * SCALE_SCENE, 0), text = "{:.3e}".format(self.valMax), height = 12, color = barTextColor, box = False, opacity = 0 )
         self.xAx = vp.cylinder( canvas = self.colorbar, pos = axOrigin, axis = vp.vector( 0.8, 0, 0 ), radius = 0.04, color = vp.color.red )
         self.yAx = vp.cylinder( canvas = self.colorbar, pos = axOrigin, axis = vp.vector( 0, 0.8, 0 ), radius = 0.04, color = vp.color.green )
         self.zAx = vp.cylinder( canvas = self.colorbar, pos = axOrigin, axis = vp.vector( 0, 0, 0 ), radius = 0.04, color = vp.color.blue )
@@ -200,11 +214,31 @@ class MooView:
             title = MooView.consolidatedTitle + "\n"
         self.innerColorbar( title, bg )
         if doOrnaments:
+            for idx, mv in enumerate( MooView.viewList ):
+                chk = vp.checkbox( bind = mv.toggleView, checked = True, text = mv.title + "    ",  pos = self.colorbar.title_anchor )
+                chk.idx = idx
+                self.cbox.append( chk )
+            self.colorbar.append_to_title("\n")
             self.timeLabel = vp.wtext( text = "Time =  0.000 sec", pos = self.colorbar.title_anchor )
             self.sleepLabel = vp.wtext( text = "    Frame dt = 0.005 sec", pos = self.colorbar.title_anchor )
             self.sleepSlider = vp.slider( pos = self.colorbar.title_anchor, length = 200, bind = self.setSleepTime, min = 0, max = len( sleepTimes ) -1, value = min( len( sleepTimes ), 2  ) )
             self.replayButton = vp.button( text = "Start Replay", pos = self.colorbar.title_anchor, bind=self.toggleReplay, disabled = True )
             self.colorbar.append_to_title("\n")
+
+    def selectCbar( self, idx ):
+        MooView.colorbarViewIdx = idx
+        moov = MooView.viewList[idx]
+        view0 = MooView.viewList[0]
+        view0.barName.text = view0.cbox[idx].text.replace( '.', '\n' )
+        view0.barName.text = view0.barName.text.replace( '/', '\n', 1 )
+        view0.barMin.text = "{:.3e}".format(moov.valMin)
+        view0.barMax.text = "{:.3e}".format(moov.valMax)
+
+    def toggleView( self, cbox ):
+        for d in self.drawables_:
+            d.setVisible( cbox.checked )
+        if cbox.checked:    # The colorbar is assigned to selected view:
+            self.selectCbar( cbox.idx )
 
     def pickObj( self ):
         obj = self.scene.mouse.pick
@@ -285,7 +319,6 @@ class MooView:
             else:
                 self.doAutoscale()
             self.updateAxis()
-        print( "Self.viewIDX = ", self.viewIdx, ", MOOView.viewIdx = ", MooView.viewIdx )
         if self.viewIdx == (MooView.viewIdx-1):
             MooView.viewList[0].graph = vp.graph( title = "Graph", xtitle = "Time (s)", ytitle = " Units here", width = 700, fast=False, align = "left" )
             MooView.viewList[0].graphPlot1 = vp.gcurve( color = vp.color.blue, interval=-1)
@@ -480,6 +513,7 @@ class MooDrawable:
         self.valMax = valMax
         self.segments = []
         self.snapshot = []
+        self.visible = True
         #cmap = plt.get_cmap( self.colormap, lut = NUM_CMAP )
         #self.rgb = [ list2vec(cmap(i)[0:3]) for i in range( NUM_CMAP ) ]
 
@@ -500,7 +534,7 @@ class MooDrawable:
         indices = np.maximum( np.minimum( scaleVal, NUM_CMAP-0.5), 0.0).astype(int)
 
         # Have to figure how this will work with multiple update rates.
-        self.snapshot.append( [simTime, indices] )
+        self.snapshot.append( [simTime, self.val] )
 
         self.displayValues( indices )
 
@@ -512,7 +546,6 @@ class MooDrawable:
             valMin = self.valMin = vmin
             valMax = self.valMax = vmax
         scaleVal = NUM_CMAP * (self.val - valMin) / (valMax - valMin)
-        #indices = scaleVal.ndarray.astype( int )
         indices = np.maximum( np.minimum( scaleVal, NUM_CMAP-0.5), 0.0).astype(int)
         self.displayValues( indices )
 
@@ -525,7 +558,9 @@ class MooDrawable:
     def replaySnapshot( self, idx ):
         if idx >= len( self.snapshot ):
             return 0.0
-        self.displayValues( self.snapshot[idx][1] )
+        scaleVal = NUM_CMAP * (self.snapshot[idx][1] - self.valMin) / (self.valMax - self.valMin)
+        indices = np.maximum( np.minimum( scaleVal, NUM_CMAP-0.5), 0.0).astype(int)
+        self.displayValues( indices )
         return self.snapshot[idx][0]    # return frame time
 
     def updateDiameter( self ):
@@ -558,6 +593,13 @@ class MooDrawable:
         graph.title = path + "." + field
         dat = [[x,y] for x, y in zip( t, v ) ]
         plot.data = dat
+
+    def setVisible( self, state ):
+        if self.visible == state:
+            return
+        self.visible = state
+        for s in self.segments:
+            s.visible = state
 
 
 #####################################################################
