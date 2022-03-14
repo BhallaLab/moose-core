@@ -71,7 +71,12 @@ class MooView:
                 for view in MooView.viewList:
                     view.replaySnapshot( idx )
                 vp.sleep( MooView.viewList[0].sleep )
-            vp.sleep( 0.5 ) # Pause 0.5 sec between replays
+            t = time.time() + 0.5
+            while time.time() < t:
+                for view in MooView.viewList:
+                    view.rotateFunc()
+                vp.sleep( MooView.viewList[0].sleep )
+            #vp.sleep( 0.5 ) # Pause 0.5 sec between replays
 
     def notifySimulationEnd( self ):
         if self.viewIdx == 0:
@@ -101,7 +106,11 @@ class MooView:
     def setSleepTime( self ):
         idx = int( round( self.sleepSlider.value ) )
         self.sleep = sleepTimes[idx]
-        self.sleepLabel.text = "    Frame dt = {:1.3f} sec".format( self.sleep )
+        self.sleepLabel.text = "Frame dt = {:1.4f} s".format( self.sleep )
+
+    def setRotation( self, slider ):
+        self.doRotation = ( abs( self.rotation ) > 0.005 )
+        self.rotation = slider.value
 
     def updateAxis( self ):
         if not self.colorbar:
@@ -219,10 +228,12 @@ class MooView:
                 chk.idx = idx
                 self.cbox.append( chk )
             self.colorbar.append_to_title("\n")
-            self.timeLabel = vp.wtext( text = "Time =  0.000 sec", pos = self.colorbar.title_anchor )
-            self.sleepLabel = vp.wtext( text = "    Frame dt = 0.005 sec", pos = self.colorbar.title_anchor )
+            self.timeLabel = vp.wtext( text = "Time =  0.000 s\n", pos = self.colorbar.title_anchor )
+            self.sleepLabel = vp.wtext( text = "Frame dt = 0.0050 s", pos = self.colorbar.title_anchor )
             self.sleepSlider = vp.slider( pos = self.colorbar.title_anchor, length = 200, bind = self.setSleepTime, min = 0, max = len( sleepTimes ) -1, value = min( len( sleepTimes ), 2  ) )
             self.replayButton = vp.button( text = "Start Replay", pos = self.colorbar.title_anchor, bind=self.toggleReplay, disabled = True )
+            self.rotateLabel = vp.wtext( text = "      Rotation", pos = self.colorbar.title_anchor )
+            self.rotateSlider = vp.slider( pos = self.colorbar.title_anchor, length = 200,  bind=self.setRotation, min = -0.1, max = 0.1, value = 0.0 )
             self.colorbar.append_to_title("\n")
 
     def selectCbar( self, idx ):
@@ -323,23 +334,26 @@ class MooView:
             MooView.viewList[0].graph = vp.graph( title = "Graph", xtitle = "Time (s)", ytitle = " Units here", width = 700, fast=False, align = "left" )
             MooView.viewList[0].graphPlot1 = vp.gcurve( color = vp.color.blue, interval=-1)
             
+    def rotateFunc(self ):
+        if self.doRotation and abs( self.rotation ) < 2.0 * 3.14 / 3.0:
+            self.scene.forward = vp.rotate( self.scene.forward, angle = self.rotation, axis = self.scene.up )
+            self.updateAxis()
 
     def updateValues( self, simTime ):
         self.simTime = simTime
         for i in self.drawables_:
             i.updateValues( simTime )
-        if self.doRotation and abs( self.rotation ) < 2.0 * 3.14 / 3.0:
-            self.scene.forward = vp.rotate( self.scene.forward, angle = self.rotation, axis = self.scene.up )
-            self.updateAxis()
+        self.rotateFunc()
         if self.viewIdx == 0:
-            self.timeLabel.text = "Time = {:7.3f} sec".format( simTime )
+            self.timeLabel.text = "Time = {:7.3f} s\n".format( simTime )
             vp.sleep( self.sleep )
 
     def replaySnapshot( self, idx ):
         for i in self.drawables_:
             simTime = i.replaySnapshot( idx )
+        self.rotateFunc()
         if self.viewIdx == 0:
-            self.timeLabel.text = "Time = {:7.3f} sec".format( simTime )
+            self.timeLabel.text = "Time = {:7.3f} s\n".format( simTime )
             self.updateAxis()
 
     def doAutoscale( self ):
@@ -403,13 +417,15 @@ class MooView:
             self.scene.camera.rotate( angle = -dtheta, axis = camAxis, origin = self.scene.camera.pos )
             return
         if event.key == "d": # Diameter scaling down
-            for dbl in self.drawables_:
-                dbl.diaScale *= 1.0 - self.sensitivity * 4
+            moov = MooView.viewList[MooView.colorbarViewIdx]
+            for dbl in moov.drawables_:
+                dbl.diaScale *= 1.0 - moov.sensitivity * 4
                 dbl.updateDiameter()
             return
         if event.key == "D":
-            for dbl in self.drawables_:
-                dbl.diaScale *= 1.0 + self.sensitivity * 4
+            moov = MooView.viewList[MooView.colorbarViewIdx]
+            for dbl in moov.drawables_:
+                dbl.diaScale *= 1.0 + moov.sensitivity * 4
                 dbl.updateDiameter()
             return
         if event.key == "s": # Scale down sleep time, make it faster.
