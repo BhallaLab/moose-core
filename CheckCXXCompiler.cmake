@@ -20,8 +20,8 @@ add_definitions(-Wall
     )
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
-        message(FATAL_ERROR "Insufficient gcc version. Minimum requried 4.9")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.1")
+        message(FATAL_ERROR "Insufficient gcc version. Minimum requried 5.1")
     endif()
     add_definitions( -Wno-unused-local-typedefs )
     add_definitions( -fmax-errors=5 )
