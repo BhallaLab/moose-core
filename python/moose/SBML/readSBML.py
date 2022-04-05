@@ -13,10 +13,14 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Thu May 13 10:19:00 2016(+0530)
 Version
-Last-Updated: Tue Apr 5 15:10:00 2022(+0530)
+Last-Updated: Tue Apr 5 17:10:00 2022(+0530)
           By:HarshaRani
 **********************************************************************/
 2022:
+Apr 05: - edge case NN_mapk15.g, extra Neutral path '/kinetics' exist which
+          was not created in xml file which was causing ex12.0* example break
+          This is fixed in writeSBML by adding basepath in compartment Annotation
+          And same is create in ReadSBML
 
 Mar 22: - function connection are done after Enzyme and Reaction are created
           this is because cplx path is modified after Enzyme created, which
@@ -165,7 +169,7 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
 
                     mapParameter(model, globparameterIdValue)
                     msgCmpt = ""
-                    errorFlag,msgCmpt = createCompartment(
+                    errorFlag,msgCmpt,baseId = createCompartment(
                         baseId, model, comptSbmlidMooseIdMap)
 
                     groupInfo = checkGroup(baseId,model,comptSbmlidMooseIdMap)
@@ -512,6 +516,8 @@ def getCmptAnnotation(obj):
                     if nodeName == "diffLength":
                         annotateMap[nodeName] = nodeValue
                     if nodeName == "surround":
+                        annotateMap[nodeName] = nodeValue
+                    if nodeName == "basepath":
                         annotateMap[nodeName] = nodeValue
     return annotateMap
 
@@ -1451,6 +1457,7 @@ def createCompartment(basePath, model, comptSbmlidMooseIdMap):
         return False, "Model has no compartment, atleast one compartment should exist to display in the widget"
     else:
         endo_surr = {}
+        toRewritebasepath = True
         for c in range(0, model.getNumCompartments()):
             compt = model.getCompartment(c)
             # print("Compartment " + str(c) + ": "+ UnitDefinition.printUnits(compt.getDerivedUnitDefinition()))
@@ -1485,6 +1492,18 @@ def createCompartment(basePath, model, comptSbmlidMooseIdMap):
                 name = sbmlCmptId
             cmptAnnotaInfo = {}
             cmptAnnotaInfo = getCmptAnnotation(compt)
+            if "basepath" in cmptAnnotaInfo.keys():
+                nl = list(filter(None, (cmptAnnotaInfo["basepath"]).split('/')))
+                pathAnno = ""
+                if len(nl) > 0:
+                    for i in range(0,len(nl)):
+                        pathAnno = pathAnno+'/'+nl[i]
+                        if not moose.exists(basePath.path+pathAnno):
+                            rewritebasepath = moose.Neutral(basePath.path+pathAnno)
+                if toRewritebasepath:
+                    basePath = rewritebasepath
+                    toRewritebasepath = False
+                
             if "Mesh" in cmptAnnotaInfo.keys():
                 if cmptAnnotaInfo["Mesh"] == "CubeMesh" or cmptAnnotaInfo["Mesh"] == "NeuroMesh":
                     mooseCmptId = moose.CubeMesh(basePath.path + '/' + name)
@@ -1516,7 +1535,7 @@ def createCompartment(basePath, model, comptSbmlidMooseIdMap):
             elif key in comptSbmlidMooseIdMap:
                 del(comptSbmlidMooseIdMap[key])
                 return False," EndoMesh's surrounding compartment missing or wrong deleting the compartment check the file"
-    return True,""
+    return True,"",basePath
 
 def setupConcChannel(reac, rName, specInfoMap, reactSBMLIdMooseId,
                           modelAnnotaInfo, model, globparameterIdValue):
