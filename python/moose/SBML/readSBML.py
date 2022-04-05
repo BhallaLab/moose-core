@@ -13,9 +13,18 @@
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Thu May 13 10:19:00 2016(+0530)
 Version
-Last-Updated: Mon Sep 21 12:50:00 2020(+0530)
+Last-Updated: Tue Apr 5 15:10:00 2022(+0530)
           By:HarshaRani
 **********************************************************************/
+2022:
+
+Mar 22: - function connection are done after Enzyme and Reaction are created
+          this is because cplx path is modified after Enzyme created, which
+          would be a problem as path changes
+        - edge case like pool is parent and product to enzyme, Stoichiometry
+          need to reduce (eg osc_different_vols)
+        - function expression fixed if multiple of same pool exist
+
 2020:
 Sep 21: - Complex pool which is created at species level is copied under enzyme,
           ensuring the value set at species is retained.
@@ -165,15 +174,18 @@ def mooseReadSBML(filepath, loadpath, solver="ee",validate="on"):
                         specInfoMap = {}
                         errorFlag,warning = createSpecies(
                             baseId, model, comptSbmlidMooseIdMap, specInfoMap, modelAnnotaInfo,groupInfo)
+
                         if errorFlag:
-                            msgRule = createRules(
-                                 model, specInfoMap, globparameterIdValue)
+                            errorFlag, msgReac = createReaction(
+                                model, specInfoMap, modelAnnotaInfo, globparameterIdValue,funcDef,groupInfo)
+                            if len(moose.wildcardFind(moose.element(loadpath).path+"/##[ISA=Reac],/##[ISA=EnzBase]")) == 0:
+                                errorFlag = False
+                                noRE = ("Atleast one reaction should be present to display in the widget ")
+
                             if errorFlag:
-                                errorFlag, msgReac = createReaction(
-                                    model, specInfoMap, modelAnnotaInfo, globparameterIdValue,funcDef,groupInfo)
-                                if len(moose.wildcardFind(moose.element(loadpath).path+"/##[ISA=Reac],/##[ISA=EnzBase]")) == 0:
-                                    errorFlag = False
-                                    noRE = ("Atleast one reaction should be present to display in the widget ")
+                                msgRule = createRules(
+                                 model, specInfoMap, globparameterIdValue)
+                            
                         getModelAnnotation(model, baseId)
                     if not errorFlag:
                         # Any time in the middle if SBML does not read then I
@@ -301,7 +313,8 @@ def setupEnzymaticReaction(enz, groupName, enzName, specInfoMap, modelAnnotaInfo
         complx1 = moose.copy(complx,enzyme_.path)
     else:
         complx1 = moose.element(enzyme_.path+'/'+complx.name)
-    specInfoMap[cplx]["Mpath"] = complx1
+    specInfoMap[cplx]["Mpath"] = moose.element(complx1)
+
     moose.connect(enzyme_, "cplx", complx1, "reac")
     moose.connect(enzyme_, "enz", enzParent, "reac")
     sublist = (modelAnnotaInfo[groupName]["substrate"])
@@ -321,7 +334,14 @@ def setupEnzymaticReaction(enz, groupName, enzName, specInfoMap, modelAnnotaInfo
     for tr in range(0,enz.getNumProducts()):
         sp = enz.getProduct(tr)
         spspieces = sp.getSpecies()
-        enz_prdlist[spspieces] = int(sp.getStoichiometry())
+        spspieces = sp.getSpecies()
+        # one of the edge (osc_different_vols) case where pool is a enzyme's parent and 
+        # product, which case the stoichiometry = 2 which is ideally correct for SBML simulator
+        # but for moose we need to reduce stoichiometry as we connect enzyme parent
+        if enzPool == spspieces and int(sp.getStoichiometry()) >1:
+            enz_prdlist[spspieces] = int(sp.getStoichiometry())-1
+        else:
+            enz_prdlist[spspieces] = int(sp.getStoichiometry())
 
     for si in range(0, len(sublist)):
         sl = sublist[si]
@@ -1144,7 +1164,8 @@ def createRules(model, specInfoMap, globparameterIdValue):
                                             comptvolume.append(poolsCompt.name)
                                     numVars = funcId.numVars
                                     x = funcId.path + '/x[' + str(numVars) + ']'
-                                    speFunXterm[i] = 'x' + str(numVars)
+                                    #speFunXterm[i] = 'x' + str(numVars)
+                                    speFunXterm['x'+str(numVars)] = i
                                     moose.connect(specMapList, 'nOut', x, 'input')
                                     funcId.numVars = numVars + 1
 
@@ -1157,7 +1178,10 @@ def createRules(model, specInfoMap, globparameterIdValue):
                             for mem in ruleMemlist:
                                 if (mem in specInfoMap):
                                     #exp1 = exp.replace(mem, str(speFunXterm[mem]))
-                                    exp1 = re.sub(r'\b%s\b'% (mem), speFunXterm[mem], exp)
+                                    #exp1 = re.sub(r'\b%s\b'% (mem), speFunXterm[mem], exp)
+                                    exp1 = re.sub(r'\b%s\b'% (mem), list(speFunXterm.keys())[list(speFunXterm.values()).index(mem)], exp,1)
+                                    speFunXterm.pop(list(speFunXterm.keys())[list(speFunXterm.values()).index(mem)])
+                                    
                                     exp = exp1
                                 elif(mem in globparameterIdValue):
                                     #exp1 = exp.replace(mem, str(globparameterIdValue[mem]))
