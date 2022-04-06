@@ -868,7 +868,7 @@ print( "Wall Clock Time = {:8.2f}, simtime = {:8.3f}".format( time.time() - _sta
         if kf[0] in ['CaConcBase', 'ChanBase', 'NMDAChan', 'VClamp']:
             objList = self._collapseElistToPathAndClass( comptList, plotSpec.relpath, kf[0] )
             return objList, kf[1]
-        elif field in [ 'n', 'conc', 'volume', 'increment']:
+        elif field in [ 'n', 'conc', 'nInit', 'concInit', 'volume', 'increment']:
             path = plotSpec.relpath
             pos = path.find( '/' )
             if pos == -1:   # Assume it is in the dend compartment.
@@ -1534,6 +1534,10 @@ rdesigneur.rmoogli.updateMoogliViewer()
         needs to talk both to PSD and to spine bulk.
         '''
         comptList = moose.wildcardFind( self.chemid.path + '/##[ISA=ChemCompt]' )
+        #if len( comptList ) == 0 and moose.exists( self.chemid.path + '/kinetics' ):
+        print( "LEN = ", len( comptList ) )
+        if len( comptList ) == 0:
+            print( "EMPTY comptlist, found kinetics" )
         oldNaming = len([i.name for i in comptList if (i.name.find( "compartment_") == 0)])
         if oldNaming == 0:
             return comptList

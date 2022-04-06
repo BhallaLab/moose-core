@@ -106,6 +106,10 @@ const string VoxelPools::getMethod( )
 void VoxelPools::advance( const ProcInfo* p )
 {
     double t = p->currTime - p->dt;
+	if (t < p->dt )
+		lsodaState = 1;
+	else
+		lsodaState = 3;
     Ksolve* k = reinterpret_cast<Ksolve*>( stoichPtr_->getKsolve().eref().data() );
 
     if( getMethod() == "lsoda" )
