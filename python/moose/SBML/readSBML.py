@@ -517,7 +517,7 @@ def getCmptAnnotation(obj):
                         annotateMap[nodeName] = nodeValue
                     if nodeName == "surround":
                         annotateMap[nodeName] = nodeValue
-                    if nodeName == "basepath":
+                    if nodeName == "basePath":
                         annotateMap[nodeName] = nodeValue
     return annotateMap
 
@@ -1492,8 +1492,8 @@ def createCompartment(basePath, model, comptSbmlidMooseIdMap):
                 name = sbmlCmptId
             cmptAnnotaInfo = {}
             cmptAnnotaInfo = getCmptAnnotation(compt)
-            if "basepath" in cmptAnnotaInfo.keys():
-                nl = list(filter(None, (cmptAnnotaInfo["basepath"]).split('/')))
+            if "basePath" in cmptAnnotaInfo.keys():
+                nl = list(filter(None, (cmptAnnotaInfo["basePath"]).split('/')))
                 pathAnno = ""
                 if len(nl) > 0:
                     for i in range(0,len(nl)):
