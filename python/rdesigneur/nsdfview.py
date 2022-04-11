@@ -11,6 +11,8 @@ import time
 import moogul
 mooViews = []
 
+defaultFieldRange = { 'conc': [0.0, 1.0], 'n': [0, 10], 'Vm': [-0.7, 0.02], 'Ik':[-1e-9, 1e-9], 'Ca':[0.0, 1.0] }
+
 class ObjHandle:
     def __init__( self, path ):
         self.path = str( path, "utf-8" )
@@ -150,6 +152,69 @@ class NsdfChemDataWrapper( moogul.DataWrapper ):
         t = np.arange( 0, len( val ), 1 ) * self.dt_
         return t, val
 
+#####################################################################
+def printElecDatasetInfo( nsdf ):
+    elec = nsdf["/data/uniform/%elec"]
+    for ee in elec:
+        path = ""
+        spl = ee.split( '%', 1 )
+        if spl[0] == "##[ISA=CompartmentBase]":
+            path += "#"
+        else:
+            path = spl[0]
+        if len( spl ) > 1:
+            path += '/' + spl[1].replace( '%', '/' )
+        for datasetName in elec[ee]:
+            path += '.' + datasetName
+            dataset = elec[ee + '/' + datasetName]
+            dt = dataset.attrs['dt']
+            shape = dataset.shape
+            print( "Elec: {:<36} shape=({}),  dt={}".format( path, shape, dt ) )
+
+def printDatasetInfo( nsdf ):
+    uniform = nsdf["/data/uniform"]
+    for uu in uniform:
+        if uu == "%elec":
+            printElecDatasetInfo( nsdf )
+        else:
+            group = uniform[uu]
+            path = uu[1:]
+            for ch in group:
+                path += '/' + ch.replace( '%', '/' )
+                for datasetName in group[ch]:
+                    dataset = group[ ch + '/' + datasetName]
+                    #print( "ATTR NAMES = ", dataset.keys() )
+                    dt = dataset.attrs['dt']
+                    shape = dataset.shape
+                    print( "Chem: {:<36} shape=({}),  dt={}".format( path + '.' + datasetName, shape, dt ) )
+
+def listDatasets( nsdf ):
+    ## Returns list of datasets in path.field format.
+    ret = []
+    uniform = nsdf["/data/uniform"]
+    for uu in uniform:
+        if uu == "%elec":
+            elec = nsdf["/data/uniform/%elec"]
+            for ee in elec:
+                path = ""
+                spl = ee.split( '%', 1 )
+                if spl[0] == "##[ISA=CompartmentBase]":
+                    path += "#"
+                else:
+                    path = spl[0]
+                if len( spl ) > 1:
+                    path += '/' + spl[1].replace( '%', '/' )
+                for field in elec[ee]:
+                    ret.append( path + '.' + field )
+        else:
+            group = uniform[uu]
+            for ch in group:
+                path = uu[1:] + '/' + ch.replace( '%', '/' )
+                if path[-2:] == '[]':
+                    path = path[:-2]
+                for field in group[ch]:
+                    ret.append( path + '.' + field )
+    return ret
 
 #####################################################################
 def main():
@@ -163,20 +228,37 @@ def main():
     parser.add_argument( '-l', '--list_datasets', action="store_true", help="List possible datasets available to view." )
     args = parser.parse_args()
 
-    if len( args.viewspec ) == 0:
+    '''
+    if (not args.list_datasets) and len( args.viewspec ) == 0:
         print( "warning: No viewpsec defined in command line" )
         quit()
+    '''
 
     nsdf = h5py.File( args.NSDF_filename, 'r' )
+    if args.list_datasets:
+        printDatasetInfo( nsdf )
+        quit()
+
+    if len( args.viewspec ) == 0:
+        viewspec = []
+        datasets = listDatasets( nsdf )
+        for ds in datasets:
+            spl = ds.split( '.' )
+            dispMin, dispMax = defaultFieldRange[ spl[1] ]
+            viewspec.append( [spl[0], spl[1], dispMin, dispMax ] )
+        merge_displays = True
+    else:
+        viewspec = args.viewspec
+        merge_displays = args.merge_displays
 
     viewer = []
-    for vs in args.viewspec:
+    for vs in viewspec:
         viewer.append( makeMoogli( nsdf, vs ) )
     dt = viewer[0].drawables_[0].dataWrapper_.dt_
     shape = viewer[0].drawables_[0].dataWrapper_.getShape()
     numSteps = shape[1]
     for v in viewer:
-        v.firstDraw( args.merge_displays, rotation = args.rotation, colormap = args.colormap, bg = args.background )
+        v.firstDraw( merge_displays, rotation = args.rotation, colormap = args.colormap, bg = args.background )
 
     simTime = 0.0
     for step in range( numSteps ):
