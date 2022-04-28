@@ -1,50 +1,97 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment.
-**           Copyright (C) 2011 Upinder S. Bhalla. and NCBS
+**           Copyright (C) 2021 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _ENDO_MESH_H
-#define _ENDO_MESH_H
+#ifndef _PRESYN_MESH_H
+#define _PRESYN_MESH_H
 
-/**
- * The EndoMesh is a cellular compartment entirely contained within another
- * compartment. It supports diffusion only with its immediate surround,
- * of which there can only be one, and with its immediate interior, which 
- * can be one or more 
- * EndoMeshes. Each voxel in the EndoMesh is well mixed, and does not
- * exchange with any other voxels.
- * Typically used in modelling endosomes, ER, mitochondria, and other
- * organelles.
- */
-class EndoMesh: public MeshCompt
+class Bouton
 {
 	public:
-		EndoMesh();
-		~EndoMesh();
+		/// coords for position of bouton
+		double x_;
+		double y_;
+		double z_;
+
+		/// coords for orientation of bouton. Currently for display,
+		/// but in due course may inform how release happens.
+		/// In theory I could compute on the fly based on postsyn coords.
+		double vx_;
+		double vy_;
+		double vz_;
+
+		double volume_;
+
+		ObjId postsynCompt_;
+	Bouton();
+};
+
+/**
+ * The PresynMesh is a set of synaptic boutons, all having the same
+ * reactions. No diffusion between them so it is easy.
+ * Two ways to set up: by matching one-to-one to a list of spines, or
+ * by matching many-to-one to dendritic segments.
+ */
+class PresynMesh: public MeshCompt
+{
+	public:
+		PresynMesh();
+		~PresynMesh();
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
-		void setRpower( const Eref& e, double v );
-		double getRpower( const Eref& e ) const;
-		void setRscale( const Eref& e, double v );
-		double getRscale( const Eref& e ) const;
-		void setApower( const Eref& e, double v );
-		double getApower( const Eref& e ) const;
-		void setAscale( const Eref& e, double v );
-		double getAscale( const Eref& e ) const;
-		void setVpower( const Eref& e, double v );
-		double getVpower( const Eref& e ) const;
-		void setVscale( const Eref& e, double v );
-		double getVscale( const Eref& e ) const;
-		void setSurround( const Eref& e, ObjId v );
-		ObjId getSurround( const Eref& e ) const;
-		void setDoAxialDiffusion( const Eref& e, bool v );
-		bool getDoAxialDiffusion( const Eref& e ) const;
+		//void setPostsynMesh( const Eref& e, ObjId v );
+		// ObjId getPostsynMesh( const Eref& e ) const;
+
+		/// Return list of postynaptic compartments, one per bouton.
+		/// Note that there may be repeats.
+		vector< ObjId >getPostsynCompts() const;
+		/// Complementary func returning vec of Ids, to match other Meshes.
 		vector< Id > getElecComptMap() const;
+
+		vector< unsigned int > getStartVoxelInCompt() const;
+		vector< unsigned int > getEndVoxelInCompt() const;
+
+		/// Spacing between boutons if compartments are dendrite segments.
+		double getBoutonSpacing() const;
+
+		/// Report the number of boutons defined on mesh.
+		unsigned int getNumBoutons() const;
+
+		/// Return volumes for each bouton. This is already handled by
+		/// the inherited function getVoxelVolume, but that is readonly.
+		vector< double > getAllBoutonVolumes() const;
+		void setAllBoutonVolumes( vector< double >& vols );
+
+		/// Already handled by voxelMidpoint
+		//vector< double > getBoutonCoords( unsigned int idx ) const;
+		vector< double > getAllBoutonOrientation() const;
+
+		/// Already handled by oneVoxelVolume
+		// double getBoutonVolume( unsigned int idx ) const;
+
+		int getStartBoutonIndexFromCompartment( ObjId b ) const;
+		int getNumBoutonsOnCompartment( ObjId b ) const;
+
+		/// Reports if this set of boutons is connected to spines vs dend.
+		bool isOnSpines() const;
+
+		/// Returns the compartments to which each bouton projects.
+		vector< ObjId > getTargetCompartments() const;
+
+		/// Returns xyz triplets for each bouton, for a len of 3*numBoutons
+		/// Already handled by getVoxelMidpoint
+		// vector< double > getAllBoutonCoords() const;
+
+		/// Returns index of each bouton on its target compartment
+		/// For spines all entries will be zero.
+		vector< int > getBoutonIndexOnTargetCompartments() const;
+
 
 		//////////////////////////////////////////////////////////////////
 		// FieldElement assignment stuff for MeshEntries
@@ -91,6 +138,10 @@ class EndoMesh: public MeshCompt
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
+		void buildOnSpineHeads( vector< ObjId > v );
+		void buildOnDendrites( vector< ObjId > v, double spacing );
+		void setRadiusStats( double r, double sdev );
+
 		/// Virtual func to make a mesh with specified Volume and numEntries
 		void innerBuildDefaultMesh( const Eref& e,
 			double volume, unsigned int numEntries );
@@ -123,29 +174,14 @@ class EndoMesh: public MeshCompt
 		static const Cinfo* initCinfo();
 
 	private:
-		/** 
-		 * Surrounding mesh. Use this for calculating
-		 * all volume and diffusion terms, don't maintain any local
-		 * variables.
-		 */
-		ObjId surround_;	
-		const MeshCompt* parent_;
+		/// Flag: Is it on spines or along a dendritic tree?
+		bool isOnSpines_;
 
-		Id insideMeshes_;	/// EndoMeshes inside. Used to update.
+		/// spacing of presyn boutons along the NeuroMesh (dendrite).
+		double spacing_;
 
-		/**
-		 * The reason why the powers don't have to be 1/3, 1/2 and 1 is
-		 * because some organelles are not a simple linear vol relationship
-		 * with their surround. I want to keep flexibility.
-		 */
-		double rPower_; 	/// rEndo = rScale * pow( surroundVol, rPower_)
-		double rScale_; 	/// rEndo = rScale * pow( surroundVol, rPower_)
-		double aPower_; 	/// aEndo = aScale * pow( surroundVol, aPower_)
-		double aScale_; 	/// aEndo = aScale * pow( surroundVol, aPower_)
-		double vPower_; 	/// vEndo = vScale * pow( surroundVol, vPower_)
-		double vScale_; 	/// vEndo = vScale * pow( surroundVol, vPower_)
-
-		bool doAxialDiffusion_;	/// Flag for axial diffusion
+		/// These are the data structures for each of the boutons.
+		vector< Bouton > boutons_;
 };
 
-#endif	// _ENDO_MESH_H
+#endif	// _PRESYN_MESH_H

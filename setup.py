@@ -3,8 +3,8 @@
 # module.
 #
 # Alternatively, you can use cmake build system which provides finer control
-# over the build. This script is called by cmake to install the python module. 
-# 
+# over the build. This script is called by cmake to install the python module.
+#
 # This script is compatible with python2.7 and python3+. Therefore use of
 # super() is commented out.
 #
@@ -15,8 +15,8 @@
 __author__     = "Dilawar Singh"
 
 __copyright__  = "Copyright 2019-, Dilawar Singh"
-__maintainer__ = "Dilawar Singh"
-__email__      = "dilawar.s.rajput@gmail.com"
+__maintainer__ = ""
+__email__      = ""
 
 import os
 import sys
@@ -49,7 +49,7 @@ if not os.path.exists(builddir_):
 
 numCores_ = multiprocessing.cpu_count()
 
-version_ = '3.2.0.dev%s' % stamp
+version_ = '3.3.0.dev%s' % stamp
 
 # importlib is available only for python3. Since we build wheels, prefer .so
 # extension. This way a wheel built by any python3.x will work with any python3.
@@ -86,7 +86,7 @@ class build_ext(_build_ext):
     user_options = [
             ('with-boost', None, 'Use Boost Libraries (OFF)')
             , ('with-gsl', None, 'Use Gnu Scienfific Library (ON)')
-            , ('with-gsl-static', None, 'Use GNU Scientific Library (static library) (OFF)') 
+            , ('with-gsl-static', None, 'Use GNU Scientific Library (static library) (OFF)')
             , ('debug', None, 'Build moose in debugging mode (OFF)')
             , ('no-build', None, 'DO NOT BUILD. (for debugging/development)')
             ] + _build_ext.user_options
@@ -137,8 +137,8 @@ class build_ext(_build_ext):
             cmake_args.append('-D%s=%s' % (k,v))
         os.chdir(str(builddir_))
         self.spawn(['cmake', str(sdir_)] + cmake_args)
-        if not self.dry_run: 
-            self.spawn(['make', '-j%d'%numCores_]) 
+        if not self.dry_run:
+            self.spawn(['make', '-j%d'%numCores_])
         os.chdir(str(sdir_))
 
 with open(os.path.join(sdir_,  "README.md")) as f:
@@ -153,7 +153,7 @@ setup(
     author='MOOSERes',
     author_email='bhalla@ncbs.res.in',
     maintainer='Dilawar Singh',
-    maintainer_email='dilawars@ncbs.res.in',
+    maintainer_email='',
     url='http://moose.ncbs.res.in',
     packages=[
         'rdesigneur', 'moose', 'moose.SBML', 'moose.genesis', 'moose.neuroml',
@@ -171,7 +171,7 @@ setup(
         ]
     },
     # python2 specific version here as well.
-    install_requires=['numpy', 'scipy', 'matplotlib'],
+    install_requires=['numpy', 'matplotlib','vpython'],
     extra_requires={'dev' : [ 'coverage', 'pytest', 'pytest-cov' ]},
     ext_modules=[CMakeExtension('dummy', optional=True)],
     cmdclass={'build_ext': build_ext, 'test': TestCommand},

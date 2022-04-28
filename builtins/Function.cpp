@@ -729,7 +729,7 @@ Variable* Function::getX(unsigned int ii)
     static Variable dummy("DUMMY");
     if(ii >= xs_.size())
     {
-        MOOSE_WARN("No active variable for index " << ii);
+        //MOOSE_WARN("No active variable for index " << ii);
         return &dummy;
     }
     return xs_[ii].get();

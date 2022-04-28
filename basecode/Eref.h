@@ -16,6 +16,7 @@ public:
 
     friend ostream& operator <<( ostream& s, const Eref& e );
     Eref();
+	Eref( const Eref& other );
     Eref( Element* e, unsigned int index, unsigned int field = 0 );
 
     /**

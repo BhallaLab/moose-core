@@ -69,6 +69,14 @@ const Cinfo* EnzBase::initCinfo()
 			&EnzBase::getNumPrd
 		);
 
+		static ReadOnlyElementValueFinfo< EnzBase, ObjId > compartment(
+			"compartment",
+        	"ObjId of parent compartment of pool. "
+        	"If the compartment isn't"
+        	"available this returns the root ObjId.",
+			&EnzBase::getCompartment
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -103,6 +111,7 @@ const Cinfo* EnzBase::initCinfo()
 		&kcat,	// Value
 		&numSub,	// ReadOnlyElementValue
 		&numPrd,	// ReadOnlyElementValue
+		&compartment,	// ReadOnlyElementValue
 		&enzDest,			// DestFinfo
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
@@ -214,4 +223,9 @@ unsigned int EnzBase::getNumPrd( const Eref& e ) const
 		e.element()->getMsgAndFunc( prdOut()->getBindIndex() );
 	assert( mfb );
 	return ( mfb->size() );
+}
+
+ObjId EnzBase::getCompartment( const Eref& e ) const
+{
+    return getCompt( e.id() );
 }

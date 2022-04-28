@@ -52,6 +52,7 @@
 #include "Variable.h"
 
 class NSDFWriter;
+class NSDFWriter2;
 
 /**
    This class is for collecting data and updating a handler object
@@ -65,9 +66,11 @@ class InputVariable: public Variable
     ~InputVariable();
     void epSetValue(const Eref &eref, double value);
     void setOwner(NSDFWriter * owner);
+    void setOwner(NSDFWriter2 * owner);
     static const Cinfo * initCinfo();
   protected:
     NSDFWriter * owner_;
+    NSDFWriter2 * owner2_;
 };
 
 #endif

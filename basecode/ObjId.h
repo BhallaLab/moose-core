@@ -33,6 +33,12 @@ public:
         ;
     }
 
+    ObjId( const ObjId& obj )
+        : id( obj.id ), dataIndex( obj.dataIndex ), fieldIndex( obj.fieldIndex )
+    {
+        ;
+    }
+
     /**
      * Creates a ObjId using specified Id and DataIndex
      */

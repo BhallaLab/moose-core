@@ -322,8 +322,7 @@ void SpineMesh::setMeshEntryVolume( unsigned int fid, double volume )
 /// For SpineMesh, coords are x1y1z1 x2y2z2 x3y3z3 r0 r1
 vector< double > SpineMesh::getCoordinates( unsigned int fid ) const
 {
-	vector< double > ret;
-	return ret;
+	return spines_[fid].spineCoords();
 }
 
 /// Virtual function to return diffusion X-section area for each neighbor

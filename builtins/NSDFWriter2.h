@@ -1,13 +1,13 @@
-/* NSDFWriter.h ---
+/* NSDFWriter2.h ---
  *
- * Filename: NSDFWriter.h
+ * Filename: NSDFWriter2.h
  * Description:
- * Author: subha
+ * Author: bhalla
  * Maintainer:
- * Created: Thu Jun 18 23:06:59 2015 (-0400)
+ * Created: Sun 13 Feb 2022
  * Version:
- * Last-Updated: Sun Dec 20 23:17:32 2015 (-0500)
- *           By: subha
+ * Last-Updated: Sun 13 Feb 2022 (-0500)
+ *           By: bhalla
  *     Update #: 2
  * URL:
  * Keywords:
@@ -45,8 +45,8 @@
 /* Code: */
 
 #ifdef USE_HDF5
-#ifndef _NSDFWRITER_H
-#define _NSDFWRITER_H
+#ifndef _NSDFWRITER2_H
+#define _NSDFWRITER2_H
 
 #include "HDF5DataWriter.h"
 
@@ -54,11 +54,42 @@ class InputVariable;
 
 /**
    compound data type for storing source->data mapping for event data
-*/
 typedef struct {
     const char * source;
     hobj_ref_t data;
 } map_type;
+*/
+
+typedef struct {
+	string containerPath;
+		// For elec models this is the path of the Neuron object.
+		// For chem models this is the path of the Mesh object.
+		// This is used to provide a single set of coords.
+	string relPath; // Relative to container
+		// for elec models it is wildcard path of all objects wrt container
+		// for chem models it is rel path to pool[]. Braces for indices.
+	string nsdfContainerPath; // NSDF makes a group of the container.
+		// Sits on /data/uniform.
+		// Converts / to %
+	string nsdfRelPath; // nsdf makes subgroups identifed by nsdfRelPath,
+		// with respect to thei container.
+		// Sits on /data/uniform/container
+		// It is the relpath with the / replaced by %
+	vector< string > objPathList; // relative paths of all objects here.
+		// For elec compts, it is the compt names
+		// For chem obj it is just the indices.
+	string field;	// Regular MOOSE value field.
+	string getField; // name of call to get the field.
+	string className; // All obj in a block should be of same class.
+	vector< vector< double > > data; // data_[objIdx][timeStep]
+	vector< ObjId > objVec;
+	hid_t container;	// reference to container
+	hid_t relPathContainer;	// reference to objects on nsdfRelPath
+	// hid_t filespace;
+	hid_t dataset;
+	bool hasMsg;
+	bool hasContainer;
+} Block;
 
 /**
    NSDFWriter dumps data in NSDF file format.
@@ -74,11 +105,11 @@ typedef struct {
      connected. These will go under Event data.
 
  */
-class NSDFWriter: public HDF5DataWriter
+class NSDFWriter2: public HDF5DataWriter
 {
   public:
-    NSDFWriter();
-    ~NSDFWriter();
+    NSDFWriter2();
+    ~NSDFWriter2();
     virtual void flush();
 	void setModelFiles(string value);
 	string getModelFiles() const;
@@ -87,6 +118,8 @@ class NSDFWriter: public HDF5DataWriter
     // the model tree rooted here is to be copied to NSDF file
     void setModelRoot(string root);
     string getModelRoot() const;
+    void setBlocks(vector< string > blocks);
+    vector< string > getBlocks() const;
     InputVariable *getEventInput(unsigned int index);
     void setNumEventInputs(unsigned int num);
     unsigned int getNumEventInputs() const;
@@ -106,13 +139,15 @@ class NSDFWriter: public HDF5DataWriter
     // Sort the incoming data lines according to source object/field.
     void process(const Eref &e, ProcPtr p);
     void reinit(const Eref &e, ProcPtr p);
-    NSDFWriter& operator=(const NSDFWriter&other);
+    NSDFWriter2& operator=(const NSDFWriter2& other);
 
     static const Cinfo *initCinfo();
 
   protected:
     hid_t getEventDataset(string srcPath, string srcField);
-    void sortOutUniformSources(const Eref& eref);
+    // void sortOutUniformSources(const Eref& eref);
+	void buildUniformSources(const Eref& eref);
+	void sortMsgs(const Eref& eref);
     /* hid_t getUniformDataset(string srcPath, string srcField); */
     map <string, string> env_; // environment attributes
     vector < hid_t > eventDatasets_;
@@ -129,6 +164,10 @@ class NSDFWriter: public HDF5DataWriter
     hid_t dataGroup_; // handle for data container.
     hid_t modelGroup_; // handle for model container
     hid_t mapGroup_; // handle for map container
+	vector< string > blockStrVec_;
+	vector< Block > blocks_;
+	vector< unsigned int > mapMsgIdx_; // Look up tgt idx from consolidated block idx.
+
     map< string, vector< hid_t > > classFieldToEvent_;
     map< string, vector< string > > classFieldToEventSrc_;
     map< string, hid_t > classFieldToUniform_;
@@ -141,6 +180,12 @@ class NSDFWriter: public HDF5DataWriter
        The data coming in return for requestOut gets stored in
        dataBuffer in the same sequence as the connections,
        irrespective of class and field.
+
+	   The messages are to be made in the correct order by the build 
+	   command, which takes specified basepath, relpath wildcard, and field.
+	   A separate block is built for each such command.
+	   In each block we have
+	   The full path of the source object i
 
        For each source object find the class and field and create map
        < class.field, vector<unsigned int> > that maps the class.field
@@ -162,8 +207,8 @@ class NSDFWriter: public HDF5DataWriter
     string modelRoot_;
 
 };
-#endif // _NSDFWRITER_H
+#endif // _NSDFWRITER2_H
 #endif // USE_HDF5
 
 
-/* NSDFWriter.h ends here */
+/* NSDFWriter2.h ends here */

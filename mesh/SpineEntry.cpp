@@ -185,6 +185,24 @@ double SpineEntry::diffusionLength() const
 	return shaft_.getLength();
 }
 
+vector< double > SpineEntry::spineCoords() const
+{
+	vector< double > ret( 11 );
+	ret[0] = head_.getX();
+	ret[1] = head_.getY();
+	ret[2] = head_.getZ();
+	ret[3] = shaft_.getX();
+	ret[4] = shaft_.getY();
+	ret[5] = shaft_.getZ();
+	ret[6] = root_.getX();
+	ret[7] = root_.getY();
+	ret[8] = root_.getZ();
+	ret[9] = head_.getDia();
+	ret[10] = shaft_.getDia();
+
+	return ret;
+}
+
 vector< double > SpineEntry::psdCoords() const
 {
 	vector< double > ret( 8, 0.0 );
