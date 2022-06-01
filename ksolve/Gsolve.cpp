@@ -938,7 +938,7 @@ void Gsolve::setDsolve( Id dsolve )
 
 
 //////////////////////////////////////////////////////////////
-// Zombie Pool Access functions
+// Pool Access functions
 //////////////////////////////////////////////////////////////
 
 void Gsolve::setN( const Eref& e, double v )
@@ -946,7 +946,7 @@ void Gsolve::setN( const Eref& e, double v )
     unsigned int vox = getVoxelIndex( e );
     if ( vox != OFFNODE )
     {
-        if ( e.element()->cinfo()->isA( "ZombieBufPool" ) )
+        if ( e.element()->cinfo()->isA( "BufPool" ) )
         {
             // Do NOT round it here, it is folded into rate term.
             pools_[vox].setN( getPoolIndex( e ), v );

@@ -87,7 +87,14 @@ const Cinfo* Reac::initCinfo()
 			"Number of products of reaction",
 			&Reac::getNumPrd
 		);
-
+    	static ReadOnlyElementValueFinfo< Reac, ObjId > compartment(
+        	"compartment",
+        	"ObjId of parent compartment of Reac. "
+        	"If the compartment isn't"
+        	"available this returns the root ObjId.",
+        	&Reac::getCompartment
+    	);
+	
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -145,6 +152,7 @@ const Cinfo* Reac::initCinfo()
 		&Kb,	// Value
 		&numSub,	// ReadOnlyValue
 		&numPrd,	// ReadOnlyValue
+		&compartment,	// ReadOnlyValue
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		// &proc,				// SharedFinfo
@@ -261,6 +269,12 @@ unsigned int Reac::getNumPrd( const Eref& e ) const
 	assert( mfb );
 	return ( mfb->size() );
 }
+
+ObjId Reac::getCompartment( const Eref& e ) const
+{
+    return getCompt( e.id() );
+}
+
 
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions

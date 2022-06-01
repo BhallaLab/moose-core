@@ -4,11 +4,12 @@ on: [push]
 
 jobs:
   build:
+    name : Python Package
 
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [2.7, 3.7, 3.8]
+        python-version: [3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -21,7 +22,8 @@ jobs:
         export DEBIAN_FRONTEND=noninteractive
         sudo -E apt install -y cmake libgsl-dev g++ gcc git 
         sudo -E apt install python3-tk python-tk
-        python -m pip install numpy matplotlib --user
+        sudo -E apt install -y libhdf5-dev doxygen
+        python -m pip install numpy matplotlib vpython --user
     - name: Build
       run: |
         python setup.py install

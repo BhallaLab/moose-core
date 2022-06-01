@@ -100,6 +100,13 @@ class SpineEntry
 		 */
 		vector< double > psdCoords() const;
 
+		/**
+		 * x1y1z1 x2y2z2 x3y3z3 r0 r1. Here x1 is farthest, x2 is 
+		 * junction between neck and shaft, and x3 is on the dend.
+		 * r0 is radius of spine head, r1 of shaft.
+		 */
+		vector< double > spineCoords() const;
+
 	private:
 		CylBase root_; /// Anchor point on dendrite
 		CylBase shaft_; /// Shaft cylinder

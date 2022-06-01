@@ -70,6 +70,10 @@ const Cinfo* SpikeGen::initCinfo()
 		"True if SpikeGen has just fired",
 		&SpikeGen::getFired
 	);
+	static ReadOnlyValueFinfo< SpikeGen, double > lastSpikeTime( "lastSpikeTime",
+		"Time of most recent spike event.",
+		&SpikeGen::getLastSpikeTime
+	);
 	static ValueFinfo< SpikeGen, bool > edgeTriggered( "edgeTriggered",
 		"When edgeTriggered = 0, the SpikeGen will fire an event in each "
 		"timestep while incoming Vm is > threshold and at least abs_refract"
@@ -91,6 +95,7 @@ const Cinfo* SpikeGen::initCinfo()
 		&refractT,	// Value
 		&absRefract,	// Value
 		&hasFired,	// ReadOnlyValue
+		&lastSpikeTime,	// ReadOnlyValue
 		&edgeTriggered,	// Value
 
 	};
@@ -174,6 +179,11 @@ double SpikeGen::getState() const
 bool SpikeGen::getFired() const
 {
 	return fired_;
+}
+
+double SpikeGen::getLastSpikeTime() const
+{
+	return lastEvent_;
 }
 
 void SpikeGen::setEdgeTriggered( bool yes )

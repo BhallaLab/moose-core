@@ -82,7 +82,7 @@ double convertConcToNumRateInTwoCompts( double v1, unsigned int n1,
 
 /**
  * Returns the compartment in which the specified object is located.
- * Traverses the tree toward the rood till it finds a compartment.
+ * Traverses the tree toward the root till it finds a compartment.
  */
 ObjId getCompt( Id id );
 

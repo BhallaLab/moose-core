@@ -1,6 +1,6 @@
-// NSDFWriter.cpp ---
+// NSDFWriter2.cpp ---
 //
-// Filename: NSDFWriter.cpp
+// Filename: NSDFWriter2.cpp
 // Description:
 // Author: subha
 // Maintainer:
@@ -13,12 +13,8 @@
 // Keywords:
 // Compatibility:
 //
-//
 
 // Commentary:
-//
-//
-//
 //
 
 // Change log:
@@ -51,16 +47,20 @@
 
 #include <fstream>
 #include <ctime>
+#include <cctype>
 #include <deque>
 #include "../basecode/header.h"
 #include "../utility/utility.h"
 #include "../utility/strutil.h"
+#include "../shell/Wildcard.h"
+#include "../shell/Shell.h"
 
 #include "HDF5WriterBase.h"
 #include "HDF5DataWriter.h"
 
-#include "InputVariable.h"
 #include "NSDFWriter.h"
+#include "NSDFWriter2.h"
+#include "InputVariable.h"
 
 extern template herr_t writeScalarAttr(hid_t file_id, string path, string value);
 extern template herr_t writeScalarAttr(hid_t file_id, string path, double value);
@@ -74,6 +74,8 @@ const char* const MAPUNIFORMSRC = "/map/uniform";
 const char* const MAPSTATICSRC = "/map/static";
 const char* const MAPEVENTSRC = "/map/event";
 
+string iso_time(time_t * t);
+/*
 string iso_time(time_t * t)
 {
     struct tm * timeinfo;
@@ -89,40 +91,50 @@ string iso_time(time_t * t)
     strftime(buf, 32, "%FT%T", timeinfo);
     return string(buf);
 }
+*/
 
-const Cinfo * NSDFWriter::initCinfo()
+const Cinfo * NSDFWriter2::initCinfo()
 {
-    static FieldElementFinfo< NSDFWriter, InputVariable > eventInputFinfo(
+    static FieldElementFinfo< NSDFWriter2, InputVariable > eventInputFinfo(
         "eventInput",
         "Sets up field elements for event inputs",
         InputVariable::initCinfo(),
-        &NSDFWriter::getEventInput,
-        &NSDFWriter::setNumEventInputs,
-        &NSDFWriter::getNumEventInputs);
+        &NSDFWriter2::getEventInput,
+        &NSDFWriter2::setNumEventInputs,
+        &NSDFWriter2::getNumEventInputs);
 
-    static ValueFinfo <NSDFWriter, string > modelRoot(
+    static ValueFinfo <NSDFWriter2, string > modelRoot(
       "modelRoot",
       "The moose element tree root to be saved under /model/modeltree. If blank, nothing is saved. Default: root object, '/'", 
-      &NSDFWriter::setModelRoot,
-      &NSDFWriter::getModelRoot);
+      &NSDFWriter2::setModelRoot,
+      &NSDFWriter2::getModelRoot);
 
-    static ValueFinfo <NSDFWriter, string > modelFileNames(
+    static ValueFinfo <NSDFWriter2, string > modelFileNames(
       "modelFileNames",
       "Comma separated list of model files to save into the NSDF file.",
-      &NSDFWriter::setModelFiles,
-      &NSDFWriter::getModelFiles);
+      &NSDFWriter2::setModelFiles,
+      &NSDFWriter2::getModelFiles);
+
+    static ValueFinfo <NSDFWriter2, vector< string > > blocks(
+      "blocks",
+      "Vector of strings to specify data blocks. Format: path.field"
+	  "The path is a wildcard path. It will be split into a single path"
+	  "to a container such as a Neuron or a Mesh, and below this a "
+	  "wildcard path to the actual objects",
+      &NSDFWriter2::setBlocks,
+      &NSDFWriter2::getBlocks);
 
     static DestFinfo process(
         "process",
         "Handle process calls. Collects data in buffer and if number of steps"
         " since last write exceeds flushLimit, writes to file.",
-        new ProcOpFunc<NSDFWriter>( &NSDFWriter::process));
+        new ProcOpFunc<NSDFWriter2>( &NSDFWriter2::process));
 
     static  DestFinfo reinit(
         "reinit",
         "Reinitialize the object. If the current file handle is valid, it tries"
         " to close that and open the file specified in current filename field.",
-        new ProcOpFunc<NSDFWriter>( &NSDFWriter::reinit ));
+        new ProcOpFunc<NSDFWriter2>( &NSDFWriter2::reinit ));
 
     static Finfo * processShared[] = {
         &process, &reinit
@@ -135,19 +147,21 @@ const Cinfo * NSDFWriter::initCinfo()
 
     static Finfo * finfos[] = {
         &eventInputFinfo,	// FieldElementFinfo
+		&modelRoot,	// ValueFinfo
 		&modelFileNames,	// ValueFinfo
+		&blocks,	// ValueFinfo
         &proc,
     };
 
     static string doc[] = {
-        "Name", "NSDFWriter",
-        "Author", "Subhasis Ray",
+        "Name", "NSDFWriter2",
+        "Author", "Upi Bhalla",
         "Description", "NSDF file writer for saving data."
     };
 
-    static Dinfo< NSDFWriter > dinfo;
+    static Dinfo< NSDFWriter2 > dinfo;
     static Cinfo cinfo(
-        "NSDFWriter",
+        "NSDFWriter2",
         HDF5DataWriter::initCinfo(),
         finfos,
         sizeof(finfos)/sizeof(Finfo*),
@@ -157,19 +171,19 @@ const Cinfo * NSDFWriter::initCinfo()
     return &cinfo;
 }
 
-static const Cinfo * nsdfWriterCinfo = NSDFWriter::initCinfo();
+static const Cinfo * nsdfWriterCinfo = NSDFWriter2::initCinfo();
 
-NSDFWriter::NSDFWriter(): eventGroup_(-1), uniformGroup_(-1), dataGroup_(-1), modelGroup_(-1), mapGroup_(-1), modelRoot_("/")
+NSDFWriter2::NSDFWriter2(): eventGroup_(-1), uniformGroup_(-1), dataGroup_(-1), modelGroup_(-1), mapGroup_(-1), modelRoot_("/")
 {
     ;
 }
 
-NSDFWriter::~NSDFWriter()
+NSDFWriter2::~NSDFWriter2()
 {
     close();
 }
 
-void NSDFWriter::close()
+void NSDFWriter2::close()
 {
     if (filehandle_ < 0){
         return;
@@ -178,26 +192,40 @@ void NSDFWriter::close()
     closeUniformData();
     if (uniformGroup_ >= 0){
         H5Gclose(uniformGroup_);
+		uniformGroup_ = -1;
     }
     closeEventData();
     if (eventGroup_ >= 0){
         H5Gclose(eventGroup_);
+		eventGroup_ = -1;
     }
     if (dataGroup_ >= 0){
         H5Gclose(dataGroup_);
+		dataGroup_ = -1;
     }
     HDF5DataWriter::close();
+	for ( auto bb = blocks_.begin(); bb != blocks_.end(); ++bb ) {
+		bb->hasContainer = false;
+	}
 }
 
-void NSDFWriter::closeUniformData()
+void NSDFWriter2::closeUniformData()
 {
-    for (map < string, hid_t>::iterator ii = classFieldToUniform_.begin();
-         ii != classFieldToUniform_.end();
-         ++ii){
-        if (ii->second >= 0){
-            H5Dclose(ii->second);
-        }
-    }
+	for ( vector< Block >::iterator ii = blocks_.begin(); ii != blocks_.end(); ++ii ) {
+		if ( ii->dataset >= 0 ) {
+			H5Dclose( ii->dataset );
+		}
+		/**
+		ii->hasMsg = false;
+		ii->hasContainer = false;
+		ii->objVec.clear();
+		ii->objPathList.clear();
+		for ( auto jj = ii->data.begin(); jj != ii->data.end(); jj++ ) {
+			jj.clear();
+		}
+		ii->data.clear();
+		*/
+	}
     vars_.clear();
     data_.clear();
     src_.clear();
@@ -206,77 +234,84 @@ void NSDFWriter::closeUniformData()
 
 }
 
-void NSDFWriter::sortOutUniformSources(const Eref& eref)
+void NSDFWriter2::sortMsgs(const Eref& eref)
 {
-    vars_.clear();
-    classFieldToSrcIndex_.clear();
-    objectField_.clear();
-    objectFieldToIndex_.clear();
-    const SrcFinfo * requestOut = (SrcFinfo*)eref.element()->cinfo()->findFinfo("requestOut");
-    unsigned int numTgt = eref.element()->getMsgTargetAndFunctions(eref.dataIndex(),
-                                                                requestOut,
-                                                                src_,
-                                                                func_);
-    assert(numTgt ==  src_.size());
-    /////////////////////////////////////////////////////////////
-    // Go through all the sources and determine the index of the
-    // source message in the dataset
-    /////////////////////////////////////////////////////////////
+    const Finfo* tmp = eref.element()->cinfo()->findFinfo("requestOut");
+    const SrcFinfo1< vector < double > *>* requestOut = static_cast<const SrcFinfo1< vector < double > * > * >(tmp);
+	vector< ObjId > tgts = eref.element()->getMsgTargets( eref.dataIndex(), requestOut );
+	// Make a map from ObjId to index of obj in objVec.
+	map< ObjId, unsigned int > mapMsgs;
+	for (unsigned int tgtIdx = 0; tgtIdx < tgts.size(); ++tgtIdx)
+		mapMsgs[ tgts[ tgtIdx ] ] = tgtIdx;
 
-    for (unsigned int ii = 0; ii < func_.size(); ++ii){
-        string varname = func_[ii];
-        unsigned int found = varname.find("get");
-        if (found == 0){
-            varname = varname.substr(3);
-            if (varname.length() == 0){
-                varname = func_[ii];
-            } else {
-                varname[0] = tolower(varname[0]);
-            }
-        }
-        assert(varname.length() > 0);
-        string className = Field<string>::get(src_[ii], "className");
-        string datasetPath = className + "/"+ varname;
-        classFieldToSrcIndex_[datasetPath].push_back(ii);
-        vars_.push_back(varname);
-    }
-    data_.resize(numTgt);
+	mapMsgIdx_.resize( tgts.size() );
+	unsigned int consolidatedBlockMsgIdx = 0;
+	for (unsigned int blockIdx = 0; blockIdx < blocks_.size(); ++blockIdx) {
+		vector< ObjId >&  objVec = blocks_[blockIdx].objVec;
+		for ( auto obj = objVec.begin(); obj != objVec.end(); ++obj ) {
+			mapMsgIdx_[consolidatedBlockMsgIdx] = mapMsgs[*obj];
+			consolidatedBlockMsgIdx++;
+		}
+	}
+	assert( tgts.size() == consolidatedBlockMsgIdx );
+	// make a vector where tgtMsgIdx = mapMsgIdx_[consolidatedBlockMsgIdx]
+}
+
+void NSDFWriter2::buildUniformSources(const Eref& eref)
+{
+	Shell* shell = reinterpret_cast<Shell*>(Id().eref().data());
+	for ( auto bb = blocks_.begin(); bb != blocks_.end(); ++bb ) {
+		if ( bb->hasMsg )
+			continue;
+		const vector< ObjId >& objVec = bb->objVec;
+		for( vector< ObjId >::const_iterator obj = objVec.begin(); obj != objVec.end(); ++obj ) {
+
+			ObjId ret = shell->doAddMsg( "single", eref.objId(), "requestOut", *obj, bb->getField ); 
+			if (ret == ObjId() ) {
+				cout << "Error: NSDFWriter2::buildUniformSources: Failed to build msg from '" << eref.id().path() << "' to '" << bb->containerPath << "/" << bb->relPath << "." << bb->field << endl;
+				return;
+			}
+		}
+
+		bb->hasMsg = true;
+	}
+	sortMsgs( eref );
 }
 
 /**
    Handle the datasets for the requested fields (connected to
    requestOut). This is is similar to what HDF5DataWriter does.
  */
-void NSDFWriter::openUniformData(const Eref &eref)
+void NSDFWriter2::openUniformData(const Eref &eref)
 {
-    sortOutUniformSources(eref);
+    buildUniformSources(eref);
     htri_t exists;
     herr_t status;
     if (uniformGroup_ < 0){
         uniformGroup_ = require_group(filehandle_, UNIFORMPATH);
     }
-
-    // create the datasets and map them to className/field
-    for (map< string, vector< unsigned int > >::iterator it = classFieldToSrcIndex_.begin();
-         it != classFieldToSrcIndex_.end();
-         ++it){
-        vector< string > tokens;
-        moose::tokenize(it->first, "/", tokens);
-        string className = tokens[0];
-        string fieldName = tokens[1];
-        hid_t container = require_group(uniformGroup_, className);
-        vector < string > srclist;
-        hid_t dataset = createDataset2D(container, fieldName.c_str(), it->second.size());
-        classFieldToUniform_[it->first] = dataset;
-        writeScalarAttr<string>(dataset, "field", fieldName);
-        H5Gclose(container);
-    }
+	for ( auto bb = blocks_.begin(); bb != blocks_.end(); ++bb ) {
+		if ( bb->hasContainer )
+			continue;
+		// From the documentation: 
+		// https://support.hdfgroup.org/HDF5/doc1.6/UG/09_Groups.html
+		// "Component link names may be any string of ASCII characters not containing a slash or a dot (/ and ., which are reserved as noted above)."
+		// So I need to replace path with a string with the slashes
+        bb->container = require_group(uniformGroup_, bb->nsdfContainerPath);
+        bb->relPathContainer = require_group(bb->container,bb->nsdfRelPath);
+       	hid_t dataset = createDataset2D(bb->relPathContainer, bb->field.c_str(), bb->data.size());
+		bb->dataset = dataset;
+       	writeScalarAttr<string>(dataset, "field", bb->field);
+       	H5Gclose(bb->container);
+       	H5Gclose(bb->relPathContainer);
+		bb->hasContainer = true;
+	}
 }
 
 /**
    create the DS for uniform data.
  */
-void NSDFWriter::createUniformMap()
+void NSDFWriter2::createUniformMap()
 {
 	innerCreateMaps( MAPUNIFORMSRC );
 }
@@ -284,7 +319,7 @@ void NSDFWriter::createUniformMap()
 /**
    create the DS for static data.
  */
-void NSDFWriter::createStaticMap()
+void NSDFWriter2::createStaticMap()
 {
 	innerCreateMaps( MAPSTATICSRC );
 }
@@ -293,46 +328,52 @@ void NSDFWriter::createStaticMap()
 /**
    Generic call for create the DS for static/uniform data
  */
-void NSDFWriter::innerCreateMaps( const char* const mapSrcStr )
+void NSDFWriter2::innerCreateMaps( const char* const mapSrcStr )
 {
     // Create the container for all the DS
     htri_t exists;
     herr_t status;
     hid_t uniformMapContainer = require_group(filehandle_, mapSrcStr );
     // Create the DS themselves
-    for (map< string, vector < unsigned int > >::iterator ii = classFieldToSrcIndex_.begin();
-         ii != classFieldToSrcIndex_.end(); ++ii){
+	for( auto bit = blocks_.begin(); bit != blocks_.end(); bit++ ) {
+    //for (map< string, vector < unsigned int > >::iterator ii = classFieldToSrcIndex_.begin(); ii != classFieldToSrcIndex_.end(); ++ii){
+		/*
         vector < string > pathTokens;
         moose::tokenize(ii->first, "/", pathTokens);
         string className = pathTokens[0];
         string fieldName = pathTokens[1];
+		*/
+        string className = bit->nsdfContainerPath + "/" + bit->nsdfRelPath;
+        string fieldName = bit->field;
 		if (mapSrcStr == MAPSTATICSRC ) //Hack. for now only static field is coords
 			fieldName = "coords";
         hid_t container = require_group(uniformMapContainer, className);
-        char ** sources = (char **)calloc(ii->second.size(), sizeof(char*));
-        for (unsigned int jj = 0; jj < ii->second.size(); ++jj){
-            sources[jj] = (char*)calloc(src_[ii->second[jj]].path().length()+1, sizeof(char));
-            strcpy(sources[jj],src_[ii->second[jj]].path().c_str());
+        char ** sources = (char **)calloc(bit->objVec.size(), sizeof(char*));
+        for (unsigned int jj = 0; jj < bit->objVec.size(); ++jj){
+            sources[jj] = (char*)calloc(bit->objVec[jj].path().length()+1, sizeof(char));
+            strcpy(sources[jj],bit->objVec[jj].path().c_str());
         }
-        hid_t ds = createStringDataset(container, fieldName, (hsize_t)ii->second.size(), (hsize_t)ii->second.size());
+        hid_t ds = createStringDataset(container, fieldName, (hsize_t)bit->objVec.size(), (hsize_t)bit->objVec.size());
         hid_t memtype = H5Tcopy(H5T_C_S1);
         status = H5Tset_size(memtype, H5T_VARIABLE);
         assert(status >= 0);
         status = H5Dwrite(ds, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, sources);
         assert(status >= 0);
-        for (unsigned int jj = 0; jj < ii->second.size(); ++jj){
+        for (unsigned int jj = 0; jj < bit->objVec.size(); ++jj){
             free(sources[jj]);
         }
         free(sources);
+		/*
         status = H5DSset_scale(ds, "source");
         status = H5DSattach_scale(classFieldToUniform_[ii->first], ds, 0);
         status = H5DSset_label(classFieldToUniform_[ii->first], 0, "source");
+		*/
         status = H5Dclose(ds);
         status = H5Tclose(memtype);
     }
 }
 
-void NSDFWriter::closeEventData()
+void NSDFWriter2::closeEventData()
 {
     for (unsigned int ii = 0; ii < eventDatasets_.size(); ++ii){
         if (eventDatasets_[ii] >= 0){
@@ -351,7 +392,7 @@ void NSDFWriter::closeEventData()
    event source objects, vector of event source fields and the vector
    of event datasets by querying the messages on InputVariables.
  */
-void NSDFWriter::openEventData(const Eref &eref)
+void NSDFWriter2::openEventData(const Eref &eref)
 {
     if (filehandle_ <= 0){
         return;
@@ -366,7 +407,7 @@ void NSDFWriter::openEventData(const Eref &eref)
         vector < string > srcFields;
         el->getMsgSourceAndSender(dest->getFid(), src, srcFields);
         if (src.size() > 1){
-            cerr << "NSDFWriter::openEventData - only one source can be connected to an eventInput" <<endl;
+            cerr << "NSDFWriter2::openEventData - only one source can be connected to an eventInput" <<endl;
         } else if (src.size() == 1){
             eventSrcFields_.push_back(srcFields[0]);
             eventSrc_.push_back(src[0].path());
@@ -376,12 +417,12 @@ void NSDFWriter::openEventData(const Eref &eref)
             hid_t dataSet = getEventDataset(src[0].path(), srcFields[0]);
             eventDatasets_.push_back(dataSet);
         } else {
-            cerr <<"NSDFWriter::openEventData - cannot handle multiple connections at single input." <<endl;
+            cerr <<"NSDFWriter2::openEventData - cannot handle multiple connections at single input." <<endl;
         }
     }
 }
 
-void NSDFWriter::createEventMap()
+void NSDFWriter2::createEventMap()
 {
     herr_t status;
     hid_t eventMapContainer = require_group(filehandle_, MAPEVENTSRC);
@@ -447,7 +488,7 @@ void NSDFWriter::createEventMap()
 
    TODO: check the returned hid_t and show appropriate error messages.
 */
-hid_t NSDFWriter::getEventDataset(string srcPath, string srcField)
+hid_t NSDFWriter2::getEventDataset(string srcPath, string srcField)
 {
     string eventSrcPath = srcPath + string("/") + srcField;
     map< string, hid_t >::iterator it = eventSrcDataset_.find(eventSrcPath);
@@ -473,34 +514,25 @@ hid_t NSDFWriter::getEventDataset(string srcPath, string srcField)
     return dataset;
 }
 
-void NSDFWriter::flush()
+void NSDFWriter2::flush()
 {
     // We need to update the tend on each write since we do not know
     // when the simulation is getting over and when it is just paused.
     writeScalarAttr<string>(filehandle_, "tend", iso_time(NULL));
 
     // append all uniform data
-    for (map< string, hid_t>::iterator it = classFieldToUniform_.begin();
-         it != classFieldToUniform_.end(); ++it){
-        map< string, vector < unsigned int > >::iterator idxit = classFieldToSrcIndex_.find(it->first);
-        if (idxit == classFieldToSrcIndex_.end()){
-            cerr << "Error: NSDFWriter::flush - could not find entry for " << it->first <<endl;
-            break;
-        }
-        if (data_.size() == 0 || data_[0].size() == 0){
-            break;
-        }
-        double * buffer = (double*)calloc(idxit->second.size() * steps_, sizeof(double));
-        vector< double > values;
-        for (unsigned int ii = 0; ii < idxit->second.size(); ++ii){
+	for ( vector< Block >::iterator bit = blocks_.begin(); (steps_ > 0) && (bit != blocks_.end()); bit++ ) {
+		assert( steps_ == bit->data[0].size() );
+        double* buffer = (double*)calloc(bit->data.size() * steps_, sizeof(double));
+        for (unsigned int ii = 0; ii < bit->data.size(); ++ii){
             for (unsigned int jj = 0; jj < steps_; ++jj){
-                buffer[ii * steps_ + jj] = data_[idxit->second[ii]][jj];
+                buffer[ii * steps_ + jj] = bit->data[ii][jj];
             }
-            data_[idxit->second[ii]].clear();
+            bit->data[ii].clear();
         }
-
-        hid_t filespace = H5Dget_space(it->second);
+        hid_t filespace = H5Dget_space(bit->dataset);
         if (filespace < 0){
+			cout << "Error: NSDFWriter2::flush(): Failed to open filespace\n";
             break;
         }
         hsize_t dims[2];
@@ -508,18 +540,27 @@ void NSDFWriter::flush()
         // retrieve current datset dimensions
         herr_t status = H5Sget_simple_extent_dims(filespace, dims, maxdims);
         hsize_t newdims[] = {dims[0], dims[1] + steps_}; // new column count
-        status = H5Dset_extent(it->second, newdims); // extend dataset to new column count
+        status = H5Dset_extent(bit->dataset, newdims); // extend dataset to new column count
+		if ( status < 0 ) {
+			cout << "Error: NSDFWriter2::flush(): Fail to extend dataset\n";
+            break;
+		}
         H5Sclose(filespace);
-        filespace = H5Dget_space(it->second); // get the updated filespace
+        filespace = H5Dget_space(bit->dataset); // get the updated filespace
         hsize_t start[2] = {0, dims[1]};
         dims[1] = steps_; // change dims for memspace & hyperslab
         hid_t memspace = H5Screate_simple(2, dims, NULL);
         H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, NULL, dims, NULL);
-        status = H5Dwrite(it->second, H5T_NATIVE_DOUBLE,  memspace, filespace, H5P_DEFAULT, buffer);
+        status = H5Dwrite(bit->dataset, H5T_NATIVE_DOUBLE,  memspace, filespace, H5P_DEFAULT, buffer);
+		if ( status < 0 ) {
+			cout << "Error: NSDFWriter2::flush(): Failed to write data\n";
+            break;
+		}
         H5Sclose(memspace);
         H5Sclose(filespace);
         free(buffer);
     }
+	steps_ = 0;
 
     // append all event data
     for (unsigned int ii = 0; ii < eventSrc_.size(); ++ii){
@@ -531,7 +572,7 @@ void NSDFWriter::flush()
     HDF5DataWriter::flush();
 }
 
-void NSDFWriter::reinit(const Eref& eref, const ProcPtr proc)
+void NSDFWriter2::reinit(const Eref& eref, const ProcPtr proc)
 {
     // write environment
     // write model
@@ -550,14 +591,11 @@ void NSDFWriter::reinit(const Eref& eref, const ProcPtr proc)
     writeScalarAttr<string>(filehandle_, "tstart", iso_time(0));
     writeScalarAttr<string>(filehandle_, "nsdf_version", "1.0");
     openUniformData(eref);
-    for (map < string, hid_t >::iterator it = classFieldToUniform_.begin();
-         it != classFieldToUniform_.end();
-         ++it){
-        // tstart is reset to 0 on reinit
-        writeScalarAttr< double >(it->second, "tstart", 0.0);
-        // dt is same for all requested data - that of the NSDFWriter
-        writeScalarAttr< double >(it->second, "dt", proc->dt);
-    }
+	for (vector< Block >::iterator bi = blocks_.begin(); bi != blocks_.end(); ++bi) {
+        writeScalarAttr< double >(bi->dataset, "tstart", 0.0);
+        // dt is same for all requested data - that of the NSDFWriter2
+        writeScalarAttr< double >(bi->dataset, "dt", proc->dt);
+	}
     openEventData(eref);
     writeModelFiles();
     writeModelTree();
@@ -568,7 +606,7 @@ void NSDFWriter::reinit(const Eref& eref, const ProcPtr proc)
     steps_ = 0;
 }
 
-void NSDFWriter::process(const Eref& eref, ProcPtr proc)
+void NSDFWriter2::process(const Eref& eref, ProcPtr proc)
 {
     if (filehandle_ < 0){
         return;
@@ -577,39 +615,37 @@ void NSDFWriter::process(const Eref& eref, ProcPtr proc)
     const Finfo* tmp = eref.element()->cinfo()->findFinfo("requestOut");
     const SrcFinfo1< vector < double > *>* requestOut = static_cast<const SrcFinfo1< vector < double > * > * >(tmp);
     requestOut->send(eref, &uniformData);
-    for (unsigned int ii = 0; ii < uniformData.size(); ++ii){
-        data_[ii].push_back(uniformData[ii]);
-    }
+	assert( uniformData.size() == mapMsgIdx_.size() );
+	// Note that uniformData is ordered by msg tgt order. We want to store
+	// data in block_->objVec order.
+	unsigned int ii = 0;
+	for (unsigned int blockIdx = 0; blockIdx < blocks_.size(); ++blockIdx) {
+		vector< vector< double > >&  bjd = blocks_[blockIdx].data;
+		for ( auto jj = bjd.begin(); jj != bjd.end(); ++jj ) {
+			jj->push_back( uniformData[ mapMsgIdx_[ii] ] );
+			ii++;
+		}
+	}
     ++steps_;
     if (steps_ < flushLimit_){
         return;
     }
-    // // TODO this is place holder. Will convert to 2D datasets to
-    // // collect same field from object on same clock
-    // for (unsigned int ii = 0; ii < datasets_.size(); ++ii){
-    //     herr_t status = appendToDataset(datasets_[ii], data_[ii]);
-    //     data_[ii].clear();
-    // }
-    // for (unsigned int ii = 0; ii < events_.size(); ++ii){
-    //     herr_t status = appendToDataset(eventDatasets_[ii], events_[ii]);
-    // }
-    NSDFWriter::flush();
-    steps_ = 0;
+    NSDFWriter2::flush();
  }
 
-NSDFWriter& NSDFWriter::operator=( const NSDFWriter& other)
+NSDFWriter2& NSDFWriter2::operator=( const NSDFWriter2& other)
 {
 	eventInputs_ = other.eventInputs_;
-	for ( vector< InputVariable >::iterator
-					i = eventInputs_.begin(); i != eventInputs_.end(); ++i )
-			i->setOwner( this );
-        for (unsigned int ii = 0; ii < getNumEventInputs(); ++ii){
-            events_[ii].clear();
-        }
+	for ( vector< InputVariable >::iterator i = eventInputs_.begin(); i != eventInputs_.end(); ++i ) {
+		i->setOwner( this );
+	}
+	for (unsigned int ii = 0; ii < getNumEventInputs(); ++ii){
+		events_[ii].clear();
+	}
 	return *this;
 }
 
-void NSDFWriter::setNumEventInputs(unsigned int num)
+void NSDFWriter2::setNumEventInputs(unsigned int num)
 {
     unsigned int prevSize = eventInputs_.size();
     eventInputs_.resize(num);
@@ -618,50 +654,50 @@ void NSDFWriter::setNumEventInputs(unsigned int num)
     }
 }
 
-unsigned int NSDFWriter::getNumEventInputs() const
+unsigned int NSDFWriter2::getNumEventInputs() const
 {
     return eventInputs_.size();
 }
 
-void NSDFWriter::setEnvironment(string key, string value)
+void NSDFWriter2::setEnvironment(string key, string value)
 {
     env_[key] = value;
 }
 
 
-void NSDFWriter::setInput(unsigned int index, double value)
+void NSDFWriter2::setInput(unsigned int index, double value)
 {
     events_[index].push_back(value);
 }
 
-InputVariable* NSDFWriter::getEventInput(unsigned int index)
+InputVariable* NSDFWriter2::getEventInput(unsigned int index)
 {
     static InputVariable dummy;
     if (index < eventInputs_.size()){
         return &eventInputs_[index];
     }
-    cout << "Warning: NSDFWriter::getEventInput: index: " << index <<
+    cout << "Warning: NSDFWriter2::getEventInput: index: " << index <<
 		" is out of range: " << eventInputs_.size() << endl;
    return &dummy;
 }
 
-void NSDFWriter::setModelRoot(string value)
+void NSDFWriter2::setModelRoot(string value)
 {
     modelRoot_ = value;
 }
 
-string NSDFWriter::getModelRoot() const
+string NSDFWriter2::getModelRoot() const
 {
     return modelRoot_;
 }
 
-void NSDFWriter::setModelFiles(string value)
+void NSDFWriter2::setModelFiles(string value)
 {
 	modelFileNames_.clear();	
     moose::tokenize( value, ", ", modelFileNames_);
 }
 
-string NSDFWriter::getModelFiles() const
+string NSDFWriter2::getModelFiles() const
 {
 	string ret = "";
 	string spacer = "";
@@ -672,21 +708,128 @@ string NSDFWriter::getModelFiles() const
     return ret;
 }
 
-void NSDFWriter::writeStaticCoords()
+bool parseBlockString( const string& val, Block& block )
+{
+	string s = val;
+	auto ff = s.find_last_of(".");
+	if (ff == string::npos )
+		return false;
+	block.hasMsg = false;
+	block.hasContainer = false;
+	block.dataset = -1;
+	block.field = s.substr( ff + 1 );
+	string temp = block.field;
+	temp[0] = toupper( temp[0] );
+	block.getField = "get" + temp;
+	s = s.substr( 0, ff );
+	vector< string > svec;
+    moose::tokenize(s, "/", svec);
+	string path = "";
+	unsigned int containerIdx = 0;
+	block.containerPath = "";
+	block.nsdfContainerPath = "";
+	string pct = "";
+	for ( unsigned int ii = 0; ii < svec.size(); ii++ ) {
+		path += "/" + svec[ii];
+		Id id( path );
+		if ( id != Id() ) {
+			if ( id.element()->cinfo()->isA( "Neuron" ) ||
+				id.element()->cinfo()->isA( "ChemCompt" ) ) 
+			{
+				containerIdx = ii;
+				block.containerPath = path;
+				block.nsdfContainerPath += pct + svec[ii];
+			}
+			pct = "%";
+		} else {
+			cout << "Error: NSDFWriter2: parseBlockString: No object found on '" << path << "'. Ignoring block.\n";
+		}
+	}
+	if( block.containerPath == "" )
+		return false;
+	block.relPath = "";
+	block.nsdfRelPath = "";
+	string slash = "";
+	pct = "";
+	for ( auto jj = containerIdx+1; jj < svec.size(); ++jj) {
+		block.relPath += slash + svec[jj];
+		slash = "/";
+		block.nsdfRelPath += pct + svec[jj];
+		pct = "%";
+	}
+	if( block.relPath == "" )
+		return false;
+	string objWildcardPath = block.containerPath + '/' + block.relPath;
+	block.objVec.clear();
+	simpleWildcardFind( objWildcardPath, block.objVec );
+	if ( block.objVec.size() == 0 ) {
+		cout << "Error: NSDFWriter2:parseBlockString: No objects found on path '" << objWildcardPath << "'\n";
+		return false;
+	}
+	block.className = block.objVec[0].element()->cinfo()->name();
+	for ( auto obj : block.objVec ) {
+		// Nasty workaround for different ways of handling CaConcs in Hsolve
+		if (obj.element()->cinfo()->name().find("CaConc") != string::npos &&
+			block.className.find( "CaConc" ) != string::npos )
+			continue;
+		if (obj.element()->cinfo()->name() != block.className ) {
+			cout << "Error: NSDFWriter2:parseBlockString: different classes found on path '" << objWildcardPath << "': '" << block.className << "' vs. '" << obj.element()->cinfo()->name() << "'\n";
+			return false;
+		}
+	}
+
+	block.data.resize( block.objVec.size() );
+	for( auto i = block.data.begin(); i != block.data.end(); i++ )
+		i->clear();
+	return true;
+}
+
+void NSDFWriter2::setBlocks(vector< string > value)
+{
+	if ( value.size() == 0 )
+		blocks_.clear();
+	blocks_.resize( value.size() );
+	for ( unsigned int i = 0; i < value.size(); ++i ) {
+		if ( !parseBlockString( value[i], blocks_[i] ) ) {
+			cout << "Error: NSDFWriter2::setBlocks: block[" << i << "] = '" 
+					<< value[i] << "' failed\n";
+			return;
+		}
+	}
+    blockStrVec_ = value;
+}
+
+vector< string > NSDFWriter2::getBlocks() const
+{
+    return blockStrVec_;
+}
+
+////////////////////////////////////////////////////////////////////////
+
+ObjId findParentElecCompt( ObjId obj )
+{
+	for (ObjId pa = Field< ObjId >::get( obj, "parent" ); pa != ObjId(); 
+		pa = Field< ObjId >::get( pa, "parent" ) ) {
+		if ( pa.element()->cinfo()->isA( "CompartmentBase" ) )
+			return pa;
+	}
+	return ObjId();
+}
+
+void NSDFWriter2::writeStaticCoords()
 {
     hid_t staticObjContainer = require_group(filehandle_, STATICPATH );
-    for (map< string, vector < unsigned int > >::iterator ii = classFieldToSrcIndex_.begin(); ii != classFieldToSrcIndex_.end(); ++ii){
-        vector < string > pathTokens;
-        moose::tokenize(ii->first, "/", pathTokens);
-        string className = pathTokens[0];
+	for( auto bit = blocks_.begin(); bit != blocks_.end(); bit++ ) {
+		string coordContainer = bit->nsdfContainerPath + "/" + bit->nsdfRelPath;
 		string fieldName = "coords"; // pathTokens[1] is not relevant.
-        hid_t container = require_group(staticObjContainer, className);
-        double * buffer = (double*)calloc(ii->second.size() * 7, sizeof(double));
-		// Ugly class checking stuff here: Both have a coord field
-		if ( className.find( "Pool" ) != string::npos || 
-			 className.find( "Compartment" ) != string::npos ) {
-        	for (unsigned int jj = 0; jj < ii->second.size(); ++jj) {
-            	vector< double > coords = Field< vector< double > >::get( src_[ii->second[jj]], fieldName.c_str() );
+        hid_t container = require_group(staticObjContainer, coordContainer);
+        double * buffer = 
+			(double*)calloc(bit->data.size() * 7, sizeof(double));
+		if ( bit->className.find( "Pool" ) != string::npos || 
+			 bit->className.find( "Compartment" ) != string::npos ) {
+        	for (unsigned int jj = 0; jj < bit->data.size(); ++jj) {
+				ObjId obj = bit->objVec[jj];
+            	vector< double > coords = Field< vector< double > >::get( obj, fieldName );
 				if ( coords.size() == 11 ) { // For SpineMesh
 					for ( unsigned int kk = 0; kk < 6; ++kk) {
 						buffer[jj * 7 + kk] = coords[kk];
@@ -704,15 +847,20 @@ void NSDFWriter::writeStaticCoords()
 					}
 				}
 			}
-		} else { // Want to check for things like Ca in an elec compt...
-        	for (unsigned int jj = 0; jj < ii->second.size(); ++jj) {
+		} else { // Check for things like Ca or chans in an elec compt
+        	for (unsigned int jj = 0; jj < bit->objVec.size(); ++jj) {
+				ObjId pa = findParentElecCompt( bit->objVec[jj] );
+				vector< double > coords( 7, 0.0 ); 
+				if (pa != ObjId()) {
+            		coords = Field< vector< double > >::get(pa, fieldName);
+				}
 				for ( unsigned int kk = 0; kk < 7; ++kk) {
-					buffer[jj * 7 + kk] = 0.0;
+					buffer[jj * 7 + kk] = coords[kk];
 				}
 			}
 		}
         hsize_t dims[2];
-		dims[0] = ii->second.size();
+		dims[0] = bit->data.size();
 		dims[1] = 7;
         hid_t memspace = H5Screate_simple(2, dims, NULL);
         hid_t dataspace = H5Screate_simple(2, dims, NULL);
@@ -725,8 +873,10 @@ void NSDFWriter::writeStaticCoords()
 	}
 }
 
-void NSDFWriter::writeModelFiles()
+void NSDFWriter2::writeModelFiles()
 {
+	// These can be large, exceed 64K limit of attributes. So write as 
+	// datasets, not attributes.
 	for ( const string& fName : modelFileNames_ ) {
     	// string fPath = MODELFILEPATH + string("/") + fName;
     	string fPath = MODELFILEPATH;
@@ -734,15 +884,28 @@ void NSDFWriter::writeModelFiles()
 		auto ss = ostringstream{};
 		if ( f.is_open() ) {
 			ss << f.rdbuf();
+			string fstr = ss.str();
+			char* filebuf = (char*)calloc( ss.str().length()+1, sizeof(char)  );
+			char** sources = (char**) calloc( 1, sizeof(char* ) );
+			sources[0] = filebuf;
+			strcpy( filebuf, fstr.c_str() );
     		hid_t fGroup = require_group(filehandle_, fPath);
-    		writeScalarAttr<string>(fGroup, fName, ss.str());
+			hid_t ds = createStringDataset(fGroup, fName, (hsize_t)1, (hsize_t)1 );
+			hid_t memtype = H5Tcopy(H5T_C_S1);
+			int status = H5Tset_size(memtype, H5T_VARIABLE );
+			assert(status >= 0);
+			// status = H5Tclose(memtype);
+			status = H5Dwrite(ds, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, sources );
+			assert(status >= 0);
+			free( filebuf );
+			free( sources );
 		} else {
-			cout << "Warning: NSDFWriter::writeModelFiles Could not open file '" << fName << "'/n";
+			cout << "Warning: NSDFWriter2::writeModelFiles Could not open file '" << fName << "'/n";
 		}
 	}
 }
 
-void NSDFWriter::writeModelTree()
+void NSDFWriter2::writeModelTree()
 {
 	if (modelRoot_ == "")
 		return;
@@ -792,4 +955,4 @@ void NSDFWriter::writeModelTree()
 #endif // USE_HDF5
 
 //
-// NSDFWriter.cpp ends here
+// NSDFWriter2.cpp ends here

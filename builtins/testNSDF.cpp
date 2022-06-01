@@ -56,6 +56,7 @@
 
 #include "../basecode/header.h"
 #include "../utility/utility.h"
+#include "../utility/strutil.h"
 
 #include "HDF5WriterBase.h"
 #include "HDF5DataWriter.h"
@@ -70,7 +71,7 @@ void testCreateStringDataset()
 {
     const char * data[STR_DSET_LEN] = {"You have to", "live", "life", "to the limit"};
     hid_t file, memtype, dset;
-    hunsigned int size = STR_DSET_LEN;
+    hsize_t size = STR_DSET_LEN;
     herr_t status;
     HDF5WriterBase writer;
     string h5Filename = moose::random_string( 10 );

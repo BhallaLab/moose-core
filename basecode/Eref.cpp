@@ -16,6 +16,12 @@ Eref::Eref()
 	;
 }
 
+Eref::Eref( const Eref& other )
+			: e_( other.e_ ), i_( other.i_ ), f_( other.f_ )
+{
+	;
+}
+
 Eref::Eref( Element* e, unsigned int index, unsigned int field )
 			: e_( e ), i_( index ), f_( field )
 {

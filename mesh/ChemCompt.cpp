@@ -56,6 +56,27 @@ const Cinfo* ChemCompt::initCinfo()
         "The first N entries are for x, next N for y, last N are z. ",
         &ChemCompt::getVoxelMidpoint
     );
+	
+    static ReadOnlyLookupValueFinfo< 
+			ChemCompt, unsigned int, vector< double > >
+   	oneVoxelMidpoint(
+        "oneVoxelMidpoint",
+        "Vector of midpoint coordinates of specified voxel.",
+        &ChemCompt::getOneVoxelMidpoint
+    );
+
+    static ReadOnlyLookupValueFinfo< 
+			ChemCompt, unsigned int, vector< double > > 
+	voxelCoords(
+               "voxelCoords",
+               "Returns vector of coords of voxel specified by fid."
+			   "Coords for CubeMesh are x1y1z1 x2y2z2."
+               "Coords for Cylinder, Neuro, Spine and PSD are: "
+			   "x1y1z1 x2y2z2 dia0 dia1 phi0 phi1"
+			   "Last two of these are ignored here."
+               "Returns empty vec if voxel idx is wrong.",
+               &ChemCompt::getCoordinates
+    );
 
     static LookupElementValueFinfo<
     ChemCompt, unsigned int, double >
@@ -157,8 +178,10 @@ const Cinfo* ChemCompt::initCinfo()
     {
         &volume,			// Value
         &voxelVolume,		// ReadOnlyLookupValue
-        &voxelMidpoint,		// ReadOnlyLookupValue
+        &voxelMidpoint,		// ReadOnlyValue
+        &oneVoxelMidpoint,		// ReadOnlyLookupValue
         &oneVoxelVolume,	// ReadOnlyLookupValue
+        &voxelCoords,	// ReadOnlyLookupValue
         &numDimensions,	// ReadOnlyValue
         &stencilRate,	// ReadOnlyLookupValue
         &stencilIndex,	// ReadOnlyLookupValue
@@ -338,6 +361,24 @@ vector< double > ChemCompt::getVoxelVolume() const
 vector< double > ChemCompt::getVoxelMidpoint() const
 {
     return this->vGetVoxelMidpoint();
+}
+
+vector< double > ChemCompt::getCoordinates( unsigned int fid ) const
+{
+	return this->getCoordinates( fid );
+}
+
+vector< double > ChemCompt::getOneVoxelMidpoint( unsigned int vox ) const
+{
+	const vector< double >& v = vGetVoxelMidpoint();
+	vector< double > ret = { 0.0, 0.0, 0.0 };
+	unsigned int numVoxels = v.size() / 3;
+	if ( vox < numVoxels ) {
+		ret[0] = v[vox];
+		ret[1] = v[vox + numVoxels];
+		ret[2] = v[vox + numVoxels * 2];
+	}
+	return ret;
 }
 
 double ChemCompt::getOneVoxelVolume( const Eref& e, unsigned int dataIndex ) const

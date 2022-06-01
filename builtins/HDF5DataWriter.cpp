@@ -14,6 +14,7 @@
 
 #include "../basecode/header.h"
 #include "../utility/utility.h"
+#include "../utility/strutil.h"
 
 #include "HDF5DataWriter.h"
 
@@ -239,7 +240,8 @@ hid_t HDF5DataWriter::getDataset(string path)
     }
     herr_t status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     // Create the groups corresponding to this path
-    string::unsigned intype lastslash = path.find_last_of("/");
+    // string::unsigned intype lastslash = path.find_last_of("/");
+    auto lastslash = path.find_last_of("/");
     vector<string> pathTokens;
     moose::tokenize(path, "/", pathTokens);
     hid_t prev_id = filehandle_;

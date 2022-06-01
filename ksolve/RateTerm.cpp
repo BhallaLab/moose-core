@@ -31,16 +31,20 @@ double StochNOrder::operator() ( const double* S ) const
 {
     double ret = k_;
     vector< unsigned int >::const_iterator i;
-    unsigned int lasty = 0;
+    unsigned int lasty = ~0U;
     double y = 0.0;
     for ( i = v_.begin(); i != v_.end(); i++)
     {
         assert( !std::isnan( S[ *i ] ) );
-        if ( lasty == *i )
+        if ( lasty == *i ) {
             y -= 1.0;
-        else
+		} else {
             y = S[ *i ];
+		}
         ret *= y;
+		if ( ret < 0.0 ) {
+			return 0.0;
+		}
         lasty = *i;
     }
     return ret;
