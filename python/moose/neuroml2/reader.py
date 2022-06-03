@@ -124,7 +124,7 @@ def setRa(comp, resistivity):
     if comp.length > 0:
         comp.Ra = resistivity * comp.length / xarea(comp)
     else:
-        comp.Ra = resistivity * 8.0 / (comp.diameter * np.pi)
+        comp.Ra = resistivity * 4.0 / (comp.diameter * np.pi)
 
 def setRm(comp, condDensity):
     """Set membrane resistance"""
