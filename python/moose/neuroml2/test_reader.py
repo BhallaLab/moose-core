@@ -97,18 +97,27 @@ class TestFullCell(unittest.TestCase):
     def test_connectivity(self):
         """Test raxial-axial connectivity between MOOSE compartments when
         there is parent->child relation in NML2."""
-        id_to_seg = dict([(seg.id, seg) for seg in self.ncell.morphology.segments])
-        for seg in self.ncell.morphology.segments:
-            try:
-                pseg = id_to_seg[seg.parent.segment]
-            except AttributeError:
-                continue
-            comp = self.reader.nml_to_moose[seg]
-            pcomp = self.reader.nml_to_moose[pseg]
-            
-            '''
-            TODO: what should this be updated to???
-            self.assertIn(comp.id_, pcomp.neighbours['raxial'])'''
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[0]').e1.name, self.dendrite1.name)
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[0]').e2.name, self.soma.name)
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[1]').e1.name, self.dendrite2.name)
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[1]').e2.name, self.dendrite1.name)
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[2]').e1.name, self.spine1.name)
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[2]').e2.name, self.dendrite2.name)
+
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[0]').srcFieldsOnE1, ['sumRaxialOut', 'proximalOut'])
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[0]').destFieldsOnE2, ['sumRaxial', 'raxialSym'])
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[1]').srcFieldsOnE1, ['sumRaxialOut', 'proximalOut'])
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[1]').destFieldsOnE2, ['sumRaxial', 'raxialSym'])
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[2]').srcFieldsOnE1, ['sumRaxialOut', 'proximalOut'])
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[2]').destFieldsOnE2, ['sumRaxial', 'raxialSym'])
+
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[0]').srcFieldsOnE2, ['sumRaxialOut', 'distalOut'])
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[0]').destFieldsOnE1, ['sumRaxial', 'raxialSym'])
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[1]').srcFieldsOnE2, ['sumRaxialOut', 'distalOut'])
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[1]').destFieldsOnE1, ['sumRaxial', 'raxialSym'])
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[2]').srcFieldsOnE2, ['sumRaxialOut', 'distalOut'])
+        self.assertEqual(moose.element('/Msgs[0]/singleMsg[2]').destFieldsOnE1, ['sumRaxial', 'raxialSym'])
+
 
     def test_capacitance(self):
         for comp_id in moose.wildcardFind(self.mcell.path + '/##[ISA=Compartment]'):
@@ -117,7 +126,7 @@ class TestFullCell(unittest.TestCase):
             self.assertTrue((comp.Cm > 0) and (comp.Cm < 1e-6))
 
     def test_protochans(self):
-        """TODO: verify the prototype cahnnel."""
+        """TODO: verify the prototype channel."""
         for chan_id in moose.wildcardFind('/library/##[ISA=HHChannel]'):
             print(moose.element(chan_id))
 
