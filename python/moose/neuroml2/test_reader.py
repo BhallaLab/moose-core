@@ -97,26 +97,13 @@ class TestFullCell(unittest.TestCase):
     def test_connectivity(self):
         """Test raxial-axial connectivity between MOOSE compartments when
         there is parent->child relation in NML2."""
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[0]').e1.name, self.dendrite1.name)
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[0]').e2.name, self.soma.name)
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[1]').e1.name, self.dendrite2.name)
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[1]').e2.name, self.dendrite1.name)
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[2]').e1.name, self.spine1.name)
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[2]').e2.name, self.dendrite2.name)
+        msgs_soma = self.soma.msgIn
+        msgs_dendrite1 = self.dendrite1.msgIn
+        msgs_dendrite2 = self.dendrite2.msgIn
 
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[0]').srcFieldsOnE1, ['sumRaxialOut', 'proximalOut'])
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[0]').destFieldsOnE2, ['sumRaxial', 'raxialSym'])
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[1]').srcFieldsOnE1, ['sumRaxialOut', 'proximalOut'])
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[1]').destFieldsOnE2, ['sumRaxial', 'raxialSym'])
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[2]').srcFieldsOnE1, ['sumRaxialOut', 'proximalOut'])
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[2]').destFieldsOnE2, ['sumRaxial', 'raxialSym'])
-
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[0]').srcFieldsOnE2, ['sumRaxialOut', 'distalOut'])
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[0]').destFieldsOnE1, ['sumRaxial', 'raxialSym'])
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[1]').srcFieldsOnE2, ['sumRaxialOut', 'distalOut'])
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[1]').destFieldsOnE1, ['sumRaxial', 'raxialSym'])
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[2]').srcFieldsOnE2, ['sumRaxialOut', 'distalOut'])
-        self.assertEqual(moose.element('/Msgs[0]/singleMsg[2]').destFieldsOnE1, ['sumRaxial', 'raxialSym'])
+        self.assertEqual(msgs_soma[3].e1.name, self.dendrite1.name)
+        self.assertEqual(msgs_dendrite1[3].e1.name, self.dendrite2.name)
+        self.assertEqual(msgs_dendrite2[3].e1.name, self.spine1.name)
 
 
     def test_capacitance(self):
