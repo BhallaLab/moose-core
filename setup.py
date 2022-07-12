@@ -49,7 +49,7 @@ if not os.path.exists(builddir_):
 
 numCores_ = multiprocessing.cpu_count()
 
-version_ = '4.0.0'
+version_ = '4.0.0.dev%s' % stamp
 
 # importlib is available only for python3. Since we build wheels, prefer .so
 # extension. This way a wheel built by any python3.x will work with any python3.
