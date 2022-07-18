@@ -70,6 +70,9 @@ public:
     /// Returns number of local buffered pools.
     unsigned int getNumBufPools() const;
 
+    /// Returns number of local func target pools.
+    unsigned int getNumFuncPools() const;
+
     /**
      *  Returns total number of pools. Includes the pools whose
      *  actual calculations happen on another solver, but are given a
@@ -190,6 +193,9 @@ public:
     void allocateModel(const vector<Id>& elist);
 	/// Clears out old model.
     void deAllocateModel();
+
+	/// Removes funcTargetPools from the list of varPools and bufPools
+	void clearFuncTargetPools();
 
     /// Functions to build the maps between Ids and internal indices
     void buildPoolLookup();
@@ -624,6 +630,11 @@ private:
      * funcTarget_[ poolIndex ] == funcIndex
      */
     vector<unsigned int> funcTarget_;
+
+	/**
+	 * vector of id of pools controlled by a func.
+	 */
+    vector<Id> funcTargetPoolVec_;
 
     /**
      * Vector of funcs controlling pool increment, that is dN/dt
