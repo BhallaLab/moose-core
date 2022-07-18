@@ -712,6 +712,10 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     char now[80];
 
     buildTicks( e );
+	if (nSteps_ == 0 )
+		info_.setFirstStep();
+	else
+		info_.setContinue();
     assert( currentStep_ == nSteps_ );
     assert( activeTicks_.size() == activeTicksMap_.size() );
     nSteps_ += numSteps;
@@ -769,6 +773,7 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
             ++k;
         }
 #endif
+		info_.setRunning();
 
         // When 10% of simulation is over, notify user when notify_ is set to
         // true.
@@ -810,6 +815,7 @@ void Clock::handleReinit( const Eref& e )
     doingReinit_ = true;
     // Curr time is end of current step.
     info_.currTime = 0.0;
+	info_.setReinit();
     vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
     for ( vector< unsigned int>::iterator j =
                 activeTicks_.begin(); j != activeTicks_.end(); ++j )
@@ -819,6 +825,7 @@ void Clock::handleReinit( const Eref& e )
     }
 
     info_.dt = dt_;
+	info_.setRunning();
     doingReinit_ = false;
 }
 

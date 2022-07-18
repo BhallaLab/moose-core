@@ -106,10 +106,18 @@ const string VoxelPools::getMethod( )
 void VoxelPools::advance( const ProcInfo* p )
 {
     double t = p->currTime - p->dt;
+	if ( p->isStart() ) // True if first step or restart.
+		lsodaState = 1;
+	// lsodaState = 1;
+	/**
 	if (t < p->dt )
 		lsodaState = 1;
 	else
-		lsodaState = 3;
+		lsodaState = 1; // Earlier this was set to 3. This made it 
+		// impossible to alter non-buffered molecules from the script after
+		// the simulation had started, even if the control returned to the
+		// parser.
+	**/
     Ksolve* k = reinterpret_cast<Ksolve*>( stoichPtr_->getKsolve().eref().data() );
 
     if( getMethod() == "lsoda" )
@@ -123,6 +131,7 @@ void VoxelPools::advance( const ProcInfo* p )
 
         // Now update the y from yout. This is different thant normal GSL or
         // BOOST based approach.
+		// totVar += stoichPtr_->getNumFuncPools();
         for (size_t i = 0; i < totVar; i++)
             varS()[i] = yout[i+1];
 
@@ -348,11 +357,14 @@ void VoxelPools::lsodaSys( double t, double* y, double* dydt, void* param)
     // Fill in the values.
 	// Ensure that the buffered values are assigned to y.
    	size_t totVar = vp->stoichPtr_->getNumVarPools() + vp->stoichPtr_->getNumProxyPools();
-	for( size_t ii = totVar; ii < vp->size(); ii++ ) {
+	for( size_t ii = totVar + vp->stoichPtr_->getNumFuncPools(); ii < vp->size(); ii++ ) {
 		y[ii] = vp->Svec()[ii];
 	}
 	
     vp->stoichPtr_->updateFuncs( y, t );
+	for( size_t ii = totVar; ii < totVar + vp->stoichPtr_->getNumFuncPools(); ii++ ) {
+		vp->Svec()[ii] = y[ii];
+	}
     vp->updateRates( y, dydt );
 }
 

@@ -528,7 +528,9 @@ void SeqSynHandler::addSpike(unsigned int index, double time, double weight)
     // for the latestSpikes slice.
     //
     // Here we reorder the entries in latestSpikes by the synapse order.
-    latestSpikes_[ synapseOrder_[index] ] += weight;
+	// Don't need to do this here at all - just examine the events_ 
+	// at Process and populate latestSpikes_ there.
+    // latestSpikes_[ synapseOrder_[index] ] += weight;
 }
 
 double SeqSynHandler::getTopSpike( unsigned int index ) const
@@ -557,6 +559,14 @@ void SeqSynHandler::vProcess( const Eref& e, ProcPtr p )
 {
     // Here we look at the correlations and do something with them.
     int nh = numHistory();
+	vector< PreSynEvent > newEvents;
+    while( !events_.empty() && events_.top().time <= p->currTime )
+    {
+        newEvents.push_back( events_.top() );
+		latestSpikes_[ synapseOrder_[ events_.top().synIndex ] ] += 
+			events_.top().weight;
+        events_.pop();
+    }
 
     // Check if we need to do correlations at all.
     if ( nh > 0 && kernel_.size() > 0 )
@@ -569,6 +579,9 @@ void SeqSynHandler::vProcess( const Eref& e, ProcPtr p )
             history_.sumIntoRow( latestSpikes_, 0 );
             latestSpikes_.assign( vGetNumSynapses(), 0.0 );
 
+			// I don't understand why we iterate over nh here.
+			// We just want the current correlation.
+			/**
             // Build up the sum of correlations over time
             vector< double > correlVec( vGetNumSynapses(), 0.0 );
             for ( int i = 0; i < nh; ++i )
@@ -576,13 +589,26 @@ void SeqSynHandler::vProcess( const Eref& e, ProcPtr p )
             if ( sequenceScale_ > 0.0 )   // Sum all responses, send to chan
             {
                 seqActivation_ = 0.0;
-                for ( vector< double >::iterator y = correlVec.begin();
-                        y != correlVec.end(); ++y )
-                    seqActivation_ += pow( *y, sequencePower_ );
+                // for ( vector< double >::iterator y = correlVec.begin(); y != correlVec.end(); ++y )
+                //   seqActivation_ += pow( *y, sequencePower_ );
+				for (const auto y : correlVec )
+                    seqActivation_ += pow( y, sequencePower_ );
 
                 // We'll use the seqActivation_ to send a special msg.
                 seqActivation_ *= sequenceScale_;
             }
+			*/
+
+            seqActivation_ = 0.0;
+            if ( sequenceScale_ > 0.0 )   // Sum all responses, send to chan
+            {
+            	for ( int i = 0; i < nh; ++i )
+                	seqActivation_ += pow( history_.dotProduct( kernel_[i], i, 0 ), sequencePower_ );
+                seqActivation_ *= sequenceScale_;
+            }
+
+			/*
+			 * I think this is altering the correl vec for next cycle.
             if ( plasticityScale_ > 0.0 )   // Short term changes in individual wts
             {
                 weightScaleVec_ = correlVec;
@@ -590,6 +616,7 @@ void SeqSynHandler::vProcess( const Eref& e, ProcPtr p )
                         y != weightScaleVec_.end(); ++y )
                     *y *= plasticityScale_;
             }
+			*/
         }
     }
 
@@ -599,20 +626,31 @@ void SeqSynHandler::vProcess( const Eref& e, ProcPtr p )
     double activation = seqActivation_; // Start with seq activation
     if ( plasticityScale_ > 0.0 )
     {
+		for (const auto ee : newEvents ) {
+            activation += ee.weight * baseScale_ *
+                          weightScaleVec_[ ee.synIndex ] / p->dt;
+		}
+		/*
         while( !events_.empty() && events_.top().time <= p->currTime )
         {
             activation += events_.top().weight * baseScale_ *
                           weightScaleVec_[ events_.top().synIndex ] / p->dt;
             events_.pop();
         }
+		*/
     }
     else
     {
+		for (const auto ee : newEvents ) {
+            activation += baseScale_ * ee.weight / p->dt;
+		}
+		/*
         while( !events_.empty() && events_.top().time <= p->currTime )
         {
             activation += baseScale_ * events_.top().weight / p->dt;
             events_.pop();
         }
+		*/
     }
     if ( activation != 0.0 )
         SynHandlerBase::activationOut()->send( e, activation );
