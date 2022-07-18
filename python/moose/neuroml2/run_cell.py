@@ -45,48 +45,48 @@
 import moose
 import moose.utils as mu
 import sys
-from reader import NML2Reader
+from moose.neuroml2.reader import NML2Reader
 import numpy as np
 
-    
+
 def run(nogui):
-    
+
     reader = NML2Reader(verbose=True)
 
     filename = 'test_files/passiveCell.nml'
     print('Loading: %s'%filename)
     reader.read(filename)
-    
-    
+
+
     msoma = reader.getComp(reader.doc.networks[0].populations[0].id,0,0)
     print(msoma)
-    
-    
+
+
     data = moose.Neutral('/data')
-    
+
     pg = reader.getInput('pulseGen1')
-    
+
     inj = moose.Table('%s/pulse' % (data.path))
     moose.connect(inj, 'requestOut', pg, 'getOutputValue')
-    
-    
+
+
     vm = moose.Table('%s/Vm' % (data.path))
     moose.connect(vm, 'requestOut', msoma, 'getVm')
-    
+
     simdt = 1e-6
     plotdt = 1e-4
     simtime = 150e-3
-    
+
     for i in range(8):
         moose.setClock( i, simdt )
     moose.setClock( 8, plotdt )
     moose.reinit()
     moose.start(simtime)
-    
+
     print("Finished simulation!")
-    
+
     t = np.linspace(0, simtime, len(vm.vector))
-    
+
     if not nogui:
         import matplotlib.pyplot as plt
 
@@ -103,9 +103,9 @@ def run(nogui):
         plt.show()
         plt.close()
 
-    
+
 if __name__ == '__main__':
-    
+
     nogui = '-nogui' in sys.argv
-    
+
     run(nogui)

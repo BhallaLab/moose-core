@@ -1,3 +1,19 @@
+Update 2021-10-28 Padraig Gleeson
+
+reader.py updated to work with Python 3.
+
+To test, run:
+
+    python run_cell.py   # example of a passive cell
+    python run_hhcell.py   # example of a HH cell
+
+Note: older test_*.py files are still giving errors, but may be out of date
+
+
+===============================
+
+Previous status:
+
 NeuroML2 is a moving target and the current parser was generated from
 the schema publicly available on Jul 28 10:18:38 2013 using the
 generateDS.py module.

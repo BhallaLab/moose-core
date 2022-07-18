@@ -13,10 +13,12 @@ r'''
 **           copyright (C) 2003-2017 Upinder S. Bhalla. and NCBS
 Created : Friday May 27 12:19:00 2016(+0530)
 Version
-Last-Updated: Tue 08 Sep 02:22:10 2020(+0530)
+Last-Updated: Tue 05 Apr 11:22:10 2022(+0530)
           By: HarshaRani
 **********************************************************************/
 /****************************
+2022
+Apr 5 : Added basepath in compartment Annotation
 2021
 Apr 16: replace ReacBase to Reac and EnzBase to Enz as API can has changed
 2020
@@ -541,7 +543,6 @@ def writeEnz(modelpath, cremodel_, sceneitems,groupInfo):
                             enzAnno2 = enzAnno2 +"<moose:enzyme>" + \
                                 (str(idBeginWith(convertSpecialChar(
                                 nameList_[i])))) + "</moose:enzyme>\n"
-
                         enzPrd = enz.neighbors["prd"]
                         noofPrd = len(enzPrd)
                         if not enzPrd:
@@ -1242,6 +1243,12 @@ def writeCompt(modelpath, cremodel_):
                                 str(compt.dataIndex) +
                                 "_")))
         comptID_sbml[compt] = csetId
+        nl = list(filter(None, (compt.parent.path).split('/')))
+        pathAnno = ""
+        if len(nl) > 1:
+            for i in range(1,len(nl)):
+                pathAnno = pathAnno+'/'+nl[i]
+            
         if compt.isA("EndoMesh"):
             if comptID_sbml.get(compt.surround) == None:
                 createCompt = False
@@ -1253,7 +1260,10 @@ def writeCompt(modelpath, cremodel_):
                                     "<moose:surround>" + \
                                     str(comptID_sbml[compt.surround])+ "</moose:surround>\n" + \
                                     "<moose:isMembraneBound>" + \
-                                    str(compt.isMembraneBound)+ "</moose:isMembraneBound>\n" 
+                                    str(compt.isMembraneBound)+ "</moose:isMembraneBound>\n"
+                if pathAnno != "":
+                    comptAnno = comptAnno + "<moose:basePath>" \
+                        + pathAnno + "</moose:basePath>"
                 if moose.exists(compt.path+'/info'):
                     if moose.element(compt.path+'/info').notes != "":
                         comptAnno = comptAnno + "<moose:Notes>" \
@@ -1269,6 +1279,10 @@ def writeCompt(modelpath, cremodel_):
                                 str(compt.diffLength)+ "</moose:diffLength>\n" + \
                                 "<moose:isMembraneBound>" + \
                                 str(compt.isMembraneBound)+ "</moose:isMembraneBound>\n"
+            if pathAnno != "":
+                    comptAnno = comptAnno + "<moose:basePath>" \
+                        + pathAnno + "</moose:basePath>"
+
             if moose.exists(compt.path+'/info'):
                 if moose.element(compt.path+'/info').notes != "":
                     comptAnno = comptAnno + "<moose:Notes>" \
@@ -1279,6 +1293,10 @@ def writeCompt(modelpath, cremodel_):
                                 str(compt.className) + "</moose:Mesh>\n" + \
                                 "<moose:isMembraneBound>" + \
                                 str(compt.isMembraneBound)+ "</moose:isMembraneBound>\n" 
+            if pathAnno != "":
+                    comptAnno = comptAnno + "<moose:basePath>" \
+                        + pathAnno + "</moose:basePath>"
+
             if moose.exists(compt.path+'/info'):
                 if moose.element(compt.path+'/info').notes != "":
                     comptAnno = comptAnno + "<moose:Notes>" \
