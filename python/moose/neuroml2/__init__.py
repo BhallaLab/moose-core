@@ -61,7 +61,7 @@ from __future__ import absolute_import, division, print_function
 import moose.utils as mu
 
 __author__ = 'Subhasis Ray'
+from moose.neuroml2.reader import NML2Reader
 
-from .reader import NML2Reader
 
 # __init__.py ends here

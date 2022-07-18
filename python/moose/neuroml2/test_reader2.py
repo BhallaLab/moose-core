@@ -47,31 +47,31 @@ import unittest
 import moose
 from reader import NML2Reader
 import neuroml as nml
+import os
 
 class TestPassiveCell(unittest.TestCase):
     def setUp(self):
+        if '/library' in moose.le():
+            moose.delete('/library')
         self.reader = NML2Reader(verbose=True)
-        
         self.lib = moose.Neutral('/library')
-        self.filename = 'test_files/passiveCell.nml'
-        print('Loading: %s'%self.filename)
+        self.filename = os.path.realpath('test_files/passiveCell.nml')
         self.reader.read(self.filename)
-        for ncell in self.reader.nml_to_moose:
-            if isinstance(ncell, nml.Cell):
-                self.ncell = ncell
+        for ncell in self.reader.nml_cells_to_moose:
+            #if isinstance((self.reader.nml_cells_to_moose[ncell]).type,moose.Neuron):
+            if self.reader.nml_cells_to_moose[ncell].isA("Neuron"):
+                self.ncell = self.reader.nml_cells_to_moose[ncell]
                 break
-        self.mcell = moose.element('/library/%s'%self.ncell.id)
+        self.mcell = moose.element('/library/%s'%self.ncell.name)
         self.soma = moose.element(self.mcell.path + '/soma')
-        
                 
     def test_basicLoading(self):
-        pass
         self.assertEqual(self.reader.filename, self.filename, 'filename was not set')
         self.assertIsNotNone(self.reader.doc, 'doc is None')
     
     def test_createCellPrototype(self):
-        self.assertIsInstance(self.mcell, moose.Neuron)
-        self.assertEqual(self.mcell.name, self.ncell.id)
+        self.assertEqual(moose.element(self.mcell).className, 'Neuron')
+        self.assertEqual(moose.element(self.mcell).name, self.ncell.name)
         
     def test_createMorphology(self):
         for comp_id in moose.wildcardFind(self.mcell.path + '/##[ISA=Compartment]'):
