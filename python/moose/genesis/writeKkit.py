@@ -653,13 +653,13 @@ def getColorCheck(color,GENESIS_COLOR_SEQUENCE):
                                 , int(color[5:7], 16)
                                 )
             index = nearestColorIndex(color, GENESIS_COLOR_SEQUENCE)
-            index = index/2
+            index = index//2
             return index
         elif color.startswith("("):
             color = eval(color)[0:3]
             index = nearestColorIndex(color, GENESIS_COLOR_SEQUENCE)
             #This is because in genesis file index of the color is half
-            index = index/2
+            index = index//2
             return index
         else:
             index = color
