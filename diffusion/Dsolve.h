@@ -130,6 +130,7 @@ public:
     void setConcInit( const Eref& e, double value );
     double getN( const Eref& e ) const;
     void setN( const Eref& e, double value );
+    double getR1( unsigned int reacIdx, const Eref& e ) const;
 	double getVolumeOfPool( const Eref& e ) const;
     double getDiffConst( const Eref& e ) const;
     void setDiffConst( const Eref& e, double value );

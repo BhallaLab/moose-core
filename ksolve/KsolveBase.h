@@ -30,6 +30,10 @@ public:
     /// Get # of molecules in given pool and voxel. Varies with time.
     virtual double getN( const Eref& e ) const = 0;
 
+	/// Get rate const in a given reac and voxel. Usually fixed but 
+	/// may vary if the reac is controlled by a function.
+    virtual double getR1( unsigned int reacIdx, const Eref& e ) const = 0;
+
     /// Set buffer status of pool. Changes class between Pool and BufPool
     virtual void setIsBuffered( const Eref& e, bool val ) {;}
 

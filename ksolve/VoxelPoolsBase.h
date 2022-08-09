@@ -94,6 +94,7 @@ public:
 
     void setN( unsigned int i, double v );
     double getN( unsigned int ) const;
+    double getR1( unsigned int ) const;
     void setConcInit( unsigned int, double v );
     double getConcInit( unsigned int ) const;
     void setDiffConst( unsigned int, double v );

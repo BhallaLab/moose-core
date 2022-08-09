@@ -1682,6 +1682,16 @@ void Stoich::setReacKf(const Eref& e, double v) const
     }
 }
 
+double Stoich::getReacNumKf(const Eref& e ) const
+{
+    unsigned int i = convertIdToReacIndex(e.id());
+    if(i != ~0U) {
+		return kinterface_->getR1( i, e );
+        // return rates_[i]->getR1(e);
+    }
+	return 0.0;
+}
+
 /**
  * For now assume a single rate term.
  */
