@@ -334,7 +334,7 @@ public:
     void setSpecies(unsigned int poolIndex, unsigned int s);
 
     /**
-     * Sets the forward rate v (given in millimoloar concentration units)
+     * Sets the forward rate v (given in millimolor concentration units)
      * for the specified reaction throughout the compartment in which the
      * reaction lives. Internally the stoich uses #/voxel units so this
      * involves querying the volume subsystem about volumes for each
@@ -342,8 +342,13 @@ public:
      */
     void setReacKf(const Eref& e, double v) const;
 
+	/**
+	 * Return forward reaction rate in #/second units.
+	 */
+    double getReacNumKf(const Eref& e ) const;
+
     /**
-     * Sets the reverse rate v (given in millimoloar concentration units)
+     * Sets the reverse rate v (given in millimolor concentration units)
      * for the specified reaction throughout the compartment in which the
      * reaction lives. Internally the stoich uses #/voxel units so this
      * involves querying the volume subsystem about volumes for each
@@ -367,7 +372,7 @@ public:
     double getMMenzKcat(const Eref& e) const;
 
     /**
-     * Sets the rate v (given in millimoloar concentration units)
+     * Sets the rate v (given in millimolor concentration units)
      * for the forward enzyme reaction of binding substrate to enzyme.
      * Does this throughout the compartment in which the
      * enzyme lives. Internally the stoich uses #/voxel units so this

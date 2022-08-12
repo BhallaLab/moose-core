@@ -969,6 +969,14 @@ double Gsolve::getN( const Eref& e ) const
     return 0.0;
 }
 
+double Gsolve::getR1( unsigned int reacIdx, const Eref& e ) const
+{
+    unsigned int vox = getVoxelIndex( e );
+    if ( vox != OFFNODE )
+        return pools_[vox].getR1( reacIdx );
+    return 0.0;
+}
+
 void Gsolve::setConcInit( const Eref& e, double v )
 {
     unsigned int vox = getVoxelIndex( e );

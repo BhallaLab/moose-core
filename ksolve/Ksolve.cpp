@@ -102,6 +102,12 @@ const Cinfo* Ksolve::initCinfo()
         &Ksolve::getNvec
     );
 
+    static ReadOnlyLookupValueFinfo< Ksolve, string, vector< double > > rateVec(
+        "rateVec",
+        "vector of forward rate consts of specified reaction.",
+        &Ksolve::getRateVecFromPath
+    );
+
     static ValueFinfo< Ksolve, unsigned int > numAllVoxels(
         "numAllVoxels",
         "Number of voxels in the entire reac-diff system, "
@@ -201,6 +207,7 @@ const Cinfo* Ksolve::initCinfo()
         &compartment,                    // Value
         &numLocalVoxels,                 // ReadOnlyValue
         &nVec,                           // LookupValue
+        &rateVec,                        // ReadOnlyLookupValue
         &numAllVoxels,                   // ReadOnlyValue
         &numPools,                       // Value
         &estimatedDt,                    // ReadOnlyValue
@@ -490,6 +497,44 @@ void Ksolve::setNvec( unsigned int voxel, vector< double > nVec )
     }
 }
 
+/// Unlike getNvec, this returns vector of R1 for this reac across voxels
+vector< double > Ksolve::getR1vec( unsigned int reacIdx ) const
+{
+	vector< double > ret( pools_.size(), 0.0 );
+	for ( unsigned int ii = 0; ii < pools_.size(); ++ii ) {
+		ret[ii] = pools_[ii].getR1( reacIdx );
+	}
+	return ret;
+}
+
+/// Unlike getNvec, this returns vector of R1 for this reac across voxels
+vector< double > Ksolve::getRateVecFromId( Id reacId ) const
+{
+	if ( reacId != Id() ) {
+		unsigned int idx = stoichPtr_->convertIdToReacIndex( reacId );
+		if ( idx != ~0U )
+			return getR1vec( idx );
+	}
+	return vector< double >( pools_.size(), 0.0 );
+}
+
+/// Unlike getNvec, this returns vector of R1 for this reac across voxels
+vector< double > Ksolve::getRateVecFromPath( string reacPath ) const
+{
+	Id reacId( reacPath );
+	if ( reacId == Id() ) {
+		cout << "Error: object not found on " << reacPath << endl;
+		return vector< double >( pools_.size(), 0.0 );
+	}
+
+	if ( reacId != Id() ) {
+		unsigned int idx = stoichPtr_->convertIdToReacIndex( reacId );
+		if ( idx != ~0U )
+			return getR1vec( idx );
+	}
+	return vector< double >( pools_.size(), 0.0 );
+}
+
 
 double Ksolve::getEstimatedDt() const
 {
@@ -711,6 +756,14 @@ double Ksolve::getN( const Eref& e ) const
     unsigned int vox = getVoxelIndex( e );
     if ( vox != OFFNODE )
         return pools_[vox].getN( getPoolIndex( e ) );
+    return 0.0;
+}
+
+double Ksolve::getR1( unsigned int reacIdx, const Eref& e ) const
+{
+    unsigned int vox = getVoxelIndex( e );
+    if ( vox != OFFNODE )
+        return pools_[vox].getR1( reacIdx );
     return 0.0;
 }
 
