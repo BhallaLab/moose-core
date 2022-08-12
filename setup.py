@@ -3,8 +3,8 @@
 # module.
 #
 # Alternatively, you can use cmake build system which provides finer control
-# over the build. This script is called by cmake to install the python module. 
-# 
+# over the build. This script is called by cmake to install the python module.
+#
 # This script is compatible with python2.7 and python3+. Therefore use of
 # super() is commented out.
 #
@@ -12,9 +12,9 @@
 #  * Python2
 #   - Update setuptools using `python2 -m pip install setuptools --upgrade --user'.
 
-__author__     = "Dilawar Singh"
+__author__     = "Dilawar Singh, HarshaRani"
 
-__copyright__  = "Copyright 2019-, Dilawar Singh"
+__copyright__  = "Copyright 2019-2022, NCBS"
 __maintainer__ = ""
 __email__      = ""
 
@@ -86,7 +86,7 @@ class build_ext(_build_ext):
     user_options = [
             ('with-boost', None, 'Use Boost Libraries (OFF)')
             , ('with-gsl', None, 'Use Gnu Scienfific Library (ON)')
-            , ('with-gsl-static', None, 'Use GNU Scientific Library (static library) (OFF)') 
+            , ('with-gsl-static', None, 'Use GNU Scientific Library (static library) (OFF)')
             , ('debug', None, 'Build moose in debugging mode (OFF)')
             , ('no-build', None, 'DO NOT BUILD. (for debugging/development)')
             ] + _build_ext.user_options
@@ -137,8 +137,8 @@ class build_ext(_build_ext):
             cmake_args.append('-D%s=%s' % (k,v))
         os.chdir(str(builddir_))
         self.spawn(['cmake', str(sdir_)] + cmake_args)
-        if not self.dry_run: 
-            self.spawn(['make', '-j%d'%numCores_]) 
+        if not self.dry_run:
+            self.spawn(['make', '-j%d'%numCores_])
         os.chdir(str(sdir_))
 
 with open(os.path.join(sdir_,  "README.md")) as f:

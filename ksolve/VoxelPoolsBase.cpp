@@ -155,6 +155,12 @@ double VoxelPoolsBase::getN( unsigned int i ) const
     return S_[i];
 }
 
+double VoxelPoolsBase::getR1( unsigned int i ) const
+{
+    return rates_[i]->getR1();
+}
+
+
 void VoxelPoolsBase::setConcInit( unsigned int i, double v )
 {
     Cinit_[i] = v;

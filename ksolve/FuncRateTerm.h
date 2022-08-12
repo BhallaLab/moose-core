@@ -32,6 +32,7 @@ class FuncRate: public ExternReac
         double operator() ( const double* S ) const {
             double t = Field< double >::get( Id(1), "currentTime" );
             auto v = (*func_)( S, t ); // get rate from func calculation.
+			*(const_cast< double * >( &k_ ) ) = v;
             assert(! std::isnan(v));
             return v;
         }
@@ -76,6 +77,10 @@ class FuncRate: public ExternReac
             return ret;
         }
 
+		double getR1() const {
+			return k_;
+		}
+
     protected:
         double k_;
         shared_ptr<FuncTerm> func_;
@@ -108,7 +113,9 @@ class FuncReac: public FuncRate
         double operator() ( const double* S ) const
         {
             // double ret = k_ * func_( S, 0.0 ); // get rate from func calculation.
-            double ret = (*func_)( S, 0.0 ); // get rate from func calculation.
+            double t = Field< double >::get( Id(1), "currentTime" );
+            double ret = (*func_)( S, t ); //get rate from func calculation.
+			*(const_cast< double * >( &k_ ) ) = ret;
             vector< unsigned int >::const_iterator i;
             for ( i = v_.begin(); i != v_.end(); i++) {
                 assert( !std::isnan( S[ *i ] ) );
