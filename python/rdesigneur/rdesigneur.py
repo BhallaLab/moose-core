@@ -133,7 +133,7 @@ class rdesigneur:
             moogList = [], 
             outputFileList = [], # List of all file save specifications.
             modelFileNameList = [], # List of any files used to build.
-            ode_method = "gsl",  # gsl, lsoda, gssa, gillespie
+            ode_method = "lsoda",  # gsl, lsoda, gssa, gillespie
             isLegacyMethod = False,
             params = None
         ):
@@ -1588,10 +1588,12 @@ rdesigneur.rmoogli.updateMoogliViewer()
         self.chemid.name = 'temp_chem'
         newChemid = moose.Neutral( self.model.path + '/chem' )
         comptlist = self._assignComptNamesFromKkit_SBML()
-        if len( comptlist ) == 1 and comptlist[0].name == 'kinetics':
+        #if len( comptlist ) == 1 and comptlist[0].name == 'kinetics':
+        if len( comptlist ) == 1:
             comptlist[0].name = 'dend'
         comptdict = { i.name:i for i in comptlist }
         if len(comptdict) == 1 or 'dend' in comptdict:
+            #print( "COMPTDICT = ", comptdict )
             self.dendCompt = moose.NeuroMesh( newChemid.path + '/dend' )
             self.dendCompt.geometryPolicy = 'cylinder'
             self.dendCompt.separateSpines = 0

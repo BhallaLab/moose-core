@@ -101,7 +101,7 @@ private:
 
     std::shared_ptr<LSODA> pLSODA;
     LSODA_ODE_SYSTEM_TYPE lsodaSystem;
-    int lsodaState = 1;
+    int lsodaState_;
 
 #ifdef USE_GSL
     gsl_odeiv2_driver* driver_;
