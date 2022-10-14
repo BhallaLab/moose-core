@@ -60,7 +60,7 @@ GENESIS_COLOR_SEQUENCE = ((248, 0, 255), (240, 0, 255), (232, 0, 255), (224, 0, 
 #Todo : To be written
 #               --StimulusTable
 
-def mooseWriteKkit( modelpath, filename, sceneitems={}):
+def mooseWriteKkit( modelpath, filename, sceneitems={},deletedanglingObj=True):
     global foundmatplotlib_
     if not foundmatplotlib_:
         print('No maplotlib found.'
@@ -114,10 +114,10 @@ def mooseWriteKkit( modelpath, filename, sceneitems={}):
             error = writePool(modelpath,f,gtId_vol,sceneitems)
             errors = errors+error
 
-            reacList,error= writeReac(modelpath,f,sceneitems)
+            reacList,error= writeReac(modelpath,f,sceneitems,deletedanglingObj)
             errors = errors+error
             
-            enzList,error = writeEnz(modelpath,f,sceneitems)
+            enzList,error = writeEnz(modelpath,f,sceneitems,deletedanglingObj)
             errors = errors+error
 
             chanList, error = writeConcChan(modelpath,f,sceneitems)
@@ -287,9 +287,18 @@ def writeConcChan(modelpath,f,sceneitems):
                     " " + str(int(x)) + " " + str(int(y)) + " "+str(int(0))+"\n")
     
     return concChanList,error
-def writeEnz( modelpath,f,sceneitems):
+def writeEnz( modelpath,f,sceneitems,deletedanglingObj):
     error = ""
     enzList = moose.wildcardFind(modelpath+'/##[0][ISA=EnzBase]')
+    enzListnew = []
+    if deletedanglingObj == True:
+        for enz in enzList:
+            if (enz.numSubstrates != 0 and enz.numProducts != 0):
+                enzListnew.append(enz)
+            else:
+
+                error = error+"\n"+enz.className+ " - "+enz.parent.parent.name +" - "+enz.name+" doesn't have substrate or product"
+        enzList = enzListnew
     for enz in enzList:
         if findCompartment(enz) == moose.element('/'):
             error = error + " \n "+enz.path+ " doesn't have compartment ignored to write to genesis"
@@ -392,9 +401,17 @@ def storeReacMsg(reacList,f):
             s = s + "addmsg /kinetics/" + reacPath + " /kinetics/" + trimPath( prd ) +  " REAC B A\n";
             f.write( s)
 
-def writeReac(modelpath,f,sceneitems):
+def writeReac(modelpath,f,sceneitems,deletedanglingObj):
     error = ""
     reacList = moose.wildcardFind(modelpath+'/##[0][ISA=Reac]')
+    reacListnew = []
+    if deletedanglingObj == True:
+        for reac in reacList:
+            if (reac.numProducts != 0 and reac.numSubstrates != 0):
+                reacListnew.append(reac)
+            else:
+                error = error+"\n"+reac.className+" - "+reac.parent.name+ " - "+reac.name+" doesn't have substrate or product"
+        reacList = reacListnew         
     for reac in reacList:
         if findCompartment(reac) == moose.element('/'):
             error = error + " \n "+reac.path+ " doesn't have compartment ignored to write to genesis"
