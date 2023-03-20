@@ -75,6 +75,10 @@ public:
      */
     double getEstimatedDt() const;
 
+    vector<double> getRateVecFromId( Id reacId ) const; //field func
+    vector<double> getRateVecFromPath( string reacPath ) const; //field func
+    vector<double> getR1vec( unsigned int reacIdx ) const; // Utility func
+
     //////////////////////////////////////////////////////////////////
     // Dest Finfos
     //////////////////////////////////////////////////////////////////
@@ -97,6 +101,7 @@ public:
     // KsolveBase inherited functions
     void setN( const Eref& e, double v );
     double getN( const Eref& e ) const;
+    double getR1( unsigned int reacIdx, const Eref& e ) const;
 
     void setConcInit( const Eref& e, double v );
     double getConcInit( const Eref& e ) const;

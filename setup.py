@@ -12,9 +12,9 @@
 #  * Python2
 #   - Update setuptools using `python2 -m pip install setuptools --upgrade --user'.
 
-__author__     = "Dilawar Singh"
+__author__     = "Dilawar Singh, HarshaRani"
 
-__copyright__  = "Copyright 2019-, Dilawar Singh"
+__copyright__  = "Copyright 2019-2022, NCBS"
 __maintainer__ = ""
 __email__      = ""
 
@@ -49,7 +49,7 @@ if not os.path.exists(builddir_):
 
 numCores_ = multiprocessing.cpu_count()
 
-version_ = '3.3.0.dev%s' % stamp
+version_ = '4.0.0.dev%s' % stamp
 
 # importlib is available only for python3. Since we build wheels, prefer .so
 # extension. This way a wheel built by any python3.x will work with any python3.

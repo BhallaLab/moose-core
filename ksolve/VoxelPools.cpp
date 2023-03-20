@@ -36,6 +36,7 @@ using namespace boost::numeric;
 
 VoxelPools::VoxelPools() : pLSODA(nullptr)
 {
+	lsodaState_ = 1;
 #ifdef USE_GSL
     driver_ = 0;
 #endif
@@ -57,6 +58,7 @@ VoxelPools::~VoxelPools()
 void VoxelPools::reinit( double dt )
 {
     VoxelPoolsBase::reinit();
+	lsodaState_ = 1;
 #ifdef USE_GSL
     if ( !driver_ )
         return;
@@ -110,18 +112,24 @@ void VoxelPools::advance( const ProcInfo* p )
 
     if( getMethod() == "lsoda" )
     {
+		// True if first step or restart, or if diffusion. Tells LSODA to 
+		// recalculate using new pool n values, which slows it down a bit. 
+		if ( p->isStart() || (numVoxels_ > 1) ) 
+			lsodaState_ = 1;
+    	size_t totVar = stoichPtr_->getNumVarPools() + stoichPtr_->getNumProxyPools();
         vector<double> yout(size()+1);
         pLSODA->lsoda_update( &VoxelPools::lsodaSys, size()
                 , Svec(), yout , &t
-                , p->currTime, &lsodaState, this
+                , p->currTime, &lsodaState_, this
                 );
 
         // Now update the y from yout. This is different thant normal GSL or
         // BOOST based approach.
-        for (size_t i = 0; i < size(); i++)
+		// totVar += stoichPtr_->getNumFuncPools();
+        for (size_t i = 0; i < totVar; i++)
             varS()[i] = yout[i+1];
 
-        if( lsodaState == 0 )
+        if( lsodaState_ == 0 )
         {
             cerr << "Error: VoxelPools::advance: LSODA integration error at time "
                  << t << "\n";
@@ -341,7 +349,16 @@ void VoxelPools::lsodaSys( double t, double* y, double* dydt, void* param)
 {
     VoxelPools* vp = reinterpret_cast< VoxelPools* >( param );
     // Fill in the values.
+	// Ensure that the buffered values are assigned to y.
+   	size_t totVar = vp->stoichPtr_->getNumVarPools() + vp->stoichPtr_->getNumProxyPools();
+	for( size_t ii = totVar + vp->stoichPtr_->getNumFuncPools(); ii < vp->size(); ii++ ) {
+		y[ii] = vp->Svec()[ii];
+	}
+	
     vp->stoichPtr_->updateFuncs( y, t );
+	for( size_t ii = totVar; ii < totVar + vp->stoichPtr_->getNumFuncPools(); ii++ ) {
+		vp->Svec()[ii] = y[ii];
+	}
     vp->updateRates( y, dydt );
 }
 

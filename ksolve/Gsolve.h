@@ -98,6 +98,7 @@ public:
 
     void setN( const Eref& e, double v );
     double getN( const Eref& e ) const;
+    double getR1( unsigned int reacIdx, const Eref& e ) const;
     void setConcInit( const Eref& e, double v );
     double getConcInit( const Eref& e ) const;
     double getVolumeOfPool( const Eref& e ) const;
