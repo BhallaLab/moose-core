@@ -442,7 +442,7 @@ def copy_deleteUnlyingPoolObj(pool,path):
                 funclist.extend(moose.element(poolcopied).neighbors[types])
 
             for fl in funclist:
-                moose.delete(fl)
+                moose.delete(moose.element(fl))
             enzlist = moose.element(poolcopied).neighbors['reac']
             for el in list(set(enzlist)):
                 moose.delete(el.path)
