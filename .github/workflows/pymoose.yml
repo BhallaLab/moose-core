@@ -23,7 +23,7 @@ jobs:
         sudo -E apt clean
         sudo -E apt update
         sudo -E apt install -y cmake libgsl-dev g++ gcc git 
-        sudo -E apt install python3-tk python-tk
+        sudo -E apt install python3-tk
         sudo -E apt install -y libhdf5-dev doxygen
         python -m pip install numpy matplotlib vpython --user
     - name: Build
