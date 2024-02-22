@@ -249,7 +249,7 @@ string textwrap(const string& text, const string& prefix, const size_t width)
     tokenize(text, " \n", words);
     string res;
     size_t size = 0;
-    for(const auto w : words) {
+    for(const auto& w : words) {
         if(size == 0) {
             res += prefix;
             size = prefix.size();
