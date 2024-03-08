@@ -8,7 +8,7 @@ This repository is sufficient for using MOOSE as a python module. We provide pyt
 
 To install `nightly` build:
 
-    $ pip install pymoose --user --pre --upgrde
+    $ pip install pymoose --user --pre --upgrade
     
 Have a look at examples, tutorials and demo here https://github.com/BhallaLab/moose-examples.
 
