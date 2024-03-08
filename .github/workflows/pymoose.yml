@@ -28,4 +28,4 @@ jobs:
         python -m pip install numpy matplotlib vpython --user
     - name: Build
       run: |
-        python setup.py install
+         pip install .
