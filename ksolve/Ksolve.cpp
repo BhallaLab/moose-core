@@ -659,8 +659,10 @@ void Ksolve::reinit( const Eref& e, ProcPtr p )
 
     if ( isBuilt_ )
     {
-        for ( unsigned int i = 0 ; i < pools_.size(); ++i )
+        for ( unsigned int i = 0 ; i < pools_.size(); ++i ) {
+            pools_[i].setNumVoxels( pools_.size() );
             pools_[i].reinit( p->dt );
+		}
     }
     else
     {

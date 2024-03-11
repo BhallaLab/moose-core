@@ -613,7 +613,7 @@ string mooseShowMsg(const ObjId& obj)
             cerr << "No Msg found on " << obj.path() << endl;
             continue;
         }
-        ss << fmt::format("  {0}, [{1}] <-- {2}, [{3}]\n", msg->getE1().path(),
+        ss << fmt::format("  {0}, [{1}] --> {2}, [{3}]\n", msg->getE1().path(),
                           moose::vectorToCSV<string>(msg->getSrcFieldsOnE1()),
                           msg->getE2().path(),
                           moose::vectorToCSV<string>(msg->getDestFieldsOnE2()));

@@ -139,6 +139,11 @@ void VoxelPoolsBase::scaleVolsBufsRates(double ratio, const Stoich* stoichPtr)
     }
 }
 
+void VoxelPoolsBase::setNumVoxels( unsigned int n )
+{
+	numVoxels_ = n;
+}
+
 //////////////////////////////////////////////////////////////
 // Zombie Pool Access functions
 //////////////////////////////////////////////////////////////

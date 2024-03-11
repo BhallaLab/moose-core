@@ -378,22 +378,22 @@ def deleteSolver(modelRoot):
             st_ksolve = st.ksolve
             moose.delete(st)
             if moose.exists((st_ksolve).path):
-                moose.delete(st_ksolve)
+                moose.delete(moose.element(st_ksolve))
 
 def poolMerge(comptS,comptD,poolNotcopiedyet):
     #Here from source file all the groups are check if exist, if doesn't exist then create those groups
     #Then for that group pools are copied
     SCmptGrp = moose.wildcardFind(comptS.path+'/#[TYPE=Neutral]')
-    SCmptGrp = SCmptGrp +(moose.element(comptS.path),)
+    SCmptGrp.append(moose.element(comptS.path))
     
     DCmptGrp = moose.wildcardFind(comptD.path+'/#[TYPE=Neutral]')
-    DCmptGrp = DCmptGrp +(moose.element(comptD.path),)
+    DCmptGrp.append(moose.element(comptD.path))
     
     objS = moose.element(comptS.path).parent.name
     objD = moose.element(comptD.path).parent.name
     
     for spath in SCmptGrp:
-        grp_cmpt = ((spath.path).replace(objS,objD)).replace('[0]','')
+        grp_cmpt = ((spath.path).replace(objS,objD,1)).replace('[0]','')
         if moose.exists(grp_cmpt):
             #If path exist, but its not the Neutral obj then creating a neutral obj with _grp
             #It has happened that pool, reac, enz name might exist with the same name, which when tried to create a group
@@ -408,10 +408,10 @@ def poolMerge(comptS,comptD,poolNotcopiedyet):
             #Neutral obj from src if doesn't exist in destination,then create src's Neutral obj in des
             src = spath
             srcpath = (spath.parent).path
-            des = srcpath.replace(objS,objD)
-            moose.Neutral(moose.element(des).path+'/'+spath.name)
-        
-        dpath = moose.element(spath.path.replace(objS,objD))
+            des = srcpath.replace(objS,objD,1)
+            despath = moose.element(des).path
+            tt = moose.Neutral(moose.element(des).path+'/'+spath.name)
+        dpath = moose.element(spath.path.replace(objS,objD,1))
         spoollist = moose.wildcardFind(spath.path+'/#[ISA=PoolBase]')
         dpoollist = moose.wildcardFind(dpath.path+'/#[ISA=PoolBase]')
         #check made, for a given Neutral or group if pool doesn't exist then copied
@@ -442,7 +442,7 @@ def copy_deleteUnlyingPoolObj(pool,path):
                 funclist.extend(moose.element(poolcopied).neighbors[types])
 
             for fl in funclist:
-                moose.delete(fl)
+                moose.delete(moose.element(fl))
             enzlist = moose.element(poolcopied).neighbors['reac']
             for el in list(set(enzlist)):
                 moose.delete(el.path)
@@ -578,12 +578,13 @@ def reacMerge(comptS,comptD,key,poolListina):
             # And assuming that pools are copied earlier EXPECT POOL CPLX
             # To be assured the it takes correct compartment name incase reaction sub's
             # belongs to different compt
-            key = findCompartment(rs).name
+            #key = findCompartment(rs).name
+            key = moose.element(rs.parent).name
             if rSsubname and rSprdname:
                 allexists =  checkexist(rSsubname,objS,objD)
                 allexistp =  checkexist(rSprdname,objS,objD)
                 if allexists and allexistp:
-                    rdpath = rs.parent.path.replace(objS,objD)
+                    rdpath = rs.parent.path.replace(objS,objD,1)
                     reac = moose.copy(rs,moose.element(rdpath))
                     connectObj(reac,rSsubname,"sub",comptD,war_msg)
                     connectObj(reac,rSprdname,"prd",comptD,war_msg)
@@ -703,7 +704,7 @@ def checkexist(spList,objB,objA):
     allexist = False
     for rsp in spList:
         found = False
-        rspPath = rsp.path.replace(objB,objA)
+        rspPath = rsp.path.replace(objB,objA,0)
         if moose.exists(rspPath):
             found = True
         allexistL.append(found)
