@@ -370,7 +370,6 @@ const Cinfo* Clock::initCinfo()
         "    MgBlock             1       50e-6\n"
         "    Nernst              1       50e-6\n"
         "    RandSpike           1       50e-6\n"
-        "    ChanBase            2       50e-6\n"
         "    IntFire             2       50e-6\n"
         "    IntFireBase         2       50e-6\n"
         "    LIF                 2       50e-6\n"
@@ -379,25 +378,26 @@ const Cinfo* Clock::initCinfo()
         "    AdExIF              2       50e-6\n"
         "    AdThreshIF          2       50e-6\n"
         "    IzhIF               2       50e-6\n"
-        "    IzhikevichNrn       2       50e-6\n"
-        "    SynChan             2       50e-6\n"
-        "    NMDAChan            2       50e-6\n"
-        "    GapJunction         2       50e-6\n"
-        "    HHChannel           2       50e-6\n"
-        "    HHChannel2D         2       50e-6\n"
-        "    Leakage             2       50e-6\n"
-        "    MarkovChannel       2       50e-6\n"
+        "    IzhikevichNrn       2       50e-6\n"        
         "    MarkovGslSolver     2       50e-6\n"
         "    MarkovRateTable     2       50e-6\n"
         "    MarkovSolver        2       50e-6\n"
         "    MarkovSolverBase    2       50e-6\n"
         "    RC                  2       50e-6\n"
-        "    Compartment (init)         3        50e-6\n"
-        "    CompartmentBase (init )    3        50e-6\n"
-        "    SymCompartment (init)      3        50e-6\n"
-        "    Compartment          4      50e-6\n"
-        "    CompartmentBase      4      50e-6\n"
-        "    SymCompartment       4      50e-6\n"
+        "    Compartment (init)         2        50e-6\n"
+        "    CompartmentBase (init )    2        50e-6\n"
+        "    SymCompartment (init)      2        50e-6\n"
+        "    Compartment          3      50e-6\n"
+        "    CompartmentBase      3      50e-6\n"
+        "    SymCompartment       3      50e-6\n"
+        "    ChanBase            4       50e-6\n"
+        "    SynChan             4       50e-6\n"
+        "    NMDAChan            4       50e-6\n"
+        "    GapJunction         4       50e-6\n"
+        "    HHChannel           4       50e-6\n"
+        "    HHChannel2D         4       50e-6\n"
+        "    Leakage             4       50e-6\n"
+        "    MarkovChannel       4       50e-6\n"        
         "    SpikeGen             5      50e-6\n"
         "    HSolve               6      50e-6\n"
         "    SpikeStats           7      50e-6\n"
@@ -712,6 +712,10 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
     char now[80];
 
     buildTicks( e );
+	if (nSteps_ == 0 )
+		info_.setFirstStep();
+	else
+		info_.setContinue();
     assert( currentStep_ == nSteps_ );
     assert( activeTicks_.size() == activeTicksMap_.size() );
     nSteps_ += numSteps;
@@ -769,6 +773,7 @@ void Clock::handleStep( const Eref& e, unsigned long numSteps )
             ++k;
         }
 #endif
+		info_.setRunning();
 
         // When 10% of simulation is over, notify user when notify_ is set to
         // true.
@@ -810,6 +815,7 @@ void Clock::handleReinit( const Eref& e )
     doingReinit_ = true;
     // Curr time is end of current step.
     info_.currTime = 0.0;
+	info_.setReinit();
     vector< unsigned int >::const_iterator k = activeTicksMap_.begin();
     for ( vector< unsigned int>::iterator j =
                 activeTicks_.begin(); j != activeTicks_.end(); ++j )
@@ -819,6 +825,7 @@ void Clock::handleReinit( const Eref& e )
     }
 
     info_.dt = dt_;
+	info_.setRunning();
     doingReinit_ = false;
 }
 
@@ -883,7 +890,6 @@ void Clock::buildDefaultTick()
     defaultTick_["MgBlock"] = 1;
     defaultTick_["Nernst"] = 1;
     defaultTick_["RandSpike"] = 1;
-    defaultTick_["ChanBase"] = 2;
     defaultTick_["IntFire"] = 2;
     defaultTick_["IntFireBase"] = 2;
     defaultTick_["LIF"] = 2;
@@ -893,21 +899,22 @@ void Clock::buildDefaultTick()
     defaultTick_["AdThreshIF"] = 2;
     defaultTick_["IzhIF"] = 2;
     defaultTick_["IzhikevichNrn"] = 2;
-    defaultTick_["SynChan"] = 2;
-    defaultTick_["NMDAChan"] = 2;
-    defaultTick_["GapJunction"] = 2;
-    defaultTick_["HHChannel"] = 2;
-    defaultTick_["HHChannel2D"] = 2;
-    defaultTick_["Leakage"] = 2;
-    defaultTick_["MarkovChannel"] = 2;
     defaultTick_["MarkovOdeSolver"] = 2;
     defaultTick_["MarkovRateTable"] = 2;
     defaultTick_["MarkovSolver"] = 2;
     defaultTick_["MarkovSolverBase"] = 2;
     defaultTick_["RC"] = 2;
-    defaultTick_["Compartment"] = 4; // Note these use an 'init', at t-1.
-    defaultTick_["CompartmentBase"] = 4; // Uses 'init'
-    defaultTick_["SymCompartment"] = 4; // Uses 'init'
+    defaultTick_["Compartment"] = 3; // Note these use an 'init', at t-1.
+    defaultTick_["CompartmentBase"] = 3; // Uses 'init'
+    defaultTick_["SymCompartment"] = 3; // Uses 'init'
+    defaultTick_["ChanBase"] = 4;
+    defaultTick_["SynChan"] = 4;
+    defaultTick_["NMDAChan"] = 4;
+    defaultTick_["GapJunction"] = 4;
+    defaultTick_["HHChannel"] = 4;
+    defaultTick_["HHChannel2D"] = 4;
+    defaultTick_["Leakage"] = 4;
+    defaultTick_["MarkovChannel"] = 4;
     defaultTick_["SpikeGen"] = 5;
     defaultTick_["HSolve"] = 6;
     defaultTick_["SpikeStats"] = 7;

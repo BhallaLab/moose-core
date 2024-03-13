@@ -94,6 +94,7 @@ public:
 
     void setN( unsigned int i, double v );
     double getN( unsigned int ) const;
+    double getR1( unsigned int ) const;
     void setConcInit( unsigned int, double v );
     double getConcInit( unsigned int ) const;
     void setDiffConst( unsigned int, double v );
@@ -204,12 +205,19 @@ public:
 
     void scaleVolsBufsRates( double ratio, const Stoich* stoichPtr );
 
+	void setNumVoxels( unsigned int );
+
     /// Debugging utility
     void print() const;
 
 protected:
     const Stoich* stoichPtr_;
     vector< RateTerm* > rates_;
+	/**
+	 * Number of voxels. If > 1, set flag for LSODA to handle molecule
+	 * flux on each timestep during diffusion, which slows it down.
+	 */
+	unsigned int numVoxels_;
 
 private:
     /**

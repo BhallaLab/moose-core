@@ -210,8 +210,8 @@ double Reac::getNumKf( const Eref& e ) const
 {
 	// Return value for voxel 0. Conceivably I might want to use the
 	// DataId part to specify which voxel to use, but that isn't in the
-	// current definition for Reacs as being a single entity for the entire
-	// compartment.
+	// current definition for Reacs as being a single entity for the
+	// entire compartment.
 	double volScale = convertConcToNumRateUsingMesh( e, subOut(), 0 );
 	return concKf_ / volScale;
 }

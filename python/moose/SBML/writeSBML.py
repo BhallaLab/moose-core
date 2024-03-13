@@ -17,6 +17,9 @@ Last-Updated: Tue 05 Apr 11:22:10 2022(+0530)
           By: HarshaRani
 **********************************************************************/
 /****************************
+2023
+Aug 3 : revisited specialChar, like /,\,[,],#,?,prime,quotes, are not allowed in name both in moose and sbml
+        All special charater are not allowed to write in sbml id those are retained and added   
 2022
 Apr 5 : Added basepath in compartment Annotation
 2021
@@ -1074,22 +1077,28 @@ def findGroup_compt(melement):
     return melement
 
 def convertSpecialCharshot(str1):
+    #Checks  name str  for special char and convert as SBML ID doesnot allow special char
     d = { "BEL"     : "&#176", 
             "'"     : "_prime_",
             "\\"    : "_slash_",
             "/"     : "_slash_", 
             "["     : "_sbo_", 
             "]"     : "_sbc_",
-            ": "    : "_" , 
-            " "     : "_" }
+            "#"    : "_hash_" , 
+            "\""     : "_quote_" ,
+            "?":"_question_",
+            "&":"_and_",
+            "<":"_greater_"
+         }
     for i, j in d.items():
         str1 = str1.replace(i, j)
     return str1
 
 def convertSpecialChar(str1):
+    # Checks  Id str  for special char and convert as SBML ID doesnot allow special char 
     d = {"&": "_and", "<": "_lessthan_", ">": "_greaterthan_", "BEL": "&#176", "-": "_minus_", "'": "_prime_",
          "+": "_plus_", "*": "_star_", "/": "_slash_", "(": "_bo_", ")": "_bc_",
-         "[": "_sbo_", "]": "_sbc_", ".": "_dot_", " ": "_"
+         "[": "_sbo_", "]": "_sbc_", ".": "_dot_", " ": "_", "#" : "_hash_", "?": "_question_"
          }
     for i, j in d.items():
         str1 = str1.replace(i, j)
@@ -1106,7 +1115,6 @@ def writeSpecies(modelpath, cremodel_, sbmlDoc, sceneitems,speGroup):
             sName = convertSpecialChar(spe.name)
             comptVec = findCompartment(spe)
             speciannoexist = False
-            
             if not comptVec.isA("ChemCompt"):
                 return -2
             else:

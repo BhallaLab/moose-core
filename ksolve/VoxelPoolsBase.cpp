@@ -139,6 +139,11 @@ void VoxelPoolsBase::scaleVolsBufsRates(double ratio, const Stoich* stoichPtr)
     }
 }
 
+void VoxelPoolsBase::setNumVoxels( unsigned int n )
+{
+	numVoxels_ = n;
+}
+
 //////////////////////////////////////////////////////////////
 // Zombie Pool Access functions
 //////////////////////////////////////////////////////////////
@@ -154,6 +159,12 @@ double VoxelPoolsBase::getN( unsigned int i ) const
 {
     return S_[i];
 }
+
+double VoxelPoolsBase::getR1( unsigned int i ) const
+{
+    return rates_[i]->getR1();
+}
+
 
 void VoxelPoolsBase::setConcInit( unsigned int i, double v )
 {

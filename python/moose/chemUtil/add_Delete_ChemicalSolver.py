@@ -40,15 +40,18 @@ def mooseDeleteChemSolver(modelRoot):
 
                 if moose.exists((st_ksolve).path):
                     print("KSolver is deleted for modelpath %s " % st_ksolve)
-                    moose.delete(st_ksolve)
+
+                    moose.delete(moose.element(st_ksolve))
 
                 if moose.exists((st_dsolve).path) and st_dsolve.path != '/':
                     print("DSolver is deleted for modelpath %s " % st_dsolve)
-                    moose.delete(st_dsolve)
+                    moose.delete(moose.element(st_dsolve))
     else:
         return ("mooseDeleteChemSolver is only for deleting Chemical Model solver which has to be `CubeMesh` or `CylMesh` found ",list(set([x.className for x in compts]) - set(['CubeMesh',"CylMesh"])))
         
 def stdSolvertype(solverName):
+    if solverName.lower() in ["lsoda"]:
+        return "lsoda"
     if solverName.lower() in ["gssa","gillespie","stochastic","gsolve"]:
         return "gssa"
     elif solverName.lower() in ["gsl","runge kutta","deterministic","ksolve","rungekutta","rk5","rkf","rk"]:
@@ -74,7 +77,6 @@ def mooseAddChemSolver(modelRoot, solver):
 
             previousSolver = stdSolvertype(comptinfo.solver)
             currentSolver = stdSolvertype(solver)
-
             if previousSolver != currentSolver:
                 comptinfo.solver = currentSolver
                 if (moose.exists(compts[0].path + '/stoich')):

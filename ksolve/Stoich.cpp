@@ -92,8 +92,14 @@ const Cinfo* Stoich::initCinfo()
     static ReadOnlyValueFinfo<Stoich, unsigned int> numBufPools(
         "numBufPools",
         "Number of buffered pools to be computed by the "
-        "numerical engine. Includes pools controlled by functions.",
+        "numerical engine.",
         &Stoich::getNumBufPools);
+
+    static ReadOnlyValueFinfo<Stoich, unsigned int> numFuncPools(
+        "numFuncPools",
+        "Number of pools controlled by functions computed by the "
+        "numerical engine.",
+        &Stoich::getNumFuncPools);
 
     static ReadOnlyValueFinfo<Stoich, unsigned int> numAllPools(
         "numAllPools",
@@ -195,6 +201,7 @@ const Cinfo* Stoich::initCinfo()
         &allowNegative,      // Value
         &numVarPools,        // ReadOnlyValue
         &numBufPools,        // ReadOnlyValue
+        &numFuncPools,        // ReadOnlyValue
         &numAllPools,        // ReadOnlyValue
         &numProxyPools,      // ReadOnlyValue
         &poolIdMap,          // ReadOnlyValue
@@ -471,9 +478,14 @@ unsigned int Stoich::getNumBufPools() const
     return bufPoolVec_.size();
 }
 
+unsigned int Stoich::getNumFuncPools() const
+{
+    return funcTargetPoolVec_.size();
+}
+
 unsigned int Stoich::getNumAllPools() const
 {
-    return varPoolVec_.size() + offSolverPoolVec_.size() + bufPoolVec_.size();
+    return varPoolVec_.size() + offSolverPoolVec_.size() + funcTargetPoolVec_.size() + bufPoolVec_.size();
 }
 
 unsigned int Stoich::getNumProxyPools() const
@@ -789,6 +801,8 @@ void Stoich::allocateModelObject(Id id)
             poolFuncVec_.push_back(ei->id());
             // objMap_[ id.value() - objMapStart_ ] = numFunctions_;
             // ++numFunctions_;
+			assert( tgt.size() == 1 );
+			funcTargetPoolVec_.push_back( tgt[0] );
         }
     }
 }
@@ -801,9 +815,27 @@ void myUnique(vector<Id>& v)
     v.erase(last, v.end());
 }
 
+void Stoich::clearFuncTargetPools()
+{
+	vector< Id > temp;
+	for ( auto pid : varPoolVec_ ) {
+		if ( std::find( funcTargetPoolVec_.begin(), funcTargetPoolVec_.end(), pid ) == funcTargetPoolVec_.end() )
+			temp.push_back( pid );
+	}
+	varPoolVec_ = temp;
+
+	temp.clear();
+	for ( auto pid : bufPoolVec_ ) {
+		if ( std::find( funcTargetPoolVec_.begin(), funcTargetPoolVec_.end(), pid ) == funcTargetPoolVec_.end() )
+			temp.push_back( pid );
+	}
+	bufPoolVec_ = temp;
+}
+
 /// Using the computed array sizes, now allocate space for them.
 void Stoich::resizeArrays()
 {
+    myUnique(funcTargetPoolVec_);
     myUnique(varPoolVec_);
     myUnique(bufPoolVec_);
     myUnique(offSolverPoolVec_);
@@ -814,8 +846,10 @@ void Stoich::resizeArrays()
     myUnique(mmEnzVec_);
     myUnique(offSolverMMenzVec_);
 
+	clearFuncTargetPools();
+
     unsigned int totNumPools =
-        varPoolVec_.size() + bufPoolVec_.size() + +offSolverPoolVec_.size();
+        varPoolVec_.size() + bufPoolVec_.size() + funcTargetPoolVec_.size() + offSolverPoolVec_.size();
 
     species_.resize(totNumPools, 0);
 
@@ -841,6 +875,7 @@ void Stoich::deAllocateModel()
 {
     varPoolVec_.clear();
     bufPoolVec_.clear();
+    funcTargetPoolVec_.clear();
     reacVec_.clear();
     enzVec_.clear();
     mmEnzVec_.clear();
@@ -890,13 +925,15 @@ void Stoich::allocateModel(const vector<Id>& elist)
 ///////////////////////////////////////////////////////////////////
 void Stoich::buildPoolLookup()
 {
-    // The order of pools is: varPools, offSolverVarPools, bufPools.
+    // The order of pools is: varPools, offSolverVarPools, funcTargetPools, bufPools.
     poolLookup_.clear();
     int poolNum = 0;
     vector<Id>::iterator i;
     for(i = varPoolVec_.begin(); i != varPoolVec_.end(); ++i)
         poolLookup_[*i] = poolNum++;
     for(i = offSolverPoolVec_.begin(); i != offSolverPoolVec_.end(); ++i)
+        poolLookup_[*i] = poolNum++;
+    for(i = funcTargetPoolVec_.begin(); i != funcTargetPoolVec_.end(); ++i)
         poolLookup_[*i] = poolNum++;
     for(i = bufPoolVec_.begin(); i != bufPoolVec_.end(); ++i)
         poolLookup_[*i] = poolNum++;
@@ -1224,6 +1261,11 @@ void Stoich::unZombifyPools()
 			SetGet2< ObjId, ObjId >::set( *i, "setSolvers", root, root );
 	}
     for(auto i = bufPoolVec_.begin(); i != bufPoolVec_.end(); ++i) {
+        Element* e = i->element();
+        if(e && !e->isDoomed())
+			SetGet2< ObjId, ObjId >::set( *i, "setSolvers", root, root );
+    }
+    for(auto i = funcTargetPoolVec_.begin(); i != funcTargetPoolVec_.end(); ++i) {
         Element* e = i->element();
         if(e && !e->isDoomed())
 			SetGet2< ObjId, ObjId >::set( *i, "setSolvers", root, root );
@@ -1638,6 +1680,16 @@ void Stoich::setReacKf(const Eref& e, double v) const
         rates_[i]->setR1(v);
         kinterface_->updateRateTerms(i);
     }
+}
+
+double Stoich::getReacNumKf(const Eref& e ) const
+{
+    unsigned int i = convertIdToReacIndex(e.id());
+    if(i != ~0U) {
+		return kinterface_->getR1( i, e );
+        // return rates_[i]->getR1(e);
+    }
+	return 0.0;
 }
 
 /**

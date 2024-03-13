@@ -1158,6 +1158,14 @@ double Dsolve::getN( const Eref& e ) const
     return 0.0;
 }
 
+double Dsolve::getR1( unsigned int reacIdx, const Eref& e ) const
+{
+	// Should not look for a reaction rate in the Dsolve.
+	return 0.0;
+}
+
+
+
 void Dsolve::setConcInit( const Eref& e, double v )
 {
     unsigned int pid = convertIdToPoolIndex( e );

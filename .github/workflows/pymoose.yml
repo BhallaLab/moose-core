@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8]
+        python-version: [3.7, 3.8, 3.9, '3.10',3.11,3.12]
 
     steps:
     - uses: actions/checkout@v2
@@ -20,10 +20,12 @@ jobs:
     - name: Install dependencies
       run: |
         export DEBIAN_FRONTEND=noninteractive
+        sudo -E apt clean
+        sudo -E apt update
         sudo -E apt install -y cmake libgsl-dev g++ gcc git 
-        sudo -E apt install python3-tk python-tk
+        sudo -E apt install python3-tk
         sudo -E apt install -y libhdf5-dev doxygen
         python -m pip install numpy matplotlib vpython --user
     - name: Build
       run: |
-        python setup.py install
+         pip install .
