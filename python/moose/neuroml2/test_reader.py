@@ -7,9 +7,9 @@
 # Maintainer:
 # Created: Wed Jul 24 16:02:21 2013 (+0530)
 # Version:
-# Last-Updated: Sun Apr 17 16:13:01 2016 (-0400)
-#           By: subha
-#     Update #: 112
+# Last-Updated: Sun Apr  7 13:38:55 2024 (+0530)
+#           By: Subhasis Ray
+#     Update #: 117
 # URL:
 # Keywords:
 # Compatibility:
@@ -50,8 +50,7 @@ from __future__ import print_function
 import unittest
 import numpy as np
 import moose
-import neuroml as nml
-from reader import NML2Reader
+from moose.neuroml2.reader import NML2Reader
 import os
 
 class TestFullCell(unittest.TestCase):
@@ -127,22 +126,23 @@ class TestFullCell(unittest.TestCase):
 
 '''
 Not yet working in NML2...
+'''
 
 class TestGran98(unittest.TestCase):
     def setUp(self):
         self.reader = NML2Reader()
         self.lib = moose.Neutral('/library')
-        self.filename = 'test_files/Granule_98/Granule_98.nml'
+        self.filename = 'test_files/Granule_98/Granule_98.cell.nml'
         self.reader.read(self.filename)
-        for ncell in self.reader.nml_to_moose:
-            if isinstance(ncell, nml.Cell):
-                self.ncell = ncell
-                break
+        # for ncell in self.reader.nml_to_moose:
+        #     if isinstance(ncell, nml.Cell):
+        #         self.ncell = ncell
+        #         break
         self.mcell = moose.element(moose.wildcardFind('/##[ISA=Cell]')[0])
 
     def test_CaPool(self):
         pass
-'''
+
 
 if __name__ == '__main__':
     unittest.main()

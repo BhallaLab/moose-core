@@ -717,6 +717,6 @@ class NML2Reader(object):
                       # shell and d is thickness - must divide by
                       # shell volume when copying
         self.proto_pools[concModel.id] = ca
-        self.nml_concs_to_moose[concModel.id] = ca
+        self.nml_conc_to_moose[concModel.id] = ca
         self.moose_to_nml[ca] = concModel
         logger_.debug('Created moose element: %s for nml conc %s' % (ca.path, concModel.id))
