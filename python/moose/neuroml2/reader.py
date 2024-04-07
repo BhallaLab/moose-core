@@ -13,15 +13,25 @@ from __future__ import print_function, division, absolute_import
 
 import os
 import math
+import logging
 import numpy as np
 import moose
 
-import logging
+
 logger_ = logging.getLogger('moose.nml2')
 
-import neuroml         as nml
-import pyneuroml.pynml as pynml
+
+nml_not_available_msg = ''
+
+try:
+    import neuroml as nml
+    import pyneuroml.pynml as pynml
+except ImportError as error:
+    raise ImportError(f'Could not import neuroml/pyneuroml. Please make sure you have pyneuroml installed (`pip install pyneuroml`)') from error
+    
+    
 from moose.neuroml2.units import SI
+
 
 def _write_flattened_nml( doc, outfile ):
     """_write_flattened_nml
