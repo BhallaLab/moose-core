@@ -7,9 +7,9 @@
 # Maintainer:
 # Created: Wed Jul 24 16:02:21 2013 (+0530)
 # Version:
-# Last-Updated: Sun Apr  7 13:38:55 2024 (+0530)
+# Last-Updated: Mon Apr  8 21:41:42 2024 (+0530)
 #           By: Subhasis Ray
-#     Update #: 117
+#     Update #: 125
 # URL:
 # Keywords:
 # Compatibility:
@@ -46,12 +46,18 @@
 
 # Code:
 
-from __future__ import print_function
+import os
 import unittest
 import numpy as np
+import logging
+
+
+LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO')
+logging.basicConfig(level=LOGLEVEL)
+
+
 import moose
 from moose.neuroml2.reader import NML2Reader
-import os
 
 class TestFullCell(unittest.TestCase):
     def setUp(self):
@@ -123,25 +129,6 @@ class TestFullCell(unittest.TestCase):
         chans = moose.wildcardFind(self.mcell.path + '/##[ISA=HHChannel]')
         self.assertTrue(len(chans) < 3) # Only soma and dendrite2 have the channels
         self.assertAlmostEqual(soma_na.Gbar, 120e-2 * self.soma.diameter * self.soma.diameter * np.pi, places=6)
-
-'''
-Not yet working in NML2...
-'''
-
-class TestGran98(unittest.TestCase):
-    def setUp(self):
-        self.reader = NML2Reader()
-        self.lib = moose.Neutral('/library')
-        self.filename = 'test_files/Granule_98/Granule_98.cell.nml'
-        self.reader.read(self.filename)
-        # for ncell in self.reader.nml_to_moose:
-        #     if isinstance(ncell, nml.Cell):
-        #         self.ncell = ncell
-        #         break
-        self.mcell = moose.element(moose.wildcardFind('/##[ISA=Cell]')[0])
-
-    def test_CaPool(self):
-        pass
 
 
 if __name__ == '__main__':
