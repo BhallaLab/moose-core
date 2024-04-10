@@ -4,7 +4,7 @@
 # Description: 
 # Author: Subhasis Ray
 # Created: Mon Apr  8 21:41:22 2024 (+0530)
-# Last-Updated: Mon Apr  8 22:00:04 2024 (+0530)
+# Last-Updated: Wed Apr 10 19:59:48 2024 (+0530)
 #           By: Subhasis Ray
 # 
 
@@ -13,7 +13,8 @@
 
 """
 import os
-import unittest
+import numpy as np
+# import unittest
 import logging
 
 
@@ -25,28 +26,39 @@ import moose
 from moose.neuroml2.reader import NML2Reader
 
 
-class TestGran98(unittest.TestCase):
-    def setUp(self):
-        self.reader = NML2Reader()
-        self.lib = moose.Neutral('/library')
-        self.filename = 'test_files/Granule_98/GranuleCell.net.nml'
-        self.reader.read(self.filename)
-        # for ncell in self.reader.nml_to_moose:
-        #     if isinstance(ncell, nml.Cell):
-        #         self.ncell = ncell
-        #         break
-        self.mcell = moose.element(moose.wildcardFind('/##[ISA=Neuron]')[0])
-        moose.le(self.mcell.path)
+def run(nogui=True):
+    reader = NML2Reader()
+    filename = 'test_files/Granule_98/GranuleCell.net.nml'    
+    reader.read(filename)
+    soma = reader.getComp(reader.doc.networks[0].populations[0].id, 0, 0)
+    data = moose.Neutral('/data')
+    pg = reader.getInput('Gran_10pA')
+    inj = moose.Table(f'{data.path}/pulse')
+    moose.connect(inj, 'requestOut', pg, 'getOutputValue')
+    vm = moose.Table(f'{data.path}/Vm')
+    moose.connect(vm, 'requestOut', soma, 'getVm')
+    print('A' * 10, soma)
 
-
-    def test_CaPool(self):
-        pass
-
+    simtime = 300e-3
+    moose.reinit()
+    moose.start(simtime)
     
-if __name__ == '__main__':
-    unittest.main()
-
-
+    t = np.arange(len(vm.vector)) * vm.dt
+    print('%' * 10, len(vm.vector), len(inj.vector))
+    results = np.array([t, vm.vector, inj.vector], dtype=[('time', float), ('Vm', float), ('Im', float)])
+    fname = 'Granule_98.npy'
+    np.save(fname, results)
+    print(f'Saved results in {fname}')
+    if not nogui:
+        import matplotlib.pyplot as plt
+        fig, axes = plt.subplots(nrows=2, sharex='all')
+        axes[0].plot(t, vm.vector, label='Vm')
+        axes[1].plot(t, inj.vector, label='Im')
+        plt.legend()
+        plt.show()
+        
+    
+run(nogui=False)
 
 
 # 
