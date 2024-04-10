@@ -86,7 +86,7 @@ def _isConcDep(ct):
 
     :return: True if Component is depenant on conc, False otherwise.
     """
-    logger_.debug(f"{'#' * 10} EXTENDS {ct.extends}")
+    # logger_.debug(f"{'#' * 10} EXTENDS {ct.extends}")
     if 'ConcDep' in ct.extends:
         return True
     return False
@@ -220,7 +220,7 @@ class NML2Reader(object):
         self.importInputs(self.doc)
 
         for cell in self.doc.cells:
-            logger_.debug(f"{'%' * 10} Creating cell prototype {cell}")
+            # logger_.debug(f"{'%' * 10} Creating cell prototype {cell}")
             self.createCellPrototype(cell, symmetric=symmetric)
 
         if len(self.doc.networks)>=1:
@@ -498,14 +498,14 @@ class NML2Reader(object):
                 # Note: MOOSE HHGate are voltage and/or concentration
                 # dependent. Here we figure out if nml description of gate is
                 # concentration dependent or not.
-                logger_.debug(f"{'#' * 5} {_isConcDep(ct)}")
+                # logger_.debug(f"{'#' * 5} {_isConcDep(ct)}")
                 if _isConcDep(ct):
                     # Concentration dependent. Concentration can't be negative.
                     # Find a suitable CaConc from the /library. Currently on Ca
                     # dependent channels are allowed.
                     caConcName = _findCaConcVariableName()
                     req_vars  = {'v': '0.0V', 'caConc':f'{max(1e-11,v):g}', caConcName:f'{max(1e-11,v):g}','vShift':vShift,'temperature':self._getTemperature()}
-                    logger_.debug(f"{'A' * 30} {req_vars}")
+                    # logger_.debug(f"{'A' * 30} {req_vars}")
                 else:
                     req_vars  = {'v':'%sV'%v,'vShift':vShift,'temperature':self._getTemperature()}
                 req_vars.update( self._variables )
@@ -688,6 +688,7 @@ class NML2Reader(object):
             pg.firstWidth = SI(pg_nml.duration)
             pg.firstLevel = SI(pg_nml.amplitude)
             pg.secondDelay = 1e9
+            logger_.debug(f'{"$" * 10} Created input {epath}')
 
 
     def importIonChannels(self, doc, vmin=-150e-3, vmax=100e-3, vdivs=5000):

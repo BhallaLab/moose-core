@@ -16,10 +16,8 @@
 ## latter in the former, including mapping entities like calcium and
 ## channel conductances, between them.
 ##########################################################################
-from __future__ import print_function, absolute_import, division
 
-# FIXME: Deprecated since 3.4
-import imp
+import importlib
 import os
 import moose
 import numpy as np
@@ -323,14 +321,18 @@ print( "Wall Clock Time = {:8.2f}, simtime = {:8.3f}".format( time.time() - _sta
             modulePath = os.path.realpath(os.path.join(*pathTokens[:-1]))
             moduleName = pathTokens[-1]
             funcName = func[modPos+1:bracePos]
-            moduleFile, pathName, description = imp.find_module(moduleName, [modulePath])
+            # moduleFile, pathName, description = imp.find_module(moduleName, [modulePath])
+            # `imp` has been deprecated and throws error in Python 3.12
+            spec = importlib.machinery.PathFinder().find_spec(moduleName, [modulePath])
             try:
-                module = imp.load_module(moduleName, moduleFile, pathName, description)
+                # module = imp.load_module(moduleName, moduleFile, pathName, description)
+                module = importlib.util.module_from_spec(spec)
                 funcObj = getattr(module, funcName)
                 funcObj(protoName)
                 return True
             finally:
-                moduleFile.close()
+              pass
+                # moduleFile.close()
             return False
         if not func[0:bracePos] in globals():
             raise BuildError( \
