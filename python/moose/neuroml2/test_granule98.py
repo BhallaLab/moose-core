@@ -4,7 +4,7 @@
 # Description: 
 # Author: Subhasis Ray
 # Created: Mon Apr  8 21:41:22 2024 (+0530)
-# Last-Updated: Wed Apr 10 19:59:48 2024 (+0530)
+# Last-Updated: Wed Apr 10 20:16:04 2024 (+0530)
 #           By: Subhasis Ray
 # 
 
@@ -13,6 +13,7 @@
 
 """
 import os
+import sys
 import numpy as np
 # import unittest
 import logging
@@ -26,9 +27,9 @@ import moose
 from moose.neuroml2.reader import NML2Reader
 
 
-def run(nogui=True):
+def run(modeldir, nogui=True):
     reader = NML2Reader()
-    filename = 'test_files/Granule_98/GranuleCell.net.nml'    
+    filename = os.path.join(modeldir, 'GranuleCell.net.nml')
     reader.read(filename)
     soma = reader.getComp(reader.doc.networks[0].populations[0].id, 0, 0)
     data = moose.Neutral('/data')
@@ -57,8 +58,14 @@ def run(nogui=True):
         plt.legend()
         plt.show()
         
-    
-run(nogui=False)
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print(f'Usage: {sys.argv[0]} modeldir')
+        print('where modeldir contains the neuroML2 model. For example, for GranuleCell model cloned from OpenSourceBrain, this should be `GranuleCell/neuroConstruct/generatedNeuroML2/`')
+        sys.exit(1)
+    model_dir = sys.argv[1]
+    run(model_dir, nogui=False)
 
 
 # 
