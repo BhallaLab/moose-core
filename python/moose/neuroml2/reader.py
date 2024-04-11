@@ -13,15 +13,25 @@ from __future__ import print_function, division, absolute_import
 
 import os
 import math
+import logging
 import numpy as np
 import moose
 
-import logging
+
 logger_ = logging.getLogger('moose.nml2')
 
-import neuroml         as nml
-import pyneuroml.pynml as pynml
+
+nml_not_available_msg = ''
+
+try:
+    import neuroml as nml
+    import pyneuroml.pynml as pynml
+except ImportError as error:
+    raise ImportError(f'Could not import neuroml/pyneuroml. Please make sure you have pyneuroml installed (`pip install pyneuroml`)') from error
+    
+    
 from moose.neuroml2.units import SI
+
 
 def _write_flattened_nml( doc, outfile ):
     """_write_flattened_nml
@@ -68,14 +78,15 @@ def _unique( ls ):
 
 def _isConcDep(ct):
     """_isConcDep
-    Check if componet is dependant on concentration. Most HHGates are
-    dependant on voltage.
+    Check if componet is dependent on concentration. Most HHGates are
+    dependent on voltage.
 
     :param ct: ComponentType
     :type ct: nml.ComponentType
 
     :return: True if Component is depenant on conc, False otherwise.
     """
+    # logger_.debug(f"{'#' * 10} EXTENDS {ct.extends}")
     if 'ConcDep' in ct.extends:
         return True
     return False
@@ -209,6 +220,7 @@ class NML2Reader(object):
         self.importInputs(self.doc)
 
         for cell in self.doc.cells:
+            # logger_.debug(f"{'%' * 10} Creating cell prototype {cell}")
             self.createCellPrototype(cell, symmetric=symmetric)
 
         if len(self.doc.networks)>=1:
@@ -427,10 +439,15 @@ class NML2Reader(object):
             raise RuntimeError(msg)
         pool_id = moose.copy(proto_pool, compartment, species.id)
         pool = moose.element(pool_id)
-        pool.B = pool.B / (np.pi * compartment.length * (
+        # print('&' * 10, compartment.path, compartment.length, compartment.diameter, pool.thick)
+        if compartment.length <= 0:
+            vol = 4 * np.pi * (0.5 * compartment.diameter**3 - (0.5 * compartment.diameter - pool.thick)**3) / 3
+        else:
+            vol = (np.pi * compartment.length * (
             0.5 * compartment.diameter + pool.thick) *
             (0.5 * compartment.diameter - pool.thick)
             )
+        pool.B = pool.B / vol
         return pool
 
     def importAxialResistance(self, nmlcell, intracellularProperties):
@@ -475,18 +492,20 @@ class NML2Reader(object):
             if ratefn.type != ct.name:
                 continue
 
-            logger_.info("Using %s to evaluate rate"%ct.name)
+            logger_.info(f"Using %s to evaluate rate"%ct.name)
             rate = []
             for v in tab:
-                # Note: MOOSE HHGate are either voltage of concentration
-                # dependant. Here we figure out if nml description of gate is
-                # concentration dependant or note.
+                # Note: MOOSE HHGate are voltage and/or concentration
+                # dependent. Here we figure out if nml description of gate is
+                # concentration dependent or not.
+                # logger_.debug(f"{'#' * 5} {_isConcDep(ct)}")
                 if _isConcDep(ct):
-                    # Concentration dependant. Concentration can't be negative.
+                    # Concentration dependent. Concentration can't be negative.
                     # Find a suitable CaConc from the /library. Currently on Ca
-                    # dependant channels are allowed.
+                    # dependent channels are allowed.
                     caConcName = _findCaConcVariableName()
-                    req_vars  = {caConcName:'%g'%max(0,v),'vShift':vShift,'temperature':self._getTemperature()}
+                    req_vars  = {'v': '0.0V', 'caConc':f'{max(1e-11,v):g}', caConcName:f'{max(1e-11,v):g}','vShift':vShift,'temperature':self._getTemperature()}
+                    # logger_.debug(f"{'A' * 30} {req_vars}")
                 else:
                     req_vars  = {'v':'%sV'%v,'vShift':vShift,'temperature':self._getTemperature()}
                 req_vars.update( self._variables )
@@ -669,6 +688,7 @@ class NML2Reader(object):
             pg.firstWidth = SI(pg_nml.duration)
             pg.firstLevel = SI(pg_nml.amplitude)
             pg.secondDelay = 1e9
+            logger_.debug(f'{"$" * 10} Created input {epath}')
 
 
     def importIonChannels(self, doc, vmin=-150e-3, vmax=100e-3, vdivs=5000):
@@ -707,6 +727,6 @@ class NML2Reader(object):
                       # shell and d is thickness - must divide by
                       # shell volume when copying
         self.proto_pools[concModel.id] = ca
-        self.nml_concs_to_moose[concModel.id] = ca
+        self.nml_conc_to_moose[concModel.id] = ca
         self.moose_to_nml[ca] = concModel
         logger_.debug('Created moose element: %s for nml conc %s' % (ca.path, concModel.id))

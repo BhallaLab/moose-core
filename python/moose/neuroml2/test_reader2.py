@@ -43,11 +43,19 @@
 # Code:
 
 from __future__ import print_function
-import unittest
-import moose
-from reader import NML2Reader
-import neuroml as nml
+
 import os
+import unittest
+import logging
+
+
+LOGLEVEL = os.environ.get('LOGLEVEL', 'INFO')
+logging.basicConfig(level=LOGLEVEL)
+
+
+import moose
+from moose.neuroml2.reader import NML2Reader
+
 
 class TestPassiveCell(unittest.TestCase):
     def setUp(self):

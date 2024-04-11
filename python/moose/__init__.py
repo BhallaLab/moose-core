@@ -740,7 +740,7 @@ def doc(arg, paged=True):
 
     """
     text = _moose.__generatedoc__(arg)
-    if pydoc.page:
+    if pydoc.pager:
         pydoc.pager(text) 
     else:
         print(text)
