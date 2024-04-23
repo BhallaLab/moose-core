@@ -38,10 +38,7 @@ class melement(_moose.ObjId):
             for k, v in kwargs.items():
                 super().setField(k, v)
         else:
-            # Support for dead python2.
-            super(melement, self).__init__(obj)
-            for k, v in kwargs.items():
-                super(melement, self).setField(k, v)
+            raise Exception('Python 2 support is deprecated.')
 
 
 def __to_melement(obj):
@@ -59,12 +56,7 @@ for p in _moose.wildcardFind("/##[TYPE=Cinfo]"):
             {"__type__": p.name, "__doc__": _moose.__generatedoc__(p.name)},
         )
     else:
-        # Python2.
-        cls = type(
-            str(p.name),
-            (melement,),
-            {"__type__": p.name, "__doc__": _moose.__generatedoc__(p.name)},
-        )
+        raise Exception('Python 2 support is deprecated.')
     setattr(_moose, cls.__name__, cls)
     __moose_classes__[cls.__name__] = cls
 
@@ -75,7 +67,7 @@ from moose._moose import *
 
 
 def version():
-    """Reutrns moose version string."""
+    """Returns moose version string."""
     return _moose.__version__
 
 __version__ = version()
@@ -352,8 +344,8 @@ def reinit():
 
 def start(runtime, notify=False):
     """Run simulation for `t` time. Advances the simulator clock by `t` time. If
-    'notify = True', a message is written to terminal whenever 10\% of
-    simulation time is over. \
+    'notify = True', a message is written to terminal whenever 10% of
+    simulation time is over.
 
     After setting up a simulation, YOU MUST CALL MOOSE.REINIT() before CALLING
     MOOSE.START() TO EXECUTE THE SIMULATION. Otherwise, the simulator behaviour
@@ -366,7 +358,7 @@ def start(runtime, notify=False):
     t : float
         duration of simulation.
     notify: bool
-        default False. If True, notify user whenever 10\% of simultion is over.
+        default False. If True, notify user whenever 10% of simultion is over.
 
     Returns
     -------
@@ -631,7 +623,7 @@ def showfields(el, field="*", showtype=False):
     """
     if isinstance(el, str):
         if not _moose.exists(el):
-            raise ValueError("no such element: %s" % el)
+            raise ValueError(f"no such element: {el}")
         el = _moose.element(el)
     result = []
     if field == "*":

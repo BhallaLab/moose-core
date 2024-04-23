@@ -777,7 +777,7 @@ void testWildcard()
     for ( i = 0 ; i < 100; i++ )
     {
         char name[10];
-        sprintf( name, "ch%ld", i );
+        snprintf( name, sizeof name, "ch%ld", i );
         el2[i] = shell->doCreate( "Annotator", c1, name, 1 );
         //el2[i] = Neutral::create( "HHChannel", name, c1->id(), Id::scratchId() );
         Field< double >::set( ObjId( el2[i], 0 ), "z", i );

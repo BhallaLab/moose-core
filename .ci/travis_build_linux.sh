@@ -12,12 +12,8 @@ set -x
 BUILDDIR=_build_travis
 mkdir -p $BUILDDIR
 
-PYTHON2="/usr/bin/python2"
 PYTHON3="/usr/bin/python3"
 
-$PYTHON2 -m pip install pip --upgrade --user
-$PYTHON2 -m pip install libNeuroML numpy==1.14 scipy==1.2 \
-    pyNeuroML python-libsbml --upgrade --user
 
 $PYTHON3 -m pip install pip --upgrade --user
 $PYTHON3 -m pip install libNeuroML pyNeuroML python-libsbml --upgrade --user
@@ -37,7 +33,6 @@ unset PYTHONPATH
 # many not be available. Therefore, it is neccessary to use fixed path for
 # python executable.
 
-$PYTHON2 -m compileall -q .
 $PYTHON3 -m compileall -q . 
 
 # Python3 with GSL in debug more.
@@ -68,13 +63,5 @@ $PYTHON3 -m compileall -q .
     make coverage 
 )
 
-# GSL and python2, failure is allowed
-set +e
-(
-    mkdir -p $BUILDDIR && cd $BUILDDIR && \
-        cmake -DPYTHON_EXECUTABLE=$PYTHON2 -DCMAKE_INSTALL_PREFIX=/usr ..
-    $MAKE && MOOSE_NUM_THREADS=$NPROC ctest -j$NPROC --output-on-failure
-)
-set -e
 
 echo "All done"

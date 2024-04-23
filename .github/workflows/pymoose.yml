@@ -4,28 +4,37 @@ on: [push]
 
 jobs:
   build:
-    name : Python Package
-
-    runs-on: ubuntu-latest
-    strategy:
+    runs-on: ${{ matrix.os }}    
+    strategy:      
       matrix:
-        python-version: [3.8, 3.9, '3.10',3.11,3.12]
-
+        os: [ubuntu-latest, macos-14]
+        build_type: [Release]
+        c_compiler: [clang]
+        python-version: ["3.12"]
+        include:
+          - os: ubuntu-latest
+            apt: 10
+          - os: macos-14
+            brew: 20
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - if: ${{ matrix.apt }}
+      run: sudo apt-get install libhdf5-dev libgsl0-dev
+    - if: ${{ matrix.brew }}
       run: |
-        export DEBIAN_FRONTEND=noninteractive
-        sudo -E apt clean
-        sudo -E apt update
-        sudo -E apt install -y cmake libgsl-dev g++ gcc git 
-        sudo -E apt install python3-tk
-        sudo -E apt install -y libhdf5-dev doxygen
-        python -m pip install numpy matplotlib vpython --user
+        brew install gsl
+        brew install hdf5      
+    - name: Set up Python ${{ matrix.python-version }}
+      shell: bash
+      run: |
+        "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
+        micromamba self-update
+        micromamba create -n moose python=${{ matrix.python-version }} graphviz lxml cmake numpy matplotlib vpython hdf5 pytables doxygen -c conda-forge
+        eval "$(micromamba shell hook --shell bash)"
+        micromamba activate moose
+        pip install python-libsbml
+        pip install pyneuroml
     - name: Build
       run: |
-         pip install .
+        pip install .
+         

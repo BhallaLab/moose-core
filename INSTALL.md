@@ -1,7 +1,7 @@
 # Building MOOSE 
 
 To build `MOOSE` from source, you need `cmake` and `python-setuptools`. We
-recommend to use Python 3.5 or higher. Python 2.7 is also supported. 
+recommend to use Python 3.8 or higher. 
 
 Before running the following command to build and install, make sure that
 followings are installed.
@@ -15,7 +15,7 @@ On Ubuntu-16.04 or higher, these dependencies can be installed with:
 sudo apt-get install python-pip python-numpy cmake libgsl-dev g++
 ```
 
-Now use `pip` to download and install the `pymoose`.
+Now use `pip` to download and install `pymoose` from the [github repository](https://github.com/BhallaLab/moose-core).
 
 ```
 $ pip install git+https://github.com/BhallaLab/moose-core --user
@@ -40,6 +40,12 @@ from github.
 
 This will build moose, `ctest` will run few tests to check if build process was
 successful.
+
+To rebuild, delete the `_build` directory and the generated `_temp__build/` directory and recreate the `_build` directory:
+
+    $ cd ..; rm -rf _build; rm -rf _temp__build
+    
+and continue the steps following that described above.
 
 To make in debug mode use:
     $ cmake -DCMAKE_BUILD_TYPE=Debug ..

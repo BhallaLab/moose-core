@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2.3 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
 # Project to build MOOSE's python module.
 project(PyMOOSE)
@@ -317,13 +317,18 @@ endif( WITH_BOOST )
 
 ######################### BUILD PYMOOSE ########################################
 
-if(NOT WITH_LEGACY_BINDING)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/pybind11)
-    add_subdirectory(pybind11)
-else()
-    message(STATUS "Building legacy python binding.")
-    add_subdirectory(pymoose)
-endif()
+# pybind11 should be installed as a dependency.
+# It can be easily done with `pip install pybind11`
+# See: https://pybind11.readthedocs.io/en/stable/installing.html
+# - Subha, Mon Apr 22 14:26:58 IST 2024
+
+# if(NOT WITH_LEGACY_BINDING)
+#     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/pybind11)
+#     add_subdirectory(pybind11)
+# else()
+#     message(STATUS "Building legacy python binding.")
+#     add_subdirectory(pymoose)
+# endif()
 
 
 # always override debian default installation directory. It will be installed in
