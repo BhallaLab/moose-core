@@ -226,7 +226,7 @@ string moosePathToColumnName(const string& path, char delim, size_t maxParents)
 string toString(double x)
 {
     char buffer[50];
-    sprintf(buffer, "%.17g", x);
+    snprintf(buffer, sizeof buffer, "%.17g", x);
     return string(buffer);
 }
 
