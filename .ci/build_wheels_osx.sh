@@ -11,7 +11,6 @@ export PATH=/usr/local/bin:$PATH
 brew update || echo "Failed to update brew"
 brew install gsl  || brew upgrade gsl 
 brew upgrade python3 || echo "Failed to upgrade python3"
-brew upgrade python2 || echo "Failed to upgrade python2"
 brew upgrade python || echo "Failed to upgrade python"
 
 # Following are to remove numpy; It is breaking the build on Xcode9.4.
@@ -48,7 +47,7 @@ for _py in 3 2; do
     $PYTHON -m pip install numpy --upgrade --user
     $PYTHON -m pip install twine  --upgrade  --user
 
-    PLATFORM=$($PYTHON -c "import distutils.util; print(distutils.util.get_platform())")
+    PLATFORM=$($PYTHON -c "import sysconfig; print(sysconfig.get_platform())")
 
     ( 
         cd $MOOSE_SOURCE_DIR

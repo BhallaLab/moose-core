@@ -5,18 +5,12 @@
 # Alternatively, you can use cmake build system which provides finer control
 # over the build. This script is called by cmake to install the python module.
 #
-# This script is compatible with python2.7 and python3+. Therefore use of
-# super() is commented out.
-#
-# NOTES:
-#  * Python2
-#   - Update setuptools using `python2 -m pip install setuptools --upgrade --user'.
 
-__author__     = "Dilawar Singh, HarshaRani"
+__author__ = "Dilawar Singh, HarshaRani, Subhasis Ray"
 
-__copyright__  = "Copyright 2019-2022, NCBS"
+__copyright__ = "Copyright 2019-2024, NCBS"
 __maintainer__ = ""
-__email__      = ""
+__email__ = ""
 
 import os
 import sys
@@ -25,8 +19,7 @@ import subprocess
 import datetime
 
 try:
-    cmakeVersion = subprocess.call(["cmake", "--version"],
-            stdout=subprocess.PIPE)
+    cmakeVersion = subprocess.call(["cmake", "--version"], stdout=subprocess.PIPE)
 except Exception as e:
     print(e)
     print("[ERROR] cmake is not found. Please install cmake.")
@@ -35,7 +28,7 @@ except Exception as e:
 # See https://docs.python.org/3/library/distutils.html
 # setuptools is preferred over distutils. And we are supporting python3 only.
 from setuptools import setup, Extension, Command
-from setuptools.command.build_ext import build_ext  as _build_ext
+from setuptools.command.build_ext import build_ext as _build_ext
 import subprocess
 
 # Global variables.
@@ -49,15 +42,17 @@ if not os.path.exists(builddir_):
 
 numCores_ = multiprocessing.cpu_count()
 
-version_ = '4.0.0.dev%s' % stamp
+version_ = '4.1.0.dev%s' % stamp
 
 # importlib is available only for python3. Since we build wheels, prefer .so
 # extension. This way a wheel built by any python3.x will work with any python3.
+
 
 class CMakeExtension(Extension):
     def __init__(self, name, **kwargs):
         # don't invoke the original build_ext for this special extension
         import tempfile
+
         # Create a temp file to create a dummy target. This build raises an
         # exception because sources are empty. With python3 we can fix it by
         # passing `optional=True` to the argument. With python2 there is no
@@ -66,6 +61,7 @@ class CMakeExtension(Extension):
         f.write(b'int main() { return 1; }')
         Extension.__init__(self, name, sources=[f.name], **kwargs)
         f.close()
+
 
 class TestCommand(Command):
     user_options = []
@@ -79,17 +75,18 @@ class TestCommand(Command):
     def run(self):
         print("[INFO ] Running tests... ")
         os.chdir(builddir_)
-        self.spawn(["ctest", "--output-on-failure", '-j%d'%numCores_])
+        self.spawn(["ctest", "--output-on-failure", '-j%d' % numCores_])
         os.chdir(sdir_)
+
 
 class build_ext(_build_ext):
     user_options = [
-            ('with-boost', None, 'Use Boost Libraries (OFF)')
-            , ('with-gsl', None, 'Use Gnu Scienfific Library (ON)')
-            , ('with-gsl-static', None, 'Use GNU Scientific Library (static library) (OFF)')
-            , ('debug', None, 'Build moose in debugging mode (OFF)')
-            , ('no-build', None, 'DO NOT BUILD. (for debugging/development)')
-            ] + _build_ext.user_options
+        ('with-boost', None, 'Use Boost Libraries (OFF)'),
+        ('with-gsl', None, 'Use Gnu Scienfific Library (ON)'),
+        ('with-gsl-static', None, 'Use GNU Scientific Library (static library) (OFF)'),
+        ('debug', None, 'Build moose in debugging mode (OFF)'),
+        ('no-build', None, 'DO NOT BUILD. (for debugging/development)'),
+    ] + _build_ext.user_options
 
     def initialize_options(self):
         # Initialize options.
@@ -134,45 +131,51 @@ class build_ext(_build_ext):
         print("[INFO ] Building pymoose in %s ..." % builddir_)
         cmake_args = []
         for k, v in self.cmake_options.items():
-            cmake_args.append('-D%s=%s' % (k,v))
+            cmake_args.append('-D%s=%s' % (k, v))
         os.chdir(str(builddir_))
         self.spawn(['cmake', str(sdir_)] + cmake_args)
         if not self.dry_run:
-            self.spawn(['make', '-j%d'%numCores_])
+            self.spawn(['make', '-j%d' % numCores_])
         os.chdir(str(sdir_))
 
-with open(os.path.join(sdir_,  "README.md")) as f:
+
+with open(os.path.join(sdir_, "README.md")) as f:
     readme = f.read()
 
 setup(
     name="pymoose",
     version=version_,
-    description= 'Python scripting interface of MOOSE Simulator (https://moose.ncbs.res.in)',
+    description='Python scripting interface of MOOSE Simulator (https://moose.ncbs.res.in)',
     long_description=readme,
     long_description_content_type='text/markdown',
-    author='MOOSERes',
+    author='MOOSERs',
     author_email='bhalla@ncbs.res.in',
     maintainer='Dilawar Singh',
     maintainer_email='',
     url='http://moose.ncbs.res.in',
     packages=[
-        'rdesigneur', 'moose', 'moose.SBML', 'moose.genesis', 'moose.neuroml',
-        'moose.neuroml2', 'moose.chemUtil', 'moose.chemMerge'
+        'rdesigneur',
+        'moose',
+        'moose.SBML',
+        'moose.genesis',
+        'moose.neuroml',
+        'moose.neuroml2',
+        'moose.chemUtil',
+        'moose.chemMerge',
     ],
     package_dir={
         'rdesigneur': os.path.join(sdir_, 'python', 'rdesigneur'),
-        'moose': os.path.join(sdir_, 'python', 'moose')
+        'moose': os.path.join(sdir_, 'python', 'moose'),
     },
     package_data={
         'moose': [
-            '_moose.so'
-            , os.path.join('neuroml2','schema','NeuroMLCoreDimensions.xml')
-            , os.path.join('chemUtil', 'rainbow2.pkl')
+            '_moose.so',
+            os.path.join('neuroml2', 'schema', 'NeuroMLCoreDimensions.xml'),
+            os.path.join('chemUtil', 'rainbow2.pkl'),
         ]
     },
-    # python2 specific version here as well.
-    install_requires=['numpy', 'matplotlib','vpython'],
-    extra_requires={'dev' : [ 'coverage', 'pytest', 'pytest-cov' ]},
+    install_requires=['numpy', 'matplotlib', 'vpython', 'pybind11'],
+    extra_requires={'dev': ['coverage', 'pytest', 'pytest-cov']},
     ext_modules=[CMakeExtension('dummy', optional=True)],
     cmdclass={'build_ext': build_ext, 'test': TestCommand},
 )

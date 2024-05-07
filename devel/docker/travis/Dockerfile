@@ -13,7 +13,6 @@ RUN apt update && apt install -y cmake gcc g++ make valgrind \
         python-dev python3-dev \
         && rm -rf /var/lib/apt/lists/*
 
-RUN python2 -m pip --no-cache-dir install pyneuroml python-libsbml
 RUN python3 -m pip --no-cache-dir install pyneuroml python-libsbml
 WORKDIR /root
 RUN ls -ltrah

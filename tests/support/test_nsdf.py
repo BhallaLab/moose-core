@@ -67,7 +67,7 @@ use a SpikeGen to detect the threshold crossing events of rising
 edges. We store the pulsegen output as Uniform data and the threshold
 crossing times as Event data. '''
     nsdf.stringAttr['creator'] = getpass.getuser()
-    nsdf.stringVecAttr['software'] = ['python2.7', 'moose3' ]
+    nsdf.stringVecAttr['software'] = ['python3', 'moose4' ]
     nsdf.stringVecAttr['method'] = ['']
     nsdf.stringAttr['rights'] = ''
     nsdf.stringAttr['license'] = 'CC-BY-NC'
