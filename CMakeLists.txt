@@ -9,14 +9,9 @@ include(CheckCXXCompiler.cmake)
 include(CheckIncludeFileCXX)
 
 # We find python executable here. Though mainly used inside pymoose. 
-# FIXME: When cmake 3.12 is widely available use the following:
-#   find_package(Python3 COMPONENTS Interpreter Numpy)
-#   set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
-set(Python_ADDITIONAL_VERSIONS 2.7)
-find_package(PythonInterp 3.5)
-if(NOT PYTHONINTERP_FOUND)
-  find_package(PythonInterp 2.7)
-endif()
+find_package(Python3 COMPONENTS Interpreter Numpy)
+set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
+find_package(PythonInterp 3.8)
 
 set(CMAKE_MACOSX_RPATH OFF)
 
@@ -321,14 +316,8 @@ endif( WITH_BOOST )
 # It can be easily done with `pip install pybind11`
 # See: https://pybind11.readthedocs.io/en/stable/installing.html
 # - Subha, Mon Apr 22 14:26:58 IST 2024
-
-# if(NOT WITH_LEGACY_BINDING)
-#     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/pybind11)
-#     add_subdirectory(pybind11)
-# else()
-#     message(STATUS "Building legacy python binding.")
-#     add_subdirectory(pymoose)
-# endif()
+find_package(pybind11 REQUIRED)
+add_subdirectory(pybind11)
 
 
 # always override debian default installation directory. It will be installed in

@@ -28,7 +28,7 @@ except Exception as e:
 # See https://docs.python.org/3/library/distutils.html
 # setuptools is preferred over distutils. And we are supporting python3 only.
 from setuptools import setup, Extension, Command
-from setuptools.command.build_ext import build_ext as _build_ext
+from setuptools.command.build_ext import build_ext
 import subprocess
 
 # Global variables.
@@ -39,6 +39,7 @@ builddir_ = os.path.join(sdir_, '_temp__build')
 
 if not os.path.exists(builddir_):
     os.makedirs(builddir_)
+    
 
 numCores_ = multiprocessing.cpu_count()
 
@@ -49,18 +50,10 @@ version_ = '4.1.0.dev%s' % stamp
 
 
 class CMakeExtension(Extension):
+    # Reference: https://martinopilia.com/posts/2018/09/15/building-python-extension.html
     def __init__(self, name, **kwargs):
         # don't invoke the original build_ext for this special extension
-        import tempfile
-
-        # Create a temp file to create a dummy target. This build raises an
-        # exception because sources are empty. With python3 we can fix it by
-        # passing `optional=True` to the argument. With python2 there is no
-        # getaway from it.
-        f = tempfile.NamedTemporaryFile(suffix='.cpp', delete=False)
-        f.write(b'int main() { return 1; }')
-        Extension.__init__(self, name, sources=[f.name], **kwargs)
-        f.close()
+        Extension.__init__(self, name, sources=[], **kwargs)
 
 
 class TestCommand(Command):
@@ -79,14 +72,14 @@ class TestCommand(Command):
         os.chdir(sdir_)
 
 
-class build_ext(_build_ext):
+class cmake_build_ext(build_ext):
     user_options = [
         ('with-boost', None, 'Use Boost Libraries (OFF)'),
         ('with-gsl', None, 'Use Gnu Scienfific Library (ON)'),
         ('with-gsl-static', None, 'Use GNU Scientific Library (static library) (OFF)'),
         ('debug', None, 'Build moose in debugging mode (OFF)'),
         ('no-build', None, 'DO NOT BUILD. (for debugging/development)'),
-    ] + _build_ext.user_options
+    ] + build_ext.user_options
 
     def initialize_options(self):
         # Initialize options.
@@ -97,12 +90,12 @@ class build_ext(_build_ext):
         self.no_build = 0
         self.cmake_options = {}
         #  super().initialize_options()
-        _build_ext.initialize_options(self)
+        build_ext.initialize_options(self)
 
     def finalize_options(self):
         # Finalize options.
         #  super().finalize_options()
-        _build_ext.finalize_options(self)
+        build_ext.finalize_options(self)
         self.cmake_options['PYTHON_EXECUTABLE'] = os.path.realpath(sys.executable)
         self.cmake_options['VERSION_MOOSE'] = version_
         if self.with_boost:
@@ -122,7 +115,7 @@ class build_ext(_build_ext):
         for ext in self.extensions:
             self.build_cmake(ext)
         #  super().run()
-        _build_ext.run(self)
+        build_ext.run(self)
 
     def build_cmake(self, ext):
         global numCores_
@@ -176,6 +169,6 @@ setup(
     },
     install_requires=['numpy', 'matplotlib', 'vpython', 'pybind11'],
     extra_requires={'dev': ['coverage', 'pytest', 'pytest-cov']},
-    ext_modules=[CMakeExtension('dummy', optional=True)],
-    cmdclass={'build_ext': build_ext, 'test': TestCommand},
+    ext_modules=[CMakeExtension('_moose', optional=True)],
+    cmdclass={'build_ext': cmake_build_ext, 'test': TestCommand},
 )
