@@ -8,11 +8,12 @@ followings are installed.
 
 - gsl-1.16 or higher.
 - python-numpy
+- pybind11 (if the setup fails to find pybind11, try running `pip install pybind11[global]`)
 
 On Ubuntu-16.04 or higher, these dependencies can be installed with:
 
 ```
-sudo apt-get install python-pip python-numpy cmake libgsl-dev g++
+sudo apt-get install python-pip python-numpy cmake libgsl-dev g++ pybind11
 ```
 
 Now use `pip` to download and install `pymoose` from the [github repository](https://github.com/BhallaLab/moose-core).
@@ -83,10 +84,26 @@ Now you can import moose in a Python script or interpreter with the statement:
     >>> import moose
     >>> moose.test()   # will take time. Not all tests will pass.
 
+## Uninstall
+
+To uninstall moose, run
+
+    $ pip uninstall pymoose
+    
+If you are building moose from source, make sure to get out of the source directory, or you may encounter a message like this:
+
+    Found existing installation: pymoose {version}
+    Can't uninstall 'pymoose'. No files were found to uninstall.
+
+
+
+
 # Notes
 
-SBML support is enabled by installing
+- SBML support is enabled by installing
 [python-libsbml](http://sbml.org/Software/libSBML/docs/python-api/libsbml-installation.html).
 Alternatively, it can be installed by using `python-pip`
 
     $ sudo pip install python-libsbml
+
+
