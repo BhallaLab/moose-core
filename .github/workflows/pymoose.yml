@@ -17,24 +17,43 @@ jobs:
           - os: macos-14
             brew: 20
     steps:
-    - uses: actions/checkout@v2
-    - if: ${{ matrix.apt }}
-      run: sudo apt-get install libhdf5-dev libgsl0-dev
-    - if: ${{ matrix.brew }}
-      run: |
-        brew install gsl
-        brew install hdf5      
-    - name: Set up Python ${{ matrix.python-version }}
-      shell: bash
-      run: |
-        "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
-        micromamba self-update
-        micromamba create -n moose python=${{ matrix.python-version }} graphviz lxml cmake numpy matplotlib vpython hdf5 pytables doxygen -c conda-forge
-        eval "$(micromamba shell hook --shell bash)"
-        micromamba activate moose
-        pip install python-libsbml
-        pip install pyneuroml
-    - name: Build
-      run: |
-        pip install .
-         
+      - name: mamba-setup
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-name: moose
+          cache-environment: true
+          cache-downloads: true
+          create-args: >-
+            python=${{ matrix.python-version }}
+            hdf5
+            graphviz
+            pytables
+            numpy
+            matplotlib
+            vpython
+            lxml
+            doxygen
+            setuptools
+            wheel
+      - name: Display Python version
+        run: |          
+          python -c "import sys; print(sys.version)"
+      - if: ${{ matrix.apt }}
+        run: sudo apt-get install libhdf5-dev libgsl0-dev graphviz-dev python3-lxml cmake doxygen
+      - if: ${{ matrix.brew }}
+        run: |
+          brew install gsl
+          brew install hdf5
+          brew install graphviz
+          brew install cmake
+          brew install doxygen
+      - name: install python module dependencies via pip
+        run: |
+          pip install pybind11[global]
+          pip install python-libsbml
+      - name: checkout
+        uses: actions/checkout@v4          
+      - name: build and install
+        run: |
+          pip install .
+          python -c "import moose; moose.le()"

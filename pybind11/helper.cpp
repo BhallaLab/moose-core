@@ -18,16 +18,16 @@
 #include <stdexcept>
 #include <csignal>
 
-#include "../external/pybind11/include/pybind11/functional.h"
-#include "../external/pybind11/include/pybind11/numpy.h"
-#include "../external/pybind11/include/pybind11/pybind11.h"
-#include "../external/pybind11/include/pybind11/stl.h"
+#include <pybind11/functional.h>
+#include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 namespace py = pybind11;
 
 // See
 // https://pybind11.readthedocs.io/en/stable/advanced/cast/stl.html#binding-stl-containers
-// #include "../external/pybind11/include/pybind11/stl_bind.h"
+// #include <pybind11/stl_bind.h>
 
 #include "../basecode/header.h"
 #include "../basecode/global.h"
