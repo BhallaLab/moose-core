@@ -8,6 +8,10 @@
 
 #include <climits>
 
+#if defined(_WIN32)
+#define PATH_MAX 260  // this is win32 path limit
+#endif
+
 #if PY_MAJOR_VERSION >= 3
 #define PYCODEOBJECT PyObject
 

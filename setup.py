@@ -17,6 +17,7 @@ import sys
 import multiprocessing
 import subprocess
 import datetime
+import platform
 
 try:
     cmakeVersion = subprocess.call(["cmake", "--version"], stdout=subprocess.PIPE)
@@ -34,7 +35,7 @@ import subprocess
 # Global variables.
 sdir_ = os.path.dirname(os.path.realpath(__file__))
 
-stamp = datetime.datetime.now().strftime('%Y%m%d')
+tstamp = datetime.datetime.now().strftime('%Y%m%d')
 builddir_ = os.path.join(sdir_, '_temp__build')
 
 if not os.path.exists(builddir_):
@@ -43,7 +44,8 @@ if not os.path.exists(builddir_):
 
 numCores_ = multiprocessing.cpu_count()
 
-version_ = '4.1.0.dev%s' % stamp
+version_ = f'4.1.0.dev{tstamp}'
+# version_ = '4.1.0.dev'
 
 # importlib is available only for python3. Since we build wheels, prefer .so
 # extension. This way a wheel built by any python3.x will work with any python3.
@@ -86,9 +88,15 @@ class cmake_build_ext(build_ext):
         self.with_boost = 0
         self.with_gsl = 1
         self.with_gsl_static = 0
-        self.debug = 0
+        self.debug = None
         self.no_build = 0
-        self.cmake_options = {}
+        if platform.system() == 'Windows':
+            # TODO: match build instructions
+            # vcpkg provides gsl, hdf5 etc dev libs
+            # MSVC by default puts output in Release or Debug folder
+            self.cmake_options = {'CMAKE_TOOLCHAIN_FILE': r'..\vcpkg\scripts\buildsystems\vcpkg.cmake'}
+        else:
+            self.cmake_options = {}
         #  super().initialize_options()
         build_ext.initialize_options(self)
 
@@ -98,17 +106,20 @@ class cmake_build_ext(build_ext):
         build_ext.finalize_options(self)
         self.cmake_options['PYTHON_EXECUTABLE'] = os.path.realpath(sys.executable)
         self.cmake_options['VERSION_MOOSE'] = version_
+        self.cmake_options['PLATFORM'] = f'{platform.system()[:3].lower()}-{platform.machine().lower()}'
+        
         if self.with_boost:
             self.cmake_options['WITH_BOOST'] = 'ON'
             self.cmake_options['WITH_GSL'] = 'OFF'
         else:
             if self.with_gsl_static:
                 self.cmake_options['GSL_USE_STATIC_LIBRARIES'] = 'ON'
-        if self.debug:
-            self.cmake_options['CMAKE_BUILD_TYPE'] = 'Debug'
+        if self.debug is not None:
+            self.cmake_options['CMAKE_BUILD_TYPE'] = 'Debug'            
         else:
+            self.debug = 0
             self.cmake_options['CMAKE_BUILD_TYPE'] = 'Release'
-
+            
     def run(self):
         if self.no_build:
             return
@@ -124,11 +135,16 @@ class cmake_build_ext(build_ext):
         print("[INFO ] Building pymoose in %s ..." % builddir_)
         cmake_args = []
         for k, v in self.cmake_options.items():
-            cmake_args.append('-D%s=%s' % (k, v))
+            cmake_args.append(f'-D{k}={v}')
         os.chdir(str(builddir_))
         self.spawn(['cmake', str(sdir_)] + cmake_args)
-        if not self.dry_run:
-            self.spawn(['make', '-j%d' % numCores_])
+        if not self.dry_run and platform.system() != 'Windows':
+            self.spawn(['make', f'-j{numCores_:d}'])
+        else:
+            cmd = ['cmake', '--build', '.']
+            if not self.debug:
+                cmd += ['--config', self.cmake_options['CMAKE_BUILD_TYPE']]
+            self.spawn(cmd)
         os.chdir(str(sdir_))
 
 
@@ -167,8 +183,9 @@ setup(
             os.path.join('chemUtil', 'rainbow2.pkl'),
         ]
     },
-    install_requires=['numpy', 'matplotlib', 'vpython', 'pybind11'],
-    extra_require={'dev': ['coverage', 'pytest', 'pytest-cov']},
+    build_requires=['numpy', 'pybind11[global]'],
+    install_requires=['numpy', 'matplotlib', 'vpython', 'pybind11[global]'],
+    extras_require={'dev': ['coverage', 'pytest', 'pytest-cov']},
     ext_modules=[CMakeExtension('_moose', optional=True)],
     cmdclass={'build_ext': cmake_build_ext, 'test': TestCommand},
 )

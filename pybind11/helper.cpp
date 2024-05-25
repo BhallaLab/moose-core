@@ -359,11 +359,16 @@ void mooseReinit()
 /* ----------------------------------------------------------------------------*/
 void mooseStart(double runtime, bool notify = false)
 {
+  // TODO: handle keyboard interrupt on _WIN32
+#if !defined(_WIN32)
+  // Credit:
+  // http://stackoverflow.com/questions/1641182/how-can-i-catch-a-ctrl-c-event-c
     struct sigaction sigHandler;
     sigHandler.sa_handler = handleKeyboardInterrupts;
     sigemptyset(&sigHandler.sa_mask);
     sigHandler.sa_flags = 0;
     sigaction(SIGINT, &sigHandler, NULL);
+#endif    
     getShellPtr()->doStart(runtime, notify);
 }
 

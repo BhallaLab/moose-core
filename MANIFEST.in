@@ -1,7 +1,6 @@
 include AUTHORS
 include CMakeLists.txt
 include CONTRIBUTING.md
-include CheckCXXCompiler.cmake
 include INSTALL.md
 include LICENSE
 include MANIFEST.in

@@ -478,7 +478,7 @@ template<> class Conv< bool >
         }
 
         static void val2str( string& s, bool val ) {
-            if ( val > 0.5 )
+            if ( val )
                 s = "1";
             else
                 s = "0";

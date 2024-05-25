@@ -1,30 +1,33 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
+set( CMAKE_VERBOSE_MAKEFILE on )
+
 # Project to build MOOSE's python module.
 project(PyMOOSE)
 
 # cmake related macros.
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-include(CheckCXXCompiler.cmake)
-include(CheckIncludeFileCXX)
+# include(CheckIncludeFileCXX)
+
 
 # We find python executable here. Though mainly used inside pymoose. 
-find_package(Python3 COMPONENTS Interpreter Numpy)
-set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
-find_package(PythonInterp 3.8)
+find_package(Python COMPONENTS Interpreter Development NumPy)
 
 set(CMAKE_MACOSX_RPATH OFF)
 
 # NOTE: version should be changed in setup.py file.
 # If moose version is not given, use setup.py file to get the default version.
-if(NOT VERSION_MOOSE)
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} setup.py --version
+# Note: Sun Jun  9 12:12:28 IST 2024 - somehow build does not get the version - it remains empty when creating packages and the process fails with file not found error:
+# - MOOSE_VERSION is a preprocessor macro to keep the version number as part of the binary library (Shell.cpp uses it) whereas VERSION_MOOSE is the CMake variable passed for populating the preprocessor macro def as well as for adding version info in the package file name.
+execute_process(COMMAND ${PYTHON_EXECUTABLE} setup.py --version
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         OUTPUT_VARIABLE VERSION_MOOSE
         OUTPUT_STRIP_TRAILING_WHITESPACE)
-endif()
+
 
 add_definitions(-DMOOSE_VERSION="${VERSION_MOOSE}")
+
+
 message(STATUS "MOOSE Version ${VERSION_MOOSE}")
 
 # This snippet is from LLVM project.
@@ -65,6 +68,17 @@ option(WITH_LEGACY_BINDING  "Use legacy python-bindings" OFF)
 
 # Default definitions.
 add_definitions(-DUSE_GENESIS_PARSER)
+
+# M_PI is undefined in MSVC unless _USE_MATH_DEFINES is defined before cmath import
+# Also, MSVC throws this error
+# "external\exprtk\exprtk.hpp(10183): fatal error C1128: number of sections exceeded object file format limit"
+# and suggests "compile with /bigobj"
+# - Subha
+if(MSVC)
+    add_definitions(-D_USE_MATH_DEFINES)
+    set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} /bigobj)
+endif()
+
 if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     message(STATUS "Building for Debug/Unit testing")
     add_definitions(-DDO_UNIT_TESTS -O)
@@ -76,7 +90,9 @@ elseif(ENABLE_UNIT_TESTS)
 else()
     message(STATUS "Building for Release/No unit tests.")
     set(CMAKE_BUILD_TYPE Release)
-    add_definitions(-UDO_UNIT_TESTS -O3 -DDISABLE_DEBUG)
+    if(NOT MSVC)
+        add_definitions(-UDO_UNIT_TESTS -O3 -DDISABLE_DEBUG)
+    endif()
 endif()
 
 if(GPROF AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
@@ -92,6 +108,13 @@ if(WITH_ASAN AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} \
         -fno-omit-frame-pointer -fsanitize=leak -fsanitize=address")
     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address")
+endif()
+
+if(MSVC)
+	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /FORCE:MULTIPLE")
+	set(CMAKE_LINKER_FLAGS  "${CMAKE_LINKER_FLAGS} /FORCE:MULTIPLE")
+	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /FORCE:MULTIPLE")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /FORCE:MULTIPLE")
 endif()
 
 # Override default GSL solvers when BOOST is enabled.
@@ -122,7 +145,7 @@ endif()
 ################################### TARGETS ####################################
 
 link_directories(${CMAKE_BINARY_DIR})
-add_library(libmoose SHARED basecode/main.cpp)
+add_library(libmoose SHARED basecode/main.cpp external/getopt/getopt.c)
 set_target_properties(libmoose PROPERTIES PREFIX "")
 add_executable(moose.bin basecode/main.cpp)
 
@@ -130,7 +153,7 @@ add_executable(moose.bin basecode/main.cpp)
 ################################### SETUP BUILD ################################
 
 # Variable to collect all static libraries.
-set(STATIC_LIBRARIES "" )
+set(STATIC_LIBRARIES "")
 # Collect all shared libraries here.
 set(SYSTEM_SHARED_LIBS "")
 
@@ -218,6 +241,12 @@ if(WITH_MPI)
     endif()
 endif(WITH_MPI)
 
+
+# DEBUG compilation process
+# get_target_property(compile_defs libmoose COMPILE_DEFINITIONS)
+# message(STATUS "App compile definitions are ${compile_defs}")
+# DEBUG compilation process
+
 # Add subdirectroeis
 add_subdirectory(basecode)
 add_subdirectory(msg)
@@ -241,6 +270,7 @@ add_subdirectory(external)
 
 # development related.
 add_subdirectory(devel)
+	
 
 ###################################### LINKING #################################
 list(APPEND MOOSE_LIBRARIES
@@ -264,6 +294,13 @@ list(APPEND MOOSE_LIBRARIES
     device
     basecode
     )
+
+# If windows MSVC, include port of getopt
+if(MSVC)
+	list(APPEND MOOSE_LIBRARIES getopt)
+	target_include_directories(moose.bin PRIVATE external/getopt)
+	target_include_directories(libmoose PRIVATE external/getopt)
+endif()
 
 # Make sure to remove duplicates.
 list(REMOVE_DUPLICATES STATIC_LIBRARIES)
@@ -293,6 +330,12 @@ if(APPLE)
         ${SYSTEM_SHARED_LIBS}
         ${CMAKE_DL_LIBS}
         )
+elseif(MSVC)
+    target_link_libraries(libmoose
+        ${MOOSE_LIBRARIES}
+        ${STATIC_LIBRARIES}
+        ${SYSTEM_SHARED_LIBS}
+        )
 else(APPLE)
     target_link_libraries(libmoose
         "-Wl,--whole-archive"
@@ -310,13 +353,16 @@ if( WITH_BOOST )
     target_link_libraries( moose.bin ${Boost_LIBRARIES} )
 endif( WITH_BOOST )
 
+
 ######################### BUILD PYMOOSE ########################################
 
 # pybind11 should be installed as a dependency.
 # It can be easily done with `pip install pybind11`
 # See: https://pybind11.readthedocs.io/en/stable/installing.html
 # - Subha, Mon Apr 22 14:26:58 IST 2024
-execute_process(COMMAND ${CMAKE_COMMAND} -E pybind11-config --cmakedir OUTPUT_VARIABLE pybind11_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+# The execute_process fails on Windows with Mamba
+# execute_process(COMMAND ${CMAKE_COMMAND} -E pybind11-config --cmakedir OUTPUT_VARIABLE pybind11_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
 find_package(pybind11 REQUIRED HINTS "${Python3_SITELIB}")
 add_subdirectory(pybind11)
 
@@ -364,9 +410,20 @@ include(CTest)
 add_subdirectory(tests)
 
 ########################### RELEASE #########################################
-set(PYMOOSE_SDIST_FILE ${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.tar.gz)
+if(WIN32)
+    set(PYMOOSE_SDIST_FILE "${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.zip")
+    set(ARCHIVE_FORMAT zip)
+else(WIN32)
+    set(PYMOOSE_SDIST_FILE "${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.tar.gz")
+    set(ARCHIVE_FORMAT gztar)
+endif()
+    
+# Tue Jun 11 08:11:00 IST 2024
+# NOTE: Calling setup.py directly for building packages is deprecated.
+# Use python -m build --wheel instead
+# - Subha
 add_custom_target(sdist
-    COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --formats=gztar 
+    COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --formats=${ARCHIVE_FORMAT}
         -d ${CMAKE_BINARY_DIR}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Creating sdist ${PYMOOSE_SDIST_FILE}" 

@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.20)
-include( ${CMAKE_CURRENT_SOURCE_DIR}/../CheckCXXCompiler.cmake)
 
 add_library(utility
     strutil.cpp
@@ -9,10 +8,15 @@ add_library(utility
     Annotator.cpp
     Vec.cpp
     cnpy.cpp
-    fileutils.cpp
-    utility.cpp
+    # fileutils.cpp
+    # utility.cpp
     )
 target_link_libraries(utility PRIVATE fmt)
+
+# DEBUG compilation process
+get_target_property(compile_defs utility COMPILE_DEFINITIONS)
+message(STATUS "App compile definitions are $compile_defs")
+# DEBUG compilation process
 
 add_executable(test_cnpy test_cnpy.cpp)
 
@@ -29,3 +33,5 @@ target_link_libraries(test_util utility)
 
 enable_testing()
 add_test(NAME cpp_test_util  COMMAND $<TARGET_FILE:test_util>)
+
+

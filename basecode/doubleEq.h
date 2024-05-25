@@ -7,5 +7,5 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-bool doubleEq( double x, double y );
-bool doubleApprox( double x, double y );
+extern bool doubleEq( double x, double y );
+extern bool doubleApprox( double x, double y );

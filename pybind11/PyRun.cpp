@@ -5,7 +5,15 @@
 // Author: subha
 // Created: Sat Oct 11 14:47:22 2014 (+0530)
 
+// avoid linker error on Win32 - tries to link against python311_d.lib
+#ifdef _DEBUG  
+#undef _DEBUG
 #include "Python.h"
+#define _DEBUG
+#else
+#include <Python.h>
+#endif
+
 #include "../basecode/header.h"
 #include "PyRun.h"
 

@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
-include( ${CMAKE_CURRENT_SOURCE_DIR}/../CheckCXXCompiler.cmake )
+
+if(MSVC)
+	add_compile_options("/bigobj")
+endif()
+    
 
 # NSDF5 support. Disabled by default.
 if(WITH_NSDF)
@@ -48,6 +52,7 @@ if(WITH_NSDF)
     endif( HDF5_FOUND )
 endif(WITH_NSDF)
 
+# SocketStreamer.cpp is not portable - so adding conditionally. - Subha
 set(SRCS
     Arith.cpp
     Group.cpp
@@ -66,9 +71,14 @@ set(SRCS
     Interpol2D.cpp
     SpikeStats.cpp
     MooseParser.cpp
-    SocketStreamer.cpp
     testBuiltins.cpp
     )
+
+if(NOT WIN32)
+       set(SRCS ${SRCS} SocketStreamer.cpp)
+else()  # MSVC Build system throws unresolved external symbol error
+	list(APPEND SRCS ../utility/cnpy.cpp)
+endif()
 
 if(WITH_NSDF AND HDF5_FOUND)
     list(APPEND SRCS
@@ -82,7 +92,14 @@ if(WITH_NSDF AND HDF5_FOUND)
     )
 endif()
 
-add_library(moose_builtins ${SRCS} )
+
+add_library(moose_builtins ${SRCS})
 if(WITH_NSDF AND HDF5_FOUND)
     target_link_libraries(moose_builtins ${HDF5_CXX_LIBRARIES} ${HDF5_HL_LIBRARIES})
 endif()
+
+# DEBUG compilation process
+get_target_property(compile_defs moose_builtins COMPILE_DEFINITIONS)
+message(STATUS "App compile definitions are ${compile_defs}")
+# DEBUG compilation process
+

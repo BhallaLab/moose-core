@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 include(CheckIncludeFileCXX)
-include( ${CMAKE_CURRENT_SOURCE_DIR}/../CheckCXXCompiler.cmake)
+
 
 if(WITH_BOOST)
     find_package(Boost 1.53 REQUIRED COMPONENTS thread)

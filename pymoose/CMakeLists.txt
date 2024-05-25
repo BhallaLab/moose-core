@@ -1,23 +1,27 @@
-include(${CMAKE_CURRENT_SOURCE_DIR}/../CheckCXXCompiler.cmake)
-
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake_modules/")
 
-execute_process(COMMAND 
-  ${PYTHON_EXECUTABLE} -c "import numpy;print(numpy.get_include())"
-  OUTPUT_VARIABLE NUMPY_INCLUDE_DIRS
-  OUTPUT_STRIP_TRAILING_WHITESPACE)
+# execute_process(COMMAND 
+#   ${PYTHON_EXECUTABLE} -c "import numpy;print(numpy.get_include())"
+#   OUTPUT_VARIABLE NUMPY_INCLUDE_DIRS
+#   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-if("${NUMPY_INCLUDE_DIRS}" STREQUAL "")
-  message(FATAL_ERROR "Could not find numpy: ${NUMPY_INCLUDE_DIRS}")
-else()
-  message(STATUS "Numpy is found at ${NUMPY_INCLUDE_DIRS}")
-endif()
-
+# if("${NUMPY_INCLUDE_DIRS}" STREQUAL "")
+#   message(FATAL_ERROR "Could not find numpy: ${NUMPY_INCLUDE_DIRS}")
+# else()
+#   message(STATUS "Numpy is found at ${NUMPY_INCLUDE_DIRS}")
+# endif()
 include_directories(${NUMPY_INCLUDE_DIRS})
 add_definitions(-std=c++14)
 add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
 
-set(PYTHON_SO_EXTENSION ".so")
+
+if(WIN32)
+# DLL extension does not work when importing module on Win32
+	set(PYTHON_SO_EXTENSION ".pyd")
+else()
+	set(PYTHON_SO_EXTENSION ".so")
+endif()
+
 message(STATUS "Python so extension ${PYTHON_SO_EXTENSION}" )
 
 # TARGET
@@ -37,25 +41,11 @@ add_library( _moose MODULE ${PYMOOSE_SRCS} )
 set(PYMOOSE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../python/moose")
 message(STATUS "Python module will be saved to ${PYMOOSE_OUTPUT_DIRECTORY}" )
 
-# make sure the Python.h is found.
-# Use python executable to find include paths. 
-# FIXME: cmake > 3.12 has great support for python but it is not available
-# everywhere YET. When it is available on centos, we can use FindPython.
-message(STATUS "Using ${PYTHON_EXECUTABLE}-config to find Python.h" )
-execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --includes
-         OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
-  OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-if("${PYTHON_INCLUDE_FLAGS}" STREQUAL "")
-  message(FATAL_ERROR "Could not determine path of Python.h.")
-else()
-  message(STATUS "Python.h is found at ${PYTHON_INCLUDE_FLAGS}")
-endif()
-
-execute_process( COMMAND ${PYTHON_EXECUTABLE}-config --libs
-         OUTPUT_VARIABLE PYTHON_LIBRARIES
-  OUTPUT_STRIP_TRAILING_WHITESPACE)
-
+find_package (Python COMPONENTS Interpreter Development Numpy)
+target_compile_options(_moose_compiler_flags INTERFACE
+  "$<${gcc_like_cxx}:-Wall;-Wextra;-Wshadow;-Wformat=2;-Wunused>"
+  "$<${msvc_cxx}:-W3>"
+)
 set_target_properties(_moose PROPERTIES
     COMPILE_DEFINITIONS "PYMOOSE"
     COMPILE_FLAGS "${COMPILE_FLAGS} ${PYTHON_INCLUDE_FLAGS}")
@@ -105,11 +95,16 @@ endif()
 #  message(STATUS "Python module wheel is not found. Please wait while I install it..")
 #  execute_process(COMMAND ${PYTHON_EXECUTABLE} -m pip install wheel --user)
 #endif(NOT PY_WHEEL)
-  
+
+
 # Create a binary distribution inside a directory. Installation is copying that
 # directory to ${CMAKE_INSTALL_PREFIX}
-set(_platform "CMAKE")
-set(PYMOOSE_BDIST_FILE ${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.${_platform}.tar.gz)
+#set(_platform "CMAKE")
+if(WIN32)
+    set(PYMOOSE_BDIST_FILE ${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.${PLATFORM}.zip)
+else()
+    set(PYMOOSE_BDIST_FILE ${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.${PLATFORM}.tar.gz)
+endif()
 set(PYMOOSE_INSTALL_DIR ${CMAKE_BINARY_DIR}/_pymoose_temp_install)
 file(MAKE_DIRECTORY ${PYMOOSE_INSTALL_DIR})
 
@@ -121,7 +116,7 @@ add_custom_command(OUTPUT ${PYMOOSE_BDIST_FILE}
   COMMAND ${PYTHON_EXECUTABLE} setup.py build_py  
   COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_dumb 
     --skip-build -p "${_platform}" -d ${CMAKE_BINARY_DIR} 
-  COMMAND ${CMAKE_COMMAND} -E chdir ${PYMOOSE_INSTALL_DIR} tar xf ${PYMOOSE_BDIST_FILE}
+  COMMAND ${CMAKE_COMMAND} -E chdir ${PYMOOSE_INSTALL_DIR} ${ZIP_CMD} ${PYMOOSE_BDIST_FILE}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   COMMENT "python's binary distribution is saved to ${CMAKE_BINARY_DIR}"
   VERBATIM)

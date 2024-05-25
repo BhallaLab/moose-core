@@ -147,7 +147,7 @@ void writeEnz( ofstream& fout, Id id,
     double vol = Field< double >::get( enzMol, "volume" ) * NA * 1e-3;
     unsigned int isMichaelisMenten = 0;
     string enzClass = Field < string > :: get(id,"className");
-    if (enzClass == "ZombieMMenz" or enzClass == "MMenz")
+    if (enzClass == "ZombieMMenz" || enzClass == "MMenz")
     {
         k1 = Field < double > :: get (id,"numKm");
         k3 = Field < double > :: get (id,"kcat");
@@ -155,7 +155,7 @@ void writeEnz( ofstream& fout, Id id,
         k1 = (k2 + k3) / k1;
         isMichaelisMenten = 1;
     }
-    else if (enzClass == "ZombieEnz" or enzClass == "Enz")
+    else if (enzClass == "ZombieEnz" || enzClass == "Enz")
     {
         k1 = Field< double >::get( id, "k1" );
         k2 = Field< double >::get( id, "k2" );
@@ -248,7 +248,7 @@ void writePool( ofstream& fout, Id id,
     string geometry;
     stringstream geometryTemp ;
     unsigned int slave_enable = 0;
-    if (pooltype == "BufPool" or pooltype == "ZombieBufPool")
+    if (pooltype == "BufPool" || pooltype == "ZombieBufPool")
     {
         vector< Id > children = Field< vector< Id > >::get( id, "children" );
         if (children.size() == 0)
@@ -257,7 +257,7 @@ void writePool( ofstream& fout, Id id,
         {
             string funcpath = Field <string> :: get(*i,"path");
             string clsname = Field <string> :: get(*i,"className");
-            if (clsname == "Function" or clsname == "ZombieFunction")
+            if (clsname == "Function" || clsname == "ZombieFunction")
                 slave_enable = 0;
             else
                 slave_enable = 4;
@@ -379,7 +379,7 @@ void storeCplxEnzMsgs( Id enz, vector< string >& msgs, Id comptid )
 void storeEnzMsgs( Id enz, vector< string >& msgs, Id comptid )
 {
     string enzClass = Field < string > :: get(enz,"className");
-    if (enzClass == "ZombieMMenz" or enzClass == "MMenz")
+    if (enzClass == "ZombieMMenz" || enzClass == "MMenz")
         storeMMenzMsgs(enz, msgs, comptid);
     else
         storeCplxEnzMsgs( enz, msgs, comptid );
@@ -585,7 +585,7 @@ void writeKkit( Id model, const string& fname )
             string path = Field <string> :: get (*itrp,"path");
             Id enzPoolparent = Field <ObjId>  :: get(*itrp,"parent");
             string enzpoolClass = Field <string> :: get(enzPoolparent,"className");
-            if (enzpoolClass != "ZombieEnz" or enzpoolClass != "Enz")
+            if (enzpoolClass != "ZombieEnz" || enzpoolClass != "Enz")
             {
                 Id annotaId( path+"/info");
                 if ( annotaId != Id() )
