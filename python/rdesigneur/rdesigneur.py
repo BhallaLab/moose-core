@@ -327,6 +327,7 @@ print( "Wall Clock Time = {:8.2f}, simtime = {:8.3f}".format( time.time() - _sta
             try:
                 # module = imp.load_module(moduleName, moduleFile, pathName, description)
                 module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
                 funcObj = getattr(module, funcName)
                 funcObj(protoName)
                 return True
