@@ -21,7 +21,7 @@
 #include "../msg/OneToOneMsg.h"
 #include "../msg/OneToAllMsg.h"
 #include "../msg/SparseMsg.h"
-#if !defined(WIN32)
+#if !defined(_WIN32)
 #include "../builtins/SocketStreamer.h"
 #endif
 #include "../builtins/Streamer.h"

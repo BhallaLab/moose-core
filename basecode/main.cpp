@@ -13,7 +13,7 @@
 #include <time.h>
 #include <math.h>
 #include <queue>
-#if defined(WIN32)
+#if defined(_WIN32)
 #include "getopt.h"
 #else
 #include <unistd.h> // for getopt
