@@ -354,7 +354,7 @@ else(APPLE)
 endif(APPLE)
 
 add_dependencies(moose.bin libmoose)
-target_link_libraries(moose.bin moose ${CMAKE_DL_LIBS})
+target_link_libraries(moose.bin _moose ${CMAKE_DL_LIBS})
 
 if( WITH_BOOST )
     target_link_libraries( moose.bin ${Boost_LIBRARIES} )
