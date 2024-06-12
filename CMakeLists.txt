@@ -77,6 +77,8 @@ add_definitions(-DUSE_GENESIS_PARSER)
 if(MSVC)
     add_definitions(-D_USE_MATH_DEFINES)
     set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} /bigobj)
+elseif(APPLE)
+    set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} "-std=c++17")
 endif()
 
 if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
@@ -145,7 +147,12 @@ endif()
 ################################### TARGETS ####################################
 
 link_directories(${CMAKE_BINARY_DIR})
-add_library(libmoose SHARED basecode/main.cpp external/getopt/getopt.c)
+if(WIN32)
+	add_library(libmoose SHARED basecode/main.cpp external/getopt/getopt.c)
+else()
+	add_library(libmoose SHARED basecode/main.cpp)
+endif(WIN32)
+
 set_target_properties(libmoose PROPERTIES PREFIX "")
 add_executable(moose.bin basecode/main.cpp)
 
@@ -296,7 +303,7 @@ list(APPEND MOOSE_LIBRARIES
     )
 
 # If windows MSVC, include port of getopt
-if(MSVC)
+if(WIN32)
 	list(APPEND MOOSE_LIBRARIES getopt)
 	target_include_directories(moose.bin PRIVATE external/getopt)
 	target_include_directories(libmoose PRIVATE external/getopt)
