@@ -4,49 +4,49 @@
 #     OUTPUT_VARIABLE COMPILER_STRING
 #     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-pybind11_add_module(moose 
+pybind11_add_module(_moose 
     pymoose.cpp 
     helper.cpp 
     Finfo.cpp
     MooseVec.cpp 
     PyRun.cpp)
 
-add_dependencies(moose libmoose)
+add_dependencies(_moose libmoose)
 
 # Use in version_info dict.
-target_compile_definitions(moose PRIVATE
+target_compile_definitions(_moose PRIVATE
     COMPILER_STRING="${CMAKE_CXX_COMPILER_ID},${CMAKE_CXX_COMPILER},${CMAKE_CXX_COMPILER_VERSION}")
 
 if(WIN32)
-set_target_properties(moose PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/python/moose
-    PREFIX "_"
-    SUFFIX ".dll")
+	set_target_properties(_moose PROPERTIES
+	    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/python/moose
+	        PREFIX ""
+		    SUFFIX ".dll")
 else()
-set_target_properties(moose PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/python/moose
-    PREFIX "_"
-    SUFFIX ".so")
+	set_target_properties(moose PROPERTIES
+	    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/python/moose
+	        PREFIX ""
+		    SUFFIX ".so")
 endif()
 
 if(APPLE)
     set(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
     message(STATUS "ADDING some linker flags ${CMAKE_EXE_LINKER_FLAGS}")
     # cmake --help-policy CMP0042
-    set_target_properties(moose PROPERTIES MACOSX_RPATH OFF)
-    target_link_libraries(moose PRIVATE
+    set_target_properties(_moose PROPERTIES MACOSX_RPATH OFF)
+    target_link_libraries(_moose PRIVATE
         "-Wl,-all_load"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES})
-    target_link_libraries(moose PRIVATE ${SYSTEM_SHARED_LIBS})
+    target_link_libraries(_moose PRIVATE ${SYSTEM_SHARED_LIBS})
 elseif(MSVC)    
-    target_link_libraries(moose PRIVATE        
+    target_link_libraries(_moose PRIVATE        
         ${MOOSE_LIBRARIES} 
         ${STATIC_LIBRARIES} 
         ${SYSTEM_SHARED_LIBS})
 else(MSVC)
     # Linux
-    target_link_libraries(moose PRIVATE
+    target_link_libraries(_moose PRIVATE
         "-Wl,--whole-archive" 
         ${MOOSE_LIBRARIES} 
         ${STATIC_LIBRARIES} 
@@ -63,7 +63,7 @@ add_custom_target(copy_python_tree ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/python/
         ${PYMOOSE_BUILD_DIR}
     COMMENT "pybind11: Copying Python src ${CMAKE_SOURCE_DIR}/python → ${PYMOOSE_BUILD_DIR}"
-    DEPENDS moose 
+    DEPENDS _moose 
     VERBATIM)
 
  
@@ -78,23 +78,26 @@ else(WIN32)
     set(ARCHIVE_CMD tar xf)
 endif()
 
-set(PYMOOSE_BDIST_FILE ${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.${PLATFORM}.${ARCHIVE_EXT})
-set(PYMOOSE_INSTALL_DIR ${CMAKE_BINARY_DIR}/_pymoose_temp_install)
-file(MAKE_DIRECTORY ${PYMOOSE_INSTALL_DIR})
+# Why are these being specified here? Avoiding setup.py/distutils/build with these hacks?
+# Wed Jun 12 16:30:25 IST 2024 - Subha
 
-add_custom_command(OUTPUT ${PYMOOSE_BDIST_FILE}
-  COMMAND ${PYTHON_EXECUTABLE} setup.py build_py  
-  COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_dumb 
-    --skip-build -p "${PLATFORM}" -d ${CMAKE_BINARY_DIR} 
-  COMMAND ${CMAKE_COMMAND} -E chdir ${PYMOOSE_INSTALL_DIR} ${ARCHIVE_CMD} ${PYMOOSE_BDIST_FILE}
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  COMMENT "python's binary distribution is saved to ${CMAKE_BINARY_DIR}"
-  VERBATIM)
+# set(PYMOOSE_BDIST_FILE ${CMAKE_BINARY_DIR}/pymoose-${VERSION_MOOSE}.${PLATFORM}.${ARCHIVE_EXT})
+# set(PYMOOSE_INSTALL_DIR ${CMAKE_BINARY_DIR}/_pymoose_temp_install)
+# file(MAKE_DIRECTORY ${PYMOOSE_INSTALL_DIR})
 
-add_custom_target(pymoose_sdist ALL
-    DEPENDS ${PYMOOSE_BDIST_FILE} moose
-    COMMENT "Building pymoose source distribution.")
+# add_custom_command(OUTPUT ${PYMOOSE_BDIST_FILE}
+#   COMMAND ${PYTHON_EXECUTABLE} setup.py build_py  
+#   COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_dumb 
+#     --skip-build -p "${PLATFORM}" -d ${CMAKE_BINARY_DIR} 
+#   COMMAND ${CMAKE_COMMAND} -E chdir ${PYMOOSE_INSTALL_DIR} ${ARCHIVE_CMD} ${PYMOOSE_BDIST_FILE}
+#   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+#   COMMENT "python's binary distribution is saved to ${CMAKE_BINARY_DIR}"
+#   VERBATIM)
 
-install(DIRECTORY ${PYMOOSE_INSTALL_DIR}/usr/local/
-    DESTINATION ${CMAKE_INSTALL_PREFIX}
-    CONFIGURATIONS Debug Release)
+# add_custom_target(pymoose_sdist ALL
+#     DEPENDS ${PYMOOSE_BDIST_FILE} _moose
+#     COMMENT "Building pymoose source distribution.")
+
+# install(DIRECTORY ${PYMOOSE_INSTALL_DIR}/usr/local/
+#     DESTINATION ${CMAKE_INSTALL_PREFIX}
+#     CONFIGURATIONS Debug Release)

@@ -134,9 +134,12 @@ class cmake_build_ext(build_ext):
         for k, v in self.cmake_options.items():
             cmake_args.append(f'-D{k}={v}')
         os.chdir(str(builddir_))
-        # cmd = ['cmake', '--build', '.', f'-j{numCores_:d}'] + cmake_args
-        cmd = ['cmake', '--build', str(sdir_), f'-j{numCores_:d}'] + cmake_args
-        cmd += ['--config', 'Debug' if self.debug else 'Release']
+        # First round to create build config Makefile or vcproject files
+        self.spawn(['cmake', str(sdir_)] + cmake_args)
+
+        # Second round - run build with make/msbuild or whatever native tool
+        cmd = ['cmake', '--build', '.']
+        cmd += ['--config', 'Debug' if self.debug else 'Release', f'-j {numCores_:d}']
         self.spawn(cmd)
         os.chdir(str(sdir_))
 
