@@ -183,7 +183,6 @@ setup(
             os.path.join('chemUtil', 'rainbow2.pkl'),
         ]
     },
-    build_requires=['numpy', 'pybind11[global]'],
     install_requires=['numpy', 'matplotlib', 'vpython', 'pybind11[global]'],
     extras_require={'dev': ['coverage', 'pytest', 'pytest-cov']},
     ext_modules=[CMakeExtension('_moose', optional=True)],

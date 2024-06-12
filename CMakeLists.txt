@@ -78,7 +78,7 @@ if(MSVC)
     add_definitions(-D_USE_MATH_DEFINES)
     set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} /bigobj)
 elseif(APPLE)
-    set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} "-std=c++17")
+    set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} "-std=c++11")
 endif()
 
 if(DEBUG OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
@@ -429,27 +429,27 @@ endif()
 # NOTE: Calling setup.py directly for building packages is deprecated.
 # Use python -m build --wheel instead
 # - Subha
-add_custom_target(sdist
-    COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --formats=${ARCHIVE_FORMAT}
-        -d ${CMAKE_BINARY_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Creating sdist ${PYMOOSE_SDIST_FILE}" 
-    VERBATIM)
+# add_custom_target(sdist
+#     COMMAND ${PYTHON_EXECUTABLE} setup.py sdist --formats=${ARCHIVE_FORMAT}
+#         -d ${CMAKE_BINARY_DIR}
+#     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+#     COMMENT "Creating sdist ${PYMOOSE_SDIST_FILE}" 
+#     VERBATIM)
 
-add_custom_target(upload_test DEPENDS sdist
-    COMMAND ${PYTHON_EXECUTABLE} -m twine upload 
-        --user $ENV{PYMOOSE_PYPI_USER} --password $ENV{PYMOOSE_PYPI_PASSWORD}
-        --repository-url https://test.pypi.org/legacy/
-        ${PYMOOSE_SDIST_FILE}
-    COMMENT "Uploading source distribution to test.pypi.org"
-    VERBATIM)
+# add_custom_target(upload_test DEPENDS sdist
+#     COMMAND ${PYTHON_EXECUTABLE} -m twine upload 
+#         --user $ENV{PYMOOSE_PYPI_USER} --password $ENV{PYMOOSE_PYPI_PASSWORD}
+#         --repository-url https://test.pypi.org/legacy/
+#         ${PYMOOSE_SDIST_FILE}
+#     COMMENT "Uploading source distribution to test.pypi.org"
+#     VERBATIM)
 
-add_custom_target(upload DEPENDS sdist
-    COMMAND ${PYTHON_EXECUTABLE} -m twine upload 
-        --user $ENV{PYMOOSE_PYPI_USER} --password $ENV{PYMOOSE_PYPI_PASSWORD}
-        ${PYMOOSE_SDIST_FILE}
-    COMMENT "Uploading source distribution to PyPI"
-    VERBATIM)
+# add_custom_target(upload DEPENDS sdist
+#     COMMAND ${PYTHON_EXECUTABLE} -m twine upload 
+#         --user $ENV{PYMOOSE_PYPI_USER} --password $ENV{PYMOOSE_PYPI_PASSWORD}
+#         ${PYMOOSE_SDIST_FILE}
+#     COMMENT "Uploading source distribution to PyPI"
+#     VERBATIM)
 
 ####################### DEVELOPMENT ########################################
 
