@@ -114,12 +114,9 @@ class cmake_build_ext(build_ext):
         else:
             if self.with_gsl_static:
                 self.cmake_options['GSL_USE_STATIC_LIBRARIES'] = 'ON'
-        if self.debug is not None:
-            self.cmake_options['CMAKE_BUILD_TYPE'] = 'Debug'            
-        else:
+        if self.debug is None:
             self.debug = 0
-            self.cmake_options['CMAKE_BUILD_TYPE'] = 'Release'
-            
+
     def run(self):
         if self.no_build:
             return
@@ -137,14 +134,10 @@ class cmake_build_ext(build_ext):
         for k, v in self.cmake_options.items():
             cmake_args.append(f'-D{k}={v}')
         os.chdir(str(builddir_))
-        self.spawn(['cmake', str(sdir_)] + cmake_args)
-        if not self.dry_run and platform.system() != 'Windows':
-            self.spawn(['make', f'-j{numCores_:d}'])
-        else:
-            cmd = ['cmake', '--build', '.']
-            if not self.debug:
-                cmd += ['--config', self.cmake_options['CMAKE_BUILD_TYPE']]
-            self.spawn(cmd)
+        # cmd = ['cmake', '--build', '.', f'-j{numCores_:d}'] + cmake_args
+        cmd = ['cmake', '--build', str(sdir_), f'-j{numCores_:d}'] + cmake_args
+        cmd += ['--config', 'Debug' if self.debug else 'Release']
+        self.spawn(cmd)
         os.chdir(str(sdir_))
 
 
@@ -176,6 +169,7 @@ setup(
         'rdesigneur': os.path.join(sdir_, 'python', 'rdesigneur'),
         'moose': os.path.join(sdir_, 'python', 'moose'),
     },
+    
     package_data={
         'moose': [
             '_moose.so',

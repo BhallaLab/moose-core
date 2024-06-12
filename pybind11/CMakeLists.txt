@@ -21,7 +21,7 @@ if(WIN32)
 set_target_properties(moose PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/python/moose
     PREFIX "_"
-    SUFFIX ".pyd")
+    SUFFIX ".dll")
 else()
 set_target_properties(moose PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/python/moose
