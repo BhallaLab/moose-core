@@ -71,7 +71,6 @@ set(SRCS
     Interpol2D.cpp
     SpikeStats.cpp
     MooseParser.cpp
-    testBuiltins.cpp
     )
 
 if(NOT WIN32)
@@ -87,19 +86,20 @@ if(WITH_NSDF AND HDF5_FOUND)
     NSDFWriter2.cpp
     HDF5DataWriter.cpp
     SpikeStats.cpp
+    )
+endif()
+
+# MSVC fails to link excecutables for test
+if(WITH_NSDF AND HDF5_FOUND AND NOT MSVC)
+    list(APPEND SRCS
     testBuiltins.cpp
     testNSDF.cpp
     )
 endif()
-
 
 add_library(moose_builtins ${SRCS})
 if(WITH_NSDF AND HDF5_FOUND)
     target_link_libraries(moose_builtins ${HDF5_CXX_LIBRARIES} ${HDF5_HL_LIBRARIES})
 endif()
 
-# DEBUG compilation process
-get_target_property(compile_defs moose_builtins COMPILE_DEFINITIONS)
-message(STATUS "App compile definitions are ${compile_defs}")
-# DEBUG compilation process
 

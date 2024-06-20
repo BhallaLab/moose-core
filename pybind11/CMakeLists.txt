@@ -1,8 +1,15 @@
 # Add pybind11 module.
 
-# execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version
-#     OUTPUT_VARIABLE COMPILER_STRING
-#     OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(WIN32)
+# TODO MS cl output does not follow GCC convention - fix parsing
+	execute_process(COMMAND ${CMAKE_CXX_COMPILER}
+	    OUTPUT_VARIABLE COMPILER_STRING
+	        OUTPUT_STRIP_TRAILING_WHITESPACE)
+else()
+	execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version
+	    OUTPUT_VARIABLE COMPILER_STRING
+	        OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()
 
 pybind11_add_module(_moose 
     pymoose.cpp 
@@ -17,15 +24,12 @@ add_dependencies(_moose libmoose)
 target_compile_definitions(_moose PRIVATE
     COMPILER_STRING="${CMAKE_CXX_COMPILER_ID},${CMAKE_CXX_COMPILER},${CMAKE_CXX_COMPILER_VERSION}")
 
-if(WIN32)
+set_target_properties(_moose PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/python/moose
+        PREFIX "")
+	
+if(NOT WIN32)
 	set_target_properties(_moose PROPERTIES
-	    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/python/moose
-	        PREFIX ""
-		    SUFFIX ".dll")
-else()
-	set_target_properties(moose PROPERTIES
-	    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/python/moose
-	        PREFIX ""
 		    SUFFIX ".so")
 endif()
 

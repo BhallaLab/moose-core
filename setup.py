@@ -123,7 +123,7 @@ class cmake_build_ext(build_ext):
         for ext in self.extensions:
             self.build_cmake(ext)
         #  super().run()
-        build_ext.run(self)
+        # build_ext.run(self)
 
     def build_cmake(self, ext):
         global numCores_

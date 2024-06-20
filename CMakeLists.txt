@@ -76,8 +76,8 @@ add_definitions(-DUSE_GENESIS_PARSER)
 # - Subha
 if(MSVC)
     add_definitions(-D_USE_MATH_DEFINES)
-    set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} /bigobj)
-elseif(APPLE)
+    set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} /bigobj /std:c++14)
+else()
     set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} "-std=c++11")
 endif()
 
@@ -154,8 +154,12 @@ else()
 endif(WIN32)
 
 set_target_properties(libmoose PROPERTIES PREFIX "")
-add_executable(moose.bin basecode/main.cpp)
 
+# MSVC Linker has a mismatch of binary lib type static/dll/pyd for exe
+# TODO find how to fix it
+if(NOT MSVC)
+       add_executable(moose.bin basecode/main.cpp)
+endif()
 
 ################################### SETUP BUILD ################################
 
@@ -305,7 +309,7 @@ list(APPEND MOOSE_LIBRARIES
 # If windows MSVC, include port of getopt
 if(WIN32)
 	list(APPEND MOOSE_LIBRARIES getopt)
-	target_include_directories(moose.bin PRIVATE external/getopt)
+	# target_include_directories(moose.bin PRIVATE external/getopt)
 	target_include_directories(libmoose PRIVATE external/getopt)
 endif()
 
@@ -353,10 +357,12 @@ else(APPLE)
         )
 endif(APPLE)
 
-add_dependencies(moose.bin libmoose)
-target_link_libraries(moose.bin _moose ${CMAKE_DL_LIBS})
+if(NOT MSVC)
+       add_dependencies(moose.bin libmoose)
+       target_link_libraries(moose.bin _moose ${CMAKE_DL_LIBS})
+endif()
 
-if( WITH_BOOST )
+if( WITH_BOOST AND NOT MSVC)
     target_link_libraries( moose.bin ${Boost_LIBRARIES} )
 endif( WITH_BOOST )
 
@@ -398,7 +404,10 @@ endif()
 
 ######################### INSTALL ##############################################
 
-install(TARGETS moose.bin DESTINATION bin CONFIGURATIONS Debug)
+if(NOT MSVC)
+       install(TARGETS moose.bin DESTINATION bin CONFIGURATIONS Debug)
+endif()
+
 install(TARGETS libmoose DESTINATION lib CONFIGURATIONS Debug)
 
 # Print message to start build process
