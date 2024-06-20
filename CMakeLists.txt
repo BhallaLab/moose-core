@@ -339,9 +339,6 @@ if(APPLE)
         "-Wl,-all_load"
         ${MOOSE_LIBRARIES}
         ${STATIC_LIBRARIES}
-        )
-
-    target_link_libraries(libmoose
         ${SYSTEM_SHARED_LIBS}
         ${CMAKE_DL_LIBS}
         )
@@ -351,7 +348,7 @@ elseif(MSVC)
         ${STATIC_LIBRARIES}
         ${SYSTEM_SHARED_LIBS}
         )
-else(APPLE)
+else(MSVC)
     target_link_libraries(libmoose
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
