@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
 set( CMAKE_VERBOSE_MAKEFILE on )
+# These are to avoid syntax errors from newer C++ standards
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Project to build MOOSE's python module.
 project(PyMOOSE)
@@ -404,8 +408,11 @@ endif()
 
 ######################### INSTALL ##############################################
 
-if(NOT MSVC)
-       install(TARGETS moose.bin DESTINATION bin CONFIGURATIONS Debug)
+if(MSVC)
+	configure_file("${CMAKE_BINARY_DIR}/python/moose/${CMAKE_BUILD_TYPE}/_moose.pyd" "${CMAKE_BINARY_DIR}/python/moose/")
+	file(REMOVE_RECURSE "${CMAKE_BINARY_DIR}/python/moose/${CMAKE_BUILD_TYPE}")
+else()
+       install(TARGETS moose.bin DESTINATION bin CONFIGURATIONS Debug)       
 endif()
 
 install(TARGETS libmoose DESTINATION lib CONFIGURATIONS Debug)
