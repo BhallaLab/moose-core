@@ -52,3 +52,6 @@ micromamba activate moose
 ```
 
 and you are ready to start running moose scripts.
+
+
+NOTE: When running moose examples that use vpython for 3D visualization, you may run into a message like `"gio: http://localhost:39143: Operation not supported` and nothing much happens. To see the visualization, start `firefox` (or any other browser you installed on WSL) from another WSL terminal and enter the web address (http://localhost:39143 in this case) in its  address bar.
