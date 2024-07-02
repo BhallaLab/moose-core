@@ -38,8 +38,13 @@ conda install cmake
 	  
 * Install HDF5 (for NSDF support)
 
+Do not use the vcpkg version, it seems to miss H5DS function defs. 
 ```
 .\vcpkg\vcpkg.exe install hdf5:x64-windows
+```
+Use the conda-forge version instead:
+```
+conda install hdf5
 ```
 
 * Install pybind11 (https://pybind11.readthedocs.io/en/stable/installing.html)
