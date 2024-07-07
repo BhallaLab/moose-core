@@ -11,24 +11,29 @@ else()
 	        OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()
 
-pybind11_add_module(_moose 
-    pymoose.cpp 
-    helper.cpp 
-    Finfo.cpp
-    MooseVec.cpp 
-    PyRun.cpp)
+if(MSVC)
+	add_library(pymoose OBJECT
+	    pymoose.cpp 
+	    helper.cpp 
+    	    Finfo.cpp
+    	    MooseVec.cpp 
+    	    PyRun.cpp)
+else()
+	pybind11_add_module(_moose 
+            pymoose.cpp 
+            helper.cpp 
+            Finfo.cpp
+            MooseVec.cpp 
+            PyRun.cpp)
+	add_dependencies(_moose libmoose)
+	# Use in version_info dict.
+	target_compile_definitions(_moose PRIVATE
+   	 COMPILER_STRING="${CMAKE_CXX_COMPILER_ID},${CMAKE_CXX_COMPILER},${CMAKE_CXX_COMPILER_VERSION}")
 
-add_dependencies(_moose libmoose)
-
-# Use in version_info dict.
-target_compile_definitions(_moose PRIVATE
-    COMPILER_STRING="${CMAKE_CXX_COMPILER_ID},${CMAKE_CXX_COMPILER},${CMAKE_CXX_COMPILER_VERSION}")
-
-set_target_properties(_moose PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/python/moose
+	 set_target_properties(_moose PROPERTIES
+	     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/python/moose
         PREFIX "")
 	
-if(NOT WIN32)
 	set_target_properties(_moose PROPERTIES
 		    SUFFIX ".so")
 endif()
@@ -44,11 +49,12 @@ if(APPLE)
         ${STATIC_LIBRARIES})
     target_link_libraries(_moose PRIVATE ${SYSTEM_SHARED_LIBS})
 elseif(MSVC)    
-    target_link_libraries(_moose PRIVATE        
-        ${MOOSE_LIBRARIES} 
-        ${STATIC_LIBRARIES} 
-        ${SYSTEM_SHARED_LIBS})
-else(MSVC)
+    # set_property(TARGET _moose APPEND PROPERTY LINK_FLAGS /WHOLEARCHIVE)
+    # target_link_libraries(_moose PRIVATE        
+    #     ${MOOSE_LIBRARIES} 
+    #     ${STATIC_LIBRARIES} )
+    # target_link_libraries(_moose PRIVATE ${SYSTEM_SHARED_LIBS})
+else()
     # Linux
     target_link_libraries(_moose PRIVATE
         "-Wl,--whole-archive" 
@@ -56,7 +62,7 @@ else(MSVC)
         ${STATIC_LIBRARIES} 
         "-Wl,--no-whole-archive"
         ${SYSTEM_SHARED_LIBS})
-endif(APPLE)
+endif()
 
 
 # Copy python tree to BUILD directory. User can set PYTHONPATH to

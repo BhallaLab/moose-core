@@ -9,7 +9,7 @@ add_library(utility
     Vec.cpp
     cnpy.cpp
     # fileutils.cpp
-    # utility.cpp
+    utility.cpp
     )
 target_link_libraries(utility PRIVATE fmt)
 

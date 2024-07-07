@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-add_library(basecode
+add_library(basecode OBJECT
 	Element.cpp
 	DataElement.cpp
 	GlobalDataElement.cpp

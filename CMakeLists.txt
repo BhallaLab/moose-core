@@ -80,7 +80,7 @@ add_definitions(-DUSE_GENESIS_PARSER)
 # - Subha
 if(MSVC)
     add_definitions(-D_USE_MATH_DEFINES)
-    set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} /bigobj /std:c++14)
+    set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} /bigobj /std:c++14 /permissive-)
 else()
     set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} "-std=c++11")
 endif()
@@ -129,7 +129,7 @@ if(WITH_BOOST OR WITH_BOOST_ODE)
     set(WITH_GSL OFF)
 endif()
 
-find_package(HDF5 COMPONENTS CXX HL)
+find_package(HDF5 COMPONENTS C CXX HL)
 
 if (NOT HDF5_FOUND)
         message("==================================================================\n"
@@ -146,18 +146,20 @@ if (NOT HDF5_FOUND)
 	)
 elseif(HDF5_FOUND)
 	set(WITH_NSDF ON)
+	
 endif()
 
 ################################### TARGETS ####################################
 
 link_directories(${CMAKE_BINARY_DIR})
-if(WIN32)
-	add_library(libmoose SHARED basecode/main.cpp external/getopt/getopt.c)
+if(MSVC)
+	add_library(_moose SHARED basecode/main.cpp external/getopt/getopt.c)
+	set_target_properties(_moose PROPERTIES PREFIX "")
 else()
 	add_library(libmoose SHARED basecode/main.cpp)
-endif(WIN32)
+	set_target_properties(libmoose PROPERTIES PREFIX "")
+endif()
 
-set_target_properties(libmoose PROPERTIES PREFIX "")
 
 # MSVC Linker has a mismatch of binary lib type static/dll/pyd for exe
 # TODO find how to fix it
@@ -172,6 +174,9 @@ set(STATIC_LIBRARIES "")
 # Collect all shared libraries here.
 set(SYSTEM_SHARED_LIBS "")
 
+if(WITH_NSDF)
+    list(APPEND SYSTEM_SHARED_LIBS ${HDF5_LIBRARIES})
+endif()
 # BOOST ode library performs better than GSL and ideally should be made default.
 # Unfortunately Boost does not have a very good matrix library; it has ublas
 # which is not well maintained and emit a lot
@@ -314,7 +319,7 @@ list(APPEND MOOSE_LIBRARIES
 if(WIN32)
 	list(APPEND MOOSE_LIBRARIES getopt)
 	# target_include_directories(moose.bin PRIVATE external/getopt)
-	target_include_directories(libmoose PRIVATE external/getopt)
+	target_include_directories(_moose PRIVATE external/getopt)
 endif()
 
 # Make sure to remove duplicates.
@@ -343,12 +348,40 @@ if(APPLE)
         ${CMAKE_DL_LIBS}
         )
 elseif(MSVC)
-    target_link_libraries(libmoose
-        ${MOOSE_LIBRARIES}
-        ${STATIC_LIBRARIES}
-        ${SYSTEM_SHARED_LIBS}
-        )
-else(MSVC)
+  # Static linking throws away any lib that is not called
+  # The equivalent to gcc --whole-archive has been added to VS 2015 update 2:  /WHOLEARCHIVE
+  # Adding linker option is not as simple as Linux/Apple here because cmake passes /WHOLEARCHIVE argument as an object file name
+  set_property(TARGET _moose APPEND PROPERTY LINK_FLAGS /WHOLEARCHIVE)
+  set_property(TARGET _moose APPEND PROPERTY LINK_FLAGS /FORCE:MULTIPLE)
+  add_library(pymoose SHARED $<TARGET_OBJECTS:moose_builtins>
+    $<TARGET_OBJECTS:msg>
+    $<TARGET_OBJECTS:shell>
+    $<TARGET_OBJECTS:randnum>
+    $<TARGET_OBJECTS:scheduling>
+    $<TARGET_OBJECTS:moose_mpi>
+    $<TARGET_OBJECTS:biophysics>
+    $<TARGET_OBJECTS:utility>
+    $<TARGET_OBJECTS:kinetics>
+    $<TARGET_OBJECTS:synapse>
+    $<TARGET_OBJECTS:intfire>
+    $<TARGET_OBJECTS:hsolve>
+    $<TARGET_OBJECTS:mesh>
+    $<TARGET_OBJECTS:signeur>
+    $<TARGET_OBJECTS:diffusion>
+    $<TARGET_OBJECTS:ksolve>
+    $<TARGET_OBJECTS:lsoda>
+    $<TARGET_OBJECTS:device>
+    $<TARGET_OBJECTS:basecode>
+    $<TARGET_OBJECTS:pymoose>)
+
+  # target_link_libraries(libmoose
+  #       ${MOOSE_LIBRARIES}
+  #       ${SYSTEM_SHARED_LIBS}
+  #       ${CMAKE_DL_LIBS}
+  # 	"/WHOLEARCHIVE"
+  #       ${STATIC_LIBRARIES}
+  #       )
+else()
     target_link_libraries(libmoose
         "-Wl,--whole-archive"
         ${MOOSE_LIBRARIES}
@@ -356,7 +389,7 @@ else(MSVC)
         "-Wl,--no-whole-archive"
         ${SYSTEM_SHARED_LIBS}
         )
-endif(APPLE)
+endif()
 
 if(NOT MSVC)
        add_dependencies(moose.bin libmoose)
@@ -365,7 +398,7 @@ endif()
 
 if( WITH_BOOST AND NOT MSVC)
     target_link_libraries( moose.bin ${Boost_LIBRARIES} )
-endif( WITH_BOOST )
+endif()
 
 
 ######################### BUILD PYMOOSE ########################################
@@ -375,7 +408,7 @@ endif( WITH_BOOST )
 # See: https://pybind11.readthedocs.io/en/stable/installing.html
 # - Subha, Mon Apr 22 14:26:58 IST 2024
 
-# The execute_process fails on Windows with Mamba
+# execute_process fails on Windows with Mamba
 # execute_process(COMMAND ${CMAKE_COMMAND} -E pybind11-config --cmakedir OUTPUT_VARIABLE pybind11_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
 find_package(pybind11 REQUIRED HINTS "${Python3_SITELIB}")
 add_subdirectory(pybind11)
@@ -406,13 +439,13 @@ endif()
 ######################### INSTALL ##############################################
 
 if(MSVC)
-	configure_file("${CMAKE_BINARY_DIR}/python/moose/${CMAKE_BUILD_TYPE}/_moose.pyd" "${CMAKE_BINARY_DIR}/python/moose/")
-	file(REMOVE_RECURSE "${CMAKE_BINARY_DIR}/python/moose/${CMAKE_BUILD_TYPE}")
+	install(TARGETS _moose DESTINATION lib CONFIGURATIONS "${CMAKE_BUILD_TYPE}")
 else()
-       install(TARGETS moose.bin DESTINATION bin CONFIGURATIONS Debug)       
+	install(TARGETS libmoose DESTINATION lib CONFIGURATIONS "${CMAKE_BUILD_TYPE}")
 endif()
-
-install(TARGETS libmoose DESTINATION lib CONFIGURATIONS Debug)
+if(NOT MSVC)
+       install(TARGETS moose.bin DESTINATION bin CONFIGURATIONS "${CMAKE_BUILD_TYPE}")       
+endif()
 
 # Print message to start build process
 if(${CMAKE_BUILD_TOOL} MATCHES "make")

@@ -4,7 +4,7 @@ You may want to use one of the virtual environment systems like Anaconda, Minifo
 
 To create an environment, open Anaconda command prompt (below we assume Windows CMD shell, you may need to change some commands for PowerShell) and enter
 ```
-conda create -n moose
+conda create -n moose -c conda-forge
 ```
 
 Then switch to this environment for your build 
@@ -27,13 +27,17 @@ conda activate moose
 * Install cmake
   Using conda (mamba)
 ```
-conda install cmake
+conda install cmake -c conda-forge
 ```
 
-* Install GSL using vcpkg (enter the following in the command line):
+* Install GSL using ~~vcpkg~~ conda (enter the following in the command line):
 
 ```
       .\vcpkg\vcpkg install gsl:x64-windows
+```
+
+```
+conda install gsl -c conda-forge
 ```
 	  
 * Install HDF5 (for NSDF support)
@@ -52,8 +56,9 @@ conda install hdf5
 ```
 .\vcpkg\vcpkg.exe install pybind11
 ```
-
-* Install doxygen
+* [Skip] For MPI install MS-MPI (https://github.com/microsoft/Microsoft-MPI/releases/), the only free MPI for Windows
+  - TODO: MPI-build on Windows is not supported yet
+* [Skip] Install doxygen
 
   ```
   .\vcpkg\vcpkg.exe install doxygen:x64-windows
@@ -72,6 +77,7 @@ pip install vpython
 C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\LaunchDevCmd.bat
 ```
 
+Gotcha: if you are on a 64 bit machine, the machine type is x64. MSVC comes with various cross compilation support (x86, x86_64). Running `"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat"` worked.
 
 * Clone `moose-core` source code using git
 * Build moose
