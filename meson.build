@@ -15,18 +15,24 @@ project('pymoose', 'c', 'cpp',
 
 pybind_dep = dependency('pybind11')
 gsl_dep = dependency('gsl', version: '>=1.16')
-mpi_dep = dependency('mpi', required: false)
+
+use_mpi = get_option('use_mpi')
+if use_mpi
+  mpi_dep = dependency('mpi', required: true)
+  add_global_arguments('-DUSE_MPI', language: ['c', 'cpp'])
+else
+  mpi_dep = []
+endif  
 
 add_global_arguments('-DMOOSE_VERSION="4.0.1"', language: ['c', 'cpp'])
 add_global_arguments('-DUSE_GSL', language: ['c', 'cpp'])
 
 ##############################################################
-# Borrowed from SciPy
+# Credit: Borrowed from SciPy
 ##############################################################
 python = import('python')
 py = python.find_installation()
 python_dep = py.dependency()
-moose_dir = py.get_install_dir() / 'moose'
 
 min_numpy_version = '1.23.5'  # keep in sync with pyproject.toml
 
@@ -58,6 +64,9 @@ elif cc.get_id() == 'msvc'
     error('pymoose requires at least vc142 (default with Visual Studio 2019) ' + \
           'when building with MSVC')
   endif
+  # Several sub libs link against the same other sublib and MSVC
+  # linker barfs at multiple defs of the same symbol
+  add_project_link_arguments('/FORCE:MULTIPLE', '/WHOLEARCHIVE', language: ['c', 'cpp'])  
 endif
 
 
@@ -82,7 +91,7 @@ if host_machine.system() == 'darwin'
 endif
 
 # Link against conda env GSL
-conda_res = run_command('python', '-c', 'import os; print(os.environ["CONDA_PREFIX"])')
+conda_res = run_command('python', '-c', 'import os; print(os.environ["CONDA_PREFIX"])', check: true)
 if conda_res.returncode() == 0
   conda_lib_path = conda_res.stdout().strip() / 'Library/lib'
 else
@@ -94,9 +103,6 @@ if is_windows
   add_global_arguments('-D_USE_MATH_DEFINES', language: ['c', 'cpp'])
   # On Windows some of the object files are too big
   add_global_arguments('/bigobj', language: ['c', 'cpp'])
-  # Several sub libs link against the same other sublib and MSVC
-  # linker barfs at multiple defs of the same symbol
-  add_project_link_arguments('/FORCE:MULTIPLE', language: ['c', 'cpp'])
   if conda_res.returncode() == 0
     add_project_link_arguments('/LIBPATH:' + conda_lib_path, language: ['c', 'cpp'])
   endif
@@ -140,6 +146,10 @@ foreach name, machine : machines
   conf_data.set(name + '_CPU_SYSTEM', machine.system())
 endforeach
 
+add_global_arguments('-DCOMPILER_STRING="' +
+                     compiler.get_id() + ' ' +
+                     compiler.version() + '"',
+                     language: ['c', 'cpp'])
 
 conf_data.set('CROSS_COMPILED', meson.is_cross_build())
 
@@ -149,6 +159,12 @@ conf_data.set('PYTHON_VERSION', py.language_version())
 
 
 # End Credit: SciPy
+libsoda = static_library('lsoda', 'external/libsoda/LSODA.cpp',
+                          include_directories: 'external/libsoda',
+                          install: true)
+libsoda_dep = declare_dependency(include_directories: 'external/libsoda',
+                                 link_with: libsoda)
+
 
 subdir('basecode')
 subdir('biophysics')
@@ -195,8 +211,18 @@ sublibs = [
     utility_lib,
 ]
 
-py.extension_module('moose', 'basecode/main.cpp',
+py.extension_module('moose', 'pybind11/pymoose.cpp',                    
                     link_with: sublibs,
-                    dependencies: [gsl_dep, mpi_dep],
+                    dependencies: [gsl_dep, mpi_dep, pybind_dep, libsoda_dep],
                     include_directories: ['external/getopt'],
-                    install: true,)
+                    install: true)
+
+moose_dir = py.get_install_dir()
+
+install_subdir(
+  'python/moose',
+  install_dir: moose_dir)
+
+install_subdir(
+  'python/redesigneur',
+  install_dir: moose_dir)

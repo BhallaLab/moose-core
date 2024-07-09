@@ -12,7 +12,9 @@ ksolve_src = ['KinSparseMatrix.cpp',
                'Gsolve.cpp',
                'KsolveBase.cpp',
                'SteadyStateGsl.cpp',
-               'testKsolve.cpp']
+               'testKsolve.cpp',
+               '../utility/utility.cpp'
+             ]
 
-ksolve_lib = static_library('ksolve', ksolve_src, dependencies: gsl_dep, include_directories: gsl_dep.get_pkgconfig_variable('includedir'))
+ksolve_lib = static_library('ksolve', ksolve_src, dependencies: [gsl_dep, libsoda_dep], include_directories: gsl_dep.get_pkgconfig_variable('includedir'))
 
