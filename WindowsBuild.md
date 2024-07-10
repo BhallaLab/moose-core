@@ -1,13 +1,22 @@
 # Building MOOSE on Windows with MSVC
 
-You may want to use one of the virtual environment systems like Anaconda, Miniforge with Mamba, or Micromamba, which will allow you to create isolated Python environments. There  are binary packages for most of the requirements in the conda channels (conda-forge). In contrast, pip will actually download the package source code and try to build it locally, which opens up a chain of dependencies on various other libraries.
+## Virtual environment
+You may want to use one of the virtual environment systems like Anaconda, Miniforge with Mamba, or Micromamba (https://mamba.readthedocs.io/en/latest/), which will allow you to create isolated Python environments. There  are binary packages for most of the requirements in the conda channels (conda-forge). In contrast, pip will actually download the package source code and try to build it locally, which opens up a chain of dependencies on various other libraries.
+
+If you want to keep things slim, `micromamba` may be ideal because it is a single statically linked C++ executable and does not install any base environment.
+
+In this guide, `conda` command can be replaced by `mamba` or `micromamba` if you are using one of those systems. 
 
 To create an environment, open Anaconda command prompt (below we assume Windows CMD shell, you may need to change some commands for PowerShell) and enter
+
 ```
-conda create -n moose -c conda-forge
+conda create -n moose meson gsl hdf5 cmake numpy matplotlib vpython doxygen pybind11[global] -c conda-forge
 ```
 
-Then switch to this environment for your build 
+This will create an environment name `moose`. In some terminals (windows cmd?) you may get an error for `pybind11[global]`. Put it inside quotes to work around it.
+
+Then activate this environment for your build :
+
 ```
 conda activate moose
 ```
@@ -15,81 +24,38 @@ conda activate moose
 ## Requirements
 * Install either MS Visual Studio 2015 or newer or MS Visual Studio Build Tools.
   Add path to this folder in your PATH variable
-* Install git fow Windows
-* Install vcpkg (https://github.com/microsoft/vcpkg)
-
-```
-      git clone https://github.com/microsoft/vcpkg
-      .\vcpkg\bootstrap-vcpkg.bat
-      .\vcpkg\vcpkg integrate install
-```
-
-* Install cmake
-  Using conda (mamba)
-```
-conda install cmake -c conda-forge
-```
-
-* Install GSL using ~~vcpkg~~ conda (enter the following in the command line):
-
-```
-      .\vcpkg\vcpkg install gsl:x64-windows
-```
-
-```
-conda install gsl -c conda-forge
-```
-	  
-* Install HDF5 (for NSDF support)
-
-Do not use the vcpkg version, it seems to miss H5DS function defs. 
-```
-.\vcpkg\vcpkg.exe install hdf5:x64-windows
-```
-Use the conda-forge version instead:
-```
-conda install hdf5
-```
-
-* Install pybind11 (https://pybind11.readthedocs.io/en/stable/installing.html)
-
-```
-.\vcpkg\vcpkg.exe install pybind11
-```
+* Install git for Windows
 * [Skip] For MPI install MS-MPI (https://github.com/microsoft/Microsoft-MPI/releases/), the only free MPI for Windows
   - TODO: MPI-build on Windows is not supported yet
 * [Skip] Install doxygen
-
-  ```
-  .\vcpkg\vcpkg.exe install doxygen:x64-windows
-  ```
-
-* Install python package requirements (any of these that you don't have already installed). 
-```
-pip install numpy
-pip install matplotlib
-pip install vpython
-```
-
-* Get the environment variable for MS BuildTools set up by running 
+* Get the environment variable for MS Visual Studio command line tools set up by running 
 
 ```
-C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\LaunchDevCmd.bat
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 ```
 
-Gotcha: if you are on a 64 bit machine, the machine type is x64. MSVC comes with various cross compilation support (x86, x86_64). Running `"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat"` worked.
-
+Gotcha: if you are on a 64 bit machine, the machine type is `x64`. MSVC comes with cross compilation support for various machine-os combos (x86, x86_64). 
 * Clone `moose-core` source code using git
 * Build moose
 ```
 cd moose-core
-pip install .
+
+meson setup --wipe _build --prefix=%CD%\\_build_install -D use_mpi=false --buildtype=release -Ddebug=false
+ninja -v -C _build 
+meson install -C _build
 ```
 
-* Rename files
+This will create `moose` module inside `moose-core/_build_install` directory. To make moose importable from any terminal, add this directory to your `PYTHONPATH` environment variable.
 
-  * The build process will create everything in the folder `_temp__build`
-  * The `python` subdirectory contains the moose python module.
-  * The binary library for moose is created as `_temp__build\python\moose\Release\moose.pyd`
-  * Move this file to `_temp__build\python\moose\_moose.pyd`
-  * Add `_temp__build\python`  to your `PYTHONPATH` environment variable and you are ready to go.
+To build a wheel, you need `build` and `meson-python` modules:
+
+```
+conda install meson-python
+conda install build
+```
+
+In a terminal, `cd` to `moose-core` and run the following:
+
+```
+python -m build
+```
