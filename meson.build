@@ -240,7 +240,7 @@ install_subdir(
   install_dir: moose_dir)
 
 install_subdir(
-  'python/redesigneur',
+  'python/rdesigneur',
   install_dir: moose_dir)
 
 # run_target('rename_lib',
