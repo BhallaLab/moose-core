@@ -225,16 +225,6 @@ else
   rename_cmd = 'mv'
 endif
 
-# custom_target('mooselib',
-#               depends: pymoose,
-#               input: pymoose,
-#               output: '_moose.so',
-#               install_dir: moose_dir / 'moose',
-#               command: [rename_cmd, pymoose.full_path(), '@OUTPUT@'],
-#               build_by_default: true,
-#               install: true
-#              )
-
 install_subdir(
   'python/moose',
   install_dir: moose_dir)
@@ -242,9 +232,5 @@ install_subdir(
 install_subdir(
   'python/rdesigneur',
   install_dir: moose_dir)
-
-# run_target('rename_lib',
-#            command: [rename_cmd, pymoose.full_path(), moose_dir / '_moose.pyd'],
-#            depends: pymoose)
 
 message('Finished installing moose in', pymoose.full_path())
