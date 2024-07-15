@@ -161,7 +161,7 @@ conf_data.set('PYTHON_VERSION', py.language_version())
 # End Credit: SciPy
 libsoda = static_library('lsoda', 'external/libsoda/LSODA.cpp',
                           include_directories: 'external/libsoda',
-                          install: true)
+                          install: false)
 libsoda_dep = declare_dependency(include_directories: 'external/libsoda',
                                  link_with: libsoda)
 

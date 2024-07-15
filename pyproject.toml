@@ -69,6 +69,3 @@ test = [
 setup = ['--default-library=static', '-Doptimization=3', '--vsenv']
 compile = ['-j4']
 dist = ['--include-subprojects']
-# Force the use of the MSVC compilers on Windows
-# [tool.meson-python.args]
-# setup = ['--vsenv']
