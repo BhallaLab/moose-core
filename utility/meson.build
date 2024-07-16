@@ -6,6 +6,8 @@ utility_src = ['strutil.cpp',
                'setupenv.cpp',
                'numutil.cpp',
                'Annotator.cpp',
-               'Vec.cpp']
+               'Vec.cpp',
+               'utility.cpp',
+               'fileutils.cpp']
 
 utility_lib = static_library('utility', utility_src)

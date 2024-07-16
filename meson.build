@@ -50,6 +50,7 @@ cc = meson.get_compiler('c')
 cpp = meson.get_compiler('cpp')
 # cy = meson.get_compiler('cython')
 
+link_args = ['-Wl,--allow-multiple-definition']
 # Check compiler is recent enough (see "Toolchain Roadmap" for details)
 if cc.get_id() == 'gcc'
   if not cc.version().version_compare('>=9.1')
@@ -66,7 +67,8 @@ elif cc.get_id() == 'msvc'
   endif
   # Several sub libs link against the same other sublib and MSVC
   # linker barfs at multiple defs of the same symbol
-  add_project_link_arguments('/FORCE:MULTIPLE', '/WHOLEARCHIVE', language: ['c', 'cpp'])  
+  add_project_link_arguments('/FORCE:MULTIPLE', '/WHOLEARCHIVE', language: ['c', 'cpp'])
+  link_args = []
 endif
 
 
@@ -213,10 +215,18 @@ sublibs = [
 
 moose_dir = py.get_install_dir()
 
+# Windows does not have getopt library and its dependencies. A port is
+# provided in "external/getopt" folder
+getopt_inc = []
+if is_windows
+  getopt_inc = ['external/getopt']
+endif
+
 pymoose = py.extension_module('_moose', 'pybind11/pymoose.cpp',
-                              link_with: sublibs,
+                              link_whole: sublibs,
+                              link_args: link_args,
                               dependencies: [gsl_dep, mpi_dep, pybind_dep, libsoda_dep],
-                              include_directories: ['external/getopt'],
+                              include_directories: getopt_inc,
                               install: true, install_dir: moose_dir / 'moose')
 
 if is_windows

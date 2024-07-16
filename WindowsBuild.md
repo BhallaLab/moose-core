@@ -10,7 +10,7 @@ In this guide, `conda` command can be replaced by `mamba` or `micromamba` if you
 To create an environment, open Anaconda command prompt (below we assume Windows CMD shell, you may need to change some commands for PowerShell) and enter
 
 ```
-conda create -n moose meson gsl hdf5 cmake numpy matplotlib vpython doxygen pybind11[global] -c conda-forge
+conda create -n moose meson gsl hdf5 cmake numpy matplotlib vpython doxygen pkg-config pybind11[global] -c conda-forge
 ```
 
 This will create an environment name `moose`. In some terminals (windows cmd?) you may get an error for `pybind11[global]`. Put it inside quotes to work around it.
@@ -28,6 +28,12 @@ conda activate moose
 * [Skip] For MPI install MS-MPI (https://github.com/microsoft/Microsoft-MPI/releases/), the only free MPI for Windows
   - TODO: MPI-build on Windows is not supported yet
 * [Skip] Install doxygen
+* Install `pkg-config`
+
+```
+conda install pkg-config
+```
+
 * Get the environment variable for MS Visual Studio command line tools set up by running 
 
 ```
@@ -45,7 +51,7 @@ ninja -v -C _build
 meson install -C _build
 ```
 
-This will create `moose` module inside `moose-core/_build_install` directory. To make moose importable from any terminal, add this directory to your `PYTHONPATH` environment variable.
+This will create `moose` module inside `moose-core/_build_install` directory. To make moose importable from any terminal, add this directory to your `PYTHONPATH` environment variable. For standard installation you can simply run `pip install .` in the `moose-core` directory.
 
 To build a wheel, you need `build` and `meson-python` modules:
 
