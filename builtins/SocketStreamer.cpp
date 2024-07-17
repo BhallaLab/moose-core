@@ -1,19 +1,27 @@
 /***
- *       Filename:  SocketStreamer.cpp
+ * Filename:  SocketStreamer.cpp
  *
- *    Description:  TCP and Unix Domain Socket to stream data.
+ * Description:  TCP and Unix Domain Socket to stream data.
  *
- *         Author:  Dilawar Singh <dilawar.s.rajput@gmail.com>
- *   Organization:  NCBS Bangalore
+ * Author:  Dilawar Singh <dilawar.s.rajput@gmail.com>
+ * Updated: 2024-07-17 by subha 
+ * Organization:  NCBS Bangalore
  *
- *        License:  See MOOSE licence.
+ * License:  See MOOSE licence.
  */
 
 #include <algorithm>
 #include <sstream>
 #include <chrono>
 #include <thread>
+
+#ifdef _WIN32
+#include <io.h>
+#define F_OK 0
+#define access _access
+#else
 #include <unistd.h>
+#endif
 
 #include "../basecode/global.h"
 #include "../basecode/header.h"
@@ -260,7 +268,7 @@ void SocketStreamer::initUDSServer( void )
                );
         }
 
-        if(! moose::filepath_exists(sockInfo_.filepath))
+        if(access(path, F_OK) != 0)
         {
             LOG( moose::warning, "No file " << sockInfo_.filepath << " exists." );
             isValid_ = false;
