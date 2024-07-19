@@ -4,7 +4,7 @@
 # Description: 
 # Author: Subhasis Ray
 # Created: Mon Apr  8 21:41:22 2024 (+0530)
-# Last-Updated: Wed Apr 10 20:16:04 2024 (+0530)
+# Last-Updated: Wed Jul 17 15:51:22 2024 (+0530)
 #           By: Subhasis Ray
 # 
 
@@ -40,15 +40,15 @@ def run(modeldir, nogui=True):
     moose.connect(vm, 'requestOut', soma, 'getVm')
     print('A' * 10, soma)
 
-    simtime = 300e-3
+    simtime = 700e-3
     moose.reinit()
     moose.start(simtime)
     
     t = np.arange(len(vm.vector)) * vm.dt
     print('%' * 10, len(vm.vector), len(inj.vector))
-    results = np.array([t, vm.vector, inj.vector], dtype=[('time', float), ('Vm', float), ('Im', float)])
-    fname = 'Granule_98.npy'
-    np.save(fname, results)
+    results = np.block([t[:, np.newaxis], vm.vector[:, np.newaxis], inj.vector[:, np.newaxis]])
+    fname = 'Granule_98.dat'
+    np.savetxt(fname, X=results, header='time Vm Im', delimiter=' ')
     print(f'Saved results in {fname}')
     if not nogui:
         import matplotlib.pyplot as plt
