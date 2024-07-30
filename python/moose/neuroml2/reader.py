@@ -621,34 +621,23 @@ class NML2Reader(object):
         if _isConcDep(ctype):
             caConcName = _findCaConcVariableName()  # moose CaCon element name
             req_vars["v"] = "0.0V"
-            for vv in vtab:
-                if param_tabs is not None:
-                    params = {
-                        name: np.interp(vv, *tab)
-                        for name, tab in param_tabs.items()
-                    }
+        for vv in vtab:
+            if param_tabs is not None:
+                params = {
+                    name: np.interp(vv, *tab)
+                    for name, tab in param_tabs.items()
+                }
+            if _isConcDep(ctype):
                 req_vars["caConc"] = f"{max(1e-11,vv):g}"  # do we need this?
                 req_vars[caConcName] = f"{max(1e-11,vv):g}"
-                vals = pynml.evaluate_component(
-                    ctype, req_variables=req_vars, parameter_values=params
-                )
-                v = vals.get("x", vals.get("t", vals.get("r", None)))
-                if v is not None:
-                    rate.append(v)
-        else:
-            for vv in vtab:
+            else:
                 req_vars["v"] = f"{vv}V"
-                if param_tabs is not None:
-                    params = {
-                        name: np.interp(vv, *tab)
-                        for name, tab in param_tabs.items()
-                    }
-                vals = pynml.evaluate_component(
-                    ctype, req_variables=req_vars, parameter_values=params
-                )
-                v = vals.get("x", vals.get("t", vals.get("r", None)))
-                if v is not None:
-                    rate.append(v)
+            vals = pynml.evaluate_component(
+                ctype, req_variables=req_vars, parameter_values=params
+            )
+            v = vals.get("x", vals.get("t", vals.get("r", None)))
+            if v is not None:
+                rate.append(v)
         return np.r_[rate]
 
     def calculateRateFn(
