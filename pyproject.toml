@@ -69,3 +69,7 @@ test = [
 setup = ['--default-library=static', '-Doptimization=3', '--vsenv']
 compile = ['-j4']
 dist = ['--include-subprojects']
+
+[tool.black]
+line-length = 80
+# skip-string-normalization = true

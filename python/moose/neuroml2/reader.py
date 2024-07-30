@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 from __future__ import print_function, division, absolute_import
 
 # Description: NeuroML2 reader.
@@ -17,11 +18,17 @@ import logging
 import numpy as np
 from collections import defaultdict
 
+from moose.neuroml2.hhfit import exponential2
+from moose.neuroml2.hhfit import sigmoid2
+from moose.neuroml2.hhfit import linoid2
+from moose.neuroml2.units import SI
+
+
 import moose
 
 
 logger_ = logging.getLogger("moose.nml2")
-
+logger_.setLevel(logging.DEBUG)
 
 nml_not_available_msg = ""
 
@@ -30,11 +37,21 @@ try:
     import pyneuroml.pynml as pynml
 except ImportError as error:
     raise ImportError(
-        f"Could not import neuroml/pyneuroml. Please make sure you have pyneuroml installed (`pip install pyneuroml`)"
+        "Could not import neuroml/pyneuroml. "
+        "Please make sure you have pyneuroml installed "
+        "(`pip install pyneuroml`)"
     ) from error
 
 
 from moose.neuroml2.units import SI
+
+
+PREDEFINED_RATEFN_MAP = {
+    "HHExpRate": exponential2,
+    "HHSigmoidRate": sigmoid2,
+    "HHSigmoidVariable": sigmoid2,
+    "HHExpLinearRate": linoid2,
+}
 
 
 def _write_flattened_nml(doc, outfile):
@@ -114,13 +131,14 @@ def _findCaConcVariableName():
 
 
 def sarea(comp):
-    """sarea
-    Return the surface area (2 * pi * r * L) of compartment from length and diameter.
+    """Return the surface area (2 * pi * r * L) of compartment from
+    length and diameter.
 
     :param comp: Compartment instance.
     :type comp: str
     :return: surface area of `comp`.
     :rtype: float
+
     """
     if comp.length > 0:
         return math.pi * comp.diameter * comp.length
@@ -168,7 +186,9 @@ def getSegments(nmlcell, component, sg_to_segments):
     if sg is None:
         segments = nmlcell.morphology.segments
     elif sg == "all":
-        segments = [seg for seglist in sg_to_segments.values() for seg in seglist]
+        segments = [
+            seg for seglist in sg_to_segments.values() for seg in seglist
+        ]
     else:
         segments = sg_to_segments[sg]
     return _unique(segments)
@@ -206,11 +226,10 @@ class NML2Reader(object):
         self.proto_chans = {}  # map id to prototype channels in moose
         self.proto_pools = {}  # map id to prototype pools (Ca2+, Mg2+)
         self.includes = {}  # Included files mapped to other readers
-        self.lib = (
-            moose.element("/library")
-            if moose.exists("/library")
-            else moose.Neutral("/library")
-        )
+        self.lib = moose.Neutral(
+            "/library"
+        )  # Keeps the prototypes: not simulated
+        self.model = moose.Neutral("/model")  # Actual model: simulated
         self.id_to_ionChannel = {}
         self._cell_to_sg = (
             {}
@@ -220,7 +239,6 @@ class NML2Reader(object):
         self.cells_in_populations = {}
         self.pop_to_cell_type = {}
         self.seg_id_to_comp_name = {}
-        self.paths_to_chan_elements = {}
         self.network = None
 
     def read(self, filename, symmetric=True):
@@ -264,59 +282,108 @@ class NML2Reader(object):
         return self.cells_in_populations[pop_id][index]
 
     def getComp(self, pop_id, cellIndex, segId):
+        """Get moose compartment corresponding to the specified NeuroML element
+
+        Parameters
+        ----------
+        pop_id : str
+            Population ID in NeuroML
+        cellIndex : str
+            Index of cell in population
+        segId : str
+            Segment ID in NeuroML
+
+        """
+        comp_name = self.seg_id_to_comp_name[self.pop_to_cell_type[pop_id]][
+            segId
+        ]
         return moose.element(
-            "%s/%s/%s/%s"
-            % (
-                self.lib.path,
-                pop_id,
-                cellIndex,
-                self.seg_id_to_comp_name[self.pop_to_cell_type[pop_id]][segId],
-            )
+            f"{self.model.path}/{self.network.id}/{pop_id}/{cellIndex}/{comp_name}"
         )
 
     def createPopulations(self):
+        """Create populations of neurons in a network
+
+        Create a container identified by `network.id` and create cell
+        populations under that. The network container is created under
+        `/model` as this is supposed to be an instantiation and not a
+        prototype (the latter are created under `/library`).
+
+        """
+        net = moose.Neutral(f"{self.model.path}/{self.network.id}")
         for pop in self.network.populations:
-            ep = "%s/%s" % (self.lib.path, pop.id)
-            mpop = moose.element(ep) if moose.exists(ep) else moose.Neutral(ep)
-            self.cells_in_populations[pop.id] = {}
-            for i in range(pop.size):
-                logger_.info(
-                    "Creating %s/%s instances of cell: %s under %s"
-                    % (i, pop.size, pop.component, mpop)
+            mpop = moose.Neutral(f"{net.path}/{pop.id}")
+            self.pop_to_cell_type[pop.id] = pop.component
+            logger_.info(
+                f"Creating {pop.size} instances of cell "
+                f"{pop.component} under {mpop.path}"
+            )
+            self.cells_in_populations[pop.id] = {
+                ii: moose.copy(
+                    self.proto_cells[pop.component],
+                    mpop,
+                    f"{ii}",
                 )
-                self.pop_to_cell_type[pop.id] = pop.component
-                chid = moose.copy(self.proto_cells[pop.component], mpop, "%s" % (i))
-                self.cells_in_populations[pop.id][i] = chid
+                for ii in range(pop.size)
+            }
 
     def getInput(self, input_id):
-        return moose.element("%s/inputs/%s" % (self.lib.path, input_id))
+        """Returns input object (PulseGen) identified by `input_id`.
+
+        Retrieves the object `/model/inputs/{input_id}`.
+
+        Parameters
+        ----------
+        input_id : str
+            NeuroML id of the object to be retrieved. Same as its name
+            in MOOSE.
+
+        """
+        return moose.element(f"{self.model.path}/inputs/{input_id}")
 
     def createInputs(self):
+        """Create inputs to model.
+
+        Currently this assumes inputs are `PulseGen` objects and
+        copies the prototypes for a network's `explicit_inputs` and
+        `input_lists` from '/library/inputs' to '/model/inputs'. It
+        also connects up the 'output' field of the `PulseGen object to
+        the 'injectMsg' field of the target compartment.
+
+        """
+        inputs = moose.Neutral(f"{self.model.path}/inputs")
         for el in self.network.explicit_inputs:
+            proto = moose.element(f"{self.lib.path}/inputs/{el.input}")
             pop_id = el.target.split("[")[0]
-            i = el.target.split("[")[1].split("]")[0]
+            ii = el.target.split("[")[1].split("]")[0]
             seg_id = 0
             if "/" in el.target:
                 seg_id = el.target.split("/")[1]
-            input = self.getInput(el.input)
-            moose.connect(input, "output", self.getComp(pop_id, i, seg_id), "injectMsg")
+            input_ = moose.copy(proto, inputs)
+            moose.connect(
+                input_, "output", self.getComp(pop_id, ii, seg_id), "injectMsg"
+            )
 
         for il in self.network.input_lists:
             for ii in il.input:
-                input = self.getInput(il.component)
+                logger_.debug(f"il.component: {il.component}, input: {ii}")
+                proto = moose.element(f"{self.lib.path}/inputs/{il.component}")
+                input_ = moose.copy(proto, inputs)
                 moose.connect(
-                    input,
+                    input_,
                     "output",
                     self.getComp(
-                        il.populations, ii.get_target_cell_id(), ii.get_segment_id()
+                        il.populations,
+                        ii.get_target_cell_id(),
+                        ii.get_segment_id(),
                     ),
                     "injectMsg",
                 )
 
     def createCellPrototype(self, cell, symmetric=True):
         """To be completed - create the morphology, channels in prototype"""
-        ep = "%s/%s" % (self.lib.path, cell.id)
-        nrn = moose.element(ep) if moose.exists(ep) else moose.Neuron(ep)
+        ep = f"{self.lib.path}/{cell.id}"
+        nrn = moose.Neuron(ep)
         self.proto_cells[cell.id] = nrn
         self.nml_cells_to_moose[cell.id] = nrn
         self.moose_to_nml[nrn] = cell
@@ -373,7 +440,9 @@ class NML2Reader(object):
                 float(x) * self.lunit for x in (p0.x, p0.y, p0.z)
             )
             p1 = segment.distal
-            comp.x, comp.y, comp.z = (float(x) * self.lunit for x in (p1.x, p1.y, p1.z))
+            comp.x, comp.y, comp.z = (
+                float(x) * self.lunit for x in (p1.x, p1.y, p1.z)
+            )
             comp.length = np.sqrt(
                 (comp.x - comp.x0) ** 2
                 + (comp.y - comp.y0) ** 2
@@ -383,7 +452,9 @@ class NML2Reader(object):
             # NOTE: moose compartments are cylindrical (both ends of a
             # compartment have same diameter). So taking the average
             # of the two ends in case of truncated-cone.
-            comp.diameter = (float(p0.diameter) + float(p1.diameter)) * self.lunit / 2
+            comp.diameter = (
+                (float(p0.diameter) + float(p1.diameter)) * self.lunit / 2
+            )
             if parent:
                 pcomp = id_to_comp[parent.id]
                 moose.connect(comp, src, pcomp, dst)
@@ -411,7 +482,9 @@ class NML2Reader(object):
                 % (nmlcell.id, self.filename)
             )
             return
-        self.importMembraneProperties(nmlcell, moosecell, bp.membrane_properties)
+        self.importMembraneProperties(
+            nmlcell, moosecell, bp.membrane_properties
+        )
         self.importIntracellularProperties(
             nmlcell, moosecell, bp.intracellular_properties
         )
@@ -472,12 +545,14 @@ class NML2Reader(object):
                     proto_pool = innerReader.proto_pools[concModel]
                     break
         if not proto_pool:
-            msg = "No prototype pool for %s referred to by %s" % (concModel, species.id)
+            msg = "No prototype pool for %s referred to by %s" % (
+                concModel,
+                species.id,
+            )
             logger_.error(msg)
             raise RuntimeError(msg)
         pool_id = moose.copy(proto_pool, compartment, species.id)
         pool = moose.element(pool_id)
-        # print('&' * 10, compartment.path, compartment.length, compartment.diameter, pool.thick)
         if compartment.length <= 0:
             vol = (
                 4
@@ -517,66 +592,126 @@ class NML2Reader(object):
         print("[INFO ] Not implemented.")
         return False
 
-    def calculateRateFn(self, ratefn, vmin, vmax, tablen=3000, vShift="0mV"):
-        """Returns A / B table from ngate."""
-        from moose.neuroml2.hhfit import exponential2
-        from moose.neuroml2.hhfit import sigmoid2
-        from moose.neuroml2.hhfit import linoid2
-        from moose.neuroml2.units import SI
+    def rateFnFromFormula(
+        self, ratefn, ctype, vtab, vshift="0.0V", param_tabs=None
+    ):
+        """Compute rate values from formula provided in NeuroML2 document
 
-        rate_fn_map = {
-            "HHExpRate": exponential2,
-            "HHSigmoidRate": sigmoid2,
-            "HHSigmoidVariable": sigmoid2,
-            "HHExpLinearRate": linoid2,
+        Parameters
+        ----------
+        ratefn : NeuroML element for rate function
+            Element defining the rate function
+        ctype: NeuroML ComponentType
+            ComponentType matching that of the rate function
+        vtab : sequence
+            Sequence of values at which the rate has to be computed
+        vshift: str
+            Voltage shift to be applied (value with unit)
+        param_tabs: dict {varname: (xp, fp)}
+            Mapping variable name to interpolation table (see
+            `calculateRateFn`)
+        """
+        rate = []
+        params = None
+        req_vars = {
+            "vShift": vshift,
+            "temperature": self._getTemperature(),
         }
+        req_vars.update(self._variables)  # what's the use?
+        if _isConcDep(ctype):
+            caConcName = _findCaConcVariableName()  # moose CaCon element name
+            req_vars["v"] = "0.0V"
+            for vv in vtab:
+                if param_tabs is not None:
+                    params = {
+                        name: np.interp(vv, *tab)
+                        for name, tab in param_tabs.items()
+                    }
+                req_vars["caConc"] = f"{max(1e-11,vv):g}"  # do we need this?
+                req_vars[caConcName] = f"{max(1e-11,vv):g}"
+                vals = pynml.evaluate_component(
+                    ctype, req_variables=req_vars, parameter_values=params
+                )
+                v = vals.get("x", vals.get("t", vals.get("r", None)))
+                if v is not None:
+                    rate.append(v)
+        else:
+            for vv in vtab:
+                req_vars["v"] = f"{vv}V"
+                if param_tabs is not None:
+                    params = {
+                        name: np.interp(vv, *tab)
+                        for name, tab in param_tabs.items()
+                    }
+                vals = pynml.evaluate_component(
+                    ctype, req_variables=req_vars, parameter_values=params
+                )
+                v = vals.get("x", vals.get("t", vals.get("r", None)))
+                if v is not None:
+                    rate.append(v)
+        return np.r_[rate]
 
-        tab = np.linspace(vmin, vmax, tablen)
-        if self._is_standard_nml_rate(ratefn):
-            midpoint, rate, scale = map(
-                SI, (ratefn.midpoint, ratefn.rate, ratefn.scale)
-            )
-            return rate_fn_map[ratefn.type](tab, rate, scale, midpoint)
+    def calculateRateFn(
+        self, ratefn, vmin, vmax, tablen=3000, vShift="0mV", param_tabs=None
+    ):
+        """Compute rate function based on NeuroML description.
 
+        Calculate the HHGate rate functions from NeuroML
+        description. In the simplest case it is forward or backward
+        rate (alpha and beta) in one of the standard forms. But in
+        some cases there needs to be further tweaks where the time
+        course (tau) and steady state (inf) values are computed based
+        on rules on alpha and beta.
+
+        Parameters
+        ----------
+        ratefn : str
+            NeuroML element describing HHRate
+        vmin : Lower end of rate table
+            Upper end of rate table
+        vmax : str
+            Upper end of rate table
+        tablen : int
+            Length of the table
+        vShift : str
+            Voltage shift to be applied
+        param_tables : dict {variable_name: interpolation_table}
+            Interpolation tables for gate parameters. The keys are used
+            as variable names when evaluating neuroml dynamics expression.
+            The values are tuples `(xp, fp)` where `xp` are the
+            x-coordinates of the datapoints and `fp` are the y-coordinates.
+            See ``numpy.interp`` for details of the latter.
+
+
+        """
+        vtab = np.linspace(vmin, vmax, tablen)
+
+        # For standard rate functions in `PREDEFINED_RATEFN_MAP` simply call it
+        # and return the result
+        function = PREDEFINED_RATEFN_MAP.get(ratefn.type, None)
+        if function is not None:
+            midpoint = SI(ratefn.midpoint)
+            rate = SI(ratefn.rate)
+            scale = SI(ratefn.scale)
+            return function(vtab, rate, scale, midpoint)
+
+        # Non-standard rate function: find a ComponentType matching
+        # the `type` of the rate function
         for ct in self.doc.ComponentType:
             if ratefn.type != ct.name:
                 continue
 
-            logger_.info(f"Using %s to evaluate rate" % ct.name)
-            rate = []
-            for v in tab:
-                # Note: MOOSE HHGate are voltage and/or concentration
-                # dependent. Here we figure out if nml description of gate is
-                # concentration dependent or not.
-                # logger_.debug(f"{'#' * 5} {_isConcDep(ct)}")
-                if _isConcDep(ct):
-                    # Concentration dependent. Concentration can't be negative.
-                    # Find a suitable CaConc from the /library. Currently on Ca
-                    # dependent channels are allowed.
-                    caConcName = _findCaConcVariableName()
-                    req_vars = {
-                        "v": "0.0V",
-                        "caConc": f"{max(1e-11,v):g}",
-                        caConcName: f"{max(1e-11,v):g}",
-                        "vShift": vShift,
-                        "temperature": self._getTemperature(),
-                    }
-                    # logger_.debug(f"{'A' * 30} {req_vars}")
-                else:
-                    req_vars = {
-                        "v": "%sV" % v,
-                        "vShift": vShift,
-                        "temperature": self._getTemperature(),
-                    }
-                req_vars.update(self._variables)
-                vals = pynml.evaluate_component(ct, req_variables=req_vars)
-                v = vals.get("x", vals.get("t", vals.get("r", None)))
-                if v is not None:
-                    rate.append(v)
-            return np.array(rate)
+            logger_.info(f"Using {ct.name} to evaluate rate")
+            rate = self.rateFnFromFormula(
+                ratefn, ct, vtab, vshift=vShift, param_tabs=param_tabs
+            )
+            return rate
 
-        print("[WARN ] Could not determine rate: %s %s %s" % (ratefn.type, vmin, vmax))
-        return np.array([])
+        print(
+            "[WARN ] Could not determine rate: %s %s %s"
+            % (ratefn.type, vmin, vmax)
+        )
+        return np.empty(0)
 
     def importChannelsToCell(self, nmlcell, moosecell, membrane_properties):
         sg_to_segments = self._cell_to_sg[nmlcell.id]
@@ -613,7 +748,10 @@ class NML2Reader(object):
             else:
                 for seg in segments:
                     self.copyChannel(
-                        chdens, self.nml_segs_to_moose[seg.id], condDensity, erev
+                        chdens,
+                        self.nml_segs_to_moose[seg.id],
+                        condDensity,
+                        erev,
                     )
             """moose.le(self.nml_to_moose[seg])
             moose.showfield(self.nml_to_moose[seg], field="*", showtype=True)"""
@@ -633,25 +771,17 @@ class NML2Reader(object):
                     break
         if not proto_chan:
             raise Exception(
-                "No prototype channel for %s referred to by %s"
-                % (chdens.ion_channel, chdens.id)
+                f"No prototype channel for {chdens.ion_channel}"
+                f"referred to by {chdens.id}"
             )
 
         if self.verbose:
             logger_.info(
-                "Copying the %s to %s, %s; erev=%s"
-                % (chdens.id, comp, condDensity, erev)
+                f"Copying {chdens.id} to {comp}, {condDensity}; erev={erev}"
             )
         orig = chdens.id
         chid = moose.copy(proto_chan, comp, chdens.id)
         chan = moose.element(chid)
-        els = list(self.paths_to_chan_elements.keys())
-        for p in els:
-            pp = p.replace("%s/" % chdens.ion_channel, "%s/" % orig)
-            self.paths_to_chan_elements[pp] = self.paths_to_chan_elements[p].replace(
-                "%s/" % chdens.ion_channel, "%s/" % orig
-            )
-        # logger_.info(self.paths_to_chan_elements)
         chan.Gbar = sarea(comp) * condDensity
         chan.Ek = erev
         moose.connect(chan, "channel", comp, "channel")
@@ -665,127 +795,180 @@ class NML2Reader(object):
             or rate.type == "HHSigmoidVariable"
         )
 
+    def _computeQ10Scale(self, ngate):
+        """Compute Q10 scale factor for NeuroML2 gate `ngate`.
+
+        Parameters
+        ----------
+        ngate : NeuroML2 element
+            Gate element in NeuroML2
+
+        """
+        q10_scale = 1.0
+        if ngate.q10_settings:
+            if ngate.q10_settings.type == "q10Fixed":
+                q10_scale = float(ngate.q10_settings.fixed_q10)
+            elif ngate.q10_settings.type == "q10ExpTemp":
+                exp_temp = SI(ngate.q10_settings.experimental_temp)
+                dtemp = self._getTemperature() - exp_temp
+                q10_scale = math.pow(
+                    float(ngate.q10_settings.q10_factor), dtemp / 10
+                )
+            else:
+                raise Exception(
+                    f"Unknown Q10 scaling type {ngate.q10_settings.type} "
+                    f": {ngate.q10_settings}"
+                )
+        return q10_scale
+
+    def updateHHGate(self, ngate, mgate, mchan, vmin, vmax, vdivs):
+        """Update moose `HHGate` mgate from NeuroML gate description
+        element `ngate`.
+
+        Some neuroml descriptions work in two stages. Traditional
+        steady state (minf/hinf) and time course (taum, tauh) are
+        computed using a standard formula first, and then these are
+        tweaked based on custom rules. This function updates a moose
+        HHGate's tables by computing these as required.
+
+        Parameters
+        ----------
+        ngate : neuroml element
+            NeuroML gate description to be implemented
+        mgate : HHGate
+            Moose HHGate object to be updated
+        mchan : HHChannel
+            Moose HHCHannel object whose part the `mgate` is
+        vmin : str
+            minimum voltage (or concentration) for gate interpolation tables
+        vmax : str
+            Maximum voltage (or concentration) for gate interpolation
+            tables
+        vdivs : str
+            Number of divisions in gate interpolation tables
+
+        """
+        # Set the moose gate powers from nml gate instance count
+        if mgate.name.endswith("X"):
+            mchan.Xpower = ngate.instances
+        elif mgate.name.endswith("Y"):
+            mchan.Ypower = ngate.instances
+        elif mgate.name.endswith("Z"):
+            mchan.Zpower = ngate.instances
+        mgate.min = vmin
+        mgate.max = vmax
+        mgate.divs = vdivs
+        q10_scale = self._computeQ10Scale(ngate)
+        alpha, beta, tau, inf = (None, None, None, None)
+        # First try computing alpha and beta from fwd and rev rate
+        # specs. Set the gate tables using alpha and beta by default.
+        fwd = ngate.forward_rate
+        rev = ngate.reverse_rate
+        param_tabs = None
+        if (fwd is not None) and (rev is not None):
+            alpha = self.calculateRateFn(
+                fwd, vmin=vmin, vmax=vmax, tablen=vdivs
+            )
+            beta = self.calculateRateFn(rev, vmin=vmin, vmax=vmax, tablen=vdivs)
+            vtab = np.linspace(vmin, vmax, vdivs)
+            param_tabs = {"alpha": (vtab, alpha), "beta": (vtab, beta)}
+            mgate.tableA = q10_scale * (alpha)
+            mgate.tableB = q10_scale * (alpha + beta)
+        # A `timeCourse` element indicates tau is not #
+        # straightforward 1/(alpha+beta) but tweaked from alpha
+        # and beta computed above
+        if getattr(ngate, "time_course", None) is not None:
+            tau = self.calculateRateFn(
+                ngate.time_course,
+                vmin=vmin,
+                vmax=vmax,
+                tablen=vdivs,
+                param_tabs=param_tabs,
+            )
+        elif (alpha is not None) and (beta is not None):
+            tau = 1.0 / (alpha + beta)
+        # A `steadyState` element indicates inf is not
+        # straightforward, but tweaked from alpha and beta computed
+        # above
+        if getattr(ngate, "steady_state", None) is not None:
+            inf = self.calculateRateFn(
+                ngate.steady_state,
+                vmin=vmin,
+                vmax=vmax,
+                tablen=vdivs,
+                param_tabs=param_tabs,
+            )
+        elif (alpha is not None) and (beta is not None):
+            inf = alpha / (alpha + beta)
+        # Update the gate tables only if tau or inf were tweaked
+        if (tau is not None) and (inf is not None):
+            mgate.tableA = q10_scale * inf / tau
+            mgate.tableB = q10_scale * 1.0 / tau
+        return mgate
+
     def createHHChannel(self, chan, vmin=-150e-3, vmax=100e-3, vdivs=5000):
-        mchan = moose.HHChannel("%s/%s" % (self.lib.path, chan.id))
-        mgates = [moose.element(x) for x in [mchan.gateX, mchan.gateY, mchan.gateZ]]
-        assert len(chan.gate_hh_rates) <= 3, "We handle only up to 3 gates in HHCHannel"
+        mchan = moose.HHChannel(f"{self.lib.path}/{chan.id}")
+        mgates = [
+            moose.element(x) for x in [mchan.gateX, mchan.gateY, mchan.gateZ]
+        ]
+        assert (
+            len(chan.gate_hh_rates) <= 3
+        ), "HHChannel allows only up to 3 gates"
 
         if self.verbose:
             logger_.info(
-                "== Creating channel: %s (%s) -> %s (%s)"
-                % (chan.id, chan.gate_hh_rates, mchan, mgates)
+                "== Creating channel: "
+                f"{chan.id} ({chan.gates}, {chan.gate_hh_rates})"
+                f"-> {mchan} ({mgates})"
             )
 
-        all_gates = chan.gates + chan.gate_hh_rates
-
         # Sort all_gates such that they come in x, y, z order.
-        all_gates = _gates_sorted(all_gates)
+        all_gates = _gates_sorted(chan.gates + chan.gate_hh_rates)
         for ngate, mgate in zip(all_gates, mgates):
             if ngate is None:
                 continue
-            if mgate.name.endswith("X"):
-                mchan.Xpower = ngate.instances
-            elif mgate.name.endswith("Y"):
-                mchan.Ypower = ngate.instances
-            elif mgate.name.endswith("Z"):
-                mchan.Zpower = ngate.instances
-            mgate.min = vmin
-            mgate.max = vmax
-            mgate.divs = vdivs
-
-            # I saw only examples of GateHHRates in
-            # HH-channels, the meaning of forwardRate and
-            # reverseRate and steadyState are not clear in the
-            # classes GateHHRatesInf, GateHHRatesTau and in
-            # GateHHTauInf the meaning of timeCourse and
-            # steady state is not obvious. Is the last one
-            # refering to tau_inf and m_inf??
-            fwd = ngate.forward_rate
-            rev = ngate.reverse_rate
-            self.paths_to_chan_elements["%s/%s" % (chan.id, ngate.id)] = "%s/%s" % (
-                chan.id,
-                mgate.name,
+            mgate = self.updateHHGate(
+                ngate=ngate,
+                mgate=mgate,
+                mchan=mchan,
+                vmin=vmin,
+                vmax=vmax,
+                vdivs=vdivs,
             )
-            q10_scale = 1
-            if ngate.q10_settings:
-                if ngate.q10_settings.type == "q10Fixed":
-                    q10_scale = float(ngate.q10_settings.fixed_q10)
-                elif ngate.q10_settings.type == "q10ExpTemp":
-                    q10_scale = math.pow(
-                        float(ngate.q10_settings.q10_factor),
-                        (
-                            self._getTemperature()
-                            - SI(ngate.q10_settings.experimental_temp)
-                        )
-                        / 10,
-                    )
-                else:
-                    raise Exception(
-                        "Unknown Q10 scaling type %s: %s"
-                        % (ngate.q10_settings.type, ngate.q10_settings)
-                    )
-
-            logger_.debug(
-                "+ Gate: %s; %s; %s; %s; %s; scale=%s"
-                % (ngate.id, mgate.path, mchan.Xpower, fwd, rev, q10_scale)
-            )
-
-            if (fwd is not None) and (rev is not None):
-                alpha = self.calculateRateFn(fwd, vmin, vmax, vdivs)
-                beta = self.calculateRateFn(rev, vmin, vmax, vdivs)
-
-                mgate.tableA = q10_scale * (alpha)
-                mgate.tableB = q10_scale * (alpha + beta)
-
-            # Assuming the meaning of the elements in GateHHTauInf ...
-            if (
-                hasattr(ngate, "time_course")
-                and hasattr(ngate, "steady_state")
-                and (ngate.time_course is not None)
-                and (ngate.steady_state is not None)
-            ):
-                tau = ngate.time_course
-                inf = ngate.steady_state
-                tau = self.calculateRateFn(tau, vmin, vmax, vdivs)
-                inf = self.calculateRateFn(inf, vmin, vmax, vdivs)
-                mgate.tableA = q10_scale * (inf / tau)
-                mgate.tableB = q10_scale * (1 / tau)
-
-            if (
-                hasattr(ngate, "steady_state")
-                and (ngate.time_course is None)
-                and (ngate.steady_state is not None)
-            ):
-                inf = ngate.steady_state
-                tau = 1 / (alpha + beta)
-                if inf is not None:
-                    inf = self.calculateRateFn(inf, vmin, vmax, vdivs)
-                    if len(inf) > 0:
-                        mgate.tableA = q10_scale * (inf / tau)
-                        mgate.tableB = q10_scale * (1 / tau)
-
-        logger_.info("%s: Created %s for %s" % (self.filename, mchan.path, chan.id))
+            logger_.debug(f"Updated HHGate {mgate.path}")
+        logger_.info(
+            f"{self.filename}: Created moose HHChannel {mchan.path} for neuroml {chan.id}"
+        )
         return mchan
 
     def createPassiveChannel(self, chan):
-        epath = "%s/%s" % (self.lib.path, chan.id)
+        epath = f"{self.lib.path}/{chan.id}"
         if moose.exists(epath):
             mchan = moose.element(epath)
         else:
             mchan = moose.Leakage(epath)
-        logger_.info("%s: Created %s for %s" % (self.filename, mchan.path, chan.id))
+        logger_.info(
+            f"{self.filename}: created {mchan.path} for {chan.id}"
+        )
         return mchan
 
     def importInputs(self, doc):
-        epath = "%s/inputs" % (self.lib.path)
-        if moose.exists(epath):
-            minputs = moose.element(epath)
-        else:
-            minputs = moose.Neutral(epath)
+        """Create inputs to the model.
 
+        Create PulseGen objects to deliver current injection. This is
+        for convenience only, and may be overridden in future for more
+        suitable experimental instrumentation/protocol description specs.
+
+        Parameters
+        ----------
+        doc : NeuroMLDocument
+            Document object read from NeuroML file
+
+        """
+        minputs = moose.Neutral(f"{self.lib.path}/inputs")
         for pg_nml in doc.pulse_generators:
-            epath = "%s/%s" % (minputs.path, pg_nml.id)
-            pg = moose.element(epath) if moose.exists(epath) else moose.PulseGen(epath)
+            epath = f"{minputs.path}/{pg_nml.id}"
+            pg = moose.PulseGen(epath)
             pg.firstDelay = SI(pg_nml.delay)
             pg.firstWidth = SI(pg_nml.duration)
             pg.firstLevel = SI(pg_nml.amplitude)
@@ -793,12 +976,10 @@ class NML2Reader(object):
             logger_.debug(f'{"$" * 10} Created input {epath}')
 
     def importIonChannels(self, doc, vmin=-150e-3, vmax=100e-3, vdivs=5000):
-        logger_.info("%s: Importing the ion channels" % self.filename)
+        logger_.info(f"{self.filename}: Importing the ion channels")
 
         for chan in doc.ion_channel + doc.ion_channel_hhs:
-            if chan.type == "ionChannelHH":
-                mchan = self.createHHChannel(chan)
-            elif self.isPassiveChan(chan):
+            if self.isPassiveChan(chan):
                 mchan = self.createPassiveChannel(chan)
             else:
                 mchan = self.createHHChannel(chan)
@@ -807,9 +988,8 @@ class NML2Reader(object):
             self.nml_chans_to_moose[chan.id] = mchan
             self.proto_chans[chan.id] = mchan
             logger_.info(
-                self.filename
-                + ": Created ion channel %s for %s %s"
-                % (mchan.path, chan.type, chan.id)
+                f"{self.filename}: Created ion channel {mchan.path} "
+                f"for {chan.type} {chan.id}"
             )
 
     def importConcentrationModels(self, doc):
@@ -823,7 +1003,7 @@ class NML2Reader(object):
         else:
             name = concModel.id
 
-        ca = moose.CaConc("%s/%s" % (self.lib.path, name))
+        ca = moose.CaConc(f"{self.lib.path}/{name}")
         ca.CaBasal = SI(concModel.resting_conc)
         ca.tau = SI(concModel.decay_constant)
         ca.thick = SI(concModel.shell_thickness)
@@ -834,5 +1014,5 @@ class NML2Reader(object):
         self.nml_conc_to_moose[concModel.id] = ca
         self.moose_to_nml[ca] = concModel
         logger_.debug(
-            "Created moose element: %s for nml conc %s" % (ca.path, concModel.id)
+            f"Created moose element {ca.path} for nml {concModel.id}"
         )
