@@ -173,7 +173,7 @@ def _findCaConcVariableName():
     caConcs = moose.wildcardFind("/library/##[TYPE=CaConc]")
     if len(caConcs) >= 1:
         return caConcs[0].name
-    
+
 
 def sarea(comp):
     """Return the surface area (2 * pi * r * L) of compartment from
@@ -613,7 +613,6 @@ class NML2Reader(object):
         """
         pool_id = moose.copy(proto_pool, comp)
         pool = moose.element(pool_id)
-        breakpoint()
         pool.diameter = comp.diameter
         pool.length = comp.length
         # for cylindrical compartments (default) moose computes volume
@@ -624,13 +623,13 @@ class NML2Reader(object):
                 4
                 * np.pi
                 * (
-                    (0.5 * comp.diameter)**3
+                    (0.5 * comp.diameter) ** 3
                     - (0.5 * comp.diameter - pool.thick) ** 3
                 )
                 / 3
             )
             pool.B = 5.2e-6 / vol
-            
+
         return pool
 
     def importAxialResistance(self, nmlcell, intracellularProperties):
@@ -700,9 +699,9 @@ class NML2Reader(object):
         vshift: str
             Voltage shift to be applied (value with unit)
         """
-        assert (vtab is not None) or (ctab is not None), (
-            "At least one of voltage and concentration arrays must be specified"
-        )
+        assert (vtab is not None) or (
+            ctab is not None
+        ), "At least one of voltage and concentration arrays must be specified"
         rate = []
         req_vars = {
             "vShift": Q_(vshift),
@@ -710,21 +709,25 @@ class NML2Reader(object):
         }
         req_vars.update(self._variables)  # what's the use?
         if (vtab is None) or (len(vtab) == 0):
-            req_vars["caConc"] = Q_(ctab, "M")
+            req_vars["caConc"] = Q_(ctab, "mole / meter ** 3")
         elif (ctab is None) or (len(ctab) == 0):
             req_vars["v"] = Q_(vtab, "V")
         else:
             # Get pair-wise coordinates for 2D table
             vv, cc = np.meshgrid(vtab, ctab)
             req_vars["v"] = Q_(vv.flatten(), "V")
-            req_vars["caConc"] = Q_(cc.flatten(), "M")
+            req_vars["caConc"] = Q_(cc.flatten(), "mole / meter ** 3")
 
         vals = array_eval_component(ctype, req_vars=req_vars, params=param_tabs)
         rate = vals.get("x", vals.get("t", vals.get("r", None)))
         if rate is None:
             raise ValueError("Evaluation of expression returned None")
         if (vtab is not None) and (ctab is not None):
-            return rate.reshape(len(vtab), len(ctab))
+            # Invert meshgrid which creates mxn array from n-vec and
+            # m-vec. MOOSE table assumes nxm lookup table where n is
+            # first index variable array is of length n and the second
+            # index variable array if of length m
+            return rate.reshape(len(ctab), len(vtab)).T
         return rate
 
     def calculateRateFn(
@@ -804,14 +807,9 @@ class NML2Reader(object):
 
             if self.verbose:
                 logger_.info(
-                    "Setting density of channel %s in %s to %s; erev=%s (passive: %s)"
-                    % (
-                        chdens.id,
-                        segments,
-                        condDensity,
-                        erev,
-                        self.isPassiveChan(ionChannel),
-                    )
+                    f"Setting density of channel {chdens.id} in {segments}"
+                    f"to {condDensity}; erev={erev} "
+                    f"(passive: {self.isPassiveChan(ionChannel)})"
                 )
 
             if self.isPassiveChan(ionChannel):
@@ -965,7 +963,8 @@ class NML2Reader(object):
         return False
 
     def isGateCaDependent(self, ngate):
-        """Returns True if `ngate` has dynamics that depends on Ca2+ concentration.
+        """Returns True if `ngate` has dynamics that depends on Ca2+
+        concentration.
 
         Parameters
         ----------
@@ -987,7 +986,7 @@ class NML2Reader(object):
         return False
 
     def isGateVoltageDependent(self, ngate):
-        """Returns True if `ngate` has dynamics that depends on Ca2+ concentration.
+        """Returns True if `ngate` has dynamics that depends voltage.
 
         Parameters
         ----------
@@ -1009,7 +1008,8 @@ class NML2Reader(object):
         return False
 
     def isGateVoltageCaDependent(self, ngate):
-        """Returns True if `ngate` has dynamics that depends on both voltage and Ca2+ concentration.
+        """Returns True if `ngate` has dynamics that depends on both voltage
+        and Ca2+ concentration.
 
         Parameters
         ----------
@@ -1040,7 +1040,10 @@ class NML2Reader(object):
         sg_to_segments = self._cell_to_sg[nmlcell.id]
         caName = _findCaConcVariableName()
         if caName is None:
-            print('[INFO ] No CaConc object found. Skip setting up [Ca2+] dependence.')
+            print(
+                "[INFO ] No CaConc object found. Skip setting up [Ca2+]"
+                " dependence."
+            )
             return
         for chdens in (
             membrane_properties.channel_densities
@@ -1308,7 +1311,6 @@ class NML2Reader(object):
             alpha = self.calculateRateFn(fwd, vtab, ctab=ctab)
             beta = self.calculateRateFn(rev, vtab, ctab=ctab)
             param_tabs = {"alpha": Q_(alpha, "1/s"), "beta": Q_(beta, "1/s")}
-
         # Beware of a peculiar cascade of evaluation below: In some
         # cases rate parameters alpha and beta are computed with
         # standard HH-type formula, then tweaked based on the
@@ -1396,18 +1398,19 @@ class NML2Reader(object):
             )
             logger_.debug(f"Updated HHGate {mgate.path}")
         logger_.info(
-            f"{self.filename}: Created moose HHChannel {mchan.path} for neuroml {chan.id}"
+            f"{self.filename}: Created moose HHChannel {mchan.path}"
+            f" for neuroml {chan.id}"
         )
         return mchan
 
     def createHHChannel2D(
         self,
         chan,
-        vmin=-150e-3,
-        vmax=100e-3,
+        vmin=-150e-3,  # -150 mV
+        vmax=100e-3,  # 100 mV
         vdivs=3000,
-        cmin=1e-6,
-        cmax=1.0,
+        cmin=1e-6,  # 1 nM
+        cmax=10.0,  # 10 mM
         cdivs=300,
     ):
         """Create and return a Hodgkin-Huxley-type ion channel whose
@@ -1420,15 +1423,15 @@ class NML2Reader(object):
         ----------
         chan : nml.IonChannel
             NeuroML channel description
-        vmin : float
+        vmin : float (default: -150 mV)
             Minimum voltage
-        vmax : float
+        vmax : float (default: 100 mV)
             Maximum voltage
         vdivs : int
             Number of divisions in the interpolation table for voltage
-        cmin : float
+        cmin : float (default: 1 nM)
             Minimum concentration
-        cmax : float
+        cmax : float (default: 10 mM)
             Maximum concentration
         cdivs : int
             Number of divisions in the interpolation table for concentration
@@ -1454,7 +1457,8 @@ class NML2Reader(object):
         for ngate, mgate in zip(all_gates, mgates):
             if ngate is None:
                 continue
-            # We need to update Xindex for gateX, Yindex for gateY and Zindex for gateZ
+            # We need to update Xindex for gateX, Yindex for gateY and
+            # Zindex for gateZ
             indexattr = f"{mgate.name[-1]}index"
             vdep = self.isGateCaDependent(ngate)
             cdep = self.isGateVoltageDependent(ngate)
@@ -1490,7 +1494,8 @@ class NML2Reader(object):
                 mgate.ydivsB = 0
 
         logger_.info(
-            f"{self.filename}: Created moose HHChannel {mchan.path} for neuroml {chan.id}"
+            f"{self.filename}: Created moose HHChannel {mchan.path}"
+            f" for neuroml {chan.id}"
         )
         return mchan
 
@@ -1549,10 +1554,7 @@ class NML2Reader(object):
             self.createDecayingPoolConcentrationModel(concModel)
 
     def createDecayingPoolConcentrationModel(self, concModel):
-        """Create prototype for concentration model.
-
-
-        """
+        """Create prototype for concentration model."""
         if hasattr(concModel, "name") and concModel.name is not None:
             name = concModel.name
         else:
@@ -1581,7 +1583,7 @@ class NML2Reader(object):
 
         # NeuroML puts the 1/(2 * F * d) factor as the attribute `rho`,
         # which may include some additional scaling.
-        
+
         # In MOOSE implementation, setting B explicitly is
         # discouraged, but kept for backwards compatibility with
         # GENESIS. It is calculated dynamically using Faraday's
@@ -1592,8 +1594,8 @@ class NML2Reader(object):
         # The only problem is the calculation assumes cylindrical
         # shell, not accounting for spherical compartments.
         # - subha
-        
-        # if concModel.rho is not None:            
+        #
+        # if concModel.rho is not None:
         #     # B = 5.2e-6/(Ad) where A is the area of the shell and d
         #     # is thickness - must divide by shell volume when copying
         #     ca.B = 5.2e-6
@@ -1603,4 +1605,5 @@ class NML2Reader(object):
         self.proto_pools[concModel.id] = ca
         self.nml_conc_to_moose[concModel.id] = ca
         self.moose_to_nml[ca] = concModel
-        logger_.debug(f"Created moose element {ca.path} for nml {concModel.id}")
+        logger_.debug(f"Created moose element {ca.path} for"
+                      f" nml {concModel.id}")
