@@ -134,9 +134,9 @@ def _gates_sorted(all_gates):
 
     Notes
     -----
-    If the id of gates are subset of 'x', 'y' or 'z' then sort them so they load in
-    X, Y or Z gate respectively. Otherwise do not touch them i.e. first gate
-    will be loaded into X, second into Y and so on.
+    If the id of gates are subset of 'x', 'y' or 'z' then sort them so they
+    load in X, Y or Z gate respectively. Otherwise do not touch them i.e.
+    first gate will be loaded into X, second into Y and so on.
     """
     allMooseGates = ["x", "y", "z"]
     allGatesDict = {g.id: g for g in all_gates}
@@ -192,8 +192,9 @@ def sarea(comp):
 
 
 def xarea(compt):
-    """xarea
-    Return the cross sectional area (pi * r^2) from the diameter of the compartment.
+    """
+    Return the cross sectional area (pi * r^2) from the diameter of the
+    compartment.
 
     Note:
     ----
@@ -286,7 +287,48 @@ class NML2Reader(object):
         self.seg_id_to_comp_name = {}
         self.network = None
 
-    def read(self, filename, symmetric=True):
+    def read(
+        self,
+        filename,
+        symmetric=True,
+        vmin=-150e-3,
+        vmax=100e-3,
+        vdivs=3000,
+        cmin=0.0,
+        cmax=10.0,
+        cdivs=5000,
+    ):
+        """Read a NeuroML2 file and create the corresponding model.
+
+        Parameters
+        ----------
+        filename : str
+            Path of NeuroML2 file
+        symmetric : bool
+            If `True` use symmetric compartments (axial resistance is
+            split with neighboring compartments on both sides)
+            otherwise asymmetric compartment (axial resistance applied
+            with one neighboring compartment only)
+        vmin : float
+            Minimum of membrane voltage range. This is used for
+            creating interpolation tables for channel dynamics.
+        vmax : float
+            Maximum of membrane voltage range. This is used for
+            creating interpolation tables for channel dynamics.
+        vdivs : int
+            Number of entries in voltage range for interpolation. This is
+            used for creating interpolation tables for channel dynamics.
+        cmin : float
+            Minimum (Ca2+) concentration
+        cmax : float
+            Maximum (Ca2+) concentration
+        cdivs : int
+            Number of entries in concentration range for interpolation. This is
+            used for creating interpolation tables for [Ca2+]-dependent channel
+            dynamics.
+
+
+        """
         filename = os.path.realpath(filename)
         self.doc = nml.loaders.read_neuroml2_file(
             filename, include_includes=True, verbose=self.verbose
@@ -303,7 +345,7 @@ class NML2Reader(object):
             moose.celsius = self._getTemperature()
 
         self.importConcentrationModels(self.doc)
-        self.importIonChannels(self.doc)
+        self.importIonChannels(self.doc, vmin=vmin)
         self.importInputs(self.doc)
 
         for cell in self.doc.cells:
@@ -345,7 +387,8 @@ class NML2Reader(object):
             segId
         ]
         return moose.element(
-            f"{self.model.path}/{self.network.id}/{pop_id}/{cellIndex}/{comp_name}"
+            f"{self.model.path}/{self.network.id}/"
+            f"{pop_id}/{cellIndex}/{comp_name}"
         )
 
     def createPopulations(self):
@@ -428,7 +471,17 @@ class NML2Reader(object):
                 )
 
     def createCellPrototype(self, cell, symmetric=True):
-        """To be completed - create the morphology, channels in prototype"""
+        """Create the morphology, channels in prototype.
+
+        Parameters
+        ----------
+        cell: NeuroML element
+            Cell element in NeuroML2
+        symmetric: bool
+            If `True`, use symmetric compartment; use asymmetric compartment
+            otherwise.
+
+        """
         ep = f"{self.lib.path}/{cell.id}"
         nrn = moose.Neuron(ep)
         self.proto_cells[cell.id] = nrn
@@ -442,6 +495,21 @@ class NML2Reader(object):
         """Create the MOOSE compartmental morphology in `moosecell` using the
         segments in NeuroML2 cell `nmlcell`. Create symmetric
         compartments if `symmetric` is True.
+
+        Parameters
+        ----------
+        nmlcell: NeuroML element
+            Cell element in NeuroML2
+        moosecell: moose.Neutral or moose.Neuron
+            MOOSE container object for the cell.
+        symmetric: bool
+            If `True`, use symmetric compartment; use asymmetric compartment
+            otherwise.
+
+        NOTE
+        ----
+        moose compartments are cylindrical (both ends of a compartment have
+        same diameter). So taking the average of the two ends in case of truncated-cone.
 
         """
         morphology = nmlcell.morphology
@@ -718,13 +786,15 @@ class NML2Reader(object):
             req_vars["v"] = Q_(vv.flatten(), "V")
             req_vars["caConc"] = Q_(cc.flatten(), "mole / meter ** 3")
 
-        vals = array_eval_component(ctype, req_vars=req_vars, params=param_tabs)
+        vals = array_eval_component(
+            ctype, req_vars=req_vars, params=param_tabs
+        )
         rate = vals.get("x", vals.get("t", vals.get("r", None)))
         if rate is None:
             raise ValueError("Evaluation of expression returned None")
         if (vtab is not None) and (ctab is not None):
-            # Invert meshgrid which creates mxn array from n-vec and
-            # m-vec. MOOSE table assumes nxm lookup table where n is
+            # Transpose meshgrid which creates m x n array from n-vec and
+            # m-vec. MOOSE table assumes n x m lookup table where n is
             # first index variable array is of length n and the second
             # index variable array if of length m
             return rate.reshape(len(ctab), len(vtab)).T
@@ -751,9 +821,9 @@ class NML2Reader(object):
             function is computed
         ctab : Sequence (default: None)
             Sequence of values for a parameter like concentration.
-            When  both `vtab` and `ctab` are specified, the rates are calculated
-            for a 2D interpolation table of len(vtab)xlen(ctab), which is
-            applicable for HHGate2D.
+            When  both `vtab` and `ctab` are specified, the rates are
+            calculated for a 2D interpolation table of len(vtab)xlen(ctab),
+            which is applicable for HHGate2D.
         param_tabs : dict {variable_name: value_array}
             Precomputed tables for gate parameters. The keys are used
             as variable names when evaluating neuroml dynamics expression.
@@ -1409,9 +1479,9 @@ class NML2Reader(object):
         vmin=-150e-3,  # -150 mV
         vmax=100e-3,  # 100 mV
         vdivs=3000,
-        cmin=1e-6,  # 1 nM
-        cmax=10.0,  # 10 mM
-        cdivs=300,
+        cmin=0,
+        cmax=10.0,
+        cdivs=5000,
     ):
         """Create and return a Hodgkin-Huxley-type ion channel whose
         dynamics depends on 2-parameters.
@@ -1429,9 +1499,9 @@ class NML2Reader(object):
             Maximum voltage
         vdivs : int
             Number of divisions in the interpolation table for voltage
-        cmin : float (default: 1 nM)
-            Minimum concentration
-        cmax : float (default: 10 mM)
+        cmin : float (default: 0)
+            Minimum concentration.
+        cmax : float (default: 10.0 = 10 mM)
             Maximum concentration
         cdivs : int
             Number of divisions in the interpolation table for concentration
@@ -1530,16 +1600,35 @@ class NML2Reader(object):
             pg.firstLevel = SI(pg_nml.amplitude)
             pg.secondDelay = 1e9
 
-    def importIonChannels(self, doc, vmin=-150e-3, vmax=100e-3, vdivs=5000):
+    def importIonChannels(
+        self,
+        doc,
+        vmin=-150e-3,
+        vmax=100e-3,
+        vdivs=3000,
+        cmin=0,
+        cmax=10.0,
+        cdivs=5000,
+    ):
         logger_.info(f"{self.filename}: Importing the ion channels")
 
         for chan in doc.ion_channel + doc.ion_channel_hhs:
             if self.isPassiveChan(chan):
                 mchan = self.createPassiveChannel(chan)
             elif self.isChannel2D(chan):
-                mchan = self.createHHChannel2D(chan)
+                mchan = self.createHHChannel2D(
+                    chan,
+                    vmin=vmin,
+                    vmax=vmax,
+                    vdivs=vdivs,
+                    cmin=cmin,
+                    cmax=cmax,
+                    cdivs=cdivs,
+                )
             else:
-                mchan = self.createHHChannel(chan)
+                mchan = self.createHHChannel(
+                    chan, vmin=vmin, vmax=vmin, vdivs=vdivs
+                )
 
             self.id_to_ionChannel[chan.id] = chan
             self.nml_chans_to_moose[chan.id] = mchan
@@ -1605,5 +1694,6 @@ class NML2Reader(object):
         self.proto_pools[concModel.id] = ca
         self.nml_conc_to_moose[concModel.id] = ca
         self.moose_to_nml[ca] = concModel
-        logger_.debug(f"Created moose element {ca.path} for"
-                      f" nml {concModel.id}")
+        logger_.debug(
+            f"Created moose element {ca.path} for" f" nml {concModel.id}"
+        )
