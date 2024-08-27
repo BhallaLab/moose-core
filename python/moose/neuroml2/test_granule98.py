@@ -77,7 +77,7 @@ if __name__ == "__main__":
     soma = reader.getComp(pop_id, cellIndex=0, segId=0)
     data = moose.Neutral("/data")
     pg = reader.getInput("Gran_10pA")
-    pg.firstWidth = 1e9
+    pg.firstWidth = 500e-3
     inj = moose.Table(f"{data.path}/pulse")
     moose.connect(inj, "requestOut", pg, "getOutputValue")
     vm = moose.Table(f"{data.path}/Vm")
@@ -89,11 +89,13 @@ if __name__ == "__main__":
         moose.connect(catab, "requestOut", capool, "getCa")
         print("Recording", capool.path, ".Ca in", catab.path)
 
+    chanmap = {}
     gktabs = []
     for el in moose.wildcardFind(
         f"{soma.path}/##[TYPE=HHChannel]"
     ) + moose.wildcardFind(f"{soma.path}/##[TYPE=HHChannel2D]"):
         chan = moose.element(el)
+        chanmap[chan.name.split('_')[1]] = chan  # for debugging
         tab = moose.Table(f"{data.path}/{chan.name}")
         moose.connect(tab, "requestOut", chan, "getGk")
         gktabs.append(tab)
@@ -106,8 +108,23 @@ if __name__ == "__main__":
         if moose.isinstance_(ch, moose.HHChannel):
             dump_gate_tables(ch, do_plot=do_plot)
 
+    kca = chanmap['KCa']
+    gate = moose.element(f'{kca.path}/gateX')
+    vtab = np.linspace(gate.xminA, gate.xmaxA, gate.xdivsA)
+    ctab = np.linspace(gate.yminA, gate.ymaxA, gate.ydivsA)
+    cplot = [gate.A[-0.65, cc] for cc in ctab]
+    vplot = [gate.A[vv, 7.55e-5] for vv in vtab]
+    fig, axes = plt.subplots(nrows=2)
+    axes[0].plot(ctab, cplot, 'x')
+    axes[0].set_xlabel('[Ca2+]')
+    axes[0].set_ylabel('A')
+    axes[1].plot(vtab, vplot, 'x')
+    axes[1].set_xlabel('V')
+    axes[1].set_ylabel('A')
+    plt.show()
     simtime = 700e-3
     moose.reinit()
+    # breakpoint()
     moose.start(simtime)
 
     t = np.arange(len(vm.vector)) * vm.dt

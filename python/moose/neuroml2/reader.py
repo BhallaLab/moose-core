@@ -1043,10 +1043,10 @@ class NML2Reader(object):
 
         """
         dynamics = [
-            ngate.forward_rate,
-            ngate.reverse_rate,
-            ngate.time_course,
-            ngate.steady_state,
+            getattr(ngate, 'forward_rate', None),
+            getattr(ngate, 'reverse_rate', None),
+            getattr(ngate, 'time_course', None),
+            getattr(ngate, 'steady_state', None)
         ]
         for dyn in dynamics:
             if dyn is not None:
@@ -1065,10 +1065,10 @@ class NML2Reader(object):
 
         """
         dynamics = [
-            ngate.forward_rate,
-            ngate.reverse_rate,
-            ngate.time_course,
-            ngate.steady_state,
+            getattr(ngate, 'forward_rate', None),
+            getattr(ngate, 'reverse_rate', None),
+            getattr(ngate, 'time_course', None),
+            getattr(ngate, 'steady_state', None)
         ]
         for dyn in dynamics:
             if dyn is not None:
@@ -1088,10 +1088,10 @@ class NML2Reader(object):
 
         """
         dynamics = [
-            ngate.forward_rate,
-            ngate.reverse_rate,
-            ngate.time_course,
-            ngate.steady_state,
+            getattr(ngate, 'forward_rate', None),
+            getattr(ngate, 'reverse_rate', None),
+            getattr(ngate, 'time_course', None),
+            getattr(ngate, 'steady_state', None)
         ]
         for dyn in dynamics:
             if dyn is not None:
