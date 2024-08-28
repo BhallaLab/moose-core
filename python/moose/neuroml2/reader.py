@@ -345,7 +345,15 @@ class NML2Reader(object):
             moose.celsius = self._getTemperature()
 
         self.importConcentrationModels(self.doc)
-        self.importIonChannels(self.doc, vmin=vmin)
+        self.importIonChannels(
+            self.doc,
+            vmin=vmin,
+            vmax=vmax,
+            vdivs=vdivs,
+            cmin=cmin,
+            cmax=cmax,
+            cdivs=cdivs,
+        )
         self.importInputs(self.doc)
 
         for cell in self.doc.cells:
@@ -1043,10 +1051,10 @@ class NML2Reader(object):
 
         """
         dynamics = [
-            getattr(ngate, 'forward_rate', None),
-            getattr(ngate, 'reverse_rate', None),
-            getattr(ngate, 'time_course', None),
-            getattr(ngate, 'steady_state', None)
+            getattr(ngate, "forward_rate", None),
+            getattr(ngate, "reverse_rate", None),
+            getattr(ngate, "time_course", None),
+            getattr(ngate, "steady_state", None),
         ]
         for dyn in dynamics:
             if dyn is not None:
@@ -1065,10 +1073,10 @@ class NML2Reader(object):
 
         """
         dynamics = [
-            getattr(ngate, 'forward_rate', None),
-            getattr(ngate, 'reverse_rate', None),
-            getattr(ngate, 'time_course', None),
-            getattr(ngate, 'steady_state', None)
+            getattr(ngate, "forward_rate", None),
+            getattr(ngate, "reverse_rate", None),
+            getattr(ngate, "time_course", None),
+            getattr(ngate, "steady_state", None),
         ]
         for dyn in dynamics:
             if dyn is not None:
@@ -1088,10 +1096,10 @@ class NML2Reader(object):
 
         """
         dynamics = [
-            getattr(ngate, 'forward_rate', None),
-            getattr(ngate, 'reverse_rate', None),
-            getattr(ngate, 'time_course', None),
-            getattr(ngate, 'steady_state', None)
+            getattr(ngate, "forward_rate", None),
+            getattr(ngate, "reverse_rate", None),
+            getattr(ngate, "time_course", None),
+            getattr(ngate, "steady_state", None),
         ]
         for dyn in dynamics:
             if dyn is not None:
@@ -1627,7 +1635,7 @@ class NML2Reader(object):
                 )
             else:
                 mchan = self.createHHChannel(
-                    chan, vmin=vmin, vmax=vmin, vdivs=vdivs
+                    chan, vmin=vmin, vmax=vmax, vdivs=vdivs
                 )
 
             self.id_to_ionChannel[chan.id] = chan

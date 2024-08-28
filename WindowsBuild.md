@@ -22,6 +22,9 @@ conda activate moose
 ```
 
 ## Requirements
+
+You need to use Windows cmd shell (not powershell) for the following:
+
 * Install either MS Visual Studio 2015 or newer or MS Visual Studio Build Tools.
   Add path to this folder in your PATH variable
 * Install git for Windows
@@ -41,6 +44,7 @@ conda install pkg-config
 ```
 
 Gotcha: if you are on a 64 bit machine, the machine type is `x64`. MSVC comes with cross compilation support for various machine-os combos (x86, x86_64). 
+
 * Clone `moose-core` source code using git
 * Build moose
 ```

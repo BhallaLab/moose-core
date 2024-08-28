@@ -268,7 +268,7 @@ void SocketStreamer::initUDSServer( void )
                );
         }
 
-        if(access(path, F_OK) != 0)
+        if(access(sockInfo_.filepath.c_str(), F_OK) != 0)
         {
             LOG( moose::warning, "No file " << sockInfo_.filepath << " exists." );
             isValid_ = false;
