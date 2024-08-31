@@ -9,8 +9,6 @@
  *        License:  MIT License
  */
 
-using namespace std;
-
 #include "utility.h"
 
 namespace moose {

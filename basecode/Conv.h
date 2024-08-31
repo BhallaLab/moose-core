@@ -566,7 +566,7 @@ template< class T > class Conv< vector< vector< T > > >
         {
             static vector< vector< T > > ret;
             ret.clear();
-            unsigned int numEntries = **buf; // first entry is vec size
+            unsigned int numEntries = (unsigned int)**buf; // first entry is vec size
             ret.resize( numEntries );
             (*buf)++;
             for ( unsigned int i = 0; i < numEntries; ++i ) {
@@ -641,7 +641,7 @@ template< class T > class Conv< vector< T > >
         static void val2buf( const vector< T >& val, double**buf )
         {
             double* temp = *buf;
-            *temp++ = val.size();
+            *temp++ = (double)val.size();
             for( unsigned int i = 0; i < val.size(); ++i ) {
                 Conv< T >::val2buf( val[i], &temp );
             }

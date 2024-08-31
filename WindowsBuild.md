@@ -43,7 +43,9 @@ conda install pkg-config
 "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 ```
 
-Gotcha: if you are on a 64 bit machine, the machine type is `x64`. MSVC comes with cross compilation support for various machine-os combos (x86, x86_64). 
+Gotcha: if you are on a 64 bit machine, the machine type is `x64`. MSVC comes with cross compilation support for various machine-os combos (x86, x86_64). You can initialize the architecture according to your specific case (see this [stackoverflow comment](https://stackoverflow.com/questions/78446613/whats-the-difference-in-visual-studio-between-amd64-x86-vs-x86-amd64)
+
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" {combo}
 
 * Clone `moose-core` source code using git
 * Build moose
@@ -55,7 +57,10 @@ ninja -v -C _build
 meson install -C _build
 ```
 
-This will create `moose` module inside `moose-core/_build_install` directory. To make moose importable from any terminal, add this directory to your `PYTHONPATH` environment variable. For standard installation you can simply run `pip install .` in the `moose-core` directory.
+This will create `moose` module inside `moose-core/_build_install` directory. To make moose importable from any terminal, add this directory to your `PYTHONPATH` environment variable. 
+
+
+For standard installation you can simply run `pip install .` in the `moose-core` directory.
 
 To build a wheel, you need `build` and `meson-python` modules:
 
@@ -69,3 +74,4 @@ In a terminal, `cd` to `moose-core` and run the following:
 ```
 python -m build
 ```
+

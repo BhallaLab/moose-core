@@ -18,9 +18,9 @@ builtins_src = ['Arith.cpp',
                 'Interpol2D.cpp',
                 'SpikeStats.cpp',
                 'MooseParser.cpp',
-                '../utility/cnpy.cpp',
-                '../external/fmt/src/format.cc',
-                '../external/fmt/src/os.cc',
+                # '../utility/cnpy.cpp',
+                # '../external/fmt/src/format.cc',
+                # '../external/fmt/src/os.cc',
                 'testBuiltins.cpp']
 
 if host_machine.system() != 'windows'

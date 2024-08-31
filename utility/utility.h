@@ -5,11 +5,12 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Wed Mar 23 10:25:58 2011 (+0530)
 // Version:
-// Last-Updated: Wed Jul 17 10:03:12 2024 (+0530)
+// Last-Updated: Sun Sep  1 00:03:10 2024 (+0530)
 //           By: Subhasis Ray
-//     Update #: 23
+//     Update #: 25
 
 #ifndef _UTILITY_H
+#define _UTILITY_H
 
 #include <memory>
 #include <vector>

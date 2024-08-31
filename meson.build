@@ -11,7 +11,8 @@
 # python -m build
 
 project('pymoose', 'c', 'cpp',
-	default_options: ['default_library=static', 'c_std=c11', 'cpp_std=c++14'])
+	# default_options: ['default_library=static', 'c_std=c11', 'cpp_std=c++14'])
+	default_options: ['c_std=c17', 'cpp_std=c++17'])
 
 pybind_dep = dependency('pybind11')
 gsl_dep = dependency('gsl', version: '>=1.16')
@@ -50,7 +51,9 @@ cc = meson.get_compiler('c')
 cpp = meson.get_compiler('cpp')
 # cy = meson.get_compiler('cython')
 
-link_args = ['-Wl,--allow-multiple-definition']
+is_msvc = cc.get_id() == 'msvc'
+link_args = []
+# link_args = ['-Wl,--allow-multiple-definition']
 # Check compiler is recent enough (see "Toolchain Roadmap" for details)
 if cc.get_id() == 'gcc'
   if not cc.version().version_compare('>=9.1')
@@ -60,14 +63,14 @@ elif cc.get_id() == 'clang' or cc.get_id() == 'clang-cl'
   if not cc.version().version_compare('>=12.0')
     error('pymoose requires clang >= 12.0')
   endif
-elif cc.get_id() == 'msvc'
+elif is_msvc
   if not cc.version().version_compare('>=19.20')
     error('pymoose requires at least vc142 (default with Visual Studio 2019) ' + \
           'when building with MSVC')
   endif
   # Several sub libs link against the same other sublib and MSVC
   # linker barfs at multiple defs of the same symbol
-  add_project_link_arguments('/FORCE:MULTIPLE', '/WHOLEARCHIVE', language: ['c', 'cpp'])
+  # add_project_link_arguments('/FORCE:MULTIPLE', '/WHOLEARCHIVE', language: ['c', 'cpp'])
   link_args = []
 endif
 
@@ -80,6 +83,13 @@ _global_c_args = cc.get_supported_arguments(
 )
 add_project_arguments(_global_c_args, language : 'c')
 
+# We need -lm for all C code (assuming it uses math functions, which is safe to
+# assume for SciPy). For C++ it isn't needed, because libstdc++/libc++ is
+# guaranteed to depend on it. For Fortran code, Meson already adds `-lm`.
+m_dep = cc.find_library('m', required : false)
+if m_dep.found()
+  add_project_link_arguments('-lm', language : 'c')
+endif
 
 if host_machine.system() == 'darwin'
   if cc.has_link_argument('-Wl,-ld_classic')
@@ -103,6 +113,9 @@ endif
 if is_windows
   # Deal with M_PI & friends; add `use_math_defines` to c_args or cpp_args
   add_global_arguments('-D_USE_MATH_DEFINES', language: ['c', 'cpp'])
+endif
+
+if is_msvc
   # On Windows some of the object files are too big
   add_global_arguments('/bigobj', language: ['c', 'cpp'])
   if conda_res.returncode() == 0
@@ -161,13 +174,19 @@ conf_data.set('PYTHON_VERSION', py.language_version())
 
 
 # End Credit: SciPy
-libsoda = static_library('lsoda', 'external/libsoda/LSODA.cpp',
-                          include_directories: 'external/libsoda',
-                          install: false)
-libsoda_dep = declare_dependency(include_directories: 'external/libsoda',
-                                 link_with: libsoda)
+# ============================================================
+# libsoda = static_library('lsoda', 'external/libsoda/LSODA.cpp',
+#                           include_directories: 'external/libsoda',
+#                           install: false)
+# libsoda_dep = declare_dependency(include_directories: 'external/libsoda',
+#                                  link_with: libsoda)
 
 
+subdir('external/libsoda')
+subdir('external/fmt')
+if is_msvc
+  subdir('external/getopt')
+endif
 subdir('basecode')
 subdir('biophysics')
 subdir('builtins')
@@ -191,6 +210,8 @@ subdir('utility')
 
 
 sublibs = [
+    lsoda_lib,
+    fmt_lib,
     basecode_lib,
     biophysics_lib,
     builtins_lib,
@@ -213,20 +234,24 @@ sublibs = [
     utility_lib,
 ]
 
+
+if is_msvc
+  sublibs += getopt_lib
+endif
 moose_dir = py.get_install_dir()
 
+include_dirs = ['external/libsoda']
 # Windows does not have getopt library and its dependencies. A port is
 # provided in "external/getopt" folder
-getopt_inc = []
 if is_windows
-  getopt_inc = ['external/getopt']
+  include_dirs += ['external/getopt']
 endif
 
 pymoose = py.extension_module('_moose', 'pybind11/pymoose.cpp',
                               link_whole: sublibs,
                               link_args: link_args,
-                              dependencies: [gsl_dep, mpi_dep, pybind_dep, libsoda_dep],
-                              include_directories: getopt_inc,
+                              dependencies: [gsl_dep, mpi_dep, pybind_dep], #, libsoda_dep],
+                              include_directories: include_dirs,
                               install: true, install_dir: moose_dir / 'moose')
 
 if is_windows

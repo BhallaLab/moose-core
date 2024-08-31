@@ -25,11 +25,4 @@ basecode_src = ['Element.cpp',
 	        'doubleEq.cpp',
 	        'testAsync.cpp']
 
-# On windows we provide getopt
-if is_windows
-  basecode_src += '../external/getopt/getopt.c'
-  basecode_lib = static_library('basecode', basecode_src,
-                                include_directories: '../external/getopt')
-else
   basecode_lib = static_library('basecode', basecode_src)
-endif

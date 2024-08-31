@@ -8,6 +8,7 @@ utility_src = ['strutil.cpp',
                'Annotator.cpp',
                'Vec.cpp',
                'utility.cpp',
+               'cnpy.cpp'
                ]
 
 utility_lib = static_library('utility', utility_src)

@@ -4,7 +4,7 @@
 pybind11_src = ['Finfo.cpp',
                 'helper.cpp',
                 'MooseVec.cpp',
-                'pymoose.cpp',
+                # 'pymoose.cpp',
                 'PyRun.cpp']
 
 python_res = run_command('python', '-c', 'from sysconfig import get_paths as gp; print(gp()["include"])')
