@@ -54,47 +54,47 @@ public:
     // Value field access function definitions
     /////////////////////////////////////////////////////////////
 
-    void vSetGbar( const Eref& e , double Gbar );
-    double vGetGbar( const Eref& e  ) const;
-    void vSetGk( const Eref& e , double Gk );
-    double vGetGk( const Eref& e  ) const;
-    void vSetEk( const Eref& e , double Ek );
-    double vGetEk( const Eref& e  ) const;
-    void vSetIk( const Eref& e, double Ik );
-    double vGetIk( const Eref& e  ) const;
-    void vSetXpower( const Eref& e , double Xpower );
-    void vSetYpower( const Eref& e , double Ypower );
-    void vSetZpower( const Eref& e , double Zpower );
-    void vSetInstant( const Eref& e , int instant );
-    int vGetInstant( const Eref& e  ) const;
-    void vSetX( const Eref& e , double X );
-    double vGetX( const Eref& e  ) const;
-    void vSetY( const Eref& e , double Y );
-    double vGetY( const Eref& e  ) const;
-    void vSetZ( const Eref& e , double Z );
-    double vGetZ( const Eref& e  ) const;
+    void vSetGbar( const Eref& e , double Gbar ) override;
+    double vGetGbar( const Eref& e  ) const override;
+    void vSetGk( const Eref& e , double Gk ) override;
+    double vGetGk( const Eref& e  ) const override;
+    void vSetEk( const Eref& e , double Ek ) override;
+    double vGetEk( const Eref& e  ) const override;
+    void vSetIk( const Eref& e, double Ik ) override;
+    double vGetIk( const Eref& e  ) const override;
+    void vSetXpower( const Eref& e , double Xpower ) override;
+    void vSetYpower( const Eref& e , double Ypower ) override;
+    void vSetZpower( const Eref& e , double Zpower ) override;
+    void vSetInstant( const Eref& e , int instant ) override;
+    int vGetInstant( const Eref& e  ) const override;
+    void vSetX( const Eref& e , double X ) override;
+    double vGetX( const Eref& e  ) const override;
+    void vSetY( const Eref& e , double Y ) override;
+    double vGetY( const Eref& e  ) const override;
+    void vSetZ( const Eref& e , double Z ) override;
+    double vGetZ( const Eref& e  ) const override;
     /**
      * Not trivial to change Ca-dependence once HSolve has been set up, and
      * unlikely that one would want to change this field after setup, so
      * keeping this field read-only.
      */
-    void vSetUseConcentration( const Eref& e, int value );
+    void vSetUseConcentration( const Eref& e, int value ) override;
     // implemented in baseclass: int getUseConcentration() const;
 
-    void vSetModulation( const Eref& e, double value );
+    void vSetModulation( const Eref& e, double value ) override;
 
     /////////////////////////////////////////////////////////////
     // Dest function definitions
     /////////////////////////////////////////////////////////////
 
-    void vProcess( const Eref& e, ProcPtr p );
-    void vReinit( const Eref& e, ProcPtr p );
-    void vHandleConc( const Eref& e, double value);
-    void vCreateGate(const Eref& e , string name);
+    void vProcess( const Eref& e, ProcPtr p ) override;
+    void vReinit( const Eref& e, ProcPtr p ) override;
+    void vHandleConc( const Eref& e, double value) override;
+    void vCreateGate(const Eref& e , string name) override;
 
     /////////////////////////////////////////////////////////////
 	// Dummy function, not needed in Zombie.
-	void vHandleVm( double Vm );
+	void vHandleVm( double Vm ) override;
 
     /////////////////////////////////////////////////////////////
     // Gate handling functions
@@ -102,19 +102,19 @@ public:
     /**
      * Access function used for the X gate. The index is ignored.
      */
-    HHGate* vGetXgate( unsigned int i ) const;
+    HHGate* vGetXgate( unsigned int i ) const override;
 
     /**
      * Access function used for the Y gate. The index is ignored.
      */
-    HHGate* vGetYgate( unsigned int i ) const;
+    HHGate* vGetYgate( unsigned int i ) const override;
 
     /**
      * Access function used for the Z gate. The index is ignored.
      */
-    HHGate* vGetZgate( unsigned int i ) const;
+    HHGate* vGetZgate( unsigned int i ) const override;
     /////////////////////////////////////////////////////////////
-	void vSetSolver( const Eref& e , Id hsolve );
+	void vSetSolver( const Eref& e , Id hsolve ) override;
 
     static const Cinfo* initCinfo();
 

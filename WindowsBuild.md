@@ -75,3 +75,26 @@ In a terminal, `cd` to `moose-core` and run the following:
 python -m build
 ```
 
+# Debug build
+Debug build tries to link with debug build of Python, and this is not
+readily available on Windows, unless you build the Python interpreter
+(CPython) itself from sources in debug mode. Therefore, debug build of moose will fail at the linking stage complaining that the linker could not find `python3x_d.lib`.
+
+The workaround, as pointed out by Ali Ramezani [here](https://stackoverflow.com/questions/66162568/lnk1104cannot-open-file-python39-d-lib), is to make a copy of `python3x.lib` named `python3x_d.lib` in the same directory (`libs`). After that, you can run meson setup as follows:
+
+`meson setup --wipe _build --prefix=%CD%\\_build_install -D use_mpi=false --buildtype=debug --optimization=0`
+
+and then go through the rest of the steps.
+
+A free graphical debugger available for MS Windows is WinDbg. You can
+use it to attach to a running Python process and set breakpoints at
+target function/line etc.
+
+In WinDbg command line you find the moose module name with
+`lm m _moose*`
+
+The will show something like `_moose_cp311_win_amd64` when your build produced `_moose.cp311-win_amd64.lib`.
+
+Now you can set a breakpoint to a class function with the module name as prefix as follows:
+
+`bp _moose_cp311_win_amd64!ChanBase::setGbar`

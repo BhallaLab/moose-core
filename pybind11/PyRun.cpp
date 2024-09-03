@@ -5,8 +5,6 @@
 // Author: subha
 // Created: Sat Oct 11 14:47:22 2014 (+0530)
 
-#include <Python.h>
-
 #include "../basecode/header.h"
 #include "PyRun.h"
 

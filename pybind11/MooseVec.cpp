@@ -135,7 +135,7 @@ py::object MooseVec::getAttribute(const string& name)
     auto cinfo = oid_.element()->cinfo();
     auto finfo = cinfo->findFinfo(name);
     if(!finfo) {
-        auto fmap = __Finfo__::finfoNames(cinfo, "*");
+        auto fmap = finfoNames(cinfo, "*");
         cerr << __func__ << ":: AttributeError: " << name
              << " is not found on path '" << oid_.path() << "'." << endl;
         cerr << finfoNotFoundMsg(cinfo) << endl;

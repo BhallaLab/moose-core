@@ -11,21 +11,10 @@
 // =====================================================================================
 
 
-#include <map>
-#include <typeindex>
-#include <typeinfo>
-#include <utility>
-#include <vector>
-#include <functional>
-#include <chrono>
-
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include <pybind11/numpy.h>
-
-namespace py = pybind11;
-using namespace std;
-using namespace pybind11::literals;
+#include "pymoose.h"
+#include "Finfo.h"
+#include "MooseVec.h"
+#include "helper.h"
 
 #include "../basecode/global.h"
 #include "../basecode/header.h"
@@ -35,10 +24,23 @@ using namespace pybind11::literals;
 #include "../shell/Shell.h"
 #include "../shell/Wildcard.h"
 #include "../utility/strutil.h"
-#include "Finfo.h"
-#include "MooseVec.h"
-#include "helper.h"
-#include "pymoose.h"
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <pybind11/numpy.h>
+
+#include <map>
+#include <typeindex>
+#include <typeinfo>
+#include <utility>
+#include <vector>
+#include <functional>
+#include <chrono>
+
+
+namespace py = pybind11;
+using namespace pybind11::literals;
+using namespace std;
 
 Id initModule(py::module &m)
 {
@@ -81,8 +83,9 @@ bool setFieldGeneric(const ObjId &oid, const string &fieldName,
         std::remove_if(fieldType.begin(), fieldType.end(), ::isspace),
         fieldType.end());
 
-    if(fieldType == "double")
+    if(fieldType == "double"){      
         return Field<double>::set(oid, fieldName, val.cast<double>());
+    }
     if(fieldType == "vector<double>")
         return Field<vector<double>>::set(oid, fieldName,
                                           val.cast<vector<double>>());
@@ -158,7 +161,7 @@ py::object getFieldGeneric(const ObjId &oid, const string &fieldName)
     // can be of different types: a simple value (ValueFinfo), list, dict or
     // DestFinfo setter which is a function.
     if(finfoType == "ValueFinfo")
-        return __Finfo__::getFieldValue(oid, finfo);
+        return getFieldValue(oid, finfo);
     else if(finfoType == "FieldElementFinfo") {
         // This is a Finfo
         return py::cast(__Finfo__(oid, finfo, "FieldElementFinfo"));
@@ -170,13 +173,13 @@ py::object getFieldGeneric(const ObjId &oid, const string &fieldName)
     else if(finfoType == "DestFinfo") {
         // Return a setter function.
         // It can be used to set field on DestFinfo.
-        return __Finfo__::getDestFinfoSetterFunc(oid, finfo);
+        return getDestFinfoSetterFunc(oid, finfo);
     }
 
     throw runtime_error("getFieldGeneric::NotImplemented : " + fieldName +
                         " with rttType " + finfo->rttiType() + " and type: '" +
                         finfoType + "'");
-    return pybind11::none();
+    return py::none();
 }
 
 /* --------------------------------------------------------------------------*/

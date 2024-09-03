@@ -156,8 +156,8 @@ void ZombieHHChannel::vSetUseConcentration( const Eref& e, int value )
 void ZombieHHChannel::vSetModulation( const Eref& e , double modulation )
 {
 	if ( modulation > 0.0 ) {
-		modulation_ = modulation;
-    	hsolve_->setHHmodulation( e.id(), modulation );
+            ChanCommon::vSetModulation(e, modulation);
+            hsolve_->setHHmodulation( e.id(), modulation );
 	}
 }
 

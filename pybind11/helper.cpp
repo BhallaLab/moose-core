@@ -450,7 +450,7 @@ vector<string> mooseGetFieldNames(const string& className,
 
 string finfoNotFoundMsg(const Cinfo* cinfo)
 {
-    auto fmap = __Finfo__::finfoNames(cinfo, "*");
+    auto fmap = finfoNames(cinfo, "*");
     stringstream ss;
     ss << "Available attributes:" << endl;
     for(size_t i = 0; i < fmap.size(); i++) {

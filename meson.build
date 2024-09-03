@@ -59,6 +59,8 @@ if cc.get_id() == 'gcc'
   if not cc.version().version_compare('>=9.1')
     error('pymoose requires GCC >= 9.1')
   endif
+  # See: https://pybind11.readthedocs.io/en/stable/faq.html#someclass-declared-with-greater-visibility-than-the-type-of-its-field-someclass-member-wattributes
+  add_project_arguments('-fvisibility=hidden', language: ['c', 'cpp'])
 elif cc.get_id() == 'clang' or cc.get_id() == 'clang-cl'
   if not cc.version().version_compare('>=12.0')
     error('pymoose requires clang >= 12.0')
@@ -113,6 +115,9 @@ endif
 if is_windows
   # Deal with M_PI & friends; add `use_math_defines` to c_args or cpp_args
   add_global_arguments('-D_USE_MATH_DEFINES', language: ['c', 'cpp'])
+  if cc.get_id() == 'gcc'  # Workaround for mingw64/ucrt64 issue with `fmt` lib and `limit`
+    add_global_arguments('-std=gnu++11', language: ['c', 'cpp']) 
+  endif
 endif
 
 if is_msvc
