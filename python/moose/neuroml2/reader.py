@@ -1362,18 +1362,12 @@ class NML2Reader(object):
             mchan.Zpower = ngate.instances
         # TODO: HHGate2D and and HHChannel2D should be updated in
         # MOOSE to avoid this redundant setting for the two tables
-        mgate.xminA = vmin
-        mgate.xmaxA = vmax
-        mgate.xdivsA = vdivs
-        mgate.yminA = cmin
-        mgate.ymaxA = cmax
-        mgate.ydivsA = cdivs
-        mgate.xminB = vmin
-        mgate.xmaxB = vmax
-        mgate.xdivsB = vdivs
-        mgate.yminB = cmin
-        mgate.ymaxB = cmax
-        mgate.ydivsB = cdivs
+        mgate.xmin = vmin
+        mgate.xmax = vmax
+        mgate.xdivs = vdivs
+        mgate.ymin = cmin
+        mgate.ymax = cmax
+        mgate.ydivs = cdivs
         # If the gate depends only on one parameter, disable the
         # second dimension
         q10_scale = self._computeQ10Scale(ngate)
