@@ -105,7 +105,7 @@ if host_machine.system() == 'darwin'
 endif
 
 # Link against conda env GSL
-conda_res = run_command('python', '-c', 'import os; print(os.environ["CONDA_PREFIX"])', check: true)
+conda_res = run_command('python', '-c', 'import os; print(os.environ["CONDA_PREFIX"])', check: false)
 if conda_res.returncode() == 0
   conda_lib_path = conda_res.stdout().strip() / 'Library/lib'
 else
