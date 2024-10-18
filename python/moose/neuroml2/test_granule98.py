@@ -110,18 +110,18 @@ if __name__ == "__main__":
 
     kca = chanmap['KCa']
     gate = moose.element(f'{kca.path}/gateX')
-    vtab = np.linspace(gate.xminA, gate.xmaxA, gate.xdivsA)
-    ctab = np.linspace(gate.yminA, gate.ymaxA, gate.ydivsA)
+    vtab = np.linspace(gate.xmin, gate.xmax, gate.xdivs)
+    ctab = np.linspace(gate.ymin, gate.ymax, gate.ydivs)
     cplot = [gate.A[-0.65, cc] for cc in ctab]
     vplot = [gate.A[vv, 7.55e-5] for vv in vtab]
-    fig, axes = plt.subplots(nrows=2)
-    axes[0].plot(ctab, cplot, 'x')
-    axes[0].set_xlabel('[Ca2+]')
-    axes[0].set_ylabel('A')
-    axes[1].plot(vtab, vplot, 'x')
-    axes[1].set_xlabel('V')
-    axes[1].set_ylabel('A')
-    plt.show()
+    # fig, axes = plt.subplots(nrows=2)
+    # axes[0].plot(ctab, cplot, 'x')
+    # axes[0].set_xlabel('[Ca2+]')
+    # axes[0].set_ylabel('A')
+    # axes[1].plot(vtab, vplot, 'x')
+    # axes[1].set_xlabel('V')
+    # axes[1].set_ylabel('A')
+    # plt.show()
     simtime = 700e-3
     moose.reinit()
     # breakpoint()
@@ -141,8 +141,6 @@ if __name__ == "__main__":
         data = np.block([t[:, np.newaxis], tab.vector[:, np.newaxis]])
         np.savetxt(fname, X=data, header="time Gk", delimiter=" ")
     if do_plot:
-        import matplotlib.pyplot as plt
-
         fig, axes = plt.subplots(nrows=2, sharex="all")
         axes[0].plot(t, vm.vector, label="Vm")
         axes[1].plot(t, inj.vector, label="Im")

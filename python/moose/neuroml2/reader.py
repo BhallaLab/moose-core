@@ -1214,7 +1214,7 @@ class NML2Reader(object):
                 )
         return q10_scale
 
-    def updateHHGate(self, ngate, mgate, mchan, vmin, vmax, vdivs):
+    def updateHHGate(self, ngate, mgate, mchan, vmin, vmax, vdivs, useInterpolation=True):
         """Update moose `HHGate` mgate from NeuroML gate description
         element `ngate`.
 
@@ -1251,6 +1251,7 @@ class NML2Reader(object):
         mgate.min = vmin
         mgate.max = vmax
         mgate.divs = vdivs
+        mgate.useInterpolation = useInterpolation
         q10_scale = self._computeQ10Scale(ngate)
         alpha, beta, tau, inf = (None, None, None, None)
         param_tabs = {}
