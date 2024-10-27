@@ -52,12 +52,30 @@ Gotcha: if you are on a 64 bit machine, the machine type is `x64`. MSVC comes wi
 ```
 cd moose-core
 
-meson setup --wipe _build --prefix=%CD%\\_build_install -D use_mpi=false --buildtype=release -Ddebug=false
+meson setup --wipe _build --prefix=%CD%\\_build_install -Duse_mpi=false --buildtype=release
 ninja -v -C _build 
 meson install -C _build
 ```
 
 This will create `moose` module inside `moose-core/_build_install` directory. To make moose importable from any terminal, add this directory to your `PYTHONPATH` environment variable. 
+
+
+Meson provides many builtin options: https://mesonbuild.com/Builtin-options.html. Meson options are supplied in the command line to `meson setup` in the format `-Doption=value`.
+
+  - **Buildtype**
+	If you want a developement build with debug enabled, pass `-Dbuildtype=debug` in the `meson setup`.
+
+
+	```
+	meson setup --wipe _build --prefix=%CD%\\_build_install -Duse_mpi=false -Dbuildtype=debug
+	```
+
+	You can either use `buildtype` option alone or use the two options `debug` and `optimization` for finer grained control over the build. According to `meson` documentation `-Dbuildtype=debug` will create a debug build with optimization level 0 (i.e., no optimization, passing `-O0 -g` to GCC), `-Dbuildtype=debugoptimized`  will create a debug build with optimization level 2 (equivalent to `-Ddebug=true -Doptimization=2`), `-Dbuildtype=release` will create a release build with optimization level 3 (equivalent to `-Ddebug=false -Doptimization=3`), and `-Dbuildtype=minsize` will create a release build with space optimization (passing `-Os` to GCC).
+	
+  - **Optimization level**
+	
+	To set optimization level, pass `-Doptimization=level`, where level can be `plain`, `0`, `g`, `1`, `2`, `3`, `s`.
+
 
 
 For standard installation you can simply run `pip install .` in the `moose-core` directory.
@@ -78,11 +96,18 @@ python -m build
 # Debug build
 Debug build tries to link with debug build of Python, and this is not
 readily available on Windows, unless you build the Python interpreter
-(CPython) itself from sources in debug mode. Therefore, debug build of moose will fail at the linking stage complaining that the linker could not find `python3x_d.lib`.
+(CPython) itself from sources in debug mode. Therefore, debug build of
+moose will fail at the linking stage complaining that the linker could
+not find `python3x_d.lib`.
 
-The workaround, as pointed out by Ali Ramezani [here](https://stackoverflow.com/questions/66162568/lnk1104cannot-open-file-python39-d-lib), is to make a copy of `python3x.lib` named `python3x_d.lib` in the same directory (`libs`). After that, you can run meson setup as follows:
+The workaround, as pointed out by Ali Ramezani
+[here](https://stackoverflow.com/questions/66162568/lnk1104cannot-open-file-python39-d-lib),
+is to make a copy of `python3x.lib` named `python3x_d.lib` in the same
+directory (`libs`). After that, you can run meson setup as follows:
 
-`meson setup --wipe _build --prefix=%CD%\\_build_install -D use_mpi=false --buildtype=debug --optimization=0`
+```
+meson setup --wipe _build --prefix=%CD%\\_build_install -Duse_mpi=false --buildtype=debug
+```
 
 and then go through the rest of the steps.
 
