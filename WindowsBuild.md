@@ -111,7 +111,7 @@ meson setup --wipe _build --prefix=%CD%\\_build_install -Duse_mpi=false --buildt
 
 and then go through the rest of the steps.
 
-A free graphical debugger available for MS Windows is WinDbg. You can
+A free graphical debugger available for MS Windows is WinDbg (https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/). You can
 use it to attach to a running Python process and set breakpoints at
 target function/line etc.
 
