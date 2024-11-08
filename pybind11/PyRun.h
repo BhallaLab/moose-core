@@ -3,10 +3,23 @@
 // Author: subha
 // Created: Sat Oct 11 14:40:45 2014 (+0530)
 
-#ifndef _PYCALL_H
-#define _PYCALL_H
+#ifndef _PyRun_h
+#define _PyRun_h
 
 #include <climits>
+
+#ifdef _DEBUG
+#undef _DEBUG
+#include <Python.h>
+#define _DEBUG
+#else
+#include <Python.h>
+#endif
+
+
+#if defined(_WIN32)
+#define PATH_MAX 260  // this is win32 path limit
+#endif
 
 #if PY_MAJOR_VERSION >= 3
 #define PYCODEOBJECT PyObject

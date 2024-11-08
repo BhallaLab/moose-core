@@ -875,3 +875,43 @@ def mergeChemModel(modelpath, dest):
         No example file which shows its use. Deprecated?
     """
     return model_utils.mooseMergeChemModel(modelpath, dest)
+
+
+def isinstance_(element, classobj):
+    """Returns True if `element` is an instance of `classobj` or its
+    subclass.
+
+    Like Python's builtin `isinstance` method, this returns `True` if
+    `element` is an instance of `classobj` or one of its subclasses.
+
+    Parameters
+    ----------
+    element : moose.melement
+        moose object
+    classobj : class
+        moose class
+
+    Returns
+    -------
+    True if `classobj` is a MOOSE-baseclass of `element`, False otherwise.
+
+    Raises
+    ------
+    TypeError if `classobj` is not a MOOSE class, or
+    `element` is not a MOOSE object
+
+
+    """
+    base_cinfo = _moose.element(f'/classes/{classobj.__name__}')
+    if base_cinfo.name == '/':
+        raise TypeError('Not a MOOSE class', classobj)
+
+    try:
+        obj_cinfo = _moose.element(f'/classes/{element.className}')
+    except AttributeError:  # Not a MOOSE element - doesn't have className attribute
+        raise TypeError('Not a MOOSE object', element)
+    while obj_cinfo.baseClass != 'none':
+        if obj_cinfo.name == base_cinfo.name:
+            return True
+        obj_cinfo = _moose.element(f'/classes/{obj_cinfo.baseClass}')
+    return False

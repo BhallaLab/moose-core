@@ -26,7 +26,7 @@ const Cinfo* HHGate::initCinfo()
         "Alternatively uses linear interpolation."
         "The range of the double is predefined based on knowledge of"
         "voltage or conc ranges, and the granularity is specified by"
-        "the xmin, xmax, and dV fields.",
+        "the xmin, xmax, and xdivs fields.",
         &HHGate::lookupA);
     static ReadOnlyLookupValueFinfo<HHGate, double, double> B(
         "B",
@@ -499,7 +499,7 @@ vector<double> HHGate::getAlphaParms(const Eref& e) const
 {
     vector<double> ret = alpha_;
     ret.insert(ret.end(), beta_.begin(), beta_.end());
-    ret.push_back(A_.size());
+    ret.push_back((double)A_.size());
     ret.push_back(xmin_);
     ret.push_back(xmax_);
 
@@ -816,7 +816,7 @@ void HHGate::updateTables()
         return;
     vector<double> parms = alpha_;
     parms.insert(parms.end(), beta_.begin(), beta_.end());
-    parms.push_back(A_.size());
+    parms.push_back((double)A_.size());
     parms.push_back(xmin_);
     parms.push_back(xmax_);
 

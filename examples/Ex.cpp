@@ -182,3 +182,13 @@ void Ex::setVal(unsigned int index, double val)
 
 	values_[index] = val;
 }
+
+void Ex::handleX(double x)
+{
+  x_ = x;
+}
+
+void Ex::handleN(int n)
+{
+  n_ = n;
+}

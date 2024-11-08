@@ -478,7 +478,7 @@ template<> class Conv< bool >
         }
 
         static void val2str( string& s, bool val ) {
-            if ( val > 0.5 )
+            if ( val )
                 s = "1";
             else
                 s = "0";
@@ -566,11 +566,11 @@ template< class T > class Conv< vector< vector< T > > >
         {
             static vector< vector< T > > ret;
             ret.clear();
-            unsigned int numEntries = **buf; // first entry is vec size
+            unsigned int numEntries = (unsigned int)**buf; // first entry is vec size
             ret.resize( numEntries );
             (*buf)++;
             for ( unsigned int i = 0; i < numEntries; ++i ) {
-                unsigned int rowSize = **buf;
+	      unsigned int rowSize = (unsigned int)**buf;
                 (*buf)++;
                 for ( unsigned int j = 0; j < rowSize; ++j )
                     ret[i].push_back( Conv< T >::buf2val( buf ) );
@@ -581,9 +581,9 @@ template< class T > class Conv< vector< vector< T > > >
         static void val2buf( const vector< vector< T > >& val, double**buf )
         {
             double* temp = *buf;
-            *temp++ = val.size();
+            *temp++ = (double)val.size();
             for( unsigned int i = 0; i < val.size(); ++i ) {
-                *temp++ = val[i].size();
+	      *temp++ = (double)val[i].size();
                 for ( unsigned int j = 0; j < val[i].size(); ++j ) {
                     Conv< T >::val2buf( val[i][j], &temp );
                 }
@@ -641,7 +641,7 @@ template< class T > class Conv< vector< T > >
         static void val2buf( const vector< T >& val, double**buf )
         {
             double* temp = *buf;
-            *temp++ = val.size();
+            *temp++ = (double)val.size();
             for( unsigned int i = 0; i < val.size(); ++i ) {
                 Conv< T >::val2buf( val[i], &temp );
             }

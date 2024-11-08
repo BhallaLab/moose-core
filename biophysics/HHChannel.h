@@ -1,5 +1,3 @@
-#ifndef _HHChannel_h
-#define _HHChannel_h
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
@@ -10,6 +8,15 @@
 ** See the file COPYING.LIB for the full notice.
 *********************************************************************
 */
+
+#ifndef _HHChannel_h
+#define _HHChannel_h
+
+#include "ChanBase.h"
+#include "ChanCommon.h"
+#include "HHChannelBase.h"
+
+class HHGate;
 
 /**
  * The HHChannel class sets up a Hodkin-Huxley type ion channel.
@@ -45,33 +52,53 @@
  * on each node.
  */
 
-class HHChannel : public HHChannelBase, public ChanCommon {
+class HHChannel : public HHChannelBase {
+
 #ifdef DO_UNIT_TESTS
     friend void testHHChannel();
     friend void testHHGateCreation();
 #endif  // DO_UNIT_TESTS
+
 public:
     HHChannel();
     ~HHChannel();
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // Avoid warning C4250 from MSVC: 
+    // "'HHChannel': inherits 'ChanCommon::ChanCommon::vSetGbar' via dominance"
+    // Although vSetX where X is the field to be set is pure virtual in ChanBase, and is 
+    // implemented in ChanCommon, MSVC seems to still resolve it by dominance.
+    // Probably the ambiguity between ChanBase::vSetEk and ChanCommon::vSetEk etc. cause Ek to be 
+    // garbage when built with MSVC.
+    // Looks like this bug persists since 2005: 
+    // https://stackoverflow.com/questions/469508/visual-studio-compiler-warning-c4250-class1-inherits-class2member-via-d
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // void vSetGbar(const Eref&e, double Gbar );
+    // double vGetGbar(const Eref&e) const;
+    // void vSetEk(const Eref&e, double Ek );
+    // double vGetEk(const Eref&e) const;
+    // void vSetGk(const Eref&e, double Gk );
+    // double vGetGk(const Eref&e) const;
+    // void vSetIk(const Eref&e, double Ic );
+    // double vGetIk(const Eref&e) const;
+    // void vHandleVm(double Vm );
 
     /////////////////////////////////////////////////////////////
     // Value field access function definitions
     /////////////////////////////////////////////////////////////
-
-    void vSetXpower(const Eref& e, double Xpower);
-    void vSetYpower(const Eref& e, double Ypower);
-    void vSetZpower(const Eref& e, double Zpower);
-    void vSetInstant(const Eref& e, int Instant);
-    int vGetInstant(const Eref& e) const;
-    void vSetX(const Eref& e, double X);
-    double vGetX(const Eref& e) const;
-    void vSetY(const Eref& e, double Y);
-    double vGetY(const Eref& e) const;
-    void vSetZ(const Eref& e, double Z);
-    double vGetZ(const Eref& e) const;
-    void vSetUseConcentration(const Eref& e, int value);
-    void vSetModulation(const Eref& e, double modulation);
-    double vGetModulation(const Eref& e) const;
+    void vSetXpower(const Eref& e, double Xpower) override;
+    void vSetYpower(const Eref& e, double Ypower) override;
+    void vSetZpower(const Eref& e, double Zpower) override;
+    void vSetInstant(const Eref& e, int Instant) override;
+    int vGetInstant(const Eref& e) const override;
+    void vSetX(const Eref& e, double X) override;
+    double vGetX(const Eref& e) const override;
+    void vSetY(const Eref& e, double Y) override;
+    double vGetY(const Eref& e) const override;
+    void vSetZ(const Eref& e, double Z) override;
+    double vGetZ(const Eref& e) const override;
+    void vSetUseConcentration(const Eref& e, int value) override;
+    // void vSetModulation(const Eref& e, double modulation) override; // defined in ChanCommon
+    // double vGetModulation(const Eref& e) const override; // defined in ChanCommon
 
     void innerSetXpower(double Xpower);
     void innerSetYpower(double Ypower);

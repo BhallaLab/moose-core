@@ -18,7 +18,7 @@
 #include "CylBase.h"
 #include "../utility/Vec.h"
 
-extern const double PI; // defined in consts.cpp
+// extern const double PI; // defined in consts.cpp
 
 CylBase::CylBase( double x, double y, double z,
 					double dia, double length, unsigned int numDivs )
@@ -132,10 +132,10 @@ bool CylBase::getIsCylinder() const
 double CylBase::volume( const CylBase& parent ) const
 {
 	if ( isCylinder_ )
-			return length_ * dia_ * dia_ * PI / 4.0;
+			return length_ * dia_ * dia_ * M_PI / 4.0;
 	double r0 = parent.dia_/2.0;
 	double r1 = dia_/2.0;
-	return length_ * ( r0*r0 + r0 *r1 + r1 * r1 ) * PI / 3.0;
+	return length_ * ( r0*r0 + r0 *r1 + r1 * r1 ) * M_PI / 3.0;
 }
 
 /**
@@ -150,7 +150,7 @@ double CylBase::voxelVolume( const CylBase& parent, unsigned int fid ) const
 {
 	assert( numDivs_ > fid );
 	if ( isCylinder_ )
-			return length_ * dia_ * dia_ * PI / ( 4.0 * numDivs_ );
+			return length_ * dia_ * dia_ * M_PI / ( 4.0 * numDivs_ );
 
  	double frac0 = ( static_cast< double >( fid ) ) /
 				static_cast< double >( numDivs_ );
@@ -161,7 +161,7 @@ double CylBase::voxelVolume( const CylBase& parent, unsigned int fid ) const
 	double s0 = length_ * frac0;
 	double s1 = length_ * frac1;
 
-	return (s1 - s0) * ( r0*r0 + r0 *r1 + r1 * r1 ) * PI / 3.0;
+	return (s1 - s0) * ( r0*r0 + r0 *r1 + r1 * r1 ) * M_PI / 3.0;
 }
 
 /// Virtual function to return coords of mesh Entry.
@@ -209,11 +209,11 @@ double CylBase::getDiffusionArea(
 {
 	assert( fid < numDivs_ + 1 );
 	if ( isCylinder_ )
-			return PI * dia_ * dia_ / 4.0;
+			return M_PI * dia_ * dia_ / 4.0;
  	double frac0 = ( static_cast< double >( fid ) ) /
 				static_cast< double >( numDivs_ );
 	double r0 = 0.5 * ( parent.dia_ * ( 1.0 - frac0 ) + dia_ * frac0 );
-	return PI * r0 * r0;
+	return M_PI * r0 * r0;
 }
 
 /// Return the cross section area of the middle of the specified voxel.
@@ -222,11 +222,11 @@ double CylBase::getMiddleArea(
 {
 	assert( fid < numDivs_ );
 	if ( isCylinder_ )
-			return PI * dia_ * dia_ / 4.0;
+			return M_PI * dia_ * dia_ / 4.0;
  	double frac0 = ( 0.5 + static_cast< double >( fid ) ) /
 				static_cast< double >( numDivs_ );
 	double r0 = 0.5 * ( parent.dia_ * ( 1.0 - frac0 ) + dia_ * frac0 );
-	return PI * r0 * r0;
+	return M_PI * r0 * r0;
 }
 
 double CylBase::getVoxelLength() const
@@ -267,9 +267,9 @@ static void fillPointsOnCircle(
 	// This will cause small errors in area estimate but they will
 	// be anisotropic. The alternative will have large errors toward
 	// 360 degrees, but not elsewhere.
-	unsigned int numAngle = floor( 2.0 * PI * r / h + 0.5 );
+	unsigned int numAngle = floor( 2.0 * M_PI * r / h + 0.5 );
 	assert( numAngle > 0 );
-	double dtheta = 2.0 * PI / numAngle;
+	double dtheta = 2.0 * M_PI / numAngle;
 	double dArea = h * dtheta * r;
 	// March along points on surface of circle centred at q.
 	for ( unsigned int j = 0; j < numAngle; ++j ) {
@@ -295,10 +295,10 @@ static void fillPointsOnDisc(
 	double dRadial = r / numRadial;
 	for ( unsigned int i = 0; i < numRadial; ++i ) {
 		double a = ( i + 0.5 ) * dRadial;
-		unsigned int numAngle = floor( 2.0 * PI * a / h + 0.5 );
+		unsigned int numAngle = floor( 2.0 * M_PI * a / h + 0.5 );
 		if ( i == 0 )
 			numAngle = 1;
-		double dtheta = 2.0 * PI / numAngle;
+		double dtheta = 2.0 * M_PI / numAngle;
 		double dArea = dRadial * dtheta * a;
 		for ( unsigned int j = 0; j < numAngle; ++j ) {
 			double theta = j * dtheta;

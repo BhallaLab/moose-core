@@ -12,35 +12,38 @@
 #ifndef _ChanCommon_h
 #define _ChanCommon_h
 
+#include "ChanBase.h"
+
+// #include "../basecode/header.h"
+
 /**
  * The ChanCommon.g handles the data fields for all ion channel classes
  * in MOOSE, when they are using regular ee calculations rather than
  * being zombified by the solver.
  */
 
-class ChanCommon: public virtual ChanBase
+class ChanCommon: public ChanBase
 {
 public:
     ChanCommon();
-    ~ChanCommon();
+    virtual ~ChanCommon() = 0;
 
     /////////////////////////////////////////////////////////////
     // Value field access function definitions
     /////////////////////////////////////////////////////////////
 
-    void vSetGbar( const Eref& e, double Gbar );
-    double vGetGbar( const Eref& e ) const;
-    void vSetModulation( const Eref& e, double modulation );
-    double vGetModulation( const Eref& e ) const;
-    double getModulation() const;
-    void vSetEk( const Eref& e, double Ek );
-    double vGetEk( const Eref& e ) const;
-    void vSetGk( const Eref& e, double Gk );
-    double vGetGk( const Eref& e ) const;
+    void vSetGbar ( const Eref& e, double Gbar ) override;
+    double vGetGbar( const Eref& e ) const override;
+    void vSetModulation( const Eref& e, double modulation )  override;
+    double vGetModulation( const Eref& e ) const  override;
+    void vSetEk( const Eref& e, double Ek )  override;
+    double vGetEk( const Eref& e ) const   override;
+    void vSetGk( const Eref& e, double Gk )   override;
+    double vGetGk( const Eref& e ) const   override;
     /// Ik is read-only for MOOSE, but we provide the set
     /// func for derived classes to update it.
-    void vSetIk( const Eref& e, double Ic );
-    double vGetIk( const Eref& e ) const;
+    void vSetIk( const Eref& e, double Ic )   override;
+    double vGetIk( const Eref& e ) const   override;
 
     /////////////////////////////////////////////////////////////
     // Dest function definitions
@@ -49,7 +52,7 @@ public:
     /**
      * Assign the local Vm_ to the incoming Vm from the compartment
      */
-    void vHandleVm( double Vm );
+    void vHandleVm( double Vm ) override;
 
     /////////////////////////////////////////////////////////////
     /**
@@ -75,6 +78,12 @@ public:
     /// Specify the Class Info static variable for initialization.
     static const Cinfo* initCinfo();
 protected:
+    // Note: this is for sublcasses to get the value directly;
+    // different from getModulation(const Eref&) for getting the value
+    // field
+    // 
+    double getModulation() const;
+
     /// Vm_ is input variable from compartment, used for most rates
     double Vm_;
 

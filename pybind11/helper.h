@@ -123,7 +123,7 @@ inline ObjId mooseCreateFromPath(const string type, const string& p,
     // If path exists and user is asking for the same type then return the
     // underlying object else raise an exception.
     auto oid = ObjId(path);
-    if(not oid.bad()) {
+    if(! oid.bad()) {
         if(oid.element()->cinfo()->name() == type)
             return oid;
         else

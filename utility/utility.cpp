@@ -4,6 +4,7 @@
  *        Created:  2020-02-23
 
  *         Author:  Dilawar Singh <dilawars@ncbs.res.in>
+ *         
  *   Organization:  NCBS Bangalore
  *        License:  MIT License
  */
@@ -27,5 +28,4 @@ namespace moose {
         }
         assert(max == 0);
     }
-
 } // namespace moose

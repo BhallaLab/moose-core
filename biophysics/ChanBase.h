@@ -11,6 +11,8 @@
 #ifndef _ChanBase_h
 #define _ChanBase_h
 
+#include "../basecode/header.h"
+
 /**
  * The ChanBase is the base class for all ion channel classes in MOOSE.
  * It knows how to communicate with the parent compartment, not much else.
@@ -20,7 +22,7 @@ class ChanBase
 {
 	public:
 		ChanBase();
-		~ChanBase();
+                virtual ~ChanBase() = 0;
 
 		/////////////////////////////////////////////////////////////
 		// Value field access function definitions

@@ -146,15 +146,14 @@ HHChannelBase::HHChannelBase()
     : Xpower_(0.0),
       Ypower_(0.0),
       Zpower_(0.0),
-      useConcentration_(0),
-      modulation_(1.0)
+      useConcentration_(0)
 {
-    ;
+  ;
 }
 
 HHChannelBase::~HHChannelBase()
 {
-    ;
+  ;
 }
 
 bool checkPower(double power)
@@ -264,10 +263,10 @@ int HHChannelBase::getUseConcentration(const Eref& e) const
     return useConcentration_;
 }
 
-double HHChannelBase::vGetModulation(const Eref& e) const
-{
-    return modulation_;
-}
+// double HHChannelBase::vGetModulation(const Eref& e) const
+// {
+//     return modulation_;
+// }
 
 ///////////////////////////////////////////////////
 // Dest function definitions

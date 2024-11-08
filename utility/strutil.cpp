@@ -7,7 +7,6 @@
  ********************************************************************/
 
 #include <string>
-#include <sstream>
 #include <regex>
 #include <cassert>
 #include <iostream>

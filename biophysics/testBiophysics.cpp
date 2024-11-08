@@ -15,6 +15,7 @@
 #include "CompartmentBase.h"
 #include "Compartment.h"
 
+extern bool doubleEq(double, double);  // defined in doubleEq.cpp
 extern void testCompartment();         // Defined in Compartment.cpp
 extern void testCompartmentProcess();  // Defined in Compartment.cpp
 extern void testMarkovRateTable();     // Defined in MarkovRateTable.cpp

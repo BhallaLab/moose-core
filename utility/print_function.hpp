@@ -192,7 +192,7 @@ namespace moose {
         {
             if('`' == msg[i])
             {
-                if(!set and reset)
+                if(!set && reset)
                 {
                     set = true;
                     reset = false;
