@@ -891,9 +891,25 @@ def isinstance_(element, classobj):
     classobj : class
         moose class
 
+    Returns
+    -------
+    True if `classobj` is a MOOSE-baseclass of `element`, False otherwise.
+
+    Raises
+    ------
+    TypeError if `classobj` is not a MOOSE class, or
+    `element` is not a MOOSE object
+
+
     """
     base_cinfo = _moose.element(f'/classes/{classobj.__name__}')
-    obj_cinfo = _moose.element(f'/classes/{element.className}')
+    if base_cinfo.name == '/':
+        raise TypeError('Not a MOOSE class', classobj)
+
+    try:
+        obj_cinfo = _moose.element(f'/classes/{element.className}')
+    except AttributeError:  # Not a MOOSE element - doesn't have className attribute
+        raise TypeError('Not a MOOSE object', element)
     while obj_cinfo.baseClass != 'none':
         if obj_cinfo.name == base_cinfo.name:
             return True
