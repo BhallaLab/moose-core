@@ -18,10 +18,9 @@ jobs:
             brew: 20
     steps:
       - name: build-tools
-      	run: |
-	     if [ "$RUNNER_OS" == "Windows" ]; then
-	     	winget install llvm
-		
+        run: |
+             if [ "$RUNNER_OS" == "Windows" ]; then
+                winget install llvm             
       - name: mamba-setup
         uses: mamba-org/setup-micromamba@v1
         with:
