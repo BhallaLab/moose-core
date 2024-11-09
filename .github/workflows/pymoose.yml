@@ -30,14 +30,14 @@ jobs:
           create-args: >-
             python=${{ matrix.python-version }}
             pip
-	    pkg-config
+            pkg-config
             build
             clang
             meson
-	    ninja
-	    meson-python
+            ninja
+            meson-python
             hdf5
-	    pybind11[global]
+            pybind11[global]
             graphviz
             pytables
             numpy
