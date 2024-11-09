@@ -25,12 +25,8 @@ jobs:
           cache-downloads: true
           create-args: >-
             python=${{ matrix.python-version }}
-            pip
             pkg-config
             clang
-            meson
-            ninja
-            meson-python
             hdf5
             pybind11[global]
             graphviz
@@ -46,7 +42,8 @@ jobs:
         run: |          
           python -c "import sys; print(sys.version)"
       - if: ${{ matrix.apt }}
-        run: sudo apt-get -y install libhdf5-dev libgsl0-dev graphviz-dev python3-lxml doxygen meson ninja-build
+        run: |
+          sudo apt-get -y install libhdf5-dev libgsl0-dev graphviz-dev python3-lxml doxygen ninja-build
       - if: ${{ matrix.brew }}
         run: |
           brew install gsl
@@ -56,6 +53,9 @@ jobs:
           brew install doxygen
       - name: install python module dependencies via pip
         run: |
+          pip install -U pip
+          pip install meson
+          pip install meson-python
           pip install pybind11[global]
           pip install python-libsbml
       - name: checkout
