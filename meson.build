@@ -11,11 +11,13 @@
 # python -m build
 
 project('pymoose', 'c', 'cpp',
-	# default_options: ['default_library=static', 'c_std=c11', 'cpp_std=c++14'])
+        # The version is created dynamically based on git commit hash. For release, make this explicit string
+        version: run_command('git', 'rev-parse',  '--short', 'HEAD', check:false).stdout().strip(),
 	default_options: ['c_std=c17', 'cpp_std=c++17'])
 
 pybind_dep = dependency('pybind11')
 gsl_dep = dependency('gsl', version: '>=1.16')
+# sundial_dep = dependency('sundial', version: '>=7.1.1')
 
 use_mpi = get_option('use_mpi')
 if use_mpi
@@ -50,7 +52,8 @@ endif
 cc = meson.get_compiler('c')
 cpp = meson.get_compiler('cpp')
 # cy = meson.get_compiler('cython')
-
+message('C compiler', cc.get_id())
+message('CPP compiler', cpp.get_id())
 is_msvc = cc.get_id() == 'msvc'
 link_args = []
 # link_args = ['-Wl,--allow-multiple-definition']
@@ -187,10 +190,10 @@ conf_data.set('PYTHON_VERSION', py.language_version())
 #                                  link_with: libsoda)
 
 
-subdir('external/libsoda')
-subdir('external/fmt')
+subdir(join_paths('external', 'libsoda'))
+subdir(join_paths('external', 'fmt'))
 if is_msvc
-  subdir('external/getopt')
+  subdir(join_paths('external', 'getopt'))
 endif
 subdir('basecode')
 subdir('biophysics')
@@ -245,19 +248,19 @@ if is_msvc
 endif
 moose_dir = py.get_install_dir()
 
-include_dirs = ['external/libsoda']
+include_dirs = [join_paths('external', 'libsoda')]
 # Windows does not have getopt library and its dependencies. A port is
 # provided in "external/getopt" folder
 if is_windows
-  include_dirs += ['external/getopt']
+  include_dirs += [join_paths('external', 'getopt')]
 endif
 
-pymoose = py.extension_module('_moose', 'pybind11/pymoose.cpp',
+pymoose = py.extension_module('_moose', join_paths('pybind11', 'pymoose.cpp'),
                               link_whole: sublibs,
                               link_args: link_args,
                               dependencies: [gsl_dep, mpi_dep, pybind_dep], #, libsoda_dep],
                               include_directories: include_dirs,
-                              install: true, install_dir: moose_dir / 'moose')
+                              install: true, install_dir: join_paths(moose_dir, 'moose'))
 
 if is_windows
   rename_cmd = 'move'
@@ -266,11 +269,11 @@ else
 endif
 
 install_subdir(
-  'python/moose',
+  join_paths('python', 'moose'),
   install_dir: moose_dir)
 
 install_subdir(
-  'python/rdesigneur',
+  join_paths('python', 'rdesigneur'),
   install_dir: moose_dir)
 
 message('Finished installing moose in', pymoose.full_path())

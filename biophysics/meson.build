@@ -45,4 +45,4 @@ biophysics_src = ['IntFire.cpp',
                   'MarkovOdeSolver.cpp',
                   'testBiophysics.cpp']
 
-biophysics_lib = static_library('biophysics', biophysics_src, dependencies: gsl_dep, include_directories: gsl_dep.get_pkgconfig_variable('includedir'))
+biophysics_lib = static_library('biophysics', biophysics_src, dependencies: gsl_dep, include_directories: gsl_dep.get_variable(pkgconfig:'includedir'))
