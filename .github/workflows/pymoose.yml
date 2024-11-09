@@ -29,11 +29,11 @@ jobs:
           cache-downloads: true
           create-args: >-
             python=${{ matrix.python-version }}
-	    pip
+            pip
 	    pkg-config
-	    build
-	    clang
-	    meson
+            build
+            clang
+            meson
 	    ninja
 	    meson-python
             hdf5
