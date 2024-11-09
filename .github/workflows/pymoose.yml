@@ -27,7 +27,6 @@ jobs:
             python=${{ matrix.python-version }}
             pip
             pkg-config
-            build
             clang
             meson
             ninja
