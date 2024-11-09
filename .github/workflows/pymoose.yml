@@ -46,7 +46,7 @@ jobs:
         run: |          
           python -c "import sys; print(sys.version)"
       - if: ${{ matrix.apt }}
-        run: sudo apt-get install libhdf5-dev libgsl0-dev graphviz-dev python3-lxml doxygen meson ninja
+        run: sudo apt-get -y install libhdf5-dev libgsl0-dev graphviz-dev python3-lxml doxygen meson ninja-build
       - if: ${{ matrix.brew }}
         run: |
           brew install gsl
