@@ -68,7 +68,7 @@ jobs:
           pip install python-libsbml
           pip install .
           python -c "import moose; moose.le()"
-      - name: build and install (non-windows)
+      - name: build and install (windows)
         if: runner.os == 'Windows' 
         run: |
           micromamba shell hook -s powershell | Out-String | Invoke-Expression
