@@ -16,6 +16,8 @@ jobs:
             apt: 10
           - os: macos-14
             brew: 20
+          - os: windows-latest
+            winget: 30
     steps:
       - name: mamba-setup
         uses: mamba-org/setup-micromamba@v1
@@ -38,29 +40,39 @@ jobs:
             doxygen
             setuptools
             wheel
+            meson
+            ninja
+            meson-python
       - name: Display Python version
         run: |          
           python -c "import sys; print(sys.version)"
       - if: ${{ matrix.apt }}
         run: |
-          sudo apt-get -y install libhdf5-dev libgsl0-dev graphviz-dev python3-lxml doxygen ninja-build
+          sudo apt-get -y install libhdf5-dev libgsl0-dev graphviz-dev python3-lxml doxygen
       - if: ${{ matrix.brew }}
         run: |
           brew install gsl
           brew install hdf5
           brew install graphviz
-          brew install cmake
           brew install doxygen
       - name: install python module dependencies via pip
         run: |
           pip install -U pip
-          pip install meson
-          pip install meson-python
-          pip install pybind11[global]
-          pip install python-libsbml
       - name: checkout
         uses: actions/checkout@v4          
-      - name: build and install
+      - name: build and install (non-windows)
+        if: runner.os != 'Windows' 
         run: |
+          eval "$(micromamba shell hook --shell bash)"
+          python -c "import sys; print('#' * 60, sys.version)"
+          pip install python-libsbml
+          pip install .
+          python -c "import moose; moose.le()"
+      - name: build and install (non-windows)
+        if: runner.os == 'Windows' 
+        run: |
+          micromamba shell hook -s powershell | Out-String | Invoke-Expression
+          python -c "import sys; print('#' * 60, sys.version)"
+          pip install python-libsbml
           pip install .
           python -c "import moose; moose.le()"

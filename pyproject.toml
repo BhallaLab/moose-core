@@ -1,6 +1,6 @@
 [build-system]
 build-backend = 'mesonpy'
-requires = ['meson-python']
+requires = ['meson', 'ninja', 'meson-python', 'pybind11[global]']
 
 [project]
 name = 'pymoose'
@@ -66,7 +66,7 @@ test = [
 ]
 
 [tool.meson-python.args]
-setup = ['--default-library=static', '-Doptimization=3', '--vsenv']
+setup = ['--default-library=static', '-Ddebug=false', '-Doptimization=3', '--vsenv']
 compile = ['-j4']
 dist = ['--include-subprojects']
 
