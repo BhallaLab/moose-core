@@ -1,6 +1,6 @@
 [build-system]
 build-backend = 'mesonpy'
-requires = ['meson', 'ninja', 'meson-python', 'pybind11[global]']
+requires = ['meson', 'ninja', 'meson-python', 'pybind11[global]', 'gsl']
 
 [project]
 name = 'pymoose'
