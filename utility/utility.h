@@ -5,11 +5,12 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Wed Mar 23 10:25:58 2011 (+0530)
 // Version:
-// Last-Updated: Tue Jul 23 12:48:17 2013 (+0530)
-//           By: subha
-//     Update #: 19
+// Last-Updated: Sun Sep  1 00:03:10 2024 (+0530)
+//           By: Subhasis Ray
+//     Update #: 25
 
 #ifndef _UTILITY_H
+#define _UTILITY_H
 
 #include <memory>
 #include <vector>
@@ -34,8 +35,8 @@ namespace moose
     string getEnv(const string& env);
     int getEnvInt(const string& env, const int defaultVal=1);
 
-    // In fileutils.cpp
-    bool filepath_exists( const string& path );
+    // In fileutils.cpp - 2024-07-17 removing this one liner used only once: subha
+    // bool filepath_exists( const string& path );
 
     /**
      * @brief Givem path of MOOSE element, return its name. It's behaviour is

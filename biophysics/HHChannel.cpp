@@ -14,7 +14,7 @@
 #include "ChanCommon.h"
 #include "HHChannelBase.h"
 #include "HHChannel.h"
-#include "../shell/Shell.h"
+
 
 const double HHChannel::EPSILON = 1.0e-10;
 const int HHChannel::INSTANT_X = 1;
@@ -65,6 +65,7 @@ HHChannel::HHChannel()
 
 HHChannel::~HHChannel()
 {
+  ;
     // if ( xGate_ && reinterpret_cast< char* >( this ) ==
     // 	ObjId( xGate_->originalChannelId(), 0 ).data() )
     // 	delete xGate_;
@@ -311,7 +312,7 @@ void HHChannel::vProcess(const Eref& e, ProcPtr info)
         g_ *= takeZpower_(Z_, Zpower_);
     }
 
-    ChanCommon::vSetGk(e, g_ * HHChannelBase::modulation_);
+    ChanCommon::vSetGk(e, g_ * ChanCommon::vGetModulation(e));
     ChanCommon::updateIk();
     // Gk_ = g_;
     // Ik_ = ( Ek_ - Vm_ ) * g_;
@@ -372,7 +373,7 @@ void HHChannel::vReinit(const Eref& er, ProcPtr info)
         g_ *= takeZpower_(Z_, Zpower_);
     }
 
-    ChanCommon::vSetGk(er, g_ * HHChannelBase::modulation_);
+    ChanCommon::vSetGk(er, g_ * ChanCommon::vGetModulation(er));
     ChanCommon::updateIk();
     // Gk_ = g_;
     // Ik_ = ( Ek_ - Vm_ ) * g_;
@@ -389,15 +390,6 @@ void HHChannel::vHandleConc(const Eref& e, double conc)
     conc_ = conc;
 }
 
-void HHChannel::vSetModulation(const Eref& e, double modulation)
-{
-    if (modulation > 0.0) HHChannelBase::modulation_ = modulation;
-}
-
-double HHChannel::vGetModulation(const Eref& e) const
-{
-    return HHChannelBase::modulation_;
-}
 
 ///////////////////////////////////////////////////
 // HHGate functions

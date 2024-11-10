@@ -31,10 +31,12 @@
 
 using namespace std;
 
-inline bool doubleEq(double a, double b)
-{
-    return std::fabs(a-b) < 1e-7;
-}
+extern bool doubleEq(double x, double y); // defined in basecode/doubleEq.cpp
+
+// inline bool doubleEq(double a, double b)
+// {
+//     return std::fabs(a-b) < 1e-7;
+// }
 
 static ostringstream assertStream;
 

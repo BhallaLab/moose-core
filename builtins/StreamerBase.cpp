@@ -26,6 +26,8 @@
 #include <sstream>
 #include <memory>
 
+extern void cnpy2::appendNumpy(const string& outfile, const vector<double>& vec, const vector<string>& colnames);
+extern void cnpy2::writeNumpy(const string& outfile, const vector<double>& vec, const vector<string>& colnames);
 // Class function definitions
 StreamerBase::StreamerBase()
 {

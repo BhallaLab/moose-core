@@ -1,5 +1,3 @@
-#ifndef _HHChannelBase_h
-#define _HHChannelBase_h
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
@@ -11,7 +9,15 @@
 *********************************************************************
 */
 
+#ifndef _HHChannelBase_h
+#define _HHChannelBase_h
+
+#include "ChanCommon.h"
+
+
 typedef double ( *PFDD )( double, double );
+
+class HHGate;
 
 /**
  * The HHChannelBase is the base class for defining Hodgkin-Huxley type
@@ -21,11 +27,11 @@ typedef double ( *PFDD )( double, double );
  * fields.
  */
 
-class HHChannelBase: public virtual ChanBase
+class HHChannelBase: public ChanCommon
 {
 	public:
 		HHChannelBase();
-		~HHChannelBase();
+                virtual ~HHChannelBase() = 0;   // this class is not to be instantiated
 
 		/////////////////////////////////////////////////////////////
 		// Value field access function definitions
@@ -47,7 +53,7 @@ class HHChannelBase: public virtual ChanBase
 		double getZ( const Eref& e ) const;
 		void setUseConcentration( const Eref& e, int value );
 		int getUseConcentration( const Eref& e ) const;
-		double vGetModulation( const Eref& e ) const;
+		// double vGetModulation( const Eref& e ) const; // provided by ChanCommon
 		/////////////////////////////////////////////////////////////
 		// Dest function definitions
 		/////////////////////////////////////////////////////////////
@@ -185,7 +191,7 @@ class HHChannelBase: public virtual ChanBase
 		bool useConcentration_;
 
 		/// Value used to scale channel conductance up or down
-		double modulation_;
+		// double modulation_; // this clashes with same field in ChanCommon
 };
 
 

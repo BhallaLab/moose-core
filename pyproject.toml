@@ -1,0 +1,75 @@
+[build-system]
+build-backend = 'mesonpy'
+requires = ['meson', 'ninja', 'meson-python', 'pybind11[global]', 'gsl']
+
+[project]
+name = 'pymoose'
+version = '4.1.0.dev'
+description = 'Python scripting interface of MOOSE Simulator (https://moose.ncbs.res.in)'
+readme = 'README.md'
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: Science/Research',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: GPL 3',
+    'Programming Language :: C',
+    'Programming Language :: C++',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Topic :: Software Development :: Libraries',
+    'Topic :: Scientific/Engineering',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX :: Linux',
+    'Operating System :: POSIX',
+    'Operating System :: Unix',
+    'Operating System :: MacOS',
+]
+
+requires-python = '>= 3.8'
+license = { file = 'LICENSE' }
+authors = [
+    {name = 'Upinder S. Bhalla', email = 'bhalla@ncbs.res.in'},
+    {name = 'Niraj Dudani', email = ''},    
+    {name = 'Subhasis Ray', email = 'ray.subhasis@gmail.com'},
+    {name = 'Aditya Gilra', email = ''},
+    {name = 'Aviral Goel', email = ''},
+    {name = 'Dilawar Singh', email = ''},
+    {name = 'Dharma Teja', email = ''},
+    {name = 'Malav Shah', email = ''},
+    {name = 'Dhruva Gowda', email = ''},
+    {name = 'G.V. Harsharani', email = 'hrani@ncbs.res.in'},
+    ]
+
+maintainers = [
+    {name = 'Upinder S. Bhalla', email = 'bhalla@ncbs.res.in'},
+    {name = 'Subhasis Ray', email = 'ray.subhasis@gmail.com'},
+    {name = 'G.V. Harsharani', email = 'hrani@ncbs.res.in'},
+    ]
+
+dependencies = ['numpy>=1.23', 'matplotlib', 'vpython', 'pybind11']
+
+[project.urls]
+homepage = 'https://moose.ncbs.res.in'
+documentation = 'https://moose.ncbs.res.in/readthedocs/index.html'
+repository = 'https://github.com/BhallaLab/moose-core'
+
+[project.optional-dependencies]
+test = [
+     'coverage',
+     'pytest',
+     'pytest-cov'
+]
+
+[tool.meson-python.args]
+setup = ['--default-library=static', '-Ddebug=false', '-Doptimization=3', '--vsenv']
+compile = ['-j4']
+dist = ['--include-subprojects']
+
+[tool.black]
+line-length = 80
+# skip-string-normalization = true

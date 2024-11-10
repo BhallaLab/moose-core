@@ -7,9 +7,9 @@
 # Maintainer:
 # Created: Fri Feb  8 11:29:36 2013 (+0530)
 # Version:
-# Last-Updated: Tue Mar  1 02:52:35 2016 (-0500)
-#           By: subha
-#     Update #: 182
+# Last-Updated: Tue Jul 16 13:52:35 2024 (+0530)
+#           By: Subhasis Ray
+#     Update #: 183
 # URL:
 # Keywords:
 # Compatibility:
@@ -166,7 +166,7 @@ def isKKIT(filename):
     """Check if `filename` is a GENESIS/KINETIKIT file.
 
     """
-    pattern = re.compile('include\s+kkit') # KKIT files must have "include kkit" statement somewhere
+    pattern = re.compile(r'include\s+kkit') # KKIT files must have "include kkit" statement somewhere
     with open(filename, 'r') as infile:
         while True:
             sentence = ''
