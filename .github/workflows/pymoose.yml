@@ -55,9 +55,6 @@ jobs:
           brew install hdf5
           brew install graphviz
           brew install doxygen
-      - name: install python module dependencies via pip
-        run: |
-          pip install -U pip
       - name: checkout
         uses: actions/checkout@v4          
       - name: build and install (non-windows)
