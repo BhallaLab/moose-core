@@ -43,6 +43,9 @@ jobs:
             meson
             ninja
             meson-python
+            cmake
+          post-cleanup: all
+          generate-run-shell: false            
       - name: Display Python version
         run: |          
           python -c "import sys; print(sys.version)"
