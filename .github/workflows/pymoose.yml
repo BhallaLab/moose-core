@@ -64,6 +64,7 @@ jobs:
         if: runner.os != 'Windows' 
         run: |
           eval "$(micromamba shell hook --shell bash)"
+          micromamba activate moose
           python -c "import sys; print('#' * 60, sys.version)"
           pip install python-libsbml
           pip install .
@@ -72,6 +73,7 @@ jobs:
         if: runner.os == 'Windows' 
         run: |
           micromamba shell hook -s powershell | Out-String | Invoke-Expression
+          micromamba activate moose
           python -c "import sys; print('#' * 60, sys.version)"
           pip install python-libsbml
           pip install .
