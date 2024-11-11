@@ -79,24 +79,22 @@ string shapeToString(const vector<size_t>& shape)
  *
  * @return  true if file is sane, else false.
  */
-bool isValidNumpyFile( FILE* fp )
+bool isValidNumpyFile(string npy_file)
 {
-    assert( fp );
-    char buffer[__pre__.size()];
-    size_t nr = fread( buffer, sizeof(char), __pre__.size(), fp );
-
-    if( 0 == nr )
-        return false;
-
-    bool equal = true;
-    // Check for equality
-    for(size_t i = 0; i < __pre__.size(); i++ )
-        if( buffer[i] != __pre__[i] )
-        {
-            equal = false;
-            break;
-        }
-    return equal;
+    char c;
+    istream_iterator<char> istream_iterator;
+    ifstream file(npy_file);
+    for(auto &current : __pre__)
+    {
+        file.get(c);
+        if((c != current) || (c == EOF))
+	{
+            file.close();
+	    return false;
+	}
+    }
+    file.close();
+    return true;
 }
 
 /**

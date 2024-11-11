@@ -1,5 +1,3 @@
-#ifndef _HHChannel2D_h
-#define _HHChannel2D_h
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
@@ -11,6 +9,13 @@
 *********************************************************************
 */
 
+#ifndef _HHChannel2D_h
+#define _HHChannel2D_h
+
+#include "ChanBase.h"
+#include "ChanCommon.h"
+#include "HHChannelBase.h"
+
 /**
  *
  * In HHChannel2D, there are three possible arguments to each gate:
@@ -21,6 +26,9 @@
 // Ported to asyn13 on 2014-05-30 by Subhasis Ray
 
 typedef double ( *PFDD )( double, double );
+
+class HHGate2D;
+
 class HHChannel2D: public ChanCommon
 {
 #ifdef DO_UNIT_TESTS

@@ -135,7 +135,7 @@ py::object MooseVec::getAttribute(const string& name)
     auto cinfo = oid_.element()->cinfo();
     auto finfo = cinfo->findFinfo(name);
     if(!finfo) {
-        auto fmap = __Finfo__::finfoNames(cinfo, "*");
+        auto fmap = finfoNames(cinfo, "*");
         cerr << __func__ << ":: AttributeError: " << name
              << " is not found on path '" << oid_.path() << "'." << endl;
         cerr << finfoNotFoundMsg(cinfo) << endl;
@@ -182,7 +182,7 @@ bool MooseVec::setAttribute(const string& name, const py::object& val)
     auto rttType = finfo->rttiType();
 
     bool isVector = false;
-    if(py::isinstance<py::iterable>(val) and(not py::isinstance<py::str>(val)))
+    if(py::isinstance<py::iterable>(val) && (! py::isinstance<py::str>(val)))
         isVector = true;
 
     if(isVector) {

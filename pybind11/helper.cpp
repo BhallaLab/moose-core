@@ -42,7 +42,7 @@ namespace py = pybind11;
 #include "../randnum/randnum.h"
 
 #include "helper.h"
-#include "pymoose.h"
+
 #include "Finfo.h"
 
 using namespace std;
@@ -359,11 +359,16 @@ void mooseReinit()
 /* ----------------------------------------------------------------------------*/
 void mooseStart(double runtime, bool notify = false)
 {
+  // TODO: handle keyboard interrupt on _WIN32
+#if !defined(_WIN32)
+  // Credit:
+  // http://stackoverflow.com/questions/1641182/how-can-i-catch-a-ctrl-c-event-c
     struct sigaction sigHandler;
     sigHandler.sa_handler = handleKeyboardInterrupts;
     sigemptyset(&sigHandler.sa_mask);
     sigHandler.sa_flags = 0;
     sigaction(SIGINT, &sigHandler, NULL);
+#endif    
     getShellPtr()->doStart(runtime, notify);
 }
 
@@ -445,7 +450,7 @@ vector<string> mooseGetFieldNames(const string& className,
 
 string finfoNotFoundMsg(const Cinfo* cinfo)
 {
-    auto fmap = __Finfo__::finfoNames(cinfo, "*");
+    auto fmap = finfoNames(cinfo, "*");
     stringstream ss;
     ss << "Available attributes:" << endl;
     for(size_t i = 0; i < fmap.size(); i++) {

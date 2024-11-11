@@ -1,5 +1,3 @@
-#ifndef _HHGate_h
-#define _HHGate_h
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment.
@@ -8,6 +6,8 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+#ifndef _HHGate_h
+#define _HHGate_h
 
 /**
  * This class handles a single gate on an HHChannel. It is equivalent to the

@@ -13,7 +13,11 @@
 #include <time.h>
 #include <math.h>
 #include <queue>
+#if defined(_WIN32)
+#include "getopt.h"
+#else
 #include <unistd.h> // for getopt
+#endif
 #include "../scheduling/Clock.h"
 #include "../msg/DiagonalMsg.h"
 #include "../msg/SparseMsg.h"

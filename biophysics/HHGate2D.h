@@ -1,5 +1,3 @@
-#ifndef _HHGate2D_h
-#define _HHGate2D_h
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
@@ -9,6 +7,9 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+#ifndef _HHGate2D_h
+#define _HHGate2D_h
+
 class HHGate2D
 {
 	public:
@@ -66,30 +67,18 @@ class HHGate2D
                 ///
                 // Setting table parameters
                 ///
-                double getXminA(const Eref& e) const;
-                void setXminA(const Eref& e, double value);
-                double getXmaxA(const Eref& e) const;
-                void setXmaxA(const Eref& e, double value);
-                unsigned int getXdivsA(const Eref& e) const;
-                void setXdivsA(const Eref& e, unsigned int value);
-                double getYminA(const Eref& e) const;
-                void setYminA(const Eref& e, double value);
-                double getYmaxA(const Eref& e) const;
-                void setYmaxA(const Eref& e, double value);
-                unsigned int getYdivsA(const Eref& e) const;
-                void setYdivsA(const Eref& e, unsigned int value);
-                double getXminB(const Eref& e) const;
-                void setXminB(const Eref& e, double value);
-                double getXmaxB(const Eref& e) const;
-                void setXmaxB(const Eref& e, double value);
-                unsigned int getXdivsB(const Eref& e) const;
-                void setXdivsB(const Eref& e, unsigned int value);
-                double getYminB(const Eref& e) const;
-                void setYminB(const Eref& e, double value);
-                double getYmaxB(const Eref& e) const;
-                void setYmaxB(const Eref& e, double value);
-                unsigned int getYdivsB(const Eref& e) const;
-                void setYdivsB(const Eref& e, unsigned int value);
+                double getXmin(const Eref& e) const;
+                void setXmin(const Eref& e, double value);
+                double getXmax(const Eref& e) const;
+                void setXmax(const Eref& e, double value);
+                unsigned int getXdivs(const Eref& e) const;
+                void setXdivs(const Eref& e, unsigned int value);
+                double getYmin(const Eref& e) const;
+                void setYmin(const Eref& e, double value);
+                double getYmax(const Eref& e) const;
+                void setYmax(const Eref& e, double value);
+                unsigned int getYdivs(const Eref& e) const;
+                void setYdivs(const Eref& e, unsigned int value);
 
 		static const Cinfo* initCinfo();
 	private:

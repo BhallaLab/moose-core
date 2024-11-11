@@ -525,7 +525,7 @@ void SteadyState::assignY( double* S )
 void print_gsl_mat( gsl_matrix* m, const char* name )
 {
     size_t i, j;
-    printf( "%s[%lu, %lu] = \n", name, m->size1, m->size2 );
+    printf( "%s[%zu, %zu] = \n", name, m->size1, m->size2 );
     for (i = 0; i < m->size1; i++)
     {
         for (j = 0; j < m->size2; j++)
