@@ -10,7 +10,7 @@ In this guide, `conda` command can be replaced by `mamba` or `micromamba` if you
 To create an environment, open Anaconda command prompt (below we assume Windows CMD shell, you may need to change some commands for PowerShell) and enter
 
 ```
-conda create -n moose meson gsl hdf5 cmake numpy matplotlib vpython doxygen pkg-config pybind11[global] -c conda-forge
+conda create -n moose meson ninja meson-python gsl hdf5 cmake numpy matplotlib vpython doxygen pkg-config clang pybind11[global] -c conda-forge
 ```
 
 This will create an environment name `moose`. In some terminals (windows cmd?) you may get an error for `pybind11[global]`. Put it inside quotes to work around it.
@@ -25,18 +25,13 @@ conda activate moose
 
 You need to use Windows cmd shell (not powershell) for the following:
 
-* Install either MS Visual Studio 2015 or newer or MS Visual Studio Build Tools.
+* Install either MS Visual Studio 2019 or MS Visual Studio Build Tools 2019, including the Windows SDK.
   Add path to this folder in your PATH variable
+* Install the LLVM compiler infrastructure (https://releases.llvm.org/download.html). You can either install it directly, adding its bin folder to the `PATH` environment variable, or install it with winget from the commandline: `winget install llvm`
 * Install git for Windows
 * [Skip] For MPI install MS-MPI (https://github.com/microsoft/Microsoft-MPI/releases/), the only free MPI for Windows
   - TODO: MPI-build on Windows is not supported yet
 * [Skip] Install doxygen
-* Install `pkg-config`
-
-```
-conda install pkg-config
-```
-
 * Get the environment variable for MS Visual Studio command line tools set up by running 
 
 ```
