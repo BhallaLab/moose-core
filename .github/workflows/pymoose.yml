@@ -79,23 +79,3 @@ jobs:
           pip install python-libsbml
           pip install .
           python -c "import moose; moose.le()"
-      - name: Package (non-windows)
-        if: runner.os != 'Windows' 
-        run: |
-          eval "$(micromamba shell hook --shell bash)"
-          micromamba activate moose
-          python -c "import sys; print('#' * 60, sys.version)"
-          pip install cibuildwheel==2.21.3
-          python -m cibuildwheel --output-dir dist
-          echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-          ls dist
-      - name: Package (windows)
-        if: runner.os == 'Windows' 
-        run: |
-          micromamba shell hook -s powershell | Out-String | Invoke-Expression
-          micromamba activate moose
-          python -c "import sys; print('#' * 60, sys.version)"
-          pip install cibuildwheel==2.21.3
-          python -m cibuildwheel --output-dir dist
-          echo "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
-          dir dist
