@@ -77,12 +77,17 @@ jobs:
         if: runner.os != 'Windows'
         env:
           CIBW_BEFORE_ALL_LINUX: yum install gsl-devel
+          CIBW_BUILD: "*-macosx_* *-manylinux_x86_64" 
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+          CIBW_MANYLINUX_PYPY_X86_64_IMAGE: manylinux_2_28          
         run: |
           python -m cibuildwheel --output-dir dist
           echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
           ls dist
       - name: Windows package
         if: runner.os == 'Windows' 
+        env:
+          CIBW_SKIP: "*-win32"
         run: |
           micromamba shell hook -s powershell | Out-String | Invoke-Expression
           micromamba activate moose

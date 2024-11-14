@@ -54,6 +54,7 @@ meson install -C _build
 
 This will create `moose` module inside `moose-core/_build_install` directory. To make moose importable from any terminal, add this directory to your `PYTHONPATH` environment variable. 
 
+*Note: for PowerShell, pass the absolute-path of the `moose-core\_build_install` directory instead of  `%CD%\\_build_install` to the `--prefix` option*
 
 Meson provides many builtin options: https://mesonbuild.com/Builtin-options.html. Meson options are supplied in the command line to `meson setup` in the format `-Doption=value`.
 
