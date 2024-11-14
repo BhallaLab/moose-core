@@ -74,7 +74,9 @@ jobs:
           generate-run-shell: false            
 
       - name: Non-Windows package 
-        if: runner.os != 'Windows' 
+        if: runner.os != 'Windows'
+        env:
+          CIBW_BEFORE_ALL_LINUX: apt-get install libgsl-dev libgsl0-dev gsl-bin
         run: |
           python -m cibuildwheel --output-dir dist
           echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
