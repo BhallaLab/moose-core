@@ -76,7 +76,8 @@ jobs:
       - name: Non-Windows package 
         if: runner.os != 'Windows'
         env:
-          CIBW_BEFORE_ALL_LINUX: yum install gsl-devel
+          CIBW_BEFORE_ALL_LINUX: yum install gsl-devel && yum install hdf5-devel
+          CIBW_BEFORE_ALL_MACOS: brew install gsl && brew install hdf5
           CIBW_BUILD: "*-macosx_* *-manylinux_x86_64" 
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_MANYLINUX_PYPY_X86_64_IMAGE: manylinux_2_28          
