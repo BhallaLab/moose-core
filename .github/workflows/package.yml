@@ -77,6 +77,8 @@ jobs:
         if: runner.os != 'Windows'
         env:
           CIBW_BEFORE_ALL_LINUX: >
+            yum install -y epel-release
+            yum-config-manager --enable epel            
             yum install -y pkgconfig &&
             yum install -y gsl-devel &&
             yum install -y hdf5-devel
