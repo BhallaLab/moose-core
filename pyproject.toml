@@ -51,7 +51,7 @@ maintainers = [
     {name = 'G.V. Harsharani', email = 'hrani@ncbs.res.in'},
     ]
 
-dependencies = ['numpy>=1.23', 'matplotlib', 'vpython', 'pybind11', 'python-libsbml']
+dependencies = ['numpy>=1.23', 'matplotlib', 'vpython', 'pybind11', 'python-libsbml', 'pyneuroml']
 
 [project.urls]
 homepage = 'https://moose.ncbs.res.in'
