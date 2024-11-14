@@ -26,15 +26,15 @@ jobs:
 
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel==2.21.3
-
       
-      - name: Install dependencies
+      - name: Ubuntu dpendencies
         if: ${{ matrix.apt }}
         run: |
           sudo apt-get -y install libhdf5-dev libgsl0-dev graphviz-dev python3-lxml doxygen
           sudo apt-get -y install libgsl-dev
           pkg-config --libs gsl
           pkg-config --cflags gsl
+      - name: MacOS dpendencies
         if: ${{ matrix.brew }}
         run: |
           brew install gsl
@@ -43,15 +43,47 @@ jobs:
           brew install doxygen
           pkg-config --libs gsl
           pkg-config --cflags gsl
+      - name: Windows dpendencies
+        if: ${{ matrix.winget }}
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-name: moose
+          cache-environment: true
+          cache-downloads: true
+          create-args: >-
+            python=${{ matrix.python-version }}
+            pkg-config
+            clang
+            hdf5
+            pybind11[global]
+            graphviz
+            pytables
+            numpy
+            matplotlib
+            vpython
+            lxml
+            doxygen
+            setuptools
+            wheel
+            meson
+            ninja
+            meson-python
+            gsl
+            cibuildwheel
+          post-cleanup: all
+          generate-run-shell: false            
 
-      - name: Package
+      - name: Non-Windows package 
         if: runner.os != 'Windows' 
         run: |
           python -m cibuildwheel --output-dir dist
           echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
           ls dist
+      - name: Windows package
         if: runner.os == 'Windows' 
         run: |
+          micromamba shell hook -s powershell | Out-String | Invoke-Expression
+          micromamba activate moose
           python -m cibuildwheel --output-dir dist
           echo "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
           dir dist
