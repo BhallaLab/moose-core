@@ -28,22 +28,6 @@ jobs:
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel==2.21.3
       
-      - name: Ubuntu dpendencies
-        if: ${{ matrix.apt }}
-        run: |
-          sudo apt-get -y install libhdf5-dev graphviz-dev python3-lxml doxygen
-          sudo apt-get -y install libgsl0-dev libgsl-dev gsl-bin 
-          pkg-config --libs gsl
-          pkg-config --cflags gsl
-      - name: MacOS dpendencies
-        if: ${{ matrix.brew }}
-        run: |
-          brew install gsl
-          brew install hdf5
-          brew install graphviz
-          brew install doxygen
-          pkg-config --libs gsl
-          pkg-config --cflags gsl
       - name: Windows dependencies
         if: ${{ matrix.winget }}
         uses: mamba-org/setup-micromamba@v1
@@ -84,9 +68,8 @@ jobs:
             yum install -y gsl-devel &&
             yum install -y hdf5-devel            
           CIBW_BEFORE_ALL_MACOS: >
-            brew install pkg-config gsl hdf5 meson &&
-            which pkg-config 
-          CIBW_BUILD: '*-macosx_arm64 *-macosx_x86_64 *-manylinux_x86_64'
+            brew install pkg-config gsl hdf5 meson
+          CIBW_BUILD: '*-macosx_arm64 *-manylinux_x86_64'
           CIBW_SKIP: 'pp*'
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_MANYLINUX_PYPY_X86_64_IMAGE: manylinux_2_28          
