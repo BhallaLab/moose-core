@@ -5,7 +5,8 @@ on: [push]
 jobs:
   build:
     runs-on: ${{ matrix.os }}    
-    strategy:      
+    strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-14, windows-latest]
         build_type: [Release]

@@ -1,7 +1,6 @@
 [build-system]
 build-backend = 'mesonpy'
 requires = [
-         'python>=3.8',
          'meson>=1.4',
          'ninja',
          'meson-python>=0.14',
@@ -9,7 +8,8 @@ requires = [
 
 [project]
 name = 'pymoose'
-dynamic = ['version']
+# dynamic = ['version']
+version = '4.1.0dev'
 description = 'Python scripting interface of MOOSE Simulator (https://moose.ncbs.res.in)'
 readme = 'README.md'
 classifiers = [
@@ -74,6 +74,55 @@ test = [
 setup = ['--default-library=static', '-Ddebug=false', '-Doptimization=3', '--vsenv']
 compile = ['-j4']
 dist = ['--include-subprojects']
+
+[tool.cibuildwheel]
+build = '*-macosx_* *-manylinux_x86_64 *-win_amd64 *-win_arm64'
+skip = "*-win32"
+test-skip = ""
+free-threaded-support = false
+
+archs = ["auto"]
+build-frontend = "default"
+config-settings = {}
+dependency-versions = 'pinned'
+environment = {}
+environment-pass = []
+build-verbosity = 0
+
+before-all = ''
+before-build = ''
+repair-wheel-command = ''
+
+test-command = ''
+before-test = ''
+test-requires = []
+test-extras = []
+
+container-engine = 'docker'
+
+[tool.cibuildwheel.linux]
+repair-wheel-command = 'auditwheel repair -w {dest_dir} {wheel}'
+manylinux-x86_64-image = 'manylinux2014'
+# manylinux-i686-image = 'manylinux2014'
+manylinux-aarch64-image = 'manylinux2014'
+manylinux-ppc64le-image = 'manylinux2014'
+manylinux-s390x-image = 'manylinux2014'
+manylinux-pypy_x86_64-image = 'manylinux2014'
+# manylinux-pypy_i686-image = 'manylinux2014'
+manylinux-pypy_aarch64-image = 'manylinux2014'
+
+# musllinux-x86_64-image = 'musllinux_1_2'
+# musllinux-i686-image = 'musllinux_1_2'
+# musllinux-aarch64-image = 'musllinux_1_2'
+# musllinux-ppc64le-image = 'musllinux_1_2'
+# musllinux-s390x-image = 'musllinux_1_2'
+# musllinux-armv7l-image = 'musllinux_1_2'
+
+
+[tool.cibuildwheel.macos]
+repair-wheel-command = 'delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}'
+
+[tool.cibuildwheel.windows]
 
 [tool.black]
 line-length = 80
