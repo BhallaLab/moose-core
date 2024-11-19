@@ -97,7 +97,7 @@ jobs:
           CIBW_BUILD_VERBOSITY: 1
           CIBW_BEFORE_ALL: 'uname -a'
           CIBW_BEFORE_ALL_MACOS: >
-            brew install pkg-config gsl hdf5 meson meson-python ninja cmake &&
+            brew install pkg-config gsl hdf5 meson ninja cmake &&
             export PKG_CONFIG=`which pkg-config`
           CIBW_BUILD: '*-macosx_arm64'
           CIBW_SKIP: 'pp*'
