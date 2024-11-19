@@ -41,9 +41,6 @@ jobs:
           brew install graphviz
           brew install doxygen
           brew install pkg-config
-          pkg-config --libs gsl
-          pkg-config --cflags gsl
-          python -m pip install cibuildwheel==2.21.3
       - name: Windows dependencies
         if: ${{ matrix.winget }}
         uses: mamba-org/setup-micromamba@v1
@@ -93,16 +90,8 @@ jobs:
           ls wheelhouse
       - name: MacOSX package
         if: runner.os == 'macOS'
-        env:            
-          CIBW_BUILD_VERBOSITY: 1
-          CIBW_BEFORE_ALL: 'uname -a'
-          CIBW_BEFORE_ALL_MACOS: >
-            brew install pkg-config gsl hdf5 meson ninja cmake &&
-            export PKG_CONFIG=`which pkg-config`
-          CIBW_BUILD: '*-macosx_arm64'
-          CIBW_SKIP: 'pp*'
-        run: |
-          python -m cibuildwheel --output-dir wheelhouse
+        run: |          
+          python -m pip wheel -w wheelhouse .
           ls wheelhouse
       - name: Windows package
         if: runner.os == 'Windows' 
