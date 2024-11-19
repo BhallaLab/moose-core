@@ -71,7 +71,6 @@ jobs:
             ninja
             meson-python
             gsl
-            # cibuildwheel
           post-cleanup: all
           generate-run-shell: false            
 
