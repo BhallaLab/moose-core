@@ -84,14 +84,13 @@ jobs:
             yum install -y gsl-devel &&
             yum install -y hdf5-devel            
           CIBW_BEFORE_ALL_MACOS: >
-            brew install pkg-config &&
-            brew install gsl &&
-            brew install hdf5 &&
-            brew install meson 
+            brew install pkg-config gsl hdf5 meson &&
+            which pkg-config &&
+            export PKG_CONFIG=`which pkg-config`  # meson cannot find pkg-config despite it being installed
           CIBW_BUILD: '*-macosx_* *-manylinux_x86_64'
           CIBW_SKIP: 'pp*'
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
-          CIBW_MANYLINUX_PYPY_X86_64_IMAGE: manylinux_2_28          
+          # CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+          # CIBW_MANYLINUX_PYPY_X86_64_IMAGE: manylinux_2_28          
         run: |
           python -m cibuildwheel --output-dir wheelhouse
           ls wheelhouse
