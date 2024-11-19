@@ -267,7 +267,9 @@ pymoose = py.extension_module('_moose', join_paths('pybind11', 'pymoose.cpp'),
                               link_args: link_args,
                               dependencies: [gsl_dep, mpi_dep, pybind_dep], #, libsoda_dep],
                               include_directories: include_dirs,
-                              install: true, install_dir: join_paths(py.get_install_dir(), 'moose'))
+                              install: true,
+#                              install_dir: join_paths(py.get_install_dir(), 'moose'))
+                              subdir: 'moose')
 
 install_subdir(
   join_paths('python', 'moose'),
