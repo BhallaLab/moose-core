@@ -35,7 +35,7 @@ add_global_arguments('-DUSE_GSL', language: ['c', 'cpp'])
 # Credit: Borrowed from SciPy
 ##############################################################
 python = import('python')
-py = python.find_installation()
+py = python.find_installation(pure: false)
 python_dep = py.dependency()
 
 min_numpy_version = '1.23.5'  # keep in sync with pyproject.toml
@@ -247,7 +247,7 @@ sublibs = [
 if is_msvc
   sublibs += getopt_lib
 endif
-moose_dir = py.get_install_dir()
+# moose_dir = py.get_install_dir()
 
 include_dirs = [join_paths('external', 'libsoda')]
 # Windows does not have getopt library and its dependencies. A port is
@@ -256,25 +256,25 @@ if is_windows
   include_dirs += [join_paths('external', 'getopt')]
 endif
 
-pymoose = py.extension_module('_moose', join_paths('pybind11', 'pymoose.cpp'),
-                              link_whole: sublibs,
-                              link_args: link_args,
-                              dependencies: [gsl_dep, mpi_dep, pybind_dep], #, libsoda_dep],
-                              include_directories: include_dirs,
-                              install: true, install_dir: join_paths(moose_dir, 'moose'))
-
 if is_windows
   rename_cmd = 'move'
 else
   rename_cmd = 'mv'
 endif
 
+pymoose = py.extension_module('_moose', join_paths('pybind11', 'pymoose.cpp'),
+                              link_whole: sublibs,
+                              link_args: link_args,
+                              dependencies: [gsl_dep, mpi_dep, pybind_dep], #, libsoda_dep],
+                              include_directories: include_dirs,
+                              install: true, install_dir: join_paths(py.get_install_dir(), 'moose'))
+
 install_subdir(
   join_paths('python', 'moose'),
-  install_dir: moose_dir)
+  install_dir: py.get_install_dir())
 
 install_subdir(
   join_paths('python', 'rdesigneur'),
-  install_dir: moose_dir)
+  install_dir: py.get_install_dir())
 
 message('Finished installing moose in', pymoose.full_path())

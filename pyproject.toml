@@ -89,7 +89,7 @@ environment = {}
 environment-pass = []
 build-verbosity = 0
 
-before-all = ''
+before-all = 'uname -a'
 before-build = ''
 repair-wheel-command = ''
 

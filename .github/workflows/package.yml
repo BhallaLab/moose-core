@@ -77,6 +77,7 @@ jobs:
       - name: Non-Windows package 
         if: runner.os != 'Windows'
         env:
+          CIBW_BEFORE_ALL: 'uname -a'
           CIBW_BEFORE_ALL_LINUX: >
             yum install -y epel-release &&
             yum install -y pkgconfig &&
@@ -97,6 +98,8 @@ jobs:
       - name: Windows package
         if: runner.os == 'Windows' 
         env:
+          CIBW_BEFORE_ALL: 'uname -a'
+          CIBW_BUILD: "*-win_*
           CIBW_SKIP: "*-win32"
         run: |
           micromamba shell hook -s powershell | Out-String | Invoke-Expression
