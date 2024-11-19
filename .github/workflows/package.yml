@@ -86,7 +86,7 @@ jobs:
           CIBW_BEFORE_ALL_MACOS: >
             brew install pkg-config gsl hdf5 meson &&
             which pkg-config 
-          CIBW_BUILD: '*-macosx_arm64 *-manylinux_x86_64'
+          CIBW_BUILD: '*-macosx_arm64 *-macosx_x86_64 *-manylinux_x86_64'
           CIBW_SKIP: 'pp*'
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_MANYLINUX_PYPY_X86_64_IMAGE: manylinux_2_28          
