@@ -43,7 +43,7 @@ jobs:
           brew install doxygen
           pkg-config --libs gsl
           pkg-config --cflags gsl
-      - name: Windows dpendencies
+      - name: Windows dependencies
         if: ${{ matrix.winget }}
         uses: mamba-org/setup-micromamba@v1
         with:
@@ -80,11 +80,12 @@ jobs:
             yum install -y epel-release &&
             yum install -y pkgconfig &&
             yum install -y gsl-devel &&
-            yum install -y hdf5-devel
+            yum install -y hdf5-devel            
           CIBW_BEFORE_ALL_MACOS: >
             brew install pkg-config &&
             brew install gsl &&
             brew install hdf5
+            brew install meson
           CIBW_BUILD: "*-macosx_* *-manylinux_x86_64" 
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_MANYLINUX_PYPY_X86_64_IMAGE: manylinux_2_28          

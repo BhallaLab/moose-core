@@ -13,6 +13,8 @@ To create an environment, open Anaconda command prompt (below we assume Windows 
 conda create -n moose meson ninja meson-python gsl hdf5 cmake numpy matplotlib vpython doxygen pkg-config clang pybind11[global] -c conda-forge
 ```
 
+*Note: Please make sure you are using the `conda-forge` channel (`-c conda-forge`) for installing `GSL` and not the anaconda `dafaults`. The latter causes linking error*
+
 This will create an environment name `moose`. In some terminals (windows cmd?) you may get an error for `pybind11[global]`. Put it inside quotes to work around it.
 
 Then activate this environment for your build :
@@ -28,6 +30,7 @@ You need to use Windows cmd shell (not powershell) for the following:
 * Install either MS Visual Studio 2019 or MS Visual Studio Build Tools 2019, including the Windows SDK.
   Add path to this folder in your PATH variable
 * Install the LLVM compiler infrastructure (https://releases.llvm.org/download.html). You can either install it directly, adding its bin folder to the `PATH` environment variable, or install it with winget from the commandline: `winget install llvm`
+  To add it to PATH in PowerShell, run: `$env:PATH="$env:PATH;C:\Program Files\LLVM\bin"`
 * Install git for Windows
 * [Skip] For MPI install MS-MPI (https://github.com/microsoft/Microsoft-MPI/releases/), the only free MPI for Windows
   - TODO: MPI-build on Windows is not supported yet

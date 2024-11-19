@@ -1,10 +1,15 @@
 [build-system]
 build-backend = 'mesonpy'
-requires = ['meson', 'ninja', 'meson-python', 'pybind11[global]']
+requires = [
+         'python>=3.8',
+         'meson>=1.4',
+         'ninja',
+         'meson-python>=0.14',
+         'pybind11[global]']
 
 [project]
 name = 'pymoose'
-version = '4.1.0.dev'
+dynamic = ['version']
 description = 'Python scripting interface of MOOSE Simulator (https://moose.ncbs.res.in)'
 readme = 'README.md'
 classifiers = [
@@ -16,11 +21,11 @@ classifiers = [
     'Programming Language :: C++',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
     'Topic :: Software Development :: Libraries',
     'Topic :: Scientific/Engineering',
     'Operating System :: Microsoft :: Windows',
