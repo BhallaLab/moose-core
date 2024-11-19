@@ -92,18 +92,18 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_MANYLINUX_PYPY_X86_64_IMAGE: manylinux_2_28          
         run: |
-          python -m cibuildwheel --output-dir dist
+          python -m cibuildwheel --output-dir wheelhouse
           echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-          ls dist
+          ls wheelhouse
       - name: Windows package
         if: runner.os == 'Windows' 
         env:
           CIBW_BEFORE_ALL: 'uname -a'
-          CIBW_BUILD: "*-win_*
-          CIBW_SKIP: "*-win32"
+          CIBW_BUILD: '*-win_*'
+          CIBW_SKIP: '*-win32'
         run: |
           micromamba shell hook -s powershell | Out-String | Invoke-Expression
           micromamba activate moose
-          python -m cibuildwheel --output-dir dist
+          python -m cibuildwheel --output-dir wheelhouse
           echo "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
-          dir dist
+          dir wheelhouse
