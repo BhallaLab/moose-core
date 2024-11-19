@@ -42,6 +42,7 @@ jobs:
           brew install hdf5
           brew install graphviz
           brew install doxygen
+          brew install pkg-config
           pkg-config --libs gsl
           pkg-config --cflags gsl
       - name: Windows dependencies
@@ -77,6 +78,7 @@ jobs:
       - name: Non-Windows package 
         if: runner.os != 'Windows'
         env:
+          CIBW_BUILD_VERBOSITY: 1
           CIBW_BEFORE_ALL: 'uname -a'
           CIBW_BEFORE_ALL_LINUX: >
             yum install -y epel-release &&
@@ -85,7 +87,7 @@ jobs:
             yum install -y hdf5-devel            
           CIBW_BEFORE_ALL_MACOS: >
             brew install pkg-config gsl hdf5 meson 
-          CIBW_BUILD: '*-macosx_arm64 *-manylinux_x86_64'
+          CIBW_BUILD: '*-macosx_arm64 *-macosx_x86_64 *-manylinux_x86_64'
           CIBW_SKIP: 'pp*'
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_MANYLINUX_PYPY_X86_64_IMAGE: manylinux_2_28          
