@@ -10,7 +10,7 @@ In this guide, `conda` command can be replaced by `mamba` or `micromamba` if you
 To create an environment, open Anaconda command prompt (below we assume Windows CMD shell, you may need to change some commands for PowerShell) and enter
 
 ```
-conda create -n moose meson ninja meson-python gsl hdf5 cmake numpy matplotlib vpython doxygen pkg-config clang pybind11[global] -c conda-forge
+conda create -n moose meson ninja meson-python gsl hdf5 numpy matplotlib vpython doxygen pkg-config clang pybind11[global] -c conda-forge
 ```
 
 *Note: Please make sure you are using the `conda-forge` channel (`-c conda-forge`) for installing `GSL` and not the anaconda `dafaults`. The latter causes linking error*
@@ -25,12 +25,11 @@ conda activate moose
 
 ## Requirements
 
-You need to use Windows cmd shell (not powershell) for the following:
-
 * Install either MS Visual Studio 2019 or MS Visual Studio Build Tools 2019, including the Windows SDK.
-  Add path to this folder in your PATH variable
+  Add path to this folder in your `PATH` environment variable.
 * Install the LLVM compiler infrastructure (https://releases.llvm.org/download.html). You can either install it directly, adding its bin folder to the `PATH` environment variable, or install it with winget from the commandline: `winget install llvm`
-  To add it to PATH in PowerShell, run: `$env:PATH="$env:PATH;C:\Program Files\LLVM\bin"`
+  - To add its executables to PATH in PowerShell, run: `$env:PATH="$env:PATH;C:\Program Files\LLVM\bin"`
+  - Alternatively, if using `cmd.exe` command prompt, add its executables to PATH in cmd, run: `set PATH="%PATH%;C:\Program Files\LLVM\bin"`
 * Install git for Windows
 * [Skip] For MPI install MS-MPI (https://github.com/microsoft/Microsoft-MPI/releases/), the only free MPI for Windows
   - TODO: MPI-build on Windows is not supported yet
@@ -41,11 +40,16 @@ You need to use Windows cmd shell (not powershell) for the following:
 "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 ```
 
-Gotcha: if you are on a 64 bit machine, the machine type is `x64`. MSVC comes with cross compilation support for various machine-os combos (x86, x86_64). You can initialize the architecture according to your specific case (see this [stackoverflow comment](https://stackoverflow.com/questions/78446613/whats-the-difference-in-visual-studio-between-amd64-x86-vs-x86-amd64)
+Gotcha: if you are on a 64 bit cpu, the machine type is `x64`. MSVC comes with cross compilation support for various machine-os combos (x86, x86_64). You can initialize the architecture according to your specific case (see this [stackoverflow comment](https://stackoverflow.com/questions/78446613/whats-the-difference-in-visual-studio-between-amd64-x86-vs-x86-amd64)
 
 "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" {combo}
 
+## Get moose source code and build
 * Clone `moose-core` source code using git
+```
+git clone https://github.com/BhallaLab/moose-core --depth 50 
+```
+
 * Build moose
 ```
 cd moose-core
@@ -92,7 +96,7 @@ In a terminal, `cd` to `moose-core` and run the following:
 python -m build
 ```
 
-# Debug build
+## Note on Debug build on Windows
 Debug build tries to link with debug build of Python, and this is not
 readily available on Windows, unless you build the Python interpreter
 (CPython) itself from sources in debug mode. Therefore, debug build of
@@ -115,10 +119,13 @@ use it to attach to a running Python process and set breakpoints at
 target function/line etc.
 
 In WinDbg command line you find the moose module name with
-`lm m _moose*`
+```
+lm m _moose*
+```
 
 The will show something like `_moose_cp311_win_amd64` when your build produced `_moose.cp311-win_amd64.lib`.
 
 Now you can set a breakpoint to a class function with the module name as prefix as follows:
-
-`bp _moose_cp311_win_amd64!ChanBase::setGbar`
+```
+bp _moose_cp311_win_amd64!ChanBase::setGbar
+```

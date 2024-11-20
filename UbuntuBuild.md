@@ -5,12 +5,30 @@
 sudo apt install build-essential
 ```
 
-1. Install conda/mamba/micromamba (in all the commands below `conda` can be replaced by `mamba` or `micromamba` respectively)
+## Building with system Python
+
+1. Install the dependencies
+```
+sudo apt-get install ninja meson pkg-config python-pip python-numpy libgsl-dev g++ pybind11 
+pip install meson-python
+pip install python-libsbml
+pip install pyneuroml
+pip install vpython
+```
+
+2. Now use `pip` to download and install `pymoose` from the [github repository](https://github.com/BhallaLab/moose-core).
+
+```
+$ pip install git+https://github.com/BhallaLab/moose-core --user
+```
+
+## Building with conda or variants
+1. Install conda/mamba/micromamba (in all the commands below `conda` can be replaced by `mamba` or `micromamba` respectively). See https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html to find how to install conda or its variants. 
 
 2. Create an environment with required packages
 
 ```
-conda create -n moose meson gsl hdf5 cmake numpy matplotlib vpython doxygen pybind11[global] pkg-config -c conda-forge
+conda create -n moose ninja meson meson-python gsl hdf5 numpy matplotlib vpython doxygen pybind11[global] pkg-config -c conda-forge
 ```
 
 3. Activate the environment
@@ -19,7 +37,11 @@ conda create -n moose meson gsl hdf5 cmake numpy matplotlib vpython doxygen pybi
 conda activate moose
 ```
 
+## After the above steps, for both system Python and conda environment
 4. Clone `moose-core` source code using git
+```
+    $ git clone https://github.com/BhallaLab/moose-core --depth 50 
+```
 5. Build moose
 ```
 cd moose-core
@@ -53,15 +75,35 @@ Meson provides many builtin options: https://mesonbuild.com/Builtin-options.html
 python -m pip install --no-build-isolation --editable .
 ```
 
-7. To build a wheel (for distribution), you need `build` and `meson-python` modules:
+7. To build a wheel (for distribution), run `pip wheel` command in the `moose-core` directory:
+```
+ pip wheel -w dist .
+ ```
+This weel create the `pymoose-{version}-{python}-{abi}-{os}_{arch}.whl` wheel file in the `moose-core/dist` directory. This can installed with 
+```
+pip install dist/pymoose-{version}-{python}-{abi}-{os}_{arch}.whl
+```
+
+## Development build with `meson` and `ninja`
+
+`pip`  builds `pymoose` with default options, it runs `meson` behind the scene.
+If you are developing moose, want to build it with different options, or need to test
+and profile it, `meson` and `ninja` based flow is recommended.
+
+Install the required dependencies and download the latest source code of moose
+from github.
 
 ```
-conda install meson-python
-conda install build
+    $ git clone https://github.com/BhallaLab/moose-core --depth 50 
+    $ cd moose-core
+    $ meson setup --wipe _build --prefix=`pwd`/_build_install -Duse_mpi=false -Dbuildtype=release
+    $ ninja -v -C _build 
+	$ meson install -C _build
 ```
 
-In a terminal, `cd` to `moose-core` and run the following:
+This will build moose, in `moose-core/_build`  directory and install it as Python package in the `moose-core/_build_install` directory.
 
-```
-python -m build
-```
+To rebuild, delete the `_build` directory and the generated `_build_install/` directory and continue the steps above starting with `meson setup ...`.
+
+To make in debug mode replace the option `-Dbuildtype=release` with `-Dbuildtype=debug`
+
