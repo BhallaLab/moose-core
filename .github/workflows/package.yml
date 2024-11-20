@@ -13,13 +13,6 @@ jobs:
         c_compiler: [clang]
         python-version: ['3.11']
         # python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
-        include:
-          - os: ubuntu-latest
-            apt: 10
-          - os: macos-14
-            brew: 20
-          - os: windows-latest
-            winget: 30
     steps:
       - uses: actions/checkout@v4
         
@@ -29,15 +22,16 @@ jobs:
         run: python -m pip install cibuildwheel==2.21.3
         
       - name: MacOS dpendencies
-        if: ${{ matrix.brew }}
+        if: ${{ runner.os == 'macOS' }}
         run: |
           brew install gsl
           brew install hdf5
           brew install graphviz
           brew install doxygen
           brew install pkg-config
+          
       - name: Windows dependencies
-        if: ${{ matrix.winget }}
+        if: ${{ runner.os == 'Windows' }}
         uses: mamba-org/setup-micromamba@v1
         with:
           environment-name: moose
@@ -83,7 +77,7 @@ jobs:
         run: |
           python -m cibuildwheel --output-dir wheelhouse
           ls wheelhouse
-      - name: MacOSX package
+      - name: MacOS package
         if: runner.os == 'macOS'
         env:
           CIBW_BUILD_VERBOSITY: 1
@@ -94,6 +88,7 @@ jobs:
             echo "<<<<<<<<<#########################################>>>>>>>>>>" &&
             echo "$$$$$ `pkg-config --libs gsl`" &&
             echo "@@@@@ `pkg-config --cflags gsl`"
+          CIBW_ARCHS: 'arm64'
           CIBW_BUILD: '*-macosx_arm64'
           CIBW_SKIP: 'pp* cp38*'
         run: |
