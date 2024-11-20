@@ -25,14 +25,9 @@ jobs:
         
       - uses: actions/setup-python@v5
 
-      - name: Ubuntu dpendencies
-        if: ${{ matrix.apt }}
-        run: |
-          sudo apt-get -y install libhdf5-dev graphviz-dev python3-lxml doxygen
-          sudo apt-get -y install libgsl0-dev libgsl-dev gsl-bin
-          python -m pip install cibuildwheel==2.21.3
-          pkg-config --libs gsl
-          pkg-config --cflags gsl
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel==2.21.3
+        
       - name: MacOS dpendencies
         if: ${{ matrix.brew }}
         run: |
