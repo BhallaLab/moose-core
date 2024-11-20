@@ -90,8 +90,19 @@ jobs:
           ls wheelhouse
       - name: MacOSX package
         if: runner.os == 'macOS'
-        run: |          
-          python -m pip wheel -w wheelhouse .
+        env:
+          CIBW_BUILD_VERBOSITY: 1
+          CIBW_BEFORE_ALL: 'uname -a'
+          CIBW_BEFORE_ALL_MACOS: >
+            brew install pkg-config gsl hdf5 meson ninja cmake &&
+            export PKG_CONFIG=`which pkg-config` &&
+            echo "<<<<<<<<<#########################################>>>>>>>>>>" &&
+            echo "$$$$$ `pkg-config --libs gsl`" &&
+            echo "@@@@@ `pkg-config --cflags gsl`"
+          CIBW_BUILD: '*-macosx_arm64'
+          CIBW_SKIP: 'pp* cp38*'
+        run: |
+          python -m cibuildwheel --output-dir wheelhouse
           ls wheelhouse
       - name: Windows package
         if: runner.os == 'Windows' 
