@@ -247,7 +247,6 @@ sublibs = [
 if is_msvc
   sublibs += getopt_lib
 endif
-# moose_dir = py.get_install_dir()
 
 include_dirs = [join_paths('external', 'libsoda')]
 # Windows does not have getopt library and its dependencies. A port is
@@ -268,7 +267,6 @@ pymoose = py.extension_module('_moose', join_paths('pybind11', 'pymoose.cpp'),
                               dependencies: [gsl_dep, mpi_dep, pybind_dep], #, libsoda_dep],
                               include_directories: include_dirs,
                               install: true,
-#                              install_dir: join_paths(py.get_install_dir(), 'moose'))
                               subdir: 'moose')
 
 install_subdir(

@@ -56,6 +56,7 @@ This will create `moose` module inside `moose-core/_build_install` directory. To
 Meson provides many builtin options: https://mesonbuild.com/Builtin-options.html. Meson options are supplied in the command line to `meson setup` in the format `-Doption=value`.
 
   - **Buildtype**
+
 	If you want a developement build with debug enabled, pass `-Dbuildtype=debug` in the `meson setup ...` command line.
 
 

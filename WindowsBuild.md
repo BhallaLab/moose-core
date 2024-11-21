@@ -40,9 +40,12 @@ conda activate moose
 "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 ```
 
-Gotcha: if you are on a 64 bit cpu, the machine type is `x64`. MSVC comes with cross compilation support for various machine-os combos (x86, x86_64). You can initialize the architecture according to your specific case (see this [stackoverflow comment](https://stackoverflow.com/questions/78446613/whats-the-difference-in-visual-studio-between-amd64-x86-vs-x86-amd64)
 
+*Gotcha: if you are on a 64 bit cpu, the machine type is `x64`. MSVC comes with cross compilation support for various machine-os combos (x86, x86_64). You can initialize the architecture according to your specific case (see this [stackoverflow comment](https://stackoverflow.com/questions/78446613/whats-the-difference-in-visual-studio-between-amd64-x86-vs-x86-amd64)*
+
+```
 "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" {combo}
+```
 
 ## Get moose source code and build
 * Clone `moose-core` source code using git
@@ -119,6 +122,7 @@ use it to attach to a running Python process and set breakpoints at
 target function/line etc.
 
 In WinDbg command line you find the moose module name with
+
 ```
 lm m _moose*
 ```
@@ -126,6 +130,7 @@ lm m _moose*
 The will show something like `_moose_cp311_win_amd64` when your build produced `_moose.cp311-win_amd64.lib`.
 
 Now you can set a breakpoint to a class function with the module name as prefix as follows:
+
 ```
 bp _moose_cp311_win_amd64!ChanBase::setGbar
 ```
