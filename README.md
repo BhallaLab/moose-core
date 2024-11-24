@@ -33,7 +33,7 @@ details about MOOSE simulator, visit https://moose.ncbs.res.in .
 ----------
 # Installation
 
-See [INSTALLATION.md](INSTALLATION.md) for instructions on installation.
+See [INSTALL.md](INSTALL.md) for instructions on installation.
 
 Have a look at examples, tutorials and demo here
 https://github.com/BhallaLab/moose-examples.

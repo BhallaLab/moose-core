@@ -1,70 +1,65 @@
 # Building MOOSE on Windows with MSVC
 
-## Virtual environment
-You may want to use one of the virtual environment systems like Anaconda, Miniforge with Mamba, or Micromamba (https://mamba.readthedocs.io/en/latest/), which will allow you to create isolated Python environments. There  are binary packages for most of the requirements in the conda channels (conda-forge). In contrast, pip will actually download the package source code and try to build it locally, which opens up a chain of dependencies on various other libraries.
-
-If you want to keep things slim, `micromamba` may be ideal because it is a single statically linked C++ executable and does not install any base environment.
-
-In this guide, `conda` command can be replaced by `mamba` or `micromamba` if you are using one of those systems. 
-
-To create an environment, open Anaconda command prompt (below we assume Windows CMD shell, you may need to change some commands for PowerShell) and enter
-
-```
-conda create -n moose meson ninja meson-python gsl hdf5 numpy matplotlib vpython doxygen pkg-config clang pybind11[global] -c conda-forge
-```
-
-*Note: Please make sure you are using the `conda-forge` channel (`-c conda-forge`) for installing `GSL` and not the anaconda `dafaults`. The latter causes linking error*
-
-This will create an environment name `moose`. In some terminals (windows cmd?) you may get an error for `pybind11[global]`. Put it inside quotes to work around it.
-
-Then activate this environment for your build :
-
-```
-conda activate moose
-```
-
-## Requirements
-
+## Install requirements
+* Install [git](https://git-scm.com/downloads/win)
 * Install either MS Visual Studio 2019 or MS Visual Studio Build Tools 2019, including the Windows SDK.
   Add path to this folder in your `PATH` environment variable.
 * Install the LLVM compiler infrastructure (https://releases.llvm.org/download.html). You can either install it directly, adding its bin folder to the `PATH` environment variable, or install it with winget from the commandline: `winget install llvm`
   - To add its executables to PATH in PowerShell, run: `$env:PATH="$env:PATH;C:\Program Files\LLVM\bin"`
   - Alternatively, if using `cmd.exe` command prompt, add its executables to PATH in cmd, run: `set PATH="%PATH%;C:\Program Files\LLVM\bin"`
-* Install git for Windows
 * [Skip] For MPI install MS-MPI (https://github.com/microsoft/Microsoft-MPI/releases/), the only free MPI for Windows
   - TODO: MPI-build on Windows is not supported yet
-* [Skip] Install doxygen
-* Get the environment variable for MS Visual Studio command line tools set up by running 
+
+## Python virtual environment
+You may want to use a system like Anaconda (or [Miniforge with Mamba, or Micromamba](https://mamba.readthedocs.io/en/latest/)), which will allow you to create isolated Python environments. There  are binary packages for most of the requirements in the conda channel `conda-forge`. 
+
+If you want to keep things slim, `micromamba` may be ideal because it is a single statically linked C++ executable and does not install any base environment.
+
+In this guide, `conda` command can be replaced by `mamba` or `micromamba` if you are using one of those systems. 
+
+To create an environment, open Anaconda command prompt and enter
 
 ```
-"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+conda create -n moose meson ninja meson-python gsl hdf5 numpy matplotlib vpython pkg-config pybind11[global] clang -c conda-forge
 ```
 
+*Note: Please make sure you are using the `conda-forge` channel (`-c conda-forge`) for installing `GSL` and not the anaconda `defaults`. The latter causes linking error*
 
-*Gotcha: if you are on a 64 bit cpu, the machine type is `x64`. MSVC comes with cross compilation support for various machine-os combos (x86, x86_64). You can initialize the architecture according to your specific case (see this [stackoverflow comment](https://stackoverflow.com/questions/78446613/whats-the-difference-in-visual-studio-between-amd64-x86-vs-x86-amd64)*
+This will create an environment name `moose`. In some terminals (windows `cmd`) you may get an error for `pybind11[global]`. Put it inside quotes to work around it.
+
+Then activate this environment for your build:
 
 ```
-"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" {combo}
+conda activate moose
 ```
 
-## Get moose source code and build
-* Clone `moose-core` source code using git
+## Build and install moose using `pip`
+```
+pip install git=https://github.com/BhallaLab/moose-core
+```
+
+## Build moose for development
+*Note: The commands below are designed for PowerShell.*
+* Get moose source code by cloning `moose-core` source code using git
 ```
 git clone https://github.com/BhallaLab/moose-core --depth 50 
 ```
 
-* Build moose
+* If you have not already set the path to LLVM binaries, run 
+
+```
+$env:PATH="$env:PATH;C:\Program Files\LLVM\bin"
+```
+  
 ```
 cd moose-core
-
-meson setup --wipe _build --prefix=%CD%\\_build_install -Duse_mpi=false --buildtype=release
+meson setup --wipe _build -Duse_mpi=false --buildtype=release
 ninja -v -C _build 
 meson install -C _build
 ```
+*Note: If you want to keep the installation in local folder replace the third command with: `meson setup --wipe _build --prefix={absolute-path} -Duse_mpi=false --buildtype=release` where `absolute-path` is the full path of the folder you want to install it in. You will have to add the `Lib\site-packages` directory within this to your PATH environment variable to make `moose` module visible to Python.*
 
 This will create `moose` module inside `moose-core/_build_install` directory. To make moose importable from any terminal, add this directory to your `PYTHONPATH` environment variable. 
-
-*Note: for PowerShell, pass the absolute-path of the `moose-core\_build_install` directory instead of  `%CD%\\_build_install` to the `--prefix` option*
 
 Meson provides many builtin options: https://mesonbuild.com/Builtin-options.html. Meson options are supplied in the command line to `meson setup` in the format `-Doption=value`.
 
@@ -82,22 +77,6 @@ Meson provides many builtin options: https://mesonbuild.com/Builtin-options.html
 	
 	To set optimization level, pass `-Doptimization=level`, where level can be `plain`, `0`, `g`, `1`, `2`, `3`, `s`.
 
-
-
-For standard installation you can simply run `pip install .` in the `moose-core` directory.
-
-To build a wheel, you need `build` and `meson-python` modules:
-
-```
-conda install meson-python
-conda install build
-```
-
-In a terminal, `cd` to `moose-core` and run the following:
-
-```
-python -m build
-```
 
 ## Note on Debug build on Windows
 Debug build tries to link with debug build of Python, and this is not
