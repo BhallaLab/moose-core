@@ -18,6 +18,10 @@ builtins_src = ['Arith.cpp',
                 'Interpol2D.cpp',
                 'SpikeStats.cpp',
                 'MooseParser.cpp',
+                'HDF5WriterBase.cpp',
+                'HDF5DataWriter.cpp',
+                'NSDFWriter.cpp',
+                'NSDFWriter2.cpp',
                 # '../utility/cnpy.cpp',
                 # '../external/fmt/src/format.cc',
                 # '../external/fmt/src/os.cc',
@@ -26,5 +30,8 @@ builtins_src = ['Arith.cpp',
 if host_machine.system() != 'windows'
   builtins_src += files(['SocketStreamer.cpp'])
 endif
-
-builtins_lib = static_library('builtins', builtins_src, include_directories: ['../external/fmt/include'])
+include_directories = ['../external/fmt/include']
+if use_hdf5
+  include_directories += hdf5_dep.get_variable(pkgconfig: 'includedir')
+endif
+builtins_lib = static_library('builtins', builtins_src, include_directories: include_directories)

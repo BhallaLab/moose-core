@@ -20,6 +20,15 @@ pybind_dep = dependency('pybind11')
 gsl_dep = dependency('gsl', version: '>=1.16')
 # sundial_dep = dependency('sundial', version: '>=7.1.1')
 
+# HDF5 cannot be found via pkg-config. Skip for now. TODO: fix this in next release
+use_hdf5 = get_option('use_hdf5')
+if use_hdf5
+  hdf5_dep = dependency('hdf5_cpp', version: '>=1.8')
+  add_global_arguments('-DUSE_HDF5', language: ['c', 'cpp'])
+else
+  hdf5_dep = []
+endif
+
 use_mpi = get_option('use_mpi')
 if use_mpi
   mpi_dep = dependency('mpi', required: true)
@@ -249,6 +258,7 @@ if is_msvc
 endif
 
 include_dirs = [join_paths('external', 'libsoda')]
+
 # Windows does not have getopt library and its dependencies. A port is
 # provided in "external/getopt" folder
 if is_windows
@@ -264,7 +274,7 @@ endif
 pymoose = py.extension_module('_moose', join_paths('pybind11', 'pymoose.cpp'),
                               link_whole: sublibs,
                               link_args: link_args,
-                              dependencies: [gsl_dep, mpi_dep, pybind_dep], #, libsoda_dep],
+                              dependencies: [gsl_dep, mpi_dep, pybind_dep, hdf5_dep], #, libsoda_dep],
                               include_directories: include_dirs,
                               install: true,
                               subdir: 'moose')
