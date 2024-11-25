@@ -25,11 +25,7 @@ jobs:
         if: ${{ runner.os == 'macOS' }}
         run: |
           brew install gsl
-          brew install hdf5
-          brew install graphviz
-          brew install doxygen
-          brew install pkg-config
-          
+          brew install hdf5          
       - name: Windows dependencies
         if: ${{ runner.os == 'Windows' }}
         uses: mamba-org/setup-micromamba@v1
