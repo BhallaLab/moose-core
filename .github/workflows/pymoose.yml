@@ -52,7 +52,7 @@ jobs:
           python -c "import sys; print(sys.version)"
       - if: ${{ matrix.apt }}
         run: |
-          sudo apt-get -y install libhdf5-dev libgsl0-dev graphviz-dev python3-lxml doxygen libgsl-dev
+          sudo apt-get -y install libgsl0-dev libgsl-dev
       - if: ${{ matrix.brew }}
         run: |
           brew uninstall pkg-config || :
