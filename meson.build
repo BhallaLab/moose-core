@@ -11,13 +11,23 @@
 # python -m build
 
 project('pymoose', 'c', 'cpp',
-        # The version is created dynamically based on git commit hash. For release, make this explicit string
-        version: run_command('git', 'rev-parse',  '--short', 'HEAD', check:false).stdout().strip(),
+        # The version is created dynamically based on git commit hash. For release, make this explicit string        
+        # version: run_command('git', 'rev-parse',  '--short', 'HEAD', check:false).stdout().strip(),
+        version: '4.1.0dev',  # cibuildwheel/meson crashes with github hash as version
 	default_options: ['c_std=c17', 'cpp_std=c++17'])
 
 pybind_dep = dependency('pybind11')
 gsl_dep = dependency('gsl', version: '>=1.16')
 # sundial_dep = dependency('sundial', version: '>=7.1.1')
+
+# HDF5 cannot be found via pkg-config. Skip for now. TODO: fix this in next release
+use_hdf5 = get_option('use_hdf5')
+if use_hdf5
+  hdf5_dep = dependency('hdf5_cpp', version: '>=1.8')
+  add_global_arguments('-DUSE_HDF5', language: ['c', 'cpp'])
+else
+  hdf5_dep = []
+endif
 
 use_mpi = get_option('use_mpi')
 if use_mpi
@@ -27,14 +37,14 @@ else
   mpi_dep = []
 endif  
 
-add_global_arguments('-DMOOSE_VERSION="4.0.1"', language: ['c', 'cpp'])
+add_global_arguments('-DMOOSE_VERSION="4.1.0"', language: ['c', 'cpp'])
 add_global_arguments('-DUSE_GSL', language: ['c', 'cpp'])
 
 ##############################################################
 # Credit: Borrowed from SciPy
 ##############################################################
 python = import('python')
-py = python.find_installation()
+py = python.find_installation(pure: false)
 python_dep = py.dependency()
 
 min_numpy_version = '1.23.5'  # keep in sync with pyproject.toml
@@ -246,21 +256,14 @@ sublibs = [
 if is_msvc
   sublibs += getopt_lib
 endif
-moose_dir = py.get_install_dir()
 
 include_dirs = [join_paths('external', 'libsoda')]
+
 # Windows does not have getopt library and its dependencies. A port is
 # provided in "external/getopt" folder
 if is_windows
   include_dirs += [join_paths('external', 'getopt')]
 endif
-
-pymoose = py.extension_module('_moose', join_paths('pybind11', 'pymoose.cpp'),
-                              link_whole: sublibs,
-                              link_args: link_args,
-                              dependencies: [gsl_dep, mpi_dep, pybind_dep], #, libsoda_dep],
-                              include_directories: include_dirs,
-                              install: true, install_dir: join_paths(moose_dir, 'moose'))
 
 if is_windows
   rename_cmd = 'move'
@@ -268,12 +271,20 @@ else
   rename_cmd = 'mv'
 endif
 
+pymoose = py.extension_module('_moose', join_paths('pybind11', 'pymoose.cpp'),
+                              link_whole: sublibs,
+                              link_args: link_args,
+                              dependencies: [gsl_dep, mpi_dep, pybind_dep, hdf5_dep], #, libsoda_dep],
+                              include_directories: include_dirs,
+                              install: true,
+                              subdir: 'moose')
+
 install_subdir(
   join_paths('python', 'moose'),
-  install_dir: moose_dir)
+  install_dir: py.get_install_dir())
 
 install_subdir(
   join_paths('python', 'rdesigneur'),
-  install_dir: moose_dir)
+  install_dir: py.get_install_dir())
 
 message('Finished installing moose in', pymoose.full_path())
