@@ -13,7 +13,7 @@ jobs:
         c_compiler: [clang]
         python-version: ["3.12"]
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             apt: 10
           - os: macos-14
             brew: 20
@@ -55,6 +55,8 @@ jobs:
           sudo apt-get -y install libhdf5-dev libgsl0-dev graphviz-dev python3-lxml doxygen libgsl-dev
       - if: ${{ matrix.brew }}
         run: |
+          brew uninstall pkg-config || :
+            brew uninstall pkg-config@0.29.2
           brew install gsl
           brew install hdf5
       - name: checkout
