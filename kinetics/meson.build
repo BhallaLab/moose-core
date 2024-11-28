@@ -14,4 +14,4 @@ kinetics_src = ['PoolBase.cpp',
                 'lookupVolumeFromMesh.cpp',
                 'testKinetics.cpp']
 
-kinetics_lib = static_library('kinetics', kinetics_src, include_directories: gsl_dep.get_pkgconfig_variable('includedir'))
+kinetics_lib = static_library('kinetics', kinetics_src, include_directories: gsl_dep.get_variable(pkgconfig:'includedir'))

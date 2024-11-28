@@ -6,4 +6,4 @@ diffusion_src = ['FastMatrixElim.cpp',
                  'Dsolve.cpp',
                  'testDiffusion.cpp']
 
-diffusion_lib = static_library('diffusion', diffusion_src, include_directories: gsl_dep.get_pkgconfig_variable('includedir'))
+diffusion_lib = static_library('diffusion', diffusion_src, include_directories: gsl_dep.get_variable(pkgconfig:'includedir'))

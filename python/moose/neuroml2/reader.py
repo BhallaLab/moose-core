@@ -84,7 +84,7 @@ def array_eval_component(comp_type, req_vars, params={}):
         exec_str.append(f"{const.name} = {pynml.get_value_in_si(const.value)}")
     for dyn in comp_type.Dynamics:
         for dv in dyn.DerivedVariable:
-            exec_str.append(f"{dv.name} = {dv.value}")
+            exec_str.append(f"{dv.name} = {dv.value.replace('^', '**')}")
             exec_str.append(f"return_vals['{dv.name}'] = {dv.name}")
         for cdv in dyn.ConditionalDerivedVariable:
             cond_str = [f"return_vals['{cdv.name}'] = "]
@@ -97,7 +97,9 @@ def array_eval_component(comp_type, req_vars, params={}):
                         .replace(".gt.", ">")
                         .replace(".lt.", "<")
                     )
-                    cond_str.append(f"where({cond}, {case_.value}, ")
+                    cond_str.append(
+                        f"where({cond}, {case_.value.replace('^', '**')}, "
+                    )
                     closing_parens += 1
                 else:
                     cond_str += [case_.value, ")" * closing_parens]
@@ -805,7 +807,10 @@ class NML2Reader(object):
             # m-vec. MOOSE table assumes n x m lookup table where n is
             # first index variable array is of length n and the second
             # index variable array if of length m
-            return rate.reshape(len(ctab), len(vtab)).T
+            if np.isscalar(rate):
+                rate = np.full((len(vtab), len(ctab)), rate)
+            else:
+                rate = rate.reshape(len(ctab), len(vtab)).T
         return rate
 
     def calculateRateFn(
@@ -1015,10 +1020,14 @@ class NML2Reader(object):
             for dyn in dynamics:
                 if dyn is not None:
                     ct = self.getComponentType(dyn)
-                    if ct is None or (ct.extends != "baseVoltageConcDepRate"):
+                    if ct is None:
                         continue
-                    if self.isDynamicsCaDependent(ct):
-                        return True
+                    if (
+                        ct.extends == "baseVoltageConcDepRate"
+                        or ct.extends == "baseVoltageConcDepVariable"
+                    ):
+                        if self.isDynamicsCaDependent(ct):
+                            return True
         return False
 
     def isChannel2D(self, chan):
@@ -1106,7 +1115,10 @@ class NML2Reader(object):
                 ct = self.getComponentType(dyn)
                 if (
                     (ct is not None)
-                    and (ct.extends == "baseVoltageConcDepRate")
+                    and (
+                        ct.extends == "baseVoltageConcDepRate"
+                        or ct.extends == "baseVoltageConcDepVariable"
+                    )
                     and self.isDynamicsVoltageCaDependent(ct)
                 ):
                     return True
@@ -1214,7 +1226,9 @@ class NML2Reader(object):
                 )
         return q10_scale
 
-    def updateHHGate(self, ngate, mgate, mchan, vmin, vmax, vdivs, useInterpolation=True):
+    def updateHHGate(
+        self, ngate, mgate, mchan, vmin, vmax, vdivs, useInterpolation=True
+    ):
         """Update moose `HHGate` mgate from NeuroML gate description
         element `ngate`.
 
@@ -1533,8 +1547,8 @@ class NML2Reader(object):
             # We need to update Xindex for gateX, Yindex for gateY and
             # Zindex for gateZ
             indexattr = f"{mgate.name[-1]}index"
-            vdep = self.isGateCaDependent(ngate)
-            cdep = self.isGateVoltageDependent(ngate)
+            vdep = self.isGateVoltageDependent(ngate)
+            cdep = self.isGateCaDependent(ngate)
             cmin_, cmax_, cdivs_ = 0, 0, 0
             vmin_, vmax_, vdivs_ = 0, 0, 0
             if vdep and cdep:
