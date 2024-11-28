@@ -56,8 +56,6 @@ jobs:
           sudo apt-get -y install libgsl0-dev libgsl-dev libhdf5-dev
       - if: ${{ matrix.brew }}
         run: |
-          brew uninstall pkg-config || :
-            brew uninstall pkg-config@0.29.2
           brew install gsl
           brew install hdf5
       - name: checkout
