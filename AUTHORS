@@ -2,11 +2,11 @@
 
 Upinder S. Bhalla 	Primary Architect, rdesigneur
 HarshaRani. G.V         MOOSE Website, SBML support, GUI
-Dilawar Singh    	Multithreading, GSoC, Packaging, Maintenance, BOOST solvers
+Subhasis Ray            Lead Developer, Python interface, Packaging, Maintenance
 
 # Past developers
 
-Subhasis Ray 	        Python interface, GUI
+Dilawar Singh    	Multithreading, GSoC, Packaging, Maintenance, BOOST solvers
 Niraj Dudani 	        Neuronal solver
 Aditya Gilra 	        NeuroML support
 Aviral Goel 	        Moogli
