@@ -53,8 +53,8 @@ $env:PATH="$env:PATH;C:\Program Files\LLVM\bin"
   
 ```
 cd moose-core
-meson setup --wipe _build -Duse_mpi=false --buildtype=release
-ninja -v -C _build 
+meson setup --wipe _build -Duse_mpi=false --buildtype=release --vsenv
+meson compile -vC _build 
 meson install -C _build
 ```
 *Note: If you want to keep the installation in local folder replace the third command with: `meson setup --wipe _build --prefix={absolute-path} -Duse_mpi=false --buildtype=release` where `absolute-path` is the full path of the folder you want to install it in. You will have to add the `Lib\site-packages` directory within this to your PATH environment variable to make `moose` module visible to Python.*
@@ -68,7 +68,7 @@ Meson provides many builtin options: https://mesonbuild.com/Builtin-options.html
 
 
 	```
-	meson setup --wipe _build --prefix=%CD%\\_build_install -Duse_mpi=false -Dbuildtype=debug
+	meson setup --wipe _build --prefix=%CD%\\_build_install -Duse_mpi=false -Dbuildtype=debug  --vsenv
 	```
 
 	You can either use `buildtype` option alone or use the two options `debug` and `optimization` for finer grained control over the build. According to `meson` documentation `-Dbuildtype=debug` will create a debug build with optimization level 0 (i.e., no optimization, passing `-O0 -g` to GCC), `-Dbuildtype=debugoptimized`  will create a debug build with optimization level 2 (equivalent to `-Ddebug=true -Doptimization=2`), `-Dbuildtype=release` will create a release build with optimization level 3 (equivalent to `-Ddebug=false -Doptimization=3`), and `-Dbuildtype=minsize` will create a release build with space optimization (passing `-Os` to GCC).
@@ -91,7 +91,7 @@ is to make a copy of `python3x.lib` named `python3x_d.lib` in the same
 directory (`libs`). After that, you can run meson setup as follows:
 
 ```
-meson setup --wipe _build --prefix=%CD%\\_build_install -Duse_mpi=false --buildtype=debug
+meson setup --wipe _build --prefix=%CD%\\_build_install -Duse_mpi=false --buildtype=debug --vsenv
 ```
 
 and then go through the rest of the steps.
