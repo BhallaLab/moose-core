@@ -1,4 +1,4 @@
 option('use_mpi', type: 'boolean', value: false,
        description: 'If specified, build with MPI support')
-option('use_hdf5', type: 'boolean', value: false,
+option('use_hdf5', type: 'boolean', value: true,
        description: 'If specified, build with HDF5 support. Needed for NSDF.')
