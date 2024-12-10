@@ -47,7 +47,7 @@ conda activate moose
 cd moose-core
 
 meson setup --wipe _build --prefix=`pwd`/_build_install -Duse_mpi=false -Dbuildtype=release
-ninja -v -C _build 
+meson compile -v -C _build 
 meson install -C _build
 ```
 
