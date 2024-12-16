@@ -41,7 +41,7 @@ https://github.com/BhallaLab/moose-examples.
 # Build 
 
 To build `pymoose`, follow instructions given in
-[INSTALLATION.md](INSTALLATION.md) and for platform specific
+[INSTALL.md](INSTALL.md) and for platform specific
 information see:
 - Linux: [UbuntuBuild.md](UbuntuBuild.md)
 - MacOSX: [AppleM1Build.md](AppleM1Build.md)

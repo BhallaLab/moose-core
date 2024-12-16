@@ -204,7 +204,10 @@ def connect(src, srcfield, dest, destfield, msgtype="Single"):
     """
     src = _moose.element(src)
     dest = _moose.element(dest)
-    return src.connect(srcfield, dest, destfield, msgtype)
+    msg = src.connect(srcfield, dest, destfield, msgtype)
+    if msg.name == '/':
+        raise RuntimeError(f'Could not connect {src}.{srcfield} with {dest}.{destfield}')
+    return msg
 
 
 def delete(arg):
@@ -239,6 +242,8 @@ def element(arg):
         MOOSE element (object) corresponding to the `arg` converted to write
         subclass.
     """
+    if not _moose.exists(arg):
+        raise RuntimeError(f'{arg}: element at path does not exist')
     return _moose.element(arg)
 
 

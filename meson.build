@@ -23,8 +23,9 @@ gsl_dep = dependency('gsl', version: '>=1.16')
 # HDF5 cannot be found via pkg-config. Skip for now. TODO: fix this in next release
 use_hdf5 = get_option('use_hdf5')
 if use_hdf5
-  hdf5_dep = dependency('hdf5_cpp', version: '>=1.8')
+  hdf5_dep = dependency('hdf5', version: '>=1.8')
   add_global_arguments('-DUSE_HDF5', language: ['c', 'cpp'])
+  add_global_arguments('-DH5_BUILT_AS_DYNAMIC_LIB', language: ['c', 'cpp'])  # to fix this issue: https://github.com/conda-forge/hdf5-feedstock/issues/58
 else
   hdf5_dep = []
 endif
