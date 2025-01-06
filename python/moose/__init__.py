@@ -12,7 +12,13 @@ References:
 
 # Notes
 # -----
-# Use these guidelines for docstring: https://numpydoc.readthedocs.io/en/latest/format.html
+#
+# 1. Use these guidelines for docstring:
+# https://numpydoc.readthedocs.io/en/latest/format.html.
+#
+# 2. We redefine many functions defined in _moose just to add the
+# docstring since Python C-API does not provide a way to add docstring
+# to a function defined in the C/C++ extension
 
 import sys
 import pydoc
@@ -242,7 +248,7 @@ def element(arg):
         MOOSE element (object) corresponding to the `arg` converted to write
         subclass.
     """
-    if not _moose.exists(arg):
+    if isinstance(arg, str) and not _moose.exists(arg):
         raise RuntimeError(f'{arg}: element at path does not exist')
     return _moose.element(arg)
 
