@@ -11,12 +11,14 @@ biophysics_src = ['IntFire.cpp',
                   'GapJunction.cpp',
                   'ChanBase.cpp',
                   'ChanCommon.cpp',
-                  'HHChannel.cpp',
                   'HHChannelBase.cpp',
+                  'HHChannel.cpp',
                   'HHChannel2D.cpp',
+                  'HHChannelF.cpp',
+                  'HHGateBase.cpp',
                   'HHGate.cpp',
                   'HHGate2D.cpp',
-                  'HHChannel2D.cpp',
+                  'HHGateF.cpp',
                   'CaConcBase.cpp',
                   'CaConc.cpp',
                   'MgBlock.cpp',
@@ -45,4 +47,6 @@ biophysics_src = ['IntFire.cpp',
                   'MarkovOdeSolver.cpp',
                   'testBiophysics.cpp']
 
-biophysics_lib = static_library('biophysics', biophysics_src, dependencies: gsl_dep, include_directories: gsl_dep.get_variable(pkgconfig:'includedir'))
+include_directories = ['../external/exprtk']
+include_directories += gsl_dep.get_variable(pkgconfig:'includedir')
+biophysics_lib = static_library('biophysics', biophysics_src, dependencies: gsl_dep, include_directories: include_directories)

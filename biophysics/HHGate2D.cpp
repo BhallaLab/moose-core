@@ -10,6 +10,7 @@
 #include "../basecode/header.h"
 #include "../basecode/ElementValueFinfo.h"
 #include "../builtins/Interpol2D.h"
+#include "HHGateBase.h"
 #include "HHGate2D.h"
 
 static const double SINGULARITY = 1.0e-6;
@@ -129,8 +130,8 @@ HHGate2D::HHGate2D()
 
 HHGate2D::HHGate2D( Id originalChanId, Id originalGateId )
 	:
-		originalChanId_( originalChanId ),
-		originalGateId_( originalGateId )
+    HHGateBase(originalChanId,
+	       originalGateId )
 {;}
 
 ///////////////////////////////////////////////////

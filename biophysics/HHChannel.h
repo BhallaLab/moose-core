@@ -53,23 +53,22 @@ class HHGate;
  */
 
 class HHChannel : public HHChannelBase {
-
 #ifdef DO_UNIT_TESTS
     friend void testHHChannel();
     friend void testHHGateCreation();
 #endif  // DO_UNIT_TESTS
 
-public:
+   public:
     HHChannel();
     ~HHChannel();
     //////////////////////////////////////////////////////////////////////////////////////////////
-    // Avoid warning C4250 from MSVC: 
+    // Avoid warning C4250 from MSVC:
     // "'HHChannel': inherits 'ChanCommon::ChanCommon::vSetGbar' via dominance"
-    // Although vSetX where X is the field to be set is pure virtual in ChanBase, and is 
-    // implemented in ChanCommon, MSVC seems to still resolve it by dominance.
-    // Probably the ambiguity between ChanBase::vSetEk and ChanCommon::vSetEk etc. cause Ek to be 
-    // garbage when built with MSVC.
-    // Looks like this bug persists since 2005: 
+    // Although vSetX where X is the field to be set is pure virtual in
+    // ChanBase, and is implemented in ChanCommon, MSVC seems to still resolve
+    // it by dominance. Probably the ambiguity between ChanBase::vSetEk and
+    // ChanCommon::vSetEk etc. cause Ek to be garbage when built with MSVC.
+    // Looks like this bug persists since 2005:
     // https://stackoverflow.com/questions/469508/visual-studio-compiler-warning-c4250-class1-inherits-class2member-via-d
     //////////////////////////////////////////////////////////////////////////////////////////////
     // void vSetGbar(const Eref&e, double Gbar );
@@ -85,20 +84,21 @@ public:
     /////////////////////////////////////////////////////////////
     // Value field access function definitions
     /////////////////////////////////////////////////////////////
-    void vSetXpower(const Eref& e, double Xpower) override;
-    void vSetYpower(const Eref& e, double Ypower) override;
-    void vSetZpower(const Eref& e, double Zpower) override;
-    void vSetInstant(const Eref& e, int Instant) override;
-    int vGetInstant(const Eref& e) const override;
-    void vSetX(const Eref& e, double X) override;
-    double vGetX(const Eref& e) const override;
-    void vSetY(const Eref& e, double Y) override;
-    double vGetY(const Eref& e) const override;
-    void vSetZ(const Eref& e, double Z) override;
-    double vGetZ(const Eref& e) const override;
-    void vSetUseConcentration(const Eref& e, int value) override;
-    // void vSetModulation(const Eref& e, double modulation) override; // defined in ChanCommon
-    // double vGetModulation(const Eref& e) const override; // defined in ChanCommon
+    // void vSetXpower(const Eref& e, double Xpower) override;
+    // void vSetYpower(const Eref& e, double Ypower) override;
+    // void vSetZpower(const Eref& e, double Zpower) override;
+    // void vSetInstant(const Eref& e, int Instant) override;
+    // int vGetInstant(const Eref& e) const override;
+    // void vSetX(const Eref& e, double X) override;
+    // double vGetX(const Eref& e) const override;
+    // void vSetY(const Eref& e, double Y) override;
+    // double vGetY(const Eref& e) const override;
+    // void vSetZ(const Eref& e, double Z) override;
+    // double vGetZ(const Eref& e) const override;
+    // void vSetUseConcentration(const Eref& e, int value) override;
+    // void vSetModulation(const Eref& e, double modulation) override; //
+    // defined in ChanCommon double vGetModulation(const Eref& e) const
+    // override; // defined in ChanCommon
 
     void innerSetXpower(double Xpower);
     void innerSetYpower(double Ypower);
@@ -120,7 +120,7 @@ public:
      * send back to the parent compartment through regular
      * messages.
      */
-    void vProcess(const Eref& e, ProcPtr p);
+    void vProcess(const Eref& e, ProcPtr p) override;
 
     /**
      * Reinitializes the values for the channel. This involves
@@ -129,7 +129,7 @@ public:
      * involves a similar cycle through the gates and then
      * updates to the parent compartment as for the processFunc.
      */
-    void vReinit(const Eref& e, ProcPtr p);
+    void vReinit(const Eref& e, ProcPtr p) override;
 
     /**
      * Assign the local Vm_ to the incoming Vm from the compartment
@@ -142,79 +142,47 @@ public:
      * the message source will be a CaConc object, but there
      * are other options for computing the conc.
      */
-    void vHandleConc(const Eref& e, double conc);
+    void vHandleConc(const Eref& e, double conc) override;
 
     /////////////////////////////////////////////////////////////
     // Gate handling functions
     /////////////////////////////////////////////////////////////
-    /**
-     * Access function used for the X gate. The index is ignored.
-     */
-    HHGate* vGetXgate(unsigned int i) const;
+    HHGate* getXgate(unsigned int i);
+    HHGate* getYgate(unsigned int i);
+    HHGate* getZgate(unsigned int i);
 
-    /**
-     * Access function used for the Y gate. The index is ignored.
-     */
-    HHGate* vGetYgate(unsigned int i) const;
-
-    /**
-     * Access function used for the Z gate. The index is ignored.
-     */
-    HHGate* vGetZgate(unsigned int i) const;
+    void setNumGates(unsigned int num);
+    unsigned int getNumXgates() const;
+    unsigned int getNumYgates() const;
+    unsigned int getNumZgates() const;
 
     /// Inner utility function for creating the gate.
     void innerCreateGate(const string& gateName, HHGate** gatePtr, Id chanId,
                          Id gateId);
 
     /// Returns true if channel is original, false if copy.
-    bool checkOriginal(Id chanId) const;
+    bool checkOriginal(Id chanId) const override;
 
-    void vCreateGate(const Eref& e, string gateType);
-    /**
-     * Utility function for destroying gate. Works only on original
-     * HHChannel. Somewhat dangerous, should never be used after a
-     * copy has been made as the pointer of the gate will be in use
-     * elsewhere.
-     */
-    void destroyGate(const Eref& e, string gateType);
+    void vCreateGate(const Eref& e, string gateType) override;
+    void destroyGate(const Eref& e, string gateType) override;
 
     /**
      * Inner utility for destroying the gate
      */
     void innerDestroyGate(const string& gateName, HHGate** gatePtr, Id chanId);
 
-    /**
-     * Utility for altering gate powers
-     */
-    bool setGatePower(const Eref& e, double power, double* assignee,
-                      const string& gateType);
+    // /**
+    //  * Utility for altering gate powers
+    //  */
+    // bool setGatePower(const Eref& e, double power, double* assignee,
+    //                   const string& gateType);
 
     /////////////////////////////////////////////////////////////
     static const Cinfo* initCinfo();
 
-private:
+   private:
     /// Conc_ is input variable for Ca-dependent channels.
     double conc_;
-
-    double (*takeXpower_)(double, double);
-    double (*takeYpower_)(double, double);
-    double (*takeZpower_)(double, double);
-
-    /// bitmapped flag for X, Y, Z, to do equil calculation for gate
-    int instant_;
-    /// Channel actual conductance depending on opening of gates.
-    /// State variable for X gate
-    double X_;
-    /// State variable for Y gate
-    double Y_;
-    /// State variable for Z gate
-    double Z_;
-
-    bool xInited_, yInited_, zInited_;  // true when a state variable
-                                        // has been initialized
-    double g_;  /// Internal variable used to calculate conductance
-
-    double integrate(double state, double dt, double A, double B);
 
     /**
      * HHGate data structure for the xGate. This is writable only
@@ -229,12 +197,12 @@ private:
     /// HHGate data structure for the yGate.
     HHGate* zGate_;
 
-    Id myId_;
+    // Id myId_;
 
-    static const double EPSILON;
-    static const int INSTANT_X;
-    static const int INSTANT_Y;
-    static const int INSTANT_Z;
+    // static const double EPSILON;
+    // static const int INSTANT_X;
+    // static const int INSTANT_Y;
+    // static const int INSTANT_Z;
 };
 
 #endif  // _HHChannel_h

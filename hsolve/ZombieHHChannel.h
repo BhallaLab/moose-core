@@ -99,20 +99,20 @@ public:
     /////////////////////////////////////////////////////////////
     // Gate handling functions
     /////////////////////////////////////////////////////////////
-    /**
-     * Access function used for the X gate. The index is ignored.
-     */
-    HHGate* vGetXgate( unsigned int i ) const override;
+    // /**
+    //  * Access function used for the X gate. The index is ignored.
+    //  */
+    // HHGate* vGetXgate( unsigned int i ) const override;
 
-    /**
-     * Access function used for the Y gate. The index is ignored.
-     */
-    HHGate* vGetYgate( unsigned int i ) const override;
+    // /**
+    //  * Access function used for the Y gate. The index is ignored.
+    //  */
+    // HHGate* vGetYgate( unsigned int i ) const override;
 
-    /**
-     * Access function used for the Z gate. The index is ignored.
-     */
-    HHGate* vGetZgate( unsigned int i ) const override;
+    // /**
+    //  * Access function used for the Z gate. The index is ignored.
+    //  */
+    // HHGate* vGetZgate( unsigned int i ) const override;
     /////////////////////////////////////////////////////////////
 	void vSetSolver( const Eref& e , Id hsolve ) override;
 

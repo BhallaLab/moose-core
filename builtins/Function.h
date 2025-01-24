@@ -41,9 +41,9 @@ public:
 
     // get a list of variable identifiers.
     vector<string> getVars() const;
-    void setVarValues(vector<string> vars, vector<double> vals);
+    void setVarValues(vector<string> vars, vector<double> vals); // subha: where is this defined?
 
-    // get/set the value of variable `name`
+    /// set the value of `index`-th variable
     void setVar(unsigned int index, double value);
 
     Variable* getX(unsigned int ii);

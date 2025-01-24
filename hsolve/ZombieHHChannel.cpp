@@ -191,20 +191,20 @@ void ZombieHHChannel::vCreateGate(const Eref& e, string name)
 // HHGate functions
 ///////////////////////////////////////////////////
 
-HHGate* ZombieHHChannel::vGetXgate( unsigned int i ) const
-{
-    return 0;
-}
+// HHGate* ZombieHHChannel::vGetXgate( unsigned int i ) const
+// {
+//     return 0;
+// }
 
-HHGate* ZombieHHChannel::vGetYgate( unsigned int i ) const
-{
-    return 0;
-}
+// HHGate* ZombieHHChannel::vGetYgate( unsigned int i ) const
+// {
+//     return 0;
+// }
 
-HHGate* ZombieHHChannel::vGetZgate( unsigned int i ) const
-{
-    return 0;
-}
+// HHGate* ZombieHHChannel::vGetZgate( unsigned int i ) const
+// {
+//     return 0;
+// }
 
 ///////////////////////////////////////////////////
 // Assign solver
