@@ -9,6 +9,9 @@
 #ifndef _HHGate_h
 #define _HHGate_h
 
+
+#include "HHGateBase.h"
+
 /**
  * This class handles a single gate on an HHChannel. It is equivalent to the
  * m and h terms on the Hodgkin-Huxley Na channel, or the n term on the
@@ -29,7 +32,7 @@
  * original HHChannel, but all the others do have read permission.
  */
 
-class HHGate {
+class HHGate: public HHGateBase {
     friend void testHHGateLookup();
     friend void testHHGateSetup();
 
@@ -119,35 +122,6 @@ public:
      * Returns looked up value of specified table
      */
     double lookupTable(const vector<double>& tab, double v) const;
-
-    /**
-     * Checks if the provided Id is the one that the HHGate was created
-     * on. If true, fine, otherwise complains about trying to set the
-     * field.
-     */
-    bool checkOriginal(Id id, const string& field) const;
-
-    /**
-     * isOriginalChannel returns true if the provided Id is the Id of
-     * the channel on which the HHGate was created.
-     */
-    bool isOriginalChannel(Id id) const;
-
-    /**
-     * isOriginalChannel returns true if the provided Id is the Id of
-     * the Gate created at the same time as the original channel.
-     */
-    bool isOriginalGate(Id id) const;
-
-    /**
-     * Returns the Id of the original Channel.
-     */
-    Id originalChannelId() const;
-
-    /**
-     * Returns the Id of the original Gate.
-     */
-    Id originalGateId() const;
 
     /**
      * tabFill does interpolation and range resizing for

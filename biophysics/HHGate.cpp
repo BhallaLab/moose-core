@@ -9,6 +9,8 @@
 
 #include "../basecode/header.h"
 #include "../basecode/ElementValueFinfo.h"
+#include "../builtins/MooseParser.h"
+#include "HHGateBase.h"
 #include "HHGate.h"
 
 static const double SINGULARITY = 1.0e-6;
@@ -199,25 +201,23 @@ static const Cinfo* hhGateCinfo = HHGate::initCinfo();
 // Core class functions
 ///////////////////////////////////////////////////
 HHGate::HHGate()
-    : xmin_(0),
+    : HHGateBase(0, 0),
+      xmin_(0),
       xmax_(1),
       invDx_(1),
-      originalChanId_(0),
-      originalGateId_(0),
       lookupByInterpolation_(0),
       isDirectTable_(0)
 {
-    ;
+    cerr << "# HHGate::HHGate() should never be called" << endl;
 }
 
 HHGate::HHGate(Id originalChanId, Id originalGateId)
-    : A_(1, 0.0),
+    : HHGateBase(originalChanId, originalGateId),
+      A_(1, 0.0),
       B_(1, 0.0),
       xmin_(0),
       xmax_(1),
       invDx_(1),
-      originalChanId_(originalChanId),
-      originalGateId_(originalGateId),
       lookupByInterpolation_(0),
       isDirectTable_(0)
 {
@@ -772,35 +772,6 @@ void HHGate::tabFill(vector<double>& table, unsigned int newXdivs,
     lookupByInterpolation_ = origLookupMode;
 }
 
-bool HHGate::checkOriginal(Id id, const string& field) const
-{
-    if(id == originalGateId_)
-        return 1;
-
-    cout << "Warning: HHGate: attempt to set field '" << field << "' on "
-         << id.path() << ", which is not the original Gate element. Ignored.\n";
-    return 0;
-}
-
-bool HHGate::isOriginalChannel(Id id) const
-{
-    return (id == originalChanId_);
-}
-
-bool HHGate::isOriginalGate(Id id) const
-{
-    return (id == originalGateId_);
-}
-
-Id HHGate::originalChannelId() const
-{
-    return originalChanId_;
-}
-
-Id HHGate::originalGateId() const
-{
-    return originalGateId_;
-}
 
 void HHGate::updateAlphaBeta()
 {

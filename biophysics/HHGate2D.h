@@ -10,7 +10,9 @@
 #ifndef _HHGate2D_h
 #define _HHGate2D_h
 
-class HHGate2D
+#include "HHGateBase.h"
+
+class HHGate2D: public HHGateBase
 {
 	public:
 		HHGate2D();

@@ -295,12 +295,11 @@ const Cinfo * Function::initCinfo()
         derivativeOut(),
     };
 
-    static string doc[] =
-    {
-        "Name", "Function",
-        "Author", "Subhasis Ray/Dilawar Singh",
+    static string doc[] = {
+        "Name", "Function", "Author", "Subhasis Ray/Dilawar Singh",
         "Description",
-        R""""(General purpose function calculator using real numbers.
+        R"(
+General purpose function calculator using real numbers.
 
 It can parse mathematical expression defining a function and evaluate it and/or
 its derivative for specified variable values.  You can assign expressions of
@@ -322,7 +321,8 @@ specified in the expression as y{i} and connecting the messages should happen
 in the same order as the y indices.
 
  This class handles only real numbers (C-double). Predefined constants
- are: pi=3.141592..., e=2.718281...)""""
+ are: pi=3.141592..., e=2.718281...
+)"
     };
 
     static Dinfo< Function > dinfo;
@@ -575,7 +575,7 @@ void Function::setExpr(const Eref& eref, const string expression)
  *
  * @Param eref
  * @Param expr Expression to set.
- * @Param dynamicLookup Weather to allow unknown variables in the expression.
+ * @Param dynamicLookup Whether to allow unknown variables in the expression.
  * (default to true in moose>=4.0.0)
  *
  * @Returns  True if compilation was successful. 

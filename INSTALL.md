@@ -43,9 +43,9 @@ To build `MOOSE` from source, you need `meson`, `ninja`, `pkg-config`, and `pyth
 recommend to use Python 3.9 or higher.  To build and install with `pip`, you also need `meson-python`.
 
 For platform specific instructions, see:
-- Linux: UbuntuBuild.md
-- MacOSX: AppleM1Build.md
-- Windows: WindowsBuild.md
+- Linux: [UbuntuBuild.md](UbuntuBuild.md)
+- MacOSX: [AppleM1Build.md](AppleM1Build.md)
+- Windows: [WindowsBuild.md](WindowsBuild.md)
 
 Briefly,
 1. Build environment: make sure that the following packages are installed on your system.
@@ -67,6 +67,14 @@ Briefly,
 ```
 $ pip install git+https://github.com/BhallaLab/moose-core --user
 ```
+
+This will install the `master` branch of MOOSE. If you want a specific fork/branch, modify the address:
+
+```
+$ pip install git+https://github.com/subhacom/moose-core@fix495merge --user
+```
+
+will install the fix495merge branch from `subhacom`'s fork of `moose-core`.
 
 ## Post installation
 

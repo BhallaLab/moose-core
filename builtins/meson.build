@@ -31,7 +31,10 @@ if host_machine.system() != 'windows'
   builtins_src += files(['SocketStreamer.cpp'])
 endif
 include_directories = ['../external/fmt/include']
+
 if use_hdf5
-  include_directories += hdf5_dep.get_variable(pkgconfig: 'includedir')
+  builtins_lib = static_library('builtins', builtins_src, include_directories: include_directories, dependencies: hdf5_dep)
+else
+  builtins_lib = static_library('builtins', builtins_src, include_directories: include_directories)
 endif
-builtins_lib = static_library('builtins', builtins_src, include_directories: include_directories)
+

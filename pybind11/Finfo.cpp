@@ -29,7 +29,7 @@ std::function<bool(T)> getSetGetFunc1(const ObjId &oid, const string &fname)
     std::function<bool(T)> func = [oid, fname](const T &val) {
         return SetGet1<T>::set(oid, fname, val);
     };
-    std::cout << "getSetGet1Func" << std::endl;
+    // std::cout << "getSetGet1Func" << std::endl;
     return func;
 }
 

@@ -396,6 +396,7 @@ const Cinfo* Clock::initCinfo()
         "    GapJunction         4       50e-6\n"
         "    HHChannel           4       50e-6\n"
         "    HHChannel2D         4       50e-6\n"
+        "    HHChannelF          4       50e-6\n"
         "    Leakage             4       50e-6\n"
         "    MarkovChannel       4       50e-6\n"        
         "    SpikeGen             5      50e-6\n"
@@ -406,7 +407,7 @@ const Cinfo* Clock::initCinfo()
 
         "    Dsolve               10     0.01\n"
         "    Adaptor              11     0.1\n"
-        "    Func                 12     0.1\n"
+        // "    Func                 12     0.1\n"
         "    Function             12     0.1\n"
         "    Arith                12     0.1\n"
         "    Gsolve (init)        15     0.1\n"
@@ -913,6 +914,7 @@ void Clock::buildDefaultTick()
     defaultTick_["GapJunction"] = 4;
     defaultTick_["HHChannel"] = 4;
     defaultTick_["HHChannel2D"] = 4;
+    defaultTick_["HHChannelF"] = 4;
     defaultTick_["Leakage"] = 4;
     defaultTick_["MarkovChannel"] = 4;
     defaultTick_["SpikeGen"] = 5;
@@ -922,7 +924,7 @@ void Clock::buildDefaultTick()
     defaultTick_["TimeTable"] = 8;
     defaultTick_["Dsolve"] = 10;
     defaultTick_["Adaptor"] = 11;
-    defaultTick_["Func"] = 12;
+    // defaultTick_["Func"] = 12; // as of 2025 this class has been removed
     defaultTick_["Function"] = 12;
     defaultTick_["Arith"] = 12;
     defaultTick_["Gsolve"] = 16; // Note this uses an 'init' at t-1
